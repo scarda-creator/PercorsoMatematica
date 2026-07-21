@@ -160,7 +160,66 @@
         curves:[{f:'exp(-x/8.5)', col:'#5eead4', width:2.4, label:'atmosfera isoterma'},
                 {f:'max(0,1-x/8.5)', col:'#8fa0b5', width:1.6, dash:true, label:'se fosse lineare (fluido incomprimibile)'}]},
       leggi: 'La differenza con Stevino è che <b>la densità di un gas dipende dalla pressione</b>: sostituendo ρ=pM/RT nell\'equazione idrostatica si ottiene un\'equazione differenziale, e la soluzione è <b>esponenziale</b> invece che lineare. L\'altezza di scala H=RT/Mg vale circa 8,5 km: ogni 8,5 km la pressione si divide per e. <b>Il liquido dà una retta, il gas un esponenziale, e la ragione è la comprimibilità</b> — è la domanda che collega i due risultati.'
+    },
+    'Teorema delle accelerazioni e Coriolis': {
+      spec: {kind:'curve', x:'0.42*t*cos(1.15*t)', y:'-0.42*t*sin(1.15*t)', tr:[0,7.2],
+        xr:[-3.2,3.2], yr:[-3.2,3.2], equal:true, height:340,
+        title:'moto RETTILINEO uniforme visto da un riferimento rotante'},
+      leggi: 'La traiettoria disegnata è quella di un corpo su cui <b>non agisce alcuna forza</b>: nel riferimento fisso va dritto a velocità costante. Vista dal riferimento <b>rotante</b> diventa una spirale che curva sempre dallo stesso lato. Per spiegare quella curvatura senza forze reali, l\'osservatore rotante deve introdurre due termini apparenti: la <b>centrifuga</b> (radiale, dipende dalla posizione) e <b>Coriolis</b> $-2m\\,\\vec\\omega\\times\\vec v$ (dipende dalla <b>velocità</b>, ed è quella che incurva). <b>La domanda d\'esame</b> è sempre distinguerle: la centrifuga agisce anche su un corpo fermo nel riferimento rotante, Coriolis solo su uno in movimento. La deviazione verso est di un grave in caduta e la rotazione del piano del pendolo di Foucault sono questa stessa figura, sulla Terra.'
+    },
+    'Urto elastico 1D: velocità finali e casi limite': {
+      spec: {kind:'func2d', xr:[0.05,5], yr:[-1.15,2.15], height:330,
+        title:'velocita finali (in unita di v1) al variare del rapporto di massa m2/m1',
+        curves:[{f:'(1-x)/(1+x)', col:'#5eead4', width:2.4, label:'v1\' (proiettile)'},
+                {f:'2/(1+x)', col:'#d8a13a', width:2.4, label:'v2\' (bersaglio)'},
+                {f:'0', col:'#4d5a6b', width:1.2, dash:true}],
+        marks:[{x:1, y:0, label:'m1=m2: si scambiano', col:'#b98cff', up:true}]},
+      leggi: 'Tre casi limite che vanno letti sul grafico e non memorizzati. <b>(1)</b> A $m_2/m_1=1$ le curve si incrociano a $v_1\'=0$ e $v_2\'=v_1$: masse uguali si <b>scambiano</b> la velocità (il biliardo). <b>(2)</b> Per $m_2\\ll m_1$ (sinistra): $v_1\'\\to v_1$ e $v_2\'\\to 2v_1$ — il bersaglio leggero schizza via al <b>doppio</b> della velocità, e il proiettile pesante non se ne accorge. <b>(3)</b> Per $m_2\\gg m_1$ (destra): $v_1\'\\to-v_1$, rimbalzo con inversione, e $v_2\'\\to0$ — la palla contro il muro. <b>Il segno di $v_1\'$ cambia esattamente a $m_1=m_2$</b>: è la soglia fra «prosegue» e «torna indietro», ed è la domanda più frequente su questo argomento.'
+    },
+    'Seconda legge di Keplero dal momento angolare': {
+      spec: {kind:'curve', x:'2.2*cos(t)-1.396', y:'1.7*sin(t)', tr:[0,6.2832],
+        xr:[-4.1,1.5], yr:[-2.2,2.2], equal:true, height:330,
+        title:'aree uguali in tempi uguali: vicino al fuoco l\'arco e piu lungo',
+        segs:[{x1:0,y1:0,x2:0.804,y2:0,col:'#5eead4',width:2},{x1:0,y1:0,x2:0.60,y2:0.93,col:'#5eead4',width:2},
+              {x1:0,y1:0,x2:-3.596,y2:0,col:'#d8a13a',width:2},{x1:0,y1:0,x2:-3.53,y2:0.35,col:'#d8a13a',width:2}],
+        marks:[{x:0,y:0,label:'fuoco (Sole)',col:'#ffffff',up:true}]},
+      leggi: 'I due settori — quello stretto e lungo vicino al fuoco, quello largo e corto lontano — hanno la <b>stessa area</b> e vengono percorsi nello <b>stesso tempo</b>. La ragione è in una riga: la velocità areolare è $\\frac{dA}{dt}=\\frac{L}{2m}$, e $L$ si conserva perché la forza è <b>centrale</b> (momento nullo rispetto al fuoco). <b>Quindi la seconda legge di Keplero non è un fatto sulla gravità</b>: vale per <i>qualunque</i> forza centrale, anche una molla. È la prima legge (l\'orbita è un\'ellisse) a richiedere specificamente il $1/r^2$. Conseguenza immediata: al perielio il pianeta va <b>più veloce</b>, perché per coprire la stessa area con un raggio corto serve un arco lungo.'
+    },
+    'Effetto Doppler e regola dei segni': {
+      spec: {kind:'func2d', xr:[-0.75,0.75], yr:[0,4.2], height:330,
+        title:'frequenza percepita (in unita di f0) al variare della velocita, in unita di c',
+        curves:[{f:'1/(1-x)', col:'#5eead4', width:2.4, label:'sorgente in moto'},
+                {f:'1+x', col:'#d8a13a', width:2.4, label:'osservatore in moto'},
+                {f:'1', col:'#4d5a6b', width:1.2, dash:true}],
+        marks:[{x:0,y:1,label:'fermi: f=f0',col:'#b98cff',up:true}]},
+      leggi: 'Le due curve <b>non coincidono</b>, ed è il punto dell\'esercizio: nel caso acustico conta chi si muove <b>rispetto al mezzo</b>. Se si muove la <b>sorgente</b> la frequenza va come $\\frac{1}{1-v/c}$ e <b>diverge</b> quando $v\\to c$ (è il muro del suono: i fronti d\'onda si accumulano). Se si muove l\'<b>osservatore</b> va come $1+v/c$, che è lineare e non diverge mai. Per $v\\ll c$ le due coincidono al primo ordine — ed è per questo che la differenza sfugge se non si guarda il grafico. <b>Regola dei segni:</b> avvicinarsi alza la frequenza, allontanarsi la abbassa; in formula si sceglie il segno che rende $f\'>f_0$ in avvicinamento. <b>Nel caso della luce non c\'è mezzo</b> e la formula relativistica è simmetrica: dipende solo dalla velocità relativa.'
+    },
+    'Riflessione a estremo fisso e a estremo libero': {
+      spec: {kind:'func2d', xr:[-4,4], yr:[-1.35,1.35], height:300, w:430,
+        title:'estremo FISSO: l\'onda riflessa torna capovolta',
+        curves:[{f:'exp(-4*pow(x+2,2))', col:'#5eead4', width:2, label:'incidente'},
+                {f:'-exp(-4*pow(x-2,2))', col:'#ff6b6b', width:2, label:'riflessa (invertita)'},
+                {f:'0', col:'#4d5a6b', width:1, dash:true}]},
+      alt2: true,
+      leggi: 'A un estremo <b>fisso</b> lo spostamento deve essere nullo in ogni istante: l\'unico modo perché incidente e riflessa si sommino a zero in quel punto è che la riflessa sia <b>capovolta</b> — sfasamento di $\\pi$. A un estremo <b>libero</b>, invece, la condizione è sulla <b>pendenza</b> (nessuna forza trasversale, $\\partial y/\\partial x=0$): lì la riflessa torna <b>diritta</b>, e nel punto di riflessione l\'ampiezza <b>raddoppia</b>. <b>Il ragionamento non va memorizzato, va rifatto ogni volta:</b> si scrive la condizione al bordo e si guarda cosa impone. È lo stesso schema che nel nucleo delle onde stazionarie decide dove stanno nodi e ventri — e in ottica dà lo sfasamento nella riflessione su un mezzo più denso.'
+    },
+    'Teorema del guscio sferico': {
+      spec: {kind:'func2d', xr:[0,4], yr:[0,1.15], height:330,
+        title:'campo gravitazionale di una sfera piena omogenea, dentro e fuori',
+        curves:[{f:'x<1 ? x : 1/(x*x)', col:'#5eead4', width:2.6, label:'g(r)'},
+                {f:'1/(x*x)', col:'#8fa0b5', width:1.4, dash:true, label:'estensione di 1/r² (falsa dentro)'}],
+        marks:[{x:1,y:1,label:'superficie: massimo',col:'#d8a13a',up:true}]},
+      leggi: 'Fuori dalla sfera il campo è <b>identico</b> a quello di tutta la massa concentrata nel centro: è la prima parte del teorema, ed è la ragione per cui si può trattare la Terra come un punto. Dentro, il guscio esterno al punto <b>non contribuisce</b> (il suo campo interno è esattamente nullo) e agisce solo la massa più interna, che per densità costante cresce come $r^3$: quindi $g\\propto M(r)/r^2\\propto r$, <b>lineare</b>. Il massimo è <b>sulla superficie</b>. <b>Due conseguenze da avere pronte:</b> in un tunnel diametrale il moto sarebbe armonico (forza di richiamo proporzionale a $r$), con periodo uguale a quello di un satellite radente; e la curva tratteggiata mostra l\'errore che si commette applicando $1/r^2$ all\'interno — diverge invece di annullarsi.'
+    },
+    'Effetto Venturi ed efflusso di Torricelli': {
+      spec: {kind:'func2d', xr:[0.3,2.2], yr:[-1.2,3.6], height:330,
+        title:'in una strozzatura la velocita sale e la pressione SCENDE',
+        curves:[{f:'1/x', col:'#5eead4', width:2.4, label:'v ∝ 1/A (continuità)'},
+                {f:'3-0.5/(x*x)', col:'#d8a13a', width:2.4, label:'p = p₀ - ½ρv² (Bernoulli)'}],
+        marks:[{x:0.5,y:2,label:'strozzatura: v alta, p bassa',col:'#ff9b6b',up:true}]},
+      leggi: 'Due leggi in una figura. L\'<b>equazione di continuità</b> $A v=$ cost impone che dove la sezione si stringe la velocità salga (curva verde, iperbole). <b>Bernoulli</b> impone poi che dove la velocità sale la pressione <b>scenda</b> (curva oro). L\'effetto è controintuitivo — ci si aspetta che «schiacciando» il fluido la pressione aumenti — e invece l\'energia si sposta da pressione a cinetica. <b>È il principio del tubo di Venturi</b> (si misura la portata dalla differenza di pressione), della portanza, e del perché due navi affiancate si attirano. <b>Torricelli è lo stesso conto con la strozzatura all\'aperto:</b> $v=\\sqrt{2gh}$ — la velocità d\'efflusso è quella di un grave caduto dall\'altezza del pelo libero, e non dipende dalla densità del liquido.'
     }
+
   };
 
   /* ============ 3. RIPASSO SPAZIATO — stesso archivio dell'app ============ */
