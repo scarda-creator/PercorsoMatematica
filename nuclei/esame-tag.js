@@ -79,7 +79,14 @@
     { n: '16', t: '03', corso: 'metodi', prova: 'scritto+orale', et: 'Metodi · B1 · scritto', nota: 'Sturm–Liouville: autofunzioni ortogonali col peso' },
     { n: '16', t: '04', corso: 'metodi', prova: 'scritto', et: 'Metodi · B2 · scritto', nota: 'Funzione di Green via spettro; risolvente' },
     { n: '17', t: '02', corso: 'metodi', prova: 'scritto', et: 'Metodi · B4 · scritto', nota: 'Equazione del calore: nucleo gaussiano, smorzamento dei modi' },
-    { n: '17', t: '03', corso: 'metodi', prova: 'scritto', et: 'Metodi · B4 · scritto', nota: 'Equazione delle onde: d’Alembert, dominio di dipendenza' }
+    { n: '17', t: '03', corso: 'metodi', prova: 'scritto', et: 'Metodi · B4 · scritto', nota: 'Equazione delle onde: d’Alembert, dominio di dipendenza' },
+    /* ---------------- aggiunte del 2026-07-21 (buchi colmati) ---------------- */
+    { n: "18", t: "01", corso: "av", prova: "scritto", et: "AV · scritto · Es.1 ★", nota: "Integrali doppi: domini normali e teorema di Fubini (Parte II.7) — Esercizio 1 sistematico" },
+    { n: "18", t: "02", corso: "av", prova: "scritto+orale", et: "AV · scritto · Es.1 ★", nota: "Cambio di variabili e jacobiano; coordinate polari (Parte II.7)" },
+    { n: "18", t: "03", corso: "av", prova: "scritto", et: "AV · scritto · Es.1", nota: "Integrali tripli in cilindriche e sferiche; volumi, masse, momenti (Parte II.7)" },
+    { n: "09", t: "02", corso: "metodi", prova: "scritto", et: "Metodi · B5 · scritto", titolo: "Gram", nota: "Gram–Schmidt in L²: ortonormalizzazione (blocco B5, ~4 scritti su 19)" },
+    { n: "19", t: "02", corso: "metodi", prova: "orale", et: "Metodi · orale (programma)", nota: "Metodo di Laplace — nel programma ufficiale del canale 3, mai comparso negli scritti" },
+    { n: "19", t: "03", corso: "metodi", prova: "orale", et: "Metodi · orale (programma)", nota: "Fase stazionaria e punto di sella — nel programma ufficiale del canale 3" }
   ];
 
   var CSS = [

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 02-bis — Integrali multipli: domini, Fubini, cambio di variabili</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>02-bis — Integrali doppi e tripli: domini normali, Fubini, cambio di variabili</b> · Analisi Vettoriale (Terracina) · Esercizio 1 del secondo esonero</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 18: Integrali multipli e cambio di variabili <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Parte II.7 · è l’Esercizio 1 del secondo esonero, sistematico · e la macchina che regge tutti i teoremi integrali',
+  blocchi:[
+  {t:'prosa', title:'Il pezzo che mancava, e perché pesa', tag:'first principles', html:R`
+  <p>Fin qui il percorso ha trattato l&rsquo;integrazione come <b>risultato</b>: Green, Gauss e Stokes trasformano un integrale in un altro. Ma in ogni compito, prima di applicare un teorema, bisogna <b>calcolare</b> un integrale doppio o triplo — e lì si vince o si perde l&rsquo;esercizio, non sul teorema.</p>
+  <p>Il calcolo di un integrale multiplo è, quasi sempre, <b>una scelta e due mestieri</b>: la scelta è <i>in che coordinate</i> guardare il dominio; i mestieri sono <b>descrivere il dominio</b> (in che ordine si integra, con che estremi) e <b>applicare il fattore di distorsione</b> (il modulo del jacobiano). Nessuna delle due difficoltà è concettuale: sono difficoltà di <i>disciplina</i>, ed è per questo che si sbagliano.</p>
+  <p>Un avvertimento che vale tutto il nucleo: <b>l&rsquo;integrale non dipende dalle coordinate, il lavoro sì.</b> Lo stesso integrale in cartesiane può costare due pagine e in polari tre righe. Riconoscere quale sistema di coordinate «vede» la simmetria del problema è la vera abilità richiesta.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Riconoscere un <b>dominio normale</b> rispetto a un asse, scriverne gli estremi e applicare <b>Fubini</b> nell&rsquo;ordine giusto — e <b>scambiare l&rsquo;ordine</b> quando il primo non si integra.</li>
+  <li>Applicare la formula del <b>cambio di variabili</b> con il <b>modulo</b> del determinante jacobiano, senza dimenticarlo e senza sbagliarne il verso.</li>
+  <li>Usare a memoria le tre trasformazioni d&rsquo;esame: <b>polari</b> ($r$), <b>cilindriche</b> ($r$), <b>sferiche</b> ($\rho^2\sin\varphi$).</li>
+  <li>Calcolare aree, volumi, masse e baricentri, e riconoscere quando conviene <b>Gauss</b> invece del calcolo diretto.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · DOMINI NORMALI E FUBINI ---------------- */
+{ num:'01', title:'Domini normali e teorema di Fubini', meta:'l’integrale doppio come integrale iterato · scegliere l’ordine · scambiarlo quando serve',
+  blocchi:[
+  {t:'prosa', title:'Dal volume all’integrale iterato', tag:'costruzione', html:R`
+  <p>L&rsquo;integrale doppio $\displaystyle\iint_D f(x,y)\,dA$ è, per $f\ge0$, il <b>volume</b> sotto il grafico sopra $D$. Il modo di calcolarlo è ridurlo a due integrazioni in cascata, e per farlo il dominio va descritto come <b>normale</b>.</p>
+  <p><b>Dominio normale rispetto a $x$</b> (si «taglia» con rette verticali):
+  $$D=\{(x,y):\ a\le x\le b,\ \ g_1(x)\le y\le g_2(x)\}\ \Longrightarrow\ \iint_Df\,dA=\int_a^b\!\!\left(\int_{g_1(x)}^{g_2(x)}f(x,y)\,dy\right)dx.$$
+  <b>Rispetto a $y$</b> è la stessa cosa a ruoli scambiati. <b>Teorema di Fubini</b> (per $f$ continua su un dominio limitato e regolare): i due ordini danno lo <b>stesso</b> risultato.</p>
+  <div class="note warn"><b>Il metodo che non sbaglia.</b> <b>(1)</b> Disegna il dominio, sempre — anche brutto. <b>(2)</b> Decidi la variabile «esterna» e falla variare in un intervallo di <b>numeri</b>. <b>(3)</b> A quella fissata, guarda il segmento che il dominio ritaglia: gli estremi della variabile interna sono <b>funzioni</b> di quella esterna. <b>Errore n.1 d&rsquo;esame: estremi interni costanti quando dovrebbero dipendere dall&rsquo;altra variabile.</b> Se ti escono tutti e quattro gli estremi numerici, o il dominio è un rettangolo, o hai sbagliato.</div>`},
+  {t:'plot', title:'Lo stesso dominio, due ordini di integrazione',
+   intro:R`Il dominio fra la parabola $y=x^2$ e la retta $y=x$. A sinistra tagliato in verticale (normale rispetto a $x$), a destra in orizzontale (rispetto a $y$).`,
+   plots:[
+    {kind:'func2d', xr:[-0.15,1.15], yr:[-0.15,1.15], equal:true, height:320, w:430,
+     title:'verticale: x da 0 a 1, y da x^2 a x',
+     curves:[{f:'x*x', col:'#4c8dff', width:2.2, label:'y = x²'},
+             {f:'x', col:'#d8a13a', width:2.2, label:'y = x'}],
+     segs:[{x1:0.25,y1:0.0625,x2:0.25,y2:0.25,col:'#5eead4',width:2.4},
+           {x1:0.5,y1:0.25,x2:0.5,y2:0.5,col:'#5eead4',width:2.4},
+           {x1:0.75,y1:0.5625,x2:0.75,y2:0.75,col:'#5eead4',width:2.4}]},
+    {kind:'func2d', xr:[-0.15,1.15], yr:[-0.15,1.15], equal:true, height:320, w:430,
+     title:'orizzontale: y da 0 a 1, x da y a radice(y)',
+     curves:[{f:'x*x', col:'#4c8dff', width:2.2, label:'y = x²'},
+             {f:'x', col:'#d8a13a', width:2.2, label:'y = x'}],
+     segs:[{x1:0.25,y1:0.25,x2:0.5,y2:0.25,col:'#b98cff',width:2.4},
+           {x1:0.5,y1:0.5,x2:0.7071,y2:0.5,col:'#b98cff',width:2.4},
+           {x1:0.75,y1:0.75,x2:0.866,y2:0.75,col:'#b98cff',width:2.4}]}
+   ],
+   leggi:R`A sinistra fissi $x$ e leggi il <b>segmento verticale</b> che il dominio ritaglia: va da $y=x^2$ (parabola, sotto) a $y=x$ (retta, sopra). Quindi $\int_0^1\!\int_{x^2}^{x}f\,dy\,dx$. A destra fissi $y$ e leggi il <b>segmento orizzontale</b>: va da $x=y$ a $x=\sqrt y$ — nota che i ruoli si invertono, perché per $0\lt y\lt1$ è $y\lt\sqrt y$. Quindi $\int_0^1\!\int_{y}^{\sqrt y}f\,dx\,dy$. <b>Le due scritture valgono lo stesso numero</b> (Fubini) ma <b>non costano lo stesso</b>: con $f=e^{y/x}$ il primo ordine è impossibile in forma chiusa e il secondo pure; con $f$ funzione della sola $y$ conviene il secondo. <b>La mossa d&rsquo;esame</b> è proprio questa: se l&rsquo;integrale interno non si fa, non insistere — <b>riscrivi il dominio nell&rsquo;altro ordine</b>. Un integrale come $\int_0^1\!\int_{y}^{1}e^{-x^2}dx\,dy$ sembra impossibile ($e^{-x^2}$ non ha primitiva elementare) e diventa immediato scambiando: $\int_0^1\!\int_0^{x}e^{-x^2}dy\,dx=\int_0^1xe^{-x^2}dx$.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Come riconosci, guardando il disegno, se conviene integrare prima in $y$ o prima in $x$?`,
+    a:R`Guarda quale famiglia di segmenti (verticali o orizzontali) taglia il dominio con <b>una sola</b> coppia di estremi. Se tagliando in verticale il segmento entra ed esce dalla stessa curva per ogni $x$, il dominio è normale rispetto a $x$ e quell&rsquo;ordine è pulito; se invece per certe $x$ il segmento si spezza in due tratti, quell&rsquo;ordine ti obbliga a <b>spezzare il dominio</b> in più pezzi — prova l&rsquo;altro. Secondo criterio, indipendente: <b>quale integrale interno so effettivamente calcolare</b>.`}
+  ]}
+]},
+
+/* ---------------- 02 · CAMBIO DI VARIABILI ---------------- */
+{ num:'02', title:'Il cambio di variabili e il jacobiano', meta:'$dA=|\\det J|\\,du\\,dv$ · perché il MODULO · le polari',
+  blocchi:[
+  {t:'reveal', title:'La formula, e da dove viene il fattore', tag:'derivazione', steps:[
+   {label:'Enunciato', body:R`<p>Sia $\Phi:(u,v)\mapsto(x,y)$ di classe $C^1$, <b>iniettiva</b> con jacobiano non nullo (salvo insiemi trascurabili), che manda $D'$ su $D$. Allora
+   $$\iint_D f(x,y)\,dx\,dy=\iint_{D'}f\big(\Phi(u,v)\big)\,\big|\det J_\Phi(u,v)\big|\,du\,dv,\qquad
+   J_\Phi=\begin{pmatrix}x_u & x_v\\ y_u & y_v\end{pmatrix}.$$</p>`},
+   {label:'Perché compare il determinante', body:R`<p>È il nucleo 01 applicato all&rsquo;area. Vicino a un punto, $\Phi$ è approssimata dalla sua <b>applicazione lineare</b> $J_\Phi$ (differenziabilità). Un&rsquo;applicazione lineare manda il quadratino $du\times dv$ in un <b>parallelogramma</b>, e l&rsquo;area di quel parallelogramma è $|\det J|\,du\,dv$ — è il significato geometrico del determinante. Sommando i contributi, l&rsquo;elemento d&rsquo;area si trasforma con quel fattore. $\blacksquare$</p>`},
+   {label:'Perché il MODULO', body:R`<div class="note warn">Il determinante può essere <b>negativo</b>: significa che $\Phi$ inverte l&rsquo;orientazione (come uno specchio). Ma l&rsquo;<b>area</b> è positiva, quindi nella formula compare $|\det J|$. <b>È l&rsquo;errore n.2 d&rsquo;esame</b>, e non è pignoleria: scambiando l&rsquo;ordine dei parametri il segno cambia, e senza modulo l&rsquo;integrale esce negativo.
+   <p>Attenzione a non confondere due situazioni che si somigliano: qui il modulo <b>ci va</b>; nel <b>flusso</b> attraverso una superficie (nucleo 03) il modulo <b>non</b> ci va, perché lì il verso della normale è parte del risultato. Area e massa non hanno segno; il flusso sì.</p></div>`}
+  ]},
+  {t:'gram', title:'Le tre trasformazioni da sapere a memoria', rows:[
+   [R`<b>polari</b> (2D)`, R`$x=r\cos\theta,\ y=r\sin\theta$; $\ \det J=r$, quindi $dA=r\,dr\,d\theta$. Dominio tipico: cerchi, corone, settori. <b>La $r$ dimenticata è l&rsquo;errore più comune in assoluto.</b>`],
+   [R`<b>cilindriche</b> (3D)`, R`$x=r\cos\theta,\ y=r\sin\theta,\ z=z$; $\ dV=r\,dr\,d\theta\,dz$. Per solidi con simmetria attorno a un asse (cilindri, coni, paraboloidi).`],
+   [R`<b>sferiche</b> (3D)`, R`$x=\rho\sin\varphi\cos\theta,\ y=\rho\sin\varphi\sin\theta,\ z=\rho\cos\varphi$; $\ dV=\rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta$, con $\varphi\in[0,\pi]$ colatitudine. Per sfere, calotte, coni pieni.`],
+   [R`<b>lineari</b>`, R`$\Phi$ lineare: $|\det J|$ è <b>costante</b> e si porta fuori. Utile per ellissi ($x=a u$, $y=b v$ dà $|\det J|=ab$ e il cerchio unitario) e per domini delimitati da rette come $x+y=c$, $x-y=c$ (si pone $u=x+y$, $v=x-y$).`],
+   [R`<b>il verso comodo</b>`, R`Spesso è più facile scrivere $u,v$ in funzione di $x,y$: allora si calcola $\det J_{(u,v)/(x,y)}$ e si usa $|\det J_\Phi|=1/|\det J_{(u,v)/(x,y)}|$ (jacobiano dell&rsquo;inversa). Legittimo e più rapido.`]
+  ]},
+  {t:'plot', title:'La mappa polare: come un rettangolo diventa una corona',
+   intro:R`La trasformazione $\Phi(r,\theta)=(r\cos\theta,\ r\sin\theta)$ vista come <b>superficie parametrica</b>: il rettangolo $[0{,}4;1]\times[0;2\pi]$ del piano dei parametri diventa la corona circolare. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'param3d', x:'u*cos(v)', y:'u*sin(v)', z:'0*u+0*v', ur:[0.4,1], vr:[0,6.28319],
+     nu:10, nv:40, w:560, height:330, yaw:0.2, pitch:1.35, alpha:0.9,
+     title:'la maglia si allarga verso l\'esterno: e il fattore r'}
+   ],
+   leggi:R`Guarda la <b>maglia</b>: i quadrilateri vicino al bordo interno sono <b>stretti</b>, quelli verso il bordo esterno <b>larghi</b>. Eppure nel piano dei parametri erano tutti uguali — passi identici in $r$ e in $\theta$. <b>Quello stiramento è esattamente il fattore $r$</b>: a raggio doppio, lo stesso $\Delta\theta$ copre un arco doppio, quindi la stessa cella dei parametri copre area doppia. Ecco perché $dA=r\,dr\,d\theta$ e non $dr\,d\theta$: <b>il jacobiano non è una formula da ricordare, è la misura di quanto la mappa stira</b>. Nota anche il caso limite: in $r=0$ le celle collassano, il jacobiano si annulla e la trasformazione non è iniettiva (tutti i $\theta$ danno lo stesso punto) — è il «salvo insiemi trascurabili» dell&rsquo;enunciato, e non dà problemi perché un punto non contribuisce all&rsquo;area. Stessa lettura in 3D per $\rho^2\sin\varphi$: il fattore è grande all&rsquo;equatore e si annulla ai poli, dove i meridiani si stringono.`},
+  {t:'esercizio', title:'Esercizio guidato: $\\iint_D e^{-(x^2+y^2)}dA$ sul cerchio di raggio $R$',
+   src:'tipo standard — la polare che salva la vita',
+   testo:R`Calcolare $\displaystyle\iint_{D}e^{-(x^2+y^2)}\,dx\,dy$ con $D=\{x^2+y^2\le R^2\}$, e dedurne il valore dell&rsquo;integrale di Gauss $\int_{-\infty}^{+\infty}e^{-x^2}dx$.`,
+   steps:[
+    {label:'Perché le polari', body:R`<p>In cartesiane l&rsquo;integrale interno $\int e^{-x^2}dx$ <b>non ha primitiva elementare</b>: la strada è chiusa. Ma il dominio è un cerchio e l&rsquo;integranda dipende solo da $x^2+y^2=r^2$: in polari <b>entrambe</b> le difficoltà spariscono.</p>`},
+    {label:'Il conto', body:R`<p>$$\iint_De^{-(x^2+y^2)}dA=\int_0^{2\pi}\!\!\int_0^{R}e^{-r^2}\,\underbrace{r\,dr}_{\text{jacobiano}}\,d\theta=2\pi\int_0^Re^{-r^2}r\,dr=2\pi\left[-\tfrac12e^{-r^2}\right]_0^R=\pi\big(1-e^{-R^2}\big).$$
+    <b>È la $r$ del jacobiano a rendere l&rsquo;integrale elementare</b> (senza, $\int e^{-r^2}dr$ sarebbe di nuovo impossibile): un caso in cui il fattore dimenticato non solo sbaglia il risultato, ma nasconde la soluzione.</p>`},
+    {label:'L’integrale di Gauss', body:R`<p>Per $R\to\infty$ il risultato tende a $\pi$. D&rsquo;altra parte, su tutto il piano l&rsquo;integrale si fattorizza:
+    $$\iint_{\mathbb{R}^2}e^{-(x^2+y^2)}dA=\left(\int_{-\infty}^{+\infty}e^{-x^2}dx\right)^{\!2}=\pi\ \Longrightarrow\ \int_{-\infty}^{+\infty}e^{-x^2}dx=\sqrt\pi.\qquad\blacksquare$$
+    Lo stesso $\sqrt\pi$ che il nucleo 14 ottiene da $\Gamma(1/2)$: due strade, un numero.</p>`}
+   ],
+   nota:R`Questo è <b>il</b> conto da avere in tasca: la gaussiana normalizzata della meccanica statistica, della teoria degli errori e del pacchetto d&rsquo;onda esce da qui.`}
+]},
+
+/* ---------------- 03 · TRIPLI ---------------- */
+{ num:'03', title:'Integrali tripli: cilindriche e sferiche', meta:'descrivere un solido · scegliere le coordinate che vedono la simmetria · volumi e masse',
+  blocchi:[
+  {t:'prosa', title:'Il metodo, identico ma con un ordine in più', tag:'saper fare', html:R`
+  <p>Per $\displaystyle\iiint_V f\,dV$ valgono le stesse regole, con una scelta in più. Due strategie di descrizione:</p>
+  <ul>
+  <li><b>Per fili</b> (dominio normale rispetto al piano $xy$): $V=\{(x,y)\in D,\ h_1(x,y)\le z\le h_2(x,y)\}$, e si integra prima in $z$, poi sul dominio piano $D$ con le tecniche della tappa 01-02. <b>È la strada standard</b>: solidi «fra due superfici».</li>
+  <li><b>Per fette</b> (normale rispetto a un asse): $\displaystyle\iiint_VfdV=\int_{z_1}^{z_2}\left(\iint_{D_z}f\,dA\right)dz$, con $D_z$ la sezione a quota $z$. Conviene quando le sezioni sono figure semplici di area nota — per il volume, $V=\int A(z)\,dz$.</li>
+  </ul>
+  <p><b>Come si sceglie il sistema di coordinate:</b> guarda le <b>superfici che delimitano</b> il solido. Se compaiono $x^2+y^2$ (cilindri, coni, paraboloidi) → <b>cilindriche</b>. Se compare $x^2+y^2+z^2$ (sfere, calotte) → <b>sferiche</b>. Se il solido è un poliedro o un parallelepipedo deformato → <b>lineari</b>. La scelta giusta rende gli estremi <b>costanti</b>, ed è quello il segnale che hai scelto bene.</p>`},
+  {t:'esercizio', title:'Esercizio guidato: volume della calotta e momento d’inerzia',
+   src:'tipo standard — sferiche con estremi non banali',
+   testo:R`(a) Calcolare il volume del solido racchiuso fra il cono $z=\sqrt{x^2+y^2}$ e la sfera $x^2+y^2+z^2=a^2$ (la «coppa di gelato»). (b) Calcolarne il momento d&rsquo;inerzia rispetto all&rsquo;asse $z$ per densità costante $\mu$.`,
+   steps:[
+    {label:'Le coordinate e gli estremi', body:R`<p>Ci sono sia $x^2+y^2$ sia $x^2+y^2+z^2$, ma la sfera domina: <b>sferiche</b>. La sfera dà $\rho\le a$. Il cono $z=\sqrt{x^2+y^2}$ in sferiche diventa $\rho\cos\varphi=\rho\sin\varphi$, cioè $\tan\varphi=1$, cioè $\varphi=\pi/4$: <b>una superficie coordinata</b> — ecco perché queste coordinate sono le giuste. Quindi
+    $$\rho\in[0,a],\qquad \varphi\in[0,\pi/4],\qquad \theta\in[0,2\pi],$$
+    tutti <b>costanti</b>: il segnale che la scelta è quella buona.</p>`},
+    {label:'(a) il volume', body:R`<p>$$V=\int_0^{2\pi}\!\!\int_0^{\pi/4}\!\!\int_0^{a}\rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta
+    =2\pi\cdot\frac{a^3}{3}\cdot\big[-\cos\varphi\big]_0^{\pi/4}=\frac{2\pi a^3}{3}\left(1-\frac{\sqrt2}{2}\right).$$
+    <b>Controllo di plausibilità:</b> il fattore $(1-\frac{\sqrt2}{2})\approx0{,}29$ dice che la coppa è circa il $29\%$ della semisfera piena — plausibile per un cono a $45°$.</p>`},
+    {label:'(b) il momento d’inerzia', body:R`<p>Serve $I_z=\mu\displaystyle\iiint_V(x^2+y^2)\,dV$, e $x^2+y^2=\rho^2\sin^2\varphi$:
+    $$I_z=\mu\int_0^{2\pi}\!\!\int_0^{\pi/4}\!\!\int_0^{a}\rho^2\sin^2\varphi\cdot\rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta
+    =2\pi\mu\,\frac{a^5}{5}\int_0^{\pi/4}\sin^3\varphi\,d\varphi.$$
+    Con $\int\sin^3=\int(1-\cos^2)\sin=-\cos\varphi+\frac{\cos^3\varphi}{3}$, valutato fra $0$ e $\pi/4$ dà $\frac23-\frac{5\sqrt2}{12}$. Quindi $I_z=\frac{2\pi\mu a^5}{5}\left(\frac23-\frac{5\sqrt2}{12}\right)$. $\blacksquare$</p>
+    <div class="note">Da notare, perché torna in Meccanica: il momento d&rsquo;inerzia è un integrale con peso $x^2+y^2$ = <b>distanza al quadrato dall&rsquo;asse</b>. Cambiare asse cambia il peso, non il metodo. Baricentro, massa, momento: sono tutti $\iiint$ della densità per un peso diverso.</div>`}
+   ],
+   nota:R`Schema riusabile: <b>(1)</b> quali superfici delimitano il solido → quali coordinate; <b>(2)</b> traduci ogni superficie in un&rsquo;equazione nelle coordinate scelte e leggi gli estremi; <b>(3)</b> non dimenticare il jacobiano ($r$ o $\rho^2\sin\varphi$); <b>(4)</b> controlla che il risultato abbia le dimensioni giuste (un volume va come $a^3$, un momento d&rsquo;inerzia come $\mu a^5$).`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In sferiche l&rsquo;angolo $\varphi$ va da $0$ a $\pi$ e $\theta$ da $0$ a $2\pi$, e non viceversa. Perché?`,
+    a:R`Perché $\varphi$ è la <b>colatitudine</b> (l&rsquo;angolo dal polo nord) e basta mezzo giro per andare da polo a polo; $\theta$ è la <b>longitudine</b> e serve il giro intero. Se li scambi ottieni una copertura doppia della sfera e un volume <b>doppio</b>. Controllo rapido: la sfera piena deve dare $\frac43\pi a^3$; se ti esce $\frac83\pi a^3$, hai invertito i ruoli.`},
+   {q:R`Quando conviene calcolare un flusso con <b>Gauss</b> invece che direttamente?`,
+    a:R`Quasi sempre, se la superficie è <b>chiusa</b>: $\oiint_{\partial V}\mathbf F\cdot\mathbf n\,dS=\iiint_V\nabla\cdot\mathbf F\,dV$ (nucleo 05) sostituisce un integrale di superficie — spesso su più facce, ognuna con la sua parametrizzazione — con <b>un solo</b> integrale triplo. La convenienza si ribalta solo se $\nabla\cdot\mathbf F$ è complicata e la superficie è una sola faccia semplice. <b>È la ragione per cui questo nucleo e il 05 vanno usati insieme:</b> l&rsquo;Esercizio 1 del secondo esonero spesso chiede proprio «flusso via Gauss», cioè un triplo travestito da flusso.`}
+  ]}
+]},
+
+/* ---------------- 04 · ESERCIZI ---------------- */
+{ num:'04', title:'Esercizi — tocca a te', meta:'scambio dell’ordine · area con trasformazione lineare · solido di rotazione',
+  blocchi:[
+  {t:'esercizio', title:'Scambiare l’ordine per rendere possibile l’integrale',
+   src:'esercizio guidato — la mossa che sblocca',
+   testo:R`Calcolare $\displaystyle\int_0^1\!\!\int_{\sqrt y}^{1}\frac{\sin x}{x}\,dx\,dy$.`,
+   steps:[
+    {label:'Perché così non si può', body:R`<p>$\int\frac{\sin x}{x}dx$ non è elementare (è il seno integrale $\mathrm{Si}$, nucleo 13): l&rsquo;integrale interno, così com&rsquo;è scritto, è un vicolo cieco. Quando succede, la mossa è <b>una sola</b>: riscrivere il dominio.</p>`},
+    {label:'Il dominio', body:R`<p>Le condizioni sono $0\le y\le1$ e $\sqrt y\le x\le1$, cioè $y\le x^2$ con $0\le x\le 1$. Letto per fili verticali: <b>$x$ da $0$ a $1$, $y$ da $0$ a $x^2$</b>.</p>`},
+    {label:'Il conto', body:R`<p>$$\int_0^1\!\!\int_0^{x^2}\frac{\sin x}{x}\,dy\,dx=\int_0^1\frac{\sin x}{x}\cdot x^2\,dx=\int_0^1 x\sin x\,dx=\big[\sin x-x\cos x\big]_0^1=\sin1-\cos1.$$
+    $\blacksquare$ La $x$ del dominio ha <b>cancellato</b> la $x$ al denominatore: è il motivo per cui l&rsquo;esercizio è costruito così.</p>`}
+   ],
+   nota:R`Riconoscimento: <b>se l&rsquo;integranda dipende dalla variabile INTERNA in modo non integrabile, scambia.</b> È un tipo d&rsquo;esame classico, e la difficoltà è tutta nel riscrivere correttamente il dominio — disegnalo.`},
+  {t:'collaudo', title:'Diagnostica rapida', items:[
+   {q:R`Area della regione delimitata da $x+y=1$, $x+y=3$, $x-y=0$, $x-y=2$: come la calcoli in tre righe?`,
+    a:R`Con la trasformazione <b>lineare</b> $u=x+y$, $v=x-y$: la regione diventa il rettangolo $[1,3]\times[0,2]$. Il jacobiano dell&rsquo;inversa: $\det\frac{\partial(u,v)}{\partial(x,y)}=\begin{vmatrix}1&1\\1&-1\end{vmatrix}=-2$, quindi $|\det J_\Phi|=\frac12$ e l&rsquo;area è $\frac12\cdot(2\cdot2)=2$. <b>Quando il dominio è delimitato da quattro rette a due a due parallele, le nuove variabili sono le equazioni stesse delle rette.</b>`},
+   {q:R`Perché il volume di un solido di rotazione si può scrivere sia come $\pi\int f(x)^2dx$ sia come integrale triplo?`,
+    a:R`Perché sono lo stesso conto a due livelli di dettaglio. L&rsquo;integrale triplo in <b>cilindriche</b> del solido ottenuto ruotando il grafico di $f$ attorno all&rsquo;asse: $\int\!\!\int\!\!\int r\,dr\,d\theta\,dz=\int dz\int_0^{2\pi}\!d\theta\int_0^{f(z)}\!r\,dr=\int 2\pi\frac{f(z)^2}{2}dz=\pi\int f(z)^2dz$. La formula dei «dischi» che conosci da Analisi 1 <b>è</b> l&rsquo;integrale triplo con le integrazioni banali già svolte.`}
+  ]}
+]},
+
+/* ---------------- 05 · SENSO E ROTTE ---------------- */
+{ num:'05', title:'Il senso e le rotte fisiche', meta:'integrare su un dominio è sommare una densità: da qui in poi, ovunque',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il jacobiano non è una regola mnemonica: è l&rsquo;<b>approssimazione lineare</b> del nucleo 01 applicata all&rsquo;area, e il determinante è il fattore di dilatazione di una mappa lineare. Il modulo c&rsquo;è perché l&rsquo;area non ha segno.</p>
+  <p><b>Il punto.</b> Un integrale multiplo è <b>una densità sommata su un dominio</b>. Tutta la difficoltà pratica sta in due gesti: descrivere il dominio (Fubini, l&rsquo;ordine giusto) e scegliere le coordinate che ne vedono la simmetria.</p>
+  <p><b>A valle.</b> I teoremi integrali (nucleo 05) trasformano questi integrali gli uni negli altri, e la scelta fra calcolo diretto e Gauss è una decisione di convenienza. Il nucleo 10 (Lebesgue) dirà <i>perché</i> l&rsquo;integrale è ben definito anche su domini brutti.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>L&rsquo;integrale multiplo</b>: sommare una densità su un dominio, nelle coordinate che ne vedono la simmetria.`,
+   rotte:[
+    {dove:'Meccanica', txt:R`Massa, <b>baricentro</b> e <b>momento d&rsquo;inerzia</b> di un corpo esteso sono tre integrali della stessa densità con pesi diversi ($1$, $\mathbf r$, $d^2$). Il tensore d&rsquo;inerzia è la matrice di tutti questi integrali insieme.`},
+    {dove:'Elettromagnetismo', txt:R`Il potenziale di una distribuzione di carica è $\int\frac{\rho\,dV}{4\pi\varepsilon_0|\mathbf r-\mathbf r'|}$: un integrale triplo, quasi sempre da fare in sferiche o cilindriche sfruttando la simmetria — che è anche ciò che rende utilizzabile Gauss.`},
+    {dove:'Meccanica<br>statistica', txt:R`La funzione di partizione è un integrale su tutto lo <b>spazio delle fasi</b>: $Z=\frac{1}{h^{3N}}\int e^{-\beta H}d^{3N}q\,d^{3N}p$ — un integrale multiplo in $6N$ dimensioni. Il cambio di variabili verso le coordinate normali (nucleo 16) è ciò che lo rende calcolabile, e il jacobiano di quel cambio è parte del risultato.`},
+    {dove:'Probabilità', txt:R`Una densità di probabilità congiunta si integra su una regione per dare la probabilità di quell&rsquo;evento; il cambio di variabili con $|\det J|$ è <b>esattamente</b> la formula di trasformazione delle densità di variabili aleatorie. Stessa matematica, altro nome.`}
+   ],
+   domanda:R`Il fattore $|\det J|$ dice quanto una trasformazione <b>comprime o dilata</b> il volume. In meccanica hamiltoniana c&rsquo;è un teorema che dice che l&rsquo;evoluzione temporale ha jacobiano <b>esattamente 1</b> (Liouville, nucleo 06): il volume nello spazio delle fasi non si comprime mai. <b>Domanda che porti avanti:</b> se il volume si conserva esattamente, come può un sistema «occupare tutto lo spazio accessibile» e termalizzare? La risposta è che il volume si conserva ma si <b>deforma</b>, allungandosi in filamenti sempre più sottili che si intrecciano ovunque — e a quel punto la domanda diventa: su quale scala smetti di distinguere un filamento sottile da una nuvola uniforme? Quella scala, e non la dinamica, è dove nasce l&rsquo;irreversibilità.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo18-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 18 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 18-integrali-multipli.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

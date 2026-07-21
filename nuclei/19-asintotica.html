@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 14-bis — Espansioni asintotiche: Laplace, fase stazionaria, punto di sella</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento III · Nucleo <b>14-bis — Espansioni asintotiche: Laplace, fase stazionaria, punto di sella</b> · Metodi · nel programma ufficiale, mai negli scritti: materia da orale</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 19: Espansioni asintotiche <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo (e perché era rimasto fuori)', meta:'nel programma ufficiale di Metodi · in nessuno dei 18 scritti esaminati · ma è il cavallo da lavoro della meccanica statistica',
+  blocchi:[
+  {t:'prosa', title:'La situazione, detta com’è', tag:'onestà prima del contenuto', html:R`
+  <p>Il programma ufficiale del canale 3 elenca quattro voci, e la quarta è: <i>«espansioni asintotiche: metodo di Laplace, fase stazionaria, punto di sella»</i>. Il conteggio sugli scritti reali dice però un&rsquo;altra cosa: <b>in nessuno dei 18 compiti esaminati (2023-2026) compare un esercizio di asintotica</b>. Per questo il percorso l&rsquo;aveva lasciata fuori: è calibrato su ciò che l&rsquo;esame chiede davvero.</p>
+  <p>Resta un fatto: il programma è ciò che il docente <b>può</b> chiedere all&rsquo;<b>orale</b>, e lì la statistica sugli scritti non protegge. Questo nucleo copre quel rischio con la profondità giusta — non un capitolo di manuale, i tre metodi e il perché funzionano.</p>
+  <p>E c&rsquo;è una seconda ragione, che per te pesa più della prima. Queste tecniche sono il <b>cavallo da lavoro</b> della meccanica statistica e degli integrali di cammino: il limite termodinamico, l&rsquo;approssimazione di sella della funzione di partizione, la WKB e la formula di Stirling sono tutte questo nucleo. È materia di tesi travestita da tecnica di calcolo.</p>`},
+  {t:'prosa', title:'L’idea unica sotto i tre metodi', tag:'first principles', html:R`
+  <p>Tutti e tre rispondono alla stessa domanda: <b>quanto vale $I(N)=\displaystyle\int g(x)\,e^{N\,h(x)}dx$ quando $N$ è grande?</b> E tutti e tre danno la stessa risposta strutturale: <b>l&rsquo;integrale è dominato da un punto solo</b>, e attorno a quel punto basta sviluppare al secondo ordine.</p>
+  <ul>
+  <li>Se $h$ è <b>reale</b>, l&rsquo;esponenziale è enorme dove $h$ è massima e trascurabile altrove: domina il <b>massimo</b> → <b>metodo di Laplace</b>.</li>
+  <li>Se $h$ è <b>immaginaria</b> ($e^{iN\varphi}$), il modulo è $1$ ovunque ma la fase gira così in fretta che i contributi si <b>cancellano</b> — tranne dove la fase è ferma: domina il punto <b>stazionario</b> → <b>fase stazionaria</b>.</li>
+  <li>Se $h$ è <b>complessa</b>, si <b>deforma il cammino</b> (nucleo 12!) fino a farlo passare per un punto di <b>sella</b> nella direzione in cui la parte reale scende più ripida: lì il problema torna a essere di Laplace → <b>punto di sella</b>.</li>
+  </ul>
+  <p>Il terzo <b>contiene</b> i primi due: è il motivo per cui questo nucleo sta nel Movimento III e non altrove — senza la libertà di deformare i contorni del teorema di Cauchy, il metodo di sella non esiste.</p>`}
+]},
+
+/* ---------------- 01 · SERIE ASINTOTICHE ---------------- */
+{ num:'01', title:'Cosa vuol dire «asintotico»', meta:'$f\\sim g$ · le serie asintotiche divergono e restano utili · il troncamento ottimo',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e la sorpresa che contiene', tag:'grammatica', html:R`
+  <p>$f(x)\sim g(x)$ per $x\to x_0$ significa $\lim f/g=1$. Una <b>serie asintotica</b> $f(x)\sim\sum_{n} a_nx^n$ per $x\to0$ significa qualcosa di più debole di una serie convergente:
+  $$f(x)-\sum_{n=0}^{N}a_nx^n=o(x^N)\qquad\text{per ogni }N\ \text{fissato, quando }x\to0.$$
+  <b>Attenzione all&rsquo;ordine dei limiti.</b> In una serie <b>convergente</b> si fissa $x$ e si manda $N\to\infty$. In una serie <b>asintotica</b> si fissa $N$ e si manda $x\to0$. Sono richieste diverse, e la seconda <b>non</b> implica la prima: una serie asintotica può <b>divergere per ogni $x\ne0$</b> ed essere ugualmente utilissima.</p>
+  <div class="note">Esempio classico: $\displaystyle\int_0^\infty\frac{e^{-t}}{1+xt}dt\sim\sum_n(-1)^nn!\,x^n$. I coefficienti $n!$ esplodono, il raggio di convergenza è <b>zero</b> — eppure i primi termini danno il valore con precisione eccellente per $x$ piccolo. Il nucleo 07 chiedeva «serie convergente o solo asintotica?» e il nucleo 12 spiegava il raggio con le singolarità: qui si vede il caso limite in cui il raggio è nullo e la serie serve lo stesso.</div>`},
+  {t:'prosa', title:'Il troncamento ottimo — la regola pratica', tag:'saper fare', html:R`
+  <p>Se la serie diverge, aggiungere termini prima <b>migliora</b> e poi <b>peggiora</b>. Il punto di svolta è dove il termine è <b>più piccolo</b>: si tronca lì, e l&rsquo;errore è dell&rsquo;ordine del primo termine trascurato. Per una serie con $a_n\sim n!\,x^n$ il minimo è attorno a $n\approx1/x$, e l&rsquo;errore migliore ottenibile va come $e^{-1/x}$.</p>
+  <p>Quel $e^{-1/x}$ è significativo: è una quantità <b>invisibile a ogni ordine</b> della serie (tutte le sue derivate in $0$ sono nulle, nucleo 12). Le serie asintotiche non vedono i contributi <b>non perturbativi</b> — istantoni, effetto tunnel, ampiezze $e^{-S/\hbar}$. <b>Il limite della serie perturbativa non è un difetto di calcolo: è fisica che vive fuori dalla perturbazione.</b></p>`}
+]},
+
+/* ---------------- 02 · LAPLACE ---------------- */
+{ num:'02', title:'Il metodo di Laplace', meta:'$\\int g\\,e^{-N f}$ · domina il minimo di $f$ · la gaussiana attorno al punto · Stirling',
+  blocchi:[
+  {t:'reveal', title:'La formula, in tre mosse', tag:'derivazione', steps:[
+   {label:'Dove si concentra', body:R`<p>Sia $I(N)=\displaystyle\int_a^b g(x)e^{-Nf(x)}dx$ con $f$ che ha un <b>minimo interno</b> non degenere in $x_0$ ($f'(x_0)=0$, $f''(x_0)\gt0$). Per $N$ grande il rapporto fra il valore in $x_0$ e quello in un altro punto è $e^{-N[f(x)-f(x_0)]}$: <b>esponenzialmente piccolo</b>. Tutto il contributo viene da un intorno di $x_0$ che si stringe come $1/\sqrt N$.</p>`},
+   {label:'Sviluppa e integra la gaussiana', body:R`<p>Vicino a $x_0$: $f(x)\approx f(x_0)+\tfrac12f''(x_0)(x-x_0)^2$ e $g(x)\approx g(x_0)$. Quindi
+   $$I(N)\approx g(x_0)e^{-Nf(x_0)}\int_{-\infty}^{+\infty}e^{-\frac{N f''(x_0)}{2}u^2}du
+   = g(x_0)\,e^{-Nf(x_0)}\sqrt{\frac{2\pi}{N f''(x_0)}}.$$
+   Gli estremi si sono potuti mandare all&rsquo;infinito perché l&rsquo;integranda è già trascurabile lì (l&rsquo;errore commesso è esponenzialmente piccolo). <b>L&rsquo;integrale gaussiano usato è quello calcolato nel nucleo 02-bis in coordinate polari.</b> $\blacksquare$</p>`},
+   {label:'Le varianti che servono', body:R`<ul>
+   <li><b>Massimo al bordo</b> ($f$ monotona): il contributo è metà gaussiana o, se $f'(a)\ne0$, si integra per parti e si ottiene $\dfrac{g(a)e^{-Nf(a)}}{Nf'(a)}$ — ordine $1/N$ invece di $1/\sqrt N$.</li>
+   <li><b>Minimo degenere</b> ($f''(x_0)=0$, $f^{(4)}\gt0$): l&rsquo;ampiezza va come $N^{-1/4}$. La potenza di $N$ <b>legge l&rsquo;ordine di degenerazione</b> — è lo stesso meccanismo degli esponenti critici.</li>
+   </ul>`}
+  ]},
+  {t:'plot', title:'La concentrazione: perché al crescere di $N$ conta solo il massimo',
+   intro:R`$e^{-N f(x)}$ normalizzata al suo massimo, con $f(x)=x^2/2+x^4/10$, per $N=1,\ 5,\ 25$.`,
+   plots:[
+    {kind:'func2d', xr:[-2.6,2.6], yr:[-0.15,1.15], height:340,
+     title:'piu N cresce, piu l\'integrale e deciso da un solo punto',
+     curves:[
+      {f:'exp(-1*(x*x/2+pow(x,4)/10))', col:'#5eead4', width:2, label:'N=1'},
+      {f:'exp(-5*(x*x/2+pow(x,4)/10))', col:'#4c8dff', width:2, label:'N=5'},
+      {f:'exp(-25*(x*x/2+pow(x,4)/10))', col:'#b98cff', width:2.2, label:'N=25'}
+     ],
+     marks:[{x:0,y:1,label:'il minimo di f',col:'#d8a13a',up:true}]}
+   ],
+   leggi:R`La stessa funzione $f$, tre valori di $N$: la campana si <b>stringe come $1/\sqrt N$</b> e tutto ciò che non sta nel picco smette di contare. Tre conseguenze da leggere qui. <b>(1)</b> Serve solo $f$ <b>vicino al minimo</b>: il resto della funzione è irrilevante, ed è per questo che basta lo sviluppo al secondo ordine. <b>(2)</b> La larghezza $\propto N^{-1/2}$ moltiplicata per l&rsquo;altezza $e^{-Nf(x_0)}$ dà il prefattore $\sqrt{2\pi/(Nf'')}$: la formula è area = base × altezza, fatta bene. <b>(3)</b> Il termine di quarto grado in $f$ deforma visibilmente la campana a $N=1$ e diventa invisibile a $N=25$ — è il motivo per cui l&rsquo;approssimazione <b>migliora</b> al crescere di $N$, al contrario di quasi tutte le altre. <b>In meccanica statistica $N$ è il numero di particelle:</b> ecco perché il limite termodinamico rende esatta l&rsquo;approssimazione di sella, e perché le fluttuazioni relative vanno come $1/\sqrt N$.`},
+  {t:'esercizio', title:'La formula di Stirling da $\\Gamma$',
+   src:'l’applicazione classica — e il ponte col nucleo 14',
+   testo:R`Ricavare $n!\sim\sqrt{2\pi n}\,\left(\dfrac{n}{e}\right)^{n}$ applicando il metodo di Laplace a $\Gamma(n+1)=\displaystyle\int_0^{\infty}t^{n}e^{-t}dt$.`,
+   steps:[
+    {label:'Portalo nella forma giusta', body:R`<p>$t^ne^{-t}=e^{n\ln t-t}$. Il grande parametro è $n$, ma l&rsquo;esponente non è ancora $-n f$: si <b>riscala</b> $t=n s$, ottenendo $dt=n\,ds$ e
+    $$\Gamma(n+1)=n^{n+1}\int_0^\infty e^{-n(s-\ln s)}ds,\qquad f(s)=s-\ln s.$$
+    <b>Il riscalamento è la mossa chiave</b>: senza, il massimo si sposta con $n$ e l&rsquo;espansione non parte.</p>`},
+    {label:'Applica Laplace', body:R`<p>$f'(s)=1-1/s=0$ dà $s_0=1$; $f(1)=1$; $f''(s)=1/s^2$, quindi $f''(1)=1$. Allora
+    $$\Gamma(n+1)\approx n^{n+1}e^{-n}\sqrt{\frac{2\pi}{n}}=\sqrt{2\pi n}\;\frac{n^n}{e^n}.\qquad\blacksquare$$</p>`},
+    {label:'Il controllo numerico', body:R`<p>Per $n=10$: $10!=3\,628\,800$ contro $\sqrt{20\pi}\,(10/e)^{10}\approx3\,598\,696$ — errore $0{,}83\%$. Per $n=100$ l&rsquo;errore scende a $0{,}083\%$: va come $\frac{1}{12n}$, il primo termine della correzione. <b>Verifica sempre così un&rsquo;asintotica</b>: un numero contro un numero, non l&rsquo;impressione che la formula sia elegante.</p>
+    <div class="note">Questa formula è ovunque in meccanica statistica: $\ln n!\approx n\ln n-n$ è ciò che trasforma il conteggio delle configurazioni nell&rsquo;<b>entropia di Boltzmann</b>. Il termine $\sqrt{2\pi n}$, trascurabile nel logaritmo, è invece essenziale quando serve la distribuzione e non solo il suo logaritmo.</div>`}
+   ]}
+]},
+
+/* ---------------- 03 · FASE STAZIONARIA E SELLA ---------------- */
+{ num:'03', title:'Fase stazionaria e punto di sella', meta:'oscillazioni che si cancellano · deformare il cammino nel piano complesso · steepest descent',
+  blocchi:[
+  {t:'reveal', title:'Fase stazionaria: dove la fase si ferma', tag:'derivazione', steps:[
+   {label:'Il meccanismo', body:R`<p>Per $I(N)=\displaystyle\int g(x)e^{iN\varphi(x)}dx$ il modulo dell&rsquo;integranda è $|g|$ ovunque: nessun punto domina in <b>ampiezza</b>. Ma la fase $N\varphi(x)$ ruota velocissima, e contributi con fasi opposte si <b>elidono</b>. L&rsquo;unico posto dove non si elidono è dove la fase è <b>stazionaria</b>: $\varphi'(x_0)=0$.</p>`},
+   {label:'La formula', body:R`<p>Sviluppando $\varphi\approx\varphi(x_0)+\tfrac12\varphi''(x_0)(x-x_0)^2$ e usando l&rsquo;integrale di Fresnel $\int e^{i\alpha u^2}du=\sqrt{\pi/|\alpha|}\,e^{i\frac{\pi}{4}\mathrm{sgn}\alpha}$:
+   $$I(N)\approx g(x_0)\,e^{iN\varphi(x_0)}\sqrt{\frac{2\pi}{N|\varphi''(x_0)|}}\;e^{\,i\frac{\pi}{4}\mathrm{sgn}\varphi''(x_0)}.$$
+   Stessa struttura di Laplace, con in più una <b>fase di $\pm\pi/4$</b>. $\blacksquare$</p>
+   <div class="note">Quella fase non è un dettaglio: accumulata lungo una traiettoria, dà l&rsquo;<b>indice di Maslov</b> della WKB, e in ottica lo sfasamento del fronte d&rsquo;onda che attraversa un fuoco. In assenza di punti stazionari l&rsquo;integrale è più piccolo di <b>qualunque</b> potenza di $1/N$ (Riemann–Lebesgue): la cancellazione è totale.</div>`}
+  ]},
+  {t:'plot', title:'Cancellazione ovunque, tranne dove la fase è ferma',
+   intro:R`$\cos\!\big(N\varphi(x)\big)$ con $\varphi(x)=x^2$ e $N=14$: le oscillazioni si infittiscono allontanandosi da $x=0$, dove $\varphi'=0$.`,
+   plots:[
+    {kind:'func2d', xr:[-2.2,2.2], yr:[-1.3,1.3], height:320,
+     title:'attorno al punto stazionario le oscillazioni rallentano: li l\'area non si cancella',
+     curves:[{f:'cos(14*x*x)', col:'#b98cff', width:1.8, label:'cos(14 x²)'},
+             {f:'0', col:'#4d5a6b', width:1, dash:true}],
+     marks:[{x:0,y:1,label:'fase stazionaria',col:'#d8a13a',up:true}]}
+   ],
+   leggi:R`Lontano da $x=0$ le creste e le valli si susseguono così fitte che ogni contributo positivo trova subito il suo negativo: <b>l&rsquo;area si annulla a coppie</b>. Vicino a $x=0$, invece, la fase $14x^2$ varia lentamente (la sua derivata si annulla), l&rsquo;oscillazione «rallenta» e resta una regione larga $\sim1/\sqrt N$ dove l&rsquo;integranda ha segno costante: <b>tutto l&rsquo;integrale viene da lì</b>. È lo stesso identico meccanismo di Laplace, con la concentrazione prodotta dalla cancellazione invece che dal decadimento. <b>In fisica</b> questa figura è il <b>principio di minima azione</b>: nell&rsquo;integrale sui cammini di Feynman ogni traiettoria contribuisce con $e^{iS/\hbar}$, e per $\hbar$ piccolo tutte si cancellano tranne quelle attorno alla traiettoria di azione <b>stazionaria</b> — cioè quella classica. La meccanica classica come punto di fase stazionaria della quantistica.`},
+  {t:'prosa', title:'Il punto di sella: quando l’esponente è complesso', tag:'il metodo che li unifica', html:R`
+  <p>Se $h$ è <b>complessa</b>, non c&rsquo;è né un massimo reale né una fase stazionaria: c&rsquo;è entrambe le cose mescolate. La mossa è quella del nucleo 12: <b>deformare il cammino d&rsquo;integrazione</b> — lecito, perché l&rsquo;integranda è olomorfa e l&rsquo;integrale non cambia purché non si attraversino singolarità.</p>
+  <p>Si cerca un punto $z_0$ con $h'(z_0)=0$: un <b>punto di sella</b> (per le funzioni olomorfe non esistono massimi interni — principio del massimo, nucleo 12 — quindi <i>ogni</i> punto critico è una sella). Attraverso una sella passano due direzioni notevoli: quella in cui $\mathrm{Re}\,h$ <b>sale</b> più ripida e quella in cui <b>scende</b> più ripida. Si deforma il cammino perché passi per $z_0$ <b>lungo la discesa più ripida</b>; su quel cammino $\mathrm{Im}\,h$ resta costante — niente più oscillazioni — e il problema torna a essere di <b>Laplace</b>:
+  $$I(N)\approx g(z_0)\,e^{N h(z_0)}\sqrt{\frac{2\pi}{N\,|h''(z_0)|}}\;e^{i\theta},$$
+  con $\theta$ l&rsquo;angolo della direzione di discesa. <b>Fase stazionaria e Laplace sono i due casi particolari</b> in cui la sella cade sull&rsquo;asse reale o su quello immaginario.</p>`},
+  {t:'plot', title:'La sella e le due direzioni',
+   intro:R`Livelli di $\mathrm{Re}(z^2)=x^2-y^2$: il punto critico in $0$ non è né massimo né minimo. Le frecce indicano la direzione di <b>massima discesa</b>, quella su cui si deforma il cammino.`,
+   plots:[
+    {kind:'contour', f:'x*x-y*y', xr:[-2,2], yr:[-2,2], height:360,
+     levels:[-3,-2,-1,-0.3,0.3,1,2,3], col:'#4c8dff', label:'Re(z²) = costante',
+     segs:[{x1:-1.7,y1:-1.7,x2:1.7,y2:1.7,col:'#5eead4',width:1.6,dash:true},
+           {x1:0,y1:0,x2:0,y2:1.5,col:'#ff9b6b',width:2.6,arrow:true,label:'discesa piu ripida',lx:0.85,ly:1.2},
+           {x1:0,y1:0,x2:0,y2:-1.5,col:'#ff9b6b',width:2.6,arrow:true},
+           {x1:0,y1:0,x2:1.5,y2:0,col:'#d8a13a',width:2.2,arrow:true,label:'salita',lx:1.15,ly:0.22},
+           {x1:0,y1:0,x2:-1.5,y2:0,col:'#d8a13a',width:2.2,arrow:true}],
+     marks:[{x:0,y:0,label:'sella',col:'#ffffff',up:true,left:true}]}
+   ],
+   leggi:R`Le curve di livello di $\mathrm{Re}(z^2)$ formano il disegno tipico della sella: lungo l&rsquo;asse reale (oro) la parte reale <b>cresce</b>, lungo l&rsquo;asse immaginario (arancione) <b>scende</b>. Il cammino d&rsquo;integrazione va deformato per passare di qui <b>nella direzione arancione</b>: lì $e^{Nh}$ decade il più rapidamente possibile allontanandosi dal punto, e l&rsquo;integrale si concentra come nel metodo di Laplace. La linea tratteggiata verde è dove $\mathrm{Re}\,h$ resta costante: attraversarla in quella direzione non concentrerebbe nulla. <b>Due fatti che chiudono il Movimento III.</b> Primo: la libertà di scegliere questo cammino è <b>esattamente</b> il teorema di Cauchy — senza deformazione dei contorni, niente metodo di sella. Secondo: che il punto critico sia una sella e non un massimo è il <b>principio del massimo modulo</b> del nucleo 12 — le funzioni olomorfe non hanno picchi interni. <b>Il metodo di sella non usa l&rsquo;analisi complessa come strumento: ne è una conseguenza.</b>`}
+]},
+
+/* ---------------- 04 · SENSO E ROTTE ---------------- */
+{ num:'04', title:'Il senso e le rotte fisiche', meta:'un solo punto decide tutto: il limite termodinamico, la traiettoria classica, il livello WKB',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> L&rsquo;integrale gaussiano viene dal nucleo 02-bis (polari); la deformazione dei cammini e il principio del massimo dal nucleo 12; la domanda «convergente o solo asintotica?» era rimasta aperta dal nucleo 07 e trova qui la sua risposta.</p>
+  <p><b>Il punto.</b> Quando un parametro è grande, un integrale è deciso da <b>un punto solo</b> — il massimo, il punto stazionario, la sella — e attorno a quel punto basta il secondo ordine. La potenza di $N$ nel prefattore misura <b>quanto</b> è dominante quel punto ($N^{-1/2}$ generico, $N^{-1/4}$ degenere, $N^{-1}$ al bordo).</p>
+  <p><b>A valle.</b> È il linguaggio del limite termodinamico, dell&rsquo;approssimazione semiclassica e dell&rsquo;integrale sui cammini.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>L&rsquo;approssimazione di sella</b>: per parametro grande, l&rsquo;integrale vale il suo integrando nel punto dominante, per la larghezza gaussiana attorno.`,
+   rotte:[
+    {dove:'Meccanica<br>statistica', txt:R`Il <b>limite termodinamico</b> è un&rsquo;approssimazione di sella con $N$ = numero di particelle: $Z=\int e^{-N\beta f}$ è dominata dal minimo dell&rsquo;energia libera, e le fluttuazioni relative vanno come $1/\sqrt N$. L&rsquo;equivalenza degli insiemi statistici <b>è</b> questo teorema. E quando due selle diventano degeneri, l&rsquo;approssimazione si rompe: è la <b>transizione di fase</b>.`},
+    {dove:'Integrali<br>di cammino', txt:R`$\int\mathcal{D}x\,e^{iS/\hbar}$: per $\hbar\to0$ la fase stazionaria seleziona la traiettoria di azione stazionaria, cioè quella <b>classica</b>. Le correzioni al secondo ordine sono le fluttuazioni quantistiche; la fase di Maslov è il $\pi/4$ di questa tappa.`},
+    {dove:'WKB e<br>tunnel', txt:R`L&rsquo;approssimazione semiclassica per l&rsquo;equazione di Schrödinger è un&rsquo;espansione asintotica in $\hbar$. L&rsquo;effetto <b>tunnel</b> corrisponde a una sella complessa (istantone) e produce $e^{-S/\hbar}$: la quantità <b>non perturbativa</b>, invisibile a ogni ordine della serie — la stessa che la tappa 01 ha incontrato come limite del troncamento ottimo.`},
+    {dove:'Teoria dei<br>campi', txt:R`La serie perturbativa in QED è <b>asintotica e non convergente</b> (argomento di Dyson): a un certo ordine i termini ricominciano a crescere. Non è un fallimento del metodo, è l&rsquo;informazione che esiste fisica non perturbativa fuori dalla portata della serie.`}
+   ],
+   domanda:R`L&rsquo;approssimazione di sella dice che, per $N$ grande, un sistema «sta» nella configurazione che minimizza l&rsquo;energia libera, e tutto il resto è soppresso come $e^{-N\Delta}$. È il motivo per cui la termodinamica funziona: un solo stato macroscopico conta. <b>Domanda che porti avanti:</b> se il sistema è grande ma <b>finito</b>, quella soppressione è enorme ma non infinita — le altre configurazioni ci sono ancora, con peso $e^{-10^{23}}$. Sono «impossibili» o solo «trascurabili»? È la stessa distinzione incontrata nel nucleo 10 con la misura nulla, e la stessa del nucleo 14 con la non-analiticità che appare solo al limite. <b>Tre nuclei diversi, la stessa frattura:</b> le proprietà su cui poggia la fisica macroscopica — irreversibilità, transizioni di fase, termalizzazione — sono <b>esatte solo all&rsquo;infinito</b>, e ciò che osserviamo è sempre finito. Studiare l&rsquo;ETH significa scegliere di prendere sul serio quel «quasi».`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo19-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 19 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 19-asintotica.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
