@@ -4,7 +4,7 @@
  * (così un nucleo nuovo appare senza dover svuotare la cache).
  * I progressi NON passano di qui: vivono in localStorage, non nella cache.
  */
-var VER = 'pm-v1';
+var VER = 'pm-v2';
 var BASE = [
   './',
   'percorso-app.html',
@@ -12,6 +12,7 @@ var BASE = [
   'mappa-percorso.html',
   'nuclei/motore-plot.js',
   'nuclei/progresso.js',
+  'nuclei/esame-tag.js',
   'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css',
   'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js',
   'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js'
