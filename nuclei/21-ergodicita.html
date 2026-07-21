@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 21 — Ergodicità e mescolamento: la traiettoria visita tutto?</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento V · Nucleo <b>21 — Ergodicità e mescolamento: medie temporali contro medie d’insieme</b> · ponte Meccanica → meccanica statistica</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 21: Ergodicità e mescolamento <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'la prima risposta candidata alla domanda del nucleo 20 · e perché da sola non basta',
+  blocchi:[
+  {t:'prosa', title:'La domanda, posta con precisione', tag:'first principles', html:R`
+  <p>La meccanica statistica calcola le medie <b>d&rsquo;insieme</b>: si pesa ogni microstato con $\rho$ e si integra. Il laboratorio misura invece medie <b>temporali</b>: uno strumento osserva <i>un</i> sistema per un certo tempo e restituisce la media di quel che è successo. Che le due coincidano non è ovvio — <b>è un&rsquo;ipotesi</b>, e si chiama ipotesi ergodica:
+  $$\lim_{T\to\infty}\frac1T\int_0^T A\big(q(t),p(t)\big)\,dt \;=\; \int_\Gamma A(q,p)\,\rho(q,p)\,d\Gamma.$$</p>
+  <p>A sinistra <b>una traiettoria</b> seguita a lungo; a destra <b>tutto lo spazio</b> pesato in un istante. L&rsquo;uguaglianza dice che, col tempo, una singola traiettoria «campiona» l&rsquo;intero spazio accessibile con le frequenze giuste. <b>Se è vera, il calcolo teorico e la misura parlano della stessa cosa.</b> Se è falsa, la meccanica statistica non ha fondamento — e in molti sistemi è falsa.</p>`}
+]},
+
+/* ---------------- 01 · ERGODICITÀ ---------------- */
+{ num:'01', title:'Ergodicità: la definizione seria', meta:'insiemi invarianti di misura zero o uno · il teorema di Birkhoff · il ruolo della misura',
+  blocchi:[
+  {t:'prosa', title:'Perché «passa per ogni punto» è la definizione sbagliata', tag:'grammatica', html:R`
+  <p>La formulazione ingenua — «la traiettoria passa per <b>tutti</b> i punti della superficie di energia» — è <b>falsa per ragioni di dimensione</b>: una curva ha dimensione 1, la superficie di energia ne ha $2n-1$. Una linea non può riempire un volume.</p>
+  <p>La definizione corretta è insiemistica: il sistema è <b>ergodico</b> se ogni insieme <b>invariante</b> sotto il flusso ha misura <b>zero</b> oppure <b>uno</b>. In parole: <b>non esistono regioni non banali in cui il moto resti intrappolato</b>. Non «passa ovunque», ma «non c&rsquo;è nessun pezzo che può fare a meno del resto».</p>
+  <p><b>Teorema di Birkhoff.</b> Per un sistema che conserva una misura di probabilità, la media temporale esiste per quasi ogni condizione iniziale; ed è <b>uguale alla media d&rsquo;insieme</b> per quasi ogni condizione iniziale <b>se e solo se</b> il sistema è ergodico. Il «quasi ogni» è quello del nucleo 10: le eccezioni hanno misura nulla.</p>
+  <div class="note">Qui la misura di Liouville (nucleo 20) fa un lavoro decisivo: è <b>lei</b> a dire quali insiemi sono trascurabili. Cambiando misura cambierebbero le eccezioni. L&rsquo;invarianza della misura non è un dettaglio tecnico: è ciò che rende l&rsquo;enunciato indipendente dall&rsquo;istante in cui lo si formula.</div>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`L&rsquo;oscillatore armonico è ergodico sulla sua superficie di energia?`,
+    a:R`<b>Sì, ma banalmente</b>: la superficie di energia è una singola ellisse (curva chiusa) e la traiettoria la percorre tutta. Il caso interessante è l&rsquo;opposto: due oscillatori <b>indipendenti</b> con frequenze in rapporto razionale danno traiettorie <b>chiuse</b> che coprono solo una curva sul toro — <b>non ergodico</b>; con rapporto irrazionale la traiettoria è densa sul toro — ergodico. <b>Un&rsquo;intera proprietà fisica che dipende dall&rsquo;irrazionalità di un numero</b>: è il primo segnale che l&rsquo;ergodicità è una nozione delicata, non generica.`},
+   {q:R`Perché un sistema <b>integrabile</b> (tante costanti del moto quanti gradi di libertà) non può essere ergodico?`,
+    a:R`Perché ogni costante del moto ulteriore all&rsquo;energia <b>ritaglia</b> la superficie di energia in sottoinsiemi invarianti di misura né 0 né 1: il moto resta confinato su un <b>toro</b> di dimensione $n$ dentro una superficie di dimensione $2n-1$. Le medie temporali dipendono allora da <b>quale</b> toro, cioè dai valori iniziali delle costanti — e non coincidono con la media d&rsquo;insieme. <b>Le leggi di conservazione sono nemiche dell&rsquo;ergodicità</b>, e per questo i sistemi molto simmetrici termalizzano male.`}
+  ]}
+]},
+
+/* ---------------- 02 · TORI E CAOS ---------------- */
+{ num:'02', title:'Tori che sopravvivono e mare caotico', meta:'KAM · la transizione non è brusca · una figura che è un esperimento numerico',
+  blocchi:[
+  {t:'prosa', title:'Cosa succede accendendo una perturbazione', tag:'il fatto sperimentale', html:R`
+  <p>Se un sistema integrabile viene perturbato, l&rsquo;aspettativa ingenua è che diventi subito ergodico. Il <b>teorema KAM</b> (Kolmogorov&ndash;Arnold&ndash;Moser) dice il contrario: per perturbazione piccola, <b>la maggior parte dei tori sopravvive</b>, deformati ma intatti. Il sistema resta intrappolato, e l&rsquo;ergodicità non c&rsquo;è.</p>
+  <p>Crescendo la perturbazione i tori si rompono <b>uno alla volta</b> — prima quelli con frequenze «quasi razionali», resistono più a lungo quelli più irrazionali — e fra i tori superstiti si apre un <b>mare caotico</b>. Lo spazio delle fasi diventa un misto: isole di regolarità immerse nel disordine. <b>La transizione all&rsquo;ergodicità non è un interruttore, è un&rsquo;erosione.</b></p>`},
+  {t:'plot', title:'La mappa standard: la stessa dinamica, due intensità',
+   intro:R`Iterazione di $p_{n+1}=p_n+K\sin q_n$, $q_{n+1}=q_n+p_{n+1}$ (mappa standard di Chirikov), su un toro. Ogni colore è <b>una sola</b> condizione iniziale, seguita per 600 passi.`,
+   plots:[
+    {kind:'iter2d', fq:'x + (y + 0.4*sin(x))', fp:'y + 0.4*sin(x)',
+     xr:[0,6.28319], yr:[0,6.28319], wrapx:true, wrapy:true, iter:600, equal:true, ticks:false,
+     w:400, height:380, title:'K=0.4: quasi ogni orbita resta su una curva (toro KAM)',
+     seeds:[[0.1,0.55],[0.1,1.1],[0.1,1.65],[0.1,2.2],[0.1,2.75],[0.1,3.3],[0.1,3.85],[0.1,4.4],[0.1,4.95],[0.1,5.5],[0.1,6.0],[3.14159,3.14159],[3.34,3.14159],[3.54,3.14159]]},
+    {kind:'iter2d', fq:'x + (y + 1.1*sin(x))', fp:'y + 1.1*sin(x)',
+     xr:[0,6.28319], yr:[0,6.28319], wrapx:true, wrapy:true, iter:600, equal:true, ticks:false,
+     w:400, height:380, title:'K=1.1: una sola orbita riempie il mare caotico',
+     seeds:[[0.1,0.55],[0.1,1.1],[0.1,1.65],[0.1,2.2],[0.1,2.75],[0.1,3.3],[0.1,3.85],[0.1,4.4],[0.1,4.95],[0.1,5.5],[0.1,6.0],[3.14159,3.14159],[3.34,3.14159],[3.54,3.14159]]}
+   ],
+   leggi:R`<b>Questa figura non è un disegno: è un esperimento numerico</b>, gli stessi semi iterati con due valori del parametro. A sinistra ogni colore resta su una <b>curva</b>: sono i tori KAM, e ciascuna orbita conosce solo la propria — <b>il sistema non è ergodico</b>, perché quelle curve sono insiemi invarianti di misura né 0 né 1. A destra, con perturbazione più forte, la maggior parte dei colori si sparpaglia in una <b>nube</b> che riempie la stessa regione: lì una singola orbita visita quasi tutto, e le medie temporali cominciano ad avere senso. Ma guarda bene: <b>restano le isole</b>, piccole zone regolari attorno ai punti fissi stabili, dove un&rsquo;orbita è ancora intrappolata. <b>Ecco perché l&rsquo;ergodicità è delicata:</b> nello stesso sistema, alla stessa energia, alcune condizioni iniziali termalizzano e altre no. Non è una proprietà del sistema soltanto: è una proprietà di <i>dove</i> parti.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se il mare caotico e le isole convivono, il sistema è ergodico o no?`,
+    a:R`<b>Non</b> ergodico in senso stretto: le isole sono insiemi invarianti di misura positiva e minore di uno, che è esattamente la negazione della definizione. Ma il mare caotico può essere ergodico <b>al suo interno</b>, e se occupa gran parte del volume le previsioni statistiche funzionano <i>in pratica</i> per quasi tutte le condizioni iniziali. <b>È il primo esempio serio di una distinzione che ti seguirà</b>: la proprietà matematica esatta è falsa, la sua versione approssimata regge — e ciò che si misura in laboratorio è la seconda.`}
+  ]}
+]},
+
+/* ---------------- 03 · MESCOLAMENTO ---------------- */
+{ num:'03', title:'Il mescolamento è più forte dell’ergodicità', meta:'ergodico ≠ mescolante · perché serve il mixing per l’equilibrio · i tempi',
+  blocchi:[
+  {t:'prosa', title:'Due proprietà che si confondono sempre', tag:'la distinzione che conta', html:R`
+  <p><b>Ergodico</b> significa che le medie temporali convergono a quelle d&rsquo;insieme. <b>Mescolante</b> (mixing) è più forte: per ogni coppia di regioni $A,B$,
+  $$\mu\big(\Phi_t(A)\cap B\big)\ \xrightarrow[t\to\infty]{}\ \mu(A)\,\mu(B).$$
+  Cioè: dopo un tempo lungo, la frazione dell&rsquo;insieme $A$ che si trova in $B$ è la stessa <b>ovunque</b> — $A$ si è spalmato uniformemente, e sapere di essere partiti in $A$ non dice più nulla su dove ci si trova.</p>
+  <p><b>Mescolante ⟹ ergodico</b>, ma non il viceversa. Il controesempio è pulito: una <b>rotazione irrazionale</b> del cerchio è ergodica (l&rsquo;orbita è densa, le medie temporali funzionano) ma <b>non mescola</b> — un arco ruota rigidamente e resta un arco, non si spalma mai. <b>Il gas che si diffonde in una stanza richiede il mescolamento, non la sola ergodicità</b>: l&rsquo;ergodicità garantisce le medie su tempi infiniti, il mescolamento garantisce che il sistema <i>si avvicini</i> all&rsquo;equilibrio e ci resti.</p>
+  <div class="note">Il meccanismo del mescolamento è quello della figura del nucleo 20: <b>stirare e ripiegare</b>. Non potendo comprimere il volume (Liouville), l&rsquo;unico modo di spalmare una regione ovunque è allungarla in filamenti sempre più sottili che si intrecciano. Il tasso di allungamento è l&rsquo;<b>esponente di Lyapunov</b>: dove è positivo, due condizioni iniziali vicine si separano esponenzialmente, ed è la definizione operativa di <b>caos</b>.</div>`},
+  {t:'plot', title:'Stirare e ripiegare: l’unico modo di mescolare senza comprimere',
+   intro:R`Un segmento di condizioni iniziali vicine <b>nel mare caotico</b>, seguito per 3, 30 e 300 passi della mappa standard ($K=1.1$). Il seme è stato scelto <b>misurando</b>: su una griglia 20×20, quest&rsquo;orbita passa da 3 celle a 26 a 106.`,
+   plots:[
+    {kind:'iter2d', fq:'x + (y + 1.1*sin(x))', fp:'y + 1.1*sin(x)',
+     xr:[0,6.28319], yr:[0,6.28319], wrapx:true, wrapy:true, iter:3, equal:true, ticks:false,
+     w:270, height:260, title:'dopo 3 passi: ancora insieme',
+     seeds:[[2.094,4.189],[2.095,4.189],[2.096,4.189],[2.097,4.189],[2.098,4.189],[2.099,4.189],[2.100,4.189],[2.101,4.189],[2.102,4.189],[2.103,4.189],[2.104,4.189]]},
+    {kind:'iter2d', fq:'x + (y + 1.1*sin(x))', fp:'y + 1.1*sin(x)',
+     xr:[0,6.28319], yr:[0,6.28319], wrapx:true, wrapy:true, iter:30, equal:true, ticks:false,
+     w:270, height:260, title:'dopo 30: il filamento si allunga',
+     seeds:[[2.094,4.189],[2.095,4.189],[2.096,4.189],[2.097,4.189],[2.098,4.189],[2.099,4.189],[2.100,4.189],[2.101,4.189],[2.102,4.189],[2.103,4.189],[2.104,4.189]]},
+    {kind:'iter2d', fq:'x + (y + 1.1*sin(x))', fp:'y + 1.1*sin(x)',
+     xr:[0,6.28319], yr:[0,6.28319], wrapx:true, wrapy:true, iter:300, equal:true, ticks:false,
+     w:270, height:260, title:'dopo 300: sparsi ovunque',
+     seeds:[[2.094,4.189],[2.095,4.189],[2.096,4.189],[2.097,4.189],[2.098,4.189],[2.099,4.189],[2.100,4.189],[2.101,4.189],[2.102,4.189],[2.103,4.189],[2.104,4.189]]}
+   ],
+   leggi:R`Undici condizioni iniziali che all&rsquo;inizio distano <b>un millesimo</b> l&rsquo;una dall&rsquo;altra, prese nel mare caotico. Dopo pochi passi sono ancora un gruppetto; dopo trenta si sono distese; dopo trecento sono <b>indistinguibili da una nuvola casuale</b> sparsa su tutta la regione caotica. <b>Eppure il volume non è cambiato di un&rsquo;unghia</b> (Liouville) e la dinamica è perfettamente <b>deterministica e invertibile</b>: dando i valori esatti finali e girando il tempo all&rsquo;indietro, i punti tornerebbero al segmentino di partenza. <b>La perdita è nella nostra risoluzione, non nella fisica</b> — e la scala di tempo su cui avviene è fissata dall&rsquo;esponente di Lyapunov: una precisione iniziale migliorata di un fattore mille compra soltanto un tempo di predizione più lungo di $\ln1000/\lambda$. <b>È il motivo per cui il caos non è imprecisione, ma amplificazione dell&rsquo;imprecisione.</b>`}
+]},
+
+/* ---------------- 04 · SENSO E ROTTE ---------------- */
+{ num:'04', title:'Il senso e le rotte fisiche', meta:'perché l’ergodicità non basta, e cosa la sostituisce nel caso quantistico',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> La misura invariante e il flusso incomprimibile vengono dal nucleo 20; il «quasi ovunque» dal nucleo 10; l&rsquo;idea che una proprietà valga per <i>quasi tutte</i> le condizioni iniziali è la stessa distinzione fra impossibile e trascurabile incontrata lì.</p>
+  <p><b>Il punto.</b> L&rsquo;ergodicità giustifica il calcolo statistico, ma è <b>rara e fragile</b>: le costanti del moto la distruggono, KAM mostra che i tori resistono, e nei sistemi reali convivono isole regolari e mare caotico. Il <b>mescolamento</b> è ciò che serve davvero per l&rsquo;equilibrio, ed è più forte.</p>
+  <p><b>A valle.</b> Il nucleo 22 mostra che nemmeno il mescolamento basta a produrre irreversibilità <i>vera</i>: serve dire cosa un osservatore non risolve. E in meccanica quantistica l&rsquo;intera impalcatura va rifatta, perché l&rsquo;evoluzione unitaria non mescola nulla nel senso classico: lì il ruolo dell&rsquo;ergodicità è preso dall&rsquo;<b>ETH</b>.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>L&rsquo;ergodicità e il mescolamento</b>: quando una traiettoria sola può parlare per l&rsquo;intero insieme.`,
+   rotte:[
+    {dove:'Fondamenti della<br>meccanica statistica', txt:R`È la giustificazione dell&rsquo;insieme microcanonico: se il sistema è ergodico sulla superficie di energia, la media temporale che misuri coincide con l&rsquo;integrale che calcoli. Boltzmann la propose come ipotesi; un secolo dopo è dimostrata solo per pochi modelli (biliardi di Sinai, sfere dure).`},
+    {dove:'Caos<br>hamiltoniano', txt:R`Esponenti di Lyapunov, KAM, transizione al caos: la figura della mappa standard è il ritratto standard del campo. La domanda «quanto è grande il mare caotico?» è quantitativa e si misura.`},
+    {dove:'Caos<br>quantistico', txt:R`Nei sistemi quantistici non esistono traiettorie, quindi l&rsquo;ergodicità classica non si trasporta. Il suo posto è preso dalla <b>statistica dei livelli</b> (nucleo 16: Poisson contro GOE/GUE) e dalla struttura degli autostati: sistemi il cui limite classico è caotico hanno spettri con repulsione dei livelli.`},
+    {dove:'ETH', txt:R`L&rsquo;<b>eigenstate thermalization hypothesis</b> è l&rsquo;analogo quantistico dell&rsquo;ipotesi ergodica, ma sposta l&rsquo;affermazione: non sulle traiettorie, bensì sugli <b>elementi di matrice</b> delle osservabili negli autostati dell&rsquo;energia. Se quelli si comportano come quantità pseudo-casuali, <b>un singolo autostato contiene già i valori termici</b> — e non serve alcuna media temporale.`}
+   ],
+   domanda:R`L&rsquo;ipotesi ergodica chiede che <i>una</i> traiettoria visiti tutto. Ma i tempi per farlo crescono come $e^N$, e nessun esperimento dura così: il gas nella stanza raggiunge l&rsquo;equilibrio in <b>secondi</b>, non in tempi di ricorrenza. <b>Quindi l&rsquo;ergodicità, anche quando è vera, spiega la cosa sbagliata</b> — spiega le medie su tempi infiniti, mentre l&rsquo;equilibrio è un fatto rapidissimo. <b>Domanda che porti avanti:</b> qual è la proprietà che rende l&rsquo;equilibrio <i>veloce</i>? Il candidato è il mescolamento con il suo tasso di Lyapunov, ma anche lì la scala giusta è quella su cui <b>l&rsquo;osservatore</b> smette di distinguere il filamento dalla nuvola. La risposta, se c&rsquo;è, non riguarda solo il sistema: riguarda la coppia sistema-osservabile. Ed è precisamente ciò che l&rsquo;ETH mette al centro.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo21-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 21 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 21-ergodicita.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

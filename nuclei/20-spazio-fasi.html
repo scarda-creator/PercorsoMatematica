@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 20 — Spazio delle fasi e teorema di Liouville</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento V · Nucleo <b>20 — Spazio delle fasi e teorema di Liouville: dove il moto diventa geometria</b> · ponte Meccanica → meccanica statistica</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 20: Spazio delle fasi e Liouville <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'il primo dei tre che portano dalla Meccanica alla tesi · qui il moto smette di essere una traiettoria e diventa un flusso',
+  blocchi:[
+  {t:'prosa', title:'Il cambio di sguardo', tag:'first principles', html:R`
+  <p>In Meccanica un sistema è una <b>traiettoria</b>: si dà $x(t)$ e si è detto tutto. Ma se le particelle sono $10^{23}$, nessuno scriverà mai quelle traiettorie, e soprattutto non servono: ciò che si misura sono poche grandezze macroscopiche.</p>
+  <p>Il passaggio che rende possibile la meccanica statistica è cambiare oggetto: non più una traiettoria nello spazio ordinario, ma <b>un punto in uno spazio più grande</b> — lo <b>spazio delle fasi</b>, dove le coordinate sono <i>tutte</i> le posizioni e <i>tutti</i> gli impulsi. Un sistema di $N$ particelle è <b>un solo punto</b> in $6N$ dimensioni, e la sua evoluzione è il moto di quel punto: un <b>flusso</b>, esattamente come i campi vettoriali del nucleo 04.</p>
+  <p>Da questo cambio di sguardo esce un teorema che sembra tecnico e invece decide tutto: il flusso hamiltoniano <b>non comprime i volumi</b>. È il teorema di Liouville, e ogni difficoltà concettuale della freccia del tempo nasce da lì.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Scrivere le <b>equazioni di Hamilton</b> e riconoscere l&rsquo;evoluzione come un <b>campo vettoriale</b> nello spazio delle fasi.</li>
+  <li>Dimostrare il <b>teorema di Liouville</b> nei due modi (divergenza nulla; jacobiano unitario) e dire quale ipotesi serve davvero.</li>
+  <li>Ricavare le tre conseguenze che contano: niente attrattori, <b>ricorrenza di Poincaré</b>, e l&rsquo;equazione di continuità per la densità $\rho$.</li>
+  <li>Spiegare perché tutto ciò rende <b>problematica</b> l&rsquo;irreversibilità — che è la domanda del nucleo 22.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · LO SPAZIO DELLE FASI ---------------- */
+{ num:'01', title:'Lo spazio delle fasi e il flusso hamiltoniano', meta:'stato = punto · evoluzione = campo vettoriale · le equazioni di Hamilton',
+  blocchi:[
+  {t:'prosa', title:'Costruzione', tag:'grammatica', html:R`
+  <p>Per un sistema con $n$ gradi di libertà si prendono le coordinate $q_1..q_n$ e i <b>momenti coniugati</b> $p_1..p_n$: lo spazio delle fasi $\Gamma$ ha dimensione $2n$. Data l&rsquo;<b>hamiltoniana</b> $H(q,p)$ — per i sistemi meccanici, l&rsquo;energia espressa in queste variabili — l&rsquo;evoluzione è
+  $$\dot q_i=\frac{\partial H}{\partial p_i},\qquad \dot p_i=-\frac{\partial H}{\partial q_i}.$$</p>
+  <p>Due differenze sostanziali rispetto a Newton, e sono il motivo per cui si passa a Hamilton. <b>(1)</b> Il sistema è del <b>primo ordine</b>: assegnato il punto $(q,p)$, il futuro è determinato — non serve altro. Quindi per ogni punto passa <b>una sola</b> traiettoria, e le traiettorie <b>non si incrociano mai</b>. <b>(2)</b> Il membro destro è un <b>campo vettoriale</b> $\mathbf v=(\partial_pH,\,-\partial_qH)$ su $\Gamma$: l&rsquo;evoluzione è il suo flusso, e tutto il linguaggio del nucleo 04 (divergenza, flusso, linee di campo) si applica di peso.</p>
+  <div class="note">Per l&rsquo;oscillatore armonico $H=\frac{p^2}{2m}+\frac12m\omega^2q^2$: le curve di livello di $H$ sono <b>ellissi</b>, e poiché $H$ si conserva ogni traiettoria <b>è</b> una di quelle ellissi. È il ritratto di fase del nucleo 06, riletto: lì era un trucco per studiare un&rsquo;EDO, qui è la geometria fondamentale della meccanica.</div>`},
+  {t:'plot', title:'Il flusso dell’oscillatore: ellissi percorse a velocità costante',
+   intro:R`Campo $(\dot q,\dot p)=(p,\,-q)$ (unità con $m=\omega=1$): le traiettorie sono le curve di livello di $H$, cioè circonferenze.`,
+   plots:[
+    {kind:'phase', fx:'y', fy:'-x', xr:[-2.6,2.6], yr:[-2.6,2.6], n:15, height:340,
+     seeds:[[1,0],[1.8,0],[2.4,0]],
+     title:'spazio delle fasi dell oscillatore: q in ascissa, p in ordinata'}
+   ],
+   leggi:R`Ogni traiettoria è una curva <b>chiusa</b>: il moto è periodico e il sistema torna esattamente dov&rsquo;era. Le curve <b>non si intersecano</b> — se lo facessero, da un punto partirebbero due futuri diversi, impossibile per un sistema del primo ordine. Il verso è orario: a $p\gt0$ la posizione cresce, e la forza di richiamo fa calare $p$. <b>La cosa da portare via</b> è che il ritratto di fase contiene tutta la dinamica <i>senza risolvere l&rsquo;equazione</i>: energia, periodo, ampiezza si leggono dalla forma delle orbite. In un sistema a $10^{23}$ particelle non potrai disegnarlo, ma il ragionamento resterà lo stesso — ed è per questo che vale la pena impararlo qui, dove si vede.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché nello spazio delle fasi le traiettorie non possono incrociarsi, mentre nello spazio ordinario sì?`,
+    a:R`Perché il sistema di Hamilton è del <b>primo ordine</b>: il campo vettoriale assegna a ogni punto <b>una</b> velocità, e per il teorema di esistenza e unicità (nucleo 06, Picard) per ogni punto passa una sola soluzione. Nello spazio ordinario due traiettorie possono passare per lo stesso punto <b>con velocità diverse</b>: l&rsquo;informazione mancante è proprio l&rsquo;impulso, che nello spazio delle fasi è una coordinata. <b>Lo spazio delle fasi è lo spazio in cui il moto diventa deterministico punto per punto.</b>`}
+  ]}
+]},
+
+/* ---------------- 02 · LIOUVILLE ---------------- */
+{ num:'02', title:'Il teorema di Liouville', meta:'il flusso hamiltoniano ha divergenza nulla · il volume nello spazio delle fasi si conserva · jacobiano = 1',
+  blocchi:[
+  {t:'reveal', title:'Due dimostrazioni, una riga ciascuna', tag:'derivazione', steps:[
+   {label:'Via la divergenza (nucleo 04)', body:R`<p>Il campo che genera il flusso è $\mathbf v=\left(\dfrac{\partial H}{\partial p},\,-\dfrac{\partial H}{\partial q}\right)$. La sua divergenza nello spazio delle fasi:
+   $$\nabla\cdot\mathbf v=\frac{\partial}{\partial q}\!\left(\frac{\partial H}{\partial p}\right)+\frac{\partial}{\partial p}\!\left(-\frac{\partial H}{\partial q}\right)=\frac{\partial^2H}{\partial q\,\partial p}-\frac{\partial^2H}{\partial p\,\partial q}=0,$$
+   perché le derivate miste commutano (Schwarz, nucleo 01). <b>Il flusso hamiltoniano è incomprimibile.</b> $\blacksquare$</p>
+   <p>Il segno meno nelle equazioni di Hamilton — che sembra una convenzione — è <b>esattamente</b> ciò che fa cancellare i due termini. Cambialo e il teorema muore.</p>`},
+   {label:'Via il jacobiano (nucleo 02-bis)', body:R`<p>Sia $\Phi_t$ la mappa che porta lo stato iniziale nello stato al tempo $t$. Per un tempo infinitesimo $dt$: $q\mapsto q+\dot q\,dt$, $p\mapsto p+\dot p\,dt$, quindi
+   $$\det J=1+\left(\frac{\partial\dot q}{\partial q}+\frac{\partial\dot p}{\partial p}\right)dt+O(dt^2)=1+(\nabla\cdot\mathbf v)\,dt=1.$$
+   E il cambio di variabili del nucleo 02-bis dice che il volume si trasforma con $|\det J|$: <b>volume invariato</b>. Componendo tanti passi infinitesimi, vale per ogni $t$. $\blacksquare$</p>`},
+   {label:'Cosa NON dice', body:R`<div class="note warn">Liouville dice che il <b>volume</b> si conserva, <b>non</b> che la forma si conserva. Una regione può allungarsi in filamenti sottilissimi e attorcigliarsi ovunque mantenendo volume costante — ed è esattamente quello che fa nei sistemi caotici (nucleo 21). <b>Confondere «volume conservato» con «la nuvola resta compatta» è l&rsquo;errore che rende incomprensibile la termodinamica.</b></div>`}
+  ]},
+  {t:'plot', title:'Volume conservato, forma distrutta: lo shear',
+   intro:R`La particella <b>libera</b> ($H=p^2/2m$) ha flusso $q\mapsto q+pt$, $p\mapsto p$. Un disco di condizioni iniziali diventa un&rsquo;ellisse inclinata: <b>stessa area</b>, forma irriconoscibile.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], xr:[-3.4,3.4], yr:[-1.6,1.6], height:250, w:430,
+     title:'t=0: il disco delle condizioni iniziali'},
+    {kind:'curve', x:'cos(t)+2*sin(t)', y:'sin(t)', tr:[0,6.2832], xr:[-3.4,3.4], yr:[-1.6,1.6], height:250, w:430,
+     title:'t dopo: stessa area, allungata (shear)'}
+   ],
+   leggi:R`La trasformazione è $\begin{pmatrix}1&t\\0&1\end{pmatrix}$, che ha <b>determinante 1</b>: area invariata, come impone Liouville. Ma la figura si <b>allunga</b> senza limite: le particelle più veloci scappano avanti, le più lente restano indietro. Dopo un tempo lungo il disco è un filamento lunghissimo e sottilissimo, che attraversa tutto lo spazio disponibile. <b>Qui c&rsquo;è in nuce tutta la questione dell&rsquo;irreversibilità:</b> se guardi con precisione infinita, l&rsquo;insieme occupa sempre lo stesso volume e nulla è andato perso — l&rsquo;evoluzione è invertibile. Se guardi con una risoluzione finita, quel filamento appare <b>sparso ovunque</b>, indistinguibile da una nuvola uniforme. Il nucleo 22 è tutto qui dentro.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un sistema con attrito ha un attrattore (per esempio il punto fisso dell&rsquo;oscillatore smorzato). Contraddice Liouville?`,
+    a:R`No: l&rsquo;attrito <b>non è hamiltoniano</b>. Un attrattore è una regione verso cui i volumi si <b>contraggono</b>, quindi $\nabla\cdot\mathbf v\lt0$, il che è incompatibile con Hamilton. Il punto profondo è che l&rsquo;attrito è una descrizione <b>efficace</b>: i gradi di libertà del mezzo sono stati eliminati dalla descrizione, e con essi il volume che si è trasferito lì. <b>Nel sistema completo (corpo + mezzo) il volume si conserva</b>; nella descrizione ridotta sembra sparire. È la stessa mossa concettuale della decoerenza, e la incontrerai di nuovo.`},
+   {q:R`Che cos&rsquo;è la <b>ricorrenza di Poincaré</b>, e perché segue da Liouville?`,
+    a:R`Se il moto è confinato in una regione di volume <b>finito</b> (energia limitata) e il flusso conserva il volume, allora quasi ogni stato <b>ritorna arbitrariamente vicino</b> a se stesso, dopo un tempo abbastanza lungo. Argomento: se le immagini successive di una regione non tornassero mai a sovrapporsi, avendo tutte lo stesso volume ne servirebbe di infinito. <b>Conseguenza scomoda:</b> un gas che si è espanso in una stanza tornerà, prima o poi, tutto in un angolo. Il tempo di ricorrenza però cresce come $e^{N}$: per $N\sim10^{23}$ è inimmaginabilmente più lungo dell&rsquo;età dell&rsquo;universo. <b>L&rsquo;irreversibilità non è impossibilità: è improbabilità estrema</b> — ed è la tensione che porti nel nucleo 22.`}
+  ]}
+]},
+
+/* ---------------- 03 · LA DENSITÀ ---------------- */
+{ num:'03', title:'La densità nello spazio delle fasi', meta:'da un punto a una distribuzione · equazione di continuità · $\\rho$ costante lungo il moto',
+  blocchi:[
+  {t:'prosa', title:'Perché serve una densità', tag:'costruzione', html:R`
+  <p>Di un sistema reale non conosci mai lo stato esatto: conosci temperatura, pressione, energia — poche grandezze compatibili con un&rsquo;<b>enormità</b> di microstati. La descrizione onesta non è un punto ma una <b>distribuzione di probabilità</b> $\rho(q,p,t)$ sullo spazio delle fasi: la probabilità di trovarsi in $d^{n}q\,d^{n}p$ è $\rho\,d^nq\,d^np$.</p>
+  <p>Come evolve $\rho$? I punti non si creano né si distruggono (le traiettorie non nascono né muoiono), quindi vale un&rsquo;<b>equazione di continuità</b> identica a quella dei fluidi (nucleo 04):
+  $$\frac{\partial\rho}{\partial t}+\nabla\cdot(\rho\,\mathbf v)=0.$$
+  Ma $\nabla\cdot\mathbf v=0$ per Liouville, quindi il termine si semplifica in $\mathbf v\cdot\nabla\rho$, e si ottiene l&rsquo;<b>equazione di Liouville</b>:
+  $$\frac{\partial\rho}{\partial t}+\{\rho,H\}=0\qquad\Longleftrightarrow\qquad \frac{d\rho}{dt}=0,$$
+  dove $\{\cdot,\cdot\}$ è la parentesi di Poisson. <b>La densità è costante lungo il moto</b>: viaggiando con il flusso, la nuvola attorno a te non si dirada mai.</p>`},
+  {t:'prosa', title:'Le tre conseguenze che contano', tag:'sintesi', html:R`
+  <ul>
+  <li><b>Equilibrio = $\rho$ funzione delle sole quantità conservate.</b> Se $\rho$ dipende da $(q,p)$ solo attraverso $H$, allora $\{\rho,H\}=0$ e la distribuzione è <b>stazionaria</b>. Da qui l&rsquo;insieme <b>microcanonico</b> ($\rho$ costante sulla superficie di energia) e il <b>canonico</b> ($\rho\propto e^{-\beta H}$): non sono postulati arbitrari, sono le soluzioni stazionarie di questa equazione.</li>
+  <li><b>L&rsquo;entropia di Gibbs non cambia mai.</b> $S=-k\!\int\rho\ln\rho$ è costante nel tempo, perché $\rho$ è trasportata rigidamente. <b>Il secondo principio non può derivare da qui</b> senza un ingrediente in più: è il problema del nucleo 22.</li>
+  <li><b>Il ponte quantistico è immediato:</b> $\frac{d\rho}{dt}=0$ diventa $i\hbar\,\partial_t\hat\rho=[\hat H,\hat\rho]$ (equazione di von Neumann) sostituendo la parentesi di Poisson col commutatore. <b>Anche lì l&rsquo;entropia resta costante</b>, per lo stesso motivo — e la decoerenza dovrà spiegare come mai osserviamo il contrario.</li>
+  </ul>`}
+]},
+
+/* ---------------- 04 · SENSO E ROTTE ---------------- */
+{ num:'04', title:'Il senso e le rotte fisiche', meta:'la geometria che rende possibile la meccanica statistica',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il campo vettoriale e la divergenza vengono dal nucleo 04; il jacobiano e il cambio di variabili dal 02-bis; l&rsquo;unicità delle traiettorie da Picard (nucleo 06); l&rsquo;uguaglianza delle derivate miste dal nucleo 01. <b>Questo nucleo non introduce quasi nulla di nuovo: riusa</b> — ed è il segno che il ponte regge.</p>
+  <p><b>Il punto.</b> Lo spazio delle fasi trasforma la dinamica in geometria di un flusso incomprimibile. Da lì: niente attrattori, ricorrenza, distribuzioni stazionarie come funzioni dell&rsquo;energia, entropia di Gibbs costante.</p>
+  <p><b>A valle.</b> Il nucleo 21 chiede se una traiettoria <i>visita</i> davvero tutto lo spazio accessibile (ergodicità); il 22 chiede come possa emergere l&rsquo;irreversibilità da un flusso che conserva tutto.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>Lo spazio delle fasi con la sua misura invariante</b>: il volume $d^nq\,d^np$ che il flusso hamiltoniano non comprime.`,
+   rotte:[
+    {dove:'Meccanica<br>statistica', txt:R`La misura di Liouville è ciò che rende <b>ben definito</b> «contare gli stati»: il volume nello spazio delle fasi diviso $h^{3N}$ è il numero di microstati, e da lì l&rsquo;entropia di Boltzmann $S=k\ln\Omega$. Senza l&rsquo;invarianza, «contare» dipenderebbe dall&rsquo;istante in cui conti.`},
+    {dove:'Meccanica<br>quantistica', txt:R`L&rsquo;equazione di Liouville diventa quella di von Neumann per la <b>matrice densità</b>, con il commutatore al posto della parentesi di Poisson. Lo spazio delle fasi diventa lo spazio di Hilbert (nucleo 09), e il volume invariante diventa l&rsquo;unitarietà dell&rsquo;evoluzione (nucleo 16).`},
+    {dove:'Caos e<br>sistemi dinamici', txt:R`L&rsquo;incomprimibilità è ciò che costringe un sistema caotico a <b>stirare e ripiegare</b>: non potendo comprimere, per mescolare deve allungare in una direzione e assottigliare nell&rsquo;altra. Gli esponenti di Lyapunov misurano quella velocità, e la loro somma è nulla proprio per Liouville.`},
+    {dove:'Simulazione<br>numerica', txt:R`Gli integratori <b>simplettici</b> (Verlet, leapfrog) sono costruiti per conservare esattamente il volume delle fasi: per questo restano stabili su miliardi di passi dove un Runge–Kutta accumula deriva sull&rsquo;energia. <b>Il teorema di questo nucleo detta il progetto del codice.</b>`}
+   ],
+   domanda:R`Liouville dice che l&rsquo;informazione sullo stato iniziale <b>non si perde mai</b>: il volume che la contiene resta identico per sempre, e il flusso è invertibile. Eppure ogni sistema macroscopico che osservi dimentica il proprio passato. <b>Domanda che porti avanti — ed è letteralmente l&rsquo;inizio della tua tesi:</b> se nulla si perde, che cosa esattamente cambia quando un sistema «raggiunge l&rsquo;equilibrio»? Le due risposte candidate sono nei prossimi due nuclei: che la traiettoria <b>visiti</b> tutto lo spazio accessibile rendendo le medie temporali uguali a quelle d&rsquo;insieme (ergodicità), oppure che l&rsquo;informazione <b>migri</b> in dettagli sempre più fini che nessun osservatore risolve (coarse-graining, decoerenza). Non sono la stessa cosa, e distinguerle è il mestiere.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo20-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 20 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 20-spazio-fasi.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
