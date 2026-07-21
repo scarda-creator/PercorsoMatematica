@@ -1,0 +1,104 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Disegno totale — percorso-matematica</title>
+<style>
+ :root{--bg:#0d0b18;--ink:#e9e6f2;--dim:#8b86a0;--pro:#b98cff;--panel:#16132a;--done:#8bd450;}
+ *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);
+   font-family:Georgia,'Times New Roman',serif}
+ header{padding:24px 30px 4px} h1{margin:0;font-size:25px;color:var(--pro)}
+ .sub{color:var(--dim);font-size:13.5px;margin-top:6px;max-width:800px;line-height:1.5}
+ svg{width:100%;height:auto;max-width:1400px;display:block}
+ .mv{fill:#12101f} .mvlab{fill:#c9c4dc;font-size:13px;font-style:italic}
+ .mvrom{fill:var(--pro);font-size:22px;font-weight:bold;font-family:Georgia}
+ .node{cursor:pointer}
+ .arc{fill:none;stroke:#3a3358;stroke-width:2}
+ .ponte{fill:none;stroke:#ff9b6b;stroke-width:2;stroke-dasharray:6 5;opacity:.7}
+ .lab{font-family:Georgia}
+ #tip{position:fixed;max-width:340px;background:var(--panel);border:1px solid #2c2748;border-radius:10px;
+   padding:11px 13px;font-size:14px;line-height:1.45;pointer-events:none;opacity:0;transition:.12s;z-index:9;
+   box-shadow:0 8px 30px #0009}
+ .legend{display:flex;gap:18px;flex-wrap:wrap;padding:8px 30px 26px;color:var(--dim);font-size:13px;align-items:center}
+ .legend i{font-style:normal} .sw{display:inline-block;width:16px;height:16px;border-radius:5px;margin-right:6px;vertical-align:-3px;border:2px solid}
+</style></head><body>
+<header><h1>Il percorso, per intero <a href="percorso-app.html" style="font-size:.5em;font-weight:400;color:#8fb0ff;text-decoration:none;vertical-align:middle">&#9654; apri l'allenamento</a></h1>
+<div class="sub">I quattro Movimenti da Analisi Vettoriale ad Analisi Funzionale e Complessa, come un solo
+organismo. <b>Pieno</b> = costruito, <b>vuoto</b> = da fare, <b>tratteggiato</b> = deepening oltre agosto.
+Le linee arancioni sono i tre ponti AV↔Metodi. Passa sopra un nucleo per il dettaglio;
+<b>clicca un nucleo costruito</b> (↗) per aprirlo.</div></header>
+<svg id="map"></svg>
+<div class="legend" id="legend"></div>
+<div id="tip"></div>
+<script>
+var NUCLEI=[{"mov": 1, "id": 1, "t": "Topologia di Rⁿ", "tag": "C", "desc": "limiti e continuità in più variabili: cosa vuol dire «vicino»", "done": true, "file": "nuclei/00-topologia.html"}, {"mov": 1, "id": 2, "t": "Differenziale", "tag": "C", "desc": "differenziabilità vera, gradiente, jacobiana, catena, Taylor", "done": true, "file": "nuclei/01-differenziabilita.html"}, {"mov": 1, "id": 3, "t": "Dini + ottimizzazione", "tag": "C", "desc": "funzione implicita/inversa; Lagrange (moltiplicatori)", "done": true, "file": "nuclei/02-dini-ottimizzazione.html"}, {"mov": 1, "id": 4, "t": "Curve e superfici", "tag": "C", "desc": "parametrizzazioni; integrali su curve e superfici", "done": true, "file": "nuclei/03-curve-superfici.html"}, {"mov": 1, "id": 5, "t": "Campi vettoriali", "tag": "C", "desc": "grad/div/rot; integrali di linea e flusso; conservativi", "done": true, "file": "nuclei/04-campi-vettoriali.html"}, {"mov": 1, "id": 6, "t": "Teoremi integrali", "tag": "C", "desc": "Green/Gauss/Stokes → Stokes generalizzato (forme)", "done": true, "file": "nuclei/05-teoremi-integrali.html"}, {"mov": 1, "id": 7, "t": "EDO qualitative", "tag": "C", "desc": "esistenza/unicità; ritratto di fase (il punto debole)", "done": true, "file": "nuclei/06-edo-qualitative.html"}, {"mov": 2, "id": 8, "t": "Serie di funzioni", "tag": "C", "desc": "convergenza uniforme, Weierstrass, serie di potenze", "done": true, "file": "nuclei/07-serie-funzioni.html"}, {"mov": 2, "id": 9, "t": "Spazi normati", "tag": "C", "desc": "metrici/normati, completezza, Banach", "done": true, "file": "nuclei/08-spazi-normati.html"}, {"mov": 2, "id": 10, "t": "Hilbert & Fourier", "tag": "C", "desc": "ortogonalità; Fourier come sviluppo ortogonale in L²", "done": true, "file": "nuclei/09-hilbert-fourier.html"}, {"mov": 2, "id": 11, "t": "Lebesgue & Lᵖ", "tag": "+", "desc": "integrale di Lebesgue essenziale, spazi Lᵖ", "done": true, "file": "nuclei/10-lebesgue.html"}, {"mov": 3, "id": 12, "t": "Olomorfe", "tag": "C", "desc": "funzioni olomorfe, Cauchy–Riemann", "done": true, "file": "nuclei/11-olomorfe.html"}, {"mov": 3, "id": 13, "t": "Cauchy", "tag": "C", "desc": "teorema e formula di Cauchy; analiticità = serie di potenze", "done": true, "file": "nuclei/12-cauchy.html"}, {"mov": 3, "id": 14, "t": "Residui", "tag": "C", "desc": "residui e integrazione per contorni (il cavallo da lavoro)", "done": true, "file": "nuclei/13-residui.html"}, {"mov": 3, "id": 15, "t": "Continuazione & speciali", "tag": "+", "desc": "continuazione analitica; funzioni speciali (Gamma)", "done": true, "file": "nuclei/14-continuazione.html"}, {"mov": 4, "id": 16, "t": "Distribuzioni & Fourier", "tag": "C", "desc": "la delta; trasformata di Fourier rigorosa; temperate", "done": true, "file": "nuclei/15-distribuzioni.html"}, {"mov": 4, "id": 17, "t": "Operatori & spettrale", "tag": "+", "desc": "Sturm–Liouville; funzioni di Green per EDO/EDP", "done": true, "file": "nuclei/16-operatori-spettrale.html"}, {"mov": 4, "id": 18, "t": "EDP della fisica", "tag": "+", "desc": "Laplace / calore / onde con questi strumenti", "done": true, "file": "nuclei/17-edp.html"}], MOV=[["I", "Calcolo multivariabile e vettoriale", "cuore di Analisi Vettoriale", "#8bd450"], ["II", "Ponte: spazi di funzioni", "AV → Metodi", "#5ac8fa"], ["III", "Analisi complessa", "cuore di Metodi", "#b98cff"], ["IV", "Funzionale e Metodi applicati", "gli strumenti della fisica", "#e0a94a"]], PONTI=[[7, 17, "EDO di Eulero: una volta, copre AV e prepara la Green di Metodi"], [8, 10, "conv. uniforme → Fourier → Hilbert: un filo unico"], [16, 10, "EDP + Fourier: cuce il 4° esercizio di Metodi e il 2° esonero AV"]];
+var PADL=210, COLW=250, ROWH=150, TOP=30;
+var svg=document.getElementById('map'), tip=document.getElementById('tip');
+var byId={}; // id -> {x,y}
+var maxlen=Math.max.apply(null, MOV.map(function(_,mi){return NUCLEI.filter(function(n){return n.mov===mi+1;}).length;}));
+var W=PADL + maxlen*COLW + 30;   // adattiva: il Movimento più lungo (7 nuclei) deve starci tutto
+var H=TOP + MOV.length*ROWH + 20;
+svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.setAttribute('preserveAspectRatio','xMidYMin meet');
+function el(t,a){var e=document.createElementNS('http://www.w3.org/2000/svg',t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+// bande dei movimenti
+MOV.forEach(function(m,mi){
+  var y=TOP+mi*ROWH;
+  svg.appendChild(el('rect',{x:10,y:y,width:W-20,height:ROWH-14,rx:12,'class':'mv'}));
+  svg.appendChild(el('text',{x:24,y:y+34,'class':'mvrom'})).textContent='Mov. '+m[0];
+  // etichetta su due righe, spezzata alla parola, per non invadere il primo nodo
+  var words=m[1].split(' '), line1='', line2='';
+  words.forEach(function(wd){ if((line1+' '+wd).trim().length<=18 && !line2) line1=(line1+' '+wd).trim(); else line2=(line2+' '+wd).trim(); });
+  var l=el('text',{x:24,y:y+56,'class':'mvlab'}); l.textContent=line1; svg.appendChild(l);
+  if(line2){ var l2=el('text',{x:24,y:y+73,'class':'mvlab'}); l2.textContent=line2; svg.appendChild(l2); }
+  var s=el('text',{x:24,y:y+(line2?92:73),'class':'mvlab'}); s.setAttribute('fill','#6f6a86'); s.setAttribute('font-size','11'); s.textContent=m[2]; svg.appendChild(s);
+});
+// nodi
+NUCLEI.forEach(function(n){
+  var idxInMov=NUCLEI.filter(function(x){return x.mov===n.mov && x.id<=n.id;}).length-1;
+  var x=PADL+idxInMov*COLW, y=TOP+(n.mov-1)*ROWH + (ROWH-14)/2;
+  byId[n.id]={x:x,y:y,w:COLW-40};
+  var w=COLW-40, h=52, col=MOV[n.mov-1][3];
+  var g=el('g',{'class':'node'});
+  var r=el('rect',{x:x,y:y-h/2,width:w,height:h,rx:11});
+  r.setAttribute('fill', n.done? col : '#181530');
+  r.setAttribute('fill-opacity', n.done? '0.22':'1');
+  r.setAttribute('stroke', col);
+  r.setAttribute('stroke-width', n.tag==='C'? '2':'1.6');
+  if(n.tag==='+') r.setAttribute('stroke-dasharray','6 4');
+  g.appendChild(r);
+  var num=el('text',{x:x+16,y:y+5,'class':'lab',fill:col,'font-size':'17','font-weight':'bold'}); num.textContent=n.id; g.appendChild(num);
+  var t=el('text',{x:x+38,y:y+2,'class':'lab',fill:'#e9e6f2','font-size':'14'}); t.textContent=n.t; g.appendChild(t);
+  var st=el('text',{x:x+38,y:y+19,'class':'lab','font-size':'11'});
+  st.setAttribute('fill', n.done? col : '#6f6a86');
+  st.textContent = n.done? '✓ costruito' : (n.tag==='C'? 'da fare' : 'oltre agosto');
+  g.appendChild(st);
+  g.addEventListener('mousemove',function(e){ showTip(e,n,col); });
+  g.addEventListener('mouseleave',hideTip);
+  if(n.done && n.file){                              // nucleo costruito = link cliccabile
+    var open=el('text',{x:x+w-15,y:y-h/2+19,'class':'lab',fill:col,'font-size':'15','text-anchor':'middle'}); open.textContent='↗'; g.appendChild(open);
+    var a=el('a',{}); a.setAttributeNS('http://www.w3.org/1999/xlink','href',n.file); a.setAttribute('href',n.file);
+    a.appendChild(g); svg.appendChild(a);
+  } else { svg.appendChild(g); }
+});
+// spina: frecce sequenziali entro ogni movimento
+MOV.forEach(function(_,mi){
+  var ns=NUCLEI.filter(function(n){return n.mov===mi+1;}).sort(function(a,b){return a.id-b.id;});
+  for(var i=0;i<ns.length-1;i++){ var A=byId[ns[i].id],B=byId[ns[i+1].id];
+    svg.appendChild(el('path',{d:'M '+(A.x+A.w)+' '+A.y+' L '+B.x+' '+B.y,'class':'arc'})); }
+});
+// ponti AV<->Metodi (archi tratteggiati arancioni)
+PONTI.forEach(function(p){ var A=byId[p[0]],B=byId[p[1]]; if(!A||!B) return;
+  var mx=(A.x+B.x)/2, my=(A.y+B.y)/2-70;
+  svg.appendChild(el('path',{d:'M '+(A.x+A.w/2)+' '+A.y+' Q '+mx+' '+my+' '+(B.x+B.w/2)+' '+B.y,'class':'ponte'}));
+});
+function showTip(e,n,col){
+  tip.innerHTML='<div style="font-weight:bold;color:'+col+';margin-bottom:4px">'+n.id+'. '+n.t+' &nbsp;<span style="font-size:11px;color:#8b86a0">['+n.tag+']</span></div>'+n.desc;
+  tip.style.opacity=1; tip.style.left=Math.min(e.clientX+15,innerWidth-360)+'px'; tip.style.top=Math.min(e.clientY+14,innerHeight-130)+'px';
+}
+function hideTip(){ tip.style.opacity=0; }
+// legenda
+var leg=document.getElementById('legend');
+[['sw','background:#8bd45044;border-color:#8bd450','costruito'],
+ ['sw','background:#181530;border-color:#8b86a0','da fare (core [C])'],
+ ['sw','background:#181530;border-color:#8b86a0;border-style:dashed','deepening [+], oltre agosto']].forEach(function(x){
+  var s=document.createElement('span'); s.innerHTML='<span class="sw" style="'+x[1]+'"></span><i>'+x[2]+'</i>'; leg.appendChild(s);});
+var pp=document.createElement('span'); pp.innerHTML='<span class="sw" style="background:none;border:none;border-top:2px dashed #ff9b6b;height:0;width:22px"></span><i>ponte AV↔Metodi</i>'; leg.appendChild(pp);
+</script></body></html>

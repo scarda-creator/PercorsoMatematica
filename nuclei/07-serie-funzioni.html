@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 07 — Serie di funzioni: convergenza uniforme, Weierstrass, serie di potenze</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento II · Nucleo <b>07 — Serie di funzioni: convergenza uniforme, Weierstrass, serie di potenze</b> · il ponte AV → Metodi comincia qui</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 04: Campi vettoriali <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Parte III · quando una successione/serie di funzioni si comporta bene, e cosa autorizza a scambiare i limiti',
+  blocchi:[
+  {t:'prosa', title:'La posta: scambiare limite e integrale/derivata', tag:'mira d&rsquo;esame', html:R`
+  <p>Fin qui hai lavorato con singole funzioni. Ora l&rsquo;oggetto è una <b>successione di funzioni</b> $f_n(x)$ o una <b>serie</b> $\sum f_n(x)$, e la domanda è come si comporta il <b>limite</b>. La posta non è astratta: è la licenza a fare i gesti che userai in continuazione in fisica — <b>scambiare</b> $\lim$, $\sum$ con $\int$ o $\frac{d}{dx}$. Questi scambi <b>non sono sempre leciti</b>, e la <b>convergenza uniforme</b> è precisamente la condizione che li autorizza.</p>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · studio di convergenza (AV Terracina, Parte III)</span>
+  Studia la convergenza puntuale e uniforme di $f_n(x)=\dfrac{nx}{1+n^2x^2}$ su $[0,1]$ e su $[1,+\infty)$.</div>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · serie di potenze</span>
+  Determina il raggio e l&rsquo;insieme di convergenza di $\displaystyle\sum_{n=1}^\infty\frac{x^n}{n\,3^n}$, e la somma dove possibile.</div>
+  <p>Il primo tipo distingue due convergenze — <b>puntuale</b> (punto per punto) e <b>uniforme</b> (con un controllo che non dipende dal punto) — e mostra che la prima è troppo debole per garantire alcunché sul limite. Il secondo è il caso più regolare e utile: le <b>serie di potenze</b>, che convergono uniformemente e si derivano/integrano termine a termine liberamente. È il seme di Taylor, di Fourier, e dell&rsquo;analiticità complessa (Movimento III).</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Distinguere <b>convergenza puntuale</b> da <b>uniforme</b>, e calcolare $\sup_x|f_n(x)-f(x)|$ per decidere l&rsquo;uniforme.</li>
+  <li>Applicare il <b>criterio di Weierstrass</b> (M-test) per dimostrare la convergenza uniforme di una serie con una maggiorazione numerica.</li>
+  <li>Usare le tre conseguenze dell&rsquo;uniforme: il limite di funzioni continue è <b>continuo</b>; si può <b>integrare termine a termine</b>; con ipotesi in più, <b>derivare termine a termine</b>.</li>
+  <li>Trovare il <b>raggio di convergenza</b> di una serie di potenze (rapporto, radice, Cauchy–Hadamard) e studiarne il comportamento agli <b>estremi</b>.</li>
+  <li>Riconoscere che una serie di potenze definisce una funzione $C^\infty$, sviluppabile in <b>Taylor</b>, e manipolarla (derivare, integrare, sommare serie geometriche modificate).</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · PUNTUALE VS UNIFORME ---------------- */
+{ num:'01', title:'Convergenza puntuale e uniforme', meta:'il $\\sup$ che fa la differenza · perché la puntuale non basta',
+  blocchi:[
+  {t:'prosa', title:'Le due definizioni', tag:'grammatica del limite', html:R`
+  <p>Sia $f_n:E\to\mathbb{R}$ una successione di funzioni.</p>
+  <ul>
+  <li><b>Convergenza puntuale.</b> $f_n\to f$ puntualmente se, per <b>ogni</b> $x$ fissato, la successione numerica $f_n(x)\to f(x)$. In simboli: $\forall x\,\forall\varepsilon\,\exists N(\varepsilon,x)$ tale che $n\ge N\Rightarrow|f_n(x)-f(x)|\lt\varepsilon$. Nota: $N$ può dipendere <b>anche da $x$</b>.</li>
+  <li><b>Convergenza uniforme.</b> $f_n\to f$ uniformemente se lo stesso $N$ funziona per <b>tutti</b> gli $x$ insieme: $\forall\varepsilon\,\exists N(\varepsilon)$ tale che $n\ge N\Rightarrow|f_n(x)-f(x)|\lt\varepsilon$ <b>per ogni</b> $x\in E$. In simboli compatti: $$\sup_{x\in E}|f_n(x)-f(x)|\xrightarrow[n\to\infty]{}0.$$</li>
+  </ul>
+  <p>La differenza è tutta nell&rsquo;ordine dei quantificatori: nella puntuale scegli $x$ <b>e poi</b> $N$ (che può adattarsi a quel punto); nell&rsquo;uniforme scegli $N$ <b>una volta sola</b>, valido ovunque. L&rsquo;uniforme dice che $f_n$ sta definitivamente dentro una &laquo;striscia&raquo; di altezza $\varepsilon$ attorno a $f$, su <b>tutto</b> il dominio.</p>`},
+  {t:'plot', title:'La convergenza puntuale che NON è uniforme',
+   intro:R`Le funzioni $f_n(x)=x^n$ su $[0,1]$, per $n=2,5,15,50$. Puntualmente $f_n\to f$ con $f(x)=0$ per $x\lt1$ e $f(1)=1$.`,
+   plots:[
+    {kind:'func2d', xr:[0,1.02], yr:[-0.05,1.05], height:360, title:'x^n su [0,1]: il gradino che si forma in x=1',
+     curves:[{f:'pow(x,2)', col:'#5eead4', label:'n=2'},{f:'pow(x,5)', col:'#4c8dff', label:'n=5'},{f:'pow(x,15)', col:'#b98cff', label:'n=15'},{f:'pow(x,50)', col:'#e0a94a', label:'n=50'}]}
+   ],
+   leggi:R`<b>Puntualmente</b>: per ogni $x\lt1$ fissato, $x^n\to0$; in $x=1$, $1^n=1$. Il limite $f$ è quindi <b>discontinuo</b>: vale $0$ su $[0,1)$ e salta a $1$ in $x=1$. Ma ogni $f_n=x^n$ è <b>continua</b>! Ecco la lezione: la convergenza puntuale <b>non conserva la continuità</b>. Perché? Guarda come la curva si schiaccia verso lo zero ovunque, tranne un &laquo;gomito&raquo; sempre più ripido vicino a $x=1$: per stare dentro una striscia di altezza $\varepsilon$ attorno a $f$, vicino a $1$ servono $n$ sempre più grandi — nessun singolo $N$ funziona per tutti gli $x$. Infatti $\sup_{[0,1]}|x^n-f(x)|$: in $x=(\tfrac12)^{1/n}$ la funzione vale $\tfrac12$, mentre $f=0$ lÀ, quindi il $\sup$ resta $\ge\tfrac12$ e <b>non tende a zero</b>. La convergenza <b>non è uniforme</b>, ed è esattamente questo che permette al limite di rompere la continuità. (Su $[0,a]$ con $a\lt1$ invece $\sup=a^n\to0$: lÀ è uniforme, e infatti il limite $0$ è continuo.)`},
+  {t:'reveal', title:'Il metodo operativo: calcola il $\\sup$', tag:'tecnica d&rsquo;esame', steps:[
+   {label:'Trova il limite puntuale', body:R`<p>Fissa $x$ e calcola $f(x)=\lim_n f_n(x)$. Questo dà la funzione candidata $f$.</p>`},
+   {label:'Studia $M_n=\\sup_x|f_n(x)-f(x)|$', body:R`<p>Considera $g_n(x)=|f_n(x)-f(x)|$ e trovane il massimo su $E$ (spesso derivando in $x$ e annullando). Se $M_n\to0$, la convergenza è <b>uniforme</b>; se $M_n\not\to0$ (tende a una costante $\gt0$ o a $+\infty$), è <b>solo puntuale</b>. Il dominio conta: spesso è uniforme su un compatto lontano dai punti critici, non uniforme su tutto.</p>
+   <div class="note">Scorciatoia per la NON uniforme: se riesci a esibire una successione di punti $x_n$ con $|f_n(x_n)-f(x_n)|\ge c\gt0$, hai già dimostrato che $M_n\ge c\not\to0$. Per $x^n$: $x_n=2^{-1/n}$ dà sempre $\tfrac12$.</div>`}
+  ]},
+  {t:'gram', title:'Puntuale vs uniforme, i simboli', rows:[
+   [R`$f_n\to f$ punt.`, R`per ogni $x$, la successione di numeri $f_n(x)$ tende a $f(x)$. $N$ dipende da $x$.`],
+   [R`$f_n\to f$ unif.`, R`$\sup_x|f_n-f|\to0$: un solo $N$ per tutti gli $x$. La più forte.`],
+   [R`$M_n=\sup_E|f_n-f|$`, R`la <b>distanza uniforme</b> (norma $\|\cdot\|_\infty$). Uniforme $\iff M_n\to0$. È il ponte al nucleo 08 (spazi normati).`],
+   [R`unif. $\Rightarrow$ punt.`, R`l&rsquo;uniforme implica la puntuale (stesso $N$ funziona per il singolo $x$), ma <b>non</b> viceversa ($x^n$).`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$f_n(x)=\dfrac{x}{n}$ su $\mathbb{R}$: converge uniformemente?`,
+    a:R`Puntualmente $f_n\to0$ ovunque. Ma $\sup_{\mathbb R}\left|\tfrac xn\right|=+\infty$ per ogni $n$ (basta prendere $x$ grande): <b>non</b> uniforme su tutto $\mathbb R$. Su un intervallo limitato $[-a,a]$ invece $\sup=\tfrac an\to0$: uniforme. Il dominio è decisivo.`},
+   {q:R`Perché ci teniamo tanto all&rsquo;uniforme e non alla puntuale?`,
+    a:R`Perché solo l&rsquo;uniforme <b>conserva</b> le proprietà buone: continuità del limite, scambio con l&rsquo;integrale, scambio con la derivata (con ipotesi). La puntuale può distruggere la continuità (il gradino di $x^n$) e far fallire gli scambi. Senza uniforme, &laquo;$\lim\int=\int\lim$&raquo; è un atto di fede, non un teorema.`}
+  ]}
+]},
+
+/* ---------------- 02 · WEIERSTRASS ---------------- */
+{ num:'02', title:'Il criterio di Weierstrass (M-test)', meta:'una maggiorazione numerica $\\sum M_n\\lt\\infty$ garantisce la convergenza uniforme della serie',
+  blocchi:[
+  {t:'prosa', title:'Il criterio', tag:'lo strumento principe per le serie', html:R`
+  <p>Per una <b>serie</b> di funzioni $\sum_n f_n(x)$, il modo pratico di dimostrare la convergenza uniforme quasi non richiede di calcolare $\sup$.</p>
+  <p><b>Criterio di Weierstrass (M-test).</b> Se esiste una successione numerica $M_n\ge0$ tale che $$|f_n(x)|\le M_n\quad\text{per ogni }x\in E,\qquad\text{e}\qquad\sum_n M_n\lt\infty,$$ allora la serie $\sum_n f_n(x)$ converge <b>uniformemente</b> (e assolutamente) su $E$.</p>
+  <p>In parole: se puoi &laquo;staccare la $x$&raquo; maggiorando ogni termine con un numero $M_n$, e la <b>serie numerica</b> $\sum M_n$ converge, allora la serie di funzioni converge uniformemente. Trasformi un problema di funzioni in un problema di <b>serie numeriche</b> (che sai trattare con i criteri di Analisi 1).</p>`},
+  {t:'reveal', title:'Perché funziona', tag:'derivazione', steps:[
+   {label:'La coda è piccola, uniformemente', body:R`<p>Sia $S(x)=\sum_{n}f_n(x)$ (converge assolutamente per confronto con $\sum M_n$) e $S_N(x)=\sum_{n\le N}f_n(x)$ la somma parziale. La coda è $$|S(x)-S_N(x)|=\left|\sum_{n\gt N}f_n(x)\right|\le\sum_{n\gt N}|f_n(x)|\le\sum_{n\gt N}M_n.$$</p>`},
+   {label:'Il controllo non dipende da $x$', body:R`<p>L&rsquo;ultima quantità $\sum_{n\gt N}M_n$ è la coda della serie numerica convergente $\sum M_n$: tende a $0$ per $N\to\infty$, e <b>non dipende da $x$</b>. Quindi $\sup_x|S(x)-S_N(x)|\le\sum_{n\gt N}M_n\to0$: convergenza uniforme. $\blacksquare$</p>
+   <div class="note">La forza del criterio: sostituisce lo studio del $\sup$ (funzionale) con la convergenza di una serie numerica (aritmetica). Il prezzo è che è solo <b>sufficiente</b>: una serie può convergere uniformemente senza che $\sum M_n$ converga (es. serie a segni alterni con Dirichlet), ma per l&rsquo;esame Weierstrass copre la stragrande maggioranza dei casi.</div>`}
+  ]},
+  {t:'esercizio', title:'Weierstrass in azione', src:'Applicazione diretta · staccare la $x$',
+   testo:R`Mostra che $\displaystyle\sum_{n=1}^\infty\frac{\sin(nx)}{n^2}$ converge uniformemente su tutto $\mathbb{R}$.`,
+   steps:[
+    {label:'Maggiora ogni termine', body:R`<p>$\left|\dfrac{\sin(nx)}{n^2}\right|\le\dfrac{1}{n^2}$ per <b>ogni</b> $x$ (il seno è limitato da $1$). Prendi $M_n=\dfrac{1}{n^2}$: la $x$ è sparita.</p>`},
+    {label:'La serie numerica converge', body:R`<p>$\sum_n\dfrac{1}{n^2}=\dfrac{\pi^2}{6}\lt\infty$ (serie armonica generalizzata con esponente $2\gt1$). Per Weierstrass, la serie di funzioni converge <b>uniformemente</b> su $\mathbb R$. $\blacksquare$</p>
+    <div class="note">Conseguenza immediata (tappa 03): la somma $S(x)=\sum\frac{\sin nx}{n^2}$ è <b>continua</b> su tutto $\mathbb R$, essendo limite uniforme di funzioni continue. È anche una serie di Fourier (nucleo 09): la vedrai riapparire.</div>`}
+   ],
+   nota:R`Il criterio fallisce se non riesci a staccare la $x$ con una maggiorazione sommabile. Es.: $\sum\frac{\sin nx}{n}$ ha $M_n=\frac1n$ e $\sum\frac1n=\infty$ — Weierstrass non conclude (e infatti la convergenza è solo condizionata, via Dirichlet). Riconoscere quando Weierstrass <b>non</b> basta è metà del mestiere.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`La serie $\sum_{n=0}^\infty x^n$ converge uniformemente su $[0,1)$?`,
+    a:R`No. Il termine $x^n$ non ha maggiorante sommabile uniforme su $[0,1)$: vicino a $1$, $\sup_{[0,1)}x^n=1$, e $M_n=1$ dà $\sum1=\infty$. Infatti la somma $\frac{1}{1-x}$ esplode a $x\to1^-$: nessuna convergenza uniforme lÀ. Su $[0,a]$ con $a\lt1$: $M_n=a^n$, $\sum a^n\lt\infty$, uniforme. Di nuovo il dominio decide.`}
+  ]}
+]},
+
+/* ---------------- 03 · LE CONSEGUENZE ---------------- */
+{ num:'03', title:'Cosa autorizza l&rsquo;uniforme', meta:'continuità del limite · scambio con l&rsquo;integrale · scambio con la derivata (con ipotesi)',
+  blocchi:[
+  {t:'prosa', title:'I tre teoremi di scambio', tag:'il perché serviva l&rsquo;uniforme', html:R`
+  <p>La convergenza uniforme è preziosa perché permette tre scambi che la puntuale nega.</p>
+  <ul>
+  <li><b>Continuità.</b> Se $f_n$ sono continue e $f_n\to f$ <b>uniformemente</b>, allora $f$ è continua: $$\lim_{x\to x_0}\lim_{n}f_n(x)=\lim_n\lim_{x\to x_0}f_n(x).$$ Si possono scambiare i due limiti. (Il gradino di $x^n$ viola questo: convergenza non uniforme.)</li>
+  <li><b>Integrazione termine a termine.</b> Se $f_n\to f$ uniformemente su $[a,b]$, allora $$\int_a^b f=\lim_n\int_a^b f_n,\qquad\text{ovvero}\qquad\int_a^b\sum_n f_n=\sum_n\int_a^b f_n.$$ Si integra dentro la serie.</li>
+  <li><b>Derivazione termine a termine.</b> Più delicata: serve che <b>la serie delle derivate</b> $\sum f_n^{\prime}$ converga uniformemente (e $\sum f_n$ converga in un punto). Allora $\left(\sum f_n\right)^{\prime}=\sum f_n^{\prime}$. Nota: qui l&rsquo;ipotesi è sull&rsquo;uniforme <b>delle derivate</b>, non della serie stessa.</li>
+  </ul>`},
+  {t:'reveal', title:'Perché l&rsquo;integrale si scambia (e la derivata no, cosÀ facilmente)', tag:'la stima', steps:[
+   {label:'Integrale: stima diretta', body:R`<p>$$\left|\int_a^b f_n-\int_a^b f\right|=\left|\int_a^b(f_n-f)\right|\le\int_a^b|f_n-f|\le(b-a)\sup_{[a,b]}|f_n-f|.$$ L&rsquo;ultimo termine è $(b-a)\,M_n\to0$ per l&rsquo;uniforme. L&rsquo;integrale &laquo;media&raquo; l&rsquo;errore, e la stima uniforme controlla la media. Diretto. $\blacksquare$</p>`},
+   {label:'Derivata: perché serve di più', body:R`<p>La derivata <b>amplifica</b> le piccole oscillazioni: due funzioni possono essere vicine (uniformemente) ma avere derivate lontanissime. Esempio: $f_n(x)=\dfrac{\sin(n^2x)}{n}\to0$ uniformemente ($M_n=\tfrac1n$), ma $f_n^{\prime}(x)=n\cos(n^2x)$ <b>non</b> tende a $0$ (oscilla con ampiezza $n$). Per questo &laquo;derivare il limite&raquo; richiede l&rsquo;ipotesi forte che siano <b>le derivate</b> a convergere uniformemente. È il motivo per cui l&rsquo;integrazione è &laquo;gratis&raquo; e la derivazione &laquo;a pagamento&raquo;.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché l&rsquo;integrazione termine a termine è più facile della derivazione?`,
+    a:R`Perché l&rsquo;integrale è un&rsquo;operazione &laquo;regolarizzante&raquo;: media i valori, e una piccola distanza uniforme $M_n$ produce un piccolo errore $(b-a)M_n$. La derivata invece &laquo;amplifica&raquo;: funzioni uniformemente vicine possono avere pendenze molto diverse ($\frac{\sin(n^2 x)}{n}$ è piccola ma la sua derivata $n\cos(n^2x)$ è grande). Quindi derivare richiede l&rsquo;uniforme <b>delle derivate</b>, non della serie.`}
+  ]}
+]},
+
+/* ---------------- 04 · SERIE DI POTENZE ---------------- */
+{ num:'04', title:'Serie di potenze', meta:'$\\sum a_n(x-x_0)^n$ · raggio di convergenza · derivazione termine a termine · Taylor e analiticità',
+  blocchi:[
+  {t:'prosa', title:'La regina delle serie di funzioni', tag:'perché si comportano benissimo', html:R`
+  <p>Una <b>serie di potenze</b> centrata in $x_0$ è $$\sum_{n=0}^\infty a_n(x-x_0)^n.$$ Sono le serie di funzioni più regolari che esistano, e per un motivo strutturale: convergono su un <b>intervallo</b> simmetrico attorno a $x_0$, e lÀ <b>uniformemente</b> (su ogni compatto interno), quindi ereditano <b>tutte</b> le proprietà buone della tappa 03 — continuità, integrabilità e (a differenza del caso generale) anche <b>derivabilità</b> termine a termine, infinite volte.</p>`},
+  {t:'reveal', title:'Il raggio di convergenza', tag:'la struttura', steps:[
+   {label:'Convergenza su un intervallo simmetrico', body:R`<p><b>Teorema.</b> Per ogni serie di potenze esiste un <b>raggio</b> $R\in[0,+\infty]$ tale che la serie converge (assolutamente) per $|x-x_0|\lt R$ e diverge per $|x-x_0|\gt R$. Sul bordo $|x-x_0|=R$ può fare di tutto (va studiato a parte). L&rsquo;intervallo $(x_0-R,x_0+R)$ è l&rsquo;<b>intervallo di convergenza</b>.</p>`},
+   {label:'Come si calcola $R$', body:R`<p>Due formule, dai criteri del rapporto e della radice applicati a $\sum|a_n|\,r^n$:
+   $$\frac{1}{R}=\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|\qquad\text{(rapporto)},\qquad \frac{1}{R}=\limsup_{n\to\infty}\sqrt[n]{|a_n|}\qquad\text{(Cauchy–Hadamard)}.$$ La seconda vale <b>sempre</b> (col $\limsup$); la prima quando il limite esiste. $R=+\infty$ significa convergenza su tutto $\mathbb{R}$ (es. $e^x=\sum\frac{x^n}{n!}$); $R=0$ significa solo in $x_0$.</p>`},
+   {label:'Derivazione e integrazione libere', body:R`<p>Dentro $(x_0-R,x_0+R)$ la serie si può derivare e integrare <b>termine a termine</b>, e le serie risultanti hanno lo <b>stesso raggio</b> $R$: $$\left(\sum a_n(x-x_0)^n\right)^{\prime}=\sum n\,a_n(x-x_0)^{n-1}.$$ Iterando, la somma $S(x)$ è $C^\infty$ su $(x_0-R,x_0+R)$, e $a_n=\dfrac{S^{(n)}(x_0)}{n!}$: <b>la serie di potenze È la serie di Taylor</b> della sua somma. $\blacksquare$</p>
+   <div class="note">Attenzione al bordo: derivando, il comportamento agli estremi $x_0\pm R$ può cambiare (la serie derivata può divergere dove l&rsquo;originale convergeva). Il raggio resta $R$, ma il bordo va ristudiato.</div>`}
+  ]},
+  {t:'plot', title:'Il raggio in figura: dentro converge, fuori esplode',
+   intro:R`La serie geometrica $\sum_{n\ge0}x^n$ (raggio $R=1$): la somma $\dfrac{1}{1-x}$ e le somme parziali $S_3,S_8$ che la inseguono dentro $|x|\lt1$.`,
+   plots:[
+    {kind:'func2d', xr:[-2.4,0.95], yr:[-1,6], height:360, title:'somma 1/(1-x) e somme parziali: convergono dentro, divergono fuori',
+     curves:[{f:'1/(1-x)', col:'#e0a94a', width:2.6, label:'somma 1/(1-x)'},{f:'(1-pow(x,4))/(1-x)', col:'#5eead4', dash:true, label:'S_3'},{f:'(1-pow(x,9))/(1-x)', col:'#4c8dff', dash:true, label:'S_8'}]}
+   ],
+   leggi:R`La serie $\sum x^n$ converge esattamente per $|x|\lt1$ (raggio $R=1$) alla funzione $\dfrac{1}{1-x}$, che vedi qui. Le somme parziali $S_N(x)=1+x+\dots+x^N=\dfrac{1-x^{N+1}}{1-x}$ inseguono la curva sempre meglio <b>dentro</b> l&rsquo;intervallo, e sempre peggio fuori: a $x=1$ la funzione ha un asintoto (la serie diverge, $\sum1=\infty$), a $x=-1$ oscilla ($\sum(-1)^n$ non converge). Il raggio $R=1$ è la distanza dal centro $0$ al <b>guaio più vicino</b> — qui la singolarità in $x=1$. Un fatto sorprendente che capirai solo in campo complesso (nucleo 12): anche una funzione liscia come $\dfrac{1}{1+x^2}$ ha raggio $1$ attorno a $0$, benché non abbia <b>nessun</b> problema sull&rsquo;asse reale — il guaio è la singolarità <b>complessa</b> in $x=\pm i$, a distanza $1$. Il raggio &laquo;vede&raquo; il piano complesso.`},
+  {t:'esercizio', title:'L&rsquo;esercizio d&rsquo;apertura', src:'AV Terracina · raggio, estremi, somma',
+   testo:R`Determina raggio e insieme di convergenza di $\displaystyle\sum_{n=1}^\infty\frac{x^n}{n\,3^n}$.`,
+   steps:[
+    {label:'Raggio col rapporto', body:R`<p>$a_n=\dfrac{1}{n\,3^n}$. $\dfrac1R=\lim\left|\dfrac{a_{n+1}}{a_n}\right|=\lim\dfrac{n\,3^n}{(n+1)3^{n+1}}=\lim\dfrac{n}{3(n+1)}=\dfrac13$. Quindi $R=3$: converge per $|x|\lt3$.</p>`},
+    {label:'Studia gli estremi', body:R`<p><b>$x=3$:</b> $\sum\dfrac{3^n}{n\,3^n}=\sum\dfrac1n$: diverge (armonica). <b>$x=-3$:</b> $\sum\dfrac{(-3)^n}{n\,3^n}=\sum\dfrac{(-1)^n}{n}$: converge (Leibniz, a segni alterni). Insieme di convergenza: $[-3,3)$.</p>`},
+    {label:'La somma', body:R`<p>Parti dalla geometrica $\sum_{n\ge1}t^n=\dfrac{t}{1-t}$ e integra: $\sum_{n\ge1}\dfrac{t^n}{n}=-\ln(1-t)$ per $|t|\lt1$. Con $t=\dfrac x3$: $$\sum_{n=1}^\infty\frac{x^n}{n\,3^n}=-\ln\!\left(1-\frac x3\right),\qquad -3\le x\lt3.\qquad\blacksquare$$ Il trucco &mdash; riconoscere una serie nota (geometrica), poi integrare/derivare termine a termine &mdash; è il metodo standard per sommare le serie di potenze d&rsquo;esame.</p>`}
+   ],
+   nota:R`Cassetta dei trucchi per la somma: (1) geometrica $\sum t^n=\frac{1}{1-t}$; (2) deriva → $\sum n t^{n-1}=\frac{1}{(1-t)^2}$; (3) integra → $\sum\frac{t^n}{n}=-\ln(1-t)$; (4) esponenziale $\sum\frac{t^n}{n!}=e^t$. Quasi ogni serie d&rsquo;esame è una di queste, manipolata.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché $e^x=\sum\frac{x^n}{n!}$ ha raggio di convergenza infinito?`,
+    a:R`$\dfrac1R=\lim\left|\dfrac{a_{n+1}}{a_n}\right|=\lim\dfrac{n!}{(n+1)!}=\lim\dfrac{1}{n+1}=0$, quindi $R=+\infty$: converge su tutto $\mathbb R$ (e su tutto $\mathbb C$). Il fattoriale al denominatore schiaccia qualsiasi $x^n$: è una funzione <b>intera</b>, senza singolarità al finito — il caso più regolare possibile.`},
+   {q:R`La serie di potenze di una funzione può avere raggio più piccolo di quanto la funzione &laquo;sembri&raquo; regolare sull&rsquo;asse reale. Perché?`,
+    a:R`Perché il raggio è la distanza (nel piano <b>complesso</b>) dal centro alla singolarità più vicina. $\frac{1}{1+x^2}$ è liscia su tutto $\mathbb R$, ma ha poli in $x=\pm i$: il raggio attorno a $0$ è $1$. È l&rsquo;anticipazione più forte del Movimento III — l&rsquo;analiticità è un fatto complesso, anche quando guardi solo i reali.`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'Prova prima, poi rivela · convergenza uniforme e serie di potenze',
+  blocchi:[
+  {t:'prosa', title:'Istruzioni', tag:'come usarli', html:R`
+  <p>Copri, prova, rivela un passo alla volta. Uno studio di convergenza col $\sup$, uno con Weierstrass, e due serie di potenze (raggio + estremi + somma).</p>`},
+  {t:'esercizio', title:'Esercizio 1 — puntuale vs uniforme col $\\sup$', src:'AV Terracina · calcolo del sup',
+   testo:R`Studia la convergenza (puntuale e uniforme) di $f_n(x)=nx\,e^{-nx^2}$ su $[0,+\infty)$.`,
+   steps:[
+    {label:'Limite puntuale', body:R`<p>Per $x=0$: $f_n(0)=0$. Per $x\gt0$ fissato: $nx\,e^{-nx^2}\to0$ (l&rsquo;esponenziale batte il fattore lineare in $n$). Quindi $f\equiv0$ puntualmente.</p>`},
+    {label:'Massimo di $f_n$', body:R`<p>$f_n^{\prime}(x)=n e^{-nx^2}(1-2nx^2)=0\Rightarrow x_n=\dfrac{1}{\sqrt{2n}}$. Valore massimo: $f_n(x_n)=n\cdot\dfrac{1}{\sqrt{2n}}\cdot e^{-1/2}=\sqrt{\dfrac n2}\,e^{-1/2}$.</p>`},
+    {label:'Conclusione', body:R`<p>$M_n=\sup f_n=\sqrt{\tfrac n2}\,e^{-1/2}\to+\infty$: la convergenza <b>non è uniforme</b> su $[0,+\infty)$ (anzi il $\sup$ esplode). Il &laquo;pizzo&raquo; della funzione si alza e si stringe verso l&rsquo;origine. $\blacksquare$ (Su $[a,+\infty)$ con $a\gt0$: il massimo esce dall&rsquo;intervallo per $n$ grande, e lÀ $\to0$, uniforme.)</p>`}
+   ],
+   nota:R`Questo è il prototipo dell&rsquo;esercizio &laquo;pizzo che scappa&raquo;: la massa si concentra in un picco sempre più alto e stretto. È anche, a meno di normalizzazione, un&rsquo;approssimante della delta di Dirac (nucleo 15): una successione che converge a $0$ puntualmente ma la cui area non svanisce.`},
+  {t:'esercizio', title:'Esercizio 2 — Weierstrass', src:'AV Terracina · convergenza uniforme di una serie',
+   testo:R`Mostra che $\displaystyle\sum_{n=1}^\infty\frac{1}{n^2}\,e^{-nx^2}$ converge uniformemente su $\mathbb{R}$.`,
+   steps:[
+    {label:'Maggiora', body:R`<p>Poiché $0\lt e^{-nx^2}\le1$ per ogni $x$: $\left|\dfrac{e^{-nx^2}}{n^2}\right|\le\dfrac{1}{n^2}=M_n$.</p>`},
+    {label:'Concludi', body:R`<p>$\sum\dfrac{1}{n^2}\lt\infty$, quindi per Weierstrass la serie converge uniformemente su $\mathbb R$, e la somma è continua. $\blacksquare$</p>`}
+   ],
+   nota:R`Ogni volta che un fattore &laquo;con la $x$&raquo; è <b>limitato</b> ($|\sin|,|\cos|\le1$, $0\lt e^{-nx^2}\le1$, $\frac{1}{1+x^2}\le1$), staccalo e riduciti alla serie numerica dei coefficienti. È il 90% degli esercizi di uniforme su serie.`},
+  {t:'esercizio', title:'Esercizio 3 — serie di potenze con la radice', src:'AV Terracina · Cauchy–Hadamard',
+   testo:R`Determina il raggio di $\displaystyle\sum_{n=1}^\infty\left(\frac{2n+1}{n}\right)^n x^n$.`,
+   steps:[
+    {label:'Radice n-esima', body:R`<p>$a_n=\left(\dfrac{2n+1}{n}\right)^n$, quindi $\sqrt[n]{|a_n|}=\dfrac{2n+1}{n}\to2$. Per Cauchy–Hadamard $\dfrac1R=2$, $R=\dfrac12$.</p>`},
+    {label:'Estremi', body:R`<p>A $|x|=\tfrac12$ il termine generale $\left(\tfrac{2n+1}{n}\right)^n\left(\tfrac12\right)^n=\left(\tfrac{2n+1}{2n}\right)^n=\left(1+\tfrac{1}{2n}\right)^n\to e^{1/2}\neq0$: il termine <b>non tende a zero</b>, quindi la serie diverge a entrambi gli estremi. Insieme di convergenza: $\left(-\tfrac12,\tfrac12\right)$. $\blacksquare$</p>`}
+   ],
+   nota:R`Quando i coefficienti hanno una potenza $n$-esima, la <b>radice</b> (Cauchy–Hadamard) è più comoda del rapporto. E il test del termine generale ($a_n x^n\not\to0\Rightarrow$ diverge) chiude spesso gli estremi senza fatica.`},
+  {t:'esercizio', title:'Esercizio 4 — sommare derivando', src:'AV Terracina · somma di una serie di potenze',
+   testo:R`Calcola $\displaystyle\sum_{n=1}^\infty n\,x^n$ per $|x|\lt1$.`,
+   steps:[
+    {label:'Parti dalla geometrica', body:R`<p>$\displaystyle\sum_{n=0}^\infty x^n=\frac{1}{1-x}$ per $|x|\lt1$. Deriva termine a termine (lecito dentro il raggio): $\displaystyle\sum_{n=1}^\infty n x^{n-1}=\frac{1}{(1-x)^2}$.</p>`},
+    {label:'Aggiusta la potenza', body:R`<p>Moltiplica per $x$ per ripristinare $x^n$: $$\sum_{n=1}^\infty n\,x^n=x\sum_{n=1}^\infty n x^{n-1}=\frac{x}{(1-x)^2}.\qquad\blacksquare$$ Verifica-lampo in $x=\tfrac12$: $\frac{1/2}{(1/2)^2}=\frac{1/2}{1/4}=2$, e $\sum n(1/2)^n=2$ ✓.</p>`}
+   ],
+   nota:R`Le due mosse — derivare la geometrica (fa scendere $n$) e moltiplicare per $x$ (aggiusta l&rsquo;esponente) — combinate danno quasi ogni somma con coefficienti polinomiali in $n$. Per $\sum n^2 x^n$ si deriva due volte.`},
+  {t:'collaudo', title:'Controllo lampo finale', items:[
+   {q:R`Come attacchi uno studio di convergenza uniforme di una successione $f_n$?`,
+    a:R`(1) Trova il limite puntuale $f$. (2) Studia $M_n=\sup_x|f_n-f|$: se serve, deriva $f_n-f$ in $x$ e trova il massimo. (3) $M_n\to0$ ⟹ uniforme; $M_n\not\to0$ ⟹ solo puntuale. Per una <b>serie</b>, salta al criterio di Weierstrass (maggiora ogni termine con $M_n$ e verifica $\sum M_n\lt\infty$).`},
+   {q:R`Come attacchi una serie di potenze?`,
+    a:R`(1) Raggio $R$ con rapporto o radice (Cauchy–Hadamard). (2) Studia gli <b>estremi</b> $x_0\pm R$ separatamente (spesso uno converge e uno no). (3) Se chiedono la somma, riconosci/riconduci a geometrica, $-\ln(1-t)$, $e^t$, e usa derivazione/integrazione termine a termine.`}
+  ]}
+]},
+
+/* ---------------- 06 · IL SENSO E LE ROTTE FISICHE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'la convergenza uniforme come licenza · gli sviluppi perturbativi · convergente vs asintotico',
+  blocchi:[
+  {t:'prosa', title:'Perché il fisico ci tiene all&rsquo;uniforme', tag:'significato', html:R`
+  <p>Ogni volta che in fisica scrivi &laquo;$\sum$&raquo; e poi lo scambi con un integrale o una derivata &mdash; e lo fai <b>di continuo</b> &mdash; stai usando (spesso implicitamente) la convergenza uniforme. Gli sviluppi in serie sono il pane della fisica teorica: sviluppi di Taylor per linearizzare, serie di Fourier per risolvere equazioni, <b>serie perturbative</b> per calcolare correzioni quando un problema non è esattamente risolubile.</p>
+  <p>Ma qui c&rsquo;è una sottigliezza profonda che questo nucleo pianta come seme: <b>non tutte le serie utili convergono</b>. Molte serie perturbative fondamentali (in elettrodinamica quantistica, in meccanica statistica) sono solo <b>asintotiche</b>: i primi termini approssimano meravigliosamente, poi la serie <b>diverge</b>. Il raggio di convergenza è zero, eppure la serie è utile. Capire la differenza fra &laquo;convergente&raquo; e &laquo;asintotica&raquo; distingue chi usa le formule da chi sa cosa significano.</p>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> La distanza uniforme $\sup|f_n-f|$ è già una <b>norma</b> (la $\|\cdot\|_\infty$): questo nucleo è la porta d&rsquo;ingresso agli <b>spazi normati</b> (nucleo 08), dove &laquo;convergenza uniforme&raquo; diventa &laquo;convergenza nella norma del sup&raquo; e la completezza di $C[a,b]$ dà un senso pulito a tutto.</p>
+  <p><b>A valle.</b> Le serie di potenze sono l&rsquo;anticipo dell&rsquo;<b>analiticità complessa</b> (nucleo 11–12): il raggio che &laquo;vede&raquo; le singolarità nel piano complesso è il primo indizio che la derivabilità vera vive in $\mathbb C$. E la convergenza uniforme è ciò che legittima lo sviluppo di <b>Fourier</b> (nucleo 09): è il primo dei tre ponti AV↔Metodi (conv. uniforme → Fourier → Hilbert).</p>`},
+  {t:'prolessi', title:'Prolessi — quando una serie converge davvero, e quando basta che sembri',
+   oggetto:R`La <b>convergenza uniforme</b> $\sup_x|f_n-f|\to0$: la licenza a scambiare $\sum$ con $\int$ e $\frac{d}{dx}$; e il <b>raggio</b> di una serie di potenze, distanza dalla singolarità (complessa) più vicina.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`La convergenza uniforme <b>autorizza</b> gli sviluppi in serie di autostati e la teoria delle perturbazioni: $|\psi\rangle=\sum_n c_n|n\rangle$, correzioni $E=E_0+\lambda E_1+\dots$. Scambiare somma e operatori è lecito solo sotto controllo uniforme.`},
+    {dove:'Meccanica<br>statistica', txt:R`Gli sviluppi del <b>viriale</b> e di <b>cluster</b> (gas non ideali) sono serie di potenze nella densità: il loro raggio di convergenza segnala la <b>transizione di fase</b> — dove la serie smette di convergere, la fisica cambia stato.`}
+   ],
+   domanda:R`Quando una serie perturbativa <b>converge</b> davvero, e quando è solo <b>asintotica</b> (utile ma divergente, raggio zero)? La domanda che porti alla tesi: il raggio di convergenza — cioè la <b>non-analiticità</b> — è il marcatore matematico delle transizioni di fase (la funzione di partizione perde analiticità dove il sistema cambia stato). Studiare <i>dove</i> e <i>come</i> una serie cessa di convergere è studiare la criticità: il filo che, dai raggi di convergenza di oggi, arriva agli zeri di Lee–Yang e alla fisica dei sistemi complessi.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 07 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 04-campi-vettoriali.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

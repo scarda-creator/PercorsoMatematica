@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 03 — Curve e superfici: parametrizzazioni, lunghezza, integrali di linea e di flusso</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>03 — Curve e superfici: lunghezza, integrali di linea e di flusso</b> · Analisi Vettoriale (Terracina), Parte II</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 03: Curve e superfici <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Parte II · i due oggetti che devi saper calcolare: lavoro lungo una curva, flusso attraverso una superficie',
+  blocchi:[
+  {t:'prosa', title:'I due esercizi che devi saper chiudere', tag:'mira d&rsquo;esame', html:R`
+  <p>La Parte II dello scritto di Terracina vive di integrali <b>lungo curve</b> e <b>attraverso superfici</b>. La mappa dell&rsquo;Argonauta isola la struttura fissa del secondo esonero: <i>Es.&nbsp;1 &mdash; integrali doppi/tripli con cambi di variabili e applicazioni geometriche (flusso, Gauss)</i>; <i>Es.&nbsp;3 &mdash; superfici + Stokes: trovare parametrizzazione, normale, bordo, calcolare circuitazione o flusso</i> (mappa Argonauta, §4, esame <code>20240704</code>, confermato da <code>20250127</code>).</p>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · integrale di linea vettoriale (mappa Argonauta, Parte II.8)</span>
+  Calcola il lavoro del campo $\mathbf F(x,y,z)=(-y,\,x,\,0)$ lungo la circonferenza $\gamma$ di raggio $1$ nel piano $z=0$, percorsa in senso antiorario. Poi rispondi: quanto vale se la percorri in senso orario?</div>
+  <div class="testo"><span class="src">Es.&nbsp;3 tipo · superficie e flusso (mappa Argonauta, Parte II.9)</span>
+  Sia $S$ la sfera di raggio $R$ centrata nell&rsquo;origine e $\mathbf F(x,y,z)=(x,y,z)$. Parametrizza $S$, costruisci il versore normale <b>uscente</b>, e calcola il flusso $\iint_S \mathbf F\cdot\mathbf n\,dS$.</div>
+  <p>I due esercizi hanno la stessa spina dorsale, letta in due dimensioni. Un integrale di linea somma $\mathbf F$ lungo una curva $1$-dimensionale, pesando con il vettore tangente $\gamma'(t)\,dt$. Un integrale di flusso somma $\mathbf F$ su una superficie $2$-dimensionale, pesando con il vettore normale $(\Phi_u\times\Phi_v)\,du\,dv$. In entrambi i casi <b>parametrizzi</b> l&rsquo;oggetto geometrico, poi riporti tutto a un integrale ordinario (semplice o doppio) sui parametri. Questo nucleo costruisce quel meccanismo e i suoi trabocchetti.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Parametrizzare una curva $\gamma:[a,b]\to\mathbb{R}^n$, riconoscere il <b>vettore velocità</b> $\gamma'(t)$ e calcolare la <b>lunghezza</b> $L=\int_a^b|\gamma'(t)|\,dt$, sapendo <i>da dove esce</i> quella formula.</li>
+  <li>Calcolare l&rsquo;<b>integrale di linea scalare</b> $\int_\gamma f\,ds$ (massa di un filo) e <b>vettoriale</b> $\int_\gamma\mathbf F\cdot d\mathbf r$ (lavoro), sapendo quale dei due <b>cambia segno</b> se inverti il verso.</li>
+  <li>Parametrizzare una superficie $\Phi(u,v)$, costruire i vettori tangenti $\Phi_u,\Phi_v$, il <b>versore normale</b> $\mathbf n=\dfrac{\Phi_u\times\Phi_v}{|\Phi_u\times\Phi_v|}$ e l&rsquo;<b>elemento d&rsquo;area</b> $dS=|\Phi_u\times\Phi_v|\,du\,dv$.</li>
+  <li>Calcolare l&rsquo;<b>area</b> $\iint_D|\Phi_u\times\Phi_v|\,du\,dv$ e il <b>flusso</b> $\iint_S\mathbf F\cdot\mathbf n\,dS=\iint_D\mathbf F(\Phi)\cdot(\Phi_u\times\Phi_v)\,du\,dv$.</li>
+  <li>Controllare l&rsquo;<b>orientazione</b> della normale (uscente vs entrante) e sapere che è ciò che fissa il <b>segno</b> del flusso &mdash; il trabocchetto che rovescia il risultato dell&rsquo;Es.&nbsp;3.</li>
+  <li>Dimostrare che lunghezza e area <b>non dipendono</b> dalla parametrizzazione scelta: sono grandezze geometriche intrinseche.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · CURVE E LUNGHEZZA ---------------- */
+{ num:'01', title:'Curve: parametrizzazione e lunghezza', meta:'La curva come mappa $\\gamma(t)$ · velocita $\\gamma^{\\ast}(t)$ tangente · lunghezza come integrale della rapidita · perche non dipende dalla parametrizzazione',
+  blocchi:[
+  {t:'prosa', title:'Che cos&rsquo;è una curva: il sostegno e la parametrizzazione', tag:'grammatica di base', html:R`
+  <p>Una <b>curva parametrizzata</b> è una mappa $\gamma:[a,b]\to\mathbb{R}^n$, $\gamma(t)=(x_1(t),\dots,x_n(t))$. Il parametro $t$ è tempo fittizio: al variare di $t$ il punto $\gamma(t)$ descrive un cammino. Va distinta l&rsquo;immagine $\gamma([a,b])\subseteq\mathbb{R}^n$, detta <b>sostegno</b> (l&rsquo;oggetto geometrico, la traccia disegnata), dalla parametrizzazione $\gamma$ (il <i>modo</i> di percorrerlo: con quale velocità, in quale verso). Lo stesso sostegno ammette infinite parametrizzazioni.</p>
+  <p>Il <b>vettore velocità</b> è la derivata $\gamma'(t)=(x_1'(t),\dots,x_n'(t))$: è <b>tangente</b> al sostegno nel punto $\gamma(t)$ e punta nel verso di percorrenza. La sua norma $|\gamma'(t)|$ è la <b>rapidità</b> (velocità scalare): quanto in fretta il punto avanza lungo la traccia. La curva si dice <b>regolare</b> se $\gamma\in C^1$ e $\gamma'(t)\neq0$ per ogni $t$: la condizione $\gamma'\neq0$ garantisce che ci sia sempre una tangente ben definita e che il punto non si fermi.</p>`},
+  {t:'gram', title:'I simboli, uno per uno', rows:[
+   [R`$\gamma:[a,b]\to\mathbb{R}^n$`, R`la <b>parametrizzazione</b>. Un vettore che dipende da un solo parametro reale $t$. L&rsquo;intervallo $[a,b]$ è il dominio; $\gamma(a),\gamma(b)$ sono gli <b>estremi</b>. Se $\gamma(a)=\gamma(b)$ la curva è <b>chiusa</b>.`],
+   [R`$\gamma'(t)$`, R`il <b>vettore velocità</b>, derivata componente per componente. È <b>tangente</b> al sostegno e indica il verso. Vive in $\mathbb{R}^n$ (è un vettore), non è un numero.`],
+   [R`$|\gamma'(t)|$`, R`la <b>rapidità</b>, un numero $\ge0$. In $\mathbb{R}^3$: $|\gamma'|=\sqrt{x'^2+y'^2+z'^2}$. È ciò che si integra per ottenere la lunghezza.`],
+   [R`$\mathbf T=\dfrac{\gamma'}{|\gamma'|}$`, R`il <b>versore tangente</b> (norma $1$), definito dove $\gamma'\neq0$. Separa la <i>direzione</i> del moto (in $\mathbf T$) dalla <i>rapidità</i> (in $|\gamma'|$). Serve per l&rsquo;integrale di linea vettoriale.`],
+   [R`$ds=|\gamma'(t)|\,dt$`, R`l&rsquo;<b>elemento d&rsquo;arco</b>: la lunghezza infinitesima di traccia percorsa nel tempo $dt$. Sempre $\ge0$. È il peso degli integrali scalari lungo la curva.`]
+  ]},
+  {t:'reveal', title:'Da dove esce $L=\\int|\\gamma^{\\ast}|\\,dt$', tag:'derivazione', steps:[
+   {label:'Spezza la curva in poligonali', body:R`<p>Per misurare la lunghezza di una traccia curva, la approssimi con una <b>spezzata</b>. Partiziona $[a,b]$ con $a=t_0\lt t_1\lt\cdots\lt t_N=b$ e congiungi con segmenti i punti $\gamma(t_k)$. La lunghezza della spezzata è la somma delle corde: $$L_N=\sum_{k=1}^{N}\big|\gamma(t_k)-\gamma(t_{k-1})\big|.$$ Più fitta la partizione, meglio la spezzata aderisce alla curva. La lunghezza è il limite $L=\lim_{N\to\infty}L_N$ (estremo superiore su tutte le partizioni, per una curva rettificabile).</p>`},
+   {label:'Ogni corda è velocita per tempo', body:R`<p>Se $\gamma\in C^1$, su ogni intervallino la corda è ben approssimata dalla velocità. Per il teorema del valor medio (o dallo sviluppo al primo ordine): $$\gamma(t_k)-\gamma(t_{k-1})\approx\gamma'(t_{k-1})\,(t_k-t_{k-1}),$$ quindi la lunghezza della corda è $$\big|\gamma(t_k)-\gamma(t_{k-1})\big|\approx\big|\gamma'(t_{k-1})\big|\,\Delta t_k,\qquad \Delta t_k=t_k-t_{k-1}.$$ La corda è, a meno di infinitesimi, <b>rapidità</b> $\times$ <b>tempo</b>: esattamente lo spazio percorso in $\Delta t_k$ a velocità $|\gamma'|$.</p>`},
+   {label:'La somma diventa un integrale', body:R`<p>Sommando: $$L_N\approx\sum_{k=1}^{N}\big|\gamma'(t_{k-1})\big|\,\Delta t_k.$$ Il membro di destra è una <b>somma di Riemann</b> della funzione continua $t\mapsto|\gamma'(t)|$. Al raffinarsi della partizione converge all&rsquo;integrale: $$\boxed{\,L=\int_a^b\big|\gamma'(t)\big|\,dt\,}\qquad\blacksquare$$ In una riga: la lunghezza è l&rsquo;integrale della rapidità nel tempo &mdash; spazio $=$ integrale della velocità, l&rsquo;identità cinematica elementare, letta al contrario.</p>
+   <div class="note">Da qui la scrittura compatta $ds=|\gamma'(t)|\,dt$ e $L=\int_\gamma ds$: l&rsquo;<b>ascissa curvilinea</b> $s(t)=\int_a^t|\gamma'(\tau)|\,d\tau$ misura la lunghezza percorsa da $\gamma(a)$ fino a $\gamma(t)$. È il &laquo;contachilometri&raquo; della curva.</div>`}
+  ]},
+  {t:'reveal', title:'Perche la lunghezza non dipende dalla parametrizzazione', tag:'invarianza', steps:[
+   {label:'Cambia il modo di percorrere', body:R`<p>Prendi un&rsquo;altra parametrizzazione dello <b>stesso</b> sostegno: $\delta=\gamma\circ\varphi$, dove $\varphi:[c,d]\to[a,b]$ è $C^1$, biunivoca e con $\varphi'\neq0$ (una <b>riparametrizzazione</b>). La stessa traccia, percorsa con un altro orologio. Vuoi verificare che la lunghezza calcolata con $\delta$ sia identica a quella con $\gamma$.</p>`},
+   {label:'La catena porta fuori il fattore', body:R`<p>Per la regola della catena $\delta'(\tau)=\gamma'(\varphi(\tau))\,\varphi'(\tau)$, dunque, prendendo la norma, $$\big|\delta'(\tau)\big|=\big|\gamma'(\varphi(\tau))\big|\cdot\big|\varphi'(\tau)\big|.$$ Nota il <b>valore assoluto</b> su $\varphi'$: la norma non vede il segno di $\varphi'$. La lunghezza con $\delta$ è $$L_\delta=\int_c^d\big|\gamma'(\varphi(\tau))\big|\,\big|\varphi'(\tau)\big|\,d\tau.$$</p>`},
+   {label:'Il cambio di variabile chiude', body:R`<p>Poni $t=\varphi(\tau)$, $dt=\varphi'(\tau)\,d\tau$. Se $\varphi$ è <b>crescente</b> ($\varphi'\gt0$): $|\varphi'|d\tau=dt$, gli estremi vanno da $a$ a $b$, e $L_\delta=\int_a^b|\gamma'(t)|\,dt=L_\gamma$. Se $\varphi$ è <b>decrescente</b> ($\varphi'\lt0$, cioè inverti il verso): $|\varphi'|=-\varphi'$, gli estremi si scambiano ($\tau=c\mapsto t=b$), e i due segni meno si elidono, dando di nuovo $L_\delta=\int_a^b|\gamma'|\,dt=L_\gamma$. $\blacksquare$</p>
+   <div class="note">La morale: il valore assoluto $|\gamma'|$ rende la lunghezza <b>cieca al verso e alla velocità</b> di percorrenza. È una proprietà del <i>sostegno</i>, non della parametrizzazione: una grandezza <b>geometrica intrinseca</b>. Lo stesso meccanismo &mdash; valore assoluto che assorbe il segno del jacobiano &mdash; renderà invariante l&rsquo;area di una superficie (tappa 03).</div>`}
+  ]},
+  {t:'esercizio', title:'Lunghezza di un&rsquo;elica', src:'Applicazione diretta · elica cilindrica',
+   testo:R`Calcola la lunghezza dell&rsquo;elica $\gamma(t)=(\cos t,\ \sin t,\ t)$ per $t\in[0,2\pi]$. Verifica prima che sia regolare.`,
+   steps:[
+    {label:'Regolarità e velocita', body:R`<p>$\gamma$ è $C^\infty$. Velocità: $\gamma'(t)=(-\sin t,\ \cos t,\ 1)$. Non si annulla mai, perché la terza componente è costante $=1$: $\gamma'\neq0$ ovunque, curva <b>regolare</b>.</p>`},
+    {label:'La rapidita è costante', body:R`<p>$$|\gamma'(t)|=\sqrt{(-\sin t)^2+(\cos t)^2+1^2}=\sqrt{\sin^2 t+\cos^2 t+1}=\sqrt{2}.$$ L&rsquo;elica si percorre a rapidità costante $\sqrt2$: il punto sale lungo $z$ mentre gira, e le due contributi si combinano in una velocità uniforme.</p>`},
+    {label:'Integra', body:R`<p>$$L=\int_0^{2\pi}|\gamma'(t)|\,dt=\int_0^{2\pi}\sqrt2\,dt=2\sqrt2\,\pi.\qquad\blacksquare$$ Controllo dimensionale: un giro di circonferenza unitaria è $2\pi$; l&rsquo;elica sale anche di $2\pi$ in $z$; la lunghezza $2\sqrt2\pi$ è l&rsquo;ipotenusa di un triangolo con cateti $2\pi$ e $2\pi$ &mdash; l&rsquo;elica &laquo;srotolata&raquo; è un segmento inclinato a $45^\circ$.</p>`}
+   ],
+   nota:R`Quando $|\gamma'|$ è costante la parametrizzazione è &laquo;a velocità uniforme&raquo; e l&rsquo;integrale è banale. Quando non lo è (es. $\gamma(t)=(t,t^2)$, $|\gamma'|=\sqrt{1+4t^2}$), l&rsquo;integrale può richiedere una primitiva non elementare: in quel caso il testo d&rsquo;esame è tarato perché l&rsquo;integrale si chiuda, oppure chiede solo di <b>impostarlo</b>.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Due parametrizzazioni della stessa circonferenza: $\gamma(t)=(\cos t,\sin t)$, $t\in[0,2\pi]$, e $\delta(t)=(\cos 2t,\sin 2t)$, $t\in[0,\pi]$. Danno la stessa lunghezza? Perché $\delta$ ha $|\delta'|=2$?`,
+    a:R`Sì, entrambe danno $2\pi$. $\delta$ percorre la stessa circonferenza <b>al doppio della velocità</b> ($|\delta'|=2$) ma per <b>metà del tempo</b> ($t\in[0,\pi]$): $\int_0^\pi 2\,dt=2\pi$. Il prodotto rapidità $\times$ tempo è invariante &mdash; è l&rsquo;invarianza della tappa.`},
+   {q:R`Perché nella derivazione della lunghezza serve $\gamma\in C^1$, e non basta che $\gamma$ sia continua?`,
+    a:R`Perché il passo &laquo;corda $\approx\gamma'\,\Delta t$&raquo; usa la derivata: senza $\gamma'$ continua la spezzata potrebbe non convergere a un integrale (esistono curve continue di lunghezza infinita, come i frattali). $C^1$ garantisce la rettificabilità e la formula.`}
+  ]},
+  {t:'plot', title:'Un&rsquo;elica: il punto gira e sale insieme',
+   intro:R`La curva $\gamma$ come <b>mappa</b> da un intervallo di tempo allo spazio: qui il punto percorre due giri girando nel piano $(x,y)$ e salendo lungo $z$. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'curve3d', x:'cos(t)', y:'sin(t)', z:'t/2.2', tr:[0,12.566], height:430, yaw:0.6, pitch:0.85, col:'#b98cff', mark3d:{x:1, y:0, z:0}, title:'elica: proiezione in (x,y) = cerchio, in z = salita costante'}
+   ],
+   leggi:R`Una curva non è un insieme di punti, è un <b>movimento</b>: la mappa $t\mapsto\gamma(t)$. Guarda le due proiezioni che compongono l&rsquo;elica — sul pavimento $(x,y)$ il punto descrive un <b>cerchio</b> ($\cos t,\sin t$), lungo la verticale <b>sale</b> a ritmo costante. La velocità $\gamma'(t)=(-\sin t,\cos t,c)$ ha modulo <b>costante</b> $\sqrt{1+c^2}$: né accelera né rallenta, e per questo la lunghezza è semplicemente rapidità$\,\times\,$tempo. Nell&rsquo;esercizio $c=1$ (elica $(\cos t,\sin t,t)$): un giro misura $\int_0^{2\pi}\!\sqrt2\,dt=2\sqrt2\,\pi$, l&rsquo;ipotenusa del triangolo con cateti $2\pi$ (giro) e $2\pi$ (salita) — l&rsquo;elica &laquo;srotolata&raquo; a $45^\circ$. <i>(Qui il passo è disegnato più dolce del vero, $c=1/2{,}2$, solo perché due coil si leggano: l&rsquo;elica dell&rsquo;esercizio è più ripida.)</i> Il fatto che la lunghezza <b>non dipenda dalla parametrizzazione</b> è il motivo per cui puoi scegliere quella comoda: rapidità doppia per metà tempo dà lo stesso integrale.`},
+  {t:'collaudo', title:'Controllo lampo — la mappa, non l&rsquo;immagine', items:[
+   {q:R`Perché diciamo che la <b>curva</b> è la mappa $\gamma$ e non solo il suo sostegno (l&rsquo;insieme dei punti percorsi)?`,
+    a:R`Perché lo stesso sostegno si percorre in modi diversi — verso opposto, velocità diversa, avanti e indietro — e proprietà come il <b>lavoro</b> di un campo (tappa 02) <b>cambiano</b> col verso. La lunghezza e la massa non cambiano; il lavoro sì. Serve la mappa, non solo il disegno.`}
+  ]}
+]},
+
+/* ---------------- 02 · INTEGRALI DI LINEA ---------------- */
+{ num:'02', title:'Integrali di linea: scalare e vettoriale', meta:'$\\int f\\,ds$ massa di un filo · $\\int \\mathbf F\\cdot d\\mathbf r$ lavoro · quale cambia segno se inverti il verso, e perche',
+  blocchi:[
+  {t:'prosa', title:'Due integrali diversi lungo la stessa curva', tag:'grammatica', html:R`
+  <p>Su una curva puoi integrare due tipi di oggetto, e vanno tenuti distinti.</p>
+  <ul>
+  <li>Una <b>funzione scalare</b> $f:\mathbb{R}^n\to\mathbb{R}$ (una densità, una temperatura): dà l&rsquo;<b>integrale di linea scalare</b> $\int_\gamma f\,ds$. Risponde a &laquo;quanta massa ha un filo di densità $f$?&raquo;.</li>
+  <li>Un <b>campo vettoriale</b> $\mathbf F:\mathbb{R}^n\to\mathbb{R}^n$ (una forza, un campo elettrico): dà l&rsquo;<b>integrale di linea vettoriale</b> $\int_\gamma\mathbf F\cdot d\mathbf r$. Risponde a &laquo;quanto lavoro compie la forza $\mathbf F$ su un punto che percorre $\gamma$?&raquo;.</li>
+  </ul>
+  <p>La differenza cruciale: il primo pesa con $ds=|\gamma'|\,dt\ge0$ (una lunghezza, sempre positiva); il secondo pesa con $d\mathbf r=\gamma'\,dt$ (un <b>vettore</b>, che porta il verso). Da qui l&rsquo;asimmetria che segna ogni esame: lo scalare <b>non</b> cambia se inverti il verso, il vettoriale <b>sì</b> (cambia segno).</p>`},
+  {t:'reveal', title:'Definizione e riduzione al parametro', tag:'costruzione', steps:[
+   {label:'Scalare: densita per lunghezza', body:R`<p>Suddividi $\gamma$ in pezzetti di lunghezza $ds$, ognuno con &laquo;massa&raquo; $f\cdot ds$. Sommando e passando all&rsquo;integrale, con $ds=|\gamma'(t)|\,dt$: $$\int_\gamma f\,ds=\int_a^b f\big(\gamma(t)\big)\,\big|\gamma'(t)\big|\,dt.$$ Se $f\equiv1$ ritrovi la lunghezza $\int_\gamma ds=L$. Geometricamente $\int_\gamma f\,ds$ è l&rsquo;<b>area della &laquo;tenda&raquo;</b> di base $\gamma$ e altezza $f$.</p>`},
+   {label:'Vettoriale: forza per spostamento', body:R`<p>Il lavoro infinitesimo di una forza è $dW=\mathbf F\cdot d\mathbf r$, prodotto scalare fra forza e spostamento $d\mathbf r=\gamma'(t)\,dt$. Sommando lungo la curva: $$\int_\gamma\mathbf F\cdot d\mathbf r=\int_a^b\mathbf F\big(\gamma(t)\big)\cdot\gamma'(t)\,dt.$$ In componenti in $\mathbb{R}^3$, con $\mathbf F=(P,Q,S)$: $\int_\gamma P\,dx+Q\,dy+S\,dz$, dove $dx=x'(t)\,dt$ eccetera. È la forma con cui l&rsquo;integrale compare spesso nel testo d&rsquo;esame.</p>`},
+   {label:'Il ponte fra i due: il versore tangente', body:R`<p>I due integrali non sono scollegati. Scrivi $\gamma'=|\gamma'|\,\mathbf T$ con $\mathbf T$ versore tangente: $$\int_\gamma\mathbf F\cdot d\mathbf r=\int_a^b\mathbf F\cdot\gamma'\,dt=\int_a^b(\mathbf F\cdot\mathbf T)\,\big|\gamma'\big|\,dt=\int_\gamma(\mathbf F\cdot\mathbf T)\,ds.$$ L&rsquo;integrale vettoriale <b>è</b> l&rsquo;integrale scalare della componente tangente $\mathbf F\cdot\mathbf T$. Il lavoro conta solo la parte di forza <b>lungo</b> il moto: la componente ortogonale alla curva non lavora.</p>`}
+  ]},
+  {t:'gram', title:'Lo scalare non gira, il vettoriale sì — la regola del verso', rows:[
+   [R`$\int_\gamma f\,ds$`, R`<b>invariante per orientazione</b>. Pesa con $ds=|\gamma'|\,dt\ge0$: il valore assoluto cancella il verso. Inverti il senso di percorrenza e ottieni <b>lo stesso</b> numero. Coerente col significato: la massa di un filo non dipende da dove inizi a contarla.`],
+   [R`$\int_\gamma\mathbf F\cdot d\mathbf r$`, R`<b>cambia segno</b> per inversione. Se $-\gamma$ è la curva percorsa al contrario, $\int_{-\gamma}\mathbf F\cdot d\mathbf r=-\int_\gamma\mathbf F\cdot d\mathbf r$. Il lavoro fatto andando è l&rsquo;opposto del lavoro fatto tornando: qui il verso è tutto.`],
+   [R`perche il segno`, R`riparametrizzando all&rsquo;indietro, $\gamma'\to-\gamma'$ (il versore tangente $\mathbf T$ si rovescia), mentre $ds=|\gamma'|\,dt$ resta positivo. Nel prodotto $\mathbf F\cdot\gamma'$ il segno passa; nel prodotto $f\,|\gamma'|$ no.`],
+   [R`notazione $\oint$`, R`quando $\gamma$ è <b>chiusa</b> si scrive $\oint_\gamma\mathbf F\cdot d\mathbf r$: la <b>circuitazione</b> di $\mathbf F$. Il suo valore, e in particolare se è nullo, è il cuore dei campi conservativi e del teorema di Stokes (nucleo successivo).`]
+  ]},
+  {t:'esercizio', title:'Massa di un filo e lavoro di un campo', src:'Es.&nbsp;tipo Terracina · scalare e vettoriale',
+   testo:R`(a) Calcola $\int_\gamma z\,ds$ lungo l&rsquo;elica $\gamma(t)=(\cos t,\sin t,t)$, $t\in[0,2\pi]$. (b) Calcola il lavoro $\int_\eta\mathbf F\cdot d\mathbf r$ del campo $\mathbf F=(-y,x,0)$ lungo la circonferenza $\eta(t)=(\cos t,\sin t,0)$, $t\in[0,2\pi]$ (antiorario). Cosa cambia in senso orario?`,
+   steps:[
+    {label:'(a) scalare: monta l&rsquo;integrale', body:R`<p>Dall&rsquo;elica $|\gamma'|=\sqrt2$ (tappa 01) e $z=t$ lungo la curva. Quindi $$\int_\gamma z\,ds=\int_0^{2\pi} t\cdot\sqrt2\,dt=\sqrt2\left[\frac{t^2}{2}\right]_0^{2\pi}=\sqrt2\cdot\frac{4\pi^2}{2}=2\sqrt2\,\pi^2.$$ Nessun segno, nessun verso: è una massa (con densità $f=z$).</p>`},
+    {label:'(b) vettoriale: monta il prodotto scalare', body:R`<p>$\eta'(t)=(-\sin t,\cos t,0)$ e $\mathbf F(\eta(t))=(-\sin t,\cos t,0)$ (basta sostituire $x=\cos t$, $y=\sin t$ in $\mathbf F=(-y,x,0)$). Prodotto scalare: $$\mathbf F\cdot\eta'=(-\sin t)(-\sin t)+(\cos t)(\cos t)+0=\sin^2 t+\cos^2 t=1.$$ Qui il campo è <b>tangente</b> alla circonferenza in ogni punto ($\mathbf F\parallel\eta'$): lavora al massimo.</p>`},
+    {label:'(b) integra e inverti', body:R`<p>$$\int_\eta\mathbf F\cdot d\mathbf r=\int_0^{2\pi}1\,dt=2\pi.$$ In <b>senso orario</b> percorri $-\eta$: il versore tangente si rovescia, $\mathbf F\cdot\eta'=-1$, e $$\oint_{-\eta}\mathbf F\cdot d\mathbf r=-2\pi.$$ Stessa curva, stesso campo, <b>segno opposto</b>: solo il verso è cambiato. $\blacksquare$</p>
+    <div class="note">La circuitazione $\oint\mathbf F\cdot d\mathbf r=2\pi\neq0$ segnala che $\mathbf F=(-y,x,0)$ <b>non è conservativo</b>: gira. È il campo di un vortice; il suo rotore è $\nabla\times\mathbf F=(0,0,2)$, e $2\pi$ è proprio $\iint(\nabla\times\mathbf F)\cdot\mathbf n\,dS$ sul disco (area $\pi$ per $2$) &mdash; un&rsquo;anticipazione di Stokes.</div>`}
+   ],
+   nota:R`Riflesso d&rsquo;esame: se leggi $\int_\gamma f\,ds$ ($f$ scalare, $ds$) &rarr; calcola $|\gamma'|$ e non pensare al verso. Se leggi $\int_\gamma\mathbf F\cdot d\mathbf r$ ($\mathbf F$ vettore, $d\mathbf r$) &rarr; fai il prodotto scalare $\mathbf F\cdot\gamma'$ e <b>rispetta il verso richiesto</b> dal testo (antiorario, dal punto A al B): un verso sbagliato costa il segno, cioè l&rsquo;esercizio.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Uno studente calcola una massa $\int_\gamma\rho\,ds$ e la ottiene <b>negativa</b> perché ha percorso la curva &laquo;al contrario&raquo;. Dov&rsquo;è l&rsquo;errore concettuale?`,
+    a:R`Non esiste: $\int_\gamma f\,ds$ è invariante per verso (pesa con $ds\ge0$). Se ottiene un segno, ha erroneamente usato $\gamma'$ al posto di $|\gamma'|$, cioè ha calcolato un integrale <b>vettoriale</b>, non scalare. Una massa non può dipendere dal verso di percorrenza.`},
+   {q:R`Il campo $\mathbf F$ è ovunque <b>ortogonale</b> alla curva $\gamma$. Quanto vale $\int_\gamma\mathbf F\cdot d\mathbf r$? E $\int_\gamma|\mathbf F|\,ds$?`,
+    a:R`Il lavoro è $0$: $\mathbf F\cdot\gamma'=0$ punto per punto (la componente tangente $\mathbf F\cdot\mathbf T$ è nulla). Invece $\int_\gamma|\mathbf F|\,ds$ è in generale $\gt0$: è un integrale scalare di una quantità positiva, non vede la direzione. I due integrali misurano cose diverse.`}
+  ]}
+]},
+
+/* ---------------- 03 · SUPERFICI: NORMALE E AREA ---------------- */
+{ num:'03', title:'Superfici: normale e area', meta:'$\\Phi(u,v)$ · vettori tangenti $\\Phi_u,\\Phi_v$ · normale $\\Phi_u\\times\\Phi_v$ · elemento d&rsquo;area $|\\Phi_u\\times\\Phi_v|\\,du\\,dv$ · invarianza',
+  blocchi:[
+  {t:'prosa', title:'Da una curva a una superficie: due parametri', tag:'il salto dimensionale', html:R`
+  <p>Una curva ha <b>un</b> parametro: $\gamma(t)$, oggetto $1$-dimensionale. Una superficie ha <b>due</b> parametri: una mappa $\Phi:D\subseteq\mathbb{R}^2\to\mathbb{R}^3$, $\Phi(u,v)=(x(u,v),\,y(u,v),\,z(u,v))$, che &laquo;dipinge&raquo; un foglio $2$-dimensionale in $\mathbb{R}^3$ al variare di $(u,v)$ nel dominio piano $D$. Congelando un parametro alla volta ottieni due famiglie di <b>curve coordinate</b>: le curve $u\mapsto\Phi(u,v_0)$ e $v\mapsto\Phi(u_0,v)$, la griglia curvilinea sulla superficie.</p>
+  <p>Le loro velocità sono i <b>vettori tangenti</b> $$\Phi_u=\frac{\partial\Phi}{\partial u}=(x_u,y_u,z_u),\qquad \Phi_v=\frac{\partial\Phi}{\partial v}=(x_v,y_v,z_v).$$ Sono tangenti alla superficie, lungo le due direzioni della griglia. Se $\Phi_u$ e $\Phi_v$ sono <b>linearmente indipendenti</b> (non paralleli), individuano un <b>piano tangente</b> alla superficie nel punto: è la condizione di <b>superficie regolare</b>, equivalente a $\Phi_u\times\Phi_v\neq0$.</p>`},
+  {t:'reveal', title:'Il versore normale e l&rsquo;elemento d&rsquo;area', tag:'costruzione geometrica', steps:[
+   {label:'La normale è il prodotto vettoriale', body:R`<p>Cerchi un vettore <b>perpendicolare</b> al piano tangente, cioè ortogonale a entrambi i tangenti $\Phi_u,\Phi_v$. In $\mathbb{R}^3$ questo vettore è, per definizione di prodotto vettoriale, $$\mathbf N=\Phi_u\times\Phi_v,$$ ortogonale sia a $\Phi_u$ sia a $\Phi_v$. Normalizzando ottieni il <b>versore normale</b> $$\mathbf n=\frac{\Phi_u\times\Phi_v}{|\Phi_u\times\Phi_v|}.$$ La regolarità $\Phi_u\times\Phi_v\neq0$ è ciò che rende $\mathbf n$ ben definito: dove il prodotto si annulla, la superficie ha uno spigolo o una degenerazione e non c&rsquo;è un piano tangente unico.</p>`},
+   {label:'Il modulo del prodotto è un&rsquo;area', body:R`<p>Il fatto chiave, spesso dimenticato: $|\Phi_u\times\Phi_v|$ <b>è l&rsquo;area</b> del parallelogramma costruito su $\Phi_u$ e $\Phi_v$. Infatti $$|\Phi_u\times\Phi_v|=|\Phi_u|\,|\Phi_v|\,\sin\theta,$$ con $\theta$ l&rsquo;angolo fra i due tangenti: base per altezza del parallelogramma. Non è un caso: il prodotto vettoriale codifica <b>direzione</b> (la normale) e <b>modulo</b> (l&rsquo;area) nello stesso oggetto.</p>`},
+   {label:'Dal parallelogramma infinitesimo all&rsquo;area', body:R`<p>Un rettangolino $[u,u+du]\times[v,v+dv]$ nel dominio $D$ viene mappato da $\Phi$, al primo ordine, in un <b>parallelogramma</b> di lati $\Phi_u\,du$ e $\Phi_v\,dv$ sulla superficie. La sua area è $$dS=\big|\Phi_u\,du\times\Phi_v\,dv\big|=|\Phi_u\times\Phi_v|\,du\,dv.$$ Sommando (integrando) su tutto $D$: $$\boxed{\ \text{Area}(S)=\iint_D|\Phi_u\times\Phi_v|\,du\,dv\ }\qquad\blacksquare$$ Il fattore $|\Phi_u\times\Phi_v|$ è la <b>dilatazione d&rsquo;area</b>: dice quanto la mappa $\Phi$ stira il dominio piano $D$ nel diventare superficie curva.</p>
+   <div class="note">Il parallelo con la curva è esatto. Curva: $ds=|\gamma'|\,dt$, fattore $|\gamma'|$ (dilatazione di lunghezza). Superficie: $dS=|\Phi_u\times\Phi_v|\,du\,dv$, fattore $|\Phi_u\times\Phi_v|$ (dilatazione d&rsquo;area). Un parametro vs due; norma di un vettore vs norma di un prodotto vettoriale.</div>`}
+  ]},
+  {t:'gram', title:'I simboli della superficie', rows:[
+   [R`$\Phi:D\to\mathbb{R}^3$`, R`la <b>parametrizzazione</b>: due parametri $(u,v)\in D\subseteq\mathbb{R}^2$, immagine in $\mathbb{R}^3$. L&rsquo;immagine $\Phi(D)$ è il <b>sostegno</b> (la superficie geometrica). Diverse $\Phi$ descrivono la stessa superficie.`],
+   [R`$\Phi_u,\ \Phi_v$`, R`i <b>vettori tangenti</b> lungo le due direzioni coordinate. Vivono nel piano tangente. Indipendenti $\iff$ superficie regolare.`],
+   [R`$\Phi_u\times\Phi_v$`, R`il vettore <b>normale</b> (non unitario). Direzione: $\perp$ superficie. Modulo: area del parallelogramma tangente. Il suo <b>verso</b> dipende dall&rsquo;ordine $u,v$ (scambiarli lo rovescia): fissa l&rsquo;orientazione.`],
+   [R`$\mathbf n=\dfrac{\Phi_u\times\Phi_v}{|\Phi_u\times\Phi_v|}$`, R`il <b>versore normale</b> (norma $1$). Due scelte possibili, $\pm\mathbf n$: uscente o entrante. La scelta è l&rsquo;<b>orientazione</b> della superficie.`],
+   [R`$dS=|\Phi_u\times\Phi_v|\,du\,dv$`, R`l&rsquo;<b>elemento d&rsquo;area</b>, sempre $\ge0$. Peso degli integrali di superficie scalari. Nel flusso vettoriale compare invece $\mathbf n\,dS=(\Phi_u\times\Phi_v)\,du\,dv$, che <b>porta il segno</b>.`]
+  ]},
+  {t:'reveal', title:'Perche l&rsquo;area non dipende dalla parametrizzazione', tag:'invarianza', steps:[
+   {label:'Riparametrizza la superficie', body:R`<p>Sia $\tilde\Phi(s,t)=\Phi(\Psi(s,t))$ un&rsquo;altra parametrizzazione dello stesso sostegno, con $\Psi:(s,t)\mapsto(u,v)$ diffeomorfismo di dominii piani (jacobiana $J_\Psi$ invertibile). Vuoi che l&rsquo;area calcolata con $\tilde\Phi$ coincida con quella calcolata con $\Phi$.</p>`},
+   {label:'La catena fattorizza il jacobiano', body:R`<p>Per la catena, $\tilde\Phi_s=\Phi_u u_s+\Phi_v v_s$ e $\tilde\Phi_t=\Phi_u u_t+\Phi_v v_t$. Nel prodotto vettoriale i termini $\Phi_u\times\Phi_u$ e $\Phi_v\times\Phi_v$ si annullano, e resta $$\tilde\Phi_s\times\tilde\Phi_t=(u_s v_t-u_t v_s)\,(\Phi_u\times\Phi_v)=\det(J_\Psi)\,(\Phi_u\times\Phi_v).$$ Prendendo il modulo: $\big|\tilde\Phi_s\times\tilde\Phi_t\big|=\big|\det J_\Psi\big|\,\big|\Phi_u\times\Phi_v\big|$.</p>`},
+   {label:'Il cambio di variabile chiude', body:R`<p>L&rsquo;area con $\tilde\Phi$ è $\iint\big|\tilde\Phi_s\times\tilde\Phi_t\big|\,ds\,dt=\iint|\det J_\Psi|\,|\Phi_u\times\Phi_v|\,ds\,dt$. Ma il teorema del cambio di variabile negli integrali doppi dice esattamente $|\det J_\Psi|\,ds\,dt=du\,dv$. Sostituendo, $$\text{Area con }\tilde\Phi=\iint_D|\Phi_u\times\Phi_v|\,du\,dv=\text{Area con }\Phi.\qquad\blacksquare$$</p>
+   <div class="note">Compare $|\det J_\Psi|$ (valore assoluto) per l&rsquo;<b>area</b>, esattamente come compariva $|\varphi'|$ per la lunghezza. E qui si vede già il seme dell&rsquo;orientazione: <b>senza</b> valore assoluto, il segno di $\det J_\Psi$ conta &mdash; e quel segno è ciò che nel <b>flusso</b> (tappa 04) decide se la normale rimane uscente o si rovescia in entrante.</div>`}
+  ]},
+  {t:'esercizio', title:'Area della sfera dalla parametrizzazione', src:'Applicazione diretta · coordinate sferiche',
+   testo:R`Parametrizza la sfera di raggio $R$ in coordinate sferiche, calcola $\Phi_\theta\times\Phi_\varphi$ e ricava l&rsquo;area $4\pi R^2$.`,
+   steps:[
+    {label:'La parametrizzazione', body:R`<p>$$\Phi(\theta,\varphi)=(R\sin\theta\cos\varphi,\ R\sin\theta\sin\varphi,\ R\cos\theta),\quad \theta\in[0,\pi],\ \varphi\in[0,2\pi].$$ Qui $\theta$ è la colatitudine (dal polo nord), $\varphi$ la longitudine. Le curve $\varphi=$ cost sono i meridiani, $\theta=$ cost i paralleli.</p>`},
+    {label:'I vettori tangenti', body:R`<p>$$\Phi_\theta=(R\cos\theta\cos\varphi,\ R\cos\theta\sin\varphi,\ -R\sin\theta),$$ $$\Phi_\varphi=(-R\sin\theta\sin\varphi,\ R\sin\theta\cos\varphi,\ 0).$$ $\Phi_\theta$ è tangente ai meridiani, $\Phi_\varphi$ ai paralleli: sono ortogonali fra loro (prodotto scalare nullo, verifica rapida), coerente con la griglia sfera.</p>`},
+    {label:'Il prodotto vettoriale', body:R`<p>Calcolando $\Phi_\theta\times\Phi_\varphi$ (determinante formale) si ottiene $$\Phi_\theta\times\Phi_\varphi=R^2\sin\theta\,\big(\sin\theta\cos\varphi,\ \sin\theta\sin\varphi,\ \cos\theta\big)=R\sin\theta\,\Phi(\theta,\varphi).$$ È diretto come $\Phi$, cioè <b>radialmente uscente</b> (poiché $\Phi=R\,\hat{\mathbf r}$ e $\sin\theta\ge0$). Il suo modulo: $$|\Phi_\theta\times\Phi_\varphi|=R^2\sin\theta\cdot|\hat{\mathbf r}|=R^2\sin\theta.$$</p>`},
+    {label:'Integra l&rsquo;area', body:R`<p>$$\text{Area}=\int_0^{2\pi}\!\!\int_0^{\pi} R^2\sin\theta\,d\theta\,d\varphi=R^2\int_0^{2\pi}\!d\varphi\int_0^\pi\!\sin\theta\,d\theta=R^2\cdot2\pi\cdot\big[-\cos\theta\big]_0^\pi=R^2\cdot2\pi\cdot2=4\pi R^2.\ \blacksquare$$ Ritrovi la formula nota. E hai ottenuto, come sottoprodotto, che il fattore $R^2\sin\theta$ &mdash; l&rsquo;elemento d&rsquo;area sferico $dS=R^2\sin\theta\,d\theta\,d\varphi$ &mdash; nasce dal modulo del prodotto vettoriale, non è calato dall&rsquo;alto.</p>`}
+   ],
+   nota:R`Il verso di $\Phi_\theta\times\Phi_\varphi$ (uscente) dipende dall&rsquo;ordine $(\theta,\varphi)$. Se avessi scritto $\Phi_\varphi\times\Phi_\theta$ avresti ottenuto $-R\sin\theta\,\Phi$: <b>entrante</b>. Per l&rsquo;<i>area</i> non importa (prendi il modulo), ma per il <i>flusso</i> è la differenza fra il risultato giusto e quello col segno sbagliato: tappa 04.`},
+  {t:'plot', title:'La sfera come immagine di $\\Phi(u,v)$, e la normale $\\Phi_u\\times\\Phi_v$',
+   intro:R`A sinistra la sfera $\Phi(\theta,\varphi)=R(\sin\theta\cos\varphi,\ \sin\theta\sin\varphi,\ \cos\theta)$ con la normale uscente in un punto; a destra un cilindro. <b>Nessuna delle due è un grafico $z=f(x,y)$</b> &mdash; ed è esattamente per questo che serve parametrizzare. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'param3d', x:'sin(u)*cos(v)', y:'sin(u)*sin(v)', z:'cos(u)', ur:[0,3.14159], vr:[0,6.28319],
+     nu:24, nv:34, w:430, height:340, yaw:0.7, pitch:0.32, normal:{u0:0.95, v0:0.8, len:0.85},
+     title:'sfera: la normale e ortogonale a entrambe le curve coordinate'},
+    {kind:'param3d', x:'cos(v)', y:'sin(v)', z:'u', ur:[-1.2,1.2], vr:[0,6.28319],
+     nu:14, nv:34, w:430, height:340, yaw:0.8, pitch:0.35, normal:{u0:0.3, v0:0.7, len:0.9},
+     title:'cilindro: stessa macchina, superficie non-grafico'}
+   ],
+   leggi:R`$\Phi$ manda un <b>rettangolo</b> del piano dei parametri sulla superficie: le linee della maglia sono le <b>curve coordinate</b> (a $u$ fisso e a $v$ fisso), e $\Phi_u,\Phi_v$ sono i loro vettori <b>tangenti</b>. Il prodotto vettoriale $\Phi_u\times\Phi_v$ è quindi ortogonale a entrambi, cioè <b>normale alla superficie</b> &mdash; è la freccia bianca. Due cose che la figura rende ovvie e che a parole restano astratte. <b>(1)</b> Il <b>modulo</b> $|\Phi_u\times\Phi_v|$ misura quanto il rettangolino $du\,dv$ viene <i>stirato</i> nel finire sulla superficie: dove la maglia è più larga, l&rsquo;elemento d&rsquo;area è più grande &mdash; ecco perché $dS=|\Phi_u\times\Phi_v|\,du\,dv$ e non $du\,dv$. Sulla sfera i quadrilateri si stringono verso i poli, ed è il fattore $\sin\theta$. <b>(2)</b> Il <b>verso</b> dipende dall&rsquo;<b>ordine</b> dei parametri: scambiare $u$ e $v$ inverte la normale. Non è un dettaglio formale &mdash; è il segno del flusso (tappa 04). <b>Nota infine cosa NON è disegnabile come grafico:</b> sfera e cilindro hanno due punti sopra lo stesso $(x,y)$, quindi nessuna $z=f(x,y)$ può descriverli. La parametrizzazione non è una tecnica alternativa: è l&rsquo;unica possibile. <b>E il cilindro qui ti regala la trappola:</b> con l&rsquo;ordine $(u,v)=(z,\varphi)$ scelto nel disegno, $\Phi_u\times\Phi_v=(-\cos v,-\sin v,0)$ punta <b>verso l&rsquo;asse</b> &mdash; la normale disegnata è <b>entrante</b>, non uscente. Invertendo l&rsquo;ordine dei parametri esce. Nessuna delle due è &laquo;sbagliata&raquo;: è la scelta che devi dichiarare, e controllare in un punto comodo prima di fidarti del segno.`},
+]},
+
+/* ---------------- 04 · IL FLUSSO E LA SUA ORIENTAZIONE ---------------- */
+{ num:'04', title:'Il flusso e la sua orientazione', meta:'$\\iint \\mathbf F\\cdot\\mathbf n\\,dS$ · come il modulo si semplifica · normale uscente vs entrante e il segno · scelta della parametrizzazione comoda',
+  blocchi:[
+  {t:'prosa', title:'Che cosa misura il flusso', tag:'significato prima della formula', html:R`
+  <p>Il <b>flusso</b> di un campo $\mathbf F$ attraverso una superficie orientata $S$ è $$\iint_S\mathbf F\cdot\mathbf n\,dS.$$ Interpretazione fluida: se $\mathbf F$ è il campo di velocità di un fluido, il flusso è il <b>volume di fluido che attraversa $S$ nell&rsquo;unità di tempo</b>. Il prodotto $\mathbf F\cdot\mathbf n$ prende solo la componente <b>normale</b> del campo: ciò che scorre <i>attraverso</i> la superficie, non ciò che scivola lungo di essa. Un campo tangente alla superficie ha flusso nullo (non la buca).</p>
+  <p>Da qui l&rsquo;asimmetria con l&rsquo;integrale di linea: là contava la componente <b>tangente</b> $\mathbf F\cdot\mathbf T$ (quanto la forza spinge <i>lungo</i> il cammino); qui conta la componente <b>normale</b> $\mathbf F\cdot\mathbf n$ (quanto il campo passa <i>attraverso</i> il foglio). Tangente per le curve, normale per le superfici.</p>`},
+  {t:'reveal', title:'La formula operativa: il modulo si cancella', tag:'derivazione', steps:[
+   {label:'Sostituisci normale ed elemento d&rsquo;area', body:R`<p>Hai $\mathbf n=\dfrac{\Phi_u\times\Phi_v}{|\Phi_u\times\Phi_v|}$ e $dS=|\Phi_u\times\Phi_v|\,du\,dv$. Metti tutto nell&rsquo;integrale, con $\mathbf F$ valutato sulla superficie, $\mathbf F(\Phi(u,v))$: $$\iint_S\mathbf F\cdot\mathbf n\,dS=\iint_D\mathbf F(\Phi)\cdot\frac{\Phi_u\times\Phi_v}{|\Phi_u\times\Phi_v|}\,|\Phi_u\times\Phi_v|\,du\,dv.$$</p>`},
+   {label:'Semplifica', body:R`<p>Il modulo $|\Phi_u\times\Phi_v|$ al denominatore si elide con quello dell&rsquo;elemento d&rsquo;area. Resta la formula che userai sempre: $$\boxed{\ \iint_S\mathbf F\cdot\mathbf n\,dS=\iint_D\mathbf F(\Phi(u,v))\cdot\big(\Phi_u\times\Phi_v\big)\,du\,dv\ }$$ Non calcoli mai davvero la norma né normalizzi: il flusso usa il prodotto vettoriale <b>non normalizzato</b> $\Phi_u\times\Phi_v$, che porta con sé sia la direzione normale sia l&rsquo;area. Questo è il vero motivo per cui il flusso è più semplice di quanto la scrittura $\mathbf F\cdot\mathbf n\,dS$ suggerisca.</p>
+   <div class="note warn"><b>Attenzione al segno.</b> Poiché $\Phi_u\times\Phi_v$ ha un verso preciso (fissato dall&rsquo;ordine $u,v$), il risultato è già dotato di segno: quel segno <b>è</b> l&rsquo;orientazione. Il testo che chiede la normale &laquo;uscente&raquo; ti obbliga a verificare che $\Phi_u\times\Phi_v$ punti fuori; se punta dentro, cambi segno (o scambi l&rsquo;ordine dei parametri).</div>`}
+  ]},
+  {t:'prosa', title:'Orientazione: uscente, entrante, e il segno del flusso', tag:'il trabocchetto dell&rsquo;Es.&nbsp;3', html:R`
+  <p>Una superficie (orientabile) ammette <b>due</b> versori normali opposti in ogni punto: $\mathbf n$ e $-\mathbf n$. Scegliere l&rsquo;uno o l&rsquo;altro è <b>orientarla</b>. Per una superficie chiusa (sfera, bordo di un solido) le due scelte hanno nomi: <b>uscente</b> (punta lontano dalla regione racchiusa) ed <b>entrante</b>. Il flusso con $-\mathbf n$ è l&rsquo;opposto del flusso con $\mathbf n$: $$\iint_S\mathbf F\cdot(-\mathbf n)\,dS=-\iint_S\mathbf F\cdot\mathbf n\,dS.$$ Il <b>modulo</b> è lo stesso, il <b>segno</b> si rovescia. Perciò &laquo;flusso uscente $=+7$&raquo; e &laquo;flusso entrante $=-7$&raquo; sono lo stesso conto, letto nei due versi.</p>
+  <p>Come una riparametrizzazione produce un&rsquo;orientazione o l&rsquo;altra: dalla tappa 03, un cambio di parametri con $\det J_\Psi\gt0$ <b>preserva</b> il verso di $\Phi_u\times\Phi_v$; uno con $\det J_\Psi\lt0$ lo <b>rovescia</b>. In particolare <b>scambiare i due parametri</b> ($u\leftrightarrow v$) ha $\det J_\Psi=-1$: rovescia la normale. È esattamente il modo più comune di sbagliare segno all&rsquo;esame.</p>
+  <p class="note"><b>Regola operativa contro il trabocchetto.</b> Dopo aver calcolato $\Phi_u\times\Phi_v$, <b>valuta il vettore in un punto concreto</b> della superficie e guarda se punta dove il testo vuole (fuori dal solido, verso l&rsquo;alto, ecc.). Se sì, procedi. Se no, cambia segno al risultato finale. Non fidarti mai dell&rsquo;ordine dei parametri &laquo;per default&raquo;: verifica sempre a mano il verso.</p>`},
+  {t:'gram', title:'Scegliere la parametrizzazione più comoda', rows:[
+   [R`grafico $z=g(x,y)$`, R`superficie data come grafico: parametrizza con $\Phi(x,y)=(x,y,g(x,y))$. Allora $\Phi_x\times\Phi_y=(-g_x,-g_y,1)$: <b>terza componente $+1$</b>, quindi normale <b>verso l&rsquo;alto</b>. Comodo e con orientazione già leggibile.`],
+   [R`sfera / porzioni`, R`coordinate sferiche $\Phi(\theta,\varphi)$ (tappa 03): $\Phi_\theta\times\Phi_\varphi=R\sin\theta\,\Phi$, <b>uscente</b>. Per il flusso attraverso una sfera è la scelta naturale: la normale uscente esce gratis dall&rsquo;ordine $(\theta,\varphi)$.`],
+   [R`cilindro`, R`$\Phi(\varphi,z)=(R\cos\varphi,R\sin\varphi,z)$: $\Phi_\varphi\times\Phi_z=R(\cos\varphi,\sin\varphi,0)=R\,\hat{\mathbf r}$, radialmente uscente dall&rsquo;asse. Naturale per flussi attraverso superfici cilindriche.`],
+   [R`la scelta paga`, R`la parametrizzazione &laquo;adattata alla simmetria&raquo; (sferica per sfere, cilindrica per cilindri) fa uscire $\Phi_u\times\Phi_v$ in forma semplice e con orientazione trasparente. Una parametrizzazione goffa (es. grafico $z=\pm\sqrt{R^2-x^2-y^2}$ per la sfera) complica i conti e nasconde il verso.`]
+  ]},
+  {t:'plot', title:'Lo stesso pezzo di superficie, due campi: flusso massimo e flusso nullo',
+   intro:R`A sinistra il campo <b>radiale</b> $\mathbf F=(x,y,z)$, a destra il campo <b>costante</b> $\mathbf F=(0,0,1)$, entrambi sulla sfera unitaria. Le frecce partono dai punti della superficie. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'param3d', x:'sin(u)*cos(v)', y:'sin(u)*sin(v)', z:'cos(u)', ur:[0,3.14159], vr:[0,6.28319],
+     nu:20, nv:28, w:430, height:340, yaw:0.7, pitch:0.35, alpha:0.8,
+     field:{fx:'x', fy:'y', fz:'z', nu:6, nv:12, len:0.42},
+     title:'F radiale: parallelo alla normale ovunque, flusso massimo'},
+    {kind:'param3d', x:'sin(u)*cos(v)', y:'sin(u)*sin(v)', z:'cos(u)', ur:[0,3.14159], vr:[0,6.28319],
+     nu:20, nv:28, w:430, height:340, yaw:0.7, pitch:0.35, alpha:0.8,
+     field:{fx:'0', fy:'0', fz:'1', nu:6, nv:12, len:0.42, col:'#5eead4'},
+     title:'F costante: entra sotto ed esce sopra, flusso totale zero'}
+   ],
+   leggi:R`Il flusso misura <b>quanto campo attraversa</b> la superficie, cioè la componente di $\mathbf F$ <b>lungo la normale</b>. A sinistra $\mathbf F=(x,y,z)$ è in ogni punto <b>parallelo</b> alla normale uscente: ogni freccia esce perpendicolarmente, il prodotto scalare $\mathbf F\cdot\mathbf n$ è massimo ovunque, e il flusso vale $\iint_S R\,dS=R\cdot4\pi R^2$. A destra il campo costante verticale <b>attraversa</b> la sfera da parte a parte: sotto <b>entra</b> (contributo negativo), sopra <b>esce</b> (positivo), e per simmetria i due si cancellano esattamente &mdash; flusso <b>zero</b>, senza calcolare nulla. <b>La lezione d&rsquo;esame:</b> prima di integrare, guarda l&rsquo;angolo fra campo e normale. Se il campo è radiale su una sfera centrata, il flusso è (valore radiale)$\times$(area); se il campo è costante su una superficie <b>chiusa</b>, il flusso è zero (e infatti la sua divergenza è nulla: nucleo 05). E se il risultato esce negativo dove ti aspettavi &laquo;uscente&raquo;, hai preso $\Phi_v\times\Phi_u$ invece di $\Phi_u\times\Phi_v$: la figura di sinistra è il promemoria di quale verso sia quello giusto.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel flusso $\iint_D\mathbf F(\Phi)\cdot(\Phi_u\times\Phi_v)\,du\,dv$ non compare mai $|\Phi_u\times\Phi_v|$. Perché, se l&rsquo;elemento d&rsquo;area è $dS=|\Phi_u\times\Phi_v|\,du\,dv$?`,
+    a:R`Perché nel flusso l&rsquo;elemento d&rsquo;area è moltiplicato per $\mathbf n=(\Phi_u\times\Phi_v)/|\Phi_u\times\Phi_v|$: il modulo al denominatore di $\mathbf n$ elide quello di $dS$. Il flusso usa il vettore <b>non normalizzato</b> $\Phi_u\times\Phi_v$ (direzione + area insieme). Il modulo resta invece negli integrali di superficie <b>scalari</b> $\iint_S f\,dS$.`},
+   {q:R`Calcoli un flusso e ottieni $-12$ ma il testo chiedeva quello <b>uscente</b>. Cosa può essere andato storto, e come lo controlli?`,
+    a:R`Probabilmente $\Phi_u\times\Phi_v$ puntava <b>verso l&rsquo;interno</b> (ordine dei parametri &laquo;sbagliato&raquo;). Valuta $\Phi_u\times\Phi_v$ in un punto concreto: se punta dentro il solido, l&rsquo;uscente è $+12$ (cambi segno). Se davvero punta fuori e il campo entra, $-12$ è corretto (il campo entra nella superficie).`}
+  ]},
+  {t:'plot', title:'Il nastro di Möbius: dove il flusso non si può nemmeno definire',
+   intro:R`Le due frecce partono dallo <b>stesso punto</b>: la verde è la normale di partenza, la rossa è la <b>stessa</b> normale dopo aver fatto un giro completo lungo il nastro, trasportata con continuità. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'param3d', x:'(1+(v/2)*cos(u/2))*cos(u)', y:'(1+(v/2)*cos(u/2))*sin(u)', z:'(v/2)*sin(u/2)',
+     ur:[0,6.28319], vr:[-0.9,0.9], nu:60, nv:8, w:560, height:380, yaw:0.9, pitch:0.5, alpha:0.92,
+     normal:[{u0:0.04, v0:0, len:0.55, col:'#5eead4'}, {u0:6.24, v0:0, len:0.55, col:'#ff6b6b'}],
+     title:'la normale torna al punto di partenza ROVESCIATA: nastro non orientabile'}
+   ],
+   leggi:R`Tutta la tappa poggia su una parola data per scontata: <b>orientabile</b>. Il flusso $\iint_S\mathbf F\cdot\mathbf n\,dS$ ha senso solo se si può scegliere $\mathbf n$ <b>con continuità su tutta la superficie</b> — cioè se la scelta &laquo;questo è il lato di sopra&raquo; sopravvive a qualunque passeggiata. Qui non sopravvive: portando la normale lungo il nastro si torna al punto di partenza con la freccia <b>capovolta</b> (verde contro rossa). Non c&rsquo;è nessun errore di calcolo — è la superficie a non avere due facce: ha <b>una sola faccia e un solo bordo</b>. Conseguenza secca: <b>su Möbius il flusso non è definito</b>, e non perché sia difficile da calcolare, ma perché $\mathbf n$ non esiste come campo continuo. Anche l&rsquo;area, invece, resta perfettamente definita ($dS=|\Phi_u\times\Phi_v|\,du\,dv$ usa il <b>modulo</b>, che non ha il problema del segno): la distinzione fra le due formule della tappa 03 diventa qui una differenza di esistenza, non di comodità. <b>La morale d&rsquo;esame:</b> quando un testo dice &laquo;superficie orientata&raquo; non sta riempiendo una riga — sta escludendo casi come questo, ed è la stessa ipotesi che compare in Gauss e in Stokes (nucleo 05). <b>In fisica</b> l&rsquo;idea riappare ovunque un segno debba essere seguito lungo un cammino chiuso: la fase di Berry che non torna al valore iniziale, e i difetti topologici dei cristalli liquidi, dove la direzione delle molecole si ribalta girando attorno a una linea di disclinazione.`},
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'Prova prima, poi rivela · uno standard (flusso attraverso la sfera, tipo Es.&nbsp;3) e uno trabocchetto (orientazione della normale)',
+  blocchi:[
+  {t:'prosa', title:'Istruzioni', tag:'come usarli', html:R`
+  <p>Copri le soluzioni, prendi carta, chiudi l&rsquo;esercizio da solo. Rivela un passo alla volta <b>solo dopo</b> aver tentato. L&rsquo;esercizio 1 è l&rsquo;Es.&nbsp;3 di Terracina nella forma piena: parametrizza la superficie, costruisci la normale <b>orientata</b>, calcola il flusso &mdash; e controlla il risultato con la divergenza. L&rsquo;esercizio 2 monta la trappola dell&rsquo;<b>orientazione</b>: una parametrizzazione che dà la normale nel verso sbagliato, l&rsquo;errore di segno che rovescia l&rsquo;Es.&nbsp;3.</p>`},
+  {t:'esercizio', title:'Esercizio 1 — flusso attraverso la sfera (standard)', src:'Es.&nbsp;3 tipo Terracina · $\\mathbf F=(x,y,z)$ attraverso la sfera di raggio $R$',
+   testo:R`Calcola il flusso di $\mathbf F(x,y,z)=(x,y,z)$ attraverso la sfera $S$ di raggio $R$ centrata nell&rsquo;origine, con normale <b>uscente</b>. Poi verifica il risultato con il teorema della divergenza.`,
+   steps:[
+    {label:'Parametrizza e prendi la normale', body:R`<p>Coordinate sferiche (tappa 03): $\Phi(\theta,\varphi)=(R\sin\theta\cos\varphi,R\sin\theta\sin\varphi,R\cos\theta)$, con $$\Phi_\theta\times\Phi_\varphi=R\sin\theta\,\Phi=R^2\sin\theta\,\hat{\mathbf r}.$$ Punta come $\hat{\mathbf r}$, cioè <b>uscente</b>: l&rsquo;orientazione richiesta è già quella giusta, con l&rsquo;ordine $(\theta,\varphi)$. Nessun cambio di segno da fare.</p>`},
+    {label:'Valuta il campo sulla superficie', body:R`<p>Sulla sfera $\mathbf F=(x,y,z)=\Phi(\theta,\varphi)$ (il campo posizione coincide col punto). Quindi il prodotto scalare da integrare: $$\mathbf F(\Phi)\cdot(\Phi_\theta\times\Phi_\varphi)=\Phi\cdot(R\sin\theta\,\Phi)=R\sin\theta\,|\Phi|^2=R\sin\theta\cdot R^2=R^3\sin\theta,$$ avendo usato $|\Phi|=R$ sulla sfera.</p>`},
+    {label:'Integra', body:R`<p>$$\iint_S\mathbf F\cdot\mathbf n\,dS=\int_0^{2\pi}\!\!\int_0^\pi R^3\sin\theta\,d\theta\,d\varphi=R^3\cdot2\pi\cdot\big[-\cos\theta\big]_0^\pi=R^3\cdot2\pi\cdot2=4\pi R^3.$$</p>`},
+    {label:'Verifica con la divergenza', body:R`<p>Il teorema della divergenza (Gauss) dà $\iint_S\mathbf F\cdot\mathbf n\,dS=\iiint_V\nabla\cdot\mathbf F\,dV$. Qui $\nabla\cdot\mathbf F=\partial_x x+\partial_y y+\partial_z z=3$, e $V$ è la palla di volume $\tfrac43\pi R^3$: $$\iiint_V 3\,dV=3\cdot\frac43\pi R^3=4\pi R^3.\qquad\checkmark$$ I due conti coincidono. Il flusso di $\mathbf F=\mathbf r$ misura, a meno del fattore $3$, il volume racchiuso: coerente col fatto che $\mathbf r$ &laquo;si allarga&raquo; uniformemente dall&rsquo;origine. $\blacksquare$</p>`}
+   ],
+   nota:R`Schema da ricopiare per ogni Es.&nbsp;3 di flusso: (1) parametrizza scegliendo la simmetria (sferica, cilindrica, grafico); (2) calcola $\Phi_u\times\Phi_v$ e <b>controlla il verso</b> rispetto all&rsquo;orientazione richiesta; (3) valuta $\mathbf F$ sulla superficie e fai $\mathbf F\cdot(\Phi_u\times\Phi_v)$; (4) integra sul dominio dei parametri; (5) se possibile, verifica con Gauss (superficie chiusa) o Stokes (con bordo).`},
+  {t:'esercizio', title:'Esercizio 2 — dove l&rsquo;orientazione morde (trabocchetto)', src:'Trappola orientazione · flusso verso l&rsquo;alto attraverso un paraboloide',
+   testo:R`Sia $S$ la calotta $z=1-x^2-y^2$ sopra il disco $x^2+y^2\le1$, orientata con la normale <b>verso l&rsquo;alto</b>. Calcola il flusso di $\mathbf F=(x,y,z)$. Attenzione: c&rsquo;è un modo di parametrizzare che dà il segno sbagliato.`,
+   steps:[
+    {label:'La trappola, dichiarata', body:R`<p>L&rsquo;errore indotto: parametrizzare, calcolare $\Phi_v\times\Phi_u$ (o scambiare l&rsquo;ordine dei parametri) <b>senza controllare il verso</b>, e consegnare un flusso col segno rovesciato. Con la normale &laquo;verso l&rsquo;alto&raquo; richiesta, la terza componente di $\Phi_u\times\Phi_v$ <b>deve</b> risultare positiva: è il controllo obbligatorio.</p>`},
+    {label:'Parametrizza come grafico', body:R`<p>Superficie a grafico: $\Phi(u,v)=(u,v,\,1-u^2-v^2)$, con $(u,v)$ nel disco $u^2+v^2\le1$. Tangenti: $$\Phi_u=(1,0,-2u),\qquad \Phi_v=(0,1,-2v).$$ Prodotto vettoriale: $$\Phi_u\times\Phi_v=(2u,\ 2v,\ 1).$$ La <b>terza componente è $+1\gt0$</b>: la normale punta verso l&rsquo;alto. Orientazione corretta, nessun cambio di segno. (Se avessi scritto $\Phi_v\times\Phi_u=(-2u,-2v,-1)$, terza componente $-1$: verso il basso, sbagliata &mdash; da correggere cambiando segno.)</p>`},
+    {label:'Monta il prodotto scalare', body:R`<p>Sulla superficie $\mathbf F(\Phi)=(u,\,v,\,1-u^2-v^2)$. Quindi $$\mathbf F(\Phi)\cdot(\Phi_u\times\Phi_v)=(u,v,1-u^2-v^2)\cdot(2u,2v,1)=2u^2+2v^2+1-u^2-v^2=u^2+v^2+1.$$</p>`},
+    {label:'Integra in polari', body:R`<p>Sul disco conviene $u=r\cos\alpha$, $v=r\sin\alpha$, $du\,dv=r\,dr\,d\alpha$, $u^2+v^2=r^2$: $$\iint_S\mathbf F\cdot\mathbf n\,dS=\int_0^{2\pi}\!\!\int_0^1(r^2+1)\,r\,dr\,d\alpha=2\pi\int_0^1(r^3+r)\,dr=2\pi\left[\frac{r^4}{4}+\frac{r^2}{2}\right]_0^1=2\pi\cdot\frac34=\frac{3\pi}{2}.$$ Il flusso verso l&rsquo;alto è $\dfrac{3\pi}{2}$. Chi avesse usato $\Phi_v\times\Phi_u$ senza controllare avrebbe scritto $-\dfrac{3\pi}{2}$: stesso modulo, verso opposto, esercizio perso. $\blacksquare$</p>
+    <div class="note warn"><b>Lezione.</b> Il segno del flusso non è nei conti, è nell&rsquo;<b>orientazione</b>. Il gesto che ti salva è sempre lo stesso: dopo $\Phi_u\times\Phi_v$, guarda una componente-spia (qui la terza, per &laquo;verso l&rsquo;alto&raquo;) e confrontala con ciò che il testo chiede. Due righe di controllo valgono l&rsquo;intero punteggio dell&rsquo;esercizio.</div>`}
+   ],
+   nota:R`Per un grafico $z=g(x,y)$ orientato verso l&rsquo;alto la regola è memorizzabile: $\Phi_x\times\Phi_y=(-g_x,-g_y,1)$, terza componente sempre $+1$. Se il testo vuole &laquo;verso il basso&raquo;, cambi segno. Se la superficie è chiusa e vuole &laquo;uscente&raquo;, valuti la normale in un punto e controlli che punti lontano dall&rsquo;interno.`}
+]},
+
+/* ---------------- 06 · IL SENSO E LE ROTTE FISICHE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'Lunghezza e area come grandezze intrinseche · flusso e circuitazione come mattoni della fisica · dove riappaiono, con altri nomi',
+  blocchi:[
+  {t:'prosa', title:'Parametrizzare è scegliere coordinate; l&rsquo;invarianza è la fisica', tag:'significato', html:R`
+  <p>Il filo conduttore del nucleo: <b>lunghezza, area, flusso e circuitazione non dipendono dalla parametrizzazione</b> (a parte il segno, che dipende solo dall&rsquo;orientazione). La parametrizzazione è un sistema di coordinate messo <i>sopra</i> l&rsquo;oggetto geometrico per poterci calcolare; l&rsquo;oggetto &mdash; la traccia, il foglio &mdash; esiste prima e indipendentemente. Le grandezze che sopravvivono al cambio di coordinate sono quelle <b>geometricamente</b> (e fisicamente) reali.</p>
+  <p>Questo non è un dettaglio tecnico: è il principio che regge tutta la fisica. Una legge fisica non può dipendere da come tu, osservatore, hai scelto di etichettare i punti. Il fattore $|\gamma'|$ per le curve e $|\Phi_u\times\Phi_v|$ per le superfici sono i &laquo;jacobiani&raquo; che assorbono la scelta di coordinate e restituiscono la grandezza intrinseca. Il valore assoluto che compare in entrambi è ciò che rende la <i>misura</i> (lunghezza, area) indifferente al verso; la sua <i>assenza</i> nel flusso è ciò che vi lascia il segno &mdash; l&rsquo;orientazione, l&rsquo;unica informazione della parametrizzazione che la fisica sceglie di conservare.</p>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> La parametrizzazione di curve e superfici poggia sul teorema di Dini e della funzione inversa (nucleo 02): è Dini a garantire che un luogo $\{F=0\}$ sia <b>localmente</b> il grafico di una funzione liscia, dunque parametrizzabile. La regola della catena (nucleo 01) è il motore di ogni derivazione qui: la usi per la lunghezza, per l&rsquo;invarianza, per il prodotto vettoriale sotto riparametrizzazione. Il gradiente $\perp$ insieme di livello riappare come normale a una superficie di livello.</p>
+  <p><b>A valle.</b></p>
+  <ul>
+  <li><b>Teoremi integrali</b> (Green, Gauss, Stokes): il prossimo nucleo. Legano un integrale di flusso o di volume a un integrale di linea sul bordo. Circuitazione $\oint\mathbf F\cdot d\mathbf r$ e flusso $\iint\mathbf F\cdot\mathbf n\,dS$ &mdash; costruiti qui &mdash; sono i due membri di quelle uguaglianze.</li>
+  <li><b>Geometria differenziale</b> (III anno): la superficie parametrizzata $\Phi(u,v)$ è una <b>carta</b>; l&rsquo;elemento d&rsquo;area $|\Phi_u\times\Phi_v|\,du\,dv$ è il primo passo verso la <b>metrica indotta</b> (prima forma fondamentale). L&rsquo;invarianza per riparametrizzazione è la definizione stessa di oggetto geometrico su una varietà.</li>
+  <li><b>Elettromagnetismo</b> e <b>meccanica statistica</b>: le due rotte della Prolessi qui sotto.</li>
+  </ul>`},
+  {t:'prolessi', title:'Prolessi — flusso e circuitazione sono i mattoni della fisica',
+   oggetto:R`i due integrali costruiti in questo nucleo: la <b>circuitazione</b> $\oint_\gamma\mathbf F\cdot d\mathbf r$ (integrale di linea vettoriale lungo un cammino chiuso) e il <b>flusso</b> $\iint_S\mathbf F\cdot\mathbf n\,dS$ (integrale di superficie della componente normale). In matematica sono definizioni; in fisica hanno un nome, un&rsquo;unità di misura e uno strumento che li legge.`,
+   rotte:[
+    {dove:'Elettro-<br>magnetismo', txt:R`La corrispondenza è letterale, simbolo per simbolo. La circuitazione del campo elettrico è la <b>forza elettromotrice</b>: $\text{f.e.m.}=\oint_\gamma\mathbf E\cdot d\mathbf r$. Il flusso del campo magnetico è il <b>flusso magnetico</b>: $\Phi_B=\iint_S\mathbf B\cdot\mathbf n\,dS$. La legge di <b>Faraday</b> le incolla nella stessa equazione: $\oint_\gamma\mathbf E\cdot d\mathbf r=-\dfrac{d}{dt}\iint_S\mathbf B\cdot\mathbf n\,dS$ &mdash; circuitazione a sinistra, flusso a destra, dove $\gamma=\partial S$ è il bordo di $S$. E la legge di <b>Gauss</b> è puro flusso: $\iint_{\partial V}\mathbf E\cdot\mathbf n\,dS=Q/\varepsilon_0$. Le equazioni di Maxwell in forma integrale <b>sono</b> equazioni fra i due oggetti di questo nucleo. Il prossimo nucleo (Green-Gauss-Stokes) è ciò che le trasforma nella forma differenziale.`},
+    {dove:'Meccanica<br>statistica', txt:R`Il cuore della tua rotta. Nello spazio delle fasi $(\mathbf q,\mathbf p)\in\mathbb{R}^{2N}$, la <b>superficie a energia costante</b> $\Sigma_E=\{H(\mathbf q,\mathbf p)=E\}$ è una superficie di livello dell&rsquo;hamiltoniana: è l&rsquo;ipersuperficie $(2N-1)$-dimensionale su cui vive l&rsquo;<b>ensemble microcanonico</b> (energia fissata). Il numero di stati accessibili è un <b>integrale di superficie</b> su $\Sigma_E$: $$\Omega(E)=\iint_{\Sigma_E}\frac{d\sigma}{|\nabla H|},$$ dove $d\sigma$ è l&rsquo;elemento d&rsquo;area (costruito esattamente come $|\Phi_u\times\Phi_v|\,du\,dv$) e $|\nabla H|$ pesa la &laquo;spaziatura&raquo; fra superfici a energia vicina &mdash; lo stesso $\nabla H$ che è normale a $\Sigma_E$, per l&rsquo;ortogonalità gradiente$\perp$livello. Da qui l&rsquo;entropia di Boltzmann $S=k\log\Omega(E)$. La termodinamica di un sistema isolato è geometria su una superficie a energia fissata.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Qui una corrispondenza <b>simbolo per simbolo</b> come le altre due è più debole: lo dico esplicitamente, meglio due rotte solide che tre forzate. Restano però due agganci onesti. Il <b>flusso di probabilità</b>: la corrente $\mathbf j=\tfrac{\hbar}{m}\,\mathrm{Im}(\psi^{*}\nabla\psi)$ ha un flusso $\iint_S\mathbf j\cdot\mathbf n\,dS$ che misura la probabilità che attraversa $S$ nell&rsquo;unità di tempo (equazione di continuità $\partial_t|\psi|^2+\nabla\cdot\mathbf j=0$): stesso oggetto-flusso di questo nucleo. E la <b>fase di Berry</b> $\gamma=\oint_C\mathbf A\cdot d\mathbf R$, integrale di linea di un &laquo;potenziale&raquo; lungo un cammino chiuso nello spazio dei parametri: una circuitazione che diventa fase fisica osservabile. Due usi veri, senza forzare l&rsquo;analogia.`}
+   ],
+   domanda:R`La superficie $\Sigma_E=\{H=E\}$ porta l&rsquo;ensemble microcanonico: la statistica di equilibrio di un sistema <b>isolato</b>, con energia fissata esattamente. Ma un sistema isolato evolve da uno <b>stato singolo</b> (un punto, o un singolo autostato $|E_n\rangle$), non da una distribuzione uniforme sull&rsquo;intera superficie. Allora: come fa un singolo punto (o un singolo autostato) a &laquo;riempire&raquo; statisticamente la superficie a energia costante e a comportarsi come l&rsquo;ensemble microcanonico? <br>&mdash; È esattamente la domanda dell&rsquo;<b>ETH</b> (eigenstate thermalization hypothesis): l&rsquo;ipotesi che i valori di aspettazione in un singolo autostato di energia coincidano già con la media microcanonica sulla superficie $\Sigma_E$, come se ogni autostato contenesse in sé l&rsquo;intera superficie. Il flusso e l&rsquo;integrale di superficie che qui sono calcolo, lì diventano il linguaggio del problema aperto attorno a cui ruota la tua tesi.`
+  }
+]}
+
+];
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo03-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 03 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 03-curve-superfici.html#04 apre direttamente la tappa 04 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

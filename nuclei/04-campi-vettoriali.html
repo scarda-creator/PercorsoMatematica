@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 04 — Campi vettoriali: gradiente, divergenza, rotore; lavoro, flusso, campi conservativi</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>04 — Campi vettoriali: gradiente, divergenza, rotore; lavoro, flusso, campi conservativi</b> · Analisi Vettoriale (Terracina), Parte II</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 04: Campi vettoriali <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Parte II · gli operatori grad-div-rot e la domanda che vale mezzo esercizio: questo campo &egrave; conservativo?',
+  blocchi:[
+  {t:'prosa', title:'I due esercizi che devi saper chiudere', tag:'mira d&rsquo;esame', html:R`
+  <p>La Parte II dello scritto di Terracina (integrali multipli, forme differenziali, Green&ndash;Gauss&ndash;Stokes) poggia interamente su un&rsquo;algebra di campi vettoriali: <b>gradiente</b>, <b>divergenza</b>, <b>rotore</b>, e la nozione di campo <b>conservativo</b>. Il nucleo precedente ha costruito la <i>meccanica</i> degli integrali (parametrizza, riduci al parametro, integra); questo costruisce l&rsquo;<i>oggetto</i> che integri &mdash; il campo &mdash; e la domanda che l&rsquo;esame ripete in ogni tema: <b>il lavoro dipende dal cammino, o solo dagli estremi?</b></p>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · campo conservativo e potenziale (mappa Argonauta, Parte II)</span>
+  Stabilisci se il campo $\mathbf F(x,y,z)=(2xy,\ x^2+z^2,\ 2yz)$ &egrave; conservativo. In caso affermativo, trovane un potenziale $\varphi$ tale che $\mathbf F=\nabla\varphi$, e usa quel potenziale per calcolare $\int_\gamma\mathbf F\cdot d\mathbf r$ da $A=(0,0,0)$ a $B=(1,1,1)$ senza scegliere alcun cammino esplicito.</div>
+  <div class="testo"><span class="src">Es.&nbsp;trabocchetto · irrotazionale ma non conservativo (il classico)</span>
+  Sia $\mathbf F(x,y)=\left(\dfrac{-y}{x^2+y^2},\ \dfrac{x}{x^2+y^2}\right)$ definito su $\mathbb{R}^2\setminus\{(0,0)\}$. Verifica che $\nabla\times\mathbf F=\mathbf 0$ (&egrave; irrotazionale). &Egrave; conservativo? Calcola $\oint_\gamma\mathbf F\cdot d\mathbf r$ sulla circonferenza unitaria percorsa in senso antiorario, e concludi.</div>
+  <p>Il primo esercizio si vince con un <b>metodo</b> (integrare le componenti una alla volta) e con una verifica di segno banale. Il secondo &egrave; una <b>trappola concettuale</b>: la condizione $\nabla\times\mathbf F=\mathbf 0$ che di solito &laquo;certifica&raquo; il potenziale qui mente, perch&eacute; il dominio ha un buco. Chi non conosce il ruolo della <b>connessione del dominio</b> risponde &laquo;conservativo&raquo; e sbaglia. Questo nucleo ti d&agrave; sia il metodo sia l&rsquo;anticorpo.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Leggere un <b>campo vettoriale</b> $\mathbf F:\Omega\subseteq\mathbb{R}^n\to\mathbb{R}^n$ come assegnazione di un vettore a ogni punto, e distinguerlo da un campo scalare $f:\Omega\to\mathbb{R}$.</li>
+  <li>Calcolare i tre operatori di $\nabla$: <b>gradiente</b> $\nabla f$ (scalare $\to$ vettore), <b>divergenza</b> $\nabla\cdot\mathbf F$ (vettore $\to$ scalare), <b>rotore</b> $\nabla\times\mathbf F$ (vettore $\to$ vettore), sapendo <i>cosa misura</i> ciascuno.</li>
+  <li>Calcolare il <b>lavoro</b> $\int_\gamma\mathbf F\cdot d\mathbf r$ e il <b>flusso</b> $\iint_S\mathbf F\cdot\mathbf n\,dS$, e sapere perch&eacute; il lavoro non dipende dalla parametrizzazione (solo dall&rsquo;orientazione).</li>
+  <li>Riconoscere un <b>campo conservativo</b> con le tre condizioni equivalenti: $\mathbf F=\nabla\varphi$ &hArr; lavoro indipendente dal cammino &hArr; $\oint\mathbf F\cdot d\mathbf r=0$ su ogni cammino chiuso.</li>
+  <li><b>Costruire il potenziale</b> $\varphi$ integrando le componenti, e usarlo per calcolare lavori come differenze $\varphi(B)-\varphi(A)$.</li>
+  <li>Applicare correttamente la condizione necessaria $\nabla\times\mathbf F=\mathbf 0$ e sapere <b>quando NON basta</b>: su domini non semplicemente connessi (il campo del vortice), dove irrotazionale non implica conservativo.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · IL CAMPO VETTORIALE ---------------- */
+{ num:'01', title:'Il campo vettoriale', meta:'$\\mathbf F:\\Omega\\subseteq\\mathbb{R}^n\\to\\mathbb{R}^n$ · un vettore a ogni punto · campo di forze, campo di velocit&agrave; · linee di campo',
+  blocchi:[
+  {t:'prosa', title:'Che cos&rsquo;&egrave; un campo: un vettore in ogni punto', tag:'grammatica di base', html:R`
+  <p>Un <b>campo vettoriale</b> su un aperto $\Omega\subseteq\mathbb{R}^n$ &egrave; una funzione $$\mathbf F:\Omega\to\mathbb{R}^n,\qquad \mathbf F(\mathbf x)=\big(F_1(\mathbf x),\dots,F_n(\mathbf x)\big),$$ che a <b>ogni punto</b> $\mathbf x$ del dominio associa un <b>vettore</b> $\mathbf F(\mathbf x)$ dello stesso spazio. La cosa da fissare subito: dominio e codominio hanno la stessa dimensione $n$. In $\mathbb{R}^3$ si scrive di solito $\mathbf F=(P,Q,S)$, con $P,Q,S:\Omega\to\mathbb{R}$ le tre <b>componenti scalari</b>. Il campo &egrave; $C^1$ (o $C^k$) se lo sono tutte le componenti.</p>
+  <p>Il salto rispetto a una funzione scalare $f:\Omega\to\mathbb{R}$ &egrave; concettuale. Una $f$ appiccica a ogni punto un <b>numero</b> (una temperatura, una densit&agrave;, un potenziale): la disegni come una superficie o con curve di livello. Un campo $\mathbf F$ appiccica a ogni punto una <b>freccia</b> (una forza, una velocit&agrave;): lo disegni come una selva di frecce, una per punto. La fisica &egrave; scritta quasi tutta in questo secondo linguaggio.</p>`},
+  {t:'prosa', title:'I due campi archetipici: forze e velocit&agrave;', tag:'significato', html:R`
+  <p>Due immagini fisiche, non decorative &mdash; sono <i>letteralmente</i> i due usi del concetto in tutta la fisica che studierai.</p>
+  <ul>
+  <li><b>Campo di forze.</b> In ogni punto dello spazio &egrave; definita la forza che agirebbe su una particella l&igrave; posta: il campo gravitazionale $\mathbf g(\mathbf x)$, il campo elettrico $\mathbf E(\mathbf x)$. La freccia in $\mathbf x$ &egrave; la forza. Domanda naturale: quanto <b>lavoro</b> fa questa forza se la particella percorre un cammino? &rarr; integrale di linea (tappa 04).</li>
+  <li><b>Campo di velocit&agrave;.</b> In un fluido in moto, $\mathbf v(\mathbf x)$ &egrave; la velocit&agrave; del fluido nel punto $\mathbf x$. La freccia &egrave; dove &laquo;va&raquo; il fluido l&igrave;. Domande naturali: quanto fluido <b>attraversa</b> una superficie? &rarr; flusso. Il fluido si sta <b>concentrando o disperdendo</b> qui? &rarr; divergenza. Sta <b>ruotando</b> qui? &rarr; rotore.</li>
+  </ul>
+  <p>Tieni in mente il fluido: rende visibili divergenza e rotore prima ancora di calcolarli. La divergenza chiede &laquo;questo punto &egrave; una sorgente o uno scarico?&raquo;; il rotore chiede &laquo;una girandola immersa qui, girerebbe?&raquo;.</p>`},
+  {t:'gram', title:'I simboli, uno per uno', rows:[
+   [R`$\mathbf F:\Omega\to\mathbb{R}^n$`, R`il <b>campo vettoriale</b>. Dominio $\Omega$ aperto di $\mathbb{R}^n$; a ogni $\mathbf x$ associa un vettore $\mathbf F(\mathbf x)\in\mathbb{R}^n$. Dominio e codominio hanno la <b>stessa dimensione</b>: &egrave; ci&ograve; che distingue un campo da una generica funzione $\mathbb{R}^n\to\mathbb{R}^m$.`],
+   [R`$\mathbf F=(P,Q,S)$`, R`le <b>componenti</b> in $\mathbb{R}^3$, ciascuna una funzione scalare di $(x,y,z)$. Notazioni equivalenti: $(F_1,F_2,F_3)$, oppure $\mathbf F=P\,\mathbf i+Q\,\mathbf j+S\,\mathbf k$ con $\mathbf i,\mathbf j,\mathbf k$ i versori degli assi.`],
+   [R`$f:\Omega\to\mathbb{R}$`, R`un <b>campo scalare</b>: un numero a ogni punto. NON &egrave; un campo vettoriale. Ma il suo gradiente $\nabla f$ lo &egrave; (tappa 02): il gradiente &egrave; la macchina che trasforma scalari in campi.`],
+   [R`linea di campo`, R`una curva $\gamma$ <b>tangente a $\mathbf F$ in ogni punto</b>: $\gamma'(t)\parallel\mathbf F(\gamma(t))$. &Egrave; la traiettoria che seguirebbe una particella trascinata dal campo. Per un campo di velocit&agrave;: le linee di corrente del fluido. Non confonderle col sostegno di una curva su cui integri: sono l&rsquo;&laquo;impronta&raquo; del campo, non un dato dell&rsquo;esercizio.`],
+   [R`$\mathbf F\in C^1$`, R`tutte le componenti hanno derivate parziali prime <b>continue</b>. &Egrave; l&rsquo;ipotesi che rende leciti divergenza, rotore e i teoremi integrali. Quasi ogni campo d&rsquo;esame &egrave; $C^\infty$ dove definito; l&rsquo;attenzione va ai punti <b>esclusi</b> dal dominio (l&rsquo;origine nel campo del vortice).`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perch&eacute; $\mathbf F(x,y)=(x^2+y^2)$ non &egrave; un campo vettoriale su $\mathbb{R}^2$, mentre $\mathbf F(x,y)=(x^2+y^2,\ 0)$ lo &egrave;?`,
+    a:R`$(x^2+y^2)$ &egrave; <b>un numero</b> a ogni punto: &egrave; un campo <b>scalare</b> $f:\mathbb{R}^2\to\mathbb{R}$. Un campo vettoriale su $\mathbb{R}^2$ deve restituire un <b>vettore di $\mathbb{R}^2$</b>, cio&egrave; due componenti. $(x^2+y^2,\,0)$ ne ha due: &egrave; un campo vettoriale (che punta ovunque lungo l&rsquo;asse $x$, con intensit&agrave; crescente allontanandosi dall&rsquo;origine).`},
+   {q:R`Un campo di velocit&agrave; costante $\mathbf v(\mathbf x)=(1,0,0)$ ovunque: come sono le sue linee di campo? Il fluido &laquo;ruota&raquo; o &laquo;si concentra&raquo; da qualche parte?`,
+    a:R`Le linee di campo sono <b>rette parallele all&rsquo;asse $x$</b>: ogni particella scorre dritta a velocit&agrave; unitaria. Nessuna rotazione (rotore nullo, tappa 03), nessuna concentrazione (divergenza nulla): &egrave; un flusso uniforme, l&rsquo;esempio pi&ugrave; semplice di campo &laquo;senza sorgenti n&eacute; vortici&raquo;.`}
+  ]}
+]},
+
+/* ---------------- 02 · IL GRADIENTE E L'OPERATORE NABLA ---------------- */
+{ num:'02', title:'Il gradiente e l&rsquo;operatore &nabla;', meta:'$\\nabla$ come vettore di derivate · $\\nabla f$ campo del pi&ugrave; ripida salita · $\\nabla f\\perp$ insieme di livello · le tre bocche di $\\nabla$',
+  blocchi:[
+  {t:'prosa', title:'&nabla; non &egrave; un vettore: &egrave; una macchina', tag:'grammatica dell&rsquo;operatore', html:R`
+  <p>Il simbolo $\nabla$ (&laquo;nabla&raquo;) &egrave; un <b>operatore differenziale</b>, scritto come se fosse un vettore le cui componenti sono istruzioni di derivazione: $$\nabla=\left(\frac{\partial}{\partial x},\ \frac{\partial}{\partial y},\ \frac{\partial}{\partial z}\right).$$ Da solo non &egrave; un numero n&eacute; un vettore: &egrave; un <b>modo di derivare</b> che aspetta un oggetto alla sua destra. La potenza della notazione sta nel fatto che le tre operazioni fondamentali del nucleo si ottengono facendo agire questo &laquo;vettore-macchina&raquo; nei tre modi in cui un vettore pu&ograve; combinarsi con qualcosa:</p>
+  <ul>
+  <li><b>moltiplicato per uno scalare</b> $f$ &rarr; il <b>gradiente</b> $\nabla f$ (produce un campo vettoriale);</li>
+  <li><b>prodotto scalare</b> con un campo $\mathbf F$ &rarr; la <b>divergenza</b> $\nabla\cdot\mathbf F$ (produce uno scalare);</li>
+  <li><b>prodotto vettoriale</b> con un campo $\mathbf F$ &rarr; il <b>rotore</b> $\nabla\times\mathbf F$ (produce un campo vettoriale).</li>
+  </ul>
+  <p>La notazione $\nabla\cdot$ e $\nabla\times$ non &egrave; un&rsquo;analogia decorativa: divergenza e rotore si <b>calcolano davvero</b> come un prodotto scalare e un prodotto vettoriale formali, trattando $\partial/\partial x$ come una componente. Lo verifichi tappa 03.</p>`},
+  {t:'prosa', title:'Il gradiente: direzione della salita pi&ugrave; ripida', tag:'significato', html:R`
+  <p>Dato un campo scalare $f:\Omega\to\mathbb{R}$ di classe $C^1$, il suo <b>gradiente</b> &egrave; il campo vettoriale $$\nabla f=\left(\frac{\partial f}{\partial x},\ \frac{\partial f}{\partial y},\ \frac{\partial f}{\partial z}\right).$$ Due propriet&agrave; ne fissano il significato, entrambe gi&agrave; incontrate nel nucleo sul differenziale e cruciali qui:</p>
+  <ul>
+  <li><b>Punta nella direzione di massima crescita</b> di $f$, e la sua norma $|\nabla f|$ &egrave; il tasso di crescita in quella direzione. La derivata direzionale lungo un versore $\mathbf u$ &egrave; $D_{\mathbf u}f=\nabla f\cdot\mathbf u$, massima quando $\mathbf u\parallel\nabla f$.</li>
+  <li>&Egrave; <b>ortogonale agli insiemi di livello</b> $\{f=c\}$. Questa &egrave; la propriet&agrave; che, tra poco, rende il gradiente il ponte tra campi scalari e campi conservativi.</li>
+  </ul>
+  <p>Un campo che &egrave; il gradiente di qualcosa, $\mathbf F=\nabla\varphi$, si dice <b>campo gradiente</b> &mdash; e questo &egrave; esattamente, lo vedrai, il significato di <b>conservativo</b>. Lo scalare $\varphi$ &egrave; il <b>potenziale</b>.</p>`},
+  {t:'reveal', title:'Perch&eacute; $\\nabla f$ &egrave; ortogonale agli insiemi di livello', tag:'derivazione', steps:[
+   {label:'Mettiti su una curva di livello', body:R`<p>Sia $c$ un valore e $\{f=c\}$ il corrispondente insieme di livello. Prendi una curva $\gamma(t)$ che <b>giace</b> su questo insieme: per definizione $f(\gamma(t))=c$ per ogni $t$, costante. Il vettore $\gamma'(t)$ &egrave; tangente all&rsquo;insieme di livello (si muove lungo di esso). Vuoi mostrare che $\nabla f$ &egrave; perpendicolare a ogni tale $\gamma'$.</p>`},
+   {label:'Deriva la relazione costante', body:R`<p>Derivo $f(\gamma(t))=c$ rispetto a $t$. A sinistra uso la <b>regola della catena</b> (nucleo 01): $$\frac{d}{dt}f(\gamma(t))=\nabla f(\gamma(t))\cdot\gamma'(t).$$ A destra la derivata di una costante &egrave; $0$. Quindi $$\nabla f(\gamma(t))\cdot\gamma'(t)=0.$$</p>`},
+   {label:'Leggi il prodotto scalare nullo', body:R`<p>Un prodotto scalare nullo tra due vettori non nulli significa <b>ortogonalit&agrave;</b>. Poich&eacute; $\gamma'$ pu&ograve; essere un qualunque vettore tangente all&rsquo;insieme di livello, $\nabla f$ &egrave; ortogonale a <b>tutte</b> le direzioni tangenti: $$\boxed{\ \nabla f\perp\{f=c\}\ }\qquad\blacksquare$$ La conseguenza operativa che userai spessissimo: se una superficie &egrave; data come luogo di livello $\{g=0\}$, il vettore <b>normale</b> alla superficie &egrave; $\nabla g$. Non serve parametrizzare per trovare la normale &mdash; il gradiente la regala.</p>
+   <div class="note">&Egrave; lo stesso conto, letto al contrario, che dominer&agrave; i campi conservativi: se $\mathbf F=\nabla\varphi$, allora lungo una curva $\dfrac{d}{dt}\varphi(\gamma(t))=\mathbf F(\gamma(t))\cdot\gamma'(t)$ &mdash; e integrando si ottiene il teorema fondamentale degli integrali di linea (tappa 05). La catena &egrave; il motore di entrambe le cose.</div>`}
+  ]},
+  {t:'gram', title:'Le tre bocche di &nabla;', rows:[
+   [R`$\nabla=(\partial_x,\partial_y,\partial_z)$`, R`l&rsquo;<b>operatore</b> nabla. Da solo non ha valore: agisce su ci&ograve; che ha a destra. Non &egrave; un vettore di numeri, &egrave; un vettore di <b>istruzioni di derivazione</b>.`],
+   [R`$\nabla f$ (gradiente)`, R`scalare $f\ \to$ <b>campo vettoriale</b>. $\nabla f=(f_x,f_y,f_z)$. Direzione di massima crescita; $\perp$ insiemi di livello. &Egrave; il &laquo;$\nabla$ per uno scalare&raquo;.`],
+   [R`$\nabla\cdot\mathbf F$ (divergenza)`, R`campo $\mathbf F\ \to$ <b>scalare</b>. $\nabla\cdot\mathbf F=P_x+Q_y+S_z$. &Egrave; il &laquo;prodotto scalare formale&raquo; $\nabla\cdot\mathbf F$. Misura sorgenti (tappa 03).`],
+   [R`$\nabla\times\mathbf F$ (rotore)`, R`campo $\mathbf F\ \to$ <b>campo vettoriale</b> (in $\mathbb{R}^3$). &Egrave; il &laquo;prodotto vettoriale formale&raquo; $\nabla\times\mathbf F$. Misura vorticit&agrave; (tappa 03).`],
+   [R`$\nabla^2 f=\nabla\cdot(\nabla f)$`, R`il <b>laplaciano</b> $f_{xx}+f_{yy}+f_{zz}$: divergenza del gradiente, scalare $\to$ scalare. Governa equilibrio, diffusione, l&rsquo;operatore di energia cinetica in QM. Comparir&agrave; nei Movimenti III&ndash;IV.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Quali di queste scritture hanno senso e quali no: $\nabla f$, $\nabla\cdot f$, $\nabla\mathbf F$, $\nabla\cdot\mathbf F$, $\nabla\times f$? ($f$ scalare, $\mathbf F$ vettoriale.)`,
+    a:R`Hanno senso: $\nabla f$ (gradiente di uno scalare) e $\nabla\cdot\mathbf F$ (divergenza di un campo). Non hanno senso standard: $\nabla\cdot f$ (il prodotto scalare vuole un <b>vettore</b> a destra, non uno scalare), $\nabla\mathbf F$ (ambiguo: sarebbe la jacobiana, un oggetto matriciale), $\nabla\times f$ (il prodotto vettoriale vuole un vettore). La grammatica di $\nabla$ &egrave; rigida: scalare a destra solo per il gradiente, vettore a destra per divergenza e rotore.`},
+   {q:R`La superficie $\{x^2+y^2+z^2=R^2\}$ &egrave; l&rsquo;insieme di livello di $g(x,y,z)=x^2+y^2+z^2$. Qual &egrave; la direzione normale in un punto, senza parametrizzare?`,
+    a:R`$\nabla g=(2x,2y,2z)=2(x,y,z)=2\mathbf r$: la normale &egrave; <b>radiale</b>, diretta come il raggio. Ritrovi che la normale alla sfera &egrave; $\hat{\mathbf r}$ (uscente), lo stesso risultato ottenuto nel nucleo 03 parametrizzando in coordinate sferiche &mdash; qui in una riga, perch&eacute; il gradiente &egrave; $\perp$ all&rsquo;insieme di livello.`}
+  ]}
+]},
+
+/* ---------------- 03 · DIVERGENZA E ROTORE ---------------- */
+{ num:'03', title:'Divergenza e rotore', meta:'$\\nabla\\cdot\\mathbf F$ densit&agrave; di sorgenti · $\\nabla\\times\\mathbf F$ vorticit&agrave; · cosa misurano davvero · le due identit&agrave; $\\nabla\\times\\nabla f=\\mathbf 0$ e $\\nabla\\cdot(\\nabla\\times\\mathbf F)=0$',
+  blocchi:[
+  {t:'prosa', title:'Le due definizioni, in componenti', tag:'grammatica di calcolo', html:R`
+  <p>Dato un campo $C^1$ $\mathbf F=(P,Q,S)$ in $\mathbb{R}^3$, si definiscono:</p>
+  <p>La <b>divergenza</b>, uno scalare: $$\nabla\cdot\mathbf F=\frac{\partial P}{\partial x}+\frac{\partial Q}{\partial y}+\frac{\partial S}{\partial z}.$$ &Egrave; il prodotto scalare formale di $\nabla=(\partial_x,\partial_y,\partial_z)$ con $\mathbf F=(P,Q,S)$: prendi la derivata di ogni componente rispetto alla <b>sua</b> variabile e somma.</p>
+  <p>Il <b>rotore</b>, un vettore, definito come prodotto vettoriale formale $\nabla\times\mathbf F$: $$\nabla\times\mathbf F=\left(\frac{\partial S}{\partial y}-\frac{\partial Q}{\partial z},\ \ \frac{\partial P}{\partial z}-\frac{\partial S}{\partial x},\ \ \frac{\partial Q}{\partial x}-\frac{\partial P}{\partial y}\right).$$ Lo si ricorda come il determinante formale $$\nabla\times\mathbf F=\det\begin{pmatrix}\mathbf i & \mathbf j & \mathbf k\\[2pt] \partial_x & \partial_y & \partial_z\\[2pt] P & Q & S\end{pmatrix}.$$ In $\mathbb{R}^2$, con $\mathbf F=(P,Q)$, sopravvive solo la terza componente, lo <b>scalar curl</b> $\dfrac{\partial Q}{\partial x}-\dfrac{\partial P}{\partial y}$: &egrave; quello che userai nel campo del vortice.</p>`},
+  {t:'reveal', title:'Che cosa misura la divergenza: densit&agrave; di flusso uscente', tag:'derivazione del significato', steps:[
+   {label:'Il flusso da una scatolina', body:R`<p>Immagina $\mathbf F$ come velocit&agrave; di un fluido. Prendi un cubetto $[x,x+\Delta x]\times[y,y+\Delta y]\times[z,z+\Delta z]$ e chiediti: quanto fluido <b>esce netto</b> dalle sue facce nell&rsquo;unit&agrave; di tempo? Guarda prima le due facce perpendicolari all&rsquo;asse $x$. Sulla faccia in $x+\Delta x$ il fluido esce a rateo $P(x+\Delta x,y,z)$ per unit&agrave; d&rsquo;area; sulla faccia in $x$ entra a rateo $P(x,y,z)$. Flusso netto in $x$: $$\big[P(x+\Delta x,\cdot)-P(x,\cdot)\big]\,\Delta y\,\Delta z.$$</p>`},
+   {label:'Il rapporto incrementale diventa derivata', body:R`<p>Metto in evidenza $\Delta x$: $$\frac{P(x+\Delta x,\cdot)-P(x,\cdot)}{\Delta x}\,\Delta x\,\Delta y\,\Delta z\ \approx\ \frac{\partial P}{\partial x}\,\Delta V,$$ dove $\Delta V=\Delta x\,\Delta y\,\Delta z$ &egrave; il volume del cubetto. Le altre due coppie di facce danno, identicamente, $\dfrac{\partial Q}{\partial y}\Delta V$ e $\dfrac{\partial S}{\partial z}\Delta V$.</p>`},
+   {label:'Somma e dividi per il volume', body:R`<p>Flusso netto uscente totale $\approx\left(\dfrac{\partial P}{\partial x}+\dfrac{\partial Q}{\partial y}+\dfrac{\partial S}{\partial z}\right)\Delta V=(\nabla\cdot\mathbf F)\,\Delta V$. Dividendo per il volume e mandandolo a zero: $$\boxed{\ \nabla\cdot\mathbf F(\mathbf x)=\lim_{\Delta V\to0}\frac{\text{flusso uscente da }\partial(\Delta V)}{\Delta V}\ }$$ La divergenza &egrave; il <b>flusso uscente per unit&agrave; di volume</b>: la <b>densit&agrave; di sorgenti</b>. $\nabla\cdot\mathbf F\gt0$ in un punto significa <b>sorgente</b> (il fluido sgorga, il campo diverge); $\nabla\cdot\mathbf F\lt0$ significa <b>pozzo</b> (il fluido sparisce, il campo converge); $\nabla\cdot\mathbf F=0$ significa <b>incomprimibile</b> (tanto entra, tanto esce). $\blacksquare$</p>
+   <div class="note">Questa &egrave; gi&agrave; met&agrave; del teorema della divergenza (Gauss, nucleo 06): sommando i contributi $(\nabla\cdot\mathbf F)\,\Delta V$ su tutti i cubetti di un solido, i flussi sulle facce interne si cancellano a due a due e resta solo il flusso sulla frontiera esterna: $\iiint_V\nabla\cdot\mathbf F\,dV=\iint_{\partial V}\mathbf F\cdot\mathbf n\,dS$. Il locale che diventa globale.</div>`}
+  ]},
+  {t:'reveal', title:'Che cosa misura il rotore: densit&agrave; di circolazione', tag:'derivazione del significato', steps:[
+   {label:'La circuitazione attorno a un rettangolino', body:R`<p>Resta nel piano $xy$ e prendi il rettangolino $[x,x+\Delta x]\times[y,y+\Delta y]$, percorso in senso <b>antiorario</b>. Calcolo la circuitazione $\oint\mathbf F\cdot d\mathbf r$ lato per lato, tenendo solo $\mathbf F=(P,Q)$. Lato inferiore (verso $+x$): $\approx P(x,y)\,\Delta x$. Lato destro (verso $+y$): $\approx Q(x+\Delta x,y)\,\Delta y$. Lato superiore (verso $-x$): $\approx -P(x,y+\Delta y)\,\Delta x$. Lato sinistro (verso $-y$): $\approx -Q(x,y)\,\Delta y$.</p>`},
+   {label:'Accoppia i lati opposti', body:R`<p>Sommo accoppiando i lati orizzontali e quelli verticali: $$\big[Q(x+\Delta x,y)-Q(x,y)\big]\Delta y-\big[P(x,y+\Delta y)-P(x,y)\big]\Delta x.$$ Ogni parentesi &egrave; un rapporto incrementale: $$\approx\frac{\partial Q}{\partial x}\Delta x\,\Delta y-\frac{\partial P}{\partial y}\Delta y\,\Delta x=\left(\frac{\partial Q}{\partial x}-\frac{\partial P}{\partial y}\right)\Delta A,$$ con $\Delta A=\Delta x\,\Delta y$ l&rsquo;area.</p>`},
+   {label:'Dividi per l&rsquo;area', body:R`<p>La quantit&agrave; tra parentesi &egrave; la terza componente di $\nabla\times\mathbf F$. Dividendo per l&rsquo;area: $$\boxed{\ (\nabla\times\mathbf F)\cdot\mathbf n=\lim_{\Delta A\to0}\frac{\oint_{\partial(\Delta A)}\mathbf F\cdot d\mathbf r}{\Delta A}\ }$$ La componente del rotore lungo $\mathbf n$ &egrave; la <b>circuitazione per unit&agrave; d&rsquo;area</b> attorno a $\mathbf n$: la <b>vorticit&agrave;</b> locale. Se metti una minuscola girandola nel fluido con l&rsquo;asse lungo $\mathbf n$, essa gira con velocit&agrave; proporzionale a $(\nabla\times\mathbf F)\cdot\mathbf n$. Rotore nullo ovunque = campo <b>irrotazionale</b> = nessuna girandola gira. $\blacksquare$</p>
+   <div class="note">E questa &egrave; gi&agrave; met&agrave; del teorema di Stokes (nucleo 06): sommando le circuitazioni sui rettangolini di una superficie, i lati interni si cancellano e resta solo il bordo: $\iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS=\oint_{\partial S}\mathbf F\cdot d\mathbf r$. La circuitazione sul bordo &egrave; il flusso del rotore attraverso la superficie.</div>`}
+  ]},
+  {t:'plot', title:'Divergenza e rotore, visti in faccia',
+   intro:R`Due campi puri. A sinistra $\mathbf F=(x,y)$: <b>sorgente</b>. A destra $\mathbf G=(-y,x)$: <b>vortice</b>. Le frecce sono normalizzate (conta la direzione, non la lunghezza).`,
+   plots:[
+    {kind:'field2d', fx:'x', fy:'y', xr:[-2,2], yr:[-2,2], n:13, height:360, title:'F = (x, y):  div F = 2 > 0,  rot F = 0'},
+    {kind:'field2d', fx:'-y', fy:'x', xr:[-2,2], yr:[-2,2], n:13, height:360, title:'G = (-y, x):  div G = 0,  rot G = 2'}
+   ],
+   leggi:R`I due operatori misurano cose <b>indipendenti</b>, e questi campi le isolano. A sinistra tutte le frecce <b>escono</b> dall&rsquo;origine: metti una scatolina in giro e ne esce più flusso di quanto entra — <b>divergenza positiva</b>, $\nabla\cdot\mathbf F=\partial_x x+\partial_y y=2$ ovunque. Ma nessuna <b>rotazione</b>: una girandola immersa non gira, $\nabla\times\mathbf F=\partial_x y-\partial_y x$… anzi $\partial_x F_y-\partial_y F_x=0-0=0$. A destra l&rsquo;opposto esatto: le frecce <b>girano</b> in cerchio, una girandola ruota (senso antiorario) — <b>rotore positivo</b>, $\nabla\times\mathbf G=\partial_x(x)-\partial_y(-y)=1+1=2$ — ma <b>niente sorgenti</b>: su ogni scatolina entra tanto flusso quanto ne esce, $\nabla\cdot\mathbf G=\partial_x(-y)+\partial_y(x)=0$. Tieni separati i due gesti: la divergenza è <b>quanto un campo esce da un punto</b> (uno scalare, un bilancio di flusso), il rotore è <b>quanto gira attorno a un punto</b> (un vettore, un asse di rotazione). Il campo di sinistra è un gradiente ($\mathbf F=\nabla(\tfrac{x^2+y^2}{2})$) e infatti è irrotazionale; quello di destra <b>non</b> lo è — è il primo esempio che porta dritto al trabocchetto della tappa 06.`},
+  {t:'reveal', title:'Le due identit&agrave; che reggono tutto: rot grad $=\\mathbf 0$, div rot $=0$', tag:'algebra di &nabla;', steps:[
+   {label:'Il rotore di un gradiente &egrave; nullo', body:R`<p>Se $\mathbf F=\nabla\varphi$ con $\varphi\in C^2$, calcolo la terza componente di $\nabla\times\nabla\varphi$: $$\frac{\partial}{\partial x}(\varphi_y)-\frac{\partial}{\partial y}(\varphi_x)=\varphi_{yx}-\varphi_{xy}.$$ Per il <b>teorema di Schwarz</b> ($\varphi\in C^2$ &rArr; le derivate miste commutano) questo &egrave; $0$. Idem per le altre due componenti. Dunque $$\boxed{\ \nabla\times(\nabla\varphi)=\mathbf 0\ }$$ Ogni campo gradiente &egrave; irrotazionale. &Egrave; la <b>condizione necessaria</b> per essere conservativo (tappa 05): se $\mathbf F=\nabla\varphi$, allora $\nabla\times\mathbf F=\mathbf 0$, sempre.</p>`},
+   {label:'La divergenza di un rotore &egrave; nulla', body:R`<p>Simmetricamente, per $\mathbf F\in C^2$: $$\nabla\cdot(\nabla\times\mathbf F)=\frac{\partial}{\partial x}(S_y-Q_z)+\frac{\partial}{\partial y}(P_z-S_x)+\frac{\partial}{\partial z}(Q_x-P_y).$$ Espandendo, i sei termini si cancellano a coppie ($S_{yx}$ con $-S_{xy}$, ecc.), sempre per Schwarz: $$\boxed{\ \nabla\cdot(\nabla\times\mathbf F)=0\ }$$ Ogni campo che &egrave; un rotore &egrave; a divergenza nulla (solenoidale). &Egrave; la ragione per cui $\nabla\cdot\mathbf B=0$ in elettromagnetismo si scrive $\mathbf B=\nabla\times\mathbf A$: il campo magnetico, senza sorgenti, &egrave; il rotore di un potenziale vettore.</p>`},
+   {label:'La struttura nascosta', body:R`<p>Le due identit&agrave; formano una catena: $$\text{scalare}\ \xrightarrow{\ \nabla\ }\ \text{campo}\ \xrightarrow{\ \nabla\times\ }\ \text{campo}\ \xrightarrow{\ \nabla\cdot\ }\ \text{scalare},$$ dove <b>ogni freccia composta con la successiva d&agrave; zero</b>: $\nabla\times\nabla=0$ e $\nabla\cdot(\nabla\times)=0$. La domanda profonda &mdash; <i>quando l&rsquo;implicazione si inverte?</i> (irrotazionale &rArr; gradiente? solenoidale &rArr; rotore?) &mdash; ha per risposta la <b>forma del dominio</b>, ed &egrave; il cuore della tappa 06. In geometria differenziale (III anno) questa &egrave; la coomologia di de Rham: le identit&agrave; $d^2=0$, e il difetto di invertibilit&agrave; misura i &laquo;buchi&raquo; dello spazio.</p>`}
+  ]},
+  {t:'esercizio', title:'Calcolare divergenza e rotore', src:'Applicazione diretta · un campo qualsiasi, i due operatori',
+   testo:R`Dato $\mathbf F(x,y,z)=(xy,\ yz,\ zx)$, calcola $\nabla\cdot\mathbf F$ e $\nabla\times\mathbf F$. Il campo &egrave; irrotazionale? &Egrave; solenoidale?`,
+   steps:[
+    {label:'Divergenza', body:R`<p>Con $P=xy$, $Q=yz$, $S=zx$: $$\nabla\cdot\mathbf F=\frac{\partial(xy)}{\partial x}+\frac{\partial(yz)}{\partial y}+\frac{\partial(zx)}{\partial z}=y+z+x.$$ Non &egrave; identicamente nulla: il campo <b>non &egrave; solenoidale</b>. Ha sorgenti dove $x+y+z\gt0$, pozzi dove $x+y+z\lt0$.</p>`},
+    {label:'Rotore, componente per componente', body:R`<p>$$\nabla\times\mathbf F=\big(S_y-Q_z,\ P_z-S_x,\ Q_x-P_y\big).$$ Calcolo: $S_y=\partial_y(zx)=0$, $Q_z=\partial_z(yz)=y$; $P_z=\partial_z(xy)=0$, $S_x=\partial_x(zx)=z$; $Q_x=\partial_x(yz)=0$, $P_y=\partial_y(xy)=x$. Quindi $$\nabla\times\mathbf F=(0-y,\ 0-z,\ 0-x)=(-y,-z,-x).$$</p>`},
+    {label:'Conclusione', body:R`<p>$\nabla\times\mathbf F=(-y,-z,-x)\neq\mathbf 0$: il campo <b>non &egrave; irrotazionale</b>. Poich&eacute; non &egrave; irrotazionale, non pu&ograve; essere un gradiente (per l&rsquo;identit&agrave; $\nabla\times\nabla\varphi=\mathbf 0$): non &egrave; conservativo, e non ha senso cercarne un potenziale. $\blacksquare$</p>
+    <div class="note">Regola d&rsquo;economia d&rsquo;esame: prima di lanciarti a cercare un potenziale, <b>calcola il rotore</b>. Se &egrave; diverso da zero, hai gi&agrave; la risposta (non conservativo) in tre derivate. Cercare un potenziale che non esiste &egrave; il modo pi&ugrave; comune di sprecare venti minuti.</div>`}
+   ],
+   nota:R`Attenzione all&rsquo;ordine degli indici nel rotore: la prima componente &egrave; $\partial_y S-\partial_z Q$ (le derivate &laquo;girano&raquo; $x\to y\to z\to x$). Un segno o un indice scambiati cambiano il vettore. Il determinante formale con la riga $\mathbf i,\mathbf j,\mathbf k$ &egrave; il modo pi&ugrave; sicuro di non sbagliarli.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Senza calcolare, quanto vale $\nabla\cdot(\nabla\times\mathbf F)$ per il campo $\mathbf F=(xy,yz,zx)$ dell&rsquo;esercizio? Verifica sul risultato $\nabla\times\mathbf F=(-y,-z,-x)$.`,
+    a:R`Vale $0$, per l&rsquo;identit&agrave; $\nabla\cdot(\nabla\times\mathbf F)=0$ (sempre, per campi $C^2$). Verifica: $\nabla\cdot(-y,-z,-x)=\partial_x(-y)+\partial_y(-z)+\partial_z(-x)=0+0+0=0$. &Egrave; un controllo gratuito che ogni rotore superi: se la divergenza del tuo rotore non &egrave; nulla, hai sbagliato il rotore.`},
+   {q:R`La divergenza produce uno scalare, il rotore un vettore. Perch&eacute; questa asimmetria &egrave; &laquo;giusta&raquo; rispetto a ci&ograve; che misurano?`,
+    a:R`La divergenza misura una <b>quantit&agrave; senza direzione</b>: quanto flusso esce per unit&agrave; di volume, un numero. Il rotore misura una <b>rotazione</b>, che in $\mathbb{R}^3$ ha un asse: serve un vettore per dire <b>attorno a quale asse</b> e con che verso (regola della mano destra) il campo circola. Sgorgare &egrave; scalare, ruotare &egrave; vettoriale.`}
+  ]}
+]},
+
+/* ---------------- 04 · LAVORO E FLUSSO DI UN CAMPO ---------------- */
+{ num:'04', title:'Lavoro e flusso di un campo', meta:'$\\int_\\gamma\\mathbf F\\cdot d\\mathbf r$ lavoro · $\\oint$ circuitazione · $\\iint_S\\mathbf F\\cdot\\mathbf n\\,dS$ flusso · la domanda: dipende dal cammino?',
+  blocchi:[
+  {t:'prosa', title:'I due modi di integrare un campo', tag:'richiamo dal nucleo 03, con l&rsquo;occhio nuovo', html:R`
+  <p>Il nucleo precedente ha costruito la <i>macchina</i>; qui la si legge come <i>propriet&agrave; del campo</i>. Un campo $\mathbf F$ si integra in due modi, secondo la geometria su cui vive:</p>
+  <p>Lungo una <b>curva</b> $\gamma:[a,b]\to\Omega$, l&rsquo;<b>integrale di linea</b> (il <b>lavoro</b>): $$\int_\gamma\mathbf F\cdot d\mathbf r=\int_a^b\mathbf F(\gamma(t))\cdot\gamma'(t)\,dt.$$ Pesa la componente <b>tangente</b> $\mathbf F\cdot\mathbf T$: quanto il campo spinge <i>lungo</i> il cammino. Quando $\gamma$ &egrave; chiusa si scrive $\oint_\gamma\mathbf F\cdot d\mathbf r$, la <b>circuitazione</b>.</p>
+  <p>Attraverso una <b>superficie</b> orientata $S=\Phi(D)$, il <b>flusso</b>: $$\iint_S\mathbf F\cdot\mathbf n\,dS=\iint_D\mathbf F(\Phi(u,v))\cdot(\Phi_u\times\Phi_v)\,du\,dv.$$ Pesa la componente <b>normale</b> $\mathbf F\cdot\mathbf n$: quanto il campo passa <i>attraverso</i> il foglio. Tangente per le curve, normale per le superfici &mdash; l&rsquo;asimmetria del nucleo 03.</p>`},
+  {t:'gram', title:'I due integrali, e la loro invarianza', rows:[
+   [R`$\int_\gamma\mathbf F\cdot d\mathbf r$`, R`il <b>lavoro</b>. In componenti: $\int_\gamma P\,dx+Q\,dy+S\,dz$, con $dx=x'(t)dt$, ecc. &Egrave; la forma che vedi pi&ugrave; spesso nel testo d&rsquo;esame (una <b>1-forma</b>, anticipo del nucleo 06).`],
+   [R`invarianza`, R`il lavoro <b>non dipende dalla parametrizzazione</b> scelta per $\gamma$ (dimostrato nel nucleo 03 col cambio di variabile): dipende solo dal <b>sostegno orientato</b>. Inverti il verso &rarr; cambia <b>segno</b>: $\int_{-\gamma}\mathbf F\cdot d\mathbf r=-\int_\gamma\mathbf F\cdot d\mathbf r$.`],
+   [R`$\oint_\gamma\mathbf F\cdot d\mathbf r$`, R`la <b>circuitazione</b> su un cammino chiuso. Per Stokes (nucleo 06) &egrave; il flusso del rotore: $\oint_{\partial S}\mathbf F\cdot d\mathbf r=\iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS$. Se $\oint\neq0$ il campo &laquo;gira&raquo;; il suo annullarsi su <b>ogni</b> ciclo &egrave; il marchio del campo conservativo (tappa 05).`],
+   [R`$\iint_S\mathbf F\cdot\mathbf n\,dS$`, R`il <b>flusso</b>. Dipende dall&rsquo;<b>orientazione</b> di $S$ (scelta di $\mathbf n$): l&rsquo;altra scelta cambia segno. Il modulo non dipende dalla parametrizzazione. Per Gauss (nucleo 06) su superficie chiusa &egrave; l&rsquo;integrale della divergenza.`]
+  ]},
+  {t:'prosa', title:'La domanda che apre il nucleo: dipende dal cammino?', tag:'il perno', html:R`
+  <p>Il lavoro $\int_\gamma\mathbf F\cdot d\mathbf r$ dipende, in generale, da <b>tutto</b> il cammino $\gamma$: da dove parti, dove arrivi, e da come ci arrivi (la strada percorsa). Esempio: il campo del vortice $\mathbf F=(-y,x)$ del nucleo 03 dava $\oint=2\pi$ su un giro e $0$ su nessun giro &mdash; il risultato dipende dalla strada.</p>
+  <p>Ma per <b>alcuni</b> campi accade qualcosa di speciale: il lavoro dipende <b>solo dagli estremi</b> $\gamma(a)$ e $\gamma(b)$, non dalla strada. Per questi campi puoi cambiare cammino a piacere senza cambiare il risultato, e su ogni cammino chiuso il lavoro &egrave; zero. Sono i <b>campi conservativi</b>: il resto del nucleo &egrave; capire chi sono, come riconoscerli e come sfruttarli per non calcolare integrali. La domanda &laquo;dipende dal cammino?&raquo; &egrave; il perno attorno a cui gira ogni esercizio di Parte II sui campi.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un campo $\mathbf F$ ha $\oint_\gamma\mathbf F\cdot d\mathbf r=5$ su una certa curva chiusa $\gamma$. Cosa puoi gi&agrave; concludere sulla sua conservativit&agrave;, senza altri calcoli?`,
+    a:R`Che <b>non &egrave; conservativo</b>. Per un campo conservativo la circuitazione su <b>ogni</b> cammino chiuso &egrave; nulla; averne trovata una $\neq0$ ($=5$) basta a escluderlo. Un solo contro-esempio di ciclo con circuitazione non nulla &egrave; una demolizione completa, come i $2\pi$ del vortice.`},
+   {q:R`Perch&eacute; il flusso $\iint_S\mathbf F\cdot\mathbf n\,dS$ &laquo;dipende dall&rsquo;orientazione&raquo; ma la sua invarianza per parametrizzazione resta vera?`,
+    a:R`Sono due cose diverse. Cambiare <b>parametrizzazione mantenendo il verso della normale</b> non cambia nulla (invarianza, nucleo 03). Cambiare <b>orientazione</b> ($\mathbf n\to-\mathbf n$) cambia il segno del risultato: &egrave; una scelta fisica (quale lato conta come &laquo;uscente&raquo;), non un artefatto di coordinate. La parametrizzazione &egrave; muta; l&rsquo;orientazione parla.`}
+  ]}
+]},
+
+/* ---------------- 05 · CAMPI CONSERVATIVI E POTENZIALI ---------------- */
+{ num:'05', title:'Campi conservativi e potenziali', meta:'$\\mathbf F=\\nabla\\varphi$ · teorema fondamentale degli integrali di linea · le tre condizioni equivalenti · costruire il potenziale',
+  blocchi:[
+  {t:'prosa', title:'Campo conservativo = campo gradiente', tag:'definizione', html:R`
+  <p>Un campo $\mathbf F:\Omega\to\mathbb{R}^n$ si dice <b>conservativo</b> se esiste un campo scalare $\varphi:\Omega\to\mathbb{R}$, detto <b>potenziale</b>, tale che $$\mathbf F=\nabla\varphi.$$ Cio&egrave;: $\mathbf F$ &egrave; il gradiente di qualcosa. In componenti, $P=\varphi_x$, $Q=\varphi_y$, $S=\varphi_z$: le componenti del campo sono le derivate parziali di un&rsquo;unica funzione.</p>
+  <p>La convenzione fisica ha un segno: si scrive spesso $\mathbf F=-\nabla U$, con $U$ l&rsquo;<b>energia potenziale</b>. Il segno &egrave; una scelta ($U=-\varphi$): la forza punta verso i potenziali <b>decrescenti</b> (una palla rotola verso il basso, verso l&rsquo;energia potenziale minima). In matematica il segno non cambia nulla di sostanziale; all&rsquo;esame di Terracina si usa $\mathbf F=\nabla\varphi$, in Meccanica userai $\mathbf F=-\nabla U$. Stesso oggetto, due convenzioni.</p>`},
+  {t:'reveal', title:'Il teorema fondamentale degli integrali di linea', tag:'derivazione', steps:[
+   {label:'Componi il potenziale con la curva', body:R`<p>Sia $\mathbf F=\nabla\varphi$ e $\gamma:[a,b]\to\Omega$ una curva $C^1$ qualsiasi da $A=\gamma(a)$ a $B=\gamma(b)$. Considera la funzione di una variabile $g(t)=\varphi(\gamma(t))$: il valore del potenziale lungo il cammino. La sua derivata, per la <b>regola della catena</b>, &egrave; $$g'(t)=\nabla\varphi(\gamma(t))\cdot\gamma'(t)=\mathbf F(\gamma(t))\cdot\gamma'(t).$$ Riconosci a destra <b>esattamente</b> l&rsquo;integrando del lavoro.</p>`},
+   {label:'Integra: appare il teorema di Torricelli', body:R`<p>Allora il lavoro &egrave; l&rsquo;integrale di una derivata esatta: $$\int_\gamma\mathbf F\cdot d\mathbf r=\int_a^b\mathbf F(\gamma(t))\cdot\gamma'(t)\,dt=\int_a^b g'(t)\,dt.$$ Per il teorema fondamentale del calcolo (in una variabile) $\int_a^b g'=g(b)-g(a)$: $$\boxed{\ \int_\gamma\mathbf F\cdot d\mathbf r=\varphi(B)-\varphi(A)\ }\qquad\blacksquare$$</p>`},
+   {label:'Leggi le tre conseguenze', body:R`<p>Il membro di destra $\varphi(B)-\varphi(A)$ contiene <b>solo gli estremi</b>. Nessuna traccia di $\gamma$, della strada, della parametrizzazione. Tre conseguenze immediate, che sono le tre facce dello stesso fatto:</p>
+   <ul>
+   <li><b>Indipendenza dal cammino:</b> due curve con gli stessi estremi danno lo stesso lavoro.</li>
+   <li><b>Circuitazione nulla:</b> se $\gamma$ &egrave; chiusa, $A=B$, quindi $\oint_\gamma\mathbf F\cdot d\mathbf r=\varphi(A)-\varphi(A)=0$, su <b>ogni</b> ciclo.</li>
+   <li><b>Calcolo senza integrare:</b> per trovare il lavoro basta valutare $\varphi$ agli estremi &mdash; niente parametrizzazione, niente integrale.</li>
+   </ul>
+   <div class="note">&Egrave; l&rsquo;esatto analogo vettoriale del teorema di Torricelli$\,$&ndash;$\,$Barrow $\int_a^b f'=f(b)-f(a)$: il potenziale $\varphi$ &egrave; la &laquo;primitiva&raquo; del campo, e il lavoro &egrave; l&rsquo;incremento della primitiva. Cercare un potenziale &egrave; cercare una primitiva in pi&ugrave; variabili.</div>`}
+  ]},
+  {t:'prosa', title:'Le tre condizioni equivalenti (e la quarta, necessaria)', tag:'il teorema di caratterizzazione', html:R`
+  <p>Su un aperto <b>connesso</b> $\Omega$, per un campo $\mathbf F\in C^1$ le seguenti sono <b>equivalenti</b>:</p>
+  <ol>
+  <li>$\mathbf F=\nabla\varphi$ per qualche potenziale $\varphi$ (conservativo);</li>
+  <li>$\int_\gamma\mathbf F\cdot d\mathbf r$ dipende solo dagli estremi (indipendenza dal cammino);</li>
+  <li>$\oint_\gamma\mathbf F\cdot d\mathbf r=0$ per ogni cammino chiuso in $\Omega$.</li>
+  </ol>
+  <p>Queste tre valgono su <b>qualunque</b> dominio connesso, senza ipotesi sulla forma. La freccia $1\Rightarrow2\Rightarrow3$ &egrave; il teorema appena dimostrato; le inverse si costruiscono <i>definendo</i> il potenziale come $\varphi(\mathbf x)=\int_{\mathbf x_0}^{\mathbf x}\mathbf F\cdot d\mathbf r$ (ben definito proprio perch&eacute; l&rsquo;integrale non dipende dal cammino).</p>
+  <p>Poi c&rsquo;&egrave; una <b>quarta</b> condizione, solo <b>necessaria</b>: $$\mathbf F\ \text{conservativo}\quad\Longrightarrow\quad\nabla\times\mathbf F=\mathbf 0\ \ (\text{irrotazionale}),$$ perch&eacute; $\nabla\times\nabla\varphi=\mathbf 0$ (identit&agrave; della tappa 03). &Egrave; il test <b>rapido</b>: se il rotore non &egrave; nullo, il campo non &egrave; conservativo, fine. Ma l&rsquo;implicazione <b>non si inverte</b> in generale: $\nabla\times\mathbf F=\mathbf 0$ NON basta a garantire il potenziale. Quando basta, e quando no, &egrave; la tappa 06 &mdash; il trabocchetto.</p>`},
+  {t:'esercizio', title:'Trova il potenziale e usalo', src:'Es.&nbsp;tipo Terracina · $\\mathbf F=(2xy,\ x^2+z^2,\ 2yz)$',
+   testo:R`Stabilisci se $\mathbf F(x,y,z)=(2xy,\ x^2+z^2,\ 2yz)$ &egrave; conservativo su $\mathbb{R}^3$; se s&igrave;, trovane un potenziale $\varphi$ e calcola $\int_\gamma\mathbf F\cdot d\mathbf r$ da $A=(0,0,0)$ a $B=(1,1,1)$.`,
+   steps:[
+    {label:'Test rapido: il rotore', body:R`<p>$P=2xy$, $Q=x^2+z^2$, $S=2yz$. Rotore: $$S_y-Q_z=2z-2z=0,\quad P_z-S_x=0-0=0,\quad Q_x-P_y=2x-2x=0.$$ Quindi $\nabla\times\mathbf F=\mathbf 0$: irrotazionale. Il dominio &egrave; $\mathbb{R}^3$, che &egrave; semplicemente connesso (tappa 06): qui irrotazionale <b>implica</b> conservativo. Un potenziale esiste; costruiamolo.</p>`},
+    {label:'Integra la prima componente', body:R`<p>Cerco $\varphi$ con $\varphi_x=P=2xy$. Integro in $x$ trattando $y,z$ come costanti: $$\varphi(x,y,z)=\int 2xy\,dx=x^2y+g(y,z),$$ dove la &laquo;costante&raquo; d&rsquo;integrazione &egrave; una funzione $g(y,z)$ delle variabili non integrate.</p>`},
+    {label:'Imponi la seconda componente', body:R`<p>Deve valere $\varphi_y=Q=x^2+z^2$. Derivo l&rsquo;espressione trovata: $\varphi_y=x^2+g_y(y,z)$. Uguaglio: $$x^2+g_y=x^2+z^2\ \Rightarrow\ g_y=z^2\ \Rightarrow\ g(y,z)=yz^2+h(z),$$ integrando in $y$ (la nuova costante &egrave; $h(z)$). Aggiornato: $\varphi=x^2y+yz^2+h(z)$.</p>`},
+    {label:'Imponi la terza componente', body:R`<p>Deve valere $\varphi_z=S=2yz$. Derivo: $\varphi_z=2yz+h'(z)$. Uguaglio: $$2yz+h'(z)=2yz\ \Rightarrow\ h'(z)=0\ \Rightarrow\ h=\text{cost}.$$ Prendo la costante $=0$: $$\varphi(x,y,z)=x^2y+yz^2.$$ Verifica al volo: $\nabla\varphi=(2xy,\ x^2+z^2,\ 2yz)=\mathbf F$. &nbsp;&check;</p>`},
+    {label:'Calcola il lavoro come differenza', body:R`<p>Nessun cammino, nessun integrale: uso il teorema fondamentale. $$\int_\gamma\mathbf F\cdot d\mathbf r=\varphi(1,1,1)-\varphi(0,0,0)=(1\cdot1+1\cdot1)-(0)=2.$$ Il lavoro vale $2$ per <b>qualunque</b> cammino da $A$ a $B$. $\blacksquare$</p>
+    <div class="note">Il metodo &egrave; sempre questo: integra $P$ in $x$ (compare $g(y,z)$), deriva in $y$ e confronta con $Q$ (determina $g$ a meno di $h(z)$), deriva in $z$ e confronta con $S$ (determina $h$). Se a un certo punto le equazioni sono <b>incompatibili</b> (ti chiedono $g_y$ che dipende da $x$, impossibile), il campo <b>non</b> era conservativo &mdash; ma se hai fatto prima il test del rotore lo sapevi gi&agrave;.</div>`}
+   ],
+   nota:R`Ordine efficiente in sede d&rsquo;esame: (1) rotore, tre derivate &mdash; se $\neq\mathbf 0$, non conservativo, stop; (2) se $=\mathbf 0$ e il dominio &egrave; &laquo;pieno&raquo; (tutto $\mathbb{R}^n$, o una palla, o un rettangolo), costruisci il potenziale integrando; (3) usa $\varphi(B)-\varphi(A)$. Non parametrizzare mai un cammino se il campo &egrave; conservativo: butteresti via il regalo del teorema.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Due potenziali dello stesso campo, $\varphi_1$ e $\varphi_2$: quanto possono differire? Perch&eacute; nell&rsquo;esercizio abbiamo potuto porre la costante $=0$?`,
+    a:R`Differiscono per una <b>costante</b>: se $\nabla\varphi_1=\nabla\varphi_2=\mathbf F$ allora $\nabla(\varphi_1-\varphi_2)=\mathbf 0$, e su un connesso ci&ograve; forza $\varphi_1-\varphi_2=$ cost. Nel lavoro $\varphi(B)-\varphi(A)$ la costante si cancella: &egrave; irrilevante, e possiamo fissarla a $0$. (In fisica &egrave; la libert&agrave; di scegliere lo &laquo;zero&raquo; dell&rsquo;energia potenziale.)`},
+   {q:R`Durante la costruzione ottieni, imponendo la seconda componente, l&rsquo;equazione $g_y=xz$ (con una $x$ a destra). Cosa significa?`,
+    a:R`&Egrave; una <b>contraddizione</b>: $g$ dipende solo da $(y,z)$, quindi $g_y$ non pu&ograve; contenere $x$. L&rsquo;impossibilit&agrave; segnala che <b>non esiste potenziale</b>: il campo non era conservativo (e infatti il suo rotore sarebbe risultato $\neq\mathbf 0$). Il metodo di costruzione &egrave; anche un test: se non chiude, il campo non era un gradiente.`}
+  ]}
+]},
+
+/* ---------------- 06 · IRROTAZIONALE NON BASTA ---------------- */
+{ num:'06', title:'Irrotazionale non basta: il trabocchetto', meta:'$\\nabla\\times\\mathbf F=\\mathbf 0$ ma $\\oint\\neq0$ · il campo del vortice · domini semplicemente connessi · lemma di Poincar&eacute;',
+  blocchi:[
+  {t:'prosa', title:'L&rsquo;implicazione che non si inverte', tag:'la trappola d&rsquo;esame, dichiarata', html:R`
+  <p>Sai che conservativo $\Rightarrow$ irrotazionale, sempre. La tentazione &mdash; e l&rsquo;errore che Terracina tende con regolarit&agrave; &mdash; &egrave; usare la freccia al contrario: &laquo;ho verificato $\nabla\times\mathbf F=\mathbf 0$, dunque il campo &egrave; conservativo, esiste il potenziale&raquo;. <b>Falso in generale.</b> Esiste un campo irrotazionale la cui circuitazione su un certo cammino chiuso &egrave; $2\pi\neq0$: irrotazionale ma non conservativo. Il colpevole non &egrave; il campo, &egrave; la <b>forma del dominio</b>.</p>`},
+  {t:'reveal', title:'Il campo del vortice: irrotazionale con circuitazione $2\\pi$', tag:'il controesempio', steps:[
+   {label:'Il campo e il suo dominio', body:R`<p>$$\mathbf F(x,y)=\left(\frac{-y}{x^2+y^2},\ \frac{x}{x^2+y^2}\right),\qquad (x,y)\in\mathbb{R}^2\setminus\{(0,0)\}.$$ &Egrave; il campo del vortice del nucleo 03, normalizzato: gira attorno all&rsquo;origine, dove <b>non &egrave; definito</b> (denominatore nullo). Il dominio ha un <b>buco</b> nell&rsquo;origine &mdash; tienilo d&rsquo;occhio, &egrave; tutta la storia.</p>`},
+   {label:'Verifica: &egrave; irrotazionale', body:R`<p>Scalar curl $\partial_x Q-\partial_y P$, con $P=\dfrac{-y}{x^2+y^2}$, $Q=\dfrac{x}{x^2+y^2}$. Calcolo $$\partial_x Q=\frac{(x^2+y^2)-x\cdot2x}{(x^2+y^2)^2}=\frac{y^2-x^2}{(x^2+y^2)^2},$$ $$\partial_y P=\frac{-(x^2+y^2)-(-y)\cdot2y}{(x^2+y^2)^2}=\frac{-(x^2+y^2)+2y^2}{(x^2+y^2)^2}=\frac{y^2-x^2}{(x^2+y^2)^2}.$$ Dunque $\partial_x Q-\partial_y P=0$ in <b>ogni</b> punto del dominio: $\nabla\times\mathbf F=\mathbf 0$, irrotazionale ovunque sia definito.</p>`},
+   {label:'Ma la circuitazione non &egrave; nulla', body:R`<p>Prendi la circonferenza unitaria $\gamma(t)=(\cos t,\sin t)$, $t\in[0,2\pi]$, antioraria. Su di essa $x^2+y^2=1$, quindi $\mathbf F(\gamma(t))=(-\sin t,\ \cos t)$; inoltre $\gamma'(t)=(-\sin t,\cos t)$. Il prodotto scalare: $$\mathbf F\cdot\gamma'=(-\sin t)(-\sin t)+(\cos t)(\cos t)=\sin^2t+\cos^2t=1.$$ Quindi $$\oint_\gamma\mathbf F\cdot d\mathbf r=\int_0^{2\pi}1\,dt=2\pi\ \neq\ 0.$$</p>`},
+   {label:'La conclusione che rovescia il test', body:R`<p>Il campo &egrave; <b>irrotazionale</b> ($\nabla\times\mathbf F=\mathbf 0$) ma <b>non conservativo</b> (una circuitazione &egrave; $2\pi\neq0$, e per un conservativo dovrebbe essere $0$ su ogni ciclo). Le due cose convivono perch&eacute; il dominio $\mathbb{R}^2\setminus\{0\}$ ha un buco. $$\boxed{\ \text{irrotazionale}\ \not\Rightarrow\ \text{conservativo, su un dominio bucato}\ }\qquad\blacksquare$$</p>
+   <div class="note warn"><b>Perch&eacute; Stokes non salva.</b> Verrebbe da dire: $\oint_\gamma\mathbf F\cdot d\mathbf r=\iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS=0$ perch&eacute; il rotore &egrave; nullo. Ma Stokes richiede che $\mathbf F$ sia $C^1$ su <b>tutta</b> la superficie $S$ che ha $\gamma$ per bordo. Ogni disco che borda la circonferenza unitaria <b>contiene l&rsquo;origine</b>, dove $\mathbf F$ non esiste: Stokes non &egrave; applicabile. Il buco impedisce di &laquo;tappare&raquo; il ciclo con una superficie ammissibile. Ecco cosa protegge il $2\pi$.</div>`}
+  ]},
+  {t:'plot', title:'Il campo del vortice: gira senza ruotare',
+   intro:R`Il campo $\mathbf F=\left(\dfrac{-y}{x^2+y^2},\ \dfrac{x}{x^2+y^2}\right)$, definito ovunque <b>tranne</b> l&rsquo;origine (il buco). Frecce normalizzate; il cerchio segna un cammino chiuso attorno al buco.`,
+   plots:[
+    {kind:'field2d', fx:'-y/(x*x+y*y+1e-9)', fy:'x/(x*x+y*y+1e-9)', xr:[-2,2], yr:[-2,2], n:15, height:400, rings:[{r:1.3, col:'#ff9b6b', width:2.4}], marks:[{x:0, y:0, label:'buco (origine esclusa)', col:'#ff6b6b', hollow:true}], title:'rot F = 0 ovunque, eppure la circuitazione sul cerchio vale 2 pi'}
+   ],
+   leggi:R`Sembra un vortice come il $(-y,x)$ della tappa 03, ma è un&rsquo;altra bestia. Calcola il rotore: <b>è zero in ogni punto</b> del dominio ($\partial_x F_y-\partial_y F_x=0$, il conto è nel controesempio sopra) — nessuna girandola locale gira, il campo è <b>irrotazionale</b>. Eppure segui il cerchio: le frecce gli sono ovunque <b>concordi</b>, quindi camminandoci sopra il campo compie lavoro positivo a ogni passo, e il totale su un giro è $\oint\mathbf F\cdot d\mathbf r=2\pi\neq0$. <b>Come può un campo senza rotazione locale avere circuitazione?</b> Perché il &laquo;teorema&raquo; rotore-nullo $\Rightarrow$ conservativo <b>richiede un dominio senza buchi</b>, e qui il buco c&rsquo;è: l&rsquo;origine è esclusa. La circuitazione $2\pi$ non viene da nessun punto interno (lì il rotore è $0$) — viene dal <b>buco</b>, che il cammino racchiude. È esattamente il $2\pi$ della corona non semplicemente connessa che avevi visto in topologia (nucleo 0): quel foro, misurato dal campo. Irrotazionale $+$ dominio <b>semplicemente connesso</b> $\Rightarrow$ conservativo; togli la seconda ipotesi e l&rsquo;implicazione salta.`},
+  {t:'prosa', title:'Il potenziale multivoco: l&rsquo;angolo', tag:'dove va a finire il potenziale', html:R`
+  <p>Localmente il campo del vortice <b>ha</b> un potenziale: &egrave; l&rsquo;<b>angolo polare</b> $\theta$. Infatti, con $\theta=\arctan(y/x)$ dove $x\gt0$, si verifica $$\nabla\theta=\left(\frac{-y}{x^2+y^2},\ \frac{x}{x^2+y^2}\right)=\mathbf F.$$ Il problema: $\theta$ &egrave; <b>multivoco</b>. Facendo un giro completo attorno all&rsquo;origine, $\theta$ cresce di $2\pi$ senza tornare al valore di partenza. Non esiste una funzione $\varphi$ <b>univoca e continua</b> su tutto $\mathbb{R}^2\setminus\{0\}$ con $\nabla\varphi=\mathbf F$ &mdash; e proprio quell&rsquo;incremento $2\pi$ dell&rsquo;angolo per giro <b>&egrave;</b> la circuitazione $\oint_\gamma\mathbf F\cdot d\mathbf r=2\pi$. Il potenziale esiste a pezzi, ma non si incolla in uno globale: il buco lo impedisce.</p>`},
+  {t:'prosa', title:'Domini semplicemente connessi e il lemma di Poincar&eacute;', tag:'quando irrotazionale BASTA', html:R`
+  <p>Un aperto connesso $\Omega$ si dice <b>semplicemente connesso</b> se ogni cammino chiuso in $\Omega$ pu&ograve; essere <b>contratto con continuit&agrave; a un punto</b> restando dentro $\Omega$. Intuizione: $\Omega$ non ha buchi. Sono semplicemente connessi $\mathbb{R}^n$, una palla, un cubo, un semipiano, l&rsquo;interno di un disco. Non lo sono: il piano bucato $\mathbb{R}^2\setminus\{0\}$ (un cappio attorno al buco non si contrae), una corona circolare, un toro.</p>
+  <p><b>Lemma di Poincar&eacute;.</b> Se $\Omega$ &egrave; <b>semplicemente connesso</b> e $\mathbf F\in C^1$ &egrave; <b>irrotazionale</b> ($\nabla\times\mathbf F=\mathbf 0$), allora $\mathbf F$ &egrave; <b>conservativo</b> (esiste il potenziale). Su questi domini l&rsquo;implicazione si inverte, e il test del rotore &egrave; conclusivo. La ragione &egrave; Stokes: su un dominio senza buchi ogni ciclo borda una superficie <b>tutta contenuta</b> in $\Omega$, quindi $\oint\mathbf F\cdot d\mathbf r=\iint(\nabla\times\mathbf F)\cdot\mathbf n\,dS=0$ &mdash; l&rsquo;argomento che falliva sul dominio bucato ora funziona.</p>
+  <p class="note"><b>Regola operativa anti-trappola.</b> Verificato $\nabla\times\mathbf F=\mathbf 0$, prima di dichiarare &laquo;conservativo&raquo; <b>guarda il dominio</b>. Se &egrave; tutto $\mathbb{R}^n$, una palla, un rettangolo, un semispazio &rarr; semplicemente connesso, Poincar&eacute; si applica, conservativo. Se ci sono <b>punti o rette esclusi</b> (denominatori che si annullano, come l&rsquo;origine del vortice o un asse) &rarr; sospetta il buco, e <b>calcola una circuitazione</b> attorno all&rsquo;esclusione per decidere.</p>`},
+  {t:'esercizio', title:'Lo stesso campo, su un dominio senza buco', src:'Trabocchetto rovesciato · il vortice ristretto al semipiano $x\\gt0$',
+   testo:R`Considera lo stesso $\mathbf F=\left(\dfrac{-y}{x^2+y^2},\dfrac{x}{x^2+y^2}\right)$ ma ristretto al semipiano <b>destro</b> $\Omega=\{x\gt0\}$. Ora &egrave; conservativo? Se s&igrave;, dai un potenziale. Come si concilia con la circuitazione $2\pi$ trovata prima?`,
+   steps:[
+    {label:'Il dominio &egrave; cambiato', body:R`<p>$\Omega=\{x\gt0\}$ &egrave; un semipiano: convesso, senza buchi, <b>semplicemente connesso</b>. Il campo &egrave; ancora irrotazionale (il conto di prima vale in ogni punto dove $\mathbf F$ &egrave; definito, e $x\gt0$ ne esclude l&rsquo;origine). Per il lemma di Poincar&eacute;, qui $\mathbf F$ <b>&egrave; conservativo</b>: il buco &egrave; rimasto fuori dal dominio.</p>`},
+    {label:'Il potenziale, ora univoco', body:R`<p>Su $\{x\gt0\}$ l&rsquo;angolo $\varphi(x,y)=\arctan\!\dfrac{y}{x}$ &egrave; <b>ben definito e continuo</b>, con valori in $(-\pi/2,\pi/2)$. Verifica: $$\varphi_x=\frac{1}{1+(y/x)^2}\cdot\left(-\frac{y}{x^2}\right)=\frac{x^2}{x^2+y^2}\cdot\left(-\frac{y}{x^2}\right)=\frac{-y}{x^2+y^2},$$ $$\varphi_y=\frac{1}{1+(y/x)^2}\cdot\frac1x=\frac{x^2}{x^2+y^2}\cdot\frac1x=\frac{x}{x^2+y^2}.$$ Quindi $\nabla\varphi=\mathbf F$: potenziale trovato, univoco su tutto $\Omega$.</p>`},
+    {label:'Nessuna contraddizione col $2\\pi$', body:R`<p>La circonferenza unitaria del calcolo di prima <b>non sta dentro</b> $\{x\gt0\}$: ne attraversa la met&agrave; sinistra. Dentro il semipiano destro <b>non esiste</b> alcun cammino chiuso che giri attorno all&rsquo;origine (dovrebbe passare per $x\le0$). Quindi ogni ciclo ammissibile in $\Omega$ ha circuitazione $0$, coerente con la conservativit&agrave;. Il $2\pi$ vive solo sui cammini che <b>abbracciano il buco</b>, e quei cammini sono stati esclusi restringendo il dominio. $\blacksquare$</p>
+    <div class="note warn"><b>Lezione dell&rsquo;esercizio.</b> Lo <b>stesso identico campo</b> &egrave; conservativo o no a seconda del <b>dominio</b> su cui lo consideri. La conservativit&agrave; non &egrave; una propriet&agrave; della sola formula di $\mathbf F$: &egrave; una propriet&agrave; della coppia (campo, dominio). All&rsquo;esame, leggi <b>sempre</b> dove il campo &egrave; definito prima di rispondere.</div>`}
+   ],
+   nota:R`I due esercizi gemelli &mdash; vortice su $\mathbb{R}^2\setminus\{0\}$ (non conservativo) e su $\{x\gt0\}$ (conservativo) &mdash; sono la coppia da avere in testa. Se Terracina d&agrave; un campo con un denominatore che si annulla su un punto o una retta, la domanda vera &egrave; sempre: il dominio racchiude l&rsquo;esclusione in un cappio, s&igrave; o no? La risposta decide tutto.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perch&eacute; una corona circolare $\{1\lt x^2+y^2\lt4\}$ non &egrave; semplicemente connessa, mentre un disco $\{x^2+y^2\lt4\}$ lo &egrave;?`,
+    a:R`Nella corona, un cerchio concentrico a met&agrave; raggio <b>gira attorno al buco centrale</b> (il disco di raggio $1$ escluso) e non pu&ograve; contrarsi a un punto senza uscire dalla corona: c&rsquo;&egrave; un ostacolo. Nel disco pieno ogni cappio si contrae liberamente al centro. Il vortice sulla corona sarebbe di nuovo irrotazionale ma non conservativo, per lo stesso motivo del piano bucato.`},
+   {q:R`Un campo &egrave; irrotazionale su $\mathbb{R}^3\setminus\{\text{asse }z\}$. Puoi concludere che &egrave; conservativo? E se fosse irrotazionale su tutto $\mathbb{R}^3$?`,
+    a:R`Sul primo dominio <b>no</b>: $\mathbb{R}^3$ meno una retta non &egrave; semplicemente connesso (un cappio che circonda l&rsquo;asse $z$ non si contrae), quindi Poincar&eacute; non si applica &mdash; va calcolata una circuitazione attorno all&rsquo;asse. Su tutto $\mathbb{R}^3$ <b>s&igrave;</b>: &egrave; semplicemente connesso, irrotazionale $\Rightarrow$ conservativo. (Nota: $\mathbb{R}^3$ meno un <b>punto</b> resta semplicemente connesso &mdash; il buco puntiforme in 3D si aggira; &egrave; il buco <b>lineare</b> a rompere la connessione semplice.)`}
+  ]},
+  {t:'plot', title:'Il toro: due cappi che non si possono stringere a un punto',
+   intro:R`La corona del piano aveva <b>un</b> buco e <b>un</b> cammino irriducibile. Il toro ne ha <b>due</b>, indipendenti: il cappio verde attorno al tubo e quello arancione attorno al foro centrale. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'param3d', x:'(2+cos(v))*cos(u)', y:'(2+cos(v))*sin(u)', z:'sin(v)',
+     ur:[0,6.28319], vr:[0,6.28319], nu:44, nv:24, w:560, height:380, yaw:0.7, pitch:0.6, alpha:0.85,
+     curves3d:[
+      {x:'(2+cos(t))*cos(0.6)', y:'(2+cos(t))*sin(0.6)', z:'sin(t)', tr:[0,6.28319], col:'#5eead4', width:3.2},
+      {x:'3.04*cos(t)', y:'3.04*sin(t)', z:'0*t', tr:[0,6.28319], col:'#ff9b6b', width:3.2}],
+     title:'i due cappi indipendenti del toro (i tratti nascosti passano dietro)'}
+   ],
+   leggi:R`Prova a immaginare di <b>stringere</b> uno dei due cappi fino a farlo diventare un punto, <b>restando sulla superficie</b>: non si può. Il verde è bloccato dal tubo, l&rsquo;arancione dal foro centrale, e nessuno dei due si deforma nell&rsquo;altro. Su una sfera, invece, ogni cappio si contrae — la sfera è <b>semplicemente connessa</b>, il toro no, e lo è &laquo;due volte&raquo;. <b>Perché questo è il nucleo e non un&rsquo;escursione:</b> l&rsquo;implicazione &laquo;irrotazionale $\Rightarrow$ conservativo&raquo; vale solo dove <b>ogni</b> cammino chiuso si contrae. Il vortice della tappa 06 falliva per un buco solo, e infatti aveva <b>una</b> circuitazione anomala; su un dominio come questo le circuitazioni indipendenti che sfuggono al potenziale sono <b>due</b>, una per cappio. Il numero dei &laquo;modi di girare&raquo; <b>è</b> il numero di gradi di libertà che il campo irrotazionale ha in più rispetto ai gradienti — e questo numero si chiama primo gruppo di omologia, che il nucleo 05 incontrerà come <b>coomologia di de Rham</b>. <b>In fisica</b> è la struttura dell&rsquo;effetto Aharonov&ndash;Bohm (fase che dipende da quale buco circondi), dei vortici quantizzati in un superfluido, e del flusso magnetico intrappolato in un anello superconduttore: il conteggio dei cappi diventa un numero quantico.`},
+]},
+
+/* ---------------- 07 · IL SENSO E LE ROTTE FISICHE ---------------- */
+{ num:'07', title:'Il senso e le rotte fisiche', meta:'campo = forze/velocit&agrave; · divergenza = sorgenti · rotore = vorticit&agrave; · conservativo = energia potenziale · dove tutto questo diventa fisica',
+  blocchi:[
+  {t:'prosa', title:'Il vocabolario che hai appena imparato &egrave; il vocabolario della fisica dei campi', tag:'significato', html:R`
+  <p>I quattro oggetti del nucleo hanno, ciascuno, un significato fisico preciso &mdash; non un&rsquo;analogia, una <b>traduzione</b>.</p>
+  <ul>
+  <li><b>Campo vettoriale</b> = campo di forze o campo di velocit&agrave;. Il modo in cui la fisica descrive un&rsquo;influenza che riempie lo spazio: gravit&agrave;, elettricit&agrave;, magnetismo, il moto di un fluido.</li>
+  <li><b>Divergenza</b> $\nabla\cdot\mathbf F$ = <b>densit&agrave; di sorgenti</b>. Dice dove il campo &laquo;nasce&raquo; e dove &laquo;muore&raquo;. In elettromagnetismo, la sorgente del campo elettrico &egrave; la carica: $\nabla\cdot\mathbf E=\rho/\varepsilon_0$.</li>
+  <li><b>Rotore</b> $\nabla\times\mathbf F$ = <b>vorticit&agrave;</b>, circolazione locale. Dice dove il campo &laquo;gira&raquo;. Un campo magnetico variabile fa girare il campo elettrico: $\nabla\times\mathbf E=-\partial_t\mathbf B$.</li>
+  <li><b>Campo conservativo</b> = esistenza di un&rsquo;<b>energia potenziale</b>. Il lavoro dipende solo dagli estremi $\Leftrightarrow$ l&rsquo;energia si conserva. &Egrave; il fondamento della conservazione dell&rsquo;energia meccanica.</li>
+  </ul>
+  <p>Il filo che regge tutto il nucleo: la <b>connessione del dominio</b> non &egrave; un tecnicismo, &egrave; il primo affacciarsi della <b>topologia</b> dentro l&rsquo;analisi. Il fatto che &laquo;irrotazionale ma non conservativo&raquo; sia possibile <b>solo</b> se il dominio ha un buco &egrave; il seme di una delle idee pi&ugrave; profonde della matematica del Novecento &mdash; l&rsquo;analisi che vede la forma dello spazio.</p>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> Il gradiente e la sua ortogonalit&agrave; agli insiemi di livello vengono dal nucleo 01 (differenziale); la regola della catena, usata per il teorema fondamentale degli integrali di linea, &egrave; sempre di l&igrave;. La macchina degli integrali di linea e di flusso &mdash; parametrizzazione, riduzione al parametro, invarianza &mdash; &egrave; il nucleo 03 al completo: qui l&rsquo;abbiamo riletta come propriet&agrave; del campo, non della curva.</p>
+  <p><b>A valle.</b></p>
+  <ul>
+  <li><b>Teoremi integrali</b> (nucleo 06: Green, Gauss, Stokes). Sono l&rsquo;intero senso di questo nucleo: divergenza e rotore, che qui hai definito e interpretato, sono <b>esattamente</b> ci&ograve; che quei teoremi integrano. Gauss lega il flusso alla divergenza, Stokes la circuitazione al rotore. Le derivazioni &laquo;a scatolina&raquo; e &laquo;a rettangolino&raquo; della tappa 03 <b>erano</b> gi&agrave; quei teoremi in forma locale.</li>
+  <li><b>Geometria differenziale</b> (III anno). Le identit&agrave; $\nabla\times\nabla=0$, $\nabla\cdot(\nabla\times)=0$ diventano l&rsquo;unica identit&agrave; $d^2=0$ delle forme differenziali; il difetto &laquo;irrotazionale ma non conservativo&raquo; diventa la <b>coomologia di de Rham</b>, che conta i buchi del dominio. Il $2\pi$ del vortice &egrave; un generatore di coomologia.</li>
+  <li><b>Elettromagnetismo, meccanica, meccanica quantistica</b>: le rotte della Prolessi qui sotto.</li>
+  </ul>`},
+  {t:'prolessi', title:'Prolessi — grad, div, rot e potenziale sono l&rsquo;alfabeto della fisica',
+   oggetto:R`i quattro oggetti di questo nucleo: il <b>campo vettoriale</b> $\mathbf F$, i tre operatori <b>gradiente</b> $\nabla f$, <b>divergenza</b> $\nabla\cdot\mathbf F$, <b>rotore</b> $\nabla\times\mathbf F$, e il <b>campo conservativo</b> $\mathbf F=\nabla\varphi$ col suo potenziale. In matematica sono definizioni; in fisica sono l&rsquo;alfabeto con cui si scrivono le leggi dei campi.`,
+   rotte:[
+    {dove:'Elettro-<br>magnetismo', txt:R`La corrispondenza &egrave; totale: le <b>equazioni di Maxwell in forma differenziale</b> sono, letteralmente, i quattro operatori di questo nucleo applicati a $\mathbf E$ e $\mathbf B$. Legge di Gauss: $\nabla\cdot\mathbf E=\rho/\varepsilon_0$ (la <b>divergenza</b> del campo elettrico &egrave; la densit&agrave; di carica: le cariche sono le sorgenti). Assenza di monopoli: $\nabla\cdot\mathbf B=0$ (il campo magnetico &egrave; solenoidale, quindi $\mathbf B=\nabla\times\mathbf A$ per l&rsquo;identit&agrave; div rot $=0$). Faraday: $\nabla\times\mathbf E=-\partial_t\mathbf B$ (il <b>rotore</b> del campo elettrico &egrave; la variazione del magnetico). Amp&egrave;re&ndash;Maxwell: $\nabla\times\mathbf B=\mu_0\mathbf J+\mu_0\varepsilon_0\,\partial_t\mathbf E$. E in <b>elettrostatica</b> $\nabla\times\mathbf E=\mathbf 0$: il campo &egrave; <b>conservativo</b>, $\mathbf E=-\nabla V$, con $V$ il potenziale elettrico &mdash; il tuo $\varphi$ col segno della fisica. Questo nucleo &egrave; la grammatica; Maxwell &egrave; il testo.`},
+    {dove:'Meccanica<br>(classica)', txt:R`La rotta pi&ugrave; diretta verso il tuo esame di settembre. Una <b>forza conservativa</b> &egrave; esattamente un campo conservativo: $\mathbf F=-\nabla U$, con $U$ l&rsquo;<b>energia potenziale</b> (gravitazionale $U=mgz$, elastica $U=\tfrac12kx^2$, ...). Il teorema fondamentale degli integrali di linea diventa il <b>teorema dell&rsquo;energia</b>: il lavoro $\int_\gamma\mathbf F\cdot d\mathbf r=U(A)-U(B)$ dipende solo dagli estremi, e uguagliandolo alla variazione di energia cinetica si ottiene $E=T+U=\text{cost}$, la <b>conservazione dell&rsquo;energia meccanica</b>. Il nome &laquo;conservativo&raquo; viene da qui: sono i campi per cui l&rsquo;energia si conserva. Una forza con $\nabla\times\mathbf F\neq\mathbf 0$ (l&rsquo;attrito, in modo effettivo) dissipa: non ha potenziale, il lavoro dipende dal cammino.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Qui protagonista &egrave; $\nabla$ <b>come operatore</b>. In MQ le grandezze fisiche diventano operatori che agiscono sulla funzione d&rsquo;onda, e $\nabla$ &egrave; il mattone: l&rsquo;<b>impulso</b> &egrave; $\hat{\mathbf p}=-i\hbar\nabla$ (il gradiente, promosso a osservabile), e l&rsquo;energia cinetica &egrave; $\dfrac{\hat p^2}{2m}=-\dfrac{\hbar^2}{2m}\nabla^2$, col <b>laplaciano</b> $\nabla^2=\nabla\cdot\nabla$ &mdash; divergenza del gradiente. L&rsquo;equazione di Schr&ouml;dinger $i\hbar\,\partial_t\psi=-\dfrac{\hbar^2}{2m}\nabla^2\psi+V\psi$ &egrave; costruita con gli operatori di questo nucleo. E la <b>corrente di probabilit&agrave;</b> $\mathbf j$ obbedisce a $\partial_t|\psi|^2+\nabla\cdot\mathbf j=0$: la stessa equazione di continuit&agrave; &laquo;variazione $=$ meno divergenza del flusso&raquo; che regge i fluidi e le cariche. Il vocabolario non cambia; cambia ci&ograve; su cui agisce.`}
+   ],
+   domanda:R`In meccanica statistica il moto di un sistema hamiltoniano nello spazio delle fasi &egrave; il flusso del campo di velocit&agrave; $\mathbf v=(\dot{\mathbf q},\dot{\mathbf p})=(\partial H/\partial\mathbf p,\,-\partial H/\partial\mathbf q)$. Calcolane la divergenza: $\nabla\cdot\mathbf v=\partial_{\mathbf q}(\partial H/\partial\mathbf p)+\partial_{\mathbf p}(-\partial H/\partial\mathbf q)=0$ per Schwarz &mdash; il <b>teorema di Liouville</b>: il flusso &egrave; a divergenza nulla, <b>incomprimibile</b>, conserva il volume nello spazio delle fasi. Ma allora ecco il paradosso: un flusso che conserva il volume non pu&ograve; &laquo;concentrare&raquo; n&eacute; &laquo;disperdere&raquo; nulla, ed &egrave; reversibile nel tempo. <b>Come fa, allora, un sistema isolato a tendere all&rsquo;equilibrio</b>, a &laquo;spalmarsi&raquo; uniformemente sulla superficie a energia costante, se il volume di fase &egrave; conservato esattamente e la dinamica &egrave; reversibile? <br>&mdash; &Egrave; il cuore del problema dell&rsquo;irreversibilit&agrave; (Loschmidt), che si scioglie con <b>mescolamento</b>, coarse-graining e, in versione quantistica, con l&rsquo;<b>ETH</b> e la decoerenza. La stessa identit&agrave; $\nabla\cdot(\nabla\times)=0$ che qui ti d&agrave; &laquo;div rot $=0$&raquo; l&igrave; ti d&agrave; l&rsquo;incomprimibilit&agrave; di Liouville &mdash; e con essa la domanda attorno a cui ruota la tua tesi.`
+  }
+]}
+
+];
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 04 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 04-campi-vettoriali.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

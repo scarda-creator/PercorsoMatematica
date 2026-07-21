@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 10 — Lebesgue e gli spazi Lᵖ: perché serve un altro integrale</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento II · Nucleo <b>10 — Integrale di Lebesgue, convergenza dominata, spazi L<sup>p</sup></b> · approfondimento [+], chiude il debito del nucleo 09</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 10: Integrale di Lebesgue e spazi Lᵖ <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'[+] · il debito lasciato aperto dal nucleo 09: chi garantisce che $L^2$ sia completo',
+  blocchi:[
+  {t:'prosa', title:'Il debito, detto con precisione', tag:'first principles', html:R`
+  <p>Nel nucleo 09 hai usato due volte un fatto senza dimostrarlo: che $L^2$ è uno spazio di Hilbert, cioè <b>completo</b>. Serviva per dire che le somme parziali di Fourier convergono a <i>qualcosa dello spazio</i>, e quindi che il sistema trigonometrico è una base. Nel nucleo 08 avevi visto il rovescio della medaglia: lo spazio delle funzioni <b>continue</b> con la norma integrale <b>non</b> è completo — la successione di rampe convergeva alla funzione segno, che sta fuori.</p>
+  <p>La soluzione a quel difetto è <b>allargare lo spazio</b>: ammettere anche funzioni discontinue, ma con un integrale abbastanza robusto da restare definito su di esse. L&rsquo;integrale di Riemann non basta. Quello di <b>Lebesgue</b> sì, e il teorema che chiude il cerchio (<b>Riesz&ndash;Fischer</b>) dice esattamente che gli spazi $L^p$ così costruiti sono <b>completi</b>.</p>
+  <p>È un nucleo <b>[+]</b>: non serve saperlo costruire, serve sapere <b>cosa garantisce</b> e quali tre teoremi di passaggio al limite autorizzano le manipolazioni che farai continuamente (scambiare limite e integrale, derivare sotto il segno, sommare serie sotto integrale).</p>`}
+]},
+
+/* ---------------- 01 · L'IDEA ---------------- */
+{ num:'01', title:'L’idea: partizionare il codominio, non il dominio', meta:'Riemann affetta l’asse $x$, Lebesgue affetta l’asse $y$ · misura · «quasi ovunque»',
+  blocchi:[
+  {t:'prosa', title:'La differenza, in una frase', tag:'costruzione', html:R`
+  <p><b>Riemann</b> divide il <b>dominio</b> in intervallini e somma $f(\xi_i)\Delta x_i$: funziona finché $f$ non oscilla troppo, perché su ogni intervallino i valori devono essere quasi uguali.</p>
+  <p><b>Lebesgue</b> divide il <b>codominio</b>: fissa una fascia di valori $[y,y+\Delta y]$, <b>misura</b> l&rsquo;insieme dei punti dove $f$ ci cade dentro, e somma $y\cdot\mu\big(\{x:f(x)\approx y\}\big)$. L&rsquo;insieme misurato può essere complicatissimo — sparso, frammentato — e non importa: basta saperne la <b>misura</b>.</p>
+  <p>L&rsquo;esempio che separa i due mondi è la funzione di Dirichlet: $f=1$ sui razionali, $0$ sugli irrazionali, su $[0,1]$. <b>Non</b> è Riemann-integrabile (ogni intervallino contiene sia razionali che irrazionali: somme superiori $=1$, inferiori $=0$). È Lebesgue-integrabile con integrale <b>zero</b>: i razionali sono numerabili, quindi hanno misura nulla, e la funzione vale $0$ <b>quasi ovunque</b>.</p>
+  <div class="note">La costruzione richiede di dire quali insiemi sono <b>misurabili</b> e quanto misurano (teoria della misura). Il punto operativo: <b>ogni funzione ragionevole che incontrerai è misurabile</b> — continue, a tratti, limiti di successioni di misurabili. Gli insiemi non misurabili esistono ma richiedono l&rsquo;assioma della scelta per essere costruiti: non compaiono in fisica.</div>`},
+  {t:'gram', title:'Il vocabolario minimo', rows:[
+   [R`<b>misura nulla</b>`, R`$E$ si copre con intervalli di lunghezza totale piccola a piacere. Esempi: un punto, un insieme numerabile ($\mathbb{Q}$), una curva nel piano. <b>Ciò che accade su un insieme di misura nulla non cambia nessun integrale.</b>`],
+   [R`<b>quasi ovunque</b> (q.o.)`, R`una proprietà vale q.o. se l&rsquo;insieme dove fallisce ha misura nulla. È l&rsquo;avverbio che compare in ogni enunciato di questo nucleo.`],
+   [R`$L^p(\Omega)$`, R`funzioni misurabili con $\lVert f\rVert_p=\left(\int_\Omega|f|^p\right)^{1/p}\lt\infty$, con la convenzione che due funzioni uguali q.o. sono lo <b>stesso</b> elemento. Per $p=\infty$: $\lVert f\rVert_\infty=$ estremo superiore essenziale.`],
+   [R`<b>Riesz–Fischer</b>`, R`$L^p$ è <b>completo</b> per ogni $1\le p\le\infty$. In particolare $L^2$ è di Hilbert col prodotto scalare $\int f\bar g$ — <b>è il teorema che il nucleo 09 stava usando</b>.`],
+   [R`<b>densità</b>`, R`le funzioni continue (e i polinomi trigonometrici) sono <b>dense</b> in $L^2$: ogni $f\in L^2$ è limite in norma di funzioni buone. È così che i teoremi si dimostrano prima sul caso liscio e poi si estendono.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché in $L^2$ &laquo;due funzioni diverse&raquo; possono essere lo stesso elemento?`,
+    a:R`Perché la norma non distingue funzioni uguali q.o.: se $f=g$ tranne che in un punto, $\lVert f-g\rVert_2=0$. Se non si identificassero, la norma sarebbe solo una <b>semi</b>norma (norma nulla con vettore non nullo) e la geometria del nucleo 09 crollerebbe. Conseguenza da tenere a mente: in $L^2$ <b>non ha senso chiedere il valore in un punto</b>. Ecco perché la convergenza di Fourier è naturale in norma e non puntuale — e perché la $\delta$ (nucleo 15) non può essere una funzione di $L^2$.`}
+  ]}
+]},
+
+/* ---------------- 02 · I TRE TEOREMI ---------------- */
+{ num:'02', title:'I tre teoremi di passaggio al limite', meta:'convergenza monotona · lemma di Fatou · convergenza dominata — la licenza per scambiare $\\lim$ e $\\int$',
+  blocchi:[
+  {t:'prosa', title:'Perché sono il vero contenuto del nucleo', tag:'sintesi', html:R`
+  <p>Il nucleo 07 dava una licenza per scambiare $\lim$ e $\int$: la convergenza <b>uniforme</b>. È una condizione forte e spesso falsa. Lebesgue la sostituisce con ipotesi molto più deboli, e sono queste che si usano davvero.</p>
+  <ul>
+  <li><b>Convergenza monotona (Beppo Levi).</b> Se $0\le f_1\le f_2\le\cdots$ e $f_n\to f$ q.o., allora $\int f_n\to\int f$ (anche se il limite è $+\infty$). Serve per le serie a termini positivi: si può integrare termine a termine senza altre ipotesi.</li>
+  <li><b>Lemma di Fatou.</b> Se $f_n\ge0$ e $f_n\to f$ q.o., allora $\int f\le\liminf\int f_n$. Non dà l&rsquo;uguaglianza, ma è la disuguaglianza sempre disponibile: <b>l&rsquo;integrale non può crescere di colpo al limite</b> (può però calare: la massa può &laquo;scappare all&rsquo;infinito&raquo;).</li>
+  <li><b>Convergenza dominata (Lebesgue).</b> Se $f_n\to f$ q.o. e <b>esiste</b> $g$ integrabile con $|f_n|\le g$ per ogni $n$, allora $\int f_n\to\int f$. <b>È il teorema che userai il 90% delle volte.</b> Nessuna uniformità richiesta: basta un &laquo;cappello&raquo; integrabile che tiene ferma tutta la successione.</li>
+  </ul>
+  <div class="note warn"><b>Perché serve la dominante.</b> Senza, l&rsquo;enunciato è falso: prendi $f_n=n$ su $[0,1/n]$ e $0$ altrove. $f_n\to0$ puntualmente ovunque, ma $\int f_n=1$ per ogni $n$: il limite degli integrali è $1\ne0$. La massa non sparisce, si concentra — è lo stesso meccanismo che nel nucleo 15 produrrà la $\delta$. Qui nessuna $g$ integrabile può dominare la successione, e infatti il teorema non si applica.</div>`},
+  {t:'plot', title:'La successione che sfugge alla dominata',
+   intro:R`$f_n=n$ su $[0,1/n]$: tende a zero in ogni punto, ma la sua area resta $1$. Guardare questa figura è capire perché la dominante non è un tecnicismo.`,
+   plots:[
+    {kind:'func2d', xr:[-0.05,1.05], yr:[-0.4,6.4], height:340,
+     title:'f_2, f_4, f_6: piu alte e piu strette, area sempre 1',
+     curves:[
+      {f:'(x>0 && x<0.5)? 2 : 0', col:'#5eead4', width:2, label:'f2'},
+      {f:'(x>0 && x<0.25)? 4 : 0', col:'#4c8dff', width:2, label:'f4'},
+      {f:'(x>0 && x<0.1667)? 6 : 0', col:'#b98cff', width:2, label:'f6'}
+     ],
+     marks:[{x:0.75, y:0, label:'qui f_n = 0 gia da n=2', col:'#8fa0b5', up:true}]}
+   ],
+   leggi:R`Fissa un punto $x_0\gt0$ qualunque: da un certo $n$ in poi il rettangolo non lo copre più, e $f_n(x_0)=0$. Quindi $f_n\to0$ <b>in ogni punto</b>. Ma l&rsquo;area di ogni rettangolo è $n\cdot\frac1n=1$, costante: $\int f_n=1\not\to0=\int\lim f_n$. <b>Il limite puntuale non basta mai, da solo, a scambiare limite e integrale</b> — serve un controllo uniforme dall&rsquo;alto, ed è la funzione dominante $g$. Qui una $g$ integrabile che stia sopra tutte le $f_n$ dovrebbe valere almeno $1/x$ vicino all&rsquo;origine, che non è integrabile: nessuna dominante esiste, e il teorema correttamente non si applica. <b>Lettura in avanti:</b> questa stessa successione, vista come <i>funzionale</i> anziché come funzione, converge alla $\delta$ di Dirac — la massa non si annulla, si concentra in un punto. È il ponte diretto verso il nucleo 15.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Puoi derivare sotto il segno di integrale $F(t)=\int_0^\infty e^{-x}\cos(tx)\,dx$?`,
+    a:R`Sì. Il candidato derivato è $-\int_0^\infty x e^{-x}\sin(tx)dx$, e il modulo dell&rsquo;integrando è dominato da $g(x)=xe^{-x}$, <b>indipendente da $t$</b> e integrabile su $[0,\infty)$. La convergenza dominata (applicata ai rapporti incrementali) autorizza lo scambio. <b>Questo è lo schema standard:</b> per derivare sotto il segno si esibisce una dominante per la derivata, uniforme nel parametro. Senza quella riga, il passaggio è un atto di fede.`},
+   {q:R`$\int_0^1\frac{dx}{\sqrt x}$ esiste? E in che senso?`,
+    a:R`Vale $2$. Come integrale di Riemann è <b>improprio</b> (l&rsquo;integrando è illimitato in $0$) e va definito con un limite; come integrale di <b>Lebesgue</b> è un integrale ordinario di una funzione positiva misurabile, e la convergenza monotona lo calcola direttamente. È uno dei vantaggi pratici: Lebesgue assorbe gli integrali impropri <b>assolutamente</b> convergenti nella teoria generale. Attenzione però: quelli solo <b>condizionatamente</b> convergenti (come $\int_0^\infty\frac{\sin x}{x}dx$ del nucleo 13) <b>non</b> sono integrali di Lebesgue — restano limiti, e vanno trattati come tali.`}
+  ]}
+]},
+
+/* ---------------- 03 · GLI SPAZI Lp ---------------- */
+{ num:'03', title:'Gli spazi $L^p$ e cosa li distingue', meta:'Hölder e Minkowski · perché solo $L^2$ è di Hilbert · inclusioni su domini finiti',
+  blocchi:[
+  {t:'gram', title:'Le disuguaglianze che servono', rows:[
+   [R`<b>Hölder</b>`, R`$\displaystyle\int|fg|\le\lVert f\rVert_p\lVert g\rVert_q$ con $\frac1p+\frac1q=1$. Per $p=q=2$ è <b>Cauchy–Schwarz</b> (nucleo 09). È lo strumento per stimare integrali di prodotti.`],
+   [R`<b>Minkowski</b>`, R`$\lVert f+g\rVert_p\le\lVert f\rVert_p+\lVert g\rVert_p$: è la disuguaglianza triangolare, cioè ciò che rende $\lVert\cdot\rVert_p$ una <b>norma</b>.`],
+   [R`<b>inclusioni</b>`, R`su un dominio di <b>misura finita</b>: $p\lt q\Rightarrow L^q\subset L^p$ (più integrabilità in alto). Su $\mathbb{R}$ <b>nessuna inclusione</b>: $1/\sqrt{|x|}$ vicino a $0$ e $1/|x|$ all&rsquo;infinito rompono le cose in direzioni opposte.`],
+   [R`<b>solo $p=2$</b>`, R`è l&rsquo;unico $L^p$ la cui norma viene da un <b>prodotto scalare</b> (si riconosce con l&rsquo;identità del parallelogramma, che vale solo per $p=2$). Per questo la fisica quantistica vive in $L^2$ e non altrove: <b>servono angoli e ortogonalità</b>, non solo distanze.`]
+  ]},
+  {t:'prosa', title:'Il conto che chiude il nucleo 09', tag:'il debito saldato', html:R`
+  <p>Ora la catena è completa, e vale la pena vederla tutta insieme:</p>
+  <ol>
+  <li>Lebesgue costruisce un integrale robusto sotto limite (i tre teoremi della tappa 02).</li>
+  <li><b>Riesz&ndash;Fischer</b>: con quell&rsquo;integrale, $L^2$ è <b>completo</b> — ogni successione di Cauchy in norma quadratica converge a un elemento di $L^2$.</li>
+  <li>Con il prodotto scalare $\langle f,g\rangle=\int f\bar g$, $L^2$ è dunque uno spazio di <b>Hilbert</b> (nucleo 09, tappa 01).</li>
+  <li>Il sistema trigonometrico è ortonormale e <b>completo</b> in esso: le somme parziali di Fourier sono di Cauchy, quindi convergono, e convergono a $f$. <b>Parseval</b> vale.</li>
+  </ol>
+  <p>Senza il passo 2, il passo 4 sarebbe stato una speranza: le somme parziali avrebbero potuto puntare a un buco, come le rampe del nucleo 08 puntavano alla funzione segno. <b>Lebesgue è ciò che tappa quel buco</b> — e il prezzo pagato è che gli elementi di $L^2$ non sono funzioni ma classi di equivalenza, con la rinuncia al valore puntuale.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la meccanica quantistica sceglie $L^2$ e non, per dire, $L^1$ o $L^4$?`,
+    a:R`Perché serve la <b>struttura di Hilbert</b>: sovrapposizione (struttura lineare), probabilità come modulo quadro (norma), ortogonalità fra stati distinguibili e sviluppo su una base di autostati (prodotto scalare), e completezza perché i limiti di stati siano stati. Solo $p=2$ ha il prodotto scalare, e la scelta è quindi forzata dalla fisica, non convenzionale. $\lVert\psi\rVert_2^2=1$ <b>è</b> la conservazione della probabilità.`}
+  ]}
+]},
+
+/* ---------------- 04 · SENSO E ROTTE ---------------- */
+{ num:'04', title:'Il senso e le rotte fisiche', meta:'cosa cambia sapere che l’integrale è quello giusto',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il controesempio del nucleo 08 (spazio di continue non completo) chiedeva un rimedio; il nucleo 09 lo ha usato senza averlo; qui è dimostrato di cosa si tratta. Lo scambio $\lim/\int$ del nucleo 07, che richiedeva convergenza uniforme, ha ora la sua versione utilizzabile: la <b>convergenza dominata</b>.</p>
+  <p><b>Il punto.</b> Cambiare integrale non è un raffinamento tecnico: è ciò che rende gli spazi di funzioni <b>chiusi rispetto ai limiti</b>, e quindi utilizzabili come spazi di stati. Il prezzo — rinunciare al valore puntuale — è esattamente ciò che apre la porta al nucleo 15, dove gli oggetti buoni non sono più funzioni ma <b>funzionali</b>.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>L&rsquo;integrale di Lebesgue e la misura</b>: la nozione di &laquo;quanto pesa un insieme&raquo; e la robustezza dell&rsquo;integrale sotto limite.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Gli stati sono elementi di $L^2$, cioè <b>classi</b> di funzioni: il valore in un punto non è osservabile, solo gli integrali lo sono. La normalizzazione $\int|\psi|^2=1$ è una misura di probabilità, e la convergenza dominata è ciò che autorizza gran parte dei passaggi al limite nei conti.`},
+    {dove:'Meccanica<br>statistica', txt:R`La teoria della misura <b>è</b> il linguaggio della probabilità (Kolmogorov): uno stato macroscopico è una misura sullo spazio delle fasi, la misura di Liouville è invariante sotto il flusso hamiltoniano (nucleo 06), e l&rsquo;ipotesi ergodica è un enunciato sulla misura degli insiemi invarianti.`},
+    {dove:'Processi<br>stocastici', txt:R`Moto browniano, cammini aleatori, integrale sui cammini: tutti definiti come <b>misure su spazi di funzioni</b>. Qui l&rsquo;integrale di Riemann non è nemmeno pensabile — le traiettorie tipiche sono continue ma non derivabili in nessun punto.`}
+   ],
+   domanda:R`La misura è ciò che permette di dire che un insieme di configurazioni è &laquo;trascurabile&raquo; pur essendo infinito — i razionali in $[0,1]$, le traiettorie che tornano indietro spontaneamente. La meccanica statistica poggia interamente su questo tipo di affermazione: le configurazioni che violano il secondo principio <b>esistono</b>, ma hanno misura ridicolmente piccola. <b>Domanda che porti avanti:</b> «misura nulla» è una proprietà matematica esatta, mentre «misura $10^{-10^{23}}$» è una proprietà fisica di tutt&rsquo;altra natura — eppure le trattiamo allo stesso modo. Quando studierai la termalizzazione, la distinzione fra <i>impossibile</i> e <i>trascurabile</i> tornerà come questione centrale, e questo nucleo ti dà il vocabolario per porla con precisione.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo10-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 10 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 10-lebesgue.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 01 — Differenziabilità in Rⁿ</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>01 — Differenziabilità in R&#8319;</b> · Analisi Vettoriale (Terracina), Blocco I</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 01: Differenziabilità in Rⁿ <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Il blocco `prolessi` (preannuncio fisico) ha: oggetto (la cosa imparata ora),
+   rotte[] = {dove, txt} verso EM / stat mech / QM col dizionario esatto, e
+   domanda (l'interrogativo aperto che tiene la mente in moto verso la tesi).
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Blocco I · l&rsquo;esercizio-tipo che questo nucleo ti fa risolvere',
+  blocchi:[
+  {t:'prosa', title:'L&rsquo;esercizio che devi saper chiudere', tag:'mira d&rsquo;esame', html:R`
+  <p>Il primo esercizio dello scritto di Terracina (Blocco I, funzioni di più variabili) ha una forma quasi fissa. Una funzione $f:\mathbb{R}^2\to\mathbb{R}$ definita <b>a tratti</b> — un quoziente fuori dall&rsquo;origine, un valore imposto in $(0,0)$ — e una catena di domande:</p>
+  <div class="testo"><span class="src">Tipo Blocco I · funzioni di più variabili (mappa Argonauta, Parte I.3)</span>
+  Sia $f(x,y)=\dfrac{N(x,y)}{(x^2+y^2)^{\alpha}}$ per $(x,y)\neq(0,0)$, $f(0,0)=0$. Al variare del parametro $\alpha$: $f$ è <b>continua</b> in $(0,0)$? <b>Derivabile</b> (esistono le parziali)? <b>Differenziabile</b>? Esistono le <b>derivate direzionali</b> e vale $\partial_v f=\nabla f\cdot v$?</div>
+  <p>Ci sono quattro parole — continua, derivabile, differenziabile, direzionale — e la trappola dell&rsquo;esame vive esattamente nel <b>rapporto fra loro</b>. Chi le tratta come sinonimi sbaglia; chi conosce la gerarchia esatta risponde in tre righe. Questo nucleo costruisce quella gerarchia dal basso.</p>
+  <p class="note"><b>Nota sulle fonti.</b> Gli scritti del <i>primo</i> esonero di Terracina non sono nella banca-dati (unico buco segnalato dall&rsquo;Argonauta, mappa §5). Il tipo di esercizio è però documentato dal programma ufficiale (Parte I) e replicato in dettaglio nel pool 02 del saper-fare del secondo esonero, da cui provengono i controlli qui sotto.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Esibire una funzione le cui <b>parziali esistono in $0$</b> ma che <b>non è continua</b> lungo una direzione obliqua — e spiegare perché non è una patologia rara ma il caso generico.</li>
+  <li>Scrivere la definizione di differenziabilità come esistenza di un&rsquo;<b>unica applicazione lineare</b> $L$ con $f(x_0+h)-f(x_0)-L(h)=o(|h|)$, e leggere ogni simbolo.</li>
+  <li>Dimostrare che se $f$ è differenziabile allora $L(h)=\nabla f(x_0)\cdot h$ e $\partial_v f=\nabla f\cdot v$, e mostrare con un controesempio che <b>senza</b> differenziabilità la formula $\nabla f\cdot v$ è falsa.</li>
+  <li>Usare la condizione sufficiente $C^1\Rightarrow$ differenziabile per chiudere l&rsquo;esercizio quando le parziali sono continue, senza calcolare il limite del resto.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · LE PARZIALI NON BASTANO ---------------- */
+{ num:'01', title:'Le parziali non bastano', meta:'Il controesempio-cardine · parziali esistono, la funzione non è continua',
+  blocchi:[
+  {t:'prosa', title:'La domanda giusta', tag:'first principles', html:R`
+  <p>La derivata parziale $\partial_x f(0,0)$ guarda $f$ <b>solo lungo l&rsquo;asse $x$</b>: è il limite di $\dfrac{f(h,0)-f(0,0)}{h}$. La parziale $\partial_y f(0,0)$ guarda solo l&rsquo;asse $y$. Due rette. Ma un intorno del punto contiene <b>infinite</b> direzioni, e — peggio — infinite curve non rettilinee. Non c&rsquo;è nessun motivo per cui due informazioni assiali debbano controllare il comportamento su tutto il piano.</p>
+  <p>Lo si vede meglio con un esempio in cui le parziali esistono, valgono zero, e nonostante ciò la funzione <b>non tende nemmeno a un limite</b> nell&rsquo;origine.</p>`},
+  {t:'esercizio', title:'Il controesempio, passo per passo', src:'Controesempio canonico · $f(x,y)=xy/(x^2+y^2)$',
+   testo:R`Sia $f(x,y)=\dfrac{xy}{x^2+y^2}$ per $(x,y)\neq(0,0)$ e $f(0,0)=0$. Esistono $\partial_x f(0,0)$ e $\partial_y f(0,0)$? $f$ è continua in $(0,0)$? È differenziabile?`,
+   steps:[
+    {label:'Parziali dalla definizione', body:R`<p>Sull&rsquo;asse $x$ la funzione è nulla: $f(h,0)=\dfrac{h\cdot 0}{h^2+0}=0$. Quindi $$\partial_x f(0,0)=\lim_{h\to0}\frac{f(h,0)-f(0,0)}{h}=\lim_{h\to0}\frac{0-0}{h}=0.$$ Idem sull&rsquo;asse $y$: $f(0,k)=0$, dunque $\partial_y f(0,0)=0$. <b>Entrambe le parziali esistono e valgono $0$</b>: $\nabla f(0,0)=(0,0)$.</p>
+    <div class="note"><b>Perché dalla definizione.</b> In $(0,0)$ la funzione è definita a parte ($f(0,0)=0$): le regole di derivazione applicate all&rsquo;espressione $xy/(x^2+y^2)$ valgono <i>fuori</i> dall&rsquo;origine, non <i>nell&rsquo;</i>origine. Nell&rsquo;origine c&rsquo;è solo il rapporto incrementale.</div>`},
+    {label:'Continuità: il test lungo le rette', body:R`<p>Avviciniamoci a $0$ lungo la retta $y=mx$: $$f(x,mx)=\frac{x\cdot mx}{x^2+m^2x^2}=\frac{m x^2}{(1+m^2)x^2}=\frac{m}{1+m^2}.$$ Il valore <b>non dipende da $x$</b>: è costante lungo ogni retta, ma <b>cambia con la pendenza $m$</b>. Lungo l&rsquo;asse ($m=0$) vale $0$; lungo la bisettrice $y=x$ ($m=1$) vale $\tfrac12$.</p>`},
+    {label:'Conclusione sulla continuità', body:R`<p>Due direzioni danno due limiti diversi ($0$ e $\tfrac12$): il limite $\lim_{(x,y)\to0}f$ <b>non esiste</b>. Poiché $f(0,0)=0\neq\tfrac12$, in particolare $f$ <b>non è continua</b> in $(0,0)$. La rottura avviene lungo una direzione <b>obliqua</b> — sugli assi $f\equiv0$ nasconde il problema, ed è esattamente lì che vivono le parziali.</p>`},
+    {label:'Quindi non differenziabile', body:R`<p>La differenziabilità implica la continuità (lo dimostreremo nella tappa 02). Per contronominale: $f$ non continua $\Rightarrow$ $f$ <b>non differenziabile</b>. Volendo vederlo direttamente, il resto normalizzato con $\nabla f(0)=0$ è $$\frac{f(h,k)-0-0}{\sqrt{h^2+k^2}}=\frac{hk}{(h^2+k^2)^{3/2}},$$ che lungo $h=k$ vale $\dfrac{h^2}{(2h^2)^{3/2}}=\dfrac{1}{2\sqrt2\,|h|}\to+\infty$: non tende a $0$. $\blacksquare$</p>`}
+   ],
+   nota:R`Morale operativa: l&rsquo;esistenza delle parziali è un&rsquo;informazione <b>assiale</b>, la continuità e la differenziabilità sono informazioni <b>omnidirezionali</b>. Nell&rsquo;esame, quando le parziali esistono, non hai ancora concluso nulla sulla differenziabilità: devi ancora fare il test sul resto.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché non puoi calcolare $\partial_x f(0,0)$ derivando l&rsquo;espressione $\dfrac{xy}{x^2+y^2}$ rispetto a $x$ e poi ponendo $(0,0)$?`,
+    a:R`Perché quell&rsquo;espressione descrive $f$ solo <b>fuori</b> dall&rsquo;origine; in $(0,0)$ vale la definizione separata $f(0,0)=0$. La parziale nell&rsquo;origine è un limite di rapporto incrementale, non il valore di una formula derivata altrove.`},
+   {q:R`Le parziali di questa $f$ esistono in $0$. Puoi concludere che $f$ ha piano tangente in $0$?`,
+    a:R`No. $f$ non è nemmeno continua in $0$: non c&rsquo;è nessun piano che la approssimi. L&rsquo;esistenza delle parziali non dà il piano tangente — lo dà la differenziabilità.`}
+  ]}
+]},
+
+/* ---------------- 02 · LA DEFINIZIONE ---------------- */
+{ num:'02', title:'La definizione di differenziabilità', meta:'Il differenziale come unica applicazione lineare · $f(x_0+h)-f(x_0)-L(h)=o(|h|)$',
+  blocchi:[
+  {t:'prosa', title:'L&rsquo;idea, prima della formula', tag:'first principles', html:R`
+  <p>In una variabile, $f$ derivabile in $x_0$ significa: vicino a $x_0$, la funzione è approssimata dalla <b>retta tangente</b>, con errore trascurabile rispetto allo spostamento. In più variabili teniamo <b>l&rsquo;idea</b> (approssimazione lineare con errore trascurabile) e buttiamo <b>la formulazione col rapporto</b> $\frac{f(x_0+h)-f(x_0)}{h}$, che non ha senso: $h\in\mathbb{R}^n$ è un vettore, e non si divide per un vettore.</p>
+  <p>La riscrittura che sopravvive: chiediamo che esista un&rsquo;<b>applicazione lineare</b> $L$ tale che la differenza fra l&rsquo;incremento vero $f(x_0+h)-f(x_0)$ e la previsione lineare $L(h)$ sia infinitesima <b>più in fretta</b> di $|h|$.</p>`},
+  {t:'prosa', title:'La definizione', tag:'definizione', html:R`
+  <p>Sia $A\subseteq\mathbb{R}^n$ aperto, $f:A\to\mathbb{R}$, $x_0\in A$. Diciamo che $f$ è <b>differenziabile</b> in $x_0$ se esiste un&rsquo;applicazione lineare $L:\mathbb{R}^n\to\mathbb{R}$ tale che</p>
+  $$f(x_0+h)-f(x_0)-L(h)=o(|h|)\qquad (h\to0),$$
+  <p>che è esattamente la scrittura compatta di</p>
+  $$\lim_{h\to0}\frac{f(x_0+h)-f(x_0)-L(h)}{|h|}=0. \tag{D}$$
+  <p>Se un tale $L$ esiste, si chiama <b>differenziale</b> di $f$ in $x_0$ e si scrive $df_{x_0}$ (oppure $df(x_0)$).</p>`},
+  {t:'gram', title:'La grammatica di (D), simbolo per simbolo', rows:[
+   [R`$A$ aperto`, R`il dominio è un <b>aperto</b>: attorno a $x_0$ c&rsquo;è tutta una pallina di punti, così $x_0+h$ appartiene ad $A$ per $|h|$ piccolo e $f(x_0+h)$ ha senso in ogni direzione.`],
+   [R`$h\in\mathbb{R}^n$`, R`l&rsquo;<b>incremento</b>, un <b>vettore</b>. &laquo;$h\to0$&raquo; significa $|h|\to0$ <b>da ogni direzione e lungo ogni curva</b>: è un limite in $\mathbb{R}^n$, non lungo una retta.`],
+   [R`$|h|$`, R`la <b>norma euclidea</b> $\sqrt{h_1^2+\cdots+h_n^2}$, un numero $\ge0$. Compare al denominatore perché <i>quello</i> sì è un numero: misura &laquo;quanto&raquo; ci si è spostati, ignorando la direzione.`],
+   [R`$L:\mathbb{R}^n\to\mathbb{R}$`, R`un&rsquo;applicazione <b>lineare</b>: $L(\alpha u+\beta v)=\alpha L(u)+\beta L(v)$. È l&rsquo;oggetto approssimante. In coordinate $L(h)=a_1h_1+\cdots+a_nh_n$ per certi coefficienti $a_i$.`],
+   [R`$L(h)$`, R`un <b>numero reale</b>: la variazione di $f$ <b>predetta dal modello lineare</b> se ci si sposta di $h$.`],
+   [R`$o(|h|)$`, R`&laquo;o-piccolo di $|h|$&raquo;: sta per una quantità $R(h)$ con $\dfrac{R(h)}{|h|}\to0$ per $h\to0$. Cioè: l&rsquo;errore va a zero <b>più in fretta</b> di $|h|$. È una <i>qualità</i> dell&rsquo;errore, non un numero fisso.`],
+   [R`$df_{x_0}$`, R`il <b>differenziale</b>: l&rsquo;applicazione lineare $L$ stessa (non un numero). È l&rsquo;oggetto che la (D) definisce, ed è <b>unico</b> quando esiste (prossimo blocco).`]
+  ]},
+  {t:'reveal', title:'Perché $L$, se esiste, è unico', tag:'dimostrazione', steps:[
+   {label:'Supponi due candidati', body:R`<p>Siano $L_1,L_2$ due applicazioni lineari che verificano entrambe la (D). Sottraendo le due condizioni, la differenza $M:=L_1-L_2$ (ancora lineare) soddisfa $$M(h)=[f(x_0+h)-f(x_0)-L_2(h)]-[f(x_0+h)-f(x_0)-L_1(h)]=o(|h|)-o(|h|)=o(|h|).$$ Dunque $M$ è lineare <b>e</b> $M(h)=o(|h|)$.</p>`},
+   {label:'Una lineare che è $o(|h|)$ è nulla', body:R`<p>Fissa un vettore $v\neq0$ e muoviti lungo la retta $h=tv$, $t\to0$. Per linearità $M(tv)=t\,M(v)$, e $|tv|=|t|\,|v|$. Allora $$0=\lim_{t\to0}\frac{M(tv)}{|tv|}=\lim_{t\to0}\frac{t\,M(v)}{|t|\,|v|}=\frac{M(v)}{|v|}\cdot\lim_{t\to0}\frac{t}{|t|}.$$ Il fattore $t/|t|$ vale $\pm1$: perché il limite sia $0$ deve essere $M(v)=0$.</p>`},
+   {label:'Conclusione', body:R`<p>Questo vale per ogni $v$: $M\equiv0$, cioè $L_1=L_2$. L&rsquo;applicazione lineare che approssima $f$, se c&rsquo;è, è <b>una sola</b>. Ecco perché si parla <b>del</b> differenziale, con l&rsquo;articolo determinativo. $\blacksquare$</p>
+   <div class="note">Questo argomento &laquo;$h=tv$&raquo; è lo stesso che nella prossima tappa estrae le parziali da $L$: la retta è il microscopio che legge una lineare una direzione alla volta.</div>`}
+  ]},
+  {t:'reveal', title:'Differenziabile ⇒ continua', tag:'dimostrazione', steps:[
+   {label:'Isola l&rsquo;incremento', body:R`<p>Dalla (D), $f(x_0+h)-f(x_0)=L(h)+o(|h|)$. Facciamo $h\to0$ e controlliamo che il secondo membro tende a $0$.</p>`},
+   {label:'I due pezzi vanno a zero', body:R`<p>$L$ è lineare, quindi continua: $L(h)\to L(0)=0$. E $o(|h|)\to0$ (è addirittura infinitesimo più veloce di $|h|$). Perciò $f(x_0+h)-f(x_0)\to0$, cioè $\lim_{h\to0}f(x_0+h)=f(x_0)$: $f$ è <b>continua</b> in $x_0$. $\blacksquare$</p>
+   <div class="note"><b>È la chiave della tappa 01.</b> $xy/(x^2+y^2)$ non è continua in $0$: quindi <b>non può</b> essere differenziabile, per quanto le parziali esistano. La continuità è un prerequisito necessario della differenziabilità, non una sua conseguenza opzionale.</div>`}
+  ]}
+]},
+
+/* ---------------- 03 · GRADIENTE E DERIVATA DIREZIONALE ---------------- */
+{ num:'03', title:'Gradiente e derivata direzionale', meta:'$L(h)=\\nabla f\\cdot h$ · $\\partial_v f=\\nabla f\\cdot v$ · e perché la formula vale SOLO se $f$ è differenziabile',
+  blocchi:[
+  {t:'reveal', title:'Il differenziale è il gradiente', tag:'dimostrazione', steps:[
+   {label:'Leggi $L$ lungo gli assi', body:R`<p>Sia $f$ differenziabile in $x_0$ con differenziale $L$. Prendi $h=t\,e_i$ ($e_i$ = $i$-esimo versore della base, $t\to0$). La (D) dà $$f(x_0+te_i)-f(x_0)=L(te_i)+o(|te_i|)=t\,L(e_i)+o(|t|).$$ Dividi per $t$: $$\frac{f(x_0+te_i)-f(x_0)}{t}=L(e_i)+\frac{o(|t|)}{t}\xrightarrow{t\to0}L(e_i).$$</p>`},
+   {label:'Il limite a sinistra è la parziale', body:R`<p>Quel limite <b>è</b> la definizione di $\partial_i f(x_0)$. Quindi $$L(e_i)=\partial_i f(x_0)\qquad i=1,\dots,n.$$ La differenziabilità <b>garantisce che le parziali esistano</b> (il viceversa è falso: tappa 01).</p>`},
+   {label:'Ricomponi $L$', body:R`<p>$L$ è lineare e ne conosci i valori sulla base: per un $h=(h_1,\dots,h_n)=\sum_i h_i e_i$, $$L(h)=\sum_{i=1}^n h_i\,L(e_i)=\sum_{i=1}^n \partial_i f(x_0)\,h_i=\nabla f(x_0)\cdot h,$$ avendo posto $\nabla f(x_0):=\big(\partial_1 f(x_0),\dots,\partial_n f(x_0)\big)$, il <b>gradiente</b>. Dunque la (D) diventa la forma operativa che userai all&rsquo;esame: $$\lim_{h\to0}\frac{f(x_0+h)-f(x_0)-\nabla f(x_0)\cdot h}{|h|}=0. \tag{D$'$}$$ $\blacksquare$</p>`}
+  ]},
+  {t:'gram', title:'Differenziale vs gradiente — non confonderli', rows:[
+   [R`$df_{x_0}$`, R`il <b>differenziale</b>: un&rsquo;<b>applicazione lineare</b> $\mathbb{R}^n\to\mathbb{R}$. Mangia un vettore $h$, restituisce un numero.`],
+   [R`$\nabla f(x_0)$`, R`il <b>gradiente</b>: un <b>vettore</b> di $\mathbb{R}^n$, le $n$ parziali incolonnate. È la <i>rappresentazione</i> di $df_{x_0}$ tramite il prodotto scalare: $df_{x_0}(h)=\nabla f(x_0)\cdot h$.`],
+   [R`$\partial_i f(x_0)$`, R`l&rsquo;$i$-esima <b>parziale</b>, un numero: $L(e_i)$. Le parziali sono le <b>componenti</b> del gradiente.`],
+   [R`$\nabla f\cdot h$`, R`<b>prodotto scalare</b> gradiente$\times$incremento: $\sum_i \partial_i f\,h_i$. È il numero &laquo;variazione predetta&raquo;.`]
+  ]},
+  {t:'reveal', title:'Derivata direzionale: se differenziabile, è $\\nabla f\\cdot v$', tag:'dimostrazione', steps:[
+   {label:'Definizione', body:R`<p>La <b>derivata direzionale</b> di $f$ in $x_0$ lungo il vettore $v$ è $$\partial_v f(x_0)=\lim_{t\to0}\frac{f(x_0+tv)-f(x_0)}{t},$$ il tasso di variazione muovendosi lungo la retta di direzione $v$. (Con $v=e_i$ si riottiene la parziale.)</p>`},
+   {label:'Usa la differenziabilità', body:R`<p>Se $f$ è differenziabile, applica la (D&#8242;) con $h=tv$: $$f(x_0+tv)-f(x_0)=\nabla f(x_0)\cdot(tv)+o(|tv|)=t\,\nabla f(x_0)\cdot v+o(|t|).$$ Dividi per $t$ e manda $t\to0$: $$\partial_v f(x_0)=\nabla f(x_0)\cdot v. \tag{$\ast$}$$ Tutte le direzionali esistono e sono <b>lineari in $v$</b>, lette da un solo oggetto: il gradiente. $\blacksquare$</p>`}
+  ]},
+  {t:'prosa', title:'Perché ($\\ast$) è falsa senza differenziabilità', tag:'il cuore della trappola', html:R`
+  <p>La formula $\partial_v f=\nabla f\cdot v$ <b>non è una definizione</b>: è un <b>teorema</b>, e la sua ipotesi è la differenziabilità. Se $f$ non è differenziabile, possono esistere tutte le direzionali e nondimeno la formula essere <b>sbagliata</b> — perché le direzionali non sono più lineari in $v$, e nessun gradiente può rappresentarle. Ecco l&rsquo;esempio che lo mostra nudo.</p>`},
+  {t:'esercizio', title:'Tutte le direzionali esistono, eppure ($\\ast$) fallisce', src:'Controesempio · $g(x,y)=x^2y/(x^4+y^2)$',
+   testo:R`Sia $g(x,y)=\dfrac{x^2 y}{x^4+y^2}$ per $(x,y)\neq(0,0)$, $g(0,0)=0$. Calcola tutte le derivate direzionali in $0$. Vale $\partial_v g=\nabla g\cdot v$? $g$ è differenziabile?`,
+   steps:[
+    {label:'Il gradiente in $0$', body:R`<p>Sugli assi $g$ è nulla: $g(x,0)=0$ e $g(0,y)=0$. Quindi $\partial_x g(0,0)=\partial_y g(0,0)=0$, cioè $\nabla g(0,0)=(0,0)$.</p>`},
+    {label:'Direzionale lungo $v=(a,b)$, $b\neq0$', body:R`<p>$$\frac{g(ta,tb)}{t}=\frac1t\cdot\frac{(ta)^2(tb)}{(ta)^4+(tb)^2}=\frac1t\cdot\frac{t^3a^2b}{t^4a^4+t^2b^2}=\frac1t\cdot\frac{t\,a^2b}{t^2a^4+b^2}=\frac{a^2b}{t^2a^4+b^2}.$$ Per $t\to0$: $$\partial_v g(0,0)=\frac{a^2 b}{b^2}=\frac{a^2}{b}.$$ Per $v=(a,0)$ ($b=0$) invece $g(ta,0)/t=0$, quindi $\partial_v g=0$. <b>Tutte</b> le direzionali esistono.</p>`},
+    {label:'Confronto con $\\nabla g\\cdot v$', body:R`<p>Sarebbe $\nabla g(0,0)\cdot v=(0,0)\cdot(a,b)=0$. Ma la direzionale vera vale $a^2/b\neq0$ (per $a,b\neq0$). La formula ($\ast$) <b>è falsa</b>: dà $0$, il valore giusto è $a^2/b$. Inoltre $a^2/b$ <b>non è lineare</b> in $(a,b)$ — nessun gradiente potrebbe generarla.</p>`},
+    {label:'Quindi non differenziabile', body:R`<p>Se $g$ fosse differenziabile, ($\ast$) varrebbe: contraddizione. Dunque $g$ <b>non è differenziabile</b> in $0$, pur avendo tutte le direzionali. (Coerente: lungo la parabola $y=x^2$ si ha $g=\dfrac{x^2\cdot x^2}{x^4+x^4}=\tfrac12$, quindi $g$ non è nemmeno continua in $0$.) $\blacksquare$</p>`}
+   ],
+   nota:R`Gerarchia completa, adesso visibile in un colpo: <b>parziali</b> $\subsetneq$ <b>tutte le direzionali</b> $\subsetneq$ <b>differenziabilità</b>. Ogni inclusione è stretta. La formula $\partial_v f=\nabla f\cdot v$ sta <b>sopra</b> l&rsquo;ultima soglia: chiederla senza differenziabilità è l&rsquo;errore concettuale che gli scritti puniscono.`},
+  {t:'plot', title:'Perché nessun piano tangente esiste',
+   intro:R`La superficie $g(x,y)=\dfrac{x^2y}{x^4+y^2}$ e l&rsquo;<b>unico piano candidato</b> a essere tangente in $0$: quello orizzontale $z=0$ (perché $\nabla g(0,0)=(0,0)$). <b>Ruota</b> e guarda la cresta.`,
+   plots:[
+    {kind:'surface3d', f:'x*x*y/(x*x*x*x+y*y+1e-9)', xr:[-1.4,1.4], yr:[-1.05,1.4], n:52, height:400, yaw:1.15, pitch:0.72, zscale:1.25, tangent:{x0:0, y0:0, span:1.25}, title:'g e il piano candidato z=0: la cresta lo abbandona subito'}
+   ],
+   leggi:R`Le parziali sono nulle, quindi <b>se</b> un piano tangente esistesse sarebbe l&rsquo;orizzontale $z=0$ (l&rsquo;azzurro). Ma la superficie <b>non gli si appoggia</b>: lungo la parabola $y=x^2$ la cresta sale a $g=\tfrac12$ e ci resta, mentre il piano è piatto a $0$ — lo scarto <b>non</b> è $o(|h|)$, è di ordine $1$. Un piano tangente che manca lungo <i>una</i> direzione non è un piano tangente. Confrontala con la sella della tappa 06: là il piano azzurro <b>abbracciava</b> la superficie in ogni direzione; qui la cresta lo pianta in asso appena esci dagli assi. Questa è la traduzione geometrica di &laquo;tutte le direzionali esistono ma $g$ non è differenziabile&raquo;: le direzionali sono le pendenze lungo le <b>rette</b> (e sugli assi valgono $0$), ma la differenziabilità chiede l&rsquo;appoggio lungo <b>ogni</b> curva, e la parabola lo nega.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una funzione ha tutte le derivate direzionali in $0$. È differenziabile lì?`,
+    a:R`No. $x^2y/(x^4+y^2)$ le ha tutte e non è differenziabile (né continua). L&rsquo;esistenza delle direzionali non basta: serve che il resto normalizzato $\to0$ e che le direzionali risultino lineari in $v$.`},
+   {q:R`In quale ordine logico stanno: &laquo;esistono le parziali&raquo;, &laquo;$f$ differenziabile&raquo;, &laquo;$f$ continua&raquo;, &laquo;$\partial_v f=\nabla f\cdot v$&raquo;?`,
+    a:R`Differenziabile $\Rightarrow$ {continua, esistono tutte le direzionali, vale $\partial_v f=\nabla f\cdot v$, in particolare esistono le parziali}. Nessuna delle frecce si inverte. Le parziali (o le direzionali) da sole non danno né continuità né differenziabilità.`}
+  ]}
+]},
+
+/* ---------------- 04 · C¹ ⇒ DIFFERENZIABILE ---------------- */
+{ num:'04', title:'C¹ ⇒ differenziabile', meta:'Teorema del differenziale totale · la scorciatoia operativa dell&rsquo;esame',
+  blocchi:[
+  {t:'prosa', title:'Il problema pratico', tag:'perché serve', html:R`
+  <p>La definizione (D&#8242;) chiede di calcolare un <b>limite in due variabili</b> del resto normalizzato: a volte è delicato (dipende dalla direzione, servono le polari). Quando le parziali sono <b>continue</b>, c&rsquo;è una scorciatoia che evita del tutto quel limite. È il criterio più usato per <i>concludere</i> la differenziabilità in un esame.</p>`},
+  {t:'prosa', title:'Il teorema', tag:'enunciato', html:R`
+  <p><b>Teorema (del differenziale totale).</b> Sia $f:A\to\mathbb{R}$, $A\subseteq\mathbb{R}^n$ aperto, $x_0\in A$. Se le derivate parziali $\partial_1 f,\dots,\partial_n f$ <b>esistono in un intorno</b> di $x_0$ e <b>sono continue in $x_0$</b>, allora $f$ è <b>differenziabile</b> in $x_0$.</p>
+  <p>In sigla: $f\in C^1$ vicino a $x_0\ \Rightarrow\ f$ differenziabile in $x_0$. Con la tappa 03 si chiude la catena completa a senso unico:</p>
+  $$f\in C^1\ \Longrightarrow\ \text{differenziabile}\ \Longrightarrow\ \begin{cases}\ f\ \text{continua}\\[2pt] \exists\,\partial_v f\ \forall v,\quad \partial_v f=\nabla f\cdot v\end{cases}$$
+  <p>e <b>nessuna</b> freccia si inverte. Le controfrecce sono i controesempi delle tappe 01 e 03.</p>
+  <div class="note warn"><b>Attenzione al verso.</b> $C^1\Rightarrow$ differenziabile, ma <b>differenziabile $\not\Rightarrow C^1$</b>: esistono funzioni differenziabili con parziali <i>discontinue</i>. Il teorema è una condizione <b>sufficiente</b>, non necessaria. Se le parziali non sono continue, non hai concluso «non differenziabile» — devi tornare alla (D&#8242;).</div>`},
+  {t:'reveal', title:'L&rsquo;idea della dimostrazione (per $n=2$)', tag:'dimostrazione', steps:[
+   {label:'Spezza l&rsquo;incremento a scaletta', body:R`<p>Scrivi $h=(s,t)$ e decomponi l&rsquo;incremento muovendoti <b>prima lungo $x$, poi lungo $y$</b>, passando per il vertice $(x_0+s,\,y_0)$: $$f(x_0+s,y_0+t)-f(x_0,y_0)=\underbrace{\big[f(x_0+s,y_0+t)-f(x_0+s,y_0)\big]}_{\text{solo }y\text{ cambia}}+\underbrace{\big[f(x_0+s,y_0)-f(x_0,y_0)\big]}_{\text{solo }x\text{ cambia}}.$$ Ogni parentesi è un incremento <b>in una sola variabile</b>: lì sai fare.</p>`},
+   {label:'Lagrange su ciascun pezzo', body:R`<p>In ogni parentesi varia una variabile sola, e la parziale corrispondente esiste: applica il teorema di Lagrange (valor medio) in una variabile. Esistono $\xi$ tra $x_0$ e $x_0+s$, e $\eta$ tra $y_0$ e $y_0+t$, tali che $$f(x_0+s,y_0+t)-f(x_0+s,y_0)=\partial_y f(x_0+s,\eta)\,t,\qquad f(x_0+s,y_0)-f(x_0,y_0)=\partial_x f(\xi,y_0)\,s.$$</p>`},
+   {label:'Usa la continuità delle parziali', body:R`<p>Poiché $(\xi,\eta)\to(x_0,y_0)$ quando $(s,t)\to(0,0)$, e le parziali sono <b>continue</b> in $(x_0,y_0)$: $$\partial_x f(\xi,y_0)=\partial_x f(x_0,y_0)+\varepsilon_1,\qquad \partial_y f(x_0+s,\eta)=\partial_y f(x_0,y_0)+\varepsilon_2,$$ con $\varepsilon_1,\varepsilon_2\to0$ per $(s,t)\to0$. È qui, e solo qui, che serve la continuità.</p>`},
+   {label:'Riconosci il differenziale e il resto', body:R`<p>Sommando: $$f(x_0+s,y_0+t)-f(x_0,y_0)=\big[\partial_x f(x_0,y_0)\,s+\partial_y f(x_0,y_0)\,t\big]+\big[\varepsilon_1 s+\varepsilon_2 t\big].$$ La prima parentesi è $\nabla f(x_0)\cdot h$. La seconda è il resto: $$\frac{|\varepsilon_1 s+\varepsilon_2 t|}{|h|}\le\frac{|\varepsilon_1|\,|s|+|\varepsilon_2|\,|t|}{|h|}\le|\varepsilon_1|+|\varepsilon_2|\to0,$$ usando $|s|,|t|\le|h|$. Dunque il resto è $o(|h|)$: la (D&#8242;) è verificata, $f$ è differenziabile. $\blacksquare$</p>
+   <div class="note">Basta in realtà che <b>una</b> delle due parziali sia continua e l&rsquo;altra semplicemente esista: l&rsquo;asimmetria della scaletta lo rende evidente. La versione &laquo;entrambe continue&raquo; è quella comoda da citare.</div>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$f(x,y)=e^{x}\cos y+x^3y$. È differenziabile su tutto $\mathbb{R}^2$? Con quale argomento in una riga?`,
+    a:R`Sì: le parziali $\partial_x f=e^x\cos y+3x^2y$ e $\partial_y f=-e^x\sin y+x^3$ sono composizioni/prodotti di funzioni continue, quindi continue ovunque. $f\in C^1(\mathbb{R}^2)\Rightarrow$ differenziabile ovunque. Nessun limite da calcolare.`},
+   {q:R`Le parziali di $f$ in $x_0$ esistono ma sono discontinue in $x_0$. Cosa puoi concludere sulla differenziabilità?`,
+    a:R`Nulla, dal solo teorema: la sua ipotesi (continuità) cade, ma è <b>sufficiente</b>, non necessaria. $f$ potrebbe essere differenziabile o no; devi tornare alla definizione (D&#8242;) e testare il resto normalizzato.`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'Prova prima, poi rivela · uno standard (tipo Blocco I) e uno trabocchetto',
+  blocchi:[
+  {t:'prosa', title:'Istruzioni', tag:'come usarli', html:R`
+  <p>Copri le soluzioni, prendi carta, chiudi l&rsquo;esercizio da solo. Rivela un passo alla volta <b>solo dopo</b> aver tentato: il valore è nel gesto tuo, non nella lettura del mio. L&rsquo;esercizio 1 è la forma standard del Blocco I; l&rsquo;esercizio 2 monta la trappola delle <b>due soglie diverse</b> (continuità e differenziabilità) segnalata dall&rsquo;Argonauta (mappa, pool 02, scritto <code>20230504</code>).</p>`},
+  {t:'esercizio', title:'Esercizio 1 — studio completo (standard)', src:'Tipo Blocco I · $f(x,y)=(x^3+y^3)/(x^2+y^2)$',
+   testo:R`Sia $f(x,y)=\dfrac{x^3+y^3}{x^2+y^2}$ per $(x,y)\neq(0,0)$, $f(0,0)=0$. Studia in $(0,0)$: continuità, esistenza delle parziali, differenziabilità.`,
+   steps:[
+    {label:'Continuità', body:R`<p>Passa in polari, $x=\rho\cos\theta$, $y=\rho\sin\theta$, $\rho=|(x,y)|$. Il numeratore: $|x^3+y^3|\le|x|^3+|y|^3\le 2\rho^3$; il denominatore è $\rho^2$. Quindi $$|f(x,y)|\le\frac{2\rho^3}{\rho^2}=2\rho\xrightarrow{\rho\to0}0=f(0,0).$$ La stima è <b>uniforme in $\theta$</b> (la costante $2$ non dipende dall&rsquo;angolo): $f$ è <b>continua</b> in $(0,0)$.</p>`},
+    {label:'Parziali dalla definizione', body:R`<p>$f(h,0)=\dfrac{h^3}{h^2}=h$, quindi $\partial_x f(0,0)=\lim_{h\to0}\dfrac{h-0}{h}=1$. Simmetricamente $f(0,k)=k$ dà $\partial_y f(0,0)=1$. Dunque $\nabla f(0,0)=(1,1)$. (Qui, a differenza dei controesempi, le parziali <b>non</b> sono nulle.)</p>`},
+    {label:'Imposta il resto (D&#8242;)', body:R`<p>Con $\nabla f(0,0)=(1,1)$ il numeratore del resto è $$f(h,k)-f(0,0)-\big(1\cdot h+1\cdot k\big)=\frac{h^3+k^3}{h^2+k^2}-(h+k).$$ Metti a denominatore comune: $$\frac{h^3+k^3-(h+k)(h^2+k^2)}{h^2+k^2}=\frac{h^3+k^3-(h^3+hk^2+h^2k+k^3)}{h^2+k^2}=\frac{-hk^2-h^2k}{h^2+k^2}=\frac{-hk(h+k)}{h^2+k^2}.$$</p>`},
+    {label:'Normalizza e testa il limite', body:R`<p>Dividi per $|h|=\sqrt{h^2+k^2}$: $$\frac{f(h,k)-(h+k)}{\sqrt{h^2+k^2}}=\frac{-hk(h+k)}{(h^2+k^2)^{3/2}}.$$ Prova la direzione obliqua $h=k$: $$\frac{-h\cdot h\cdot 2h}{(2h^2)^{3/2}}=\frac{-2h^3}{2\sqrt2\,|h|^3}=-\frac{1}{\sqrt2}\cdot\frac{h^3}{|h|^3}.$$ Per $h\to0^+$ vale $-\tfrac{1}{\sqrt2}\neq0$.</p>`},
+    {label:'Conclusione', body:R`<p>Il limite del resto normalizzato non è $0$ (dipende dalla direzione), quindi <b>$f$ non è differenziabile</b> in $(0,0)$, pur essendo <b>continua</b> e <b>derivabile</b> con $\nabla f(0,0)=(1,1)$. Le parziali esistono, ma non &laquo;cuciono&raquo; un piano tangente. $\blacksquare$</p>
+    <div class="note">Diagnosi rapida: qui le parziali <b>non</b> erano nulle, quindi <b>non</b> puoi saltare alla scorciatoia &laquo;$|f|/\rho\to0$&raquo;; devi sottrarre il gradiente completo $h+k$ prima di normalizzare. Dimenticarlo è l&rsquo;errore n.1.</div>`}
+   ],
+   nota:R`Il criterio $C^1$ non aiutava a <i>concludere la differenziabilità</i> (che infatti non c&rsquo;è): le parziali fuori da $0$ sono continue, ma il teorema è a senso unico e non dice nulla sul &laquo;no&raquo;. Per il &laquo;no&raquo; serve sempre il limite del resto.`},
+  {t:'esercizio', title:'Esercizio 2 — parametro e due soglie (trabocchetto)', src:'Trappola &laquo;soglie diverse&raquo; · $f(x,y)=|x|^{\\alpha}y/(x^2+y^2)$',
+   testo:R`Sia $f(x,y)=\dfrac{|x|^{\alpha}\,y}{x^2+y^2}$ per $(x,y)\neq(0,0)$, $f(0,0)=0$, con $\alpha\gt0$. Per quali $\alpha$ è continua in $0$? Per quali è differenziabile? La soglia è la stessa?`,
+   steps:[
+    {label:'La trappola, dichiarata', body:R`<p>L&rsquo;errore indotto: trovare <i>una</i> soglia con la stima di continuità e riusare <b>la stessa disuguaglianza</b> per la differenziabilità. Sono due limiti diversi (uno su $|f|$, uno su $|f|/\rho$): danno <b>due soglie diverse</b>. Teniamole separate fin dall&rsquo;inizio.</p>`},
+    {label:'Continuità', body:R`<p>In polari $|x|^\alpha\le\rho^\alpha$, $|y|\le\rho$, denominatore $\rho^2$: $$|f|\le\frac{\rho^\alpha\cdot\rho}{\rho^2}=\rho^{\alpha-1}.$$ Tende a $0$ per $\rho\to0$ <b>se e solo se</b> $\alpha-1\gt0$, cioè $\alpha\gt1$. (Per $\alpha\le1$: lungo $y=x\gt0$ si ha $f=\dfrac{x^\alpha\,x}{2x^2}=\tfrac12 x^{\alpha-1}$, che <b>non</b> tende a $0$.) Continua $\iff \alpha\gt1$.</p>`},
+    {label:'Parziali in $0$', body:R`<p>Sugli assi $f$ è nulla: $f(h,0)=\dfrac{|h|^\alpha\cdot0}{h^2}=0$ e $f(0,k)=\dfrac{0\cdot k}{k^2}=0$ (per $\alpha\gt0$, $|0|^\alpha=0$). Quindi $\partial_x f(0,0)=\partial_y f(0,0)=0$: $\nabla f(0,0)=(0,0)$.</p>`},
+    {label:'Differenziabilità', body:R`<p>Con gradiente nullo, il resto normalizzato è $|f|/\rho$: $$\frac{|f|}{\rho}\le\frac{\rho^\alpha\cdot\rho}{\rho^2\cdot\rho}=\rho^{\alpha-2}\xrightarrow{\rho\to0}0\iff\alpha-2\gt0,\ \text{cioè }\alpha\gt2.$$ Per necessità, lungo $y=x\gt0$: $\dfrac{f}{\rho}=\dfrac{\tfrac12 x^{\alpha-1}}{\sqrt2\,x}=\dfrac{x^{\alpha-2}}{2\sqrt2}$, che non tende a $0$ se $\alpha\le2$. Differenziabile $\iff\alpha\gt2$.</p>`},
+    {label:'Le due soglie, a confronto', body:R`<p>Continua per $\alpha\gt1$, differenziabile per $\alpha\gt2$: <b>soglie diverse</b>. Nella fascia $1\lt\alpha\le2$ la funzione è <b>continua e derivabile</b> ($\nabla f(0,0)=(0,0)$) ma <b>non differenziabile</b>. È la fascia dove cade chi riusa una sola stima. $\blacksquare$</p>
+    <div class="note"><b>Perché la differenziabilità pretende una soglia più alta.</b> Il resto normalizzato ha un $\rho$ in più al denominatore rispetto a $|f|$: chiede un ordine di infinitesimo in più al numeratore. Differenziabilità $=$ continuità &laquo;con un grado di margine&raquo;.</div>`}
+   ],
+   nota:R`Regola d&rsquo;esame trasferibile: per un quoziente $\dfrac{N}{(x^2+y^2)^{\alpha}}$ con $N\sim\rho^{p}$, la continuità chiede $p-2\alpha\gt0$ e la differenziabilità (a gradiente nullo) chiede $p-2\alpha-1\gt0$. Le due soglie distano sempre di $1$. Riconoscilo e non lo sbagli più.`}
+]},
+
+/* ---------------- 06 · IL SENSO ---------------- */
+{ num:'06', title:'Il senso: approssimazione lineare e gradiente', meta:'Significato fisico, senza decorazione · e dove ritrovi tutto questo',
+  blocchi:[
+  {t:'prosa', title:'Differenziabile = esiste il piano tangente', tag:'significato', html:R`
+  <p>La (D&#8242;) dice, letta al contrario: $$f(x_0+h)=f(x_0)+\nabla f(x_0)\cdot h+o(|h|).$$ Il grafico $z=f(x_0)+\nabla f(x_0)\cdot h$ è un <b>iperpiano</b> (in $\mathbb{R}^3$, un piano): è il <b>piano tangente</b> al grafico di $f$ nel punto. Differenziabilità significa esattamente che, ingrandendo attorno a $x_0$, il grafico è <b>indistinguibile</b> dal suo piano tangente — l&rsquo;errore $o(|h|)$ svanisce più in fretta di quanto ti avvicini.</p>
+  <p>Ora si capisce perché le parziali da sole non bastano: conoscere $\partial_x f$ e $\partial_y f$ dà <b>due rette</b> nel piano tangente candidato (le pendenze lungo gli assi), ma due rette individuano un piano <i>solo se</i> il grafico gli si appoggia davvero <b>in ogni direzione</b>. La differenziabilità è precisamente questa clausola &laquo;in ogni direzione&raquo;, che nei controesempi salta lungo le oblique.</p>`},
+  {t:'plot', title:'Il piano tangente, guardato in faccia',
+   intro:R`La sella $z=x^2-y^2$ e il suo <b>piano tangente</b> (azzurro) nel punto segnato $(0{,}7,\,0{,}5)$. <b>Trascina per ruotare</b> e guarda l&rsquo;intorno del punto bianco.`,
+   plots:[
+    {kind:'surface3d', f:'x*x-y*y', xr:[-1.6,1.6], yr:[-1.6,1.6], n:42, height:400, yaw:0.7, pitch:0.5, zscale:1.3, tangent:{x0:0.7, y0:0.5, span:0.66}, title:'z = x^2 - y^2 e il piano tangente in (0.7, 0.5)'}
+   ],
+   leggi:R`Vicino al punto bianco, il piano azzurro e la superficie sono <b>incollati</b>: è questo il contenuto della (D&#8242;), $f(x_0+h)=f(x_0)+\nabla f(x_0)\cdot h+o(|h|)$. L&rsquo;errore $o(|h|)$ è la distanza verticale fra superficie e piano, e va a zero <b>più in fretta</b> di $|h|$ — per questo, ingrandendo attorno al punto, i due diventano indistinguibili. Allontanandoti, invece, la sella <b>si stacca</b> dal piano: lungo una diagonale sale, lungo l&rsquo;altra scende, mentre il piano resta dritto. Questo scarto crescente è la <b>curvatura</b>, cioè il termine di secondo ordine che il differenziale ignora (lo recupererai con l&rsquo;Hessiana in Taylor). Nota la differenza col controesempio della tappa 03: là un piano tangente <b>non esiste affatto</b>, perché il grafico non si appoggia a nessun piano lungo le direzioni oblique; qui esiste, e la superficie gli si appoggia in ogni direzione. Differenziabile significa esattamente <b>questo</b>.`},
+  {t:'prosa', title:'Il gradiente è la direzione di massima salita', tag:'significato', html:R`
+  <p>Fissa $|v|=1$ e guarda come varia $f$ nella direzione $v$: per la ($\ast$), $$\partial_v f(x_0)=\nabla f(x_0)\cdot v=|\nabla f(x_0)|\,\cos\theta,$$ dove $\theta$ è l&rsquo;angolo tra $v$ e $\nabla f(x_0)$. Questo numero è <b>massimo</b> quando $\cos\theta=1$, cioè $v$ <b>parallelo</b> a $\nabla f(x_0)$, e vale allora $|\nabla f(x_0)|$.</p>
+  <p>Due fatti precisi, non immagini:</p>
+  <ul>
+  <li>Il gradiente <b>punta nella direzione di crescita più ripida</b> di $f$, e il suo <b>modulo è il tasso</b> di crescita in quella direzione. La direzione opposta $-\nabla f$ è la discesa più ripida.</li>
+  <li>Nelle direzioni con $\cos\theta=0$, cioè $v\perp\nabla f$, si ha $\partial_v f=0$: sono le direzioni <b>tangenti all&rsquo;insieme di livello</b> $\{f=\text{cost}\}$. Quindi $\nabla f(x_0)$ è <b>ortogonale all&rsquo;insieme di livello</b> passante per $x_0$.</li>
+  </ul>`},
+  {t:'plot', title:'Il gradiente è ortogonale ai livelli',
+   intro:R`Le curve di livello di $f(x,y)=\tfrac12 x^2+y^2$ (ellissi) e il campo $\nabla f=(x,\,2y)$ sovrapposto: una freccia in ogni punto.`,
+   plots:[
+    {kind:'contour', f:'0.5*x*x+y*y', levels:[0.25,0.6,1.1,1.8,2.6], col:'#4c8dff', label:'livelli di f', xr:[-2.2,2.2], yr:[-2.2,2.2], height:400, grad:{fx:'x', fy:'2*y', label:'grad f = (x, 2y)'}, title:'grad f taglia i livelli ad angolo retto e punta in salita'}
+   ],
+   leggi:R`Guarda una qualsiasi freccia: <b>buca</b> la curva di livello ad angolo retto. Non è un caso, è la ($\ast$) letta al contrario: nelle direzioni <b>tangenti</b> al livello $f$ non cambia ($\partial_v f=\nabla f\cdot v=0$), quindi il gradiente — che è la direzione di cambiamento — deve essere <b>perpendicolare</b> a quelle. E fra tutte le direzioni, la freccia indica quella di <b>salita più ripida</b>: punta sempre verso i livelli di valore maggiore, e dove le ellissi sono più fitte (gradiente lungo) la salita è più erta. Le frecce non sono radiali — puntano <b>più verso l&rsquo;alto che di lato</b>, perché il coefficiente di $y$ è doppio: $f$ cresce più in fretta lungo $y$. È lo stesso disegno che in fisica chiami campo $\mathbf F=-\nabla V$ (verso il potenziale calante) o flusso di calore $\mathbf q=-k\nabla T$: le equipotenziali <b>sono</b> queste ellissi, e il campo <b>è</b> queste frecce girate.`},
+  {t:'prosa', title:'Dove vive in fisica', tag:'connessioni fisiche', html:R`
+  <p>La struttura &laquo;campo scalare $\to$ suo gradiente&raquo; è ovunque, e con lo stesso contenuto operativo appena costruito:</p>
+  <ul>
+  <li><b>Forze conservative.</b> Un potenziale $V(\mathbf r)$ genera la forza $\mathbf F=-\nabla V$: la forza punta verso il calo più ripido dell&rsquo;energia potenziale, con intensità pari alla pendenza. Le superfici equipotenziali $\{V=\text{cost}\}$ sono ortogonali a $\mathbf F$ — è l&rsquo;ortogonalità gradiente$\perp$livello, riletta in meccanica.</li>
+  <li><b>Flusso di calore.</b> La legge di Fourier $\mathbf q=-k\nabla T$: il calore fluisce verso la temperatura decrescente più ripida. Stessa formula, altro campo.</li>
+  <li><b>Il differenziale come 1-forma.</b> $df_{x_0}$ è per costruzione un&rsquo;<b>applicazione lineare</b> su $\mathbb{R}^n$: è il primo esempio di <b>forma differenziale</b>. Questa è la porta del Movimento sui teoremi integrali (Green, Gauss, Stokes) e del ponte verso la geometria differenziale del III anno, dove $df$, $\nabla f$ e la derivata direzionale diventano lo stesso oggetto letto in tre linguaggi.</li>
+  </ul>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> Tutto qui poggia sul nucleo di <b>topologia di $\mathbb{R}^n$</b>: aperto (perché $x_0+h$ resti nel dominio), norma $|h|$, e soprattutto il <b>limite in più variabili</b> come limite lungo <i>ogni</i> curva — è quella nozione che rende falsa la continuità dei controesempi e vera la stima uniforme in $\theta$.</p>
+  <p><b>A valle, subito.</b></p>
+  <ul>
+  <li><b>Dini</b> (funzione implicita): l&rsquo;ipotesi $\partial_z F(P_0)\neq0$ è &laquo;il piano tangente non è verticale rispetto a $z$&raquo; — differenziabilità di $F$ letta geometricamente. E $\nabla g=-\dfrac{1}{F_z}(F_x,F_y)$ nasce dal differenziale.</li>
+  <li><b>Ottimizzazione libera</b>: nei punti interni di massimo/minimo $\nabla f=0$ (nessuna direzione di salita), poi l&rsquo;Hessiana. La stazionarietà è &laquo;gradiente nullo&raquo;.</li>
+  <li><b>Lagrange</b> (ottimizzazione vincolata): $\nabla f=\lambda\nabla g$ dice che, sul vincolo, non resta nessuna direzione tangente al livello di $g$ lungo cui $f$ cresca — i due gradienti allineati. È l&rsquo;ortogonalità gradiente$\perp$livello, applicata due volte.</li>
+  <li><b>Formula di Taylor</b> in più variabili: la (D&#8242;) è l&rsquo;ordine $1$; l&rsquo;Hessiana è l&rsquo;ordine $2$.</li>
+  </ul>`},
+  {t:'prolessi', title:'Prolessi — lo stesso oggetto, tra un anno',
+   oggetto:R`l&rsquo;approssimazione lineare $f(x_0+h)=f(x_0)+\nabla f(x_0)\cdot h+o(|h|)$: il differenziale $df_{x_0}$ (una <b>applicazione lineare</b>), il <b>gradiente</b> $\nabla f$, la derivata come mappa lineare. Non cambierà l&rsquo;oggetto: cambierà solo il nome che gli danno — e le domande che gli faranno.`,
+   rotte:[
+    {dove:'Elettro-<br>magnetismo', txt:R`Il campo elettrostatico <b>è</b> un gradiente: $\mathbf{E}=-\nabla\phi$. Il tuo teorema &laquo;$\nabla f\perp$ insieme di livello&raquo; diventa parola per parola &laquo;$\mathbf{E}\perp$ superfici equipotenziali&raquo;. E il differenziale-1-forma $df$ è il seme del <b>potenziale di gauge</b> $A=A_\mu\,dx^\mu$: la macchina $d(\cdot)$ che qui manda una funzione nella sua 1-forma, lì manda $A$ nel campo $F=dA$ — la stessissima che nel Movimento I diventa il teorema di Stokes.`},
+    {dove:'Meccanica<br>statistica', txt:R`Le variabili di stato <b>sono</b> derivate parziali di un potenziale: da $F(T,V)$ (energia libera) leggi $S=-\partial_T F$, $\;p=-\partial_V F$. &laquo;$f$ differenziabile $=$ esiste il piano tangente&raquo; qui significa &laquo;esistono variabili intensive ben definite&raquo;; e l&rsquo;uguaglianza delle miste $\partial_T\partial_V F=\partial_V\partial_T F$ (Schwarz, prossimo nucleo) <b>è</b> una relazione di Maxwell.`},
+    {dove:'Meccanica<br>quantistica', txt:R`La derivata smette di essere un&rsquo;operazione e diventa un <b>oggetto</b>: l&rsquo;operatore impulso $\hat{p}=-i\hbar\nabla$ su $L^2$. &laquo;La derivata è un&rsquo;applicazione lineare&raquo; è il primo gradino di &laquo;gli osservabili sono operatori lineari autoaggiunti&raquo;. Il gradiente, qui una modesta mappa $\mathbb{R}^n\!\to\!\mathbb{R}$, acquisterà uno <b>spettro</b> e autofunzioni (le onde piane): Movimenti II e IV.`}
+   ],
+   domanda:R`Lo stesso oggetto è un <i>campo</i> in EM, una <i>derivata di stato</i> in termodinamica, un <i>osservabile</i> in QM. Ma questo nucleo parla soprattutto di <b>quando la differenziabilità fallisce</b> (parziali sì, piano tangente no). Allora: la fisica ha un nome per il punto in cui l&rsquo;energia libera <b>smette</b> di essere differenziabile? <br>&mdash; Risposta da tenere in tasca fino a meccanica statistica: sì, si chiama <b>transizione di fase</b>. La non-analiticità di $F$ <i>è</i> la criticità. Il &laquo;buco&raquo; dei tuoi controesempi, promosso a fenomeno fisico — e vive accanto alla tua tesi (ETH, sistemi complessi).`
+  }
+]}
+
+];
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo01-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 01 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 01-differenziabilita.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

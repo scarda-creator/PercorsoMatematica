@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 0 — Topologia di Rⁿ: norma, palle, aperti/chiusi, limiti in più variabili, compattezza, connessione</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>0 — Topologia di R&#8319;: cosa vuol dire &laquo;vicino&raquo;, limiti, compattezza, connessione</b> · il fondamento (precede la differenziabilit&agrave;)</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 0: Topologia di Rⁿ <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge \neq (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perch&eacute; questo nucleo', meta:'AV Terracina, Parte I · prima di derivare, integrare, ottimizzare serve una sola parola resa rigorosa: <b>vicino</b>. Da l&igrave; nascono limiti, continuit&agrave; ed esistenza degli ottimi.',
+  blocchi:[
+  {t:'prosa', title:'I due esercizi che questo nucleo ti insegna a chiudere', tag:'mira d&rsquo;esame', html:R`
+  <p>Tutto il calcolo che verr&agrave; &mdash; differenziabilit&agrave;, integrali multipli, campi, ottimizzazione &mdash; poggia su una nozione che in una variabile davi per scontata e che in pi&ugrave; variabili diventa <b>sottile e insidiosa</b>: cosa significa che un punto &egrave; &laquo;vicino&raquo; a un altro, e cosa significa che una funzione ha un limite. Questo nucleo &egrave; il pavimento sotto ogni altro. Due esercizi ne mostrano la posta.</p>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · limite in due variabili (AV Terracina, Parte I)</span>
+  Stabilisci se esiste $\displaystyle\lim_{(x,y)\to(0,0)}\frac{xy}{x^2+y^2}$. Se esiste, calcolalo; se non esiste, dimostralo.</div>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · esistenza degli ottimi (garanzia, non calcolo)</span>
+  Sia $f(x,y)=x^2-xy+y^2$ ristretta al disco chiuso $\overline B=\{x^2+y^2\le1\}$. Prima di calcolarli: puoi affermare che $f$ ammette <b>massimo</b> e <b>minimo</b> su $\overline B$? In virt&ugrave; di quale teorema, e quali ipotesi controlli?</div>
+  <p>Il primo esercizio &egrave; una <b>trappola</b>: la risposta &laquo;faccio tendere $x$ e $y$ a zero e ottengo $0/0$, quindi $0$&raquo; &egrave; sbagliata, e il modo giusto di ragionare &mdash; per <b>cammini</b> &mdash; non esiste in una variabile. Il secondo non &egrave; un calcolo: &egrave; una <b>garanzia di esistenza</b>. Che una funzione continua su un insieme &laquo;chiuso e limitato&raquo; raggiunga il suo massimo &egrave; il teorema di Weierstrass, ed &egrave; ci&ograve; che rende sensato ogni problema di ottimizzazione che affronterai (Lagrange compreso). Senza questo nucleo, cerchi ottimi che potrebbero non esistere.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Misurare la <b>distanza</b> in $\mathbb{R}^n$ con la norma euclidea, e usarne le tre propriet&agrave; (positivit&agrave;, omogeneit&agrave;, disuguaglianza triangolare).</li>
+  <li>Tradurre &laquo;vicino&raquo; in un oggetto preciso &mdash; la <b>palla</b> $B_r(x_0)$ &mdash; e scrivere la convergenza $x_k\to x_0$ come $\lVert x_k-x_0\rVert\to0$.</li>
+  <li>Classificare un insieme: <b>aperto</b>, <b>chiuso</b>, n&eacute; l&rsquo;uno n&eacute; l&rsquo;altro; individuarne <b>frontiera</b> e <b>punti di accumulazione</b>, senza cadere nell&rsquo;errore &laquo;non aperto quindi chiuso&raquo;.</li>
+  <li>Decidere se un <b>limite</b> in pi&ugrave; variabili esiste: dimostrarne la <b>non esistenza</b> con due cammini, o l&rsquo;<b>esistenza</b> con le coordinate polari e una maggiorazione.</li>
+  <li>Riconoscere una funzione <b>continua</b> e usare le successioni per smascherare una discontinuit&agrave;.</li>
+  <li>Riconoscere un insieme <b>compatto</b> (chiuso e limitato, in $\mathbb{R}^n$) e invocare <b>Weierstrass</b> per garantire l&rsquo;esistenza di max e min.</li>
+  <li>Riconoscere un dominio <b>connesso</b> (&laquo;un pezzo solo&raquo;) e sapere perch&eacute; questa propriet&agrave; ritorner&agrave;, pi&ugrave; forte, nei campi conservativi.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · NORMA E DISTANZA IN Rⁿ ---------------- */
+{ num:'01', title:'Norma e distanza in R&#8319;', meta:'$\\lVert x\\rVert=\\sqrt{x_1^2+\\dots+x_n^2}$ · la disuguaglianza triangolare · distanza $d(x,y)=\\lVert x-y\\rVert$ · perch&eacute; in dimensione finita la norma &laquo;non conta&raquo;',
+  blocchi:[
+  {t:'prosa', title:'Dal valore assoluto alla norma: misurare la lunghezza di un vettore', tag:'grammatica di base', html:R`
+  <p>In una variabile la distanza fra due numeri &egrave; $|x-y|$: il valore assoluto della differenza. In $\mathbb{R}^n$ i punti sono <b>vettori</b> $x=(x_1,\dots,x_n)$, e la generalizzazione naturale del valore assoluto &egrave; la <b>norma euclidea</b> $$\lVert x\rVert=\sqrt{x_1^2+x_2^2+\dots+x_n^2}=\sqrt{\textstyle\sum_{i=1}^n x_i^2}\,.$$ &Egrave; la lunghezza della freccia dall&rsquo;origine a $x$, il teorema di Pitagora esteso a $n$ dimensioni. Da essa si costruisce la <b>distanza</b> fra due punti, $$d(x,y)=\lVert x-y\rVert=\sqrt{\textstyle\sum_{i=1}^n (x_i-y_i)^2}\,,$$ che &egrave; l&rsquo;unico ingrediente di cui tutto il resto del nucleo ha bisogno. Ogni volta che dirai &laquo;vicino&raquo;, dietro c&rsquo;&egrave; questo numero piccolo.</p>`},
+  {t:'prosa', title:'Le tre propriet&agrave; che fanno di $\\lVert\\cdot\\rVert$ una norma', tag:'gli assiomi', html:R`
+  <p>Non ogni modo di misurare &egrave; una norma. Una funzione $\lVert\cdot\rVert:\mathbb{R}^n\to[0,+\infty)$ &egrave; una <b>norma</b> se soddisfa tre propriet&agrave;, per ogni $x,y\in\mathbb{R}^n$ e ogni scalare $\lambda\in\mathbb{R}$:</p>
+  <ul>
+  <li><b>Positivit&agrave;:</b> $\lVert x\rVert\ge0$, e $\lVert x\rVert=0$ <b>se e solo se</b> $x=0$. La lunghezza &egrave; nulla solo per il vettore nullo.</li>
+  <li><b>Omogeneit&agrave;:</b> $\lVert\lambda x\rVert=|\lambda|\,\lVert x\rVert$. Raddoppiare il vettore raddoppia la lunghezza; il segno non conta.</li>
+  <li><b>Disuguaglianza triangolare:</b> $\lVert x+y\rVert\le\lVert x\rVert+\lVert y\rVert$. Il lato di un triangolo non supera la somma degli altri due: la via dritta &egrave; la pi&ugrave; corta.</li>
+  </ul>
+  <p>La terza &egrave; la sola non ovvia, ed &egrave; il cavallo di battaglia di tutte le stime del corso: ogni volta che dovrai controllare che una quantit&agrave; &laquo;non esploda&raquo;, la userai. La dimostro qui, perch&eacute; il meccanismo (passare dalla norma al quadrato e sfruttare Cauchy&ndash;Schwarz) &egrave; lo stesso che ricomparir&agrave; negli spazi di Hilbert del Movimento II.</p>`},
+  {t:'reveal', title:'La disuguaglianza triangolare, da Cauchy&ndash;Schwarz', tag:'derivazione', steps:[
+   {label:'Passa al quadrato della norma', body:R`<p>Elevo al quadrato il primo membro e uso $\lVert v\rVert^2=v\cdot v$ (prodotto scalare del vettore con s&eacute;): $$\lVert x+y\rVert^2=(x+y)\cdot(x+y)=x\cdot x+2\,x\cdot y+y\cdot y=\lVert x\rVert^2+2\,x\cdot y+\lVert y\rVert^2.$$ Tutto il problema &egrave; ora controllare il termine misto $x\cdot y$.</p>`},
+   {label:'Applica Cauchy&ndash;Schwarz', body:R`<p>La <b>disuguaglianza di Cauchy&ndash;Schwarz</b> dice $$|x\cdot y|\le\lVert x\rVert\,\lVert y\rVert.$$ (Si dimostra osservando che il polinomio $t\mapsto\lVert x-t y\rVert^2\ge0$ non pu&ograve; avere due radici reali distinte, quindi il suo discriminante &egrave; $\le0$; quel discriminante &egrave; esattamente $4\big[(x\cdot y)^2-\lVert x\rVert^2\lVert y\rVert^2\big]$.) In particolare $x\cdot y\le|x\cdot y|\le\lVert x\rVert\,\lVert y\rVert$.</p>`},
+   {label:'Ricomponi il quadrato perfetto', body:R`<p>Sostituendo la maggiorazione nel termine misto: $$\lVert x+y\rVert^2\le\lVert x\rVert^2+2\lVert x\rVert\lVert y\rVert+\lVert y\rVert^2=\big(\lVert x\rVert+\lVert y\rVert\big)^2.$$ Entrambi i membri sono $\ge0$, quindi posso estrarre la radice conservando il verso: $$\boxed{\ \lVert x+y\rVert\le\lVert x\rVert+\lVert y\rVert\ }\qquad\blacksquare$$ Da qui segue anche la forma che userai per la distanza, la <b>disuguaglianza triangolare per $d$</b>: $d(x,z)\le d(x,y)+d(y,z)$ &mdash; passando per un punto intermedio non si accorcia mai la strada.</p>`}
+  ]},
+  {t:'prosa', title:'Tutte le norme di $\\mathbb{R}^n$ sono equivalenti (e perch&eacute; ti libera)', tag:'un fatto che semplifica tutto', html:R`
+  <p>La norma euclidea non &egrave; l&rsquo;unica misura possibile. Si usano anche $$\lVert x\rVert_1=\sum_{i=1}^n|x_i|\quad(\text{"taxi"}),\qquad \lVert x\rVert_\infty=\max_{i}|x_i|\quad(\text{"del massimo"}).$$ La domanda &egrave;: cambiando norma, cambia il significato di &laquo;vicino&raquo;? La risposta, in dimensione <b>finita</b>, &egrave; no. Vale infatti $$\lVert x\rVert_\infty\le\lVert x\rVert_2\le\lVert x\rVert_1\le n\,\lVert x\rVert_\infty,$$ e pi&ugrave; in generale <b>due norme qualsiasi $\lVert\cdot\rVert_a,\lVert\cdot\rVert_b$ su $\mathbb{R}^n$ sono equivalenti</b>: esistono costanti $c_1,c_2\gt0$ con $$c_1\lVert x\rVert_a\le\lVert x\rVert_b\le c_2\lVert x\rVert_a\qquad\forall x.$$ La conseguenza operativa &egrave; potente: <b>convergenza, insiemi aperti, continuit&agrave; e compattezza non dipendono dalla norma scelta</b>. Se una successione tende a un limite in una norma, ci tende in tutte; puoi usare la pi&ugrave; comoda per i conti. Tienilo a mente come un lusso &mdash; perch&eacute; nel Movimento II, in dimensione <b>infinita</b> (spazi di funzioni), questo lusso <b>svanisce</b>: l&igrave; le norme non sono pi&ugrave; equivalenti, e la scelta della norma cambia la matematica. &Egrave; il primo confine di questo nucleo.</p>`},
+  {t:'plot', title:'Le palle unitarie delle tre norme',
+   intro:R`A sinistra le <b>palle euclidee</b> $\lVert x\rVert=r$ per $r=0{,}5;1;1{,}5;2$: &laquo;vicino&raquo; significa stare dentro uno di questi cerchi. A destra la <b>sfera unitaria</b> $\lVert x\rVert=1$ per le tre norme &mdash; euclidea, taxi $\lVert x\rVert_1=|x_1|+|x_2|$, sup $\lVert x\rVert_\infty=\max_i|x_i|$.`,
+   plots:[
+    {kind:'contour', f:'hypot(x,y)', levels:[0.5,1,1.5,2], xr:[-2.3,2.3], yr:[-2.3,2.3], height:300, title:'palle euclidee B_r(0), r = 0.5, 1, 1.5, 2'},
+    {kind:'contour', f:'hypot(x,y)', levels:[1], col:'#5eead4', label:'euclidea', xr:[-1.6,1.6], yr:[-1.6,1.6], height:300, title:'la stessa nozione di vicino, tre misure diverse',
+     overlays:[{f:'abs(x)+abs(y)', levels:[1], col:'#d8a13a', label:'taxi'},
+               {f:'max(abs(x),abs(y))', levels:[1], col:'#b98cff', label:'sup'}]}
+   ],
+   leggi:R`Il rombo sta <b>dentro</b> il cerchio, che sta <b>dentro</b> il quadrato: &egrave; l&rsquo;equivalenza delle norme resa visibile. Nessuna delle tre &laquo;vede&raquo; una vicinanza che le altre non vedono &mdash; una successione entra definitivamente in ogni rombo piccolo se e solo se entra in ogni cerchio piccolo. Per questo in $\mathbb{R}^n$ puoi lavorare sempre con l&rsquo;euclidea. In dimensione infinita (Movimento II, spazi di Banach) questa figura <b>smette di valere</b>: norme diverse danno topologie diverse, ed &egrave; l&rsquo;origine di met&agrave; delle difficolt&agrave; dell&rsquo;analisi funzionale.`},
+  {t:'gram', title:'I simboli, uno per uno', rows:[
+   [R`$x=(x_1,\dots,x_n)$`, R`un <b>punto</b> di $\mathbb{R}^n$, cio&egrave; un vettore di $n$ coordinate reali. In $\mathbb{R}^2$ scrivi $(x,y)$, in $\mathbb{R}^3$ $(x,y,z)$: le $x_i$ sono le <b>componenti</b>.`],
+   [R`$\lVert x\rVert$`, R`la <b>norma euclidea</b> di $x$, un numero $\ge0$: la lunghezza del vettore. Quando serve distinguerla si scrive $\lVert x\rVert_2$. &Egrave; il generalizzato di $|x|$ da $\mathbb{R}$ a $\mathbb{R}^n$.`],
+   [R`$x\cdot y$`, R`il <b>prodotto scalare</b> $\sum_i x_i y_i$. Lega norma e angolo: $\lVert x\rVert^2=x\cdot x$ e $x\cdot y=\lVert x\rVert\lVert y\rVert\cos\theta$. &Egrave; la struttura in pi&ugrave; che rende $\mathbb{R}^n$ euclideo, non solo normato.`],
+   [R`$d(x,y)=\lVert x-y\rVert$`, R`la <b>distanza</b> fra due punti. Simmetrica ($d(x,y)=d(y,x)$), nulla solo se $x=y$, e triangolare. La coppia $(\mathbb{R}^n,d)$ &egrave; il prototipo di <b>spazio metrico</b> (Movimento II).`],
+   [R`$\lVert\cdot\rVert_a\sim\lVert\cdot\rVert_b$`, R`due norme <b>equivalenti</b>: si maggiorano a vicenda a meno di costanti. In $\mathbb{R}^n$ (dim. finita) <b>tutte</b> lo sono; in dim. infinita no. L&rsquo;equivalenza garantisce che &laquo;vicino&raquo; non dipenda dalla norma.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Il punto $x=(3,4)\in\mathbb{R}^2$. Calcola $\lVert x\rVert_2$, $\lVert x\rVert_1$ e $\lVert x\rVert_\infty$. Verifica su questi numeri la catena $\lVert x\rVert_\infty\le\lVert x\rVert_2\le\lVert x\rVert_1$.`,
+    a:R`$\lVert x\rVert_2=\sqrt{9+16}=5$; $\lVert x\rVert_1=|3|+|4|=7$; $\lVert x\rVert_\infty=\max(3,4)=4$. La catena regge: $4\le5\le7$. Tre numeri diversi per la stessa freccia, ma dello <b>stesso ordine di grandezza</b> &mdash; ed &egrave; questo che l&rsquo;equivalenza garantisce sempre.`},
+   {q:R`La funzione $N(x,y)=|x|-|y|$ pu&ograve; essere una norma su $\mathbb{R}^2$? Controlla gli assiomi.`,
+    a:R`No. Viola la <b>positivit&agrave;</b>: $N(0,1)=0-1=-1\lt0$, e una norma non &egrave; mai negativa; inoltre $N(1,1)=0$ pur essendo $(1,1)\neq0$, mentre una norma si annulla solo sul vettore nullo. Non basta &laquo;combinare i moduli&raquo;: servono tutti e tre gli assiomi, e il primo gi&agrave; la esclude.`}
+  ]}
+]},
+
+/* ---------------- 02 · PALLE, INTORNI, CONVERGENZA ---------------- */
+{ num:'02', title:'Palle, intorni, convergenza', meta:'$B_r(x_0)=\\{x:\\lVert x-x_0\\rVert\\lt r\\}$ · &laquo;vicino&raquo; reso rigoroso · $x_k\\to x_0\\iff\\lVert x_k-x_0\\rVert\\to0$ · convergenza per componenti',
+  blocchi:[
+  {t:'prosa', title:'La palla: l&rsquo;insieme dei punti vicini a $x_0$', tag:'la definizione che rende rigoroso &laquo;vicino&raquo;', html:R`
+  <p>&laquo;Vicino&raquo; &egrave; una parola vaga finch&eacute; non le dai un raggio. La <b>palla aperta</b> di centro $x_0\in\mathbb{R}^n$ e raggio $r\gt0$ &egrave; l&rsquo;insieme $$B_r(x_0)=\{\,x\in\mathbb{R}^n:\lVert x-x_0\rVert\lt r\,\}\,,$$ cio&egrave; tutti i punti a distanza <b>strettamente minore</b> di $r$ dal centro. In $\mathbb{R}$ &egrave; l&rsquo;intervallo aperto $(x_0-r,x_0+r)$; in $\mathbb{R}^2$ un disco senza bordo; in $\mathbb{R}^3$ una sfera piena senza buccia. La palla &egrave; la forma concreta di &laquo;essere entro una tolleranza $r$ da $x_0$&raquo;. Dire &laquo;$x$ &egrave; vicino a $x_0$&raquo; significa esattamente &laquo;$x\in B_r(x_0)$ per un $r$ piccolo&raquo;.</p>
+  <p>Distingui subito la <b>palla aperta</b> $B_r$ (disuguaglianza stretta $\lt$, il bordo escluso) dalla <b>palla chiusa</b> $\overline B_r(x_0)=\{x:\lVert x-x_0\rVert\le r\}$ (bordo incluso, $\le$) e dalla <b>sfera</b> $\{x:\lVert x-x_0\rVert=r\}$ (solo il bordo). La differenza fra $\lt$ e $\le$ qui non &egrave; pignoleria: &egrave; la differenza fra aperto e chiuso della prossima tappa, e fra &laquo;esiste il massimo&raquo; e &laquo;non esiste&raquo; di Weierstrass.</p>`},
+  {t:'prosa', title:'Intorno e convergenza: la traduzione del limite', tag:'grammatica del limite', html:R`
+  <p>Un <b>intorno</b> di $x_0$ &egrave; un qualunque insieme che contiene una palla $B_r(x_0)$ centrata in $x_0$. La palla &egrave; l&rsquo;intorno-tipo; qualsiasi cosa la contenga &laquo;circonda&raquo; $x_0$ con un margine. Con questo vocabolario la convergenza di una successione di punti $x_k\in\mathbb{R}^n$ si scrive in tre modi equivalenti: $$x_k\to x_0\quad\iff\quad \lVert x_k-x_0\rVert\to0\quad\iff\quad \forall r\gt0\ \ x_k\in B_r(x_0)\ \text{definitivamente}.$$ La lettura da tenere: $x_k$ tende a $x_0$ se, fissata <b>qualunque</b> tolleranza $r$, da un certo indice in poi <b>tutti</b> i punti della successione stanno dentro la palla $B_r(x_0)$. &Egrave; il limite in una variabile con $|x_k-x_0|$ rimpiazzato da $\lVert x_k-x_0\rVert$: la sola cosa cambiata &egrave; il modo di misurare la distanza.</p>`},
+  {t:'reveal', title:'Convergere in $\\mathbb{R}^n$ &egrave; convergere componente per componente', tag:'derivazione utile', steps:[
+   {label:'Le due maggiorazioni chiave', body:R`<p>Per ogni indice $j$ la singola componente non supera la norma dell&rsquo;intero vettore, e la norma non supera $\sqrt n$ volte la componente pi&ugrave; grande: $$|x_i-x_{0,i}|\ \le\ \lVert x-x_0\rVert\ \le\ \sqrt n\,\max_{j}|x_j-x_{0,j}|.$$ La prima disuguaglianza &egrave; ovvia (un addendo non supera la radice della somma dei quadrati); la seconda perch&eacute; ogni quadrato &egrave; $\le$ del massimo, e i quadrati sono $n$.</p>`},
+   {label:'Stringi la norma fra due successioni infinitesime', body:R`<p>Se $x_k\to x_0$ allora $\lVert x_k-x_0\rVert\to0$; per la prima disuguaglianza <b>ogni</b> $|x_{k,i}-x_{0,i}|\to0$, cio&egrave; ogni componente converge. Viceversa, se ogni componente converge, il $\max_j$ tende a $0$, e per la seconda disuguaglianza $\lVert x_k-x_0\rVert\to0$. $$\boxed{\ x_k\to x_0\ \text{in }\mathbb{R}^n\quad\iff\quad x_{k,i}\to x_{0,i}\ \text{per ogni }i\ }\qquad\blacksquare$$</p>
+   <div class="note">Questo trasforma un problema $n$-dimensionale in $n$ problemi unidimensionali che gi&agrave; sai risolvere. &Egrave; anche il motivo per cui l&rsquo;equivalenza delle norme (tappa 01) non era un dettaglio: qui ho appena usato $\lVert\cdot\rVert_2$ e $\lVert\cdot\rVert_\infty$ come se fossero intercambiabili, ed &egrave; lecito proprio perch&eacute; sono equivalenti.</div>`}
+  ]},
+  {t:'plot', title:'Che aspetto ha $x_k\\to x_0$',
+   intro:R`La successione $x_k=e^{-0{,}3\,k}(\cos k,\ \sin k)$ in $\mathbb{R}^2$, disegnata come cammino continuo, con tre palle $B_r(0)$ di raggio $r=1;\ 0{,}5;\ 0{,}2$.`,
+   plots:[
+    {kind:'curve', x:'exp(-0.30*t)*cos(t)', y:'exp(-0.30*t)*sin(t)', tr:[0,22], xr:[-1.15,1.15], yr:[-1.15,1.15], height:330, title:'x_k -> 0 : entra DEFINITIVAMENTE in ogni palla'},
+    {kind:'contour', f:'hypot(x,y)', levels:[1,0.5,0.2], xr:[-1.15,1.15], yr:[-1.15,1.15], height:330, title:'le palle B_1, B_0.5, B_0.2 attorno al limite'}
+   ],
+   leggi:R`Sovrapponi mentalmente le due figure. Convergere <b>non</b> significa avvicinarsi un po&rsquo; a ogni passo &mdash; la spirale gira, e a ogni giro si allontana temporaneamente dalla direzione precedente. Significa una cosa sola: <b>fissata</b> una palla, per quanto piccola, da un certo indice in poi la successione &egrave; <b>tutta dentro</b> e non ne esce pi&ugrave;. L&rsquo;ordine dei quantificatori &egrave; questo, e non si inverte: prima $\varepsilon$, poi $N$. La stessa spirale che vedi qui &egrave; la traiettoria di un oscillatore smorzato nel piano delle fasi &mdash; la rincontrerai, con questo significato fisico, nel nucleo 7.`},
+  {t:'gram', title:'Il vocabolario del &laquo;vicino&raquo;', rows:[
+   [R`$B_r(x_0)$`, R`<b>palla aperta</b>, raggio $r\gt0$: $\{\lVert x-x_0\rVert\lt r\}$. Bordo <b>escluso</b>. &Egrave; l&rsquo;intorno-tipo di $x_0$; il mattone con cui si definisce &laquo;aperto&raquo;.`],
+   [R`$\overline B_r(x_0)$`, R`<b>palla chiusa</b>: $\{\lVert x-x_0\rVert\le r\}$. Bordo <b>incluso</b>. Chiusa e limitata $\Rightarrow$ compatta (tappa 06). La differenza $\lt$ vs $\le$ &egrave; la differenza aperto/chiuso.`],
+   [R`intorno di $x_0$`, R`un insieme che <b>contiene</b> una $B_r(x_0)$. &laquo;$U$ intorno di $x_0$&raquo; = &laquo;$x_0$ sta dentro $U$ con un margine tutto attorno&raquo;. Non deve essere una palla, deve contenerne una.`],
+   [R`$x_k\to x_0$`, R`<b>convergenza</b>: $\lVert x_k-x_0\rVert\to0$. Equivale a: da un certo $k$ in poi tutti gli $x_k$ stanno in ogni palla di $x_0$. In $\mathbb{R}^n$ equivale alla convergenza di ogni componente.`],
+   [R`definitivamente`, R`&laquo;da un certo indice in poi&raquo;: esiste $N$ tale che la propriet&agrave; vale per ogni $k\ge N$. &Egrave; il &laquo;$\exists N\ \forall k\ge N$&raquo; nascosto in ogni limite di successione.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`La successione $x_k=\left(\dfrac1k,\ \dfrac{k}{k+1}\right)\in\mathbb{R}^2$ converge? A quale punto? Usa la convergenza per componenti.`,
+    a:R`S&igrave;. Prima componente: $\tfrac1k\to0$. Seconda: $\tfrac{k}{k+1}=\tfrac{1}{1+1/k}\to1$. Poich&eacute; entrambe le componenti convergono, $x_k\to(0,1)$. Il punto limite <b>non appartiene</b> ai valori della successione, ma questo &egrave; normale: il limite &egrave; dove &laquo;tende&raquo;, non un termine.`},
+   {q:R`Il punto $(0,1)$ del quesito precedente sta dentro la palla aperta $B_1\big((0,0)\big)$? E dentro quella chiusa $\overline B_1\big((0,0)\big)$?`,
+    a:R`$\lVert(0,1)\rVert=1$. Nella palla <b>aperta</b> serve $\lt1$: $(0,1)$ &egrave; <b>escluso</b>. Nella palla <b>chiusa</b> basta $\le1$: &egrave; <b>incluso</b> (sta esattamente sul bordo). Ecco perch&eacute; il limite di una successione tutta dentro la palla aperta pu&ograve; finire sul bordo, fuori dall&rsquo;aperto: l&rsquo;anticipo esatto della definizione di &laquo;chiuso&raquo;.`}
+  ]}
+]},
+
+/* ---------------- 03 · APERTI, CHIUSI, FRONTIERA, ACCUMULAZIONE ---------------- */
+{ num:'03', title:'Aperti, chiusi, frontiera, accumulazione', meta:'punto interno · $A$ aperto · punto di accumulazione · $A$ chiuso ($=$ contiene i limiti) · frontiera $\\partial A$ · il trabocchetto: aperto e chiuso NON sono opposti',
+  blocchi:[
+  {t:'prosa', title:'Punti interni e insiemi aperti', tag:'la prima definizione', html:R`
+  <p>Un punto $x_0\in A$ &egrave; <b>interno</b> ad $A$ se una <b>intera palla</b> attorno a lui sta dentro $A$: esiste $r\gt0$ con $B_r(x_0)\subseteq A$. Intuizione: da $x_0$ puoi muoverti un po&rsquo; in <b>ogni</b> direzione senza uscire da $A$; hai margine attorno.</p>
+  <p>Un insieme $A$ &egrave; <b>aperto</b> se <b>ogni</b> suo punto &egrave; interno: $$A\ \text{aperto}\quad\iff\quad \forall x_0\in A\ \ \exists r\gt0:\ B_r(x_0)\subseteq A.$$ Nessun punto di un aperto sta &laquo;sull&rsquo;orlo&raquo;: c&rsquo;&egrave; sempre spazio attorno. Le palle aperte $B_r(x_0)$ sono aperte (da cui il nome), cos&igrave; come $\mathbb{R}^n$, i semipiani $\{x\gt0\}$, l&rsquo;interno di un disco. Un insieme che include anche solo un punto del proprio bordo <b>non</b> &egrave; aperto.</p>`},
+  {t:'prosa', title:'Punti di accumulazione e insiemi chiusi', tag:'la seconda definizione', html:R`
+  <p>Un punto $x_0$ (che pu&ograve; anche <b>non</b> appartenere ad $A$) &egrave; di <b>accumulazione</b> per $A$ se ogni palla forata attorno a lui contiene punti di $A$: $$\forall r\gt0:\quad \big(B_r(x_0)\setminus\{x_0\}\big)\cap A\neq\varnothing.$$ In altre parole, $A$ si &laquo;accalca&raquo; arbitrariamente vicino a $x_0$: esiste una successione di punti di $A$, diversi da $x_0$, che tende a $x_0$. &Egrave; il concetto giusto per definire il limite: ha senso chiedere $\lim_{x\to x_0}f(x)$ solo se $x_0$ &egrave; di accumulazione per il dominio di $f$ &mdash; altrimenti non hai punti da cui avvicinarti.</p>
+  <p>Un insieme $A$ &egrave; <b>chiuso</b> se contiene <b>tutti</b> i propri punti di accumulazione. La caratterizzazione operativa, quella che userai davvero, &egrave; per successioni: $$A\ \text{chiuso}\quad\iff\quad\text{ogni successione }x_k\in A\text{ convergente ha limite }\lim x_k\in A.$$ Un chiuso &laquo;non lascia scappare i limiti&raquo;: se ti avvicini a un punto restando dentro $A$, quel punto &egrave; dentro $A$. Definizione alternativa, del tutto equivalente: $A$ &egrave; chiuso se e solo se il suo <b>complementare</b> $\mathbb{R}^n\setminus A$ &egrave; aperto. Chiuso e aperto sono legati per complemento, non per opposizione &mdash; e qui nasce il trabocchetto.</p>`},
+  {t:'prosa', title:'Frontiera, chiusura, interno', tag:'l&rsquo;anatomia di un insieme', html:R`
+  <p>La <b>frontiera</b> $\partial A$ &egrave; l&rsquo;insieme dei punti $x_0$ le cui palle incontrano <b>sia</b> $A$ <b>sia</b> il complementare: ogni $B_r(x_0)$ contiene punti dentro $A$ e punti fuori. Sono i punti &laquo;sull&rsquo;orlo&raquo;, che possono appartenere ad $A$ o no. Con essa si compongono i tre pezzi di ogni insieme:</p>
+  <ul>
+  <li>l&rsquo;<b>interno</b> $\mathring A$: i punti interni ad $A$ (il pi&ugrave; grande aperto contenuto in $A$);</li>
+  <li>la <b>frontiera</b> $\partial A$: l&rsquo;orlo;</li>
+  <li>la <b>chiusura</b> $\overline A=A\cup\partial A=\mathring A\cup\partial A$: $A$ pi&ugrave; il suo orlo (il pi&ugrave; piccolo chiuso che contiene $A$).</li>
+  </ul>
+  <p>Regola-ponte: $A$ &egrave; aperto $\iff A=\mathring A$ (coincide col suo interno, non contiene punti di frontiera); $A$ &egrave; chiuso $\iff A=\overline A$ (contiene tutta la sua frontiera). Il disco $\{x^2+y^2\lt1\}$ &egrave; aperto (frontiera = circonferenza, esclusa); $\{x^2+y^2\le1\}$ &egrave; chiuso (circonferenza inclusa); la circonferenza $\{x^2+y^2=1\}$ &egrave; essa stessa la frontiera di entrambi.</p>`},
+  {t:'reveal', title:'Il trabocchetto: aperto e chiuso NON sono opposti', tag:'l&rsquo;errore che l&rsquo;esame tende', steps:[
+   {label:'La tentazione linguistica', body:R`<p>&laquo;Aperto&raquo; e &laquo;chiuso&raquo; suonano come antonimi, quindi la mente conclude: se non &egrave; aperto &egrave; chiuso, e viceversa. <b>Falso.</b> Non sono i due valori di un interruttore: sono <b>due propriet&agrave; indipendenti</b>, e un insieme pu&ograve; averne una, l&rsquo;altra, entrambe o nessuna. La negazione di &laquo;aperto&raquo; &egrave; &laquo;non aperto&raquo;, non &laquo;chiuso&raquo;.</p>`},
+   {label:'I quattro casi, tutti realizzati', body:R`<p>In $\mathbb{R}$, con esempi che riconosci:</p>
+   <ul>
+   <li><b>Aperto e non chiuso:</b> l&rsquo;intervallo $(0,1)$. Ogni punto ha margine; ma $x_k=\tfrac1k\to0\notin(0,1)$, un limite scappa.</li>
+   <li><b>Chiuso e non aperto:</b> $[0,1]$. Contiene tutti i limiti; ma il punto $0$ non ha alcuna palla dentro $[0,1]$ (a sinistra si esce), quindi non &egrave; interno.</li>
+   <li><b>N&eacute; aperto n&eacute; chiuso:</b> il semiaperto $[0,1)$. Il punto $0$ non &egrave; interno (non aperto), e $x_k=1-\tfrac1k\to1\notin[0,1)$ (non chiuso). In $\mathbb{R}^2$: $\{x^2+y^2\le1,\ y\gt0\}$, met&agrave; bordo inclusa met&agrave; no.</li>
+   <li><b>Sia aperto sia chiuso (&laquo;clopen&raquo;):</b> l&rsquo;<b>insieme vuoto</b> $\varnothing$ e <b>tutto</b> $\mathbb{R}^n$. In $\mathbb{R}^n$ sono gli <b>unici</b> due &mdash; ed &egrave; esattamente questo fatto che, riletto, significa &laquo;$\mathbb{R}^n$ &egrave; connesso&raquo; (tappa 07).</li>
+   </ul>`},
+   {label:'La regola da fissare', body:R`<p>$$\boxed{\ \text{"non aperto"}\ \neq\ \text{"chiuso"};\qquad \text{"non chiuso"}\ \neq\ \text{"aperto"}\ }$$ Per stabilire se un insieme &egrave; chiuso <b>non</b> guardare se &egrave; aperto: verifica direttamente la definizione (contiene i limiti delle sue successioni? contiene la sua frontiera?). All&rsquo;esame, davanti a un insieme misto come $\{1\le x^2+y^2\lt4\}$, la risposta corretta &egrave; spesso &laquo;n&eacute; aperto n&eacute; chiuso&raquo;, e chi ragiona per opposti la manca. $\blacksquare$</p>`}
+  ]},
+  {t:'plot', title:'Un insieme n&eacute; aperto n&eacute; chiuso, guardato in faccia',
+   intro:R`L&rsquo;anello semiaperto $A=\{(x,y):\ 0{,}5\lt\lVert x\rVert\le 1\}$. Bordo <b>tratteggiato</b> = escluso da $A$; bordo <b>pieno</b> = incluso.`,
+   plots:[
+    {kind:'contour', f:'hypot(x,y)', levels:[1], col:'#4c8dff', label:'||x||=1 (incluso)', width:2.6,
+     xr:[-1.35,1.35], yr:[-1.35,1.35], height:340, title:'A = { 0.5 < ||x|| <= 1 } : ne aperto, ne chiuso',
+     overlays:[{f:'hypot(x,y)', levels:[0.5], col:'#ff6b6b', label:'||x||=0.5 (escluso)', dash:true, width:2.6}]}
+   ],
+   leggi:R`$A$ non &egrave; <b>aperto</b>: prendi un punto sul cerchio pieno esterno &mdash; sta in $A$, ma ogni palla attorno a lui esce dall&rsquo;anello, quindi non &egrave; interno. $A$ non &egrave; <b>chiuso</b>: i punti del cerchio tratteggiato interno sono di accumulazione per $A$ (ci sono punti di $A$ arbitrariamente vicini) ma non appartengono ad $A$, quindi manca una parte del suo bordo. Da qui la regola: <b>aperto e chiuso non sono complementari, sono due propriet&agrave; indipendenti</b>, e un insieme pu&ograve; non averne nessuna. La frontiera $\partial A$ &egrave; l&rsquo;<b>unione dei due cerchi</b>, indipendentemente da chi dei due appartenga ad $A$: la frontiera non sa nulla dell&rsquo;appartenenza. Nota anche che $A$ &egrave; <b>limitato</b> ma non chiuso, quindi non compatto: una funzione continua su $A$ pu&ograve; non avere massimo (tappa 06).`},
+  {t:'gram', title:'Le parole della topologia', rows:[
+   [R`$x_0$ interno ad $A$`, R`$\exists r\gt0:\ B_r(x_0)\subseteq A$. Ha margine in ogni direzione dentro $A$. L&rsquo;insieme degli interni &egrave; $\mathring A$.`],
+   [R`$A$ aperto`, R`ogni punto &egrave; interno: $A=\mathring A$. Equivale a: il complementare $\mathbb{R}^n\setminus A$ &egrave; chiuso. Le palle $B_r$ sono aperte.`],
+   [R`$x_0$ di accumulazione`, R`ogni palla forata di $x_0$ tocca $A$: c&rsquo;&egrave; una successione in $A\setminus\{x_0\}$ che tende a $x_0$. Condizione per poter scrivere $\lim_{x\to x_0}$. Pu&ograve; non stare in $A$.`],
+   [R`$A$ chiuso`, R`contiene tutti i suoi punti di accumulazione $\iff$ $A=\overline A$ $\iff$ ogni successione convergente in $A$ ha limite in $A$ $\iff$ il complementare &egrave; aperto.`],
+   [R`$\partial A$ (frontiera)`, R`i punti le cui palle toccano sia $A$ sia il complementare: l&rsquo;orlo. $\overline A=A\cup\partial A$. Aperto $\iff$ non contiene punti di $\partial A$; chiuso $\iff$ li contiene tutti.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Classifica $A=\{(x,y):0\lt x^2+y^2\le1\}$ (disco unitario chiuso, origine tolta): aperto, chiuso, n&eacute; l&rsquo;uno n&eacute; l&rsquo;altro? Qual &egrave; la sua frontiera?`,
+    a:R`<b>N&eacute; aperto n&eacute; chiuso.</b> Non aperto: i punti sulla circonferenza $x^2+y^2=1$ appartengono ad $A$ ma non sono interni (una palla sconfina fuori). Non chiuso: la successione $\big(\tfrac1k,0\big)\in A$ tende a $(0,0)\notin A$ &mdash; un punto di accumulazione mancante. La frontiera &egrave; $\partial A=\{x^2+y^2=1\}\cup\{(0,0)\}$: la circonferenza esterna e il buco puntiforme al centro.`},
+   {q:R`Vero o falso: &laquo;l&rsquo;unione di infiniti insiemi chiusi &egrave; sempre chiusa&raquo;. Se falso, un controesempio.`,
+    a:R`<b>Falso.</b> Ogni singoletto $\{\tfrac1k\}$ &egrave; chiuso, ma $\bigcup_{k\ge1}\{\tfrac1k\}=\{1,\tfrac12,\tfrac13,\dots\}$ non &egrave; chiuso: manca il punto di accumulazione $0$. (Regola giusta: unione <b>finita</b> di chiusi &egrave; chiusa; intersezione <b>qualsiasi</b> di chiusi &egrave; chiusa. Per gli aperti &egrave; il contrario: unione qualsiasi, intersezione finita.)`}
+  ]}
+]},
+
+/* ---------------- 04 · LIMITI IN PIÙ VARIABILI ---------------- */
+{ num:'04', title:'Limiti in pi&ugrave; variabili', meta:'la sottigliezza centrale: il limite esiste solo se &egrave; lo stesso per OGNI cammino · $\\frac{xy}{x^2+y^2}$ · le rette non bastano · coordinate polari come metodo',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e la differenza che cambia tutto', tag:'grammatica del limite', html:R`
+  <p>Sia $x_0$ un punto di accumulazione del dominio di $f:\Omega\subseteq\mathbb{R}^n\to\mathbb{R}$. Si dice che $$\lim_{x\to x_0}f(x)=L\quad\iff\quad \forall\varepsilon\gt0\ \exists\delta\gt0:\ 0\lt\lVert x-x_0\rVert\lt\delta\ \Longrightarrow\ |f(x)-L|\lt\varepsilon.$$ Letteralmente lo stesso $\varepsilon$&ndash;$\delta$ di una variabile, con $|x-x_0|$ diventato $\lVert x-x_0\rVert$. Ma dentro quella norma si nasconde un cambiamento radicale. In $\mathbb{R}$ ci si avvicina a $x_0$ solo da <b>due</b> lati: da sinistra e da destra. Il limite esiste quando i due limiti laterali coincidono &mdash; due condizioni.</p>
+  <p>In $\mathbb{R}^n$ la condizione $0\lt\lVert x-x_0\rVert\lt\delta$ descrive una <b>palla forata</b>: puoi avvicinarti a $x_0$ da <b>infinite direzioni</b> e lungo <b>infiniti cammini</b>, anche curvi, anche a spirale. La definizione pretende $|f(x)-L|\lt\varepsilon$ per <b>tutti</b> questi modi contemporaneamente. Da qui il principio che governa ogni esercizio: $$\boxed{\ \lim_{x\to x_0}f(x)=L\ \Longrightarrow\ f\ \text{tende a}\ L\ \text{lungo}\ \textbf{ogni}\ \text{cammino che arriva in}\ x_0\ }$$ Il limite esiste solo se il valore-limite &egrave; lo <b>stesso</b> lungo ogni possibile avvicinamento. Basta trovare <b>due</b> cammini con limiti diversi per concludere che il limite <b>non esiste</b>.</p>`},
+  {t:'reveal', title:'Il controesempio classico: $\\dfrac{xy}{x^2+y^2}$ non ha limite in $(0,0)$', tag:'metodo per la NON esistenza', steps:[
+   {label:'Prova i cammini pi&ugrave; semplici: gli assi', body:R`<p>Sia $f(x,y)=\dfrac{xy}{x^2+y^2}$, definita su $\mathbb{R}^2\setminus\{(0,0)\}$ (il denominatore si annulla solo nell&rsquo;origine, che &egrave; punto di accumulazione: giusto chiedersi il limite). Avvicinati lungo l&rsquo;asse $x$ ($y=0$): $$f(x,0)=\frac{x\cdot0}{x^2+0}=0\ \to\ 0.$$ Lungo l&rsquo;asse $y$ ($x=0$): $f(0,y)=0\to0$. Entrambi danno $0$: la tentazione &egrave; concludere &laquo;il limite &egrave; $0$&raquo;. <b>Non ancora</b>: hai provato due cammini, ce ne sono infiniti.</p>`},
+   {label:'Prova le rette per l&rsquo;origine', body:R`<p>Avvicinati lungo la generica retta $y=mx$: $$f(x,mx)=\frac{x\cdot mx}{x^2+m^2x^2}=\frac{m x^2}{x^2(1+m^2)}=\frac{m}{1+m^2}.$$ Il risultato <b>non dipende da $x$</b>: lungo tutta la retta $y=mx$ la funzione vale costantemente $\dfrac{m}{1+m^2}$, e quindi tende a quel valore. Ma quel valore <b>dipende da $m$</b>: per $m=0$ vale $0$, per $m=1$ vale $\tfrac12$, per $m=2$ vale $\tfrac25$.</p>`},
+   {label:'Concludi la non esistenza', body:R`<p>Hai due cammini con limiti diversi: lungo $y=0$ il limite &egrave; $0$, lungo $y=x$ &egrave; $\tfrac12$. Se il limite esistesse, dovrebbe essere unico e uguale lungo <b>ogni</b> cammino. $$0\neq\tfrac12\ \Longrightarrow\ \lim_{(x,y)\to(0,0)}\frac{xy}{x^2+y^2}\ \textbf{non esiste}.\qquad\blacksquare$$</p>
+   <div class="note"><b>Perch&eacute; l&rsquo;errore $0/0\to0$ &egrave; una trappola.</b> Sostituire &laquo;$x\to0$ e $y\to0$&raquo; e leggere &laquo;$0/0$&raquo; non &egrave; un calcolo: &egrave; una forma indeterminata che qui nasconde una funzione che, sui cerchi $\lVert(x,y)\rVert=\text{cost}$, assume <b>tutti</b> i valori fra $-\tfrac12$ e $\tfrac12$ senza mai stabilizzarsi. Vicino all&rsquo;origine non &laquo;si schiaccia&raquo; su un numero: gira.</div>`}
+  ]},
+  {t:'plot', title:'Perch&eacute; $\\dfrac{xy}{x^2+y^2}$ non ha limite: la figura lo dice prima del conto',
+   intro:R`A sinistra il grafico $z=\dfrac{xy}{x^2+y^2}$ &mdash; <b>trascinalo per ruotarlo</b>. A destra le sue curve di livello.`,
+   plots:[
+    {kind:'surface3d', f:'x*y/(x*x+y*y+1e-9)', xr:[-1.5,1.5], yr:[-1.5,1.5], n:44, height:360, yaw:0.9, pitch:0.95, zscale:1.15, title:'z = xy/(x^2+y^2) : due lobi alti, due bassi, e una fenditura al centro'},
+    {kind:'contour', f:'x*y/(x*x+y*y+1e-9)', levels:[-0.45,-0.3,0,0.3,0.45], xr:[-1.5,1.5], yr:[-1.5,1.5], height:360, title:'i livelli sono RETTE per l origine'}
+   ],
+   leggi:R`La figura di destra &egrave; la dimostrazione. Le curve di livello $\frac{xy}{x^2+y^2}=c$ sono <b>rette passanti per l&rsquo;origine</b>: su ciascuna la funzione vale <b>costantemente</b> $c$, fin dentro il punto critico. Sostituendo $y=mx$ trovi infatti $\frac{m}{1+m^2}$, che non dipende da $x$ ma <b>solo dalla direzione</b> $m$: la funzione &egrave; <b>omogenea di grado 0</b>. Avvicinandoti all&rsquo;origine lungo l&rsquo;asse $x$ ($m=0$) leggi $0$; lungo la bisettrice ($m=1$) leggi $\tfrac12$. Due cammini, due valori: il limite non esiste. Nella superficie a sinistra la stessa cosa &egrave; il fatto che, girando attorno all&rsquo;origine a raggio fissato, la quota <b>oscilla fra $-\tfrac12$ e $+\tfrac12$ senza mai stabilizzarsi</b> &mdash; e continua a farlo per ogni raggio, per piccolo che sia. Non c&rsquo;&egrave; nessuna quota da assegnare al centro che chiuda il buco. Confronta con la tappa 05, dove una funzione simile ma con un grado in pi&ugrave; al numeratore <b>si appiattisce</b> e il buco si chiude.`},
+  {t:'prosa', title:'Le rette non bastano: il trabocchetto dentro il trabocchetto', tag:'l&rsquo;errore raffinato', html:R`
+  <p>Chi ha imparato il metodo dei cammini a volte lo indebolisce cos&igrave;: &laquo;ho provato tutte le rette $y=mx$, il limite viene sempre lo stesso, quindi il limite esiste ed &egrave; quel valore&raquo;. <b>Falso.</b> Coincidere lungo tutte le rette <b>non basta</b>: restano infiniti cammini <b>curvi</b>. Il controesempio da avere in testa: $$g(x,y)=\frac{x^2 y}{x^4+y^2}.$$ Lungo ogni retta $y=mx$: $g(x,mx)=\dfrac{x^2\cdot mx}{x^4+m^2x^2}=\dfrac{m x}{x^2+m^2}\to0$ per $x\to0$ (anche lungo gli assi il valore &egrave; $0$). <b>Ogni retta d&agrave; $0$.</b> Ma prova la parabola $y=x^2$: $$g(x,x^2)=\frac{x^2\cdot x^2}{x^4+(x^2)^2}=\frac{x^4}{x^4+x^4}=\frac{x^4}{2x^4}=\frac12.$$ Lungo la parabola il limite &egrave; $\tfrac12\neq0$: il limite <b>non esiste</b>, nonostante <b>tutte</b> le rette dessero $0$. Morale: provare le rette pu&ograve; <b>smentire</b> l&rsquo;esistenza (se gi&agrave; danno valori diversi), ma non pu&ograve; mai <b>dimostrarla</b>. Per dimostrare che un limite esiste serve un altro strumento.</p>`},
+  {t:'reveal', title:'Il metodo che dimostra l&rsquo;esistenza: coordinate polari', tag:'la tecnica costruttiva', steps:[
+   {label:'L&rsquo;idea: un solo raggio al posto di infiniti cammini', body:R`<p>In $\mathbb{R}^2$ scrivi $x=r\cos\theta$, $y=r\sin\theta$, con $r=\lVert(x,y)\rVert\ge0$ la distanza dall&rsquo;origine e $\theta$ l&rsquo;angolo. Il punto essenziale: $$(x,y)\to(0,0)\quad\iff\quad r\to0,\quad\text{qualunque sia }\theta.$$ Tutti i cammini che arrivano nell&rsquo;origine hanno $r\to0$; ci&ograve; che li distingue &egrave; come varia $\theta$ lungo il cammino (fissa per una retta, variabile per una spirale). Se riesci a controllare $f$ <b>uniformemente in $\theta$</b>, hai controllato tutti i cammini in un colpo.</p>`},
+   {label:'Il criterio operativo', body:R`<p>Scrivi $f$ in polari e cerca una <b>maggiorazione che dipende solo da $r$</b>: $$|f(r\cos\theta,r\sin\theta)-L|\ \le\ h(r)\qquad\text{per ogni }\theta,\quad\text{con }h(r)\to0.$$ Se la trovi, allora $|f-L|$ &egrave; schiacciato a zero indipendentemente dalla direzione, e $$\lim_{(x,y)\to(0,0)}f=L.$$ La chiave &egrave; che la stima <b>non contenga $\theta$</b> (o contenga solo fattori limitati come $\cos\theta,\sin\theta$, che stanno in $[-1,1]$): l&rsquo;uniformit&agrave; in $\theta$ &egrave; ci&ograve; che rende la conclusione valida per tutti i cammini.</p>`},
+   {label:'Esempio: $\\dfrac{x^2 y}{x^2+y^2}$ ha limite $0$', body:R`<p>Metti $\varphi(x,y)=\dfrac{x^2y}{x^2+y^2}$ in polari. Numeratore: $x^2y=r^3\cos^2\theta\sin\theta$. Denominatore: $x^2+y^2=r^2$. Quindi $$\varphi=\frac{r^3\cos^2\theta\sin\theta}{r^2}=r\,\cos^2\theta\sin\theta.$$ Ora stimo, usando $|\cos^2\theta\sin\theta|\le1$: $$|\varphi-0|=r\,|\cos^2\theta\sin\theta|\ \le\ r\ \xrightarrow[r\to0]{}\ 0.$$ La maggiorante $h(r)=r$ non dipende da $\theta$ e tende a $0$: per il criterio, $$\lim_{(x,y)\to(0,0)}\frac{x^2y}{x^2+y^2}=0.\qquad\blacksquare$$ Confronta con $\dfrac{xy}{x^2+y^2}$: l&igrave;, in polari, $\dfrac{r^2\cos\theta\sin\theta}{r^2}=\cos\theta\sin\theta$, che <b>non contiene $r$</b> e dipende solo da $\theta$ &mdash; nessuna maggiorante infinitesima, e infatti il limite non esiste. La presenza o assenza di un fattore $r$ che &laquo;spegne&raquo; l&rsquo;angolo &egrave; la spia.</p>`}
+  ]},
+  {t:'plot', title:'Il caso che punisce chi si ferma alle rette: $\\dfrac{x^2y}{x^4+y^2}$',
+   intro:R`Le curve di livello di $g(x,y)=\dfrac{x^2y}{x^4+y^2}$, e la <b>parabola</b> $y=x^2$ (tratteggiata) lungo cui la funzione vale costantemente $\tfrac12$.`,
+   plots:[
+    {kind:'contour', f:'x*x*y/(x*x*x*x+y*y+1e-9)', levels:[0.1,0.25,0.4,0.49], xr:[-1.6,1.6], yr:[-1.2,1.6], height:340,
+     title:'i livelli non sono rette: sono PARABOLE y = k x^2',
+     overlays:[{f:'y-x*x', levels:[0], col:'#ff6b6b', label:'y = x^2 : qui g vale 1/2', dash:true, width:2.4}]},
+    {kind:'surface3d', f:'x*x*y/(x*x*x*x+y*y+1e-9)', xr:[-1.4,1.4], yr:[-1,1.4], n:46, height:340, yaw:1.15, pitch:0.85, zscale:1.2, title:'la cresta lungo la parabola non si abbassa'}
+   ],
+   leggi:R`Lungo <b>ogni retta</b> $y=mx$ si ha $g=\frac{m x^3}{x^4+m^2x^2}=\frac{mx}{x^2+m^2}\to 0$: chi prova solo le rette conclude &laquo;il limite &egrave; $0$&raquo; ed &egrave; <b>fregato</b>. Lungo la parabola $y=x^2$ invece $g=\frac{x^4}{2x^4}=\tfrac12$ costantemente. Le curve di livello lo mostrano senza calcoli: <b>non sono rette, sono parabole</b> $y=kx^2$, e ogni parabola porta il suo valore fin dentro l&rsquo;origine. Regola operativa: quando le rette danno tutte lo stesso valore, <b>non hai finito</b> &mdash; guarda i gradi. Qui il numeratore ha grado $3$ e il denominatore mescola grado $4$ e grado $2$: la disomogeneit&agrave; &egrave; il segnale che il cammino giusto &egrave; una curva che bilancia $x^4$ con $y^2$, cio&egrave; $y\sim x^2$. Se invece vuoi <b>dimostrare</b> che un limite esiste, nessuna famiglia di cammini basta: servono le polari e una maggiorazione uniforme in $\theta$.`},
+  {t:'esercizio', title:'Decidi tu: esiste o no?', src:'Applicazione diretta · una coppia gemella da chiudere in sede d&rsquo;esame',
+   testo:R`Per ciascuno, stabilisci se il limite in $(0,0)$ esiste, e in caso affermativo calcolalo:$$\text{(a)}\quad \lim_{(x,y)\to(0,0)}\frac{x^3+y^3}{x^2+y^2},\qquad\qquad \text{(b)}\quad \lim_{(x,y)\to(0,0)}\frac{x^2-y^2}{x^2+y^2}.$$`,
+   steps:[
+    {label:'(a) Polari', body:R`<p>$x^3+y^3=r^3(\cos^3\theta+\sin^3\theta)$, denominatore $r^2$. Dunque $$\frac{x^3+y^3}{x^2+y^2}=r\,(\cos^3\theta+\sin^3\theta).$$ Il fattore angolare &egrave; limitato: $|\cos^3\theta+\sin^3\theta|\le|\cos^3\theta|+|\sin^3\theta|\le2$. Quindi $$\left|\frac{x^3+y^3}{x^2+y^2}\right|\le 2r\ \xrightarrow[r\to0]{}\ 0.$$ La maggiorante $2r$ non dipende da $\theta$ e tende a $0$: il limite <b>esiste</b> e vale $\mathbf{0}$.</p>`},
+    {label:'(b) Polari, e la spia', body:R`<p>$x^2-y^2=r^2(\cos^2\theta-\sin^2\theta)$, denominatore $r^2$. I fattori $r^2$ si <b>cancellano</b>: $$\frac{x^2-y^2}{x^2+y^2}=\cos^2\theta-\sin^2\theta=\cos(2\theta).$$ Nessun $r$ superstite: il valore dipende <b>solo</b> dall&rsquo;angolo di avvicinamento. Lungo l&rsquo;asse $x$ ($\theta=0$): $\cos0=1$. Lungo l&rsquo;asse $y$ ($\theta=\tfrac\pi2$): $\cos\pi=-1$.</p>`},
+    {label:'(b) Conclusione', body:R`<p>Due cammini, due limiti: $1$ lungo l&rsquo;asse $x$, $-1$ lungo l&rsquo;asse $y$. $$1\neq-1\ \Longrightarrow\ \lim_{(x,y)\to(0,0)}\frac{x^2-y^2}{x^2+y^2}\ \textbf{non esiste}.\qquad\blacksquare$$ La differenza fra (a) e (b) &egrave; tutta nel grado: nel numeratore di (a) c&rsquo;&egrave; $r^3$ contro $r^2$ al denominatore, un $r$ avanza e spegne l&rsquo;angolo; in (b) numeratore e denominatore sono entrambi $r^2$, l&rsquo;angolo sopravvive nudo.</p>`}
+   ],
+   nota:R`Ordine efficiente in sede d&rsquo;esame: (1) prova due&ndash;tre cammini facili (assi, $y=x$); se danno valori diversi, hai gi&agrave; la <b>non esistenza</b>, stop. (2) Se coincidono, <b>non</b> concludere: passa in polari e cerca una maggiorante $h(r)\to0$ indipendente da $\theta$; se la trovi, il limite <b>esiste</b>. (3) Se in polari resta un $\theta$ nudo (nessun $r$ che lo moltiplica), il limite <b>non esiste</b>. Non fermarti mai alle sole rette per affermare l&rsquo;esistenza: ricorda $\dfrac{x^2y}{x^4+y^2}$.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Uno studente scrive: &laquo;$\lim_{(x,y)\to(0,0)}\dfrac{x^2y}{x^4+y^2}=0$ perch&eacute; lungo ogni retta il limite &egrave; $0$&raquo;. Dove sbaglia?`,
+    a:R`Sbaglia nel <b>quantificatore</b>: le rette sono infinite ma non sono <b>tutti</b> i cammini. Lungo la parabola $y=x^2$ la funzione vale costantemente $\tfrac12$, quindi il limite lungo quel cammino &egrave; $\tfrac12\neq0$: il limite <b>non esiste</b>. Coincidere lungo tutte le rette pu&ograve; solo <b>non contraddire</b> l&rsquo;esistenza; non la dimostra mai. La dimostrazione richiede una stima uniforme (polari), non un fascio di cammini.`},
+   {q:R`In polari una funzione diventa $f=r^2\sin(1/\theta)\cdot\cos\theta$ vicino all&rsquo;origine (con fattori angolari limitati). Puoi concludere sul limite in $(0,0)$?`,
+    a:R`S&igrave;: il limite <b>esiste</b> e vale $0$. I fattori $\sin(1/\theta)$ e $\cos\theta$ sono <b>limitati</b> (in $[-1,1]$), quindi $|f|\le r^2\cdot1\cdot1=r^2\to0$, maggiorante indipendente da $\theta$. Non importa quanto &laquo;brutta&raquo; sia la dipendenza angolare: se &egrave; <b>limitata</b> ed &egrave; moltiplicata da una potenza positiva di $r$, viene schiacciata a zero.`}
+  ]}
+]},
+
+/* ---------------- 05 · CONTINUITÀ ---------------- */
+{ num:'05', title:'Continuit&agrave; in pi&ugrave; variabili', meta:'$f$ continua in $x_0$ $\\iff$ $\\lim_{x\\to x_0}f=f(x_0)$ · caratterizzazione per successioni · continuit&agrave; separata NON basta · perch&eacute; i polinomi e i quozienti sono continui',
+  blocchi:[
+  {t:'prosa', title:'La definizione: nessun salto', tag:'grammatica', html:R`
+  <p>Una funzione $f:\Omega\subseteq\mathbb{R}^n\to\mathbb{R}$ &egrave; <b>continua</b> nel punto $x_0\in\Omega$ (di accumulazione) se $$\lim_{x\to x_0}f(x)=f(x_0),$$ cio&egrave; il limite esiste <b>ed eguaglia il valore</b> nel punto. In $\varepsilon$&ndash;$\delta$: $\forall\varepsilon\gt0\ \exists\delta\gt0$ tale che $\lVert x-x_0\rVert\lt\delta\Rightarrow|f(x)-f(x_0)|\lt\varepsilon$. Intuizione: piccole variazioni dell&rsquo;ingresso producono piccole variazioni dell&rsquo;uscita; il grafico non &laquo;salta&raquo;. La funzione &egrave; continua su $\Omega$ se lo &egrave; in ogni punto.</p>
+  <p>Poich&eacute; la continuit&agrave; &egrave; un limite, eredita <b>tutta</b> la sottigliezza della tappa 04: per essere continua in $x_0$, $f$ deve tendere a $f(x_0)$ lungo <b>ogni</b> cammino. Un solo cammino con limite diverso rompe la continuit&agrave;. Ecco perch&eacute; i limiti vengono prima: la continuit&agrave; &egrave; il caso in cui il limite non solo esiste, ma &laquo;fa la cosa giusta&raquo;.</p>`},
+  {t:'prosa', title:'La caratterizzazione per successioni (Heine)', tag:'lo strumento che smaschera le discontinuit&agrave;', html:R`
+  <p>Esiste una lettura equivalente della continuit&agrave;, spesso pi&ugrave; comoda per <b>negarla</b>: $$f\ \text{continua in }x_0\quad\iff\quad \text{per ogni successione}\ x_k\to x_0\ \text{si ha}\ f(x_k)\to f(x_0).$$ &laquo;$f$ manda successioni convergenti in successioni convergenti, al valore giusto&raquo;. La forza sta nel verso $\Leftarrow$ negato: per <b>dimostrare che $f$ NON &egrave; continua</b> in $x_0$ basta esibire <b>una sola</b> successione $x_k\to x_0$ con $f(x_k)\not\to f(x_0)$. Un controesempio, non infiniti cammini. &Egrave; il gemello, in linguaggio di successioni, del metodo dei cammini per i limiti.</p>`},
+  {t:'reveal', title:'Continuit&agrave; separata NON implica continuit&agrave;', tag:'il trabocchetto', steps:[
+   {label:'Il candidato e la sua estensione', body:R`<p>Riprendi $f(x,y)=\dfrac{xy}{x^2+y^2}$ e <b>estendila</b> nell&rsquo;origine ponendo $f(0,0)=0$. Ora $f$ &egrave; definita su tutto $\mathbb{R}^2$. La domanda: &egrave; continua in $(0,0)$?</p>`},
+   {label:'&Egrave; continua in ciascuna variabile separatamente', body:R`<p>Fissa $y=0$ e guarda $x\mapsto f(x,0)$: vale $\dfrac{x\cdot0}{x^2}=0$ per $x\neq0$ e $f(0,0)=0$, quindi &egrave; la funzione costante $0$ &mdash; <b>continua</b> in $x=0$. Simmetricamente $y\mapsto f(0,y)\equiv0$ &egrave; continua. Dunque $f$ &egrave; <b>separatamente continua</b>: continua rispetto a $x$ (con $y$ fissato) e rispetto a $y$ (con $x$ fissato), nell&rsquo;origine.</p>`},
+   {label:'Ma non &egrave; continua come funzione di $(x,y)$', body:R`<p>Prendi la successione $x_k=\big(\tfrac1k,\tfrac1k\big)\to(0,0)$, che si avvicina lungo la bisettrice. Allora $$f(x_k)=\frac{\tfrac1k\cdot\tfrac1k}{\tfrac1{k^2}+\tfrac1{k^2}}=\frac{1/k^2}{2/k^2}=\frac12\ \not\to\ 0=f(0,0).$$ Una successione che tende all&rsquo;origine con immagini che tendono a $\tfrac12\neq f(0,0)$: per Heine, $f$ <b>non &egrave; continua</b> in $(0,0)$. $$\boxed{\ \text{separatamente continua}\ \not\Rightarrow\ \text{continua}\ }\qquad\blacksquare$$</p>
+   <div class="note warn"><b>Perch&eacute; l&rsquo;esame lo tende.</b> Guardare le derivate parziali, o le sezioni lungo gli assi, e concludere &laquo;continua/regolare nell&rsquo;origine&raquo; &egrave; l&rsquo;errore-gemello del &laquo;tutte le rette danno lo stesso valore&raquo;. Continuit&agrave; separata &egrave; solo continuit&agrave; lungo <b>due</b> cammini (i due assi): non vede la diagonale, non vede le parabole. La continuit&agrave; vera &egrave; una propriet&agrave; <b>congiunta</b>, su tutti i cammini insieme. Lo stesso baco, in versione derivate, sar&agrave; il cuore del prossimo nucleo: &laquo;esistono le parziali&raquo; non implica &laquo;differenziabile&raquo;.</div>`}
+  ]},
+  {t:'prosa', title:'Perch&eacute; quasi tutte le funzioni d&rsquo;esame sono continue', tag:'l&rsquo;algebra della continuit&agrave;', html:R`
+  <p>La continuit&agrave; si conserva sotto le operazioni: se $f,g$ sono continue in $x_0$, lo sono $f\pm g$, $fg$, e $f/g$ dove $g(x_0)\neq0$; e la <b>composizione</b> di funzioni continue &egrave; continua. Le proiezioni $x\mapsto x_i$ sono continue; da esse, sommando e moltiplicando, ottieni che <b>ogni polinomio</b> in $(x_1,\dots,x_n)$ &egrave; continuo su tutto $\mathbb{R}^n$, e ogni <b>funzione razionale</b> (quoziente di polinomi) &egrave; continua <b>dove il denominatore non si annulla</b>. Le composizioni con $\exp$, $\sin$, $\cos$, $\log$, $\sqrt{\ }$ restano continue nei rispettivi domini.</p>
+  <p>Conseguenza pratica: nei tuoi esercizi la continuit&agrave; &egrave; &laquo;gratis&raquo; ovunque tranne nei <b>punti eccezionali</b> &mdash; tipicamente gli zeri del denominatore, dove la funzione &egrave; stata estesa a mano (come l&rsquo;origine di $\tfrac{xy}{x^2+y^2}$). L&rsquo;unico punto da studiare davvero &egrave; quello: e lo studi con i limiti della tappa 04. Il resto del dominio &egrave; continuo per costruzione.</p>`},
+  {t:'gram', title:'Continuit&agrave;: le tre facce', rows:[
+   [R`$\lim_{x\to x_0}f=f(x_0)$`, R`<b>continuit&agrave; puntuale</b> ($\varepsilon$&ndash;$\delta$). Il limite esiste e coincide col valore. Eredita la regola dei cammini: deve valere lungo <b>ogni</b> avvicinamento.`],
+   [R`$x_k\to x_0\Rightarrow f(x_k)\to f(x_0)$`, R`caratterizzazione <b>sequenziale</b> (Heine), equivalente. La usi al contrario per <b>negare</b> la continuit&agrave;: una sola successione &laquo;cattiva&raquo; basta.`],
+   [R`continuit&agrave; separata`, R`continua in ciascuna variabile con le altre fissate. &Egrave; continuit&agrave; lungo i soli assi coordinati: <b>pi&ugrave; debole</b>, <b>non</b> implica quella congiunta. Trappola classica.`],
+   [R`$f^{-1}(\text{aperto})$ aperto`, R`continuit&agrave; <b>globale</b>, versione topologica: la controimmagine di ogni aperto &egrave; aperta. &Egrave; la definizione che sopravvive negli spazi astratti del Movimento II, dove non c&rsquo;&egrave; pi&ugrave; la norma ma restano gli aperti.`],
+   [R`$f,g$ continue $\Rightarrow f/g$`, R`continua dove $g\neq0$. Polinomi continui ovunque, razionali continui fuori dagli zeri del denominatore. &Egrave; il motivo per cui resta da studiare solo il punto eccezionale.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`La funzione $f(x,y)=\dfrac{x^2y}{x^2+y^2}$ per $(x,y)\neq(0,0)$ e $f(0,0)=0$ &egrave; continua nell&rsquo;origine?`,
+    a:R`<b>S&igrave;.</b> Nella tappa 04 (in polari) hai visto $\lim_{(x,y)\to(0,0)}\dfrac{x^2y}{x^2+y^2}=0$, e il valore assegnato &egrave; $f(0,0)=0$: limite $=$ valore, dunque continua. Fuori dall&rsquo;origine &egrave; razionale con denominatore non nullo, quindi continua ovunque. La stessa struttura di $\tfrac{xy}{x^2+y^2}$ ma con un grado in pi&ugrave; al numeratore: quel grado in pi&ugrave; salva la continuit&agrave;.`},
+   {q:R`Vero o falso: &laquo;se tutte le derivate parziali di $f$ esistono in $x_0$, allora $f$ &egrave; continua in $x_0$&raquo;.`,
+    a:R`<b>Falso.</b> L&rsquo;esistenza delle parziali &egrave; continuit&agrave; separata (lungo gli assi) rafforzata dalla derivabilit&agrave; su quelle rette &mdash; ma non vede gli altri cammini. $\tfrac{xy}{x^2+y^2}$ esteso con $0$ ha entrambe le parziali nulle nell&rsquo;origine, eppure <b>non &egrave; continua</b> l&igrave;. &Egrave; l&rsquo;annuncio esatto del prossimo nucleo: &laquo;parziali esistono&raquo; &egrave; molto meno di &laquo;differenziabile&raquo;, che a sua volta implica la continuit&agrave;.`}
+  ]}
+]},
+
+/* ---------------- 06 · COMPATTEZZA E WEIERSTRASS ---------------- */
+{ num:'06', title:'Compattezza e Weierstrass', meta:'Heine&ndash;Borel: in $\\mathbb{R}^n$ compatto $\\iff$ chiuso e limitato · Bolzano&ndash;Weierstrass · teorema di Weierstrass: continua su compatto ha max e min · &egrave; ci&ograve; che garantisce gli ottimi',
+  blocchi:[
+  {t:'prosa', title:'Chiuso e limitato: la doppia condizione', tag:'la definizione utile', html:R`
+  <p>Un insieme $K\subseteq\mathbb{R}^n$ &egrave; <b>limitato</b> se sta dentro una palla: esiste $M\gt0$ con $K\subseteq B_M(0)$, cio&egrave; $\lVert x\rVert\le M$ per ogni $x\in K$. &laquo;Non si estende all&rsquo;infinito&raquo;. Combinando col chiuso della tappa 03 si ottiene la nozione centrale: $K$ &egrave; <b>compatto</b>. In $\mathbb{R}^n$ vale la caratterizzazione che userai sempre, il <b>teorema di Heine&ndash;Borel</b>: $$\boxed{\ K\subseteq\mathbb{R}^n\ \text{compatto}\quad\iff\quad K\ \text{è chiuso e limitato}\ }$$ Due controlli semplici &mdash; &laquo;contiene la sua frontiera?&raquo; e &laquo;sta dentro una palla?&raquo; &mdash; e sai se un insieme &egrave; compatto. Il disco chiuso $\overline B$, un rettangolo $[a,b]\times[c,d]$, una sfera, un segmento: tutti compatti. Il piano $\mathbb{R}^2$ (illimitato), il disco aperto (non chiuso), una retta (illimitata): non compatti.</p>
+  <p>La definizione &laquo;vera&raquo; di compattezza &mdash; da ogni ricoprimento con aperti se ne estrae uno finito &mdash; &egrave; quella che sopravvive negli spazi astratti; ma in $\mathbb{R}^n$ equivale a &laquo;chiuso e limitato&raquo; e alla <b>compattezza per successioni</b>: <b>ogni successione in $K$ ammette una sottosuccessione convergente a un punto di $K$</b>. &Egrave; questa terza forma il motore delle dimostrazioni, e poggia su un teorema che gi&agrave; conosci in una variabile.</p>`},
+  {t:'prosa', title:'Bolzano&ndash;Weierstrass: da dove viene la sottosuccessione', tag:'il mattone', html:R`
+  <p><b>Teorema di Bolzano&ndash;Weierstrass.</b> Ogni successione <b>limitata</b> in $\mathbb{R}^n$ ammette una sottosuccessione convergente. In $\mathbb{R}$ &egrave; il fatto che una successione limitata, avendo estremo superiore e inferiore, si &laquo;accalca&raquo; da qualche parte (per bisezione ripetuta dell&rsquo;intervallo che la contiene si isola un punto di accumulazione). In $\mathbb{R}^n$ si ottiene applicandolo una coordinata alla volta: estrai una sottosuccessione che converge nella prima componente, da questa una che converge anche nella seconda, e cos&igrave; via $n$ volte; l&rsquo;ultima converge in tutte le componenti, quindi (tappa 02) come vettore.</p>
+  <p>Se in pi&ugrave; la successione vive in un insieme <b>chiuso</b> $K$, il limite della sottosuccessione &mdash; essendo limite di punti di $K$ &mdash; appartiene a $K$. Ecco la compattezza per successioni: chiuso (il limite resta dentro) $+$ limitato (Bolzano&ndash;Weierstrass fornisce la sottosuccessione) $=$ ogni successione ha una sottosuccessione convergente <b>in $K$</b>. Con questo in mano, il teorema di Weierstrass &egrave; a un passo.</p>`},
+  {t:'reveal', title:'Teorema di Weierstrass: una continua su un compatto ha max e min', tag:'la dimostrazione', steps:[
+   {label:'L&rsquo;enunciato e la strategia', body:R`<p><b>Teorema.</b> Se $K\subseteq\mathbb{R}^n$ &egrave; compatto e non vuoto, e $f:K\to\mathbb{R}$ &egrave; continua, allora $f$ &egrave; <b>limitata</b> e <b>assume</b> massimo e minimo: esistono $x_{\max},x_{\min}\in K$ con $f(x_{\min})\le f(x)\le f(x_{\max})$ per ogni $x\in K$. Dimostro il massimo (il minimo &egrave; identico su $-f$). Idea: costruisco una successione che &laquo;insegue&raquo; l&rsquo;estremo superiore, ne estraggo un punto limite con la compattezza, e la continuit&agrave; mi dice che il valore l&igrave; &egrave; proprio il massimo.</p>`},
+   {label:'Successione massimizzante', body:R`<p>Sia $M=\sup_{K}f\in(-\infty,+\infty]$ l&rsquo;estremo superiore dei valori (a priori potrebbe essere $+\infty$, cio&egrave; $f$ illimitata: lo escluder&ograve; alla fine). Per definizione di sup, esiste una successione $x_k\in K$ con $$f(x_k)\ \to\ M\qquad(k\to\infty).$$ La chiamo <b>massimizzante</b>: i suoi valori si avvicinano quanto vuoi al tetto $M$.</p>`},
+   {label:'Compattezza: estrai un punto limite', body:R`<p>$K$ &egrave; compatto, dunque compatto per successioni: dalla $x_k$ estraggo una <b>sottosuccessione</b> $x_{k_j}$ che converge a un punto $\bar x\in K$ (il limite resta in $K$ perch&eacute; $K$ &egrave; chiuso). &Egrave; qui che la compattezza fa tutto il lavoro: senza di essa la successione massimizzante potrebbe &laquo;fuggire&raquo; verso il bordo mancante o all&rsquo;infinito, senza punto limite in $K$.</p>`},
+   {label:'Continuit&agrave;: il valore l&igrave; &egrave; il massimo', body:R`<p>$f$ &egrave; continua e $x_{k_j}\to\bar x$, quindi (Heine, tappa 05) $f(x_{k_j})\to f(\bar x)$. Ma $x_{k_j}$ &egrave; sottosuccessione di una successione con $f(x_k)\to M$, dunque anche $f(x_{k_j})\to M$. Il limite &egrave; unico: $$f(\bar x)=M.$$ Questo dice due cose insieme. Primo: $M=f(\bar x)$ &egrave; un <b>numero reale finito</b> (non $+\infty$), quindi $f$ &egrave; limitata superiormente. Secondo: il valore $M$ &egrave; <b>assunto</b> nel punto $\bar x\in K$, che &egrave; dunque il punto di massimo $x_{\max}$. $$\boxed{\ f\ \text{continua su }K\ \text{compatto}\ \Longrightarrow\ \exists\,\max_K f\ \text{e}\ \min_K f\ }\qquad\blacksquare$$</p>
+   <div class="note"><b>Le due ipotesi sono entrambe indispensabili.</b> Se cade la <b>limitatezza</b>: $f(x)=x$ su $[0,+\infty)$ non ha massimo (cresce senza fermarsi). Se cade la <b>chiusura</b>: $f(x)=x$ su $(0,1)$ non ha n&eacute; massimo n&eacute; minimo (l&rsquo;estremo &egrave; $1$, ma $1\notin(0,1)$: il valore si avvicina senza mai essere raggiunto). Togli la compattezza e la garanzia svanisce.</div>`}
+  ]},
+  {t:'prosa', title:'Perch&eacute; questo teorema regge l&rsquo;ottimizzazione', tag:'il ponte in avanti', html:R`
+  <p>Quando pi&ugrave; avanti cercherai i punti di massimo e minimo di una funzione &mdash; liberi (gradiente nullo) o vincolati (moltiplicatori di Lagrange) &mdash; farai un&rsquo;operazione che presuppone <b>silenziosamente</b> che quei punti <b>esistano</b>. Weierstrass &egrave; la licenza che lo garantisce: se il dominio (o il vincolo) &egrave; <b>chiuso e limitato</b> e la funzione &egrave; <b>continua</b>, il massimo e il minimo <b>esistono</b> e sono <b>assunti</b> in qualche punto del compatto. A quel punto Lagrange serve a <b>trovarli</b>; Weierstrass ti aveva assicurato che c&rsquo;&egrave; qualcosa da trovare.</p>
+  <p>Da qui la strategia standard degli esercizi di ottimizzazione su un compatto (esempio: massimizzare $f$ sul disco chiuso $\overline B$): il massimo assoluto sta o in un <b>punto interno stazionario</b> ($\nabla f=0$) oppure <b>sulla frontiera</b> $\partial\overline B$ (da studiare a parte, spesso con Lagrange o una parametrizzazione). Confronti i valori candidati e prendi il pi&ugrave; grande e il pi&ugrave; piccolo. Questa procedura ha senso <b>solo perch&eacute;</b> Weierstrass ti ha promesso che l&rsquo;estremo &egrave; raggiunto in uno di quei punti, non &laquo;all&rsquo;infinito&raquo; o su un bordo mancante.</p>`},
+  {t:'plot', title:'Weierstrass in figura: i livelli salgono finch&eacute; il compatto li ferma',
+   intro:R`Le curve di livello di $f(x,y)=x^2-xy+y^2$ (ellissi ruotate) e il disco chiuso $\overline B=\{x^2+y^2\le1\}$, in blu pieno perch&eacute; il bordo <b>appartiene</b> all&rsquo;insieme.`,
+   plots:[
+    {kind:'contour', f:'x*x-x*y+y*y', levels:[0.15,0.5,1.0,1.5], col:'#5eead4', label:'livelli di f', xr:[-1.9,1.9], yr:[-1.9,1.9], height:400,
+     title:'i livelli salgono finche il bordo del compatto li ferma',
+     overlays:[{f:'hypot(x,y)', levels:[1], col:'#4c8dff', label:'bordo di B (incluso)', width:2.8}],
+     marks:[{x:0,y:0,label:'min f=0',col:'#ffffff'},{x:0.7071,y:-0.7071,label:'max f=3/2',col:'#d8a13a'},{x:-0.7071,y:0.7071,label:'max f=3/2',col:'#d8a13a',left:true,up:true}]}
+   ],
+   leggi:R`Il <b>minimo</b> $f=0$ &egrave; nell&rsquo;origine, dove le ellissi degenerano in un punto: sta all&rsquo;<b>interno</b>, e infatti l&agrave; il gradiente si annulla. Il <b>massimo</b> non &egrave; interno: le ellissi crescono verso l&rsquo;esterno, quindi il valore pi&ugrave; alto si raggiunge dove il disco le taglia &mdash; sul <b>bordo</b>, nei due punti $\pm(1/\sqrt2,\,-1/\sqrt2)$ in cui l&rsquo;ellisse &egrave; <b>tangente</b> alla circonferenza, con $f=\tfrac32$. Guarda quella tangenza: &egrave; l&rsquo;intera idea dei <b>moltiplicatori di Lagrange</b> (nucleo 3) vista prima di conoscerne la formula &mdash; nel punto ottimo vincolato, la curva di livello e il vincolo hanno la <b>stessa direzione normale</b>, cio&egrave; $\nabla f=\lambda\nabla g$. E qui si vede perch&eacute; serve la <b>chiusura</b>: se il bordo fosse escluso ($\lVert x\rVert\lt1$), quel massimo <b>non verrebbe mai raggiunto</b> &mdash; ti avvicineresti a $\tfrac32$ senza toccarlo, e l&rsquo;esercizio &laquo;trova il massimo&raquo; non avrebbe risposta. Weierstrass &egrave; esattamente la garanzia che questo non succeda: chiuso e limitato $\Rightarrow$ compatto $\Rightarrow$ gli ottimi <b>esistono</b>, prima ancora di sapere dove.`},
+  {t:'esercizio', title:'La garanzia, prima del calcolo', src:'Es.&nbsp;tipo · esistenza degli ottimi su un dominio',
+   testo:R`Per ciascuna coppia (funzione, dominio), stabilisci se il teorema di Weierstrass garantisce l&rsquo;esistenza di massimo e minimo. Se non la garantisce, di&rsquo; quale ipotesi manca e se gli ottimi esistono comunque.$$\text{(a)}\ f(x,y)=x^2-xy+y^2\ \text{su}\ \overline B=\{x^2+y^2\le1\};\quad \text{(b)}\ g(x,y)=x\ \text{su}\ \{x^2+y^2\lt1\};\quad \text{(c)}\ h(x,y)=e^{-(x^2+y^2)}\ \text{su}\ \mathbb{R}^2.$$`,
+   steps:[
+    {label:'(a) Compatto: garantiti', body:R`<p>$f$ &egrave; un polinomio, quindi continua su tutto $\mathbb{R}^2$. Il dominio $\overline B$ &egrave; <b>chiuso</b> (contiene la circonferenza $x^2+y^2=1$, disuguaglianza $\le$) e <b>limitato</b> (dentro $B_2(0)$): compatto. Weierstrass <b>si applica</b>: massimo e minimo esistono e sono assunti. (Li troveresti poi con $\nabla f=0$ all&rsquo;interno e Lagrange sul bordo &mdash; ma la loro esistenza &egrave; gi&agrave; certa <b>prima</b> di ogni conto.)</p>`},
+    {label:'(b) Dominio aperto: non garantiti, e infatti mancano', body:R`<p>$g(x,y)=x$ &egrave; continua, ma il dominio $\{x^2+y^2\lt1\}$ &egrave; il disco <b>aperto</b>: limitato ma <b>non chiuso</b>. Manca un&rsquo;ipotesi, Weierstrass non si applica. E gli ottimi <b>non esistono</b>: $g$ tende a $1$ avvicinandosi al bordo destro $(1,0)$ e a $-1$ verso $(-1,0)$, ma quei punti sono esclusi; l&rsquo;estremo superiore $1$ e inferiore $-1$ non sono <b>assunti</b>. Sup e inf esistono, max e min no.</p>`},
+    {label:'(c) Dominio illimitato: non garantiti, ma qui esistono comunque', body:R`<p>$h(x,y)=e^{-(x^2+y^2)}$ &egrave; continua, ma $\mathbb{R}^2$ &egrave; chiuso e <b>illimitato</b>: non compatto, Weierstrass non si applica <b>direttamente</b>. Tuttavia il <b>massimo esiste</b>: $h\le1$ ovunque, con $h=1$ raggiunto in $(0,0)$. Il <b>minimo</b> invece <b>non esiste</b>: $h\to0$ all&rsquo;infinito ma non vale mai $0$ (inf $=0$ non assunto). Lezione: la compattezza &egrave; <b>sufficiente</b>, non <b>necessaria</b> &mdash; senza di essa gli ottimi <b>possono</b> esistere, ma nulla lo garantisce, e vanno verificati a mano. $\blacksquare$</p>`}
+   ],
+   nota:R`In sede d&rsquo;esame, prima di lanciarti nel calcolo degli ottimi <b>controlla la compattezza del dominio</b>: chiuso ($\le$, non $\lt$; frontiera inclusa) e limitato (sta in una palla). Se &egrave; compatto, hai la certezza dell&rsquo;esistenza e sai che gli ottimi stanno fra i punti stazionari interni e la frontiera. Se non &egrave; compatto, il problema pu&ograve; <b>non avere</b> soluzione: studia il comportamento verso il bordo escluso o verso l&rsquo;infinito prima di dichiarare un massimo.`},
+  {t:'gram', title:'Il vocabolario della compattezza', rows:[
+   [R`$K$ limitato`, R`$\exists M:\ K\subseteq B_M(0)$, cio&egrave; $\lVert x\rVert\le M$ su $K$. &laquo;Non fugge all&rsquo;infinito&raquo;. Da solo non basta: il disco aperto &egrave; limitato ma non compatto.`],
+   [R`$K$ compatto`, R`in $\mathbb{R}^n$: <b>chiuso e limitato</b> (Heine&ndash;Borel) $\iff$ ogni successione ha una sottosuccessione convergente <b>in $K$</b>. &Egrave; l&rsquo;ipotesi che &laquo;trattiene&raquo; punti e valori.`],
+   [R`Bolzano&ndash;Weierstrass`, R`ogni successione <b>limitata</b> in $\mathbb{R}^n$ ha una sottosuccessione convergente. Il mattone della compattezza per successioni; in $\mathbb{R}^n$ si prova coordinata per coordinata.`],
+   [R`teorema di Weierstrass`, R`$f$ continua su $K$ compatto non vuoto $\Rightarrow$ $f$ limitata e <b>assume</b> max e min. La garanzia di esistenza degli ottimi. Entrambe le ipotesi (continua, compatto) sono necessarie.`],
+   [R`$\max$ vs $\sup$`, R`il <b>sup</b> &egrave; l&rsquo;estremo superiore, sempre esistente (eventualmente $+\infty$); il <b>max</b> &egrave; un sup che viene <b>assunto</b> in un punto. Weierstrass &egrave; esattamente ci&ograve; che fa coincidere sup e max su un compatto.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`L&rsquo;insieme $\{(x,y):xy\ge1,\ x\gt0\}$ (un ramo di iperbole e ci&ograve; che sta oltre) &egrave; compatto? Una funzione continua vi ammette necessariamente massimo?`,
+    a:R`<b>Non compatto</b>: &egrave; chiuso ($\ge$, $\gt$ sul semipiano lascia comunque un chiuso nella sua chiusura relativa... in realt&agrave; $x\gt0$ lo rende <b>non chiuso</b> in $\mathbb{R}^2$ e comunque &egrave; <b>illimitato</b>, si estende verso $x\to+\infty$). Basta l&rsquo;illimitatezza per negare la compattezza. Quindi Weierstrass non garantisce nulla: una continua vi pu&ograve; non avere massimo (es. $f(x,y)=x$ cresce senza limite).`},
+   {q:R`Perch&eacute; nel teorema di Weierstrass non basta che $K$ sia chiuso? Fai l&rsquo;esempio minimo.`,
+    a:R`Perch&eacute; un chiuso pu&ograve; essere <b>illimitato</b>, e allora la successione massimizzante pu&ograve; fuggire all&rsquo;infinito senza sottosuccessione convergente. Esempio minimo: $f(x)=x$ su $K=[0,+\infty)$, che &egrave; chiuso ma illimitato: $\sup f=+\infty$, nessun massimo. Servono <b>entrambe</b> le propriet&agrave; &mdash; chiuso trattiene i limiti, limitato garantisce che ci sia un limite da trattenere.`}
+  ]}
+]},
+
+/* ---------------- 07 · CONNESSIONE PER ARCHI ---------------- */
+{ num:'07', title:'Connessione per archi', meta:'&laquo;un pezzo solo&raquo; · $\\Omega$ connesso per archi: due punti uniti da un cammino continuo interno · valori intermedi in pi&ugrave; variabili · il ponte: connesso vs semplicemente connesso',
+  blocchi:[
+  {t:'prosa', title:'Un pezzo solo: la definizione', tag:'grammatica', html:R`
+  <p>Un insieme $\Omega\subseteq\mathbb{R}^n$ &egrave; <b>connesso per archi</b> se due qualsiasi suoi punti si possono unire con un cammino continuo che <b>non esce</b> da $\Omega$: per ogni $a,b\in\Omega$ esiste una funzione continua $\gamma:[0,1]\to\Omega$ con $\gamma(0)=a$ e $\gamma(1)=b$. Intuizione: $\Omega$ &egrave; &laquo;un pezzo solo&raquo;, ci si sposta da un punto qualsiasi a un altro senza saltare fuori. Il disco, il piano, una palla, una corona circolare, un semipiano sono connessi; l&rsquo;unione di due dischi disgiunti $\{x^2+y^2\lt1\}\cup\{(x-5)^2+y^2\lt1\}$ non lo &egrave;: per passare da uno all&rsquo;altro devi attraversare il vuoto tra loro.</p>
+  <p>C&rsquo;&egrave; anche la nozione topologica di <b>connesso</b> (non decomponibile in due aperti disgiunti non vuoti): $\Omega$ &egrave; connesso se gli unici sottoinsiemi &laquo;clopen&raquo; (aperti e chiusi assieme, tappa 03) sono $\varnothing$ e $\Omega$ stesso. Per gli <b>aperti di $\mathbb{R}^n$</b> le due nozioni coincidono &mdash; connesso $\iff$ connesso per archi &mdash; quindi userai la pi&ugrave; concreta: cerca un cammino.</p>`},
+  {t:'prosa', title:'Perch&eacute; serve: valori intermedi e costanti', tag:'le due conseguenze operative', html:R`
+  <p>La connessione &egrave; la propriet&agrave; che fa funzionare due argomenti che userai continuamente.</p>
+  <ul>
+  <li><b>Teorema dei valori intermedi, in pi&ugrave; variabili.</b> L&rsquo;immagine di un connesso tramite una funzione continua &egrave; connessa. Se $f:\Omega\to\mathbb{R}$ &egrave; continua e $\Omega\subseteq\mathbb{R}^n$ &egrave; connesso, allora $f(\Omega)$ &egrave; un <b>intervallo</b>: se $f$ assume i valori $\alpha$ e $\beta$, assume anche ogni valore tra loro. &Egrave; il &laquo;attraversa lo zero&raquo; che giustifica, per esempio, l&rsquo;esistenza di soluzioni.</li>
+  <li><b>Gradiente nullo $\Rightarrow$ funzione costante.</b> Se $\nabla f=0$ su un aperto <b>connesso</b> $\Omega$, allora $f$ &egrave; costante su $\Omega$. La dimostrazione usa proprio un cammino: integrando lungo un arco da $a$ a $b$ interno a $\Omega$, la variazione di $f$ &egrave; nulla perch&eacute; il gradiente &egrave; nullo, quindi $f(a)=f(b)$ per ogni coppia. <b>Se $\Omega$ non &egrave; connesso questo &egrave; falso</b>: su due dischi separati $f$ pu&ograve; valere $0$ su uno e $7$ sull&rsquo;altro con gradiente nullo ovunque.</li>
+  </ul>
+  <p>La seconda conseguenza &egrave; esattamente ci&ograve; che, nel nucleo sui campi, garantisce che due potenziali dello stesso campo differiscano per una <b>costante</b> &mdash; ma solo su un dominio connesso. La connessione non &egrave; una curiosit&agrave;: &egrave; l&rsquo;ipotesi nascosta in mezza dozzina di teoremi che verranno.</p>`},
+  {t:'prosa', title:'Il ponte in avanti: connesso non basta, serve semplicemente connesso', tag:'dove questo filo riemerge, pi&ugrave; forte', html:R`
+  <p>Qui pianto un chiodo che ritroverai nel <b>nucleo sui campi vettoriali</b> (04), dove decide un&rsquo;intera classe di esercizi. La connessione &laquo;un pezzo solo&raquo; garantisce che un potenziale, se esiste, sia unico a meno di una costante. Ma per garantire che il potenziale <b>esista</b> serve una condizione <b>pi&ugrave; forte</b>: che il dominio non abbia <b>buchi</b>. Un aperto connesso &egrave; <b>semplicemente connesso</b> se ogni cammino chiuso al suo interno pu&ograve; essere contratto con continuit&agrave; a un punto senza uscire dal dominio.</p>
+  <p>La distinzione &egrave; netta e ti servir&agrave; letteralmente: il piano bucato $\mathbb{R}^2\setminus\{(0,0)\}$ &egrave; <b>connesso</b> (un pezzo solo: giri attorno al buco e vai ovunque) ma <b>non semplicemente connesso</b> (un cappio attorno all&rsquo;origine non si contrae). Ed &egrave; esattamente su questo dominio che vive il campo del vortice $\mathbf F=\big(\tfrac{-y}{x^2+y^2},\tfrac{x}{x^2+y^2}\big)$: <b>irrotazionale</b> ($\nabla\times\mathbf F=\mathbf 0$) ma <b>non conservativo</b> (la sua circuitazione su un giro &egrave; $2\pi\neq0$). $$\boxed{\ \text{connesso} \Rightarrow \text{potenziale unico a meno di costante};\quad \text{semplicemente connesso} \Rightarrow \text{irrotazionale} \Rightarrow \text{conservativo}\ }$$ Tieni a mente la gerarchia: connesso &egrave; &laquo;un pezzo&raquo;, semplicemente connesso &egrave; &laquo;un pezzo senza buchi&raquo;. La prima proteggerai l&rsquo;unicit&agrave;, la seconda l&rsquo;esistenza. Quando nel nucleo 04 vedrai il lemma di Poincar&eacute; e il vortice, questo chiodo sar&agrave; gi&agrave; piantato.</p>`},
+  {t:'plot', title:'Un pezzo solo, oppure due',
+   intro:R`A sinistra $\{x^2+y^2=1\}\cup\{(x-3)^2+y^2=1\}$: due componenti separate. A destra la corona $1\le\lVert x\rVert\le2$: un pezzo solo, ma <b>con un buco</b>.`,
+   plots:[
+    {kind:'contour', f:'(x*x+y*y-1)*((x-3)*(x-3)+y*y-1)', levels:[0], col:'#ff6b6b', xr:[-1.6,4.6], yr:[-2.2,2.2], height:300, title:'NON connesso: due componenti, nessun cammino fra loro'},
+    {kind:'contour', f:'hypot(x,y)', levels:[1,2], col:'#5eead4', xr:[-2.4,2.4], yr:[-2.4,2.4], height:300, title:'connesso ma NON semplicemente connesso'}
+   ],
+   leggi:R`A sinistra: qualunque funzione continua a valori in $\{0,1\}$ pu&ograve; valere $0$ su un cerchio e $1$ sull&rsquo;altro senza mai saltare &mdash; per questo su un insieme <b>non</b> connesso &laquo;gradiente nullo&raquo; <b>non</b> implica &laquo;funzione costante&raquo;: implica solo costante <b>su ciascuna componente</b>. &Egrave; l&rsquo;errore classico nei campi conservativi, dove ti trovi un potenziale con <b>costanti diverse</b> su pezzi diversi del dominio. A destra: la corona &egrave; connessa (da ogni punto raggiungi ogni altro restando dentro), ma un laccio che gira attorno al buco <b>non pu&ograve; essere contratto a un punto</b> senza uscire. Questa seconda propriet&agrave; &mdash; <b>semplicemente connesso</b> &mdash; &egrave; pi&ugrave; forte, e sar&agrave; l&rsquo;ipotesi decisiva del nucleo 5: un campo irrotazionale $\nabla\times F=0$ &egrave; conservativo <b>solo</b> su domini semplicemente connessi. Il controesempio universale, il campo $\left(\frac{-y}{x^2+y^2},\frac{x}{x^2+y^2}\right)$, vive esattamente sulla figura di destra: irrotazionale ovunque, eppure il suo integrale sul cerchio vale $2\pi$. Il buco che vedi qui &egrave; quel $2\pi$.`},
+  {t:'gram', title:'Le sfumature del &laquo;pezzo solo&raquo;', rows:[
+   [R`$\Omega$ connesso per archi`, R`$\forall a,b\in\Omega\ \exists\gamma:[0,1]\to\Omega$ continua, $\gamma(0)=a$, $\gamma(1)=b$. &laquo;Un pezzo solo&raquo;, ci si sposta senza uscire. Per gli aperti di $\mathbb{R}^n$ equivale a connesso topologico.`],
+   [R`$\Omega$ connesso`, R`non &egrave; unione di due aperti disgiunti non vuoti; gli unici clopen sono $\varnothing$ e $\Omega$. L&rsquo;immagine continua di un connesso &egrave; connessa (valori intermedi).`],
+   [R`semplicemente connesso`, R`connesso <b>e</b> ogni cappio si contrae a un punto: &laquo;un pezzo <b>senza buchi</b>&raquo;. Pi&ugrave; forte di connesso. $\mathbb{R}^n$, palle, semipiani: s&igrave;. Piano bucato, corona: no.`],
+   [R`$\nabla f=0$ su connesso`, R`$\Rightarrow f$ costante. Su un dominio <b>sconnesso</b> pu&ograve; valere costanti diverse sui diversi pezzi. &Egrave; l&rsquo;unicit&agrave; del potenziale a meno di costante nel nucleo dei campi.`],
+   [R`componente connessa`, R`il massimo pezzo connesso contenente un punto. Un aperto si decompone in componenti connesse disgiunte: i suoi &laquo;pezzi&raquo;. Su ciascuno gli argomenti di connessione valgono separatamente.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`La corona circolare $\{1\lt x^2+y^2\lt4\}$ &egrave; connessa? &Egrave; semplicemente connessa?`,
+    a:R`<b>Connessa s&igrave;</b> (un pezzo solo: due punti qualsiasi si uniscono con un arco che gira nell&rsquo;anello). <b>Semplicemente connessa no</b>: un cerchio concentrico a met&agrave; raggio circonda il buco centrale (il disco $\le1$ escluso) e non si contrae a un punto senza attraversare quel buco. &Egrave; il tipo di dominio su cui un campo irrotazionale pu&ograve; non essere conservativo &mdash; lo stesso motivo del piano bucato.`},
+   {q:R`Se $\nabla f=(0,0)$ su tutto l&rsquo;insieme $\Omega=\{x\lt0\}\cup\{x\gt0\}$ (il piano meno l&rsquo;asse $y$), &egrave; vero che $f$ &egrave; costante?`,
+    a:R`<b>No.</b> $\Omega$ &egrave; <b>sconnesso</b>: due componenti, il semipiano sinistro e il destro, senza cammino che le unisca dentro $\Omega$. Il teorema &laquo;$\nabla f=0\Rightarrow$ costante&raquo; vale su ciascuna componente <b>separatamente</b>: $f$ pu&ograve; valere una costante a sinistra e un&rsquo;altra a destra (es. $f=-1$ per $x\lt0$, $f=+3$ per $x\gt0$). La connessione &egrave; l&rsquo;ipotesi che stavi per dare per scontata.`}
+  ]}
+]},
+
+/* ---------------- 08 · IL SENSO E LE ROTTE FISICHE ---------------- */
+{ num:'08', title:'Il senso e le rotte fisiche', meta:'topologia = struttura di vicinanza · compattezza = niente scappa all&rsquo;orlo n&eacute; all&rsquo;infinito · connessione = un pezzo solo · e dove tutto questo diventa spazi astratti, spettro, ergodicit&agrave;',
+  blocchi:[
+  {t:'prosa', title:'Le tre idee del nucleo, ridotte all&rsquo;osso', tag:'significato, non addobbo', html:R`
+  <p>Sotto le definizioni ci sono tre idee, e vale la pena isolarle perch&eacute; sono ci&ograve; che porti via anche quando i dettagli sbiadiscono.</p>
+  <ul>
+  <li><b>Topologia = struttura di vicinanza.</b> Prima di misurare, derivare, integrare, devi sapere cosa significa &laquo;due punti sono vicini&raquo;. La palla $B_r(x_0)$ &egrave; la risposta; da essa nascono aperti, limiti, continuit&agrave;. La topologia &egrave; lo scheletro minimo che rende sensata la parola &laquo;tende a&raquo;.</li>
+  <li><b>Compattezza = niente scappa, n&eacute; all&rsquo;infinito n&eacute; all&rsquo;orlo.</b> Chiuso trattiene i limiti (nulla fugge dal bordo mancante), limitato impedisce la fuga all&rsquo;infinito. &Egrave; la propriet&agrave; che <b>garantisce esistenza</b>: di massimi e minimi (Weierstrass), e &mdash; nella sua versione astratta &mdash; di equilibri, stati fondamentali, punti fissi. Ogni volta che in fisica &laquo;deve esistere uno stato di minima energia&raquo;, sotto c&rsquo;&egrave; una compattezza.</li>
+  <li><b>Connessione = un pezzo solo.</b> Garantisce che &laquo;attraversi tutti i valori intermedi&raquo; e che &laquo;gradiente nullo significhi costante&raquo;. La sua versione pi&ugrave; forte &mdash; semplicemente connesso, senza buchi &mdash; decide se un campo irrotazionale &egrave; conservativo. La forma del dominio &egrave; fisica, non contorno.</li>
+  </ul>`},
+  {t:'prosa', title:'A valle: dove riappare, dentro e oltre il percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte</b> questo nucleo non ha nulla: &egrave; il fondamento, il pavimento. <b>A valle</b> regge l&rsquo;intero Movimento I. La <b>differenziabilit&agrave;</b> (nucleo 01) &egrave; scritta con palle e limiti che hai definito qui; il trabocchetto &laquo;parziali esistono ma non differenziabile&raquo; &egrave; lo stesso baco di &laquo;continua separatamente ma non congiuntamente&raquo; della tappa 05. L&rsquo;<b>ottimizzazione vincolata</b> (Lagrange) &egrave; sensata solo perch&eacute; Weierstrass garantisce l&rsquo;esistenza degli ottimi su un compatto. I <b>campi conservativi</b> (nucleo 04) dipendono dalla connessione del dominio, come hai anticipato nella tappa 07.</p>
+  <p>Oltre il Movimento I, il salto &egrave; concettuale. Tutto ci&ograve; che hai fatto qui in $\mathbb{R}^n$ &mdash; norma, palla, aperto, convergenza, compattezza, continuit&agrave; &mdash; verr&agrave; <b>astratto</b> nel <b>Movimento II</b>: uno <b>spazio metrico</b> &egrave; un insieme con una distanza $d$ che soddisfa gli assiomi della tappa 01; uno <b>spazio normato</b> ha una norma; uno <b>spazio di Banach</b> &egrave; un normato <b>completo</b>. In quella teoria $\mathbb{R}^n$ non sparisce: &egrave; il <b>prototipo</b>, l&rsquo;esempio concreto da cui la teoria astratta &egrave; stata distillata. E c&rsquo;&egrave; il punto esatto in cui questo nucleo <b>smette di valere</b>: in dimensione infinita (spazi di funzioni) le norme <b>non</b> sono pi&ugrave; equivalenti, e &laquo;chiuso e limitato&raquo; <b>non</b> implica pi&ugrave; compatto (Heine&ndash;Borel fallisce). Sapere dove finisce ci&ograve; che hai imparato &egrave; parte dell&rsquo;averlo imparato.</p>`},
+  {t:'prolessi', title:'Prolessi — la topologia di $\\mathbb{R}^n$ &egrave; il prototipo di ogni &laquo;spazio&raquo; della fisica',
+   oggetto:R`la struttura topologica di $\mathbb{R}^n$: la <b>norma</b> $\lVert\cdot\rVert$ e la distanza, le <b>palle</b> $B_r(x_0)$ come nozione di &laquo;vicino&raquo;, gli <b>aperti/chiusi</b>, la <b>compattezza</b> (chiuso e limitato) e la <b>connessione</b>. In matematica sono definizioni sul caso concreto $\mathbb{R}^n$; in fisica sono l&rsquo;impalcatura di ogni spazio in cui vive un sistema &mdash; delle configurazioni, delle fasi, degli stati.`,
+   rotte:[
+    {dove:'Analisi<br>funzionale<br>(Mov. II)', txt:R`La corrispondenza &egrave; una <b>promozione ad assioma</b>. Gli assiomi della norma (tappa 01) diventano la definizione di <b>spazio normato</b>; la distanza $d(x,y)=\lVert x-y\rVert$ diventa lo <b>spazio metrico</b>; la palla $B_r$ resta la definizione di &laquo;vicino&raquo; e di aperto; la convergenza per successioni resta identica. $\mathbb{R}^n$ &egrave; il <b>prototipo</b>, ma la teoria astratta comprende gli <b>spazi di funzioni</b> $C[a,b]$, $L^2$, $\ell^2$, dove i &laquo;punti&raquo; sono funzioni. Lo spazio di <b>Banach</b> aggiunge la <b>completezza</b> (ogni successione di Cauchy converge &mdash; il buco $\sqrt2\notin\mathbb{Q}$ non esiste): &egrave; ci&ograve; che rende leciti limiti, serie, punti fissi. E l&rsquo;avvertimento chiave: in dimensione infinita &laquo;chiuso e limitato&raquo; <b>non</b> basta pi&ugrave; per compatto &mdash; la palla unitaria di $L^2$ &egrave; chiusa, limitata e <b>non</b> compatta. Il tuo Heine&ndash;Borel &egrave; un lusso della dimensione finita.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Qui la parola-ponte &egrave; <b>compattezza $\Rightarrow$ discretezza</b>. In MQ gli stati vivono in uno spazio di Hilbert (un Banach con prodotto scalare, la versione infinito-dimensionale di $\mathbb{R}^n$) e le osservabili sono operatori. Quando l&rsquo;operatore hamiltoniano ha <b>risolvente compatto</b> &mdash; tipicamente perch&eacute; il sistema &egrave; <b>confinato</b> (potenziale che intrappola, dominio spaziale limitato) &mdash; il suo <b>spettro &egrave; discreto</b>: i livelli energetici sono <b>quantizzati</b>, $E_0\lt E_1\lt E_2\lt\dots$, separati. La compattezza &egrave; la ragione matematica per cui l&rsquo;energia di un elettrone legato assume valori discreti e non un continuo. E l&rsquo;esistenza dello <b>stato fondamentale</b> &mdash; il minimo dell&rsquo;energia $\inf\langle\psi|H|\psi\rangle$ &mdash; &egrave; un teorema di Weierstrass astratto: senza compattezza (sistema non legato) il minimo pu&ograve; non essere assunto, ed &egrave; il caso degli stati di <b>scattering</b>, con spettro continuo.`},
+    {dove:'Meccanica<br>statistica', txt:R`Il moto di un sistema hamiltoniano vive nello <b>spazio delle fasi</b> $(\mathbf q,\mathbf p)$, un $\mathbb{R}^{2N}$ (o una sua sottovariet&agrave;). La superficie a <b>energia costante</b> $\{H(\mathbf q,\mathbf p)=E\}$ &egrave;, per un sistema <b>legato</b>, un insieme <b>compatto</b>: chiuso (controimmagine del chiuso $\{E\}$ tramite $H$ continua) e limitato (l&rsquo;energia finita impedisce la fuga all&rsquo;infinito). La compattezza &egrave; ci&ograve; che rende <b>finita</b> la misura microcanonica su quella superficie &mdash; senza la quale non potresti nemmeno <b>normalizzare</b> le probabilit&agrave;, e l&rsquo;insieme statistico non esisterebbe. La <b>connessione</b> topologico-dinamica di quella superficie, e le nozioni pi&ugrave; forti di <b>ergodicit&agrave;</b> e <b>mescolamento</b>, decidono se le medie temporali coincidono con quelle d&rsquo;insieme.`}
+   ],
+   domanda:R`La superficie a energia costante di un sistema legato &egrave; compatta, e la dinamica hamiltoniana vi conserva il volume (Liouville). Ma la compattezza da sola non dice come una traiettoria <b>riempie</b> quella superficie: potrebbe girare su un toro (moto integrabile, ordinato) oppure <b>mescolare</b> ergodicamente ogni regione con ogni altra. La domanda che la fisica ti far&agrave;: <b>quali propriet&agrave; topologiche e dinamiche dello spazio delle fasi rendono un sistema &laquo;ergodico&raquo; o &laquo;mescolante&raquo;</b>, cio&egrave; fanno s&igrave; che le medie temporali di un&rsquo;osservabile coincidano con le medie sull&rsquo;insieme &mdash; il fondamento non dimostrato della meccanica statistica? <br>&mdash; &Egrave; la porta della tua tesi. In versione <b>quantistica</b> la domanda diventa: come fa un sistema isolato, la cui evoluzione &egrave; unitaria e reversibile su uno spazio di Hilbert, a &laquo;termalizzare&raquo;, cio&egrave; a portare le osservabili al valore d&rsquo;equilibrio? La risposta candidata &egrave; l&rsquo;<b>ETH</b> (eigenstate thermalization hypothesis): l&rsquo;informazione termica &egrave; gi&agrave; scritta nei singoli autostati dell&rsquo;energia. La struttura di &laquo;vicinanza&raquo; e di &laquo;compattezza&raquo; che qui hai imparato in $\mathbb{R}^n$ &egrave; il primo mattone del linguaggio in cui quella domanda si formula &mdash; spazio degli stati, spettro, misura invariante, mescolamento.`
+  }
+]}
+
+];
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo00-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 0 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 00-topologia.html#04 apre direttamente la tappa 04 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

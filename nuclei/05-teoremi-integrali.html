@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 05 — Teoremi integrali: Green, Gauss, Stokes e lo Stokes generalizzato</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>05 — Teoremi integrali: Green, Gauss, Stokes e lo Stokes generalizzato</b> · Analisi Vettoriale (Terracina), Parte II</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 04: Campi vettoriali <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Parte II · i teoremi integrali chiudono il Movimento I: un solo enunciato in tre vesti',
+  blocchi:[
+  {t:'prosa', title:'I due esercizi che questo nucleo ti fa chiudere', tag:'mira d&rsquo;esame', html:R`
+  <p>Hai imparato a derivare un campo in tre modi (gradiente, divergenza, rotore) e a integrarlo lungo curve e attraverso superfici. Questo nucleo li <b>lega</b>: dice che l&rsquo;integrale di una <b>derivata</b> su una regione è determinato dai <b>valori sul bordo</b>. È la generalizzazione a più dimensioni del teorema fondamentale del calcolo $\int_a^b f'=f(b)-f(a)$, ed è il <b>vertice</b> di Analisi Vettoriale. Due esercizi ne fissano la posta.</p>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · Green nel piano (AV Terracina, Parte II)</span>
+  Calcola $\displaystyle\oint_{\partial D}\big(y^2\,dx+3xy\,dy\big)$ dove $\partial D$ è il bordo, percorso in senso antiorario, del semianello $D=\{1\le x^2+y^2\le4,\ y\ge0\}$.</div>
+  <div class="testo"><span class="src">Es.&nbsp;tipo · flusso e divergenza in 3D</span>
+  Calcola il flusso di $\mathbf F=(x^3,\ y^3,\ z^3)$ uscente dalla sfera $x^2+y^2+z^2=R^2$.</div>
+  <p>Il primo si può fare in due modi: parametrizzando i quattro pezzi del bordo (lungo, insidioso sui versi), oppure con <b>Green</b>, che lo trasforma in un integrale doppio sull&rsquo;area — spesso molto più corto. Il secondo, con la definizione di flusso, richiederebbe di parametrizzare la sfera; con il <b>teorema della divergenza</b> diventa un integrale triplo di $\nabla\!\cdot\!\mathbf F=3(x^2+y^2+z^2)$ sulla palla, che in coordinate sferiche si chiude subito. Saper scegliere <b>quale forma del teorema</b> usare è metà del mestiere.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Enunciare e applicare il <b>teorema di Green</b> nelle sue due forme (circuitazione = flusso del rotore; flusso uscente = integrale della divergenza nel piano), scegliendo il verso corretto del bordo.</li>
+  <li>Applicare il <b>teorema della divergenza (Gauss)</b> in 3D per trasformare un flusso attraverso una superficie chiusa in un integrale triplo, e viceversa.</li>
+  <li>Applicare il <b>teorema di Stokes</b> per trasformare una circuitazione su un cammino chiuso nel flusso del rotore attraverso una superficie qualsiasi che lo borda, con l&rsquo;orientazione mano-destra corretta.</li>
+  <li>Usare Green per calcolare <b>aree</b> con $\tfrac12\oint(x\,dy-y\,dx)$.</li>
+  <li>Vedere i tre teoremi come <b>un solo enunciato</b>, $\int_\Omega d\omega=\int_{\partial\Omega}\omega$, e riconoscere in $d^2=0$ le identità rot·grad$=\mathbf 0$ e div·rot$=0$.</li>
+  <li>Riconoscere <b>quando i teoremi NON si applicano</b>: singolarità dentro la regione (il buco del campo-vortice), bordo non chiuso, orientazioni incoerenti.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · GREEN NEL PIANO ---------------- */
+{ num:'01', title:'Green nel piano', meta:'$\\oint_{\\partial D}(P\\,dx+Q\\,dy)=\\iint_D(Q_x-P_y)\\,dA$ · circuitazione = flusso del rotore · l&rsquo;orientazione del bordo',
+  blocchi:[
+  {t:'prosa', title:'L&rsquo;enunciato', tag:'il teorema', html:R`
+  <p><b>Teorema (Green).</b> Sia $D\subset\mathbb{R}^2$ una regione limitata con bordo $\partial D$ regolare a tratti, e $\mathbf F=(P,Q)$ un campo $C^1$ su un aperto contenente $D$. Percorrendo $\partial D$ in senso <b>antiorario</b> (con $D$ alla sinistra), $$\boxed{\ \oint_{\partial D}\big(P\,dx+Q\,dy\big)=\iint_D\left(\frac{\partial Q}{\partial x}-\frac{\partial P}{\partial y}\right)dA\ }$$</p>
+  <p>Il primo membro è un integrale di linea (una circuitazione: $\oint\mathbf F\cdot d\mathbf r$). Il secondo è un integrale doppio sull&rsquo;area della quantità $Q_x-P_y$, che riconosci dal nucleo 4: è la <b>terza componente del rotore</b> di $\mathbf F$, la <i>vorticità</i>. Green dice quindi: <b>la circuitazione lungo il bordo è l&rsquo;integrale della vorticità sull&rsquo;area racchiusa</b>. Ogni girandola interna contribuisce; sommate, danno il giro totale sul contorno.</p>`},
+  {t:'reveal', title:'Da dove esce: cancellazione dei bordi interni', tag:'derivazione', steps:[
+   {label:'Un rettangolino elementare', body:R`<p>Dal nucleo 4 sai già che la circuitazione antioraria attorno a un rettangolino $[x,x+\Delta x]\times[y,y+\Delta y]$ vale, a meno di ordini superiori, $$\oint_{\partial(\Delta A)}\mathbf F\cdot d\mathbf r\approx\left(\frac{\partial Q}{\partial x}-\frac{\partial P}{\partial y}\right)\Delta x\,\Delta y=(Q_x-P_y)\,\Delta A.$$ È la vorticità per l&rsquo;area del rettangolino.</p>`},
+   {label:'Piastrella la regione', body:R`<p>Ricopri $D$ con tanti rettangolini e somma le loro circuitazioni. Su ogni <b>lato interno</b>, condiviso da due rettangolini adiacenti, il cammino viene percorso <b>due volte in versi opposti</b>: i due contributi si <b>cancellano</b>. Restano solo i lati che stanno sul <b>bordo esterno</b> $\partial D$, ciascuno percorso una volta nel verso antiorario.</p>`},
+   {label:'Passa al limite', body:R`<p>La somma delle circuitazioni elementari = circuitazione sul bordo esterno (i lati interni cancellati). La somma delle $(Q_x-P_y)\Delta A$ = integrale doppio. Nel limite $\Delta A\to0$: $$\oint_{\partial D}P\,dx+Q\,dy=\iint_D(Q_x-P_y)\,dA.\qquad\blacksquare$$ La cancellazione dei bordi interni è il cuore di <b>tutti</b> i teoremi di questo nucleo: è il motivo per cui solo il bordo sopravvive.</p>
+   <div class="note">Se $D$ ha dei <b>buchi</b> (regione non semplicemente connessa, es. un anello), $\partial D$ ha più componenti: il bordo esterno antiorario <b>e</b> i bordi interni percorsi in senso <b>orario</b>. La formula vale con questa convenzione: sempre &laquo;$D$ alla sinistra&raquo;.</div>`}
+  ]},
+  {t:'plot', title:'Green in figura: la circuitazione è la vorticità racchiusa',
+   intro:R`Il campo $\mathbf F=(-y,\ x)$ (rotore costante $=2$) e un cammino chiuso $\partial D$ (il cerchio arancione).`,
+   plots:[
+    {kind:'field2d', fx:'-y', fy:'x', xr:[-2,2], yr:[-2,2], n:13, height:380, rings:[{r:1.3, col:'#ff9b6b', width:2.4}], title:'la circuitazione sul bordo = area x rotore medio'}
+   ],
+   leggi:R`Per questo campo $Q_x-P_y=\partial_x(x)-\partial_y(-y)=1+1=2$ in ogni punto: la vorticità è costante. Green dà allora $\oint_{\partial D}\mathbf F\cdot d\mathbf r=\iint_D 2\,dA=2\cdot\text{Area}(D)$. Sul cerchio di raggio $r=1{,}3$: $2\cdot\pi r^2=2\pi(1{,}69)\approx10{,}6$. Puoi verificarlo a mano parametrizzando il cerchio — ma il punto è che <b>non serve</b>: la circuitazione non &laquo;sa&raquo; nulla del cammino oltre all&rsquo;area che racchiude, perché ogni girandola interna spinge il flusso attorno e i contributi adiacenti si passano il testimone fino al bordo. Se restringi il cammino, racchiudi meno vorticità e la circuitazione cala in proporzione all&rsquo;area. È la stessa cancellazione-dei-bordi-interni della dimostrazione, resa visibile: il bordo è tutto ciò che resta.`},
+  {t:'prosa', title:'Le due letture: rotore e divergenza nel piano', tag:'la stessa formula, due volti', html:R`
+  <p>La formula di Green si legge in due modi, a seconda di come chiami $(P,Q)$.</p>
+  <ul>
+  <li><b>Forma del rotore (circuitazione).</b> Con $\mathbf F=(P,Q)$ come sopra: $\oint\mathbf F\cdot d\mathbf r=\iint_D(\nabla\times\mathbf F)_z\,dA$. La circuitazione sul bordo = flusso del rotore attraverso l&rsquo;area. È la versione 2D di <b>Stokes</b>.</li>
+  <li><b>Forma della divergenza (flusso uscente).</b> Prendi il campo $\mathbf G=(P,Q)$ e calcola il <b>flusso uscente</b> attraverso $\partial D$, cioè $\oint_{\partial D}\mathbf G\cdot\mathbf n\,ds$ con $\mathbf n$ normale esterna. Un conto (sostituendo $\mathbf n\,ds=(dy,-dx)$) lo trasforma in $\oint(P\,dy-Q\,dx)$, e Green dà $$\oint_{\partial D}\mathbf G\cdot\mathbf n\,ds=\iint_D\left(\frac{\partial P}{\partial x}+\frac{\partial Q}{\partial y}\right)dA=\iint_D\nabla\!\cdot\!\mathbf G\,dA.$$ Il flusso uscente = integrale della divergenza. È la versione 2D del <b>teorema della divergenza</b>.</li>
+  </ul>
+  <p>Stesso teorema, due contabilità: quanto un campo <b>gira</b> attorno alla regione, o quanto <b>esce</b> da essa. Le vedrai separarsi in 3D come Stokes (tappa 03) e Gauss (tappa 02).</p>`},
+  {t:'gram', title:'I simboli di Green, uno per uno', rows:[
+   [R`$\oint_{\partial D}$`, R`integrale sul bordo <b>chiuso</b>, orientato antiorario ($D$ a sinistra). Il cerchietto ricorda che il cammino si chiude.`],
+   [R`$P\,dx+Q\,dy$`, R`la <b>1-forma</b> $\mathbf F\cdot d\mathbf r$ con $\mathbf F=(P,Q)$: il lavoro infinitesimo del campo lungo il bordo.`],
+   [R`$Q_x-P_y$`, R`la <b>vorticità</b> (terza componente del rotore). È ciò che Green integra sull&rsquo;area.`],
+   [R`$dA=dx\,dy$`, R`elemento d&rsquo;area. In coordinate diverse porta lo jacobiano (polari: $r\,dr\,d\theta$).`]
+  ]},
+  {t:'esercizio', title:'L&rsquo;esercizio d&rsquo;apertura, chiuso con Green', src:'AV Terracina · $\\oint y^2\\,dx+3xy\\,dy$ sul semianello',
+   testo:R`Calcola $\oint_{\partial D}(y^2\,dx+3xy\,dy)$, $\partial D$ antiorario, $D=\{1\le x^2+y^2\le4,\ y\ge0\}$.`,
+   steps:[
+    {label:'Identifica e deriva', body:R`<p>$P=y^2$, $Q=3xy$. Green: $Q_x-P_y=\partial_x(3xy)-\partial_y(y^2)=3y-2y=y$. Quindi $$\oint_{\partial D}=\iint_D y\,dA.$$ Il bordo (semicerchio esterno, due segmenti sull&rsquo;asse, semicerchio interno) sparisce: un solo integrale doppio.</p>`},
+    {label:'Passa in polari', body:R`<p>$D$ è il semianello superiore: $r\in[1,2]$, $\theta\in[0,\pi]$, $y=r\sin\theta$, $dA=r\,dr\,d\theta$. $$\iint_D y\,dA=\int_0^\pi\!\!\int_1^2 (r\sin\theta)\,r\,dr\,d\theta=\left(\int_0^\pi\sin\theta\,d\theta\right)\left(\int_1^2 r^2\,dr\right).$$</p>`},
+    {label:'Integra', body:R`<p>$\int_0^\pi\sin\theta\,d\theta=[-\cos\theta]_0^\pi=2$. $\int_1^2 r^2\,dr=\left[\tfrac{r^3}{3}\right]_1^2=\tfrac{8-1}{3}=\tfrac73$. Prodotto: $$\oint_{\partial D}(y^2\,dx+3xy\,dy)=2\cdot\tfrac73=\tfrac{14}{3}.\qquad\blacksquare$$ Fatto a mano sui quattro pezzi del bordo avresti rischiato errori di segno sui versi; Green lo ha ridotto a un integrale doppio elementare.</p>`}
+   ],
+   nota:R`Regola operativa: davanti a $\oint P\,dx+Q\,dy$ su un bordo chiuso, calcola <b>subito</b> $Q_x-P_y$. Se è semplice (spesso lo è, o addirittura costante), Green vince sulla parametrizzazione. Se $Q_x-P_y=0$ (campo irrotazionale) <b>e</b> $D$ è semplicemente connesso, l&rsquo;integrale è $0$ senza conti — ma attento al buco (tappa 05).`},
+  {t:'esercizio', title:'Green per l&rsquo;area', src:'Applicazione classica · l&rsquo;area come integrale di bordo',
+   testo:R`Mostra che l&rsquo;area di $D$ vale $\text{Area}(D)=\tfrac12\oint_{\partial D}(x\,dy-y\,dx)$, e usala per l&rsquo;area dell&rsquo;ellisse $\frac{x^2}{a^2}+\frac{y^2}{b^2}=1$.`,
+   steps:[
+    {label:'La formula dell&rsquo;area', body:R`<p>Scegli $P=-y/2$, $Q=x/2$. Allora $Q_x-P_y=\tfrac12+\tfrac12=1$, e Green dà $$\oint_{\partial D}\left(-\tfrac{y}{2}\,dx+\tfrac{x}{2}\,dy\right)=\iint_D 1\,dA=\text{Area}(D).$$ L&rsquo;area, di solito un integrale doppio, diventa un integrale <b>sul bordo</b>.</p>`},
+    {label:'Parametrizza l&rsquo;ellisse', body:R`<p>$x=a\cos t$, $y=b\sin t$, $t\in[0,2\pi]$. Allora $dx=-a\sin t\,dt$, $dy=b\cos t\,dt$, e $$x\,dy-y\,dx=a\cos t\cdot b\cos t\,dt-b\sin t\cdot(-a\sin t)\,dt=ab(\cos^2 t+\sin^2 t)\,dt=ab\,dt.$$</p>`},
+    {label:'Integra', body:R`<p>$$\text{Area}=\tfrac12\int_0^{2\pi}ab\,dt=\tfrac12\,ab\cdot2\pi=\pi ab.\qquad\blacksquare$$ Ritrovi $\pi ab$ (e con $a=b=r$, $\pi r^2$). Questa formula è il principio del <b>planimetro</b>, lo strumento che misura l&rsquo;area di una figura percorrendone solo il contorno.</p>`}
+   ],
+   nota:R`Altre due scelte danno la stessa area: $\text{Area}=\oint x\,dy=-\oint y\,dx$ (prendi $P=0,Q=x$ oppure $P=-y,Q=0$). La versione simmetrica $\tfrac12\oint(x\,dy-y\,dx)$ è la più robusta numericamente.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché nell&rsquo;enunciato di Green il bordo va percorso in senso antiorario, e cosa succede al segno se lo percorri in senso orario?`,
+    a:R`L&rsquo;orientazione antioraria è quella con $D$ &laquo;a sinistra&raquo;: è la convenzione che rende la formula con il segno $+$. Percorrendo in senso orario, $\oint$ cambia segno, quindi otterresti $-\iint_D(Q_x-P_y)\,dA$. Sui buchi interni la convenzione &laquo;$D$ a sinistra&raquo; impone verso orario.`},
+   {q:R`Un campo ha $Q_x-P_y=0$ ovunque su un disco. Quanto vale $\oint_{\partial D}P\,dx+Q\,dy$ sul bordo del disco?`,
+    a:R`Zero: $\iint_D 0\,dA=0$. Il disco è semplicemente connesso e il campo è irrotazionale, quindi conservativo lÀ, e la circuitazione su ogni cammino chiuso è nulla. <b>Ma</b> se il campo avesse una singolarità dentro (buco), Green non si applicherebbe sull&rsquo;intero disco e la circuitazione potrebbe non essere zero (tappa 05).`}
+  ]}
+]},
+
+/* ---------------- 02 · DIVERGENZA / GAUSS IN 3D ---------------- */
+{ num:'02', title:'Il teorema della divergenza (Gauss)', meta:'$\\iiint_V\\nabla\\!\\cdot\\!\\mathbf F\\,dV=\\iint_{\\partial V}\\mathbf F\\!\\cdot\\!\\mathbf n\\,dS$ · bilancio di sorgenti = flusso totale uscente',
+  blocchi:[
+  {t:'prosa', title:'L&rsquo;enunciato', tag:'il teorema', html:R`
+  <p><b>Teorema (divergenza, Gauss–Ostrogradskij).</b> Sia $V\subset\mathbb{R}^3$ un solido limitato con bordo $\partial V$ una superficie chiusa regolare a tratti, orientata con normale <b>uscente</b> $\mathbf n$, e $\mathbf F$ un campo $C^1$. Allora $$\boxed{\ \iiint_V\nabla\!\cdot\!\mathbf F\,dV=\iint_{\partial V}\mathbf F\cdot\mathbf n\,dS\ }$$</p>
+  <p>A destra il <b>flusso</b> di $\mathbf F$ uscente dalla superficie chiusa. A sinistra l&rsquo;integrale della <b>divergenza</b> sul volume. Dal nucleo 4: $\nabla\!\cdot\!\mathbf F$ è la densità di flusso uscente per unità di volume. Il teorema dice che <b>il flusso totale uscente da una superficie chiusa è la somma di tutte le sorgenti contenute dentro</b>. Se dentro non ci sono sorgenti nette ($\nabla\!\cdot\!\mathbf F=0$, campo <b>solenoidale</b>), tanto flusso entra quanto esce: flusso totale zero.</p>`},
+  {t:'reveal', title:'Perché vale: stessa cancellazione, in 3D', tag:'idea della dimostrazione', steps:[
+   {label:'Cubetti elementari', body:R`<p>Dal nucleo 4, il flusso uscente da un cubetto $[x,x+\Delta x]\times[y,y+\Delta y]\times[z,z+\Delta z]$ vale $\approx(\nabla\!\cdot\!\mathbf F)\,\Delta V$. Riempi $V$ di cubetti e somma i flussi uscenti.</p>`},
+   {label:'Le facce interne si cancellano', body:R`<p>Ogni faccia <b>interna</b> è condivisa da due cubetti adiacenti: ciò che <b>esce</b> da uno <b>entra</b> nell&rsquo;altro, con normali opposte. I due contributi si annullano. Sopravvivono solo le facce sul <b>bordo esterno</b> $\partial V$, con la normale uscente. Somma dei flussi elementari = flusso sul bordo; somma delle $(\nabla\!\cdot\!\mathbf F)\Delta V$ = integrale triplo. Al limite: la formula. $\blacksquare$</p>
+   <div class="note">È lo stesso meccanismo di Green (lati interni) e Stokes (lati interni sulla superficie): <b>una sola idea</b> — le derivate interne si telescopano e resta il bordo. Lo Stokes generalizzato della tappa 04 la enuncia una volta per tutte.</div>`}
+  ]},
+  {t:'plot', title:'Sorgente e campo solenoidale, a confronto',
+   intro:R`Sezione 2D di due campi. A sinistra $\mathbf F=(x,y)$: divergenza $2\gt0$, tutto esce dal cerchio. A destra $\mathbf G=(-y,x)$: divergenza $0$, entra quanto esce.`,
+   plots:[
+    {kind:'field2d', fx:'x', fy:'y', xr:[-2,2], yr:[-2,2], n:12, height:360, rings:[{r:1.2, col:'#ff9b6b', width:2.4}], title:'div = 2:  flusso uscente positivo = 2 x Area'},
+    {kind:'field2d', fx:'-y', fy:'x', xr:[-2,2], yr:[-2,2], n:12, height:360, rings:[{r:1.2, col:'#ff9b6b', width:2.4}], title:'div = 0:  flusso uscente nullo (tutto tangente)'}
+   ],
+   leggi:R`A sinistra ogni freccia <b>attraversa il cerchio uscendo</b>: il flusso uscente è positivo, e vale $\iint_{\text{disco}}\nabla\!\cdot\!\mathbf F\,dA=\iint 2\,dA=2\pi r^2$. C&rsquo;è una sorgente distribuita (la divergenza $2$) dentro. A destra le frecce sono <b>tangenti</b> al cerchio: non lo attraversano mai, il flusso uscente è <b>zero</b> — coerente con $\nabla\!\cdot\!\mathbf G=0$. Nessuna sorgente: il campo gira soltanto. Questa è la contabilità di Gauss in due dimensioni; in 3D è identica con la superficie chiusa al posto del cerchio e il volume al posto dell&rsquo;area. Nota che divergenza e rotore sono <b>indipendenti</b>: il campo di destra ha divergenza nulla ma rotore $2$, quello di sinistra il contrario — li avevi separati nel nucleo 4, qui li integri.`},
+  {t:'esercizio', title:'L&rsquo;esercizio d&rsquo;apertura: flusso dalla sfera', src:'$\\mathbf F=(x^3,y^3,z^3)$ attraverso la sfera di raggio $R$',
+   testo:R`Calcola il flusso di $\mathbf F=(x^3,y^3,z^3)$ uscente dalla sfera $x^2+y^2+z^2=R^2$.`,
+   steps:[
+    {label:'Divergenza', body:R`<p>$\nabla\!\cdot\!\mathbf F=\partial_x(x^3)+\partial_y(y^3)+\partial_z(z^3)=3x^2+3y^2+3z^2=3(x^2+y^2+z^2)=3\rho^2$ (con $\rho$ raggio sferico). Gauss: $$\iint_{\text{sfera}}\mathbf F\cdot\mathbf n\,dS=\iiint_{\text{palla}}3\rho^2\,dV.$$ Parametrizzare la sfera per il flusso diretto sarebbe lungo; l&rsquo;integrale triplo di una funzione radiale è immediato.</p>`},
+    {label:'Coordinate sferiche', body:R`<p>$dV=\rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta$, con $\rho\in[0,R]$, $\varphi\in[0,\pi]$, $\theta\in[0,2\pi]$. $$\iiint 3\rho^2\,dV=3\int_0^{2\pi}\!\!d\theta\int_0^\pi\!\sin\varphi\,d\varphi\int_0^R\rho^2\cdot\rho^2\,d\rho.$$</p>`},
+    {label:'Integra i tre fattori', body:R`<p>$\int_0^{2\pi}d\theta=2\pi$; $\int_0^\pi\sin\varphi\,d\varphi=2$; $\int_0^R\rho^4\,d\rho=\tfrac{R^5}{5}$. Prodotto: $$\Phi=3\cdot2\pi\cdot2\cdot\tfrac{R^5}{5}=\frac{12\pi R^5}{5}.\qquad\blacksquare$$</p>`}
+   ],
+   nota:R`Il caso <b>$\mathbf F=(x,y,z)$</b> (Es. 3 tipo Terracina) è ancora più diretto: $\nabla\!\cdot\!\mathbf F=3$, flusso $=3\cdot\text{Vol}(\text{palla})=3\cdot\tfrac43\pi R^3=4\pi R^3$. Verifica-lampo: la sfera unitaria dà $4\pi$, la superficie stessa — coincidenza utile per ricordarlo.`},
+  {t:'esercizio', title:'Quando conviene il verso opposto: superficie non chiusa', src:'Trabocchetto · chiudere la superficie a mano',
+   testo:R`Calcola il flusso di $\mathbf F=(0,0,z)$ verso l&rsquo;alto attraverso il paraboloide $z=4-x^2-y^2$, $z\ge0$ (una calotta <b>non chiusa</b>).`,
+   steps:[
+    {label:'Gauss chiede una superficie chiusa', body:R`<p>La calotta non è chiusa: manca il &laquo;tappo&raquo; sul piano $z=0$ (il disco $x^2+y^2\le4$). Gauss si applica solo a superfici chiuse. <b>Chiudi</b> aggiungendo il disco $D$ con normale <b>verso il basso</b> (per avere la normale uscente dal solido $V$ sotto il paraboloide).</p>`},
+    {label:'Applica Gauss al solido chiuso', body:R`<p>$\nabla\!\cdot\!\mathbf F=\partial_z z=1$. $$\Phi_{\text{calotta}}+\Phi_{\text{disco}}=\iiint_V 1\,dV=\text{Vol}(V).$$ Il volume sotto il paraboloide: $\int_0^{2\pi}\!\!\int_0^2 (4-r^2)\,r\,dr\,d\theta=2\pi\left[2r^2-\tfrac{r^4}{4}\right]_0^2=2\pi(8-4)=8\pi$.</p>`},
+    {label:'Sottrai il tappo', body:R`<p>Sul disco $z=0$, $\mathbf F=(0,0,0)$, quindi $\Phi_{\text{disco}}=0$. Dunque $$\Phi_{\text{calotta}}=8\pi-0=8\pi.\qquad\blacksquare$$ Se il campo non fosse stato nullo sul tappo, avresti dovuto calcolarne il flusso (con la normale verso il basso) e sottrarlo. <b>La trappola è dimenticare il tappo</b>, o sbagliarne la normale.</p>`}
+   ],
+   nota:R`Strategia generale: per una superficie <b>aperta</b> con integrando scomodo, chiudila con una superficie <b>comoda</b> (un piano), applica Gauss al solido, e sottrai il flusso attraverso il pezzo aggiunto. Attento sempre all&rsquo;orientazione: la normale deve essere <b>uscente dal solido</b> su tutto il bordo.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un campo ha divergenza nulla ovunque. Quanto vale il suo flusso attraverso QUALSIASI superficie chiusa?`,
+    a:R`Zero, per Gauss: $\iiint_V 0\,dV=0$. È la definizione di campo <b>solenoidale</b>: nessuna sorgente, tanto flusso entra quanto esce da ogni volume chiuso. In fisica: il campo magnetico $\mathbf B$ ($\nabla\!\cdot\!\mathbf B=0$, niente monopoli) e i campi di velocità incomprimibili.`},
+   {q:R`Perché la normale deve essere uscente, e non entrante?`,
+    a:R`È una convenzione di segno: &laquo;uscente&raquo; rende il flusso positivo quando c&rsquo;è una sorgente (divergenza positiva) dentro. Con la normale entrante tutti i segni si invertono e la formula diventa $\iiint\nabla\!\cdot\!\mathbf F\,dV=-\iint\mathbf F\cdot\mathbf n_{\text{entr}}\,dS$. Coerenza: sorgente ⇒ flusso esce.`}
+  ]}
+]},
+
+/* ---------------- 03 · STOKES CLASSICO ---------------- */
+{ num:'03', title:'Il teorema di Stokes', meta:'$\\iint_S(\\nabla\\times\\mathbf F)\\!\\cdot\\!\\mathbf n\\,dS=\\oint_{\\partial S}\\mathbf F\\!\\cdot\\!d\\mathbf r$ · circuitazione = flusso del rotore · la regola della mano destra',
+  blocchi:[
+  {t:'prosa', title:'L&rsquo;enunciato', tag:'il teorema', html:R`
+  <p><b>Teorema (Stokes).</b> Sia $S\subset\mathbb{R}^3$ una superficie regolare a tratti con bordo $\partial S$ una curva chiusa, e $\mathbf F$ un campo $C^1$. Orientate $S$ con normale $\mathbf n$ e $\partial S$ in modo <b>coerente</b> (regola della mano destra: pollice lungo $\mathbf n$, le dita danno il verso di $\partial S$). Allora $$\boxed{\ \iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS=\oint_{\partial S}\mathbf F\cdot d\mathbf r\ }$$</p>
+  <p>La <b>circuitazione</b> di $\mathbf F$ lungo il bordo = <b>flusso del rotore</b> attraverso la superficie. È Green portato in 3D e appoggiato a una superficie curva. Conseguenza sorprendente: il flusso del rotore dipende <b>solo dal bordo</b>, non dalla superficie scelta. Due superfici diverse con lo <b>stesso bordo</b> danno lo stesso flusso del rotore — perché entrambe valgono la stessa circuitazione $\oint_{\partial S}$.</p>`},
+  {t:'reveal', title:'La coerenza di orientazione, e perché la superficie non conta', tag:'i due punti delicati', steps:[
+   {label:'Mano destra: normale ↔ bordo', body:R`<p>L&rsquo;orientazione di $S$ (scelta di $\mathbf n$) e quella di $\partial S$ non sono indipendenti: sono legate dalla <b>regola della mano destra</b>. Se il pollice destro punta lungo $\mathbf n$, le dita curvano nel verso di percorrenza di $\partial S$. Invertire $\mathbf n$ inverte il verso del bordo e cambia il segno di <b>entrambi</b> i membri, coerentemente. Sbagliare questa coerenza è l&rsquo;errore di segno tipico d&rsquo;esame.</p>`},
+   {label:'Il flusso del rotore dipende solo dal bordo', body:R`<p>Prendi due superfici $S_1,S_2$ con lo <b>stesso bordo</b> $\partial S_1=\partial S_2=\gamma$. Stokes dà $\iint_{S_1}(\nabla\times\mathbf F)\cdot\mathbf n=\oint_\gamma\mathbf F\cdot d\mathbf r=\iint_{S_2}(\nabla\times\mathbf F)\cdot\mathbf n$: <b>uguali</b>. Equivalentemente, sulla superficie chiusa $S_1\cup(-S_2)$ il flusso del rotore è zero — ed è proprio Gauss applicato a $\nabla\times\mathbf F$, che ha divergenza nulla ($\nabla\!\cdot\!(\nabla\times\mathbf F)=0$, nucleo 4). Le due identità del nucleo 4 riappaiono qui come <b>coerenza</b> dei teoremi.</p>
+   <div class="note">Libertà operativa: per calcolare $\oint_\gamma\mathbf F\cdot d\mathbf r$ via Stokes, scegli la superficie $S$ <b>più comoda</b> che ha $\gamma$ come bordo (spesso un pezzo di piano). Il risultato non dipende dalla scelta.</div>`}
+  ]},
+  {t:'plot', title:'Stokes: la circuitazione sul bordo misura il rotore dentro',
+   intro:R`Il campo $\mathbf F=(-y,x,0)$ (rotore $\nabla\times\mathbf F=(0,0,2)$, verticale) e il bordo $\partial S$ (cerchio arancione) di una superficie $S$ nel piano.`,
+   plots:[
+    {kind:'field2d', fx:'-y', fy:'x', xr:[-2,2], yr:[-2,2], n:13, height:380, rings:[{r:1.3, col:'#ff9b6b', width:2.4}], title:'flusso del rotore verticale attraverso il disco = circuitazione sul bordo'}
+   ],
+   leggi:R`Prendi come $S$ il disco piatto di raggio $1{,}3$ nel piano $xy$, con normale $\mathbf n=(0,0,1)$ verso l&rsquo;alto. Il rotore è $(0,0,2)$, quindi $(\nabla\times\mathbf F)\cdot\mathbf n=2$, e il flusso è $\iint_S 2\,dS=2\cdot\pi r^2\approx10{,}6$. Stokes dice che questo <b>è</b> la circuitazione $\oint_{\partial S}\mathbf F\cdot d\mathbf r$ lungo il cerchio arancione — che vedi essere positiva perché le frecce sono concordi al verso antiorario del bordo (mano destra col pollice in su). Il punto profondo: potresti gonfiare $S$ a <b>cupola</b> sopra lo stesso cerchio, e il flusso del rotore resterebbe $10{,}6$, perché il bordo non cambia. La superficie è libera; solo il suo <b>orlo</b> conta.`},
+  {t:'esercizio', title:'Circuitazione via Stokes', src:'Applicazione diretta · scegliere la superficie comoda',
+   testo:R`Calcola $\oint_\gamma\mathbf F\cdot d\mathbf r$ con $\mathbf F=(y,\ z,\ x)$ e $\gamma$ il triangolo di vertici $(1,0,0),(0,1,0),(0,0,1)$, percorso in quell&rsquo;ordine.`,
+   steps:[
+    {label:'Rotore', body:R`<p>$\nabla\times\mathbf F=\left(\partial_y x-\partial_z z,\ \partial_z y-\partial_x x,\ \partial_x z-\partial_y y\right)=(0-1,\ 0-1,\ 0-1)=(-1,-1,-1).$ Costante: comodo.</p>`},
+    {label:'Scegli la superficie e la normale', body:R`<p>Il triangolo sta sul piano $x+y+z=1$. Prendi $S$ = quel triangolo. Normale coerente col verso dato (mano destra): $\mathbf n=\tfrac{1}{\sqrt3}(1,1,1)$ (verso l&rsquo;esterno dal primo ottante). Allora $$(\nabla\times\mathbf F)\cdot\mathbf n=(-1,-1,-1)\cdot\tfrac{1}{\sqrt3}(1,1,1)=\tfrac{-3}{\sqrt3}=-\sqrt3.$$</p>`},
+    {label:'Flusso = costante × area', body:R`<p>L&rsquo;area del triangolo equilatero di lato $\sqrt2$ (distanza fra due vertici, es. $(1,0,0)$ e $(0,1,0)$) è $\tfrac{\sqrt3}{4}(\sqrt2)^2=\tfrac{\sqrt3}{2}$. Quindi $$\oint_\gamma\mathbf F\cdot d\mathbf r=\iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS=-\sqrt3\cdot\tfrac{\sqrt3}{2}=-\tfrac{3}{2}.\qquad\blacksquare$$ Fatto lato per lato sarebbe stato tre integrali; con Stokes, uno scalare per un&rsquo;area.</p>`}
+   ],
+   nota:R`Verifica dell&rsquo;orientazione: l&rsquo;ordine $(1,0,0)\to(0,1,0)\to(0,0,1)$ gira in senso antiorario visto dall&rsquo;esterno del primo ottante, coerente con $\mathbf n$ verso $(1,1,1)$. Se avessi preso $\mathbf n$ opposta, il segno si ribaltava a $+\tfrac32$: <b>sempre</b> controllare la mano destra prima di concludere.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Due studenti calcolano $\oint_\gamma\mathbf F\cdot d\mathbf r$ scegliendo superfici diverse con lo stesso bordo $\gamma$. Devono ottenere lo stesso numero?`,
+    a:R`SÀ. Per Stokes entrambi valgono $\oint_\gamma\mathbf F\cdot d\mathbf r$, che dipende solo da $\gamma$. Il flusso del rotore è invariante rispetto alla superficie scelta (a bordo fissato), perché $\nabla\!\cdot\!(\nabla\times\mathbf F)=0$. Chi ottiene numeri diversi ha sbagliato un&rsquo;orientazione.`},
+   {q:R`Se $\mathbf F=\nabla\varphi$ è un gradiente, quanto vale $\oint_\gamma\mathbf F\cdot d\mathbf r$ su una curva chiusa?`,
+    a:R`Zero: $\nabla\times\nabla\varphi=\mathbf 0$ (nucleo 4), quindi per Stokes il flusso del rotore è $0$, quindi la circuitazione è $0$. È la definizione di campo conservativo. <b>Attenzione al buco</b>: vale se $\gamma$ borda una superficie tutta nel dominio; se $\gamma$ gira attorno a una singolarità (campo-vortice), non c&rsquo;è tale superficie e la circuitazione può essere $\neq0$ (tappa 05).`}
+  ]},
+  {t:'plot', title:'Due superfici, lo stesso bordo: perché il flusso del rotore non cambia',
+   intro:R`Il bordo è lo stesso cerchio $x^2+y^2=1$ nel piano $z=0$. A sinistra il <b>disco piatto</b> teso su di esso, a destra la <b>calotta</b> emisferica: due superfici diverse, un solo bordo. <b>Trascina per ruotare.</b>`,
+   plots:[
+    {kind:'param3d', x:'u*cos(v)', y:'u*sin(v)', z:'0*u', ur:[0.02,1], vr:[0,6.28319],
+     nu:12, nv:34, w:430, height:330, yaw:0.7, pitch:0.55, alpha:0.85,
+     normal:{u0:0.55, v0:1.1, len:0.7},
+     curves3d:[{x:'cos(t)', y:'sin(t)', z:'0*t', tr:[0,6.28319], col:'#ff9b6b', width:3.4}],
+     title:'il disco piatto: la superficie piu comoda'},
+    {kind:'param3d', x:'sin(u)*cos(v)', y:'sin(u)*sin(v)', z:'cos(u)', ur:[0.001,1.5708], vr:[0,6.28319],
+     nu:16, nv:34, w:430, height:330, yaw:0.7, pitch:0.55, alpha:0.85,
+     normal:{u0:0.7, v0:1.1, len:0.7},
+     curves3d:[{x:'cos(t)', y:'sin(t)', z:'0*t', tr:[0,6.28319], col:'#ff9b6b', width:3.4}],
+     title:'la calotta: stesso bordo, superficie diversa'}
+   ],
+   leggi:R`Il teorema di Stokes dice $\displaystyle\oint_{\partial S}\mathbf F\cdot d\mathbf r=\iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS$: il primo membro dipende <b>solo dal bordo</b>. Ma le due superfici del disegno hanno lo <b>stesso</b> bordo — quindi il flusso del rotore attraverso il disco e attraverso la calotta deve dare <b>lo stesso numero</b>, per quanto le due superfici siano diverse. <b>Questa è la vera potenza operativa del teorema, ed è la mossa che ti salva all&rsquo;esame:</b> quando il flusso attraverso una superficie scomoda è difficile, si sostituisce la superficie con un&rsquo;altra qualunque che abbia lo stesso bordo — di solito il disco piatto. Due avvertenze che la figura rende concrete. <b>(1)</b> Le due normali (frecce bianche) devono essere <b>coerentemente orientate</b> col verso di percorrenza del bordo: regola della mano destra. Se ne inverti una, quel flusso cambia segno e l&rsquo;uguaglianza salta. <b>(2)</b> Fra le due superfici non devono esserci <b>singolarità</b> del campo: la deformazione è lecita solo se la regione compresa è tutta dentro il dominio di regolarità. È lo stesso &laquo;buco&raquo; del nucleo 04, ed è la ragione per cui unendo disco e calotta (che formano una superficie <b>chiusa</b>) si ottiene flusso totale nullo: $\displaystyle\oiint(\nabla\times\mathbf F)\cdot\mathbf n\,dS=0$ perché $\nabla\cdot(\nabla\times\mathbf F)=0$ — la stessa identità, vista dall&rsquo;altro lato.`},
+]},
+
+/* ---------------- 04 · L'UNIFICAZIONE: FORME DIFFERENZIALI ---------------- */
+{ num:'04', title:'Un solo teorema: forme differenziali e $d$', meta:'$\\int_\\Omega d\\omega=\\int_{\\partial\\Omega}\\omega$ · $d$ unifica grad, rot, div · $d^2=0$ ricodifica le due identità',
+  blocchi:[
+  {t:'prosa', title:'Tre teoremi, una struttura', tag:'il salto di astrazione', html:R`
+  <p>Green, Gauss e Stokes hanno la <b>stessa forma</b>: <i>l&rsquo;integrale di una derivata su una regione = l&rsquo;integrale della funzione sul bordo</i>. Con il linguaggio delle <b>forme differenziali</b> diventano letteralmente lo stesso teorema, lo <b>Stokes generalizzato</b>: $$\boxed{\ \int_\Omega d\omega=\int_{\partial\Omega}\omega\ }$$ dove $\omega$ è una forma, $d$ è la <b>derivata esterna</b>, $\Omega$ una regione orientata e $\partial\Omega$ il suo bordo. Sostituendo il grado giusto di $\omega$ e la dimensione giusta di $\Omega$ ricadi in ciascuno dei tre teoremi — e nel teorema fondamentale del calcolo.</p>`},
+  {t:'gram', title:'Le forme in $\\mathbb{R}^3$, per grado', rows:[
+   [R`$0$-forma`, R`una <b>funzione</b> $f$. La sua derivata esterna è $df=f_x\,dx+f_y\,dy+f_z\,dz$: la 1-forma del <b>gradiente</b>.`],
+   [R`$1$-forma`, R`$\omega=P\,dx+Q\,dy+R\,dz$ (un campo $\mathbf F=(P,Q,R)$ &laquo;da integrare su curve&raquo;). $d\omega$ codifica il <b>rotore</b>.`],
+   [R`$2$-forma`, R`$\eta=A\,dy\wedge dz+B\,dz\wedge dx+C\,dx\wedge dy$ (un campo &laquo;da integrare su superfici&raquo;, il flusso). $d\eta$ codifica la <b>divergenza</b>.`],
+   [R`$3$-forma`, R`$g\,dx\wedge dy\wedge dz$: una densità &laquo;da integrare su volumi&raquo;.`],
+   [R`$d$`, R`la <b>derivata esterna</b>: alza il grado di $1$. In $\mathbb{R}^3$ la catena $0\xrightarrow{d}1\xrightarrow{d}2\xrightarrow{d}3$ È grad $\to$ rot $\to$ div.`],
+   [R`$\wedge$`, R`prodotto <b>esterno</b>, antisimmetrico ($dx\wedge dy=-dy\wedge dx$, $dx\wedge dx=0$): è l&rsquo;algebra che produce automaticamente i segni del rotore e i determinanti dell&rsquo;area orientata.`]
+  ]},
+  {t:'reveal', title:'Come i tre teoremi ricadono dallo Stokes generalizzato', tag:'un dizionario', steps:[
+   {label:'Teorema fondamentale del calcolo', body:R`<p>$\Omega=[a,b]$ (dimensione 1), $\omega=f$ una 0-forma, $\partial\Omega=\{a,b\}$ (con segni $+b,-a$). $d\omega=f'\,dx$. Lo Stokes generalizzato: $$\int_a^b f'\,dx=f(b)-f(a).$$ Il capostipite.</p>`},
+   {label:'Green e Stokes', body:R`<p>$\omega=P\,dx+Q\,dy$ una 1-forma. $d\omega=(Q_x-P_y)\,dx\wedge dy$ — compare la vorticità. Su $\Omega=D\subset\mathbb{R}^2$: $\int_D(Q_x-P_y)\,dA=\oint_{\partial D}P\,dx+Q\,dy$, cioè <b>Green</b>. Su una superficie $S\subset\mathbb{R}^3$ con la 1-forma di $\mathbf F$: è <b>Stokes classico</b>, $\iint_S d\omega=\oint_{\partial S}\omega$.</p>`},
+   {label:'Gauss', body:R`<p>$\eta$ la 2-forma del flusso di $\mathbf F$. $d\eta=(\nabla\!\cdot\!\mathbf F)\,dx\wedge dy\wedge dz$ — compare la divergenza. Su $\Omega=V\subset\mathbb{R}^3$: $\iiint_V\nabla\!\cdot\!\mathbf F\,dV=\iint_{\partial V}\mathbf F\cdot\mathbf n\,dS$, cioè <b>Gauss</b>. $\blacksquare$</p>
+   <div class="note">Un solo enunciato, tre (anzi quattro) teoremi. Non è un gioco di notazione: è la scoperta che &laquo;derivare e poi integrare sul pieno&raquo; equivale a &laquo;integrare sul bordo&raquo;, in ogni dimensione. È la porta della <b>geometria differenziale</b> (III anno) e della fisica delle forme (gauge, Maxwell).</div>`}
+  ]},
+  {t:'prosa', title:'$d^2=0$: le due identità del nucleo 4, in una riga', tag:'la chiusura del cerchio', html:R`
+  <p>La proprietà centrale della derivata esterna è $$\boxed{\ d(d\omega)=0\ \text{ per ogni forma }\omega\ }$$ &laquo;derivare due volte dà zero&raquo;. In $\mathbb{R}^3$ questa singola equazione <b>è</b> le due identità che avevi dimostrato con Schwarz nel nucleo 4:</p>
+  <ul>
+  <li>$d^2$ su una <b>0-forma</b> ($f\to df\to d(df)$): grad poi rot. $d(df)=0$ dice $\nabla\times(\nabla f)=\mathbf 0$. <b>Ogni gradiente è irrotazionale.</b></li>
+  <li>$d^2$ su una <b>1-forma</b> ($\omega\to d\omega\to d(d\omega)$): rot poi div. $d(d\omega)=0$ dice $\nabla\!\cdot\!(\nabla\times\mathbf F)=0$. <b>Ogni rotore è solenoidale.</b></li>
+  </ul>
+  <p>Le due identità &laquo;a caso&raquo; del nucleo 4 sono la stessa legge $d^2=0$, letta in due gradi. E la domanda &laquo;irrotazionale ⇒ conservativo?&raquo; (che nel nucleo dei campi finiva sul buco) diventa: <b>quando una forma chiusa ($d\omega=0$) è esatta ($\omega=d\alpha$)?</b> La risposta è topologica — dipende dai buchi del dominio — ed è la <b>coomologia di de Rham</b>. Il $2\pi$ del campo-vortice è il primo mattone di questa teoria.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In che senso il teorema fondamentale del calcolo, Green, Stokes e Gauss sono &laquo;lo stesso teorema&raquo;?`,
+    a:R`Sono tutti $\int_\Omega d\omega=\int_{\partial\Omega}\omega$, per gradi di $\omega$ e dimensioni di $\Omega$ diversi. &laquo;Integrare la derivata sul pieno = integrare la forma sul bordo.&raquo; La derivata esterna $d$ è grad/rot/div a seconda del grado; il bordo $\partial$ abbassa la dimensione di uno.`},
+   {q:R`Cosa diventano le identità $\nabla\times\nabla f=\mathbf 0$ e $\nabla\!\cdot\!(\nabla\times\mathbf F)=0$ nel linguaggio delle forme?`,
+    a:R`Entrambe sono $d^2=0$: la prima è $d(df)=0$ (su una 0-forma), la seconda $d(d\omega)=0$ (su una 1-forma). Una sola legge algebrica, non due coincidenze. La sua contropartita topologica (chiuse vs esatte) è la coomologia di de Rham.`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'Prova prima, poi rivela · Green, Gauss, Stokes, e il trabocchetto del buco',
+  blocchi:[
+  {t:'prosa', title:'Istruzioni', tag:'come usarli', html:R`
+  <p>Copri le soluzioni, prendi carta, chiudi l&rsquo;esercizio da solo, poi rivela un passo alla volta. Sono tarati sul livello dello scritto: Green su regione con simmetria, Gauss con chiusura di superficie, Stokes con scelta della superficie comoda, e il <b>trabocchetto del buco</b> — il caso in cui i teoremi <i>non</i> si applicano ingenuamente e va isolata la singolarità.</p>`},
+  {t:'esercizio', title:'Esercizio 1 — Green con campo non banale', src:'Tipo Terracina · circuitazione su un quarto di anello',
+   testo:R`Calcola $\oint_{\partial D}\big((x^2-y)\,dx+(x+y^2)\,dy\big)$, $\partial D$ antiorario, dove $D$ è il quarto di anello $\{1\le x^2+y^2\le4,\ x\ge0,\ y\ge0\}$.`,
+   steps:[
+    {label:'Green', body:R`<p>$P=x^2-y$, $Q=x+y^2$. $Q_x-P_y=1-(-1)=2$. Quindi $\oint=\iint_D 2\,dA=2\,\text{Area}(D)$.</p>`},
+    {label:'Area del quarto di anello', body:R`<p>Un quarto di corona fra $r=1$ e $r=2$: $\text{Area}=\tfrac14\pi(2^2-1^2)=\tfrac14\pi\cdot3=\tfrac{3\pi}{4}$.</p>`},
+    {label:'Risultato', body:R`<p>$$\oint_{\partial D}=2\cdot\tfrac{3\pi}{4}=\tfrac{3\pi}{2}.\qquad\blacksquare$$ Il campo aveva termini $x^2,y^2$ che a mano sul bordo sarebbero stati fastidiosi; Green li ha resi irrilevanti (spariscono in $Q_x-P_y$).</p>`}
+   ],
+   nota:R`Nota generale: i termini che sono <b>gradienti puri</b> (qui $x^2\,dx=d(\tfrac{x^3}{3})$ e $y^2\,dy$) non contribuiscono mai a una circuitazione chiusa — sono conservativi. Riconoscerli in anticipo (e scartarli) accorcia i conti.`},
+  {t:'esercizio', title:'Esercizio 2 — Gauss con chiusura', src:'Tipo Terracina · flusso da una superficie aperta',
+   testo:R`Calcola il flusso di $\mathbf F=(x,\ y,\ 2z)$ uscente (verso l&rsquo;alto/fuori) dalla superficie del cono $z=\sqrt{x^2+y^2}$, $0\le z\le1$ — la superficie laterale, senza il tappo superiore.`,
+   steps:[
+    {label:'Chiudi con il disco superiore', body:R`<p>La superficie laterale non è chiusa: manca il disco $D$ a $z=1$, $x^2+y^2\le1$. Chiudi con $D$ (normale verso l&rsquo;alto, uscente dal cono solido $V$). $\nabla\!\cdot\!\mathbf F=1+1+2=4$.</p>`},
+    {label:'Gauss sul cono solido', body:R`<p>$\Phi_{\text{lat}}+\Phi_{\text{disco}}=\iiint_V 4\,dV=4\,\text{Vol}(V)$. Volume del cono di raggio $1$ e altezza $1$: $\tfrac13\pi r^2 h=\tfrac{\pi}{3}$. Quindi la somma vale $4\cdot\tfrac{\pi}{3}=\tfrac{4\pi}{3}$.</p>`},
+    {label:'Sottrai il flusso dal disco', body:R`<p>Sul disco $z=1$, $\mathbf n=(0,0,1)$, $\mathbf F\cdot\mathbf n=2z=2$. $\Phi_{\text{disco}}=\iint_D 2\,dA=2\cdot\pi(1)^2=2\pi$. Dunque $$\Phi_{\text{lat}}=\tfrac{4\pi}{3}-2\pi=\tfrac{4\pi-6\pi}{3}=-\tfrac{2\pi}{3}.\qquad\blacksquare$$ Il flusso laterale è <b>negativo</b>: attraverso i fianchi del cono, con questa orientazione, entra più di quanto esce.</p>`}
+   ],
+   nota:R`Il segno negativo non è un errore: dipende dall&rsquo;orientazione &laquo;uscente dal solido&raquo; scelta per la superficie laterale. Se il testo chiede il flusso attraverso la superficie laterale con una <b>specifica</b> normale, verifica quale, perché il segno dipende da quella scelta — trabocchetto ricorrente.`},
+  {t:'esercizio', title:'Esercizio 3 — Stokes, superficie a scelta', src:'Tipo Terracina · circuitazione su una curva sghemba',
+   testo:R`Calcola $\oint_\gamma\mathbf F\cdot d\mathbf r$ con $\mathbf F=(z-y,\ x-z,\ y-x)$ e $\gamma$ il bordo (antiorario visto dall&rsquo;alto) della porzione di piano $z=0$ tagliata dal cerchio $x^2+y^2=9$.`,
+   steps:[
+    {label:'Rotore', body:R`<p>$\nabla\times\mathbf F=(\partial_y(y-x)-\partial_z(x-z),\ \partial_z(z-y)-\partial_x(y-x),\ \partial_x(x-z)-\partial_y(z-y))=(1-(-1),\ 1-(-1),\ 1-(-1))=(2,2,2).$</p>`},
+    {label:'Superficie comoda: il disco', body:R`<p>$\gamma$ borda il disco $S$ nel piano $z=0$, normale $\mathbf n=(0,0,1)$ (mano destra, antiorario dall&rsquo;alto). $(\nabla\times\mathbf F)\cdot\mathbf n=(2,2,2)\cdot(0,0,1)=2$.</p>`},
+    {label:'Flusso costante', body:R`<p>$$\oint_\gamma\mathbf F\cdot d\mathbf r=\iint_S 2\,dS=2\cdot\text{Area}(\text{disco})=2\cdot\pi(3)^2=18\pi.\qquad\blacksquare$$ La curva è nel piano, quindi il disco è la superficie ovvia; ma anche una cupola sopra $\gamma$ avrebbe dato $18\pi$.</p>`}
+   ],
+   nota:R`Quando il rotore è costante e la curva è piana, Stokes riduce tutto a &laquo;componente del rotore lungo la normale, per l&rsquo;area&raquo;. Sempre verificare la mano destra: bordo antiorario dall&rsquo;alto ⇒ normale verso l&rsquo;alto.`},
+  {t:'esercizio', title:'Esercizio 4 — il buco: quando i teoremi NON bastano', src:'Trabocchetto · circuitazione attorno a una singolarità',
+   testo:R`Sia $\mathbf F=\left(\dfrac{-y}{x^2+y^2},\ \dfrac{x}{x^2+y^2}\right)$. Calcola $\oint_\gamma\mathbf F\cdot d\mathbf r$ dove $\gamma$ è (a) il cerchio $x^2+y^2=1$ antiorario; (b) il bordo del quadrato $[2,3]\times[2,3]$.`,
+   steps:[
+    {label:'Il rotore è nullo — ma attento al dominio', body:R`<p>Dal nucleo 4: $Q_x-P_y=0$ ovunque <b>tranne</b> l&rsquo;origine, dove $\mathbf F$ non è definito. Green richiede $\mathbf F$ di classe $C^1$ su tutto $D$: applicabile solo se $\gamma$ <b>non racchiude</b> l&rsquo;origine.</p>`},
+    {label:'(a) il cerchio racchiude il buco', body:R`<p>$\gamma$ racchiude l&rsquo;origine: Green NON si applica al disco (c&rsquo;è il buco). Calcolo diretto con $x=\cos t,y=\sin t$: $\mathbf F=(-\sin t,\cos t)$, $d\mathbf r=(-\sin t,\cos t)\,dt$, $\mathbf F\cdot d\mathbf r=(\sin^2 t+\cos^2 t)\,dt=dt$. $$\oint_\gamma=\int_0^{2\pi}dt=2\pi\neq0.$$ La circuitazione è $2\pi$: la misura del buco (nucleo 0, la corona non semplicemente connessa).</p>`},
+    {label:'(b) il quadrato NON racchiude il buco', body:R`<p>Il quadrato $[2,3]^2$ sta lontano dall&rsquo;origine: $\mathbf F$ è $C^1$ e irrotazionale su tutta la regione racchiusa. Green (o la conservatività locale) dà $$\oint_\gamma=\iint_D 0\,dA=0.$$ Stesso campo, stessa formula del rotore, <b>risultato diverso</b> — perché conta se il cammino racchiude la singolarità. $\blacksquare$</p>`}
+   ],
+   nota:R`Morale, la più importante del nucleo: i teoremi integrali valgono <b>solo dove il campo è regolare su tutta la regione</b>. Con una singolarità dentro, isola-la (togli un dischetto attorno all&rsquo;origine: il bordo diventa $\gamma$ meno un cerchietto, e la circuitazione su $\gamma$ = circuitazione sul cerchietto = $2\pi$, indipendente dalla forma di $\gamma$). Il valore $2\pi$ è un <b>invariante topologico</b>: quante volte il cammino gira attorno al buco. Questo è il seme dell&rsquo;indice di avvolgimento e della coomologia.`},
+  {t:'collaudo', title:'Controllo lampo finale', items:[
+   {q:R`Come decidi, davanti a $\oint\mathbf F\cdot d\mathbf r$, se puoi usare Green/Stokes o se devi stare attento?`,
+    a:R`Controlla due cose: (1) il campo è $C^1$ su <b>tutta</b> la regione racchiusa dal cammino? Se ha una singolarità dentro (denominatore che si annulla), i teoremi non si applicano direttamente — isola la singolarità. (2) L&rsquo;orientazione bordo↔normale è coerente (mano destra)? Se sÀ e il campo è regolare, il rotore/divergenza fa il lavoro.`},
+   {q:R`Il flusso di $\nabla\times\mathbf F$ attraverso una superficie chiusa (senza bordo, es. una sfera intera) quanto vale?`,
+    a:R`Zero. Una superficie chiusa non ha bordo ($\partial S=\varnothing$), quindi per Stokes il flusso del rotore è $\oint_\varnothing=0$. Equivalentemente, per Gauss, $\iiint\nabla\!\cdot\!(\nabla\times\mathbf F)\,dV=\iiint 0\,dV=0$. Le due identità del nucleo 4, di nuovo coerenti.`}
+  ]}
+]},
+
+/* ---------------- 06 · IL SENSO E LE ROTTE FISICHE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'i teoremi integrali come contabilità della fisica · Maxwell in forma integrale · verso le forme e la topologia',
+  blocchi:[
+  {t:'prosa', title:'Perché la fisica è scritta cosÀ', tag:'significato', html:R`
+  <p>I teoremi integrali sono la <b>grammatica</b> con cui la fisica passa dal locale al globale. Ogni legge di conservazione ha due volti — una densità (locale, differenziale) e un bilancio su una regione (globale, integrale) — e a legarli è sempre uno di questi teoremi.</p>
+  <ul>
+  <li><b>Gauss ⟷ legge di Gauss.</b> $\oint\mathbf E\cdot\mathbf n\,dS=Q_{\text{int}}/\varepsilon_0$: il flusso del campo elettrico da una superficie chiusa = carica racchiusa. È il teorema della divergenza applicato a $\nabla\!\cdot\!\mathbf E=\rho/\varepsilon_0$. Le cariche sono le <b>sorgenti</b> del campo.</li>
+  <li><b>Stokes ⟷ legge di Ampère e induzione di Faraday.</b> $\oint\mathbf B\cdot d\mathbf r=\mu_0 I$ e $\oint\mathbf E\cdot d\mathbf r=-\frac{d\Phi_B}{dt}$: circuitazioni = correnti/flussi concatenati. È Stokes applicato a $\nabla\times\mathbf B$ e $\nabla\times\mathbf E$.</li>
+  <li><b>Le equazioni di Maxwell</b> esistono in due forme, <b>integrale e differenziale</b>, ed è <i>esattamente</i> questo nucleo a tradurle l&rsquo;una nell&rsquo;altra. Non due teorie: una teoria, due contabilità.</li>
+  </ul>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> Tutto poggia sui nuclei 3–4: parametrizzazioni e integrali di superficie (nucleo 3), grad/div/rot e le due identità (nucleo 4), e la nozione di dominio semplicemente connesso (nucleo 0). La cancellazione dei bordi interni è l&rsquo;unica idea, ripetuta in 2D e 3D.</p>
+  <p><b>A valle.</b> Lo Stokes generalizzato $\int_\Omega d\omega=\int_{\partial\Omega}\omega$ è la porta di due mondi: la <b>geometria differenziale</b> (Geometria Differenziale del III anno: varietà, forme, coomologia di de Rham) e la <b>fisica delle forme</b> (elettromagnetismo come teoria di gauge, $F=dA$, e le fasi geometriche della meccanica quantistica). Il &laquo;buco&raquo; del campo-vortice, che qui hai visto dare circuitazione $2\pi$, è il primo esempio di come la <b>topologia del dominio</b> entri nella fisica.</p>`},
+  {t:'prolessi', title:'Prolessi — il bordo racconta il dentro, e la topologia entra nella fisica',
+   oggetto:R`Lo <b>Stokes generalizzato</b> $\int_\Omega d\omega=\int_{\partial\Omega}\omega$: l&rsquo;integrale di una derivata sul pieno è determinato dai valori sul bordo. Con $d^2=0$ e la distinzione chiuse/esatte.`,
+   rotte:[
+    {dove:'Elettro-<br>magnetismo', txt:R`Le leggi di Gauss $\oint\mathbf E\cdot d\mathbf S=Q/\varepsilon_0$ e di Ampère $\oint\mathbf B\cdot d\mathbf r=\mu_0 I$ <b>sono</b> Gauss e Stokes; Maxwell in forma integrale ⟷ differenziale è questo nucleo. In forma covariante, $F=dA$ e $dF=0$ (due delle quattro equazioni) è $d^2=0$.`},
+    {dove:'Meccanica<br>quantistica', txt:R`$d\omega$ e chiuse-vs-esatte sono il seme della <b>coomologia di de Rham</b>. La <b>fase di Berry</b> e l&rsquo;effetto <b>Aharonov–Bohm</b> sono integrali di una 1-forma di connessione su cammini che racchiudono un flusso: la stessa macchina del campo-vortice, con la fase al posto del lavoro.`},
+    {dove:'Meccanica<br>statistica', txt:R`Le leggi di conservazione locali (continuità $\partial_t\rho+\nabla\!\cdot\!\mathbf j=0$) diventano bilanci globali su un volume via Gauss: è cosÀ che &laquo;niente si crea né si distrugge&raquo; passa da equazione differenziale a contabilità misurabile.`}
+   ],
+   domanda:R`Un integrale conservato su un bordo dipende solo dalla topologia del dominio, non dai dettagli del campo (è un <b>invariante</b>). La domanda che porti alla tesi: nei sistemi complessi e caotici, quali &laquo;cariche topologiche&raquo; restano invarianti sotto la dinamica, mentre tutto il resto si mescola? È il punto dove l&rsquo;ergodicità (tutto si rimescola) incontra le quantità che <i>non</i> si rimescolano — e uno dei fili che portano a ETH e alla natura dell&rsquo;irreversibilità.`}
+]}
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 05 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 04-campi-vettoriali.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

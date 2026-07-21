@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 13 — Residui e integrazione per contorni: il cavallo da lavoro di Metodi</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento III · Nucleo <b>13 — Residui: il teorema, i quattro sottotipi d’esame, i poli sull’asse</b> · Metodi Matematici della Fisica</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 13: Residui e integrazione per contorni <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'Metodi · l’esercizio con il peso d’esame più alto: integrale reale calcolato per contorni',
+  blocchi:[
+  {t:'prosa', title:'Dove va a parare tutto il Movimento III', tag:'first principles', html:R`
+  <p>Il nucleo 12 ha stabilito che l&rsquo;integrale su una curva chiusa dipende solo da <b>quali singolarità</b> essa racchiude, e che ogni singolarità contribuisce $2\pi i\,a_{-1}$. Questo nucleo trasforma quel fatto in una <b>macchina di calcolo</b>: integrali reali che con i metodi del primo anno sono proibitivi — $\int_{-\infty}^{+\infty}\frac{dx}{1+x^4}$, $\int_0^{2\pi}\frac{d\theta}{a+\cos\theta}$, $\int_0^\infty\frac{\sin x}{x}dx$ — si calcolano in mezza pagina passando dal piano complesso.</p>
+  <p>L&rsquo;idea è sempre la stessa, e conviene fissarla prima delle tecniche: <b>l&rsquo;integrale che ti serve è un pezzo di un contorno chiuso</b>. Si chiude il cammino aggiungendo un arco, si calcola il tutto con i residui (cosa facile), si dimostra che l&rsquo;arco aggiunto <b>svanisce</b> (di solito con la stima ML), e per differenza si ottiene il pezzo che serviva.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Calcolare un <b>residuo</b> in un polo semplice o multiplo, e leggerlo da uno sviluppo quando le formule non si applicano bene.</li>
+  <li>Applicare il <b>teorema dei residui</b> a un contorno assegnato.</li>
+  <li>Riconoscere e svolgere i <b>quattro sottotipi</b> d&rsquo;esame: (a) razionali su $\mathbb{R}$; (b) razionali in $\cos,\sin$ sul cerchio; (c) con $e^{ikx}$ (lemma di Jordan, e il <b>trabocchetto del semipiano</b> a seconda del segno di $k$); (d) con tagli (contorno a buco della serratura).</li>
+  <li>Gestire un <b>polo sull&rsquo;asse reale</b> con il valore principale e la regola del <b>mezzo residuo</b>.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · IL RESIDUO ---------------- */
+{ num:'01', title:'Il residuo e come si calcola', meta:'$a_{-1}$ di Laurent · polo semplice, polo di ordine $m$, quoziente · quando conviene lo sviluppo',
+  blocchi:[
+  {t:'prosa', title:'Definizione, e le tre formule che coprono il 95% dei casi', tag:'grammatica', html:R`
+  <p>Se $z_0$ è una singolarità <b>isolata</b> di $f$, il <b>residuo</b> è il coefficiente $a_{-1}$ del suo sviluppo di Laurent attorno a $z_0$; equivalentemente $\mathrm{Res}(f,z_0)=\frac{1}{2\pi i}\oint f\,dz$ su un cerchietto attorno a $z_0$.</p>
+  <ul>
+  <li><b>Polo semplice:</b> $\ \mathrm{Res}(f,z_0)=\displaystyle\lim_{z\to z_0}(z-z_0)f(z)$.</li>
+  <li><b>Quoziente con polo semplice</b> ($f=P/Q$ con $Q(z_0)=0$, $Q'(z_0)\ne0$): $\ \mathrm{Res}=\dfrac{P(z_0)}{Q'(z_0)}$. <b>È la formula che si usa più spesso</b>: evita di fattorizzare $Q$.</li>
+  <li><b>Polo di ordine $m$:</b> $\ \mathrm{Res}(f,z_0)=\dfrac{1}{(m-1)!}\displaystyle\lim_{z\to z_0}\frac{d^{\,m-1}}{dz^{\,m-1}}\Big[(z-z_0)^mf(z)\Big]$.</li>
+  </ul>
+  <div class="note"><b>Quando le formule non convengono:</b> se $f$ è un prodotto/quoziente di funzioni con sviluppi noti (esponenziali, trigonometriche), è più rapido e più sicuro <b>sviluppare in serie</b> e leggere il coefficiente di $(z-z_0)^{-1}$ — soprattutto per poli di ordine $\ge3$, dove le derivate diventano pesanti. Ed è l&rsquo;<b>unico</b> modo per una singolarità essenziale: $\mathrm{Res}\big(e^{1/z},0\big)=1$ si legge dallo sviluppo, nessuna formula lo dà.</div>`},
+  {t:'esercizio', title:'Tre residui, tre metodi diversi',
+   src:'palestra minima — da fare a mente',
+   testo:R`Calcolare: (a) $\mathrm{Res}\left(\dfrac{z}{z^2+1},\,i\right)$; (b) $\mathrm{Res}\left(\dfrac{e^{z}}{(z-2)^3},\,2\right)$; (c) $\mathrm{Res}\left(\dfrac{\cos z-1}{z^5},\,0\right)$.`,
+   steps:[
+    {label:'(a) formula del quoziente', body:R`<p>$P=z$, $Q=z^2+1$, $Q'=2z$. Quindi $\mathrm{Res}=\dfrac{P(i)}{Q'(i)}=\dfrac{i}{2i}=\dfrac12$. (Con la fattorizzazione: $\lim_{z\to i}(z-i)\frac{z}{(z-i)(z+i)}=\frac{i}{2i}$: stesso risultato, più scrittura.)</p>`},
+    {label:'(b) polo di ordine 3', body:R`<p>$m=3$: $\ \mathrm{Res}=\dfrac{1}{2!}\lim_{z\to2}\dfrac{d^2}{dz^2}\left[(z-2)^3\dfrac{e^z}{(z-2)^3}\right]=\dfrac{1}{2}\,e^{2}$.</p>`},
+    {label:'(c) sviluppo (le formule qui sono peggio)', body:R`<p>$\cos z-1=-\dfrac{z^2}{2}+\dfrac{z^4}{24}-\cdots$, quindi
+    $$\frac{\cos z-1}{z^5}=-\frac{1}{2z^3}+\frac{1}{24\,z}-\cdots$$
+    Il coefficiente di $z^{-1}$ è $\dfrac{1}{24}$: residuo $=\dfrac1{24}$. Con la formula del polo di ordine $5$ avresti dovuto derivare quattro volte. $\blacksquare$</p>`}
+   ],
+   nota:R`Criterio di scelta: <b>quoziente semplice</b> → formula $P/Q'$; <b>ordine 2</b> → formula con una derivata; <b>ordine ≥3 o funzioni trascendenti</b> → sviluppo in serie. Scegliere male non è un errore, ma costa minuti che all&rsquo;esame contano.`}
+]},
+
+/* ---------------- 02 · IL TEOREMA DEI RESIDUI ---------------- */
+{ num:'02', title:'Il teorema dei residui', meta:'$\\oint_\\gamma f=2\\pi i\\sum\\mathrm{Res}$ · la deformazione dei cammini come dimostrazione',
+  blocchi:[
+  {t:'reveal', title:'Enunciato e perché è già dimostrato', tag:'derivazione', steps:[
+   {label:'Enunciato', body:R`<p><b>Teorema dei residui.</b> Sia $\gamma$ una curva chiusa semplice, percorsa in senso <b>antiorario</b>, e $f$ olomorfa su e dentro $\gamma$ tranne che in un numero finito di singolarità isolate $z_1,\dots,z_k$ interne. Allora
+   $$\oint_\gamma f(z)\,dz=2\pi i\sum_{j=1}^{k}\mathrm{Res}(f,z_j).$$
+   Se il verso è orario, il segno si inverte; se il cammino avvolge una singolarità $n$ volte, quel residuo va contato $n$ volte (indice di avvolgimento).</p>`},
+   {label:'La dimostrazione, in una riga di geometria', body:R`<p>Per la deformazione dei cammini (nucleo 12), $\gamma$ si sostituisce con la somma di cerchietti disgiunti attorno a ciascuna singolarità: la regione fra $\gamma$ e i cerchietti è priva di singolarità, e su di essa vale Cauchy. Su ogni cerchietto, integrando lo sviluppo di Laurent termine a termine, sopravvive solo il termine $a_{-1}(z-z_j)^{-1}$, che dà $2\pi i\,a_{-1}$. Somma, e hai finito. $\blacksquare$</p>
+   <div class="note">Il teorema è quindi solo <b>contabilità</b> sopra un fatto già noto. La difficoltà d&rsquo;esame non sta mai qui: sta nello <b>scegliere il contorno</b> e nel <b>dimostrare che l&rsquo;arco svanisce</b>. Le prossime due tappe sono su quello.</div>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$\displaystyle\oint_{|z|=4}\frac{dz}{z^2-1}$?`,
+    a:R`Poli semplici in $\pm1$, entrambi interni. $\mathrm{Res}_{1}=\frac{1}{2z}\big|_{1}=\frac12$, $\mathrm{Res}_{-1}=\frac{1}{2z}\big|_{-1}=-\frac12$ (formula $P/Q'$). Somma nulla, quindi l&rsquo;integrale è <b>0</b>. Utile ricordarlo: la somma dei residui può annullarsi, e allora un contorno grande dà zero anche con singolarità dentro.`},
+   {q:R`Perché il verso di percorrenza cambia il segno?`,
+    a:R`Perché l&rsquo;integrale è definito dalla parametrizzazione, e invertire il verso è la sostituzione $t\to-t$, che cambia il segno di $\gamma'(t)$. Concretamente: su $|z|=r$ antiorario $\oint dz/z=2\pi i$; orario dà $-2\pi i$. Nei compiti il verso è quasi sempre antiorario, ma quando il testo dice &laquo;orario&raquo; o descrive il cammino a parole, va controllato: è una fonte di errore di segno gratuita.`}
+  ]}
+]},
+
+/* ---------------- 03 · I QUATTRO SOTTOTIPI ---------------- */
+{ num:'03', title:'I quattro sottotipi d’esame', meta:'razionali su $\\mathbb{R}$ · razionali in $\\cos,\\sin$ · con $e^{ikx}$ (Jordan) · con tagli (keyhole)',
+  blocchi:[
+  {t:'reveal', title:'(a) Razionali su tutta la retta: $\\int_{-\\infty}^{+\\infty}\\frac{P(x)}{Q(x)}dx$', tag:'sottotipo A', steps:[
+   {label:'La ricetta', body:R`<p>Condizione d&rsquo;uso: $Q$ senza zeri reali e $\deg Q\ge\deg P+2$ (serve perché l&rsquo;arco svanisca). Si chiude con la <b>semicirconferenza superiore</b> $C_R$ di raggio $R$:
+   $$\oint_{\gamma_R}=\int_{-R}^{R}\frac{P}{Q}dx+\int_{C_R}\frac{P}{Q}dz=2\pi i\sum_{\mathrm{Im}\,z_j\gt0}\mathrm{Res}.$$
+   L&rsquo;arco: per la stima ML, $\left|\int_{C_R}\right|\le\pi R\cdot\max_{C_R}\left|\frac PQ\right|\sim\pi R\cdot\frac{C}{R^{2}}\to0$. Quindi l&rsquo;integrale reale <b>è</b> $2\pi i$ volte la somma dei residui nel <b>semipiano superiore</b>.</p>`},
+   {label:'Esempio svolto: $\\int_{-\\infty}^{+\\infty}\\frac{dx}{1+x^4}$', body:R`<p>I poli sono le radici quarte di $-1$: $e^{i\pi/4},e^{i3\pi/4},e^{i5\pi/4},e^{i7\pi/4}$; nel semipiano superiore ci sono le prime due. Con $Q=1+z^4$, $Q'=4z^3$ e la formula del quoziente:
+   $$\mathrm{Res}(z_j)=\frac{1}{4z_j^3}=\frac{z_j}{4z_j^4}=\frac{z_j}{4(-1)}=-\frac{z_j}{4}$$
+   (usando $z_j^4=-1$: un trucco che semplifica sempre questi casi). Sommando le due radici superiori: $e^{i\pi/4}+e^{i3\pi/4}=i\sqrt2$, quindi $\sum\mathrm{Res}=-\frac{i\sqrt2}{4}$ e
+   $$\int_{-\infty}^{+\infty}\frac{dx}{1+x^4}=2\pi i\left(-\frac{i\sqrt2}{4}\right)=\frac{\pi\sqrt2}{2}=\frac{\pi}{\sqrt2}.\qquad\blacksquare$$
+   <b>Controllo di plausibilità:</b> il risultato è reale e positivo, come deve essere per un integrando positivo. Se ti esce complesso o negativo, hai sbagliato un segno.</p>`}
+  ]},
+  {t:'plot', title:'Il contorno del sottotipo (a): semicerchio nel semipiano superiore',
+   intro:R`Per $\frac{1}{1+z^4}$: quattro poli sulle diagonali, i due superiori dentro il contorno chiuso.`,
+   plots:[
+    {kind:'curve', x:'1.55*cos(t)', y:'1.55*sin(t)', tr:[0,3.14159], xr:[-2,2], yr:[-1.1,2], height:330,
+     title:'contorno chiuso: segmento [-R,R] + arco C_R (che svanisce)',
+     segs:[{x1:-1.55, y1:0, x2:1.55, y2:0, col:'#ff9b6b', width:2.6},
+           {x1:1.0, y1:1.75, x2:1.0, y2:1.75, col:'#b98cff', label:'C_R'}],
+     marks:[{x:0.707, y:0.707, label:'polo (dentro)', col:'#5eead4', up:true},
+            {x:-0.707, y:0.707, label:'polo (dentro)', col:'#5eead4', up:true, left:true},
+            {x:0.707, y:-0.707, label:'fuori', col:'#6b7788', hollow:true},
+            {x:-0.707, y:-0.707, label:'fuori', col:'#6b7788', hollow:true, left:true}]}
+   ],
+   leggi:R`Il cammino chiuso è la somma di due pezzi: il <b>segmento reale</b> $[-R,R]$ (arancione) — che al limite $R\to\infty$ è l&rsquo;integrale che vuoi — e l&rsquo;<b>arco</b> $C_R$ (viola), che va dimostrato svanire. Solo i poli con parte immaginaria positiva contano; quelli sotto (cerchietti vuoti) sono fuori dal contorno e non contribuiscono. <b>La scelta del semipiano è libera in questo sottotipo</b> — chiudendo sotto si otterrebbe lo stesso valore, con i due residui inferiori e il segno invertito dal verso orario. Non lo è più nel sottotipo (c), dove il fattore $e^{ikz}$ esplode in uno dei due semipiani: lì la scelta è <b>obbligata</b>, ed è il trabocchetto principale del nucleo.`},
+  {t:'reveal', title:'(b) Razionali in $\\cos\\theta,\\sin\\theta$ su $[0,2\\pi]$', tag:'sottotipo B', steps:[
+   {label:'La sostituzione', body:R`<p>Poni $z=e^{i\theta}$: il segmento $\theta\in[0,2\pi]$ diventa il <b>cerchio unitario</b> percorso una volta, e
+   $$\cos\theta=\frac{z+z^{-1}}{2},\qquad \sin\theta=\frac{z-z^{-1}}{2i},\qquad d\theta=\frac{dz}{iz}.$$
+   L&rsquo;integrale diventa $\oint_{|z|=1}$ di una funzione <b>razionale</b>: si calcolano i residui dei poli con $|z_j|\lt1$ e si moltiplica per $2\pi i$.</p>`},
+   {label:'Esempio: $\\int_0^{2\\pi}\\frac{d\\theta}{2+\\cos\\theta}$', body:R`<p>Sostituendo: $\displaystyle\oint\frac{1}{2+\frac{z+z^{-1}}{2}}\frac{dz}{iz}=\oint\frac{2\,dz}{i\,(z^2+4z+1)}$. Le radici sono $z=-2\pm\sqrt3$: solo $z_0=-2+\sqrt3\approx-0{,}268$ ha modulo $\lt1$. Con la formula del quoziente, $\mathrm{Res}=\frac{2}{i}\cdot\frac{1}{2z_0+4}=\frac{2}{i\cdot2\sqrt3}$. Dunque
+   $$\int_0^{2\pi}\frac{d\theta}{2+\cos\theta}=2\pi i\cdot\frac{1}{i\sqrt3}=\frac{2\pi}{\sqrt3}.\qquad\blacksquare$$
+   <b>Controllo:</b> l&rsquo;integrando sta fra $1/3$ e $1$, quindi l&rsquo;integrale sta fra $2\pi/3\approx2{,}1$ e $2\pi\approx6{,}3$; e $2\pi/\sqrt3\approx3{,}6$ ci sta. Un controllo così costa dieci secondi e salva un esercizio.</p>`}
+  ]},
+  {t:'reveal', title:'(c) Con $e^{ikx}$: il lemma di Jordan e il trabocchetto del semipiano', tag:'sottotipo C — il più insidioso', steps:[
+   {label:'Il lemma di Jordan', body:R`<p>Se $f(z)\to0$ uniformemente sull&rsquo;arco quando $R\to\infty$ (basta $|f|\le M/R^{\alpha}$, $\alpha\gt0$: <b>più debole</b> di quanto serve nel sottotipo (a)), allora per $k\gt0$
+   $$\int_{C_R^{+}}f(z)e^{ikz}\,dz\to0\quad\text{(arco nel semipiano SUPERIORE).}$$
+   Il motivo è che $|e^{ikz}|=e^{-k\,\mathrm{Im}\,z}$: se $k\gt0$ e $\mathrm{Im}\,z\gt0$, il fattore è <b>esponenzialmente piccolo</b> e schiaccia l&rsquo;arco. Nel semipiano <b>inferiore</b> lo stesso fattore <b>esplode</b>.</p>`},
+   {label:'Il trabocchetto, detto esplicitamente', body:R`<div class="note warn"><b>La regola da non sbagliare:</b> $e^{ikx}$ con $k\gt0$ $\Rightarrow$ si chiude <b>SOPRA</b> (residui con $\mathrm{Im}\,z_j\gt0$). Con $k\lt0$ $\Rightarrow$ si chiude <b>SOTTO</b>, e poiché il contorno inferiore si percorre in senso <b>orario</b> compare un segno meno: $\int=-2\pi i\sum_{\mathrm{Im}\,z_j\lt0}\mathrm{Res}$. Chiudere dalla parte sbagliata è l&rsquo;errore più comune dell&rsquo;intero corso: l&rsquo;arco non svanisce affatto, e il risultato è privo di senso (spesso esce con segno o parte immaginaria errati).</div>
+   <p>Nota pratica: per $\int f(x)\cos kx\,dx$ e $\int f(x)\sin kx\,dx$ si calcola $\int f(x)e^{ikx}dx$ e si prende alla fine parte reale o immaginaria. <b>Non</b> si sostituisce $\cos kz=\frac{e^{ikz}+e^{-ikz}}{2}$ dentro il contorno: i due esponenziali vogliono semipiani <b>opposti</b>, e il conto va in pezzi.</p>`},
+   {label:'Esempio: $\\int_{-\\infty}^{+\\infty}\\frac{\\cos x}{x^2+1}dx$', body:R`<p>Si calcola $\displaystyle\int\frac{e^{ix}}{x^2+1}dx$ ($k=1\gt0$: si chiude sopra). Unico polo superiore: $z=i$, con $\mathrm{Res}=\frac{e^{i\cdot i}}{2i}=\frac{e^{-1}}{2i}$. Quindi l&rsquo;integrale vale $2\pi i\cdot\frac{e^{-1}}{2i}=\frac{\pi}{e}$, che è già reale; prendendo la parte reale:
+   $$\int_{-\infty}^{+\infty}\frac{\cos x}{x^2+1}dx=\frac{\pi}{e}.\qquad\blacksquare$$
+   (La parte immaginaria, nulla, dà anche $\int\frac{\sin x}{x^2+1}dx=0$ — corretto, l&rsquo;integrando è dispari.)</p>`}
+  ]},
+  {t:'reveal', title:'(d) Con tagli: il contorno a buco della serratura', tag:'sottotipo D', steps:[
+   {label:'Quando serve', body:R`<p>Quando l&rsquo;integrando contiene una funzione <b>polidroma</b> — tipicamente $x^{\alpha}$ con $\alpha$ non intero, o $\log x$ — e l&rsquo;integrale è su $[0,+\infty)$. Si sceglie il taglio <b>lungo il semiasse reale positivo</b> (cioè $\arg z\in(0,2\pi)$), e il contorno &laquo;keyhole&raquo;: si va da $\varepsilon$ a $R$ appena <b>sopra</b> il taglio, un cerchione di raggio $R$, ritorno da $R$ a $\varepsilon$ appena <b>sotto</b>, e un cerchietto di raggio $\varepsilon$ attorno all&rsquo;origine.</p>`},
+   {label:'Il meccanismo: i due lati non si cancellano', body:R`<p>Sopra il taglio $\arg z=0$ e l&rsquo;integrando vale $f(x)$; sotto, $\arg z=2\pi$ e vale $f(x)e^{2\pi i\alpha}$ (per $z^{\alpha-1}$). Percorrendo il ritorno in verso opposto, i due tratti danno
+   $$\big(1-e^{2\pi i\alpha}\big)\int_0^{\infty}f(x)\,dx=2\pi i\sum\mathrm{Res},$$
+   perché i due cerchi svaniscono ($R\to\infty$ e $\varepsilon\to0$, da verificare con ML). <b>È proprio la polidromia a rendere possibile il calcolo</b>: se la funzione fosse monodroma i due lati si cancellerebbero e resterebbe $0=0$.</p>`},
+   {label:'Esempio: $\\int_0^{\\infty}\\frac{x^{\\alpha-1}}{1+x}dx$, $0\\lt\\alpha\\lt1$', body:R`<p>Unico polo in $z=-1=e^{i\pi}$, con $\mathrm{Res}=(e^{i\pi})^{\alpha-1}=e^{i\pi(\alpha-1)}=-e^{i\pi\alpha}$. Quindi
+   $$\big(1-e^{2\pi i\alpha}\big)I=2\pi i\big(-e^{i\pi\alpha}\big)\ \Longrightarrow\ I=\frac{-2\pi i\,e^{i\pi\alpha}}{1-e^{2\pi i\alpha}}=\frac{2\pi i}{e^{i\pi\alpha}-e^{-i\pi\alpha}}=\frac{2\pi i}{2i\sin\pi\alpha}=\frac{\pi}{\sin\pi\alpha}.$$
+   (Al penultimo passaggio si è diviso numeratore e denominatore per $e^{i\pi\alpha}$.) $\blacksquare$</p>
+   <div class="note">Il risultato $\dfrac{\pi}{\sin\pi\alpha}$ è la <b>formula di riflessione</b> $\Gamma(\alpha)\Gamma(1-\alpha)=\frac{\pi}{\sin\pi\alpha}$ — la ritroverai nel nucleo 14. Un integrale reale, un contorno, e ne esce un&rsquo;identità fra funzioni speciali.</div>`}
+  ]},
+  {t:'plot', title:'Il contorno keyhole del sottotipo (d)',
+   intro:R`Taglio sul semiasse reale positivo. Il cammino corre <b>sopra</b> il taglio verso destra e <b>sotto</b> tornando: i due tratti non si cancellano perché la determinazione è cambiata di $e^{2\pi i\alpha}$.`,
+   plots:[
+    {kind:'func2d', xr:[-2.3,2.3], yr:[-2,2], equal:true, height:360, ticks:false,
+     title:'keyhole: cerchio grande R, cerchietto eps, due lati del taglio',
+     curves:[{f:'0*x', col:'#0e1117', width:0.1}],
+     rings:[{r:1.75, col:'#b98cff', width:2.4, label:'C_R'},
+            {r:0.28, col:'#5eead4', width:2, label:'C_eps'}],
+     segs:[{x1:0.28, y1:0.13, x2:1.74, y2:0.13, col:'#ff9b6b', width:2.6, arrow:true, label:'sopra il taglio: arg=0', lx:1.0, ly:0.42},
+           {x1:1.74, y1:-0.13, x2:0.28, y2:-0.13, col:'#ff6b6b', width:2.6, arrow:true, label:'sotto: arg=2 pi', lx:1.0, ly:-0.45},
+           {x1:0.28, y1:0, x2:2.25, y2:0, col:'#d8a13a', width:1.2, dash:true}],
+     marks:[{x:-1, y:0, label:'polo z=-1', col:'#4c8dff', up:true, left:true},
+            {x:0, y:0, col:'#ff9b6b', hollow:true}]}
+   ],
+   leggi:R`I quattro pezzi del cammino chiuso: il cerchio grande $C_R$ (viola), il cerchietto $C_\varepsilon$ attorno al punto di diramazione (verde), e i <b>due lati del taglio</b> (arancione sopra, rosso sotto) che nel disegno sono separati per chiarezza ma nel limite coincidono col semiasse reale positivo (tratteggiato oro). <b>La chiave sta tutta lì:</b> geometricamente i due tratti sono lo stesso segmento percorso avanti e indietro, e per una funzione monodroma darebbero somma nulla; ma la funzione polidroma vale $f(x)$ sopra e $f(x)e^{2\pi i\alpha}$ sotto, quindi la loro somma è $\big(1-e^{2\pi i\alpha}\big)\int_0^\infty f$ — non zero, ed è ciò che si calcola. I due cerchi svaniscono per ML, purché $0\lt\alpha\lt1$: se $\alpha$ esce da quell&rsquo;intervallo l&rsquo;integrale reale stesso diverge, e la condizione di convergenza e quella di svanimento coincidono — non è un caso.`}
+]},
+
+/* ---------------- 04 · POLI SULL'ASSE ---------------- */
+{ num:'04', title:'Poli sull’asse reale: valore principale e mezzo residuo', meta:'il caso $\\int\\frac{\\sin x}{x}dx$ · rientranza semicircolare · la regola del mezzo giro',
+  blocchi:[
+  {t:'prosa', title:'Il problema, e la deviazione che lo risolve', tag:'costruzione', html:R`
+  <p>Se una singolarità sta <b>sul</b> cammino, l&rsquo;integrale non esiste nel senso ordinario. Si definisce allora il <b>valore principale</b> di Cauchy, che elimina simmetricamente un intorno del polo:
+  $$\mathrm{P}\!\!\int_{-\infty}^{+\infty}f(x)\,dx:=\lim_{\varepsilon\to0^+}\left(\int_{-\infty}^{x_0-\varepsilon}+\int_{x_0+\varepsilon}^{+\infty}\right)f(x)\,dx.$$
+  Nel contorno, il polo si aggira con una <b>rientranza semicircolare</b> di raggio $\varepsilon$. Il contributo di quel semicerchio non svanisce: vale <b>metà</b> del giro completo.</p>
+  <p><b>Regola del mezzo residuo.</b> Per un polo <b>semplice</b> in $x_0$, il semicerchio percorso in senso antiorario contribuisce $+i\pi\,\mathrm{Res}(f,x_0)$ (orario: $-i\pi\,\mathrm{Res}$). Da qui la formula d&rsquo;uso, quando si chiude sopra:
+  $$\mathrm{P}\!\!\int_{-\infty}^{+\infty}f=2\pi i\!\!\sum_{\mathrm{Im}\,z_j\gt0}\!\!\mathrm{Res}+\pi i\!\!\sum_{x_j\in\mathbb{R}}\!\!\mathrm{Res}.$$
+  <b>Vale solo per poli semplici</b>: con un polo doppio sull&rsquo;asse la rientranza diverge e il valore principale non esiste.</p>`},
+  {t:'esercizio', title:'L’integrale di Dirichlet: $\\int_0^{\\infty}\\frac{\\sin x}{x}dx=\\frac{\\pi}{2}$',
+   src:'classico assoluto — chiesto in ogni forma',
+   testo:R`Calcolare $\displaystyle\int_0^{+\infty}\frac{\sin x}{x}\,dx$ con il metodo dei residui.`,
+   steps:[
+    {label:'Prepara: passa all’esponenziale e simmetrizza', body:R`<p>L&rsquo;integrando è pari, quindi $\int_0^\infty\frac{\sin x}{x}=\frac12\int_{-\infty}^{+\infty}\frac{\sin x}{x}dx=\frac12\,\mathrm{Im}\,\mathrm{P}\!\!\int_{-\infty}^{+\infty}\frac{e^{ix}}{x}dx$. Nota che $\frac{\sin x}{x}$ è regolare in $0$ (singolarità eliminabile), ma $\frac{e^{ix}}{x}$ ha un <b>polo semplice</b> in $0$: da qui il valore principale.</p>`},
+    {label:'Il contorno', body:R`<p>$k=1\gt0$: si chiude <b>sopra</b>, con una rientranza semicircolare che scavalca l&rsquo;origine. Dentro il contorno <b>non c&rsquo;è nessun polo</b>: $e^{iz}/z$ è olomorfa lì. Quindi l&rsquo;integrale sul cammino chiuso è $0$, e per Jordan l&rsquo;arco grande svanisce.</p>`},
+    {label:'Il conto', body:R`<p>Restano il valore principale e la rientranza. La rientranza, percorsa in senso <b>orario</b> (il contorno la scavalca da sopra), dà $-i\pi\,\mathrm{Res}\left(\frac{e^{iz}}{z},0\right)=-i\pi\cdot1$. Dunque
+    $$0=\mathrm{P}\!\!\int_{-\infty}^{+\infty}\frac{e^{ix}}{x}dx-i\pi\ \Longrightarrow\ \mathrm{P}\!\!\int_{-\infty}^{+\infty}\frac{e^{ix}}{x}dx=i\pi.$$
+    Parte immaginaria: $\int_{-\infty}^{+\infty}\frac{\sin x}{x}dx=\pi$, quindi
+    $$\int_0^{+\infty}\frac{\sin x}{x}\,dx=\frac{\pi}{2}.\qquad\blacksquare$$</p>
+    <div class="note">La parte <b>reale</b> dà anche $\mathrm{P}\!\int\frac{\cos x}{x}dx=0$, corretto perché l&rsquo;integrando è dispari. Due risultati al prezzo di uno: è il vantaggio di lavorare con l&rsquo;esponenziale invece che con seno e coseno separati.</div>`}
+   ],
+   nota:R`Da ricordare a memoria, perché è il modello di una famiglia intera: <b>polo semplice sull&rsquo;asse ⇒ mezzo residuo</b>; e il segno dipende da come la rientranza aggira il polo (dentro o fuori dal contorno). Disegnare il cammino, sempre — l&rsquo;errore di segno nasce dal non disegnarlo.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la rientranza dà <b>metà</b> del residuo, e non un altro frazionamento?`,
+    a:R`Perché vicino a un polo semplice $f\approx\frac{a_{-1}}{z-x_0}$, e su un arco di ampiezza angolare $\theta$ di raggio $\varepsilon$ si ha $\int\frac{a_{-1}}{z-x_0}dz=a_{-1}\int i\,d\vartheta=i\theta a_{-1}$, indipendente da $\varepsilon$. Per il semicerchio $\theta=\pi$, quindi $i\pi a_{-1}$: <b>la frazione di residuo è la frazione di angolo giro</b>. Per un polo di ordine $\ge2$ questo argomento fallisce (compaiono potenze $\varepsilon^{-1}$ che divergono) — ed è la ragione per cui la regola vale solo per poli semplici.`},
+   {q:R`In fisica, cosa distingue $\frac{1}{x-x_0+i\epsilon}$ dal valore principale?`,
+    a:R`L&rsquo;identità di Sokhotski&ndash;Plemelj: $\frac{1}{x-x_0\pm i\epsilon}=\mathrm{P}\frac{1}{x-x_0}\mp i\pi\delta(x-x_0)$. Spostare il polo di $\pm i\epsilon$ invece di aggirarlo dà lo stesso valore principale <b>più</b> un termine di delta — e quel termine è fisica pura: è la <b>regola d&rsquo;oro di Fermi</b>, il tasso di transizione, la parte dissipativa della risposta. La scelta del segno di $\epsilon$ è la scelta della prescrizione causale (nucleo 12). Nel nucleo 15 la $\delta$ diventa un oggetto rigoroso e questa identità un teorema sulle distribuzioni.`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'uno per sottotipo, con la scelta del contorno da motivare',
+  blocchi:[
+  {t:'esercizio', title:'(a) $\\int_{-\\infty}^{+\\infty}\\frac{x^2}{(x^2+1)(x^2+4)}dx$',
+   src:'esercizio guidato — sottotipo A',
+   testo:R`Calcolare $\displaystyle\int_{-\infty}^{+\infty}\frac{x^2\,dx}{(x^2+1)(x^2+4)}$.`,
+   steps:[
+    {label:'Ammissibilità e poli', body:R`<p>$\deg Q=4\ge\deg P+2=4$: l&rsquo;arco svanisce (ML dà $\sim\pi R\cdot R^2/R^4\to0$). Poli superiori: $z=i$ e $z=2i$, entrambi semplici.</p>`},
+    {label:'I due residui', body:R`<p>In $z=i$: $\ \dfrac{z^2}{(z+i)(z^2+4)}\Big|_{i}=\dfrac{-1}{2i\cdot3}=\dfrac{-1}{6i}=\dfrac{i}{6}$.</p>
+    <p>In $z=2i$: $\ \dfrac{z^2}{(z^2+1)(z+2i)}\Big|_{2i}=\dfrac{-4}{(-3)(4i)}=\dfrac{-4}{-12i}=\dfrac{1}{3i}=-\dfrac{i}{3}$.</p>`},
+    {label:'Somma', body:R`<p>$\sum\mathrm{Res}=\dfrac{i}{6}-\dfrac{i}{3}=-\dfrac{i}{6}$, quindi
+    $$I=2\pi i\left(-\frac{i}{6}\right)=\frac{\pi}{3}.\qquad\blacksquare$$
+    Reale e positivo: coerente con un integrando positivo. $\ \pi/3\approx1{,}05$, plausibile.</p>`}
+   ]},
+  {t:'esercizio', title:'(c) $\\int_{-\\infty}^{+\\infty}\\frac{x\\sin x}{x^2+4}dx$ — attenzione al semipiano',
+   src:'esercizio guidato — sottotipo C',
+   testo:R`Calcolare $\displaystyle\int_{-\infty}^{+\infty}\frac{x\sin x}{x^2+4}\,dx$, motivando la scelta del contorno.`,
+   steps:[
+    {label:'Prepara', body:R`<p>Considera $\displaystyle\int\frac{z\,e^{iz}}{z^2+4}dz$ e prendi alla fine la <b>parte immaginaria</b>. Qui $k=1\gt0$, quindi si chiude nel semipiano <b>superiore</b>. Nota che $\frac{z}{z^2+4}\sim\frac1R\to0$ sull&rsquo;arco: Jordan si applica (la condizione è più debole che nel sottotipo (a), e infatti qui $\deg Q=\deg P+1$).</p>`},
+    {label:'Residuo', body:R`<p>Unico polo superiore: $z=2i$. Con la formula del quoziente su $\frac{ze^{iz}}{z^2+4}$: $\ \mathrm{Res}=\dfrac{z e^{iz}}{2z}\Big|_{2i}=\dfrac{e^{i(2i)}}{2}=\dfrac{e^{-2}}{2}$.</p>`},
+    {label:'Conclusione', body:R`<p>$\displaystyle\int\frac{xe^{ix}}{x^2+4}dx=2\pi i\cdot\frac{e^{-2}}{2}=i\pi e^{-2}$, la cui parte immaginaria è
+    $$\int_{-\infty}^{+\infty}\frac{x\sin x}{x^2+4}dx=\frac{\pi}{e^{2}}.\qquad\blacksquare$$
+    (La parte reale, nulla, dice $\mathrm{P}\!\int\frac{x\cos x}{x^2+4}dx=0$: giusto, integrando dispari.)</p>
+    <div class="note warn">Se avessi chiuso <b>sotto</b>: l&rsquo;arco con $|e^{iz}|=e^{-\mathrm{Im}\,z}$ <b>esplode</b> nel semipiano inferiore, il lemma di Jordan non vale, e il conto — pur producendo un numero — sarebbe privo di giustificazione e sbagliato di segno. La scelta del semipiano si <b>motiva sempre per iscritto</b>: è il punto in cui il correttore verifica che hai capito.</div>`}
+   ]},
+  {t:'collaudo', title:'Diagnostica rapida — scegli il contorno senza calcolare', items:[
+   {q:R`$\int_0^{2\pi}\frac{\cos 3\theta}{5-4\cos\theta}d\theta$: quale sottotipo, e quale sostituzione?`,
+    a:R`Sottotipo <b>(b)</b>: $z=e^{i\theta}$ sul cerchio unitario. Il numeratore diventa $\cos3\theta=\frac{z^3+z^{-3}}{2}$; conviene calcolare $\oint\frac{z^3}{\dots}\frac{dz}{iz}$ e prendere la parte reale (oppure sfruttare la simmetria $z\to1/z$). Il denominatore $5-2(z+z^{-1})$ ha radici $z=2$ e $z=1/2$: solo $1/2$ è dentro. <b>Attenzione</b>: il termine $z^{-3}$ crea un polo di ordine alto nell&rsquo;origine, quindi conviene la via &laquo;parte reale di $z^3$&raquo; invece di espandere entrambi.`},
+   {q:R`$\int_{-\infty}^{+\infty}\frac{e^{-2ix}}{x^2+x+1}dx$: sopra o sotto?`,
+    a:R`<b>Sotto</b>: $k=-2\lt0$, quindi $|e^{-2iz}|=e^{2\,\mathrm{Im}\,z}$ è piccolo dove $\mathrm{Im}\,z\lt0$. Si chiude nel semipiano inferiore, il contorno risulta percorso in senso <b>orario</b> e l&rsquo;integrale vale $-2\pi i\,\mathrm{Res}$ nel polo con parte immaginaria negativa (le radici sono $\frac{-1\pm i\sqrt3}{2}$: si prende quella con il $-$). Il segno meno davanti è parte della risposta, non un dettaglio.`}
+  ]}
+]},
+
+/* ---------------- 06 · SENSO E ROTTE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'ogni polo è un modo, ogni residuo la sua ampiezza',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il teorema dei residui è la contabilità di ciò che il nucleo 12 aveva già stabilito: l&rsquo;integrale su una chiusa dipende solo da quali buchi si circondano, e ogni buco contribuisce col suo $a_{-1}$. La polidromia del nucleo 11 diventa qui la tecnica dei contorni con taglio.</p>
+  <p><b>Il punto, in una frase riusabile:</b> <i>ogni polo è un modo, il residuo è la sua ampiezza, la scelta del contorno è la scelta di quali modi contano</i>. Questa frase, che qui è una regola di calcolo, in fisica diventa letterale: i poli di un propagatore sono gli stati, quelli di una funzione di risposta sono le risonanze, e chiudere il contorno da una parte o dall&rsquo;altra è scegliere la causalità.</p>
+  <p><b>A valle.</b> Il nucleo 14 mostra che la stessa macchina produce identità fra funzioni speciali; il nucleo 15 la usa per antitrasformare Fourier e costruire funzioni di Green.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>Il teorema dei residui</b>: $\oint f=2\pi i\sum\mathrm{Res}$, con la scelta del contorno come scelta fisica.`,
+   rotte:[
+    {dove:'Propagatori e<br>funzioni di Green', txt:R`Antitrasformare $\tilde G(\omega)=\frac{1}{\omega^2-\omega_0^2+i\epsilon}$ significa chiudere il contorno nel semipiano scelto dal <b>segno di $t$</b>: per $t\gt0$ sopra, per $t\lt0$ sotto. Il risultato è la Green ritardata — la risposta che arriva <b>dopo</b> lo stimolo. La causalità è, operativamente, un lemma di Jordan.`},
+    {dove:'Risonanze e<br>tempi di vita', txt:R`Un polo in $\omega=\omega_0-i\Gamma/2$ dà, antitrasformando, un fattore $e^{-i\omega_0t}e^{-\Gamma t/2}$: la <b>parte immaginaria del polo è l&rsquo;inverso del tempo di vita</b>. Una lorentziana misurata in laboratorio è un polo nel piano complesso, e la sua larghezza è la sua distanza dall&rsquo;asse reale.`},
+    {dove:'Meccanica statistica<br>a $T$ finita', txt:R`Le <b>somme di Matsubara</b> $\sum_n g(i\omega_n)$ sulle frequenze immaginarie si calcolano come somme di residui: si introduce una funzione con poli proprio in $i\omega_n$ (la distribuzione di Bose o Fermi) e si deforma il contorno. Un formalismo intero costruito su questo nucleo.`},
+    {dove:'Metodo del punto<br>di sella', txt:R`Per integrali con esponenziale grande si <b>deforma</b> il cammino fino a farlo passare per un punto stazionario, lungo la direzione di massima discesa. È la libertà di deformazione di questo nucleo, usata per l&rsquo;approssimazione asintotica: da lì nascono Stirling, WKB, e l&rsquo;approssimazione di sella dell&rsquo;integrale sui cammini.`}
+   ],
+   domanda:R`I poli di una funzione di risposta danno i <b>tempi di rilassamento</b> di un sistema: un polo vicino all&rsquo;asse reale è un modo che decade lentamente, uno lontano è un modo che muore subito. Per un sistema quantistico <b>chiuso e finito</b>, però, lo spettro è discreto e reale: nessun polo fuori asse, nessun decadimento vero — l&rsquo;evoluzione è quasi-periodica e a tempi enormi (Poincaré) il sistema <i>torna indietro</i>. <b>Domanda che porti avanti:</b> il decadimento che misuriamo è allora una proprietà di quali poli sono <i>effettivamente</i> rilevanti su tempi osservabili, cioè di come i residui si distribuiscono su uno spettro fittissimo. Studiare la decoerenza e l&rsquo;ETH significa, in questo linguaggio, chiedersi <b>quando una selva di poli reali imita un unico polo complesso</b> — e su che scala di tempi la finzione regge.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo13-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 13 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 13-residui.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

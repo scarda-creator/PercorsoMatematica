@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 16 — Operatori, teorema spettrale, Sturm–Liouville e Green spettrale</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento IV · Nucleo <b>16 — Operatori autoaggiunti, teorema spettrale, Sturm–Liouville, Green via spettro</b> · Metodi · peso d’esame ALTO</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 16: Operatori e teoria spettrale <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'Metodi · «spettro» compare in 19 scritti su 19 · e il trabocchetto dei proiettori con autovettori non ortonormali',
+  blocchi:[
+  {t:'prosa', title:'Dove converge tutto il percorso', tag:'first principles', html:R`
+  <p>Nel nucleo 09 la base ortonormale era data (le armoniche di Fourier). Qui si capisce <b>da dove viene una base</b>: non si sceglie, si <b>trova</b> — è la base degli autovettori dell&rsquo;operatore che governa il problema. Fourier funziona sulle EDP a coefficienti costanti perché $e^{ikx}$ sono le autofunzioni di $d^2/dx^2$; cambia l&rsquo;operatore e cambia la base giusta (Legendre, Bessel, Hermite: tutte autofunzioni di qualche operatore).</p>
+  <p>Il teorema che rende questo possibile è il <b>teorema spettrale</b>: un operatore <b>autoaggiunto</b> ha autovalori <b>reali</b> e una base <b>ortonormale</b> di autovettori, e si scrive come somma pesata di <b>proiettori</b>. In meccanica quantistica non è un teorema di servizio: è la struttura stessa della teoria — osservabili = operatori autoaggiunti, valori misurabili = spettro, probabilità = proiezioni.</p>
+  <div class="note warn"><b>Calibrazione d&rsquo;esame.</b> Lo scheletro del percorso marcava questo nucleo come approfondimento, ma la mappa degli scritti dice <b>&laquo;spettro di operatori: 19 su 19&raquo;</b>, con il trabocchetto dei <b>proiettori costruiti su autovettori non ortonormali</b>. È materia centrale, ed è scritta qui come tale.</div>`}
+]},
+
+/* ---------------- 01 · OPERATORI E AGGIUNTO ---------------- */
+{ num:'01', title:'Operatori, aggiunto, autoaggiunto', meta:'$\\langle Af,g\\rangle=\\langle f,A^\\dagger g\\rangle$ · autovalori reali · autovettori ortogonali',
+  blocchi:[
+  {t:'prosa', title:'Le definizioni, e cosa forzano', tag:'grammatica', html:R`
+  <p>Sia $H$ uno spazio di Hilbert (nucleo 09) e $A:H\to H$ lineare. L&rsquo;<b>aggiunto</b> $A^\dagger$ è definito da
+  $$\langle Af,g\rangle=\langle f,A^\dagger g\rangle\qquad\forall f,g.$$
+  $A$ è <b>autoaggiunto</b> (hermitiano) se $A=A^\dagger$. In dimensione finita: matrice uguale alla propria trasposta coniugata. In dimensione infinita c&rsquo;è una sottigliezza che conta — <b>autoaggiunto</b> richiede anche che i domini coincidano; un operatore solo &laquo;simmetrico&raquo; può non esserlo, e le <b>condizioni al bordo</b> fanno parte della definizione dell&rsquo;operatore, non sono un accessorio.</p>
+  <p>Due conseguenze immediate, ed è per queste che la fisica usa proprio questi operatori:</p>
+  <ul>
+  <li><b>Autovalori reali:</b> da $A\phi=\lambda\phi$ segue $\lambda\lVert\phi\rVert^2=\langle A\phi,\phi\rangle=\langle\phi,A\phi\rangle=\bar\lambda\lVert\phi\rVert^2$, quindi $\lambda=\bar\lambda$. <b>I risultati di una misura sono numeri reali</b> perché le osservabili sono autoaggiunte.</li>
+  <li><b>Autovettori di autovalori distinti sono ortogonali:</b> $\lambda\langle\phi,\psi\rangle=\langle A\phi,\psi\rangle=\langle\phi,A\psi\rangle=\mu\langle\phi,\psi\rangle$, e se $\lambda\ne\mu$ resta $\langle\phi,\psi\rangle=0$. <b>Stati con esiti di misura diversi sono perfettamente distinguibili.</b></li>
+  </ul>
+  <div class="note">Nota sull&rsquo;<b>unitario</b>: $U^\dagger U=\mathbb{1}$, cioè $U$ conserva il prodotto scalare. L&rsquo;evoluzione temporale $e^{-iHt/\hbar}$ è unitaria <b>perché</b> $H$ è autoaggiunto — la conservazione della probabilità (Parseval, nucleo 09) è l&rsquo;unitarietà. Autoaggiunto e unitario stanno fra loro come reale e di modulo uno.</div>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$-i\frac{d}{dx}$ su $[0,L]$: è autoaggiunto?`,
+    a:R`<b>Dipende dalle condizioni al bordo</b>, ed è tutto il punto. Integrando per parti, $\langle -i f',g\rangle-\langle f,-ig'\rangle=-i\big[f\bar g\big]_0^L$: l&rsquo;operatore è autoaggiunto solo se quel termine di bordo si annulla, per esempio con condizioni <b>periodiche</b> $f(0)=f(L)$. Con Dirichlet $f(0)=f(L)=0$ l&rsquo;operatore è simmetrico ma <b>non</b> autoaggiunto (i domini di $A$ e $A^\dagger$ differiscono) e non ha autovettori. È la ragione per cui &laquo;l&rsquo;impulso in una scatola&raquo; è un oggetto delicato, mentre l&rsquo;energia no.`},
+   {q:R`Un operatore con autovalori reali è necessariamente autoaggiunto?`,
+    a:R`No. $\begin{pmatrix}1&1\\0&2\end{pmatrix}$ ha autovalori $1,2$ reali ma non è simmetrica, e i suoi autovettori <b>non</b> sono ortogonali. È esattamente la situazione del trabocchetto della tappa 02: si può diagonalizzare, ma non con una base ortonormale — e i proiettori spettrali <b>non</b> sono $|v\rangle\langle v|$.`}
+  ]}
+]},
+
+/* ---------------- 02 · TEOREMA SPETTRALE ---------------- */
+{ num:'02', title:'Il teorema spettrale e i proiettori', meta:'$A=\\sum\\lambda_nP_n$ · funzioni di operatori · TRABOCCHETTO: autovettori non ortonormali',
+  blocchi:[
+  {t:'prosa', title:'Enunciato e uso', tag:'il teorema', html:R`
+  <p><b>Teorema spettrale (caso con spettro discreto).</b> Se $A$ è autoaggiunto (e compatto, o con risolvente compatto — è il caso dei problemi ai limiti su domini limitati), esiste una <b>base ortonormale</b> $\{\phi_n\}$ di $H$ fatta di autovettori, $A\phi_n=\lambda_n\phi_n$ con $\lambda_n\in\mathbb{R}$, e
+  $$A=\sum_n\lambda_n P_n,\qquad P_n=|\phi_n\rangle\langle\phi_n|,\qquad P_nP_m=\delta_{nm}P_n,\qquad \sum_nP_n=\mathbb{1}.$$
+  In pratica: nella base giusta $A$ è <b>diagonale</b>, e agisce su ogni componente moltiplicandola per $\lambda_n$.</p>
+  <p><b>Perché è potente:</b> permette di definire <b>funzioni di operatori</b>. Se $f$ è una funzione ordinaria,
+  $$f(A):=\sum_n f(\lambda_n)\,P_n.$$
+  Da qui $e^{-iHt/\hbar}=\sum_ne^{-iE_nt/\hbar}P_n$ (l&rsquo;evoluzione quantistica), $e^{-\beta H}$ (il peso di Boltzmann), $A^{-1}=\sum\lambda_n^{-1}P_n$ (la funzione di Green, tappa 04). <b>Nella base spettrale ogni funzione dell&rsquo;operatore è banale</b>: agisce numero per numero.</p>
+  <p>Quando lo spettro non è discreto (l&rsquo;operatore posizione, l&rsquo;hamiltoniana libera) la somma diventa un integrale su una <b>misura spettrale</b>: gli &laquo;autovettori&raquo; non stanno nello spazio (le onde piane non sono normalizzabili) e vivono nelle distribuzioni del nucleo 15. La struttura resta la stessa.</p>`},
+  {t:'reveal', title:'Il trabocchetto: proiettori con autovettori NON ortonormali', tag:'errore d’esame n.2', steps:[
+   {label:'Il caso buono', body:R`<p>Se gli autovettori sono ortonormali ($\langle v_i,v_j\rangle=\delta_{ij}$), allora $P_n=|v_n\rangle\langle v_n|$ e tutto funziona: $P_n^2=P_n$, $P_nP_m=0$, $\sum P_n=\mathbb{1}$.</p>`},
+   {label:'Il caso in cui la formula è FALSA', body:R`<div class="note warn">Se l&rsquo;operatore <b>non</b> è autoaggiunto, gli autovettori in generale <b>non sono ortogonali</b>, e $|v_n\rangle\langle v_n|$ <b>non è il proiettore spettrale</b>: non è nemmeno idempotente nella direzione giusta, e la somma non fa l&rsquo;identità. Applicare la formula per abitudine è l&rsquo;errore n.2 segnalato negli scritti.</div>
+   <p>La via corretta è il <b>cambio di base esplicito</b>. Se $S$ è la matrice che ha per colonne gli autovettori $v_n$, allora $A=S\Lambda S^{-1}$ e
+   $$P_n=S\,E_{nn}\,S^{-1},$$
+   con $E_{nn}$ la matrice che ha $1$ nel posto $(n,n)$ e $0$ altrove. Equivalentemente si introduce la <b>base duale</b> (biortogonale) $\{w_n\}$, le righe di $S^{-1}$, con $\langle w_i,v_j\rangle=\delta_{ij}$, e allora
+   $$P_n=|v_n\rangle\langle w_n|\qquad\text{— autovettore a destra, DUALE a sinistra.}$$</p>`},
+   {label:'Esempio minimo da tenere a mente', body:R`<p>$A=\begin{pmatrix}1&1\\0&2\end{pmatrix}$: autovalori $1,2$; autovettori $v_1=\binom{1}{0}$, $v_2=\binom{1}{1}$ — <b>non ortogonali</b>. La formula sbagliata darebbe $|v_2\rangle\langle v_2|=\begin{pmatrix}1&1\\1&1\end{pmatrix}$, che non è nemmeno idempotente ($P^2=2P$). Con $S=\begin{pmatrix}1&1\\0&1\end{pmatrix}$, $S^{-1}=\begin{pmatrix}1&-1\\0&1\end{pmatrix}$, i proiettori corretti sono
+   $$P_1=\begin{pmatrix}1&-1\\0&0\end{pmatrix},\qquad P_2=\begin{pmatrix}0&1\\0&1\end{pmatrix},$$
+   che verificano $P_1+P_2=\mathbb{1}$, $P_i^2=P_i$, $P_1P_2=0$ e $A=1\cdot P_1+2\cdot P_2$. $\blacksquare$ <b>Nota che non sono simmetrici</b>: sono proiettori <b>obliqui</b>, e va bene così — la proiezione ortogonale del nucleo 09 esiste solo quando la base lo è.</p>`}
+  ]},
+  {t:'plot', title:'Lo spettro come insieme di punti — e la firma del caos',
+   intro:R`Lo spettro di un operatore è un insieme di numeri reali su una retta. <b>Come sono spaziati</b> è un&rsquo;informazione fisica: due sistemi con la stessa densità di livelli possono avere statistiche di spaziatura opposte.`,
+   plots:[
+    {kind:'func2d', xr:[0,10], yr:[-1.5,1.5], height:280, ticks:false,
+     title:'sopra: livelli di un sistema integrabile - sotto: caotico (repulsione)',
+     curves:[{f:'0*x-9', col:'#0e1117', width:0.1}],
+     segs:[{x1:0.2, y1:0.6, x2:9.8, y2:0.6, col:'#4d5a6b', width:1.2},
+           {x1:0.2, y1:-0.6, x2:9.8, y2:-0.6, col:'#4d5a6b', width:1.2},
+           {x1:0.2, y1:1.15, x2:0.2, y2:1.15, col:'#5eead4', label:'integrabile: livelli che si accalcano e si incrociano', lx:4.6, ly:1.15},
+           {x1:0.2, y1:-1.25, x2:0.2, y2:-1.25, col:'#b98cff', label:'caotico: livelli che si respingono (spaziature regolari)', lx:4.6, ly:-1.25}],
+     marks:[{x:0.6,y:0.6,col:'#5eead4'},{x:0.75,y:0.6,col:'#5eead4'},{x:1.9,y:0.6,col:'#5eead4'},
+            {x:2.05,y:0.6,col:'#5eead4'},{x:2.12,y:0.6,col:'#5eead4'},{x:3.8,y:0.6,col:'#5eead4'},
+            {x:4.6,y:0.6,col:'#5eead4'},{x:4.7,y:0.6,col:'#5eead4'},{x:6.2,y:0.6,col:'#5eead4'},
+            {x:6.9,y:0.6,col:'#5eead4'},{x:7.0,y:0.6,col:'#5eead4'},{x:8.5,y:0.6,col:'#5eead4'},
+            {x:9.3,y:0.6,col:'#5eead4'},{x:9.45,y:0.6,col:'#5eead4'},
+            {x:0.7,y:-0.6,col:'#b98cff'},{x:1.5,y:-0.6,col:'#b98cff'},{x:2.35,y:-0.6,col:'#b98cff'},
+            {x:3.0,y:-0.6,col:'#b98cff'},{x:3.75,y:-0.6,col:'#b98cff'},{x:4.55,y:-0.6,col:'#b98cff'},
+            {x:5.2,y:-0.6,col:'#b98cff'},{x:6.0,y:-0.6,col:'#b98cff'},{x:6.75,y:-0.6,col:'#b98cff'},
+            {x:7.4,y:-0.6,col:'#b98cff'},{x:8.2,y:-0.6,col:'#b98cff'},{x:8.95,y:-0.6,col:'#b98cff'},
+            {x:9.6,y:-0.6,col:'#b98cff'}]}
+   ],
+   leggi:R`Le due righe hanno <b>lo stesso numero di livelli nello stesso intervallo</b> — stessa densità media — ma una statistica di spaziatura completamente diversa. Sopra i livelli si <b>accalcano</b> a coppie e lasciano vuoti: è la firma di un sistema <b>integrabile</b>, dove i livelli provengono da numeri quantici indipendenti e possono incrociarsi liberamente (statistica di Poisson). Sotto le distanze sono <b>sorprendentemente regolari</b>, nessuna coppia troppo vicina: i livelli si <b>respingono</b>, ed è la firma del <b>caos quantistico</b> (statistiche GOE/GUE delle matrici casuali). <b>Questa figura è il punto in cui la matematica del percorso tocca la tua tesi:</b> la congettura di Bohigas&ndash;Giannoni&ndash;Schmit dice che i sistemi il cui limite classico è caotico hanno statistica da matrici casuali, e l&rsquo;<b>ETH</b> è l&rsquo;affermazione gemella sugli <b>autostati</b> — non solo i livelli, ma anche gli elementi di matrice delle osservabili in quella base si comportano come quantità pseudo-casuali. Guardare uno spettro è, letteralmente, guardare se un sistema termalizzerà.`}
+]},
+
+/* ---------------- 03 · STURM–LIOUVILLE ---------------- */
+{ num:'03', title:'Sturm–Liouville: da dove vengono le basi della fisica', meta:'$(pu^{\\prime})^{\\prime}+qu+\\lambda wu=0$ · autofunzioni ortogonali col peso $w$ · Fourier, Legendre, Bessel come casi',
+  blocchi:[
+  {t:'prosa', title:'La forma, e perché è quella giusta', tag:'costruzione', html:R`
+  <p>Un problema di <b>Sturm&ndash;Liouville</b> è un problema agli autovalori per una EDO del secondo ordine scritta in forma <b>autoaggiunta</b>:
+  $$\frac{d}{dx}\!\left(p(x)\frac{du}{dx}\right)+q(x)\,u+\lambda\,w(x)\,u=0,\qquad x\in[a,b],$$
+  con condizioni al bordo separate (Dirichlet, Neumann, Robin) e $p,w\gt0$. <b>Ogni</b> EDO lineare del secondo ordine si può portare in questa forma moltiplicandola per un fattore integrante — non è un caso particolare, è una forma normale.</p>
+  <p>Il motivo della forma è che rende l&rsquo;operatore <b>autoaggiunto rispetto al prodotto scalare con peso</b> $\langle f,g\rangle_w=\int_a^b f\,\bar g\,w\,dx$. Da lì, per la tappa 01:</p>
+  <ul>
+  <li>gli autovalori $\lambda_n$ sono <b>reali</b>, discreti, e $\lambda_n\to+\infty$;</li>
+  <li>le autofunzioni sono <b>ortogonali col peso</b>: $\int_a^b\phi_n\phi_m\,w\,dx=0$ per $n\ne m$;</li>
+  <li>formano una <b>base</b> di $L^2_w[a,b]$: ogni $f$ si sviluppa in serie di autofunzioni, con Parseval.</li>
+  </ul>
+  <div class="note">È la <b>generalizzazione di Fourier</b>. Con $p=w=1$, $q=0$ su $[0,L]$ e Dirichlet si riottengono $\sin\frac{n\pi x}{L}$ e la serie di Fourier del nucleo 09. Con altri coefficienti si ottengono i <b>polinomi di Legendre</b> (peso $1$ su $[-1,1]$, dal laplaciano in coordinate sferiche), le <b>funzioni di Bessel</b> (peso $x$, dal laplaciano in coordinate cilindriche), i <b>polinomi di Hermite</b> (peso $e^{-x^2}$, dall&rsquo;oscillatore armonico quantistico). <b>Tutte le &laquo;funzioni speciali&raquo; della fisica sono autofunzioni di qualche Sturm&ndash;Liouville</b>, e la loro ortogonalità — che sui libri appare come una tabella da memorizzare — è un corollario di questa struttura.</div>`},
+  {t:'plot', title:'Le prime autofunzioni: i modi di una corda',
+   intro:R`Il caso più semplice: $-u''=\lambda u$ su $[0,1]$ con $u(0)=u(1)=0$. Autovalori $\lambda_n=(n\pi)^2$, autofunzioni $\sin(n\pi x)$.`,
+   plots:[
+    {kind:'func2d', xr:[0,1], yr:[-1.35,1.35], height:320,
+     title:'phi_n = sin(n pi x): n-1 nodi interni, ortogonali fra loro',
+     curves:[
+      {f:'sin(PI*x)', col:'#5eead4', width:2.2, label:'n=1 (fondamentale)'},
+      {f:'sin(2*PI*x)', col:'#4c8dff', width:2.2, label:'n=2'},
+      {f:'sin(3*PI*x)', col:'#b98cff', width:2.2, label:'n=3'}
+     ],
+     marks:[{x:0.5,y:0,label:'nodo di n=2',col:'#8fa0b5',up:true},
+            {x:0.3333,y:0,col:'#8fa0b5'},{x:0.6667,y:0,col:'#8fa0b5'}]}
+   ],
+   leggi:R`Tre fatti generali si vedono in questo caso particolare, e valgono per <b>ogni</b> problema di Sturm&ndash;Liouville. <b>(1) Teorema dei nodi:</b> la $n$-esima autofunzione ha esattamente $n-1$ zeri interni — l&rsquo;autofunzione fondamentale non cambia mai segno. In meccanica quantistica: lo stato fondamentale non ha nodi, e contare i nodi <b>è</b> contare il livello. <b>(2) Ortogonalità:</b> $\int_0^1\sin(n\pi x)\sin(m\pi x)dx=0$ per $n\ne m$ — la stessa cancellazione di aree vista nel nucleo 09, qui come conseguenza dell&rsquo;autoaggiuntezza invece che di un&rsquo;identità trigonometrica. <b>(3) Autovalori crescenti:</b> $\lambda_n=(n\pi)^2\to\infty$, cioè più nodi = più &laquo;energia&raquo;. Nel calore del nucleo 15 è il motivo per cui i modi alti muoiono per primi; in una corda è il motivo per cui le armoniche acute si smorzano prima.`},
+  {t:'esercizio', title:'La particella nella scatola: quella figura È la funzione d’onda',
+   src:'il problema di Sturm–Liouville più famoso della fisica',
+   testo:R`Risolvere l&rsquo;equazione di Schrödinger stazionaria per una particella libera di massa $m$ confinata in $[0,L]$ con pareti impenetrabili:
+   $$-\frac{\hbar^2}{2m}\,\psi''(x)=E\,\psi(x),\qquad \psi(0)=\psi(L)=0.$$
+   Determinare i livelli di energia e le funzioni d&rsquo;onda normalizzate, e dire quale struttura di questo nucleo si sta usando.`,
+   steps:[
+    {label:'Riconoscere il problema', body:R`<p>Riscritta come $\psi''=-\dfrac{2mE}{\hbar^2}\psi$, cioè $\psi''+\lambda\psi=0$ con $\lambda=\dfrac{2mE}{\hbar^2}$, <b>è esattamente il problema di Sturm&ndash;Liouville della tappa 03</b>: $p=1$, $q=0$, peso $w=1$, condizioni di Dirichlet. L&rsquo;operatore $\hat H=-\frac{\hbar^2}{2m}\frac{d^2}{dx^2}$ con quelle condizioni al bordo è <b>autoaggiunto</b> (tappa 01) — ed è per questo che ci si aspetta autovalori reali e autofunzioni ortogonali.</p>`},
+    {label:'Autovalori: l’energia è quantizzata', body:R`<p>La soluzione generale è $\psi=A\sin(\sqrt\lambda x)+B\cos(\sqrt\lambda x)$. La condizione $\psi(0)=0$ impone $B=0$; la condizione $\psi(L)=0$ impone $\sin(\sqrt\lambda L)=0$, cioè $\sqrt\lambda L=n\pi$ con $n=1,2,3,\dots$ Quindi $\lambda_n=\left(\frac{n\pi}{L}\right)^2$ e
+    $$\boxed{\ E_n=\frac{\hbar^2\pi^2}{2mL^2}\,n^2\ }$$
+    <b>La quantizzazione non è un postulato aggiuntivo</b>: è la stessa cosa che rende discreti i modi di una corda. Le condizioni al bordo selezionano un insieme <b>discreto</b> di autovalori, e quegli autovalori sono le energie misurabili — lo <b>spettro</b> dell&rsquo;operatore, nel senso letterale della tappa 02.</p>`},
+    {label:'Autofunzioni normalizzate', body:R`<p>$\psi_n(x)=A\sin\frac{n\pi x}{L}$, con $A$ fissato dalla <b>normalizzazione</b> $\int_0^L|\psi_n|^2dx=1$: poiché $\int_0^L\sin^2\frac{n\pi x}{L}dx=\frac L2$, si ha $A=\sqrt{2/L}$ e
+    $$\psi_n(x)=\sqrt{\frac2L}\,\sin\frac{n\pi x}{L}.$$
+    <b>Sono le curve della figura qui sopra</b>, riscalate. E le tre proprietà lette lì diventano fisica, una per una: gli $n-1$ <b>nodi</b> contano il livello (lo stato fondamentale non ha nodi); l&rsquo;<b>ortogonalità</b> $\int_0^L\psi_n\psi_m=0$ dice che stati con energie diverse sono perfettamente distinguibili; gli autovalori <b>crescenti</b> sono lo spettro che sale come $n^2$.</p>`},
+    {label:'Dove entra tutto il resto del percorso', body:R`<p>La <b>completezza</b> del sistema $\{\psi_n\}$ (nucleo 09) dice che ogni stato iniziale si scrive $\psi(x,0)=\sum_nc_n\psi_n(x)$ con $c_n=\langle\psi_n,\psi\rangle$ — è una <b>serie di Fourier</b>, con $\sum|c_n|^2=1$ per <b>Parseval</b>, cioè la conservazione della probabilità. E l&rsquo;evoluzione temporale, per il teorema spettrale (tappa 02), è
+    $$\psi(x,t)=\sum_n c_n\,\psi_n(x)\,e^{-iE_nt/\hbar}:$$
+    ogni componente ruota di fase con la <b>propria</b> frequenza $E_n/\hbar$, e nient&rsquo;altro accade. $\blacksquare$</p>
+    <div class="note">Confronta col nucleo 17: l&rsquo;equazione del calore sullo stesso intervallo dà $e^{-\alpha\lambda_nt}$ (moduli che <b>calano</b>, irreversibile), Schrödinger dà $e^{-iE_nt/\hbar}$ (moduli <b>costanti</b>, unitario). Stessa base, stesso spettro, due destini — e la differenza è un solo fattore $i$.</div>`}
+   ],
+   nota:R`Vale la pena fermarsi su cosa è successo: non abbiamo &laquo;applicato la meccanica quantistica&raquo;, abbiamo risolto un problema agli autovalori di Sturm&ndash;Liouville e poi <b>letto i risultati in linguaggio fisico</b>. La quantizzazione dell&rsquo;energia, la distinguibilità degli stati, la conservazione della probabilità e l&rsquo;evoluzione per fasi sono tutte conseguenze della struttura matematica di questo nucleo. È il punto in cui il percorso smette di preparare l&rsquo;esame e comincia a preparare la tesi.`},
+]},
+
+/* ---------------- 04 · GREEN SPETTRALE ---------------- */
+{ num:'04', title:'La funzione di Green nella base spettrale', meta:'$G=\\sum\\frac{\\phi_n(x)\\phi_n(\\xi)}{\\lambda_n}$ · il risolvente e i suoi poli · il ponte col nucleo 13',
+  blocchi:[
+  {t:'reveal', title:'Costruzione, e cosa rivela', tag:'derivazione', steps:[
+   {label:'Sviluppa tutto nella base', body:R`<p>Vuoi risolvere $\mathcal{L}u=f$ con $\mathcal{L}$ autoaggiunto e autofunzioni ortonormali $\phi_n$, $\mathcal{L}\phi_n=\lambda_n\phi_n$. Scrivi $u=\sum_nu_n\phi_n$ e $f=\sum_nf_n\phi_n$ (nucleo 09). L&rsquo;equazione diventa <b>numerica</b>, modo per modo:
+   $$\lambda_nu_n=f_n\ \Longrightarrow\ u_n=\frac{f_n}{\lambda_n}.$$
+   Ricomponendo e usando $f_n=\int\phi_n(\xi)f(\xi)d\xi$:
+   $$u(x)=\int\left[\sum_n\frac{\phi_n(x)\,\phi_n(\xi)}{\lambda_n}\right]f(\xi)\,d\xi\ \Longrightarrow\ \boxed{\ G(x,\xi)=\sum_n\frac{\phi_n(x)\phi_n(\xi)}{\lambda_n}\ }$$
+   La Green del nucleo 15, <b>scritta nella base spettrale</b>. $\blacksquare$</p>`},
+   {label:'Le due letture', body:R`<p><b>Simmetria gratis:</b> la formula è manifestamente simmetrica in $x\leftrightarrow\xi$ — la reciprocità che nel nucleo 15 andava verificata a mano è qui una conseguenza dell&rsquo;autoaggiuntezza.</p>
+   <p><b>Il pericolo:</b> se $\lambda_n=0$ per qualche $n$ la formula esplode. Significa che l&rsquo;omogenea ha soluzione non banale, e allora $\mathcal{L}u=f$ è risolubile <b>solo</b> se $f$ è ortogonale a quel modo (<b>alternativa di Fredholm</b>). In fisica è la <b>risonanza</b>: forzare un sistema esattamente su un suo modo proprio non dà una risposta stazionaria.</p>`},
+   {label:'Il risolvente: qui torna il nucleo 13', body:R`<p>Più in generale si studia il <b>risolvente</b> $R(z)=(\mathcal{L}-z)^{-1}=\sum_n\dfrac{P_n}{\lambda_n-z}$, funzione della variabile <b>complessa</b> $z$. Guardalo con gli occhi del Movimento III: è una funzione meromorfa i cui <b>poli sono esattamente gli autovalori</b>, e cui residui sono i <b>proiettori</b>:
+   $$P_n=-\frac{1}{2\pi i}\oint_{\gamma_n}R(z)\,dz,$$
+   con $\gamma_n$ un cerchietto attorno a $\lambda_n$. <b>Il teorema dei residui del nucleo 13 estrae i proiettori spettrali.</b> È così che il teorema spettrale si dimostra nei casi generali, ed è il motivo per cui lo spettro si chiama così: è l&rsquo;insieme dei punti dove il risolvente <b>non</b> è olomorfo.</p>
+   <div class="note">Da qui si vede anche perché uno spettro <b>continuo</b> non è fatto di poli ma di un <b>taglio</b> (nucleo 11): infiniti poli che si addensano diventano una linea di non-analiticità. La distinzione fra stati legati (poli) e stati di scattering (tagli) è, in questo linguaggio, la distinzione fra le due specie di singolarità.</div>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Per $-u''=f$ su $[0,1]$ con Dirichlet, la Green spettrale è $\sum_n\frac{2\sin(n\pi x)\sin(n\pi\xi)}{(n\pi)^2}$. È la stessa del nucleo 15?`,
+    a:R`Sì: la serie converge alla funzione triangolare $x_\lt(1-x_\gt)$ trovata lì. Sono due rappresentazioni dello stesso oggetto — una <b>chiusa</b> (utile per i conti e per il disegno) e una <b>spettrale</b> (utile per capire quali modi rispondono e con che peso). Nota il decadimento $1/n^2$ dei coefficienti: è la firma di una funzione continua con derivata discontinua (nucleo 09) — l&rsquo;angolo della Green si legge nello spettro.`},
+   {q:R`Perché in meccanica quantistica si insiste tanto sull&rsquo;autoaggiuntezza e non basta &laquo;simmetrico&raquo;?`,
+    a:R`Perché il <b>teorema spettrale</b> vale per gli autoaggiunti, non per i simmetrici, e con esso tutto ciò che serve: spettro reale, base di autostati, e soprattutto l&rsquo;evoluzione <b>unitaria</b> $e^{-iHt/\hbar}$ (teorema di Stone). Un&rsquo;hamiltoniana solo simmetrica può ammettere estensioni autoaggiunte <b>diverse</b> — fisiche diverse dallo stesso &laquo;operatore&raquo;. Concretamente: le <b>condizioni al bordo</b> non sono un dettaglio tecnico, sono parte della definizione del sistema fisico.`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'diagonalizzazione con proiettori · autovettori non ortogonali · Sturm–Liouville con peso',
+  blocchi:[
+  {t:'esercizio', title:'Proiettori spettrali di una matrice simmetrica, e di una che non lo è',
+   src:'esercizio-tipo — la coppia da saper distinguere',
+   testo:R`(a) Per $A=\begin{pmatrix}2&1\\1&2\end{pmatrix}$ trovare autovalori, proiettori spettrali e scrivere $A=\sum\lambda_nP_n$; calcolare $e^{A}$. (b) Ripetere per $B=\begin{pmatrix}3&1\\0&2\end{pmatrix}$, facendo attenzione ai proiettori.`,
+   steps:[
+    {label:'(a) il caso simmetrico', body:R`<p>$\det(A-\lambda)=(2-\lambda)^2-1=0$ dà $\lambda=1,3$. Autovettori: $v_1=\frac{1}{\sqrt2}\binom{1}{-1}$ e $v_3=\frac{1}{\sqrt2}\binom{1}{1}$, <b>ortonormali</b> (come garantisce la tappa 01). Quindi
+    $$P_1=v_1v_1^{T}=\frac12\begin{pmatrix}1&-1\\-1&1\end{pmatrix},\qquad P_3=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix},$$
+    con $P_1+P_3=\mathbb{1}$ e $A=1\cdot P_1+3\cdot P_3$ (verificare svolgendo). E per il teorema spettrale
+    $$e^{A}=e^{1}P_1+e^{3}P_3=\frac{1}{2}\begin{pmatrix}e+e^3&e^3-e\\ e^3-e& e+e^3\end{pmatrix}.$$
+    <b>Nessuna serie da sommare</b>: le funzioni di operatori si calcolano sugli autovalori.</p>`},
+    {label:'(b) il caso non simmetrico', body:R`<p>Autovalori $3,2$; autovettori $v_3=\binom{1}{0}$ e $v_2=\binom{1}{-1}$: <b>non ortogonali</b> ($\langle v_3,v_2\rangle=1\ne0$). Qui $|v\rangle\langle v|$ <b>è sbagliato</b>. Con $S=\begin{pmatrix}1&1\\0&-1\end{pmatrix}$, $S^{-1}=\begin{pmatrix}1&1\\0&-1\end{pmatrix}$:
+    $$P_3=S\begin{pmatrix}1&0\\0&0\end{pmatrix}S^{-1}=\begin{pmatrix}1&1\\0&0\end{pmatrix},\qquad P_2=\begin{pmatrix}0&-1\\0&1\end{pmatrix}.$$
+    Controlli: $P_3+P_2=\mathbb{1}$ ✓, $P_i^2=P_i$ ✓, $3P_3+2P_2=\begin{pmatrix}3&1\\0&2\end{pmatrix}=B$ ✓. <b>I proiettori non sono simmetrici</b> — sono obliqui, e questo è corretto. $\blacksquare$</p>`},
+    {label:'La morale', body:R`<p>Prima di scrivere $P_n=|v_n\rangle\langle v_n|$, <b>controlla che gli autovettori siano ortonormali</b>. Lo sono automaticamente se l&rsquo;operatore è autoaggiunto (o normale); altrimenti serve il cambio di base $S\,E_{nn}\,S^{-1}$. Il controllo $\sum_nP_n=\mathbb{1}$ costa dieci secondi e smaschera l&rsquo;errore sempre.</p>`}
+   ],
+   nota:R`Caso limite da conoscere: se la matrice non è <b>diagonalizzabile</b> (autovalore con molteplicità geometrica minore di quella algebrica, es. $\begin{pmatrix}1&1\\0&1\end{pmatrix}$) non esistono affatto proiettori spettrali che la ricostruiscano: serve la forma di <b>Jordan</b>, e $f(A)$ acquista termini con le derivate di $f$. Non può succedere per operatori autoaggiunti.`},
+  {t:'collaudo', title:'Diagnostica rapida', items:[
+   {q:R`L&rsquo;equazione di Legendre $\big((1-x^2)u'\big)'+\lambda u=0$ su $[-1,1]$: che peso ha, e cosa ne segue?`,
+    a:R`È già in forma di Sturm&ndash;Liouville con $p=1-x^2$, $q=0$, <b>peso $w=1$</b>. Ne segue che le autofunzioni — i <b>polinomi di Legendre</b> $P_n$, con $\lambda_n=n(n+1)$ — sono ortogonali <b>senza peso</b>: $\int_{-1}^{1}P_nP_m\,dx=0$ per $n\ne m$. Nota che $p$ si annulla agli estremi: è un problema <b>singolare</b>, e lì le condizioni al bordo diventano semplicemente la richiesta di limitatezza. È il caso che nasce dal laplaciano in coordinate sferiche — da cui le armoniche sferiche e i numeri quantici $\ell,m$.`},
+   {q:R`Perché la base &laquo;giusta&raquo; per un problema è quella degli autovettori dell&rsquo;operatore, e non una qualunque?`,
+    a:R`Perché in quella base l&rsquo;operatore è <b>diagonale</b>: il problema si spezza in equazioni indipendenti, una per modo, e le funzioni dell&rsquo;operatore (evoluzione, inversa, esponenziale) si calcolano numero per numero. È lo stesso principio del nucleo 09 (Fourier diagonalizza $d^2/dx^2$) portato al caso generale: <b>diagonalizzare è disaccoppiare</b>. E quando due operatori commutano, esiste una base che li diagonalizza <b>entrambi</b> — in meccanica quantistica è la ragione per cui gli osservabili compatibili hanno autostati comuni e numeri quantici simultanei.`}
+  ]}
+]},
+
+/* ---------------- 06 · SENSO E ROTTE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'il nucleo che tocca la tesi più da vicino',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il nucleo 09 dava la geometria (proiezioni, basi ortonormali); il 15 dava la Green come risposta all&rsquo;impulso; il 13 dava i residui. Qui i tre si saldano: la Green è $\mathcal{L}^{-1}$ scritta nella base spettrale, e i proiettori spettrali sono <b>residui del risolvente</b>.</p>
+  <p><b>Il punto.</b> Un operatore autoaggiunto porta con sé la propria base. Trovare quella base è <b>risolvere</b> il problema, perché lì l&rsquo;operatore è un numero per ogni modo. Tutta la fisica lineare è la ricerca della base giusta.</p>
+  <p><b>A valle.</b> Il nucleo 17 applica questa macchina alle tre EDP archetipe della fisica.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>L&rsquo;operatore autoaggiunto e il suo spettro</b>: $A=\sum\lambda_nP_n$, con la base di autovettori come base &laquo;giusta&raquo;.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`È il dizionario completo: osservabile = operatore autoaggiunto; valori misurabili = <b>spettro</b>; probabilità dell&rsquo;esito $n$ = $\lVert P_n\psi\rVert^2$; collasso = applicazione del proiettore; evoluzione = $e^{-iHt/\hbar}$, funzione dell&rsquo;operatore. Osservabili compatibili = operatori che <b>commutano</b> = base comune.`},
+    {dove:'Modi normali<br>e stabilità', txt:R`Piccole oscillazioni attorno a un equilibrio: diagonalizzare la matrice hessiana dà i <b>modi normali</b> e le frequenze proprie. Autovalore negativo = direzione instabile. È lo stesso conto che nel nucleo 06 classificava i punti fissi del ritratto di fase, qui in $N$ dimensioni.`},
+    {dove:'Meccanica<br>statistica', txt:R`$Z=\mathrm{Tr}\,e^{-\beta H}=\sum_ne^{-\beta E_n}$: la funzione di partizione è una funzione dell&rsquo;operatore, calcolata sullo spettro. Tutta la termodinamica di un sistema quantistico è contenuta nella <b>lista dei suoi autovalori</b> e nel loro addensamento (densità degli stati).`},
+    {dove:'Caos quantistico<br>e ETH', txt:R`La <b>statistica delle spaziature</b> distingue integrabile (Poisson) da caotico (GOE/GUE): è la figura della tappa 02. L&rsquo;<b>ETH</b> aggiunge l&rsquo;affermazione sugli autostati — $\langle m|\hat O|n\rangle$ si comporta come una matrice casuale con una parte liscia diagonale — e da lì deriva che un singolo autostato contiene già l&rsquo;informazione termica. <b>È il tuo terreno di tesi, scritto nel linguaggio di questo nucleo.</b>`}
+   ],
+   domanda:R`Se l&rsquo;evoluzione è $\psi(t)=\sum_nc_ne^{-iE_nt/\hbar}\phi_n$, allora nella base spettrale <b>non succede nulla</b>: solo fasi che ruotano, moduli $|c_n|$ costanti per sempre. Un sistema quantistico chiuso non termalizza mai, in senso stretto. Eppure le osservabili macroscopiche si stabilizzano. La risposta dell&rsquo;ETH è che la termalizzazione non sta nello <b>stato</b> ma nelle <b>osservabili</b>: se gli elementi di matrice $\langle m|\hat O|n\rangle$ fuori diagonale sono minuscoli e pseudo-casuali, le fasi che ruotano si cancellano fra loro e $\langle\hat O\rangle(t)$ si assesta sul valore microcanonico. <b>Domanda che porti avanti:</b> quali proprietà dello <i>spettro</i> (spaziature, degenerazioni, risonanze) rendono quella cancellazione robusta invece che accidentale — e quanto a lungo regge, prima che le ricorrenze di Poincaré la smentiscano? Tutto ciò che serve per porre la domanda con precisione — base ortonormale, proiettori, funzioni di operatori, spettro — è in questo nucleo.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo16-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 16 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 16-operatori-spettrale.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

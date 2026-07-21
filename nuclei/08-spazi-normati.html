@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 08 — Spazi metrici e normati, completezza, spazi di Banach</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento II · Nucleo <b>08 — Spazi metrici e normati, completezza, spazi di Banach</b> · l&rsquo;astrazione di «spazio di funzioni»</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 04: Campi vettoriali <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'Metodi · l&rsquo;idea che le funzioni siano «punti» di uno spazio, con una distanza, e cosa vuol dire che lo spazio «non ha buchi»',
+  blocchi:[
+  {t:'prosa', title:'Il salto: le funzioni diventano punti', tag:'first principles', html:R`
+  <p>Fin qui &laquo;spazio&raquo; ha voluto dire $\mathbb{R}^n$: punti con coordinate, una distanza euclidea, palle. Ora facciamo il salto che regge tutta l&rsquo;analisi funzionale (e la meccanica quantistica): trattare <b>le funzioni come punti</b> di uno spazio, con una loro <b>distanza</b>. La successione $f_n\to f$ del nucleo 07 diventa allora la convergenza di una successione di <b>punti</b> a un punto — e &laquo;convergenza uniforme&raquo; diventa &laquo;convergenza nella distanza del sup&raquo;. Serve rendere rigorose tre cose: cosa è una <b>distanza</b>, cosa vuol dire che una successione &laquo;dovrebbe&raquo; convergere (Cauchy), e cosa vuol dire che uno spazio <b>non ha buchi</b> (completezza).</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Verificare che una funzione sia una <b>metrica</b> o una <b>norma</b> controllandone gli assiomi, e riconoscere gli spazi modello ($\mathbb{R}^n$, $C[a,b]$, $\ell^p$).</li>
+  <li>Riconoscere una <b>successione di Cauchy</b> e capire perché è la formulazione &laquo;interna&raquo; della convergenza.</li>
+  <li>Dire cosa significa <b>completo</b>, e esibire il controesempio standard di uno spazio <b>non</b> completo ($C[a,b]$ con la norma integrale).</li>
+  <li>Enunciare cosa è uno <b>spazio di Banach</b> e perché la completezza è la proprietà che rende gli spazi di funzioni utilizzabili.</li>
+  <li>Applicare il <b>teorema delle contrazioni</b> (punto fisso di Banach–Caccioppoli) — e riconoscerlo come la macchina dietro Picard (nucleo 06) e molti metodi iterativi.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · METRICA E NORMA ---------------- */
+{ num:'01', title:'Metrica e norma: gli assiomi', meta:'distanza astratta · norma e distanza indotta · gli spazi modello $\\mathbb{R}^n$, $C[a,b]$, $\\ell^p$',
+  blocchi:[
+  {t:'prosa', title:'La distanza, spogliata all&rsquo;osso', tag:'gli assiomi', html:R`
+  <p>Uno <b>spazio metrico</b> è un insieme $X$ con una funzione <b>distanza</b> $d:X\times X\to[0,+\infty)$ che soddisfa, per ogni $x,y,z$:</p>
+  <ul>
+  <li><b>Positività:</b> $d(x,y)\ge0$, e $d(x,y)=0\iff x=y$. La distanza è nulla solo da un punto a se stesso.</li>
+  <li><b>Simmetria:</b> $d(x,y)=d(y,x)$.</li>
+  <li><b>Disuguaglianza triangolare:</b> $d(x,z)\le d(x,y)+d(y,z)$. La via diretta non supera la deviazione.</li>
+  </ul>
+  <p>Sono le stesse tre proprietà della distanza euclidea (nucleo 0), ma ora <b>staccate</b> da $\mathbb{R}^n$: valgono per punti che possono essere funzioni, successioni, matrici. Tutto ciò che avevi imparato su &laquo;vicino&raquo;, limiti, aperti, chiusi, continuità (nucleo 0) si trasporta parola per parola sostituendo $\lVert x-y\rVert$ con $d(x,y)$.</p>`},
+  {t:'prosa', title:'La norma: una distanza compatibile con la struttura lineare', tag:'grammatica', html:R`
+  <p>Quando $X$ è uno <b>spazio vettoriale</b> (si possono sommare i punti e moltiplicarli per scalari), la distanza più naturale viene da una <b>norma</b> $\lVert\cdot\rVert:X\to[0,+\infty)$, con gli assiomi (nucleo 0, ora astratti):</p>
+  <ul>
+  <li><b>Positività:</b> $\lVert x\rVert\ge0$, $=0\iff x=0$.</li>
+  <li><b>Omogeneità:</b> $\lVert\lambda x\rVert=|\lambda|\,\lVert x\rVert$.</li>
+  <li><b>Triangolare:</b> $\lVert x+y\rVert\le\lVert x\rVert+\lVert y\rVert$.</li>
+  </ul>
+  <p>La norma <b>induce</b> la distanza $d(x,y)=\lVert x-y\rVert$. Non ogni metrica viene da una norma, ma quelle degli spazi di funzioni che ci servono sÀ. La norma aggiunge alla metrica la compatibilità con somma e scalari — indispensabile per fare &laquo;combinazioni lineari di funzioni&raquo;, cioè sviluppi in serie.</p>`},
+  {t:'gram', title:'Gli spazi modello (da tenere a mente sempre)', rows:[
+   [R`$\mathbb{R}^n$`, R`$\lVert x\rVert_2=\sqrt{\sum x_i^2}$. Lo spazio finito-dimensionale di partenza. <b>Completo</b>.`],
+   [R`$C[a,b]$`, R`funzioni continue su $[a,b]$, con la <b>norma del sup</b> $\lVert f\rVert_\infty=\max_{[a,b]}|f|$. Convergenza in questa norma = convergenza <b>uniforme</b> (nucleo 07). <b>Completo</b>.`],
+   [R`$C[a,b]$ con $\lVert\cdot\rVert_1$`, R`stesse funzioni, ma norma integrale $\lVert f\rVert_1=\int_a^b|f|$. Convergenza in media. <b>NON completo</b> (tappa 03): è il controesempio-cardine.`],
+   [R`$\ell^p$`, R`successioni $x=(x_1,x_2,\dots)$ con $\lVert x\rVert_p=\left(\sum|x_k|^p\right)^{1/p}\lt\infty$. Il caso $p=2$ è lo spazio di Hilbert delle successioni (nucleo 09). <b>Completo</b>.`]
+  ]},
+  {t:'reveal', title:'In dimensione infinita le norme NON sono più equivalenti', tag:'il confine col nucleo 0', steps:[
+   {label:'Cosa valeva in $\\mathbb{R}^n$', body:R`<p>Nel nucleo 0 hai visto che in dimensione <b>finita</b> tutte le norme sono <b>equivalenti</b>: $\lVert\cdot\rVert_1,\lVert\cdot\rVert_2,\lVert\cdot\rVert_\infty$ danno la stessa nozione di convergenza, gli stessi aperti, la stessa topologia. Potevi scegliere la più comoda.</p>`},
+   {label:'Cosa si rompe in dimensione infinita', body:R`<p>Sugli spazi di funzioni questo <b>svanisce</b>. Prendi $f_n$ su $[0,1]$ un &laquo;pizzo&raquo; alto $1$ e largo $2/n$ attorno a $0$. Allora $\lVert f_n\rVert_\infty=1$ (non tende a $0$), ma $\lVert f_n\rVert_1=\int|f_n|\approx\tfrac1n\to0$. La <b>stessa</b> successione converge a $0$ in norma $1$ ma non in norma $\infty$: le due norme danno convergenze <b>diverse</b>. Non c&rsquo;è più una scelta &laquo;innocua&raquo;: la norma <b>cambia la matematica</b>. $\blacksquare$</p>
+   <div class="note">È la ragione profonda per cui l&rsquo;analisi funzionale è più sottile dell&rsquo;analisi in $\mathbb{R}^n$: la dimensione infinita rompe l&rsquo;equivalenza delle norme e la compattezza delle palle chiuse (un fatto che ritroverai). Scegliere lo <b>spazio giusto</b> (norma giusta) diventa parte del problema.</div>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la norma del sup su $C[a,b]$ corrisponde alla convergenza uniforme?`,
+    a:R`Perché $\lVert f_n-f\rVert_\infty=\sup_{[a,b]}|f_n-f|$: dire che questa distanza tende a $0$ È esattamente la definizione di convergenza uniforme (nucleo 07). La convergenza uniforme non era che la convergenza nella metrica giusta su uno spazio di funzioni — questo nucleo dà il linguaggio che la rende una &laquo;semplice&raquo; convergenza di punti.`},
+   {q:R`In $\mathbb{R}^2$ le norme $\lVert\cdot\rVert_1,\lVert\cdot\rVert_2,\lVert\cdot\rVert_\infty$ danno topologie diverse?`,
+    a:R`No: in dimensione finita sono tutte <b>equivalenti</b> (nucleo 0), quindi stessa convergenza, stessi aperti. La differenza (rombo/cerchio/quadrato come palle unitarie) è solo geometrica, non topologica. È solo in dimensione infinita che l&rsquo;equivalenza cade e la scelta della norma conta davvero.`}
+  ]}
+]},
+
+/* ---------------- 02 · CAUCHY E COMPLETEZZA ---------------- */
+{ num:'02', title:'Successioni di Cauchy e completezza', meta:'la convergenza «interna» · uno spazio completo non ha buchi',
+  blocchi:[
+  {t:'prosa', title:'Cauchy: convergere senza nominare il limite', tag:'grammatica', html:R`
+  <p>Una successione $(x_n)$ in uno spazio metrico è di <b>Cauchy</b> se i suoi termini si <b>avvicinano fra loro</b> indefinitamente: $$\forall\varepsilon\gt0\ \exists N:\quad m,n\ge N\ \Rightarrow\ d(x_n,x_m)\lt\varepsilon.$$ È una condizione <b>interna</b>: parla solo dei termini della successione, senza nominare un limite. Ogni successione convergente è di Cauchy (se tutti si avvicinano a $x$, si avvicinano fra loro, per la triangolare). Ma il <b>viceversa</b> — &laquo;Cauchy ⟹ converge&raquo; — <b>non è automatico</b>: dipende dallo spazio.</p>`},
+  {t:'prosa', title:'Completezza: nessun buco', tag:'la definizione centrale', html:R`
+  <p>Uno spazio metrico è <b>completo</b> se <b>ogni</b> successione di Cauchy converge a un punto <b>dello spazio</b>. In uno spazio completo, &laquo;i termini si accalcano&raquo; (Cauchy) garantisce che ci sia davvero un punto verso cui si accalcano.</p>
+  <p>L&rsquo;esempio guida: $\mathbb{Q}$ (i razionali) <b>non</b> è completo. La successione $3,\ 3.1,\ 3.14,\ 3.141,\dots$ è di Cauchy (i termini si avvicinano), ma il suo limite $\pi$ <b>non</b> è razionale: c&rsquo;è un &laquo;buco&raquo; dove il limite dovrebbe stare. $\mathbb{R}$ si costruisce proprio <b>tappando</b> questi buchi (completamento di $\mathbb{Q}$). La completezza è la proprietà che rende $\mathbb{R}$ il posto giusto per fare analisi — e che vogliamo per gli spazi di funzioni.</p>`},
+  {t:'reveal', title:'Perché la completezza è ciò che serve davvero', tag:'il punto', steps:[
+   {label:'Il problema che risolve', body:R`<p>Spesso costruisci una soluzione come <b>limite</b> di approssimazioni successive $x_1,x_2,\dots$ (iterate di un metodo). Riesci a mostrare che sono di Cauchy (si stabilizzano), ma <b>non conosci il limite in anticipo</b>. In uno spazio completo, questo <b>basta</b>: Cauchy garantisce che il limite <b>esista</b> nello spazio. Senza completezza, potresti costruire una successione che &laquo;dovrebbe&raquo; convergere ma il cui limite &laquo;non c&rsquo;è&raquo;.</p>`},
+   {label:'Il legame con la convergenza uniforme', body:R`<p>Il teorema chiave (che rende $C[a,b]$ utile): <b>$C[a,b]$ con la norma del sup è completo</b>. Motivo: se $(f_n)$ è di Cauchy in $\lVert\cdot\rVert_\infty$, allora per ogni $x$ i numeri $f_n(x)$ sono di Cauchy in $\mathbb{R}$ (completo), quindi convergono a un $f(x)$; e la stima uniforme fa sÀ che $f_n\to f$ <b>uniformemente</b>, quindi (nucleo 07) $f$ è <b>continua</b>, cioè sta in $C[a,b]$. La completezza di $C[a,b]$ eredita quella di $\mathbb{R}$ più la conservazione della continuità sotto limite uniforme. $\blacksquare$</p></p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Ogni successione convergente è di Cauchy. È vero il viceversa?`,
+    a:R`Solo negli spazi <b>completi</b>. In generale no: in $\mathbb{Q}$ la successione delle troncate di $\pi$ è di Cauchy ma non converge (in $\mathbb{Q}$). &laquo;Completo&raquo; È precisamente &laquo;ogni Cauchy converge&raquo;. È la proprietà che distingue $\mathbb{R}$ da $\mathbb{Q}$, e gli spazi di funzioni buoni da quelli difettosi.`}
+  ]}
+]},
+
+/* ---------------- 03 · BANACH E IL CONTROESEMPIO ---------------- */
+{ num:'03', title:'Spazi di Banach (e uno spazio che NON lo è)', meta:'Banach = normato completo · $C[a,b]$ con la norma integrale non è completo',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'enunciato', html:R`
+  <p>Uno <b>spazio di Banach</b> è uno <b>spazio normato completo</b>: uno spazio vettoriale con una norma, in cui ogni successione di Cauchy converge (nella norma) a un elemento dello spazio. È l&rsquo;ambiente standard dell&rsquo;analisi funzionale — abbastanza ricco da contenere combinazioni lineari e limiti, abbastanza solido da non avere buchi. $\mathbb{R}^n$, $C[a,b]$ con $\lVert\cdot\rVert_\infty$, gli $\ell^p$ e (nucleo 10) gli $L^p$ sono di Banach.</p>`},
+  {t:'reveal', title:'Il controesempio-cardine: $C[a,b]$ con la norma integrale NON è completo', tag:'dimostrazione', steps:[
+   {label:'Costruisci una Cauchy', body:R`<p>Su $[-1,1]$ prendi $f_n$ continue che valgono $-1$ su $[-1,-\tfrac1n]$, $+1$ su $[\tfrac1n,1]$, e salgono linearmente in mezzo. In norma $\lVert f\rVert_1=\int_{-1}^1|f|$: per $m,n$ grandi, $f_n$ e $f_m$ differiscono solo sul tratto stretto attorno a $0$, quindi $\lVert f_n-f_m\rVert_1\le\text{(area del triangolino)}\to0$. È di <b>Cauchy</b> in $\lVert\cdot\rVert_1$.</p>`},
+   {label:'Il limite non è continuo', body:R`<p>Ma $f_n\to\text{sgn}(x)$ (la funzione segno: $-1$ per $x\lt0$, $+1$ per $x\gt0$) nella norma $1$, e $\text{sgn}$ <b>non è continua</b> in $0$: <b>non appartiene a $C[-1,1]$</b>. La successione di Cauchy converge (in norma $1$) a un limite che <b>sta fuori dallo spazio</b>: c&rsquo;è un buco. Quindi $\big(C[a,b],\lVert\cdot\rVert_1\big)$ <b>non è completo</b>, dunque non è di Banach. $\blacksquare$</p>
+   <div class="note">La morale: <b>lo stesso insieme di funzioni</b> è completo con una norma (il sup) e non con un&rsquo;altra (l&rsquo;integrale). La completezza è una proprietà della <b>coppia</b> (insieme, norma), non dell&rsquo;insieme da solo. Per rendere completa la norma integrale bisogna <b>allargare</b> lo spazio: si aggiungono le funzioni discontinue/misurabili e si ottengono gli spazi $L^p$ — il motivo per cui serve l&rsquo;integrale di Lebesgue (nucleo 10).</div>`}
+  ]},
+  {t:'plot', title:'La successione di Cauchy che scivola fuori dallo spazio',
+   intro:R`Le funzioni continue $f_n$ (rampa che sale da $-1$ a $+1$ su un tratto largo $2/n$) tendono, in norma integrale, alla funzione <b>segno</b>, che è discontinua.`,
+   plots:[
+    {kind:'func2d', xr:[-1.1,1.1], yr:[-1.4,1.4], height:340, title:'f_n continue -> sgn(x) discontinua: il limite esce da C[-1,1]',
+     curves:[{f:'max(-1,min(1,3*x))', col:'#5eead4', label:'n=3'},{f:'max(-1,min(1,8*x))', col:'#4c8dff', label:'n=8'},{f:'max(-1,min(1,30*x))', col:'#b98cff', label:'n=30'},{f:'sign(x)', col:'#e0a94a', dash:true, label:'limite sgn(x)'}]}
+   ],
+   leggi:R`Le rampe $f_n$ sono tutte <b>continue</b> (stanno in $C[-1,1]$), e in norma integrale si avvicinano fra loro: l&rsquo;area fra due rampe è il triangolino attorno a $0$, che si stringe come $1/n$. Sono di <b>Cauchy</b>. Ma il loro limite è la funzione <b>segno</b> (tratteggiata), che ha un salto in $0$ e <b>non è continua</b>: non è un punto di $C[-1,1]$. La successione &laquo;punta&raquo; a un buco. Ecco perché $\big(C[-1,1],\lVert\cdot\rVert_1\big)$ non è completo. Con la norma del <b>sup</b>, invece, le $f_n$ <b>non</b> sarebbero di Cauchy ($\sup|f_n-f_m|=1$ vicino a $0$): la norma del sup &laquo;vede&raquo; il salto e impedisce l&rsquo;avvicinamento — per questo con il sup lo spazio resta completo. La stessa successione, due norme, due destini: è la lezione del nucleo, resa visibile.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Come può lo stesso insieme $C[a,b]$ essere completo con una norma e non con un&rsquo;altra?`,
+    a:R`Perché la completezza dipende dalla norma, che decide <b>quali</b> successioni sono di Cauchy e verso cosa convergono. Il sup &laquo;vede&raquo; i salti (una rampa e un gradino distano $1$), quindi la successione delle rampe non è di Cauchy e nessun buco appare. L&rsquo;integrale &laquo;media&raquo; e non vede il salto puntuale, quindi la successione è di Cauchy ma il limite (il gradino) esce dallo spazio. La completezza è della coppia (insieme, norma).`}
+  ]}
+]},
+
+/* ---------------- 04 · CONTRAZIONI ---------------- */
+{ num:'04', title:'Il teorema delle contrazioni', meta:'punto fisso di Banach–Caccioppoli · esistenza+unicità+costruzione, in uno colpo · dietro Picard e i metodi iterativi',
+  blocchi:[
+  {t:'prosa', title:'Il teorema', tag:'enunciato', html:R`
+  <p>È il teorema più usato dell&rsquo;analisi funzionale, e la ragione per cui la completezza vale oro.</p>
+  <p><b>Teorema (contrazioni, Banach–Caccioppoli).</b> Sia $(X,d)$ uno spazio metrico <b>completo</b> e $T:X\to X$ una <b>contrazione</b>: esiste $0\le k\lt1$ con $$d\big(T(x),T(y)\big)\le k\,d(x,y)\qquad\forall x,y.$$ Allora $T$ ha <b>uno e un solo</b> punto fisso $x^*$ (con $T(x^*)=x^*$), e le <b>iterate</b> $x_{n+1}=T(x_n)$ vi convergono, partendo da qualunque $x_0$.</p>
+  <p>Tre cose in un colpo: il punto fisso <b>esiste</b>, è <b>unico</b>, ed è <b>calcolabile</b> iterando. Una contrazione &laquo;avvicina&raquo; sempre i punti di un fattore $k\lt1$: applicandola ripetutamente, ogni distanza si schiaccia geometricamente verso zero, e tutto converge a un unico punto immobile.</p>`},
+  {t:'reveal', title:'La dimostrazione, in tre stime', tag:'derivazione', steps:[
+   {label:'Le iterate sono di Cauchy', body:R`<p>$d(x_{n+1},x_n)=d(T x_n,T x_{n-1})\le k\,d(x_n,x_{n-1})\le\dots\le k^n d(x_1,x_0)$. I passi si accorciano <b>geometricamente</b>. Per la triangolare, $d(x_{n+p},x_n)\le(k^n+\dots+k^{n+p-1})d(x_1,x_0)\le\dfrac{k^n}{1-k}d(x_1,x_0)\to0$. La successione è di <b>Cauchy</b>.</p>`},
+   {label:'Esiste il limite (qui serve la completezza)', body:R`<p>Poiché $X$ è <b>completo</b>, la successione di Cauchy $(x_n)$ converge a un $x^*\in X$. <b>È qui, e solo qui, che la completezza entra</b>: senza, le iterate potrebbero puntare a un buco. Passando al limite in $x_{n+1}=T(x_n)$ e usando che $T$ è continua (una contrazione è Lipschitz, quindi continua): $x^*=T(x^*)$. Punto fisso trovato.</p>`},
+   {label:'È unico', body:R`<p>Se $x^*$ e $y^*$ fossero due punti fissi: $d(x^*,y^*)=d(Tx^*,Ty^*)\le k\,d(x^*,y^*)$, cioè $(1-k)d(x^*,y^*)\le0$ con $1-k\gt0$, quindi $d(x^*,y^*)=0$, $x^*=y^*$. $\blacksquare$</p>
+   <div class="note">Stima dell&rsquo;errore, gratis: $d(x_n,x^*)\le\dfrac{k^n}{1-k}d(x_1,x_0)$. Sai <b>quanto</b> sei vicino dopo $n$ passi senza conoscere $x^*$: è il motore dei metodi numerici (Newton, iterazioni di punto fisso).</div>`}
+  ]},
+  {t:'plot', title:'Le iterate che si stringono al punto fisso',
+   intro:R`La contrazione $T(x)=\cos(x)$ su $\mathbb{R}$ (che è una contrazione su un intorno del punto fisso): le iterate $x_0=0,\ x_1=T(x_0),\ x_2,\dots$ convergono al numero di Dottie $x^*\approx0{,}739$.`,
+   plots:[
+    {kind:'func2d', xr:[0,1.4], yr:[0,1.4], height:360, title:'x_{n+1}=cos(x_n): le iterate a scala convergono a cos(x)=x',
+     curves:[{f:'cos(x)', col:'#5eead4', width:2.4, label:'y=cos x'},{f:'x', col:'#4c8dff', dash:true, label:'y=x'}],
+     marks:[{x:0.739,y:0.739,label:'punto fisso x*',col:'#e0a94a',up:true}]}
+   ],
+   leggi:R`Il punto fisso $x^*$ è dove $\cos x=x$, cioè l&rsquo;<b>intersezione</b> fra la curva $y=\cos x$ (azzurra) e la bisettrice $y=x$ (tratteggiata) — il punto giallo. L&rsquo;iterazione $x_{n+1}=\cos(x_n)$ si legge come una &laquo;scala&raquo;: da $x_n$ sali/scendi verticalmente fino alla curva ($=x_{n+1}$), poi orizzontalmente fino alla bisettrice per riportare $x_{n+1}$ sull&rsquo;asse, e ripeti. Poiché $|\cos^{\prime} x|=|\sin x|\lt1$ vicino a $x^*$, ogni passo <b>accorcia</b> la distanza dal punto fisso di un fattore $\lt1$: la scala spiraleggia verso l&rsquo;intersezione, da qualunque punto parti. È la contrazione in azione — e la ragione per cui digitare ripetutamente $\cos$ sulla calcolatrice converge sempre a $0{,}739$. Lo stesso meccanismo, sullo spazio completo delle funzioni continue, dà la soluzione di un&rsquo;equazione differenziale (Picard, sotto).`},
+  {t:'prosa', title:'Perché questo È Picard (nucleo 06)', tag:'il cerchio si chiude', html:R`
+  <p>Nel nucleo 06 hai dimostrato esistenza e unicità per $\dot x=f(t,x)$ trasformando l&rsquo;EDO nell&rsquo;equazione integrale $x(t)=x_0+\int_{t_0}^t f(s,x(s))\,ds$, cioè in un <b>punto fisso</b> dell&rsquo;operatore $T[x](t)=x_0+\int_{t_0}^t f(s,x(s))\,ds$. Ora hai il teorema generale che lo giustifica: $T$ agisce sullo spazio <b>completo</b> $C[t_0-\delta,t_0+\delta]$ (norma del sup), e la condizione di <b>Lipschitz</b> su $f$ rende $T$ una <b>contrazione</b> per $\delta$ piccolo (il fattore era $L\,\delta\lt1$). Le iterate di Picard sono le iterate della contrazione; il punto fisso è la soluzione; l&rsquo;unicità del punto fisso è l&rsquo;unicità della soluzione. Il teorema di Cauchy–Lipschitz è un <b>corollario</b> del teorema delle contrazioni sullo spazio giusto — ecco perché serviva la completezza di $C[a,b]$.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la completezza è indispensabile nel teorema delle contrazioni?`,
+    a:R`Perché la contrazione produce una successione di iterate di <b>Cauchy</b>, ma per concludere che <b>convergono a un punto dello spazio</b> (il punto fisso) serve che ogni Cauchy converga — cioè la completezza. Su uno spazio non completo, le iterate potrebbero &laquo;puntare a un buco&raquo; e nessun punto fisso esisterebbe nello spazio. È l&rsquo;unico ingrediente che non è pura algebra della contrazione.`},
+   {q:R`$T(x)=x+1$ su $\mathbb{R}$ ha un punto fisso?`,
+    a:R`No: $x+1=x$ non ha soluzioni. E infatti $T$ <b>non</b> è una contrazione ($d(Tx,Ty)=|x-y|$, fattore $k=1$, non $\lt1$). Il teorema non si applica. La stretta disuguaglianza $k\lt1$ è essenziale: con $k=1$ (isometria) il punto fisso può non esistere.`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'Prova prima, poi rivela · norme, completezza, contrazioni',
+  blocchi:[
+  {t:'prosa', title:'Istruzioni', tag:'come usarli', html:R`
+  <p>Copri, prova, rivela. Verifica di norma, riconoscimento di completezza, e un&rsquo;applicazione del teorema delle contrazioni.</p>`},
+  {t:'esercizio', title:'Esercizio 1 — verifica di norma', src:'Metodi · gli assiomi',
+   testo:R`Verifica che $\lVert f\rVert_\infty=\max_{[0,1]}|f|$ è una norma su $C[0,1]$.`,
+   steps:[
+    {label:'Positività', body:R`<p>$\max|f|\ge0$ sempre. Se $\max|f|=0$ allora $|f(x)|=0$ per ogni $x$, cioè $f\equiv0$. Viceversa $\lVert0\rVert_\infty=0$. ✓</p>`},
+    {label:'Omogeneità', body:R`<p>$\lVert\lambda f\rVert_\infty=\max|\lambda f|=|\lambda|\max|f|=|\lambda|\,\lVert f\rVert_\infty$. ✓</p>`},
+    {label:'Triangolare', body:R`<p>Per ogni $x$: $|f(x)+g(x)|\le|f(x)|+|g(x)|\le\lVert f\rVert_\infty+\lVert g\rVert_\infty$. Passando al $\max$ a sinistra: $\lVert f+g\rVert_\infty\le\lVert f\rVert_\infty+\lVert g\rVert_\infty$. ✓ $\blacksquare$</p>`}
+   ],
+   nota:R`Il $\max$ esiste perché $f$ continua su un compatto (Weierstrass, nucleo 0): ecco perché serve $C[0,1]$ e non solo funzioni limitate. La triangolare del sup si riduce alla triangolare del valore assoluto punto per punto, poi si prende il $\max$.`},
+  {t:'esercizio', title:'Esercizio 2 — completo o no?', src:'Metodi · riconoscere i buchi',
+   testo:R`Lo spazio delle funzioni polinomiali su $[0,1]$, con la norma del sup, è completo?`,
+   steps:[
+    {label:'Cerca una Cauchy che esce', body:R`<p>Considera i polinomi di Taylor $p_n(x)=\sum_{k=0}^n\dfrac{x^k}{k!}$. In norma sup su $[0,1]$ convergono <b>uniformemente</b> a $e^x$ (coda controllata da Weierstrass), quindi sono di <b>Cauchy</b>.</p>`},
+    {label:'Il limite non è un polinomio', body:R`<p>Ma $e^x$ <b>non</b> è un polinomio. La successione di Cauchy di polinomi converge a qualcosa fuori dallo spazio dei polinomi: <b>non completo</b>. $\blacksquare$ (Il suo completamento è tutto $C[0,1]$, per il teorema di approssimazione di Weierstrass: i polinomi sono densi.)</p>`}
+   ],
+   nota:R`Regola per riconoscere un non-completo: trova una successione nello spazio che converga (in norma) a qualcosa di &laquo;più regolare che manca&raquo; — funzioni discontinue per la norma $1$, funzioni non polinomiali per i polinomi. Il completamento &laquo;aggiunge&raquo; esattamente i limiti mancanti.`},
+  {t:'esercizio', title:'Esercizio 3 — una contrazione esplicita', src:'Metodi · punto fisso',
+   testo:R`Mostra che $T(x)=\tfrac12(x+\tfrac{2}{x})$ è una contrazione su $[1,2]$, e identifica il punto fisso.`,
+   steps:[
+    {label:'Manda $[1,2]$ in sé', body:R`<p>$T$ è il passo di Newton per $\sqrt2$. Su $[1,2]$: $T(1)=\tfrac12(1+2)=1{,}5$, $T(2)=\tfrac12(2+1)=1{,}5$, e il minimo di $T$ è in $x=\sqrt2$ con $T(\sqrt2)=\sqrt2\approx1{,}414$. Quindi $T([1,2])\subseteq[1{,}41,\,1{,}5]\subseteq[1,2]$: $T$ manda l&rsquo;intervallo in sé.</p>`},
+    {label:'È una contrazione', body:R`<p>$T^{\prime}(x)=\tfrac12(1-\tfrac{2}{x^2})$. Su $[1,2]$: $|T^{\prime}(x)|=\tfrac12|1-\tfrac2{x^2}|\le\tfrac12$ (il massimo di $|1-\frac2{x^2}|$ su $[1,2]$ è in $x=1$, dà $|1-2|=1$). Quindi $k=\tfrac12\lt1$: <b>contrazione</b>.</p>`},
+    {label:'Punto fisso', body:R`<p>$T(x)=x\Rightarrow\tfrac12(x+\tfrac2x)=x\Rightarrow x+\tfrac2x=2x\Rightarrow\tfrac2x=x\Rightarrow x^2=2\Rightarrow x=\sqrt2$. Le iterate convergono a $\sqrt2$ da qualunque punto di $[1,2]$: è il metodo di Newton per la radice quadrata, e la contrattività spiega la sua rapidissima convergenza. $\blacksquare$</p>`}
+   ],
+   nota:R`Il metodo di Newton è la contrazione par excellence: vicino alla radice $|T^{\prime}|$ è piccolo (anzi $T^{\prime}(x^*)=0$ qui), e la convergenza è addirittura <b>quadratica</b> (le cifre corrette raddoppiano a ogni passo). Il teorema delle contrazioni garantisce la convergenza; la derivata nulla al punto fisso ne spiega la velocità.`},
+  {t:'collaudo', title:'Controllo lampo finale', items:[
+   {q:R`Qual è la catena logica che collega &laquo;completezza&raquo; e &laquo;esistenza di soluzioni&raquo;?`,
+    a:R`Costruisci soluzioni come limiti di iterate (di una contrazione: metodo numerico, Picard). Le iterate sono di Cauchy (la contrazione le stringe geometricamente). La <b>completezza</b> garantisce che una Cauchy converga a un punto <b>dello spazio</b>: quel punto è la soluzione. Senza completezza, la costruzione punterebbe a un buco. Completezza = &laquo;i limiti che dovrebbero esistere, esistono davvero, qui dentro&raquo;.`},
+   {q:R`Perché per rendere completa la norma integrale bisogna cambiare spazio, non solo &laquo;aggiustare&raquo;?`,
+    a:R`Perché i buchi (limiti di Cauchy in norma $1$) sono funzioni <b>discontinue/misurabili</b> che non stanno in $C[a,b]$: per tapparli devi <b>allargare</b> l&rsquo;insieme fino a includerle. Il completamento di $\big(C[a,b],\lVert\cdot\rVert_1\big)$ È lo spazio $L^1$ delle funzioni integrabili secondo Lebesgue (nucleo 10). Ecco perché l&rsquo;integrale di Lebesgue non è un lusso: è ciò che rende completi gli spazi $L^p$.`}
+  ]}
+]},
+
+/* ---------------- 06 · IL SENSO E LE ROTTE FISICHE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'lo spazio degli stati · completezza come garanzia di esistenza · verso Hilbert e la QM',
+  blocchi:[
+  {t:'prosa', title:'Perché la fisica vive negli spazi completi', tag:'significato', html:R`
+  <p>L&rsquo;idea che gli stati di un sistema fisico formino uno <b>spazio</b> — con una distanza, una struttura lineare, e la completezza — è il fondamento della meccanica quantistica e della teoria dei campi. Uno stato quantistico è un <b>vettore</b> in uno spazio (di Hilbert, nucleo 09), le osservabili sono operatori su di esso, e la sovrapposizione è la combinazione lineare. La <b>completezza</b> è ciò che garantisce che i limiti di stati siano ancora stati: senza, una successione di stati fisici potrebbe convergere a qualcosa che &laquo;non è uno stato&raquo;, e la teoria perderebbe senso. Il teorema delle contrazioni, dal canto suo, è il motore di ogni <b>metodo iterativo</b> — dai calcoli perturbativi ai metodi numerici con cui si simulano i sistemi complessi.</p>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> Questo nucleo dà il linguaggio pulito alla convergenza uniforme del nucleo 07 (= convergenza nella norma del sup) e generalizza la topologia di $\mathbb{R}^n$ del nucleo 0 (distanza, palle, aperti, continuità) a spazi di funzioni. Il teorema delle contrazioni ingloba Picard (nucleo 06).</p>
+  <p><b>A valle.</b> Aggiungendo alla norma un <b>prodotto scalare</b> (che dà angoli e ortogonalità) si arriva agli <b>spazi di Hilbert</b> (nucleo 09): lÀ la completezza + l&rsquo;ortogonalità danno Fourier come sviluppo su una base, e $L^2$ come spazio degli stati. La completezza della norma integrale richiede l&rsquo;<b>integrale di Lebesgue</b> (nucleo 10). E l&rsquo;idea di operatore su uno spazio di Banach prepara la teoria <b>spettrale</b> (nucleo 16).</p>`},
+  {t:'prolessi', title:'Prolessi — lo spazio degli stati, e i limiti che restano dentro',
+   oggetto:R`Uno <b>spazio di Banach</b>: funzioni (o stati) come punti, una <b>norma</b> che li misura, e la <b>completezza</b> che garantisce che ogni successione di Cauchy converga a un punto dello spazio.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Gli stati vivono in uno spazio <b>completo</b> (di Hilbert, nucleo 09): la completezza rende i limiti di stati ancora stati, e legittima sviluppi in serie e passaggi al limite. Senza, la sovrapposizione infinita $\sum c_n|n\rangle$ potrebbe non essere uno stato.`},
+    {dove:'Meccanica<br>statistica', txt:R`Il teorema delle contrazioni è dietro le equazioni <b>autoconsistenti</b> (campo medio, Hartree): la magnetizzazione $m$ risolve $m=T(m)$, e il punto fisso — quando $T$ è una contrazione — è lo stato d&rsquo;equilibrio. Quando cessa di esserlo (la derivata di $T$ attraversa $1$), c&rsquo;è una <b>transizione di fase</b>.`}
+   ],
+   domanda:R`In dimensione infinita l&rsquo;intuizione finita cade: le palle chiuse non sono più compatte, le norme non sono equivalenti, la convergenza dipende dalla topologia scelta. La domanda che porti alla tesi: è proprio in questo &laquo;spazio troppo grande&raquo; che vivono i fenomeni <b>collettivi</b> dei sistemi con infiniti gradi di libertà — rotture di simmetria, transizioni, stati macroscopicamente distinti. Capire quale <b>topologia</b> e quale <b>spazio</b> descrivono un sistema a molti corpi è già metà della fisica: il filo che porta agli spazi di Fock, al limite termodinamico, e alla domanda su come emergano proprietà macroscopiche robuste (ETH) da una dinamica su uno spazio di stati infinito-dimensionale.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 08 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 04-campi-vettoriali.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

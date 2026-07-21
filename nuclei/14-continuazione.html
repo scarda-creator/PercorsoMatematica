@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 14 — Continuazione analitica e funzioni speciali: Gamma, riflessione, regolarizzazione</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento III · Nucleo <b>14 — Continuazione analitica, funzione Gamma, regolarizzazione zeta</b> · approfondimento [+], oltre agosto</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 14: Continuazione analitica e funzioni speciali <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'[+] approfondimento · la rigidità dell’analiticità portata alle sue conseguenze estreme',
+  blocchi:[
+  {t:'prosa', title:'Il punto di arrivo del Movimento III', tag:'first principles', html:R`
+  <p>Il principio di identità (nucleo 12) dice che due funzioni olomorfe che coincidono su un frammento coincidono ovunque. Letto al contrario è una <b>procedura</b>: se conosco una funzione su un pezzetto, la sua estensione olomorfa — se esiste — è <b>unica</b>. Non c&rsquo;è scelta, non c&rsquo;è arbitrarietà: la funzione &laquo;sa già&raquo; come continuare.</p>
+  <p>Questo cambia lo statuto di certe formule della fisica. Una serie che converge solo per $|z|\lt1$, o un integrale che converge solo per $\mathrm{Re}\,s\gt1$, <b>non definiscono</b> la funzione: sono soltanto una <i>finestra</i> su un oggetto più grande, che esiste anche dove la formula fallisce. Da qui viene la pratica — che in fisica sembra un trucco e non lo è — di dare senso a espressioni divergenti: si continua analiticamente in un parametro fino al valore che interessa.</p>
+  <p>Questo nucleo è marcato <b>[+]</b>: non è materia d&rsquo;esame nella sua parte finale (regolarizzazione), ma la prima metà (continuazione, $\Gamma$) compare nei compiti come sfondo delle funzioni speciali, e la seconda è ciò che rende il Movimento III uno strumento di fisica teorica e non solo di calcolo.</p>`}
+]},
+
+/* ---------------- 01 · CONTINUAZIONE ANALITICA ---------------- */
+{ num:'01', title:'Continuazione analitica: la formula non è la funzione', meta:'unicità dell’estensione · la serie geometrica e $1/(1-z)$ · il cerchio di convergenza non è un confine della funzione',
+  blocchi:[
+  {t:'prosa', title:'Definizione e unicità', tag:'grammatica', html:R`
+  <p>Siano $f_1$ olomorfa su $\Omega_1$ e $f_2$ olomorfa su $\Omega_2$, con $\Omega_1\cap\Omega_2$ aperto e connesso. Se $f_1=f_2$ sull&rsquo;intersezione, $f_2$ si dice <b>continuazione analitica</b> di $f_1$. Per il principio di identità la continuazione, <b>se esiste, è unica</b>.</p>
+  <p>L&rsquo;esempio minimo dice già tutto. La serie $\sum_{n\ge0}z^n$ converge <b>solo</b> per $|z|\lt1$ e lì vale $\frac{1}{1-z}$. Ma $\frac{1}{1-z}$ è olomorfa su tutto $\mathbb{C}\setminus\{1\}$. La serie non &laquo;sbaglia&raquo; fuori dal disco: semplicemente <b>smette di essere una rappresentazione</b> della funzione, che invece continua a esistere. Chiedere &laquo;quanto vale $\sum(-2)^n$?&raquo; è mal posto come domanda sulla serie, ma ha una risposta perfettamente definita come domanda sulla funzione: $\frac{1}{1-(-2)}=\frac13$.</p>
+  <div class="note">Il cerchio di convergenza è determinato dalla <b>singolarità più vicina</b> (nucleo 12), non dai limiti della funzione. Nel caso sopra la singolarità è in $z=1$: la serie centrata in $0$ non può superarla, ma una serie centrata in $z_0=-1$ ha raggio $2$ e copre regioni che la prima non vedeva. <b>Iterando questo spostamento di centro si continua la funzione</b>: è la costruzione originale di Weierstrass.</div>`},
+  {t:'plot', title:'La serie muore, la funzione no',
+   intro:R`Somme parziali di $\sum z^n$ (fino a $N=6$ e $N=14$) confrontate con $\frac{1}{1-x}$ sull&rsquo;asse reale.`,
+   plots:[
+    {kind:'func2d', xr:[-2.2,0.95], yr:[-1.5,4], height:360,
+     title:'oltre |x|=1 le somme parziali divergono; 1/(1-x) prosegue tranquilla',
+     curves:[
+      {f:'1/(1-x)', col:'#8fa0b5', width:2.4, dash:true, label:'1/(1-x)'},
+      {f:'1+x+pow(x,2)+pow(x,3)+pow(x,4)+pow(x,5)+pow(x,6)', col:'#5eead4', width:1.8, label:'S6'},
+      {f:'1+x+pow(x,2)+pow(x,3)+pow(x,4)+pow(x,5)+pow(x,6)+pow(x,7)+pow(x,8)+pow(x,9)+pow(x,10)+pow(x,11)+pow(x,12)+pow(x,13)+pow(x,14)', col:'#b98cff', width:1.8, label:'S14'}
+     ],
+     segs:[{x1:-1, y1:-1.5, x2:-1, y2:4, col:'#ff6b6b', dash:true, width:1.6, label:'|x|=1', lx:-1, ly:3.6}],
+     marks:[{x:-2, y:0.3333, label:'valore vero: 1/3', col:'#ff9b6b', up:true}]}
+   ],
+   leggi:R`Dentro il cerchio di convergenza ($|x|\lt1$) le somme parziali si stringono alla curva grigia: più termini, meglio è. <b>Oltre $x=-1$ il comportamento si rovescia</b>: $S_{14}$ è <i>peggiore</i> di $S_6$, e aumentando $N$ le oscillazioni esplodono. Eppure la funzione $\frac{1}{1-x}$ in $x=-2$ vale tranquillamente $\frac13$ (punto arancione): <b>il valore esiste, è la serie a non saperlo raggiungere</b>. La morale è metodologica e vale per tutta la fisica teorica: quando una serie perturbativa diverge, la prima domanda non è &laquo;come sommo meglio&raquo;, è <b>&laquo;qual è la funzione che questa serie stava approssimando, e come la raggiungo per un&rsquo;altra strada&raquo;</b>. Le due strade classiche sono la continuazione analitica (questo nucleo) e le somme asintotiche.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$\sum_{n\ge0}z^n$ converge in $|z|\lt1$; la funzione $\frac{1}{1-z}$ è definita su $\mathbb{C}\setminus\{1\}$. Perché non si può continuare oltre $z=1$?`,
+    a:R`Perché $z=1$ è una <b>singolarità vera</b> (un polo): nessuna funzione olomorfa può estendersi attraverso di essa. La continuazione aggira gli ostacoli, non li elimina. Esistono anche casi peggiori, in cui il cerchio di convergenza è tutto fatto di singolarità (<b>frontiera naturale</b>): per esempio $\sum z^{2^n}$, che non si può continuare in nessun punto di $|z|=1$. La rigidità taglia in entrambi i sensi.`},
+   {q:R`In che senso la continuazione è &laquo;unica&raquo; se la funzione è polidroma (nucleo 11)?`,
+    a:R`È unica <b>lungo un cammino</b>: continuando $\log z$ lungo cammini diversi che aggirano l&rsquo;origine in modi diversi si arriva a determinazioni diverse. L&rsquo;unicità vale su domini semplicemente connessi; con un buco, la continuazione dipende dalla <b>classe di omotopia</b> del cammino. È la stessa struttura del nucleo 04 (potenziale multivoco attorno a un buco) e la ragione per cui la superficie giusta su cui vive $\log$ non è il piano ma una <b>superficie di Riemann</b> a infiniti fogli.`}
+  ]}
+]},
+
+/* ---------------- 02 · LA FUNZIONE GAMMA ---------------- */
+{ num:'02', title:'La funzione Gamma: il fattoriale continuato', meta:'$\\Gamma(z)=\\int_0^\\infty t^{z-1}e^{-t}dt$ per $\\mathrm{Re}\\,z\\gt0$ · l’equazione funzionale continua tutto il piano · poli negli interi $\\le0$',
+  blocchi:[
+  {t:'prosa', title:'Definizione, e come si estende', tag:'costruzione', html:R`
+  <p>Per $\mathrm{Re}\,z\gt0$ si definisce
+  $$\Gamma(z)=\int_0^{\infty}t^{\,z-1}e^{-t}\,dt.$$
+  L&rsquo;integrale converge lì e definisce una funzione olomorfa (si deriva sotto il segno). Integrando per parti si ottiene l&rsquo;<b>equazione funzionale</b>
+  $$\Gamma(z+1)=z\,\Gamma(z),$$
+  e poiché $\Gamma(1)=1$ segue $\Gamma(n+1)=n!$ per $n$ intero: <b>Gamma interpola il fattoriale</b>.</p>
+  <p>La stessa equazione, letta al contrario come $\Gamma(z)=\dfrac{\Gamma(z+1)}{z}$, è lo strumento di <b>continuazione</b>: il membro destro ha senso per $\mathrm{Re}\,z\gt-1$ (tranne $z=0$), e itererando $n$ volte
+  $$\Gamma(z)=\frac{\Gamma(z+n)}{z(z+1)\cdots(z+n-1)}$$
+  si copre tutto il piano. Ne risulta una funzione <b>meromorfa su $\mathbb{C}$</b>, con <b>poli semplici</b> in $z=0,-1,-2,\dots$ e residuo $\mathrm{Res}(\Gamma,-n)=\dfrac{(-1)^n}{n!}$. Notevole: $\Gamma$ <b>non ha zeri</b> — quindi $1/\Gamma$ è una funzione intera.</p>`},
+  {t:'plot', title:'Gamma sull’asse reale: il fattoriale, e i poli sugli interi negativi',
+   intro:R`$\Gamma(x)$ calcolata con la formula di continuazione più Stirling: liscia e crescente a destra, con un polo a ogni intero $\le0$ e segni alternati fra un polo e l&rsquo;altro.`,
+   plots:[
+    {kind:'func2d', xr:[-3.6,4.4], yr:[-6,6], height:380,
+     title:'Gamma(x): Gamma(n+1)=n! e poli semplici in 0,-1,-2,-3',
+     curves:[{f:'sqrt(2*PI/(x+8))*pow((x+8)/E,(x+8))*(1+1/(12*(x+8))+1/(288*(x+8)*(x+8)))/(x*(x+1)*(x+2)*(x+3)*(x+4)*(x+5)*(x+6)*(x+7))', col:'#5eead4', width:2.4, label:'Gamma(x)'}],
+     segs:[{x1:-3.6, y1:0, x2:4.4, y2:0, col:'#4d5a6b', width:1}],
+     marks:[{x:1, y:1, label:'G(1)=0!=1', col:'#d8a13a', up:true, left:true},
+            {x:3, y:2, label:'G(3)=2!=2', col:'#d8a13a', up:true, left:true},
+            {x:4, y:6, label:'G(4)=3!=6', col:'#d8a13a', left:true},
+            {x:1.4616, y:0.8856, label:'minimo', col:'#b98cff'}]}
+   ],
+   leggi:R`Sui punti oro la curva passa esattamente per i fattoriali — è il senso di &laquo;interpolare&raquo;. Fra un intero negativo e l&rsquo;altro la funzione cambia <b>segno</b>, perché ogni polo è semplice e il denominatore $z(z+1)\cdots$ cambia segno a ogni fattore che attraversa lo zero. Il minimo a $x\approx1{,}46$ (dove $\Gamma\approx0{,}886$) è il punto in cui il &laquo;fattoriale continuo&raquo; smette di scendere e comincia la crescita più-che-esponenziale: non c&rsquo;è nulla del genere nei fattoriali interi, ed è visibile solo continuando. <b>Attenzione a non leggere i poli come un difetto</b>: sono il modo in cui la funzione registra che $\Gamma(z)=\Gamma(z+1)/z$ divide per zero. E servono: nella regolarizzazione dimensionale della teoria dei campi, le divergenze dei diagrammi compaiono <b>esattamente</b> come poli di $\Gamma$ nel parametro dimensionale.`},
+  {t:'prosa', title:'La formula di riflessione — e dove l’hai già incontrata', tag:'collegamento', html:R`
+  <p>$$\Gamma(z)\,\Gamma(1-z)=\frac{\pi}{\sin\pi z},\qquad z\notin\mathbb{Z}.$$
+  Il membro destro ha poli semplici in tutti gli interi: a destra dello zero li fornisce $\Gamma(1-z)$, a sinistra $\Gamma(z)$. Ponendo $z=\frac12$ si ottiene $\Gamma\!\left(\frac12\right)^2=\pi$, cioè
+  $$\Gamma\!\left(\tfrac12\right)=\sqrt\pi\quad\Longleftrightarrow\quad\int_{-\infty}^{+\infty}e^{-t^2}dt=\sqrt\pi,$$
+  l&rsquo;integrale gaussiano. <b>Questa formula l&rsquo;hai già dimostrata</b>: è l&rsquo;integrale $\int_0^\infty\frac{x^{\alpha-1}}{1+x}dx=\frac{\pi}{\sin\pi\alpha}$ del nucleo 13 (sottotipo keyhole), che coincide con $\Gamma(\alpha)\Gamma(1-\alpha)$. Il contorno a buco della serratura non era un esercizio di stile: produceva un&rsquo;identità fra funzioni speciali.</p>`}
+]},
+
+/* ---------------- 03 · REGOLARIZZAZIONE ---------------- */
+{ num:'03', title:'Regolarizzazione: dare un valore a ciò che diverge', meta:'$\\zeta(s)$ oltre $\\mathrm{Re}\\,s\\gt1$ · «$1+2+3+\\cdots=-1/12$» detto con precisione · l’effetto Casimir',
+  blocchi:[
+  {t:'prosa', title:'La zeta di Riemann e la sua continuazione', tag:'costruzione', html:R`
+  <p>$$\zeta(s)=\sum_{n=1}^{\infty}\frac{1}{n^{s}},\qquad \mathrm{Re}\,s\gt1.$$
+  La serie converge solo in quel semipiano (per $s=1$ è la serie armonica). Ma $\zeta$ si <b>continua</b> a tutto $\mathbb{C}$ tranne $s=1$, dove ha un polo semplice di residuo $1$. La continuazione si costruisce con l&rsquo;equazione funzionale
+  $$\zeta(s)=2^{s}\pi^{\,s-1}\sin\!\left(\frac{\pi s}{2}\right)\Gamma(1-s)\,\zeta(1-s),$$
+  che lega i valori in $s$ a quelli in $1-s$ e usa proprio la $\Gamma$ della tappa precedente.</p>
+  <p>Da qui i valori famosi: $\zeta(-1)=-\frac1{12}$, $\zeta(0)=-\frac12$, $\zeta(-2n)=0$ (gli &laquo;zeri banali&raquo;, dovuti al $\sin$). E l&rsquo;affermazione da bar &laquo;$1+2+3+\cdots=-\frac1{12}$&raquo; va detta con precisione: la <b>serie</b> $\sum n$ diverge, punto. Ciò che vale $-\frac1{12}$ è il <b>valore in $s=-1$ della continuazione analitica della funzione</b> che, per $\mathrm{Re}\,s\gt1$, è rappresentata da $\sum n^{-s}$. La formula $\sum n=\zeta(-1)$ è un abuso di notazione per una procedura precisa; il numero, però, è fisicamente misurabile.</p>`},
+  {t:'prosa', title:'Perché la fisica se ne serve: l&rsquo;effetto Casimir', tag:'rotta', html:R`
+  <p>Due piastre conduttrici parallele, distanti $a$, nel vuoto. L&rsquo;energia di punto zero del campo elettromagnetico fra le piastre è $E=\frac{\hbar}{2}\sum_n\omega_n$ con $\omega_n\propto n$: una somma <b>divergente</b>. Regolarizzandola con la zeta si ottiene un termine finito e la <b>forza attrattiva</b>
+  $$\frac{F}{A}=-\frac{\pi^2\hbar c}{240\,a^4},$$
+  misurata in laboratorio (Lamoreaux, 1997) con accordo di pochi percento. Il $240$ contiene proprio $\zeta(-3)=\frac{1}{120}$.</p>
+  <div class="note">La lettura corretta non è &laquo;la matematica ha addomesticato l&rsquo;infinito con un trucco&raquo;. È: <b>la somma divergente non era la quantità fisica</b>. L&rsquo;osservabile è la <i>differenza</i> di energia fra la configurazione con le piastre e quella senza, e in quella differenza gli infiniti si cancellano; la continuazione analitica è il modo tecnicamente più pulito di eseguire la cancellazione. La stessa logica regge la <b>rinormalizzazione</b> in teoria dei campi, e la <b>regolarizzazione dimensionale</b> — dove si continua analiticamente nella <i>dimensione dello spazio-tempo</i>, e le divergenze appaiono come poli di $\Gamma$ in $d=4$.</div>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la continuazione analitica dà un risultato &laquo;giusto&raquo; e non uno dei tanti possibili?`,
+    a:R`Per <b>unicità</b>: se un&rsquo;estensione olomorfa esiste, è una sola (principio di identità). Non si sta scegliendo un valore fra molti, si sta calcolando l&rsquo;unico compatibile con l&rsquo;analiticità. La domanda fisica seria non è &laquo;perché quel numero&raquo;, ma <b>&laquo;perché l&rsquo;analiticità è la proprietà giusta da imporre&raquo;</b> — e la risposta, come nel nucleo 11, è che analiticità in un parametro fisico corrisponde di solito a causalità o a località della teoria.`},
+   {q:R`Che rapporto c&rsquo;è fra i valori $\zeta(2)=\frac{\pi^2}{6}$ e $\zeta(4)=\frac{\pi^4}{90}$ e il nucleo 09?`,
+    a:R`Sono esattamente le somme ottenute con <b>Parseval</b> dalle serie di Fourier di $x$ e $x^2$. Due strade indipendenti: là un&rsquo;identità geometrica in uno spazio di Hilbert, qui una funzione analitica di variabile complessa. Il fatto che convergano sugli stessi numeri non è un caso: entrambe stanno leggendo la struttura degli interi, e questa doppia lettura è ciò che rende $\zeta$ l&rsquo;oggetto centrale che è.`}
+  ]}
+]},
+
+/* ---------------- 04 · SENSO E ROTTE ---------------- */
+{ num:'04', title:'Il senso e le rotte fisiche', meta:'chiusura del Movimento III: cosa lascia in mano per la fisica teorica',
+  blocchi:[
+  {t:'prosa', title:'Cosa chiude questo nucleo', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il principio d&rsquo;identità (nucleo 12) diventa un metodo; l&rsquo;integrale keyhole (nucleo 13) diventa la formula di riflessione; le singolarità del nucleo 11 diventano i poli di $\Gamma$ e di $\zeta$, che in fisica sono le divergenze da rinormalizzare.</p>
+  <p><b>Il punto.</b> Una formula è una finestra, non l&rsquo;oggetto. Se la funzione dietro è analitica, essa esiste anche dove la formula tace, e ci si arriva in un solo modo possibile. È l&rsquo;idea che trasforma l&rsquo;analisi complessa da tecnica di calcolo a <b>principio costruttivo</b> della fisica teorica.</p>
+  <p><b>A valle.</b> Il Movimento IV (nuclei 15&ndash;18) riporta tutto sul terreno operativo: distribuzioni, trasformata di Fourier rigorosa, funzioni di Green, operatori e spettro, EDP della fisica. Le antitrasformate si calcoleranno con i residui, le funzioni di Green avranno i poli di questo nucleo, e la $\delta$ sarà il limite regolarizzato di famiglie analitiche.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>La continuazione analitica</b>: l&rsquo;estensione unica di una funzione oltre il dominio in cui la sua formula converge.`,
+   rotte:[
+    {dove:'Rinormalizzazione', txt:R`La <b>regolarizzazione dimensionale</b> continua analiticamente nella dimensione $d$ dello spazio-tempo: gli integrali divergenti diventano funzioni di $d$, e le divergenze compaiono come <b>poli di $\Gamma$</b> in $d=4$. La struttura tecnica dell&rsquo;intera teoria quantistica dei campi perturbativa poggia su questo nucleo.`},
+    {dove:'Statistica<br>a $T$ finita', txt:R`La <b>rotazione di Wick</b> $t\to-i\tau$ è una continuazione analitica che trasforma l&rsquo;evoluzione quantistica $e^{-iHt}$ nel peso di Boltzmann $e^{-\beta H}$: meccanica quantistica e meccanica statistica sono la <b>stessa</b> teoria continuata analiticamente nel tempo, con $\beta$ come tempo immaginario. È forse il ponte concettuale più profondo fra i due campi che ti interessano.`},
+    {dove:'Transizioni<br>di fase', txt:R`La funzione di partizione di un sistema finito è analitica in $\beta$ e nel campo: <b>nessuna transizione</b> è possibile. Gli <b>zeri di Lee&ndash;Yang</b> nel piano complesso si avvicinano all&rsquo;asse reale al crescere del sistema, e nel limite termodinamico lo toccano: <b>la transizione di fase è l&rsquo;arrivo di una singolarità sull&rsquo;asse fisico</b>.`},
+    {dove:'Scattering', txt:R`L&rsquo;ampiezza continuata nell&rsquo;energia complessa ha poli (stati legati, risonanze) e tagli (soglie). La <b>continuazione al secondo foglio</b> è dove vivono le risonanze instabili — oggetti che sull&rsquo;asse reale fisico non appaiono come stati, ma governano ciò che si misura.`}
+   ],
+   domanda:R`Se la funzione di partizione di un sistema <b>finito</b> è analitica, allora nessun sistema reale — che è sempre finito — ha vere transizioni di fase, vere singolarità, vera irreversibilità: sono tutte proprietà del <i>limite</i>. Eppure le osserviamo. <b>Domanda che porti avanti, ed è la stessa dei nuclei 06 e 13 in un&rsquo;altra veste:</b> qual è la quantità che misura <i>quanto vicino all&rsquo;asse reale</i> sono arrivate le singolarità di un sistema grande ma finito — e vale la pena studiare la termalizzazione (ETH, decoerenza) proprio come la <b>migrazione degli zeri e dei poli verso l&rsquo;asse fisico</b>, invece che come proprietà delle traiettorie? Se sì, gli strumenti per porla bene sono tutti in questo Movimento.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo14-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 14 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 14-continuazione.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

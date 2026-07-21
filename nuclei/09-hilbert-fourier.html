@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 09 — Hilbert &amp; Fourier: ortogonalità, proiezione, sviluppo su base ortonormale</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento II · Nucleo <b>09 — Hilbert &amp; Fourier: ortogonalità, proiezione, sviluppo su base ortonormale</b> · Metodi Matematici della Fisica</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 09: Hilbert & Fourier <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | plot | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'Metodi · Fourier non è un trucco di calcolo: è lo sviluppo di un vettore su una base ortonormale, in uno spazio di funzioni',
+  blocchi:[
+  {t:'prosa', title:'La frase che riorganizza tutto', tag:'first principles', html:R`
+  <p>In $\mathbb{R}^3$ scrivere $v=v_1\mathbf e_1+v_2\mathbf e_2+v_3\mathbf e_3$ è banale, e le componenti si trovano con un prodotto scalare: $v_k=\langle v,\mathbf e_k\rangle$. Nessuno lo chiama &laquo;sviluppo in serie&raquo;: è solo scrivere un vettore nella sua base.</p>
+  <p>La serie di Fourier <b>è la stessa identica operazione</b>, in uno spazio dove i punti sono funzioni:
+  $$f(x)=\sum_n c_n e_n(x),\qquad c_n=\langle f,e_n\rangle,$$
+  con $e_n$ le funzioni trigonometriche, opportunamente normalizzate. Le formule integrali per i coefficienti — che a prima vista sembrano magia — sono <b>proiezioni</b>: $c_n=\langle f,e_n\rangle$ è un integrale solo perché in questo spazio il prodotto scalare è un integrale.</p>
+  <p>Il nucleo 08 ti ha dato la <b>distanza</b> fra funzioni e la <b>completezza</b>. Qui aggiungiamo una sola struttura in più — il <b>prodotto scalare</b> — e con essa arrivano angoli, ortogonalità, proiezioni e il teorema di Pitagora. Uno spazio vettoriale con prodotto scalare, completo, si chiama <b>spazio di Hilbert</b>: è l&rsquo;ambiente in cui vive la meccanica quantistica, e in cui Fourier smette di essere una tecnica e diventa geometria.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Riconoscere un <b>prodotto scalare</b>, la norma che induce, e usare <b>Cauchy&ndash;Schwarz</b>.</li>
+  <li>Calcolare la <b>proiezione ortogonale</b> su un sottospazio e sapere <b>perché</b> è la miglior approssimazione (non solo che lo è).</li>
+  <li>Verificare che il sistema trigonometrico è <b>ortogonale</b> e scrivere i <b>coefficienti di Fourier</b> di una funzione assegnata (forma reale ed esponenziale).</li>
+  <li>Distinguere i tre modi di convergere di una serie di Fourier — in $L^2$, puntualmente (<b>Dirichlet</b>), uniformemente — e sapere cosa succede in un salto (<b>Gibbs</b>).</li>
+  <li>Usare <b>Bessel</b> e <b>Parseval</b>, e con Parseval sommare serie numeriche (il trucco d&rsquo;esame: $\sum 1/n^2=\pi^2/6$, $\sum 1/n^4=\pi^4/90$).</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · PRODOTTO SCALARE E PROIEZIONE ---------------- */
+{ num:'01', title:'Prodotto scalare, ortogonalità, proiezione', meta:'la struttura che aggiunge angoli · Cauchy–Schwarz · la proiezione È la miglior approssimazione',
+  blocchi:[
+  {t:'prosa', title:'Gli assiomi, e cosa portano in dote', tag:'grammatica', html:R`
+  <p>Un <b>prodotto scalare</b> su uno spazio vettoriale $H$ (reale) è una mappa $\langle\cdot,\cdot\rangle:H\times H\to\mathbb{R}$ <b>bilineare</b>, <b>simmetrica</b> e <b>definita positiva</b>: $\langle f,f\rangle\ge0$, con $=0$ solo per $f=0$. Nel caso complesso è <i>sesquilineare</i>: $\langle f,g\rangle=\overline{\langle g,f\rangle}$ e la linearità sta in un solo argomento (in fisica, per convenzione, nel secondo).</p>
+  <p>Induce la norma $\lVert f\rVert=\sqrt{\langle f,f\rangle}$ — quindi tutto il nucleo 08 vale ancora. Ma in più dà due cose che una norma qualsiasi <b>non</b> dà:</p>
+  <ul>
+  <li><b>Ortogonalità:</b> $f\perp g$ significa $\langle f,g\rangle=0$. Un concetto di <i>angolo retto</i> fra funzioni.</li>
+  <li><b>Pitagora:</b> se $f\perp g$ allora $\lVert f+g\rVert^2=\lVert f\rVert^2+\lVert g\rVert^2$ (si espande e il doppio prodotto muore).</li>
+  </ul>
+  <p><b>Cauchy&ndash;Schwarz:</b> $|\langle f,g\rangle|\le\lVert f\rVert\,\lVert g\rVert$, con uguaglianza solo se $f,g$ sono paralleli. È ciò che rende legittima la definizione di <b>angolo</b> $\cos\theta=\dfrac{\langle f,g\rangle}{\lVert f\rVert\lVert g\rVert}$, ed è anche ciò che dimostra la disuguaglianza triangolare per la norma indotta.</p>
+  <div class="note">Uno spazio con prodotto scalare <b>completo</b> (nucleo 08) si chiama <b>spazio di Hilbert</b>. Senza completezza si dice pre-hilbertiano: la geometria c&rsquo;è, ma i limiti possono cadere fuori. È esattamente la ragione per cui non basta $C[a,b]$ e serve $L^2$ (nucleo 10).</div>`},
+  {t:'gram', title:'Gli spazi modello di questo nucleo', rows:[
+   [R`$\mathbb{R}^n$`, R`$\langle x,y\rangle=\sum_k x_ky_k$. Il caso finito-dimensionale: qui tutto ciò che segue lo sai già dalla Geometria.`],
+   [R`$\ell^2$`, R`successioni con $\sum|x_k|^2\lt\infty$, $\langle x,y\rangle=\sum_k x_k\overline{y_k}$. <b>Hilbert.</b> È lo spazio delle <i>componenti</i>.`],
+   [R`$L^2[-\pi,\pi]$`, R`funzioni con $\int|f|^2\lt\infty$, $\langle f,g\rangle=\displaystyle\int_{-\pi}^{\pi}f\,\overline g\,dx$. <b>Hilbert</b> (serve Lebesgue, nucleo 10). È lo spazio naturale di Fourier.`],
+   [R`$C[a,b]$ con $\langle f,g\rangle=\int f g$`, R`stesso prodotto scalare, ma spazio <b>non completo</b> (nucleo 08): pre-hilbertiano. Il suo completamento è proprio $L^2$.`]
+  ]},
+  {t:'reveal', title:'Il teorema della proiezione: perché la proiezione è la <i>miglior</i> approssimazione', tag:'derivazione', steps:[
+   {label:'Il problema', body:R`<p>Sia $V\subset H$ un sottospazio (per noi: le combinazioni dei primi $N$ vettori di una famiglia ortonormale). Domanda: fra tutti i $w\in V$, quale <b>minimizza</b> la distanza $\lVert f-w\rVert$? Cioè: qual è la migliore approssimazione di $f$ dentro $V$?</p>`},
+   {label:'La candidata: la proiezione', body:R`<p>Sia $\{e_1,\dots,e_N\}$ una base <b>ortonormale</b> di $V$ ($\langle e_i,e_j\rangle=\delta_{ij}$) e poniamo
+   $$P f=\sum_{k=1}^{N}\langle f,e_k\rangle\,e_k.$$
+   Il fatto chiave: <b>$f-Pf$ è ortogonale a tutto $V$</b>. Verifica su un generatore: $\langle f-Pf,e_j\rangle=\langle f,e_j\rangle-\sum_k\langle f,e_k\rangle\langle e_k,e_j\rangle=\langle f,e_j\rangle-\langle f,e_j\rangle=0$, perché l&rsquo;ortonormalità spegne tutti i termini tranne $k=j$. Per linearità l&rsquo;ortogonalità vale contro ogni $w\in V$.</p>`},
+   {label:'Pitagora chiude la questione', body:R`<p>Per ogni $w\in V$ scriviamo $f-w=(f-Pf)+(Pf-w)$. Il primo pezzo è ortogonale a $V$, il secondo <b>sta</b> in $V$: sono ortogonali fra loro, quindi per Pitagora
+   $$\lVert f-w\rVert^2=\lVert f-Pf\rVert^2+\lVert Pf-w\rVert^2\ \ge\ \lVert f-Pf\rVert^2,$$
+   con uguaglianza <b>se e solo se</b> $w=Pf$. La proiezione è la miglior approssimazione, ed è l&rsquo;unica. $\blacksquare$</p>
+   <div class="note">Qui c&rsquo;è tutto il senso di Fourier: le somme parziali di Fourier <b>non</b> sono un&rsquo;approssimazione qualsiasi che per fortuna funziona — sono <b>la</b> proiezione ortogonale di $f$ sullo spazio generato dalle prime $N$ armoniche, dunque la miglior approssimazione possibile in norma $L^2$ con quel numero di armoniche. La minimizzazione è automatica, non va imposta.</div>`}
+  ]},
+  {t:'plot', title:'La geometria che regge tutto: $f-Pf\\perp V$',
+   intro:R`La figura è in $\mathbb{R}^2$ perché lì l&rsquo;occhio la vede, ma <b>l&rsquo;argomento non usa la dimensione</b>: vale identico quando i punti sono funzioni e il sottospazio è generato da $\sin$ e $\cos$.`,
+   plots:[
+    {kind:'func2d', xr:[-0.4,3.2], yr:[-0.4,2.6], equal:true, height:360, ticks:false,
+     title:'proiezione: l\'errore f - Pf e ortogonale al sottospazio V',
+     curves:[{f:'0.45*x', col:'#5eead4', width:2.4, label:'sottospazio V'}],
+     segs:[
+      {x1:0, y1:0, x2:1.9, y2:2.2, col:'#4c8dff', arrow:true, width:2.6, label:'f', lx:0.75, ly:1.5},
+      {x1:0, y1:0, x2:2.62, y2:1.18, col:'#d8a13a', arrow:true, width:2.6, label:'Pf', lx:1.5, ly:0.45},
+      {x1:1.9, y1:2.2, x2:2.62, y2:1.18, col:'#ff9b6b', dash:true, width:2.2, label:'f - Pf', lx:2.5, ly:1.95},
+      {x1:2.62, y1:1.18, x2:2.44, y2:0.98, col:'#8fa0b5', width:1.4},
+      {x1:2.44, y1:0.98, x2:2.28, y2:1.2, col:'#8fa0b5', width:1.4},
+      {x1:1.9, y1:2.2, x2:2.1, y2:0.945, col:'#6b7788', dash:true, width:1.4, label:'f - w', lx:1.72, ly:1.35}
+     ],
+     marks:[{x:2.62, y:1.18, col:'#d8a13a'},
+            {x:2.1, y:0.945, label:'w (altro punto di V)', col:'#6b7788', left:true}]}
+   ],
+   leggi:R`Il vettore azzurro è $f$, la retta verde è il sottospazio $V$ delle approssimazioni ammesse. La proiezione $Pf$ (oro) è il punto di $V$ per cui il <b>residuo</b> $f-Pf$ (arancione tratteggiato) forma un <b>angolo retto</b> con $V$ — la squadretta grigia lo segna. Qualunque altro $w\in V$ (grigio) chiude un triangolo rettangolo con cateti $f-Pf$ e $Pf-w$: la sua ipotenusa $\lVert f-w\rVert$ è per forza più lunga. <b>La minimalità è Pitagora, non un calcolo di minimo.</b> Trasporta ora ogni parola in $L^2$: $f$ è una funzione, $V$ è lo spazio delle combinazioni di $\{1,\cos x,\sin x,\dots,\cos Nx,\sin Nx\}$, $Pf$ è la somma parziale di Fourier $S_N f$, e l&rsquo;angolo retto dice $\int_{-\pi}^{\pi}(f-S_Nf)\cos kx\,dx=0$ per ogni $k\le N$: <b>il residuo non contiene più nessuna delle armoniche che hai già usato</b>. È il motivo per cui aggiungere un&rsquo;armonica non ti costringe mai a ricalcolare le precedenti — i coefficienti sono definitivi.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché i coefficienti di Fourier <b>non</b> cambiano quando aumenti $N$?`,
+    a:R`Perché la base è <b>ortonormale</b>: il coefficiente $c_k=\langle f,e_k\rangle$ dipende solo da $f$ e da $e_k$, non dagli altri elementi usati. Geometricamente: le direzioni sono fra loro perpendicolari, quindi la componente lungo una non &laquo;sporca&raquo; le altre. Con una base <b>non</b> ortogonale, invece, i coefficienti della miglior approssimazione cambierebbero tutti a ogni nuovo vettore (bisognerebbe risolvere un sistema, la matrice di Gram).`},
+   {q:R`Che ruolo ha Cauchy–Schwarz nella definizione dell&rsquo;angolo fra due funzioni?`,
+    a:R`Garantisce che $\dfrac{\langle f,g\rangle}{\lVert f\rVert\lVert g\rVert}$ stia in $[-1,1]$, cioè che sia effettivamente il coseno di un angolo. Senza quella disuguaglianza la definizione non avrebbe senso. È lo stesso enunciato che, in probabilità, dice che il coefficiente di correlazione sta fra $-1$ e $1$ — e non è un&rsquo;analogia: la covarianza <b>è</b> un prodotto scalare.`}
+  ]}
+]},
+
+/* ---------------- 02 · BASI ORTONORMALI, BESSEL, PARSEVAL ---------------- */
+{ num:'02', title:'Basi ortonormali: Bessel e Parseval', meta:'coefficienti astratti · l’energia non può crescere (Bessel) · si conserva se la base è completa (Parseval)',
+  blocchi:[
+  {t:'prosa', title:'Sistema ortonormale e coefficienti', tag:'grammatica', html:R`
+  <p>Una famiglia $\{e_n\}_{n\in\mathbb{N}}\subset H$ è <b>ortonormale</b> se $\langle e_n,e_m\rangle=\delta_{nm}$. Dato $f\in H$, i numeri
+  $$c_n=\langle f,e_n\rangle$$
+  si chiamano <b>coefficienti di Fourier di $f$ rispetto al sistema</b> — qualunque sia il sistema, non solo quello trigonometrico. La somma parziale $S_Nf=\sum_{n\le N}c_ne_n$ è, per la tappa 01, la proiezione ortogonale su $\mathrm{span}\{e_1,\dots,e_N\}$.</p>`},
+  {t:'reveal', title:'Disuguaglianza di Bessel: $\\sum|c_n|^2\\le\\lVert f\\rVert^2$', tag:'derivazione', steps:[
+   {label:'Calcola la norma del residuo', body:R`<p>Espandi $\lVert f-S_Nf\rVert^2=\langle f-S_Nf,\,f-S_Nf\rangle$. Usando $\langle f,S_Nf\rangle=\sum_{n\le N}\overline{c_n}\langle f,e_n\rangle=\sum_{n\le N}|c_n|^2$ e $\lVert S_Nf\rVert^2=\sum_{n\le N}|c_n|^2$ (Pitagora sui termini ortonormali), i conti danno
+   $$\lVert f-S_Nf\rVert^2=\lVert f\rVert^2-\sum_{n\le N}|c_n|^2.$$</p>`},
+   {label:'La disuguaglianza cade da sola', body:R`<p>Il membro sinistro è $\ge0$ (è una norma al quadrato), quindi $\sum_{n\le N}|c_n|^2\le\lVert f\rVert^2$ <b>per ogni $N$</b>. Le somme parziali sono crescenti e limitate: la serie converge e
+   $$\boxed{\ \sum_{n=1}^{\infty}|c_n|^2\le\lVert f\rVert^2\ }\qquad\text{(Bessel).}$$
+   Conseguenza gratis: $c_n\to0$. Le componenti di un vettore su direzioni sempre nuove devono spegnersi. $\blacksquare$</p>
+   <div class="note">Lettura fisica: $\lVert f\rVert^2$ è l&rsquo;<b>energia</b> del segnale, $|c_n|^2$ l&rsquo;energia nel modo $n$-esimo. Bessel dice che la somma delle energie dei modi non può superare l&rsquo;energia totale — non puoi tirare fuori più di quanto c&rsquo;è.</div>`}
+  ]},
+  {t:'prosa', title:'Parseval: quando l&rsquo;energia si conserva tutta', tag:'la definizione che conta', html:R`
+  <p>Bessel lascia aperta la possibilità che una parte dell&rsquo;energia <b>sfugga</b> alla famiglia: se il sistema è troppo povero (per esempio, hai dimenticato i coseni), esiste un pezzo di $f$ ortogonale a tutti gli $e_n$, invisibile ai coefficienti.</p>
+  <p>Un sistema ortonormale si dice <b>completo</b> — ed è allora una <b>base hilbertiana</b> — quando questo non accade: le uniche funzioni ortogonali a tutti gli $e_n$ sono la funzione nulla. Le tre condizioni seguenti sono equivalenti, e sono la definizione operativa:</p>
+  <ul>
+  <li>$\lVert f-S_Nf\rVert\to0$ per ogni $f$ (le somme parziali convergono a $f$ <b>in norma</b>);</li>
+  <li>vale l&rsquo;<b>identità di Parseval</b> $\displaystyle\sum_n|c_n|^2=\lVert f\rVert^2$ (Bessel con l&rsquo;uguale);</li>
+  <li>$\langle f,e_n\rangle=0\ \forall n\ \Rightarrow\ f=0$.</li>
+  </ul>
+  <p>Nota bene la differenza con l&rsquo;algebra lineare: una base hilbertiana <b>non</b> è una base algebrica. $f$ non è una combinazione <i>finita</i> degli $e_n$: è il <b>limite</b> delle proiezioni. Ed è qui che serve la <b>completezza dello spazio</b> (nucleo 08): senza, quel limite potrebbe non esistere dentro lo spazio. <b>Due completezze diverse, stessa parola:</b> completo il <i>sistema</i> (niente energia sfugge), completo lo <i>spazio</i> (niente limite sfugge). Servono entrambe, e vanno tenute distinte all&rsquo;esame.</p>`},
+  {t:'plot', title:'Ortogonalità, vista: $\\int_{-\\pi}^{\\pi}\\sin x\\,\\sin 2x\\,dx=0$',
+   intro:R`Che due armoniche diverse siano &laquo;perpendicolari&raquo; non è un&rsquo;astrazione: è una cancellazione di aree che si può guardare.`,
+   plots:[
+    {kind:'func2d', xr:[-3.15,3.15], yr:[-1.15,1.15], height:300, w:430,
+     title:'le due armoniche: sin x e sin 2x',
+     curves:[{f:'sin(x)', col:'#4c8dff', width:2.4, label:'sin x'},
+             {f:'sin(2*x)', col:'#d8a13a', width:2.4, label:'sin 2x'}]},
+    {kind:'func2d', xr:[-3.15,3.15], yr:[-1.15,1.15], height:300, w:430,
+     title:'il loro prodotto: aree opposte che si annullano',
+     curves:[{f:'sin(x)*sin(2*x)', col:'#b98cff', width:2.6, label:'sin x · sin 2x'},
+             {f:'0', col:'#4d5a6b', width:1.2, dash:true}]}
+   ],
+   leggi:R`A sinistra due elementi del sistema trigonometrico. A destra il loro <b>prodotto</b>: l&rsquo;integrale su $[-\pi,\pi]$ è l&rsquo;area con segno sotto quella curva viola, e i lobi positivi cancellano <b>esattamente</b> quelli negativi — l&rsquo;integrale è zero, cioè $\sin x\perp\sin 2x$. Lo stesso accade per ogni coppia $\sin nx,\sin mx$ con $n\ne m$, per ogni $\cos nx,\cos mx$, e per ogni $\sin$ contro ogni $\cos$ (qui basta la <b>parità</b>: dispari per pari fa dispari, e l&rsquo;integrale di una funzione dispari su un intervallo simmetrico è nullo). <b>All&rsquo;esame</b> l&rsquo;ortogonalità si verifica con Werner: $\sin nx\sin mx=\tfrac12[\cos(n-m)x-\cos(n+m)x]$, e ogni $\cos kx$ con $k\ne0$ ha integrale nullo su un periodo. Il caso $n=m$ è l&rsquo;unico che sopravvive e dà la <b>normalizzazione</b>: $\int_{-\pi}^{\pi}\sin^2nx\,dx=\pi$ — la ragione del $1/\pi$ davanti ai coefficienti nella tappa 03.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un sistema ortonormale <b>non</b> completo: cosa si rompe?`,
+    a:R`Bessel resta valida ma con disuguaglianza <b>stretta</b> per qualche $f$: una parte dell&rsquo;energia sta in una direzione che il sistema non vede. Esempio: in $L^2[-\pi,\pi]$ prendi solo i $\{\sin nx\}$. Le funzioni <b>pari</b> non nulle (es. $f=1$) hanno tutti i coefficienti nulli pur non essendo nulle: $S_Nf\equiv0\not\to f$. Il sistema completo va preso con seni <b>e</b> coseni (o con tutti gli $e^{inx}$).`},
+   {q:R`«Completo» detto del sistema e detto dello spazio: stessa cosa?`,
+    a:R`No, e confonderli è un classico. <b>Spazio completo</b> (nucleo 08) = ogni successione di Cauchy converge <i>dentro</i> lo spazio; è una proprietà della coppia (insieme, norma). <b>Sistema completo</b> = nessun vettore non nullo è ortogonale a tutti gli $e_n$; è una proprietà della famiglia. $L^2$ è uno spazio completo, e $\{e^{inx}/\sqrt{2\pi}\}$ è un sistema completo <i>in esso</i>. Servono entrambe: la prima perché il limite esista, la seconda perché il limite sia proprio $f$.`}
+  ]}
+]},
+
+/* ---------------- 03 · LA SERIE DI FOURIER ---------------- */
+{ num:'03', title:'La serie di Fourier e i suoi tre modi di convergere', meta:'il sistema trigonometrico · coefficienti reali ed esponenziali · $L^2$ sempre, Dirichlet puntualmente, Gibbs nei salti',
+  blocchi:[
+  {t:'prosa', title:'Il sistema, e da dove vengono i coefficienti', tag:'costruzione', html:R`
+  <p>Su $[-\pi,\pi]$ il sistema trigonometrico $\{1,\cos x,\sin x,\cos 2x,\sin 2x,\dots\}$ è <b>ortogonale</b> (tappa 02) con $\lVert\cos nx\rVert^2=\lVert\sin nx\rVert^2=\pi$ per $n\ge1$ e $\lVert 1\rVert^2=2\pi$. Normalizzando si ottiene una <b>base hilbertiana</b> di $L^2[-\pi,\pi]$ — la completezza del sistema è un teorema (via Stone&ndash;Weierstrass o nucleo di Fejér), non un&rsquo;ovvietà.</p>
+  <p>Applicando $c_n=\langle f,e_n\rangle$ e riassorbendo le normalizzazioni si arriva alle formule d&rsquo;uso:
+  $$f(x)\sim\frac{a_0}{2}+\sum_{n=1}^{\infty}\big(a_n\cos nx+b_n\sin nx\big),$$
+  $$a_n=\frac1\pi\int_{-\pi}^{\pi}f(x)\cos nx\,dx,\qquad b_n=\frac1\pi\int_{-\pi}^{\pi}f(x)\sin nx\,dx.$$
+  Il $\tfrac{a_0}{2}$ non è un vezzo: rende la formula di $a_n$ valida anche per $n=0$ (e $\tfrac{a_0}{2}$ è la <b>media</b> di $f$). Il simbolo $\sim$ è d&rsquo;obbligo finché non si è detto <b>in che senso</b> la serie converge: è il tema della seconda metà di questa tappa.</p>`},
+  {t:'gram', title:'Il formulario operativo (quello che serve al compito)', rows:[
+   [R`forma reale`, R`$f\sim\dfrac{a_0}{2}+\sum(a_n\cos nx+b_n\sin nx)$, con $a_n,b_n$ come sopra. Periodo $2\pi$.`],
+   [R`forma esponenziale`, R`$f\sim\sum_{n\in\mathbb{Z}}c_ne^{inx}$, $c_n=\dfrac{1}{2\pi}\displaystyle\int_{-\pi}^{\pi}f(x)e^{-inx}dx$. Legami: $c_n=\tfrac12(a_n-ib_n)$, $c_{-n}=\overline{c_n}$ se $f$ è reale.`],
+   [R`parità`, R`$f$ <b>pari</b> $\Rightarrow b_n=0$ (serie di soli coseni); $f$ <b>dispari</b> $\Rightarrow a_n=0$ (soli seni). <b>Da controllare sempre per primo</b>: dimezza il lavoro e previene errori di segno.`],
+   [R`periodo $2L$`, R`su $[-L,L]$: $\cos\frac{n\pi x}{L},\sin\frac{n\pi x}{L}$, e $a_n=\frac1L\int_{-L}^{L}f\cos\frac{n\pi x}{L}dx$. Stessa struttura, riscalata.`],
+   [R`Parseval (forma reale)`, R`$\dfrac1\pi\displaystyle\int_{-\pi}^{\pi}|f|^2dx=\dfrac{a_0^2}{2}+\sum_{n\ge1}(a_n^2+b_n^2)$. <b>Il generatore di somme di serie numeriche.</b>`],
+   [R`decadimento`, R`più $f$ è regolare, più i coefficienti calano in fretta: salto $\Rightarrow c_n\sim 1/n$; continua con derivata a tratti $\Rightarrow 1/n^2$; $C^\infty$ periodica $\Rightarrow$ più veloce di ogni potenza. <b>Il decadimento dei coefficienti misura la regolarità.</b>`]
+  ]},
+  {t:'reveal', title:'I tre modi di convergere — da non confondere mai', tag:'il cuore teorico', steps:[
+   {label:'In $L^2$: sempre, senza ipotesi', body:R`<p>Se $f\in L^2[-\pi,\pi]$ (basta questo: nessuna continuità richiesta), allora $\lVert f-S_Nf\rVert_2\to0$, cioè $\int_{-\pi}^{\pi}|f-S_Nf|^2dx\to0$, e vale <b>Parseval</b>. È la traduzione diretta di &laquo;il sistema trigonometrico è una base hilbertiana&raquo; ed è il regime <b>naturale</b> di Fourier: l&rsquo;errore è misurato in <b>media quadratica</b>, non punto per punto.</p>`},
+   {label:'Puntualmente: serve Dirichlet', body:R`<p>La convergenza in $L^2$ <b>non</b> dice nulla su un singolo punto (si può cambiare $f$ in un punto senza cambiare nessun coefficiente). Serve un teorema in più.</p>
+   <p><b>Teorema di Dirichlet.</b> Se $f$ è $2\pi$-periodica, <b>regolare a tratti</b> (continua a tratti con derivata continua a tratti, con limiti laterali finiti), allora per ogni $x$
+   $$S_Nf(x)\ \longrightarrow\ \frac{f(x^+)+f(x^-)}{2}.$$
+   Nei punti di continuità la serie converge a $f(x)$; nei <b>salti</b> converge alla <b>semisomma</b> dei due limiti laterali — la serie &laquo;taglia il salto a metà&raquo;, e non ha altra scelta: le somme parziali sono continue e simmetriche attorno al salto.</p>`},
+   {label:'Uniformemente: solo se non ci sono salti', body:R`<p>Se $f$ è <b>continua</b>, $2\pi$-periodica (cioè anche $f(-\pi)=f(\pi)$!) e regolare a tratti, la convergenza è <b>uniforme</b> (nucleo 07). Se invece c&rsquo;è un salto, la convergenza uniforme è <b>impossibile</b>: le $S_N$ sono continue, e un limite uniforme di funzioni continue è continuo (nucleo 07). Il modo in cui questa impossibilità si manifesta ha un nome: <b>fenomeno di Gibbs</b>.</p>
+   <div class="note warn"><b>Trabocchetto d&rsquo;esame.</b> Una $f$ continua su $[-\pi,\pi]$ ma con $f(-\pi)\ne f(\pi)$ (per esempio $f(x)=x$) <b>ha</b> un salto una volta estesa per periodicità. Vale Dirichlet, non l&rsquo;uniforme: agli estremi la serie converge a $\frac{f(\pi^-)+f(-\pi^+)}{2}$, che per $f(x)=x$ fa $0$, non $\pi$. Guarda sempre la funzione <b>estesa</b>, non quella sull&rsquo;intervallo.</div>`}
+  ]},
+  {t:'plot', title:'Il fenomeno di Gibbs: l&rsquo;orecchia che non se ne va',
+   intro:R`Onda quadra $f=\mathrm{sgn}(\sin x)$, dispari: solo seni, e solo armoniche dispari — $f\sim\dfrac4\pi\left(\sin x+\dfrac{\sin3x}{3}+\dfrac{\sin5x}{5}+\cdots\right)$.`,
+   plots:[
+    {kind:'func2d', xr:[-3.3,3.3], yr:[-1.45,1.45], height:380,
+     title:'somme parziali N=1, 3, 9, 21 contro l\'onda quadra',
+     curves:[
+      {f:'sign(sin(x))', col:'#8fa0b5', width:1.6, dash:true, label:'f (onda quadra)'},
+      {f:'4/PI*sin(x)', col:'#5eead4', width:1.8, label:'S1'},
+      {f:'4/PI*(sin(x)+sin(3*x)/3)', col:'#4c8dff', width:1.8, label:'S3'},
+      {f:'4/PI*(sin(x)+sin(3*x)/3+sin(5*x)/5+sin(7*x)/7+sin(9*x)/9)', col:'#d8a13a', width:1.8, label:'S9'},
+      {f:'4/PI*(sin(x)+sin(3*x)/3+sin(5*x)/5+sin(7*x)/7+sin(9*x)/9+sin(11*x)/11+sin(13*x)/13+sin(15*x)/15+sin(17*x)/17+sin(19*x)/19+sin(21*x)/21)', col:'#b98cff', width:2, label:'S21'}
+     ],
+     marks:[{x:0.15, y:1.179, label:'overshoot ~ 9% del salto', col:'#ff9b6b', up:true}]}
+   ],
+   leggi:R`Tre letture, in ordine di importanza. <b>(1)</b> Lontano dal salto le somme parziali si incollano alla funzione: aggiungere armoniche migliora ovunque, come promette Dirichlet. <b>(2)</b> Vicino a $x=0$ ogni $S_N$ <b>supera</b> il valore $1$ di circa il $9\%$ dell&rsquo;ampiezza del salto (precisamente $8{,}95\%$: il valore limite è $\frac{2}{\pi}\int_0^{\pi}\frac{\sin t}{t}dt\approx1{,}179$). Aumentando $N$ l&rsquo;orecchia <b>non si abbassa</b>: si stringe, scivolando verso il salto. Ecco perché la convergenza <b>non</b> è uniforme — il $\sup$ dell&rsquo;errore non tende a zero, resta $\approx0{,}18$. <b>(3)</b> Eppure la convergenza in $L^2$ c&rsquo;è: l&rsquo;orecchia si assottiglia, quindi l&rsquo;<b>area</b> dell&rsquo;errore al quadrato va a zero anche se la sua <b>altezza</b> no. È il controesempio che tiene separati i due modi di convergere — l&rsquo;errore in media quadratica può sparire mentre l&rsquo;errore massimo resta. In $x=0$ tutte le somme parziali valgono esattamente $0$: la semisomma dei limiti laterali $\frac{1+(-1)}{2}$, come dice Dirichlet.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`La serie di Fourier di $f(x)=x$ su $[-\pi,\pi]$, valutata in $x=\pi$: quanto vale?`,
+    a:R`Vale $0$. Tutti i termini sono $b_n\sin(n\pi)=0$. E deve essere così: l&rsquo;estensione periodica di $x$ ha un salto in $\pi$ da $+\pi$ a $-\pi$, e Dirichlet dà la semisomma $\frac{\pi+(-\pi)}{2}=0$. Chi scrive &laquo;$=\pi$&raquo; ha dimenticato di guardare la funzione <b>estesa</b>.`},
+   {q:R`Se i coefficienti di $f$ decadono come $1/n^2$, cosa puoi dire della convergenza?`,
+    a:R`Che è <b>uniforme</b> e assoluta: $\sum|a_n|+|b_n|\lt\infty$ (converge come $\sum1/n^2$), quindi il criterio di <b>Weierstrass</b> (nucleo 07) si applica con $M_n=|a_n|+|b_n|$. Di conseguenza la somma è <b>continua</b>. Al contrario, un decadimento $\sim1/n$ è la firma di un <b>salto</b>: la serie converge puntualmente (Dirichlet) ma non uniformemente. <b>Il decadimento dei coefficienti è un termometro della regolarità</b> — e serve anche a controllare a colpo d&rsquo;occhio se i coefficienti calcolati sono plausibili.`}
+  ]}
+]},
+
+/* ---------------- 04 · ESEMPI E CALCOLO ---------------- */
+{ num:'04', title:'I due esempi che coprono l’esame', meta:'onda quadra (dispari, salto) e $f(x)=x$ · da Parseval alle somme di serie numeriche',
+  blocchi:[
+  {t:'esercizio', title:'Onda quadra: coefficienti, valore nel salto, e $\\sum1/(2k+1)^2$',
+   src:'tipo standard — Metodi, prima parte',
+   testo:R`Sia $f$ la funzione $2\pi$-periodica con $f(x)=-1$ per $-\pi\lt x\lt0$ e $f(x)=+1$ per $0\lt x\lt\pi$. Calcolarne la serie di Fourier, discuterne la convergenza e dedurre il valore di $\displaystyle\sum_{k=0}^{\infty}\frac{1}{(2k+1)^2}$.`,
+   steps:[
+    {label:'Parità: metà del lavoro sparisce', body:R`<p>$f$ è <b>dispari</b> ($f(-x)=-f(x)$), quindi $f\cos nx$ è dispari e $$a_n=\frac1\pi\int_{-\pi}^{\pi}f\cos nx\,dx=0\quad\forall n$$ (anche $a_0$: la media è nulla). Restano solo i $b_n$: serie di soli seni. <b>Questo controllo va sempre fatto per primo.</b></p>`},
+    {label:'Calcolo di $b_n$', body:R`<p>$f\sin nx$ è <b>pari</b> (dispari per dispari), quindi si integra su metà intervallo e si raddoppia:
+    $$b_n=\frac1\pi\int_{-\pi}^{\pi}f\sin nx\,dx=\frac2\pi\int_0^{\pi}\sin nx\,dx=\frac2\pi\left[\frac{-\cos nx}{n}\right]_0^{\pi}=\frac{2}{n\pi}\big(1-\cos n\pi\big)=\frac{2}{n\pi}\big(1-(-1)^n\big).$$
+    Quindi $b_n=0$ per $n$ <b>pari</b> e $b_n=\dfrac{4}{n\pi}$ per $n$ <b>dispari</b>:
+    $$f(x)\sim\frac4\pi\sum_{k=0}^{\infty}\frac{\sin\big((2k+1)x\big)}{2k+1}.$$</p>`},
+    {label:'Convergenza: cosa scrivere', body:R`<p>$f$ è regolare a tratti, quindi <b>Dirichlet</b>: la serie converge a $f(x)$ in ogni punto di continuità, e a $\frac{f(x^+)+f(x^-)}{2}=0$ nei salti $x=0,\pm\pi$. Non è uniforme (c&rsquo;è un salto; e i coefficienti vanno come $1/n$, non sommabili). In $L^2$ converge, sempre. <b>Verifica di plausibilità:</b> in $x=\pi/2$ la serie dà $\frac4\pi(1-\frac13+\frac15-\cdots)=\frac4\pi\cdot\frac\pi4=1=f(\pi/2)$ — ritrovi la serie di Leibniz, che è un buon controllo dei conti.</p>`},
+    {label:'Parseval e la somma della serie', body:R`<p>$\dfrac1\pi\displaystyle\int_{-\pi}^{\pi}|f|^2dx=\dfrac1\pi\cdot2\pi=2$. A destra, con $a_n=0$ e $b_{2k+1}=\frac{4}{(2k+1)\pi}$:
+    $$2=\sum_{k=0}^{\infty}\frac{16}{(2k+1)^2\pi^2}\ \Longrightarrow\ \sum_{k=0}^{\infty}\frac{1}{(2k+1)^2}=\frac{2\pi^2}{16}=\frac{\pi^2}{8}.\qquad\blacksquare$$</p>
+    <div class="note">Da qui esce anche $\sum_{n\ge1}\frac1{n^2}$: separando pari e dispari, $\sum\frac1{n^2}=\sum\frac{1}{(2k)^2}+\sum\frac1{(2k+1)^2}=\frac14\sum\frac1{n^2}+\frac{\pi^2}{8}$, quindi $\frac34\sum\frac1{n^2}=\frac{\pi^2}{8}$ e $\sum\frac1{n^2}=\frac{\pi^2}{6}$.</div>`}
+   ],
+   nota:R`Schema riusabile su ogni esercizio di questo tipo: <b>parità → coefficienti su mezzo intervallo → Dirichlet nei salti → Parseval per la serie numerica</b>. Il quarto passo è quasi sempre la domanda finale del compito.`},
+  {t:'esercizio', title:'$f(x)=x$: il dente di sega e il problema di Basilea',
+   src:'tipo standard — con la trappola dell’estremo',
+   testo:R`Sviluppare in serie di Fourier la funzione $2\pi$-periodica che vale $f(x)=x$ su $(-\pi,\pi)$. Dedurne $\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^2}$.`,
+   steps:[
+    {label:'Parità e coefficienti', body:R`<p>$f$ è <b>dispari</b>: $a_n=0$. Per parti:
+    $$b_n=\frac2\pi\int_0^{\pi}x\sin nx\,dx=\frac2\pi\left(\left[-\frac{x\cos nx}{n}\right]_0^{\pi}+\frac1n\int_0^\pi\cos nx\,dx\right)=\frac2\pi\cdot\frac{-\pi\cos n\pi}{n}=\frac{2(-1)^{n+1}}{n}.$$
+    (il secondo integrale è nullo). Dunque
+    $$x\sim2\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}{n}\sin nx.$$</p>`},
+    {label:'La trappola dell&rsquo;estremo', body:R`<p>$f$ è continua su $(-\pi,\pi)$, ma la sua <b>estensione periodica</b> salta da $\pi$ a $-\pi$ in $x=\pm\pi$: il grafico è un <b>dente di sega</b>. In $x=\pi$ la serie vale $0$ (tutti i $\sin n\pi=0$), che è la semisomma $\frac{\pi+(-\pi)}{2}$ — coerente con Dirichlet. I coefficienti $\sim1/n$ confermano il salto, e la convergenza <b>non</b> è uniforme.</p>`},
+    {label:'Parseval → Basilea', body:R`<p>$\dfrac1\pi\displaystyle\int_{-\pi}^{\pi}x^2dx=\dfrac1\pi\cdot\dfrac{2\pi^3}{3}=\dfrac{2\pi^2}{3}$, e $\sum b_n^2=\sum\dfrac4{n^2}$. Quindi
+    $$\frac{2\pi^2}{3}=4\sum_{n=1}^{\infty}\frac1{n^2}\ \Longrightarrow\ \sum_{n=1}^{\infty}\frac{1}{n^2}=\frac{\pi^2}{6}.\qquad\blacksquare$$
+    Lo stesso risultato ottenuto per altra via nell&rsquo;esercizio precedente: due strade indipendenti allo stesso numero, che è il modo più rapido per accorgersi di un errore di conto.</p>`}
+   ],
+   nota:R`Il problema di Basilea — resistito un secolo, risolto da Eulero nel 1735 — qui cade come <b>corollario</b> di un&rsquo;identità geometrica: la conservazione della norma nel passaggio a una base ortonormale. È l&rsquo;esempio migliore di cosa vuol dire &laquo;cambiare linguaggio&raquo; in matematica.`},
+  {t:'plot', title:'Il dente di sega e le sue somme parziali',
+   intro:R`Le somme parziali di $x\sim2\sum(-1)^{n+1}\frac{\sin nx}{n}$: la stessa struttura dell&rsquo;onda quadra, ma qui il salto è agli <b>estremi</b> — dove l&rsquo;estensione periodica si spezza.`,
+   plots:[
+    {kind:'func2d', xr:[-3.3,3.3], yr:[-3.9,3.9], height:360,
+     title:'S3, S10 e la retta y=x: il salto vive in x = +/- pi',
+     curves:[
+      {f:'x', col:'#8fa0b5', width:1.6, dash:true, label:'f(x)=x'},
+      {f:'2*(sin(x)-sin(2*x)/2+sin(3*x)/3)', col:'#5eead4', width:1.8, label:'S3'},
+      {f:'2*(sin(x)-sin(2*x)/2+sin(3*x)/3-sin(4*x)/4+sin(5*x)/5-sin(6*x)/6+sin(7*x)/7-sin(8*x)/8+sin(9*x)/9-sin(10*x)/10)', col:'#b98cff', width:2, label:'S10'}
+     ],
+     marks:[{x:3.14159, y:0, label:'semisomma = 0', col:'#ff9b6b', left:true, up:true}]}
+   ],
+   leggi:R`Nel mezzo dell&rsquo;intervallo $S_{10}$ è quasi indistinguibile dalla retta: la serie ricostruisce $x$. Agli <b>estremi</b> tutte le somme parziali sono costrette a tornare a $0$ — sono somme di seni, che in $\pm\pi$ valgono zero — e lì compare di nuovo l&rsquo;<b>orecchia di Gibbs</b>, perché l&rsquo;estensione periodica ha un salto di ampiezza $2\pi$. È la figura da tenere a mente quando all&rsquo;esame si chiede &laquo;quanto vale la serie in $x=\pi$&raquo;: la risposta $0$ non è un caso particolare, è ciò che il grafico <b>obbliga</b> a fare. Nota anche la differenza col grafico precedente: qui l&rsquo;errore lontano dai salti cala visibilmente più in fretta, coerente col fatto che i coefficienti $2/n$ hanno lo stesso ordine ma la funzione è &laquo;meno spigolosa&raquo; all&rsquo;interno.`}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'coseni per una funzione pari · Parseval al quarto ordine · riconoscere il regime di convergenza',
+  blocchi:[
+  {t:'esercizio', title:'$f(x)=x^2$: soli coseni, e $\\sum1/n^4=\\pi^4/90$',
+   src:'esercizio guidato — provaci prima di rivelare',
+   testo:R`Sviluppare in serie di Fourier la funzione $2\pi$-periodica con $f(x)=x^2$ su $[-\pi,\pi]$. Discutere il tipo di convergenza. Dedurre $\sum_{n\ge1}\frac{(-1)^{n+1}}{n^2}$ e $\sum_{n\ge1}\frac1{n^4}$.`,
+   steps:[
+    {label:'Parità e $a_0$', body:R`<p>$f$ è <b>pari</b> $\Rightarrow b_n=0$: soli coseni. $$a_0=\frac1\pi\int_{-\pi}^{\pi}x^2dx=\frac{2\pi^2}{3},\qquad \frac{a_0}{2}=\frac{\pi^2}{3}$$ (che è la media di $x^2$ su $[-\pi,\pi]$: un controllo immediato).</p>`},
+    {label:'$a_n$ per doppia integrazione per parti', body:R`<p>$$a_n=\frac2\pi\int_0^{\pi}x^2\cos nx\,dx=\frac2\pi\left(\left[\frac{x^2\sin nx}{n}\right]_0^\pi-\frac2n\int_0^\pi x\sin nx\,dx\right)=\frac{4(-1)^n}{n^2}.$$
+    Quindi $$x^2\sim\frac{\pi^2}{3}+4\sum_{n=1}^{\infty}\frac{(-1)^n}{n^2}\cos nx.$$
+    I coefficienti vanno come $1/n^2$: l&rsquo;estensione periodica di $x^2$ è <b>continua</b> (in $\pm\pi$ vale $\pi^2$ da entrambi i lati), quindi la convergenza è <b>uniforme</b> — Weierstrass con $M_n=4/n^2$. Differenza sostanziale rispetto ai due esempi della tappa 04.</p>`},
+    {label:'Le due somme', body:R`<p><b>Puntuale in $x=0$:</b> $0=\frac{\pi^2}{3}+4\sum\frac{(-1)^n}{n^2}$, da cui $\sum_{n\ge1}\frac{(-1)^{n+1}}{n^2}=\frac{\pi^2}{12}$. (In $x=\pi$ si ritrova invece $\sum1/n^2=\pi^2/6$.)</p>
+    <p><b>Parseval:</b> $\frac1\pi\int_{-\pi}^{\pi}x^4dx=\frac{2\pi^4}{5}$, e a destra $\frac{a_0^2}{2}+\sum a_n^2=\frac{2\pi^4}{9}+16\sum\frac1{n^4}$. Dunque
+    $$16\sum_{n\ge1}\frac1{n^4}=\frac{2\pi^4}{5}-\frac{2\pi^4}{9}=\frac{8\pi^4}{45}\ \Longrightarrow\ \sum_{n=1}^{\infty}\frac1{n^4}=\frac{\pi^4}{90}.\qquad\blacksquare$$</p>`}
+   ],
+   nota:R`Regola pratica: la valutazione <b>puntuale</b> della serie dà somme con $1/n^2$ (e segni alterni a seconda del punto scelto); <b>Parseval</b> raddoppia l&rsquo;esponente e dà $1/n^4$. Se il compito chiede una somma con esponente pari doppio rispetto ai coefficienti, la strada è Parseval.`},
+  {t:'collaudo', title:'Diagnostica rapida — riconosci il regime senza calcolare', items:[
+   {q:R`$f(x)=|x|$ su $[-\pi,\pi]$, estesa per periodicità: che convergenza aspettarsi, e quale famiglia di coefficienti?`,
+    a:R`$f$ è <b>pari</b> $\Rightarrow$ soli coseni. L&rsquo;estensione periodica è <b>continua</b> (in $\pm\pi$ vale $\pi$ da entrambe le parti) ma ha un angolo in $0$: derivata discontinua $\Rightarrow$ coefficienti $\sim1/n^2$ $\Rightarrow$ convergenza <b>uniforme</b> (Weierstrass), <b>niente Gibbs</b>. Il calcolo dà $a_n=\frac{2((-1)^n-1)}{\pi n^2}$, non nulli solo per $n$ dispari.`},
+   {q:R`Due funzioni diverse possono avere gli stessi coefficienti di Fourier?`,
+    a:R`Sì, ma solo se differiscono su un insieme di <b>misura nulla</b> (per esempio in un numero finito di punti): gli integrali che definiscono i coefficienti non se ne accorgono. In $L^2$ quelle due funzioni sono lo <b>stesso</b> elemento — gli elementi di $L^2$ sono classi di equivalenza, non funzioni puntuali. È il motivo profondo per cui la convergenza naturale di Fourier è in norma e non puntuale, e prepara il nucleo 10 (Lebesgue).`},
+   {q:R`Perché $\sum_n |c_n|^2$ si chiama «energia» e non è solo un&rsquo;analogia?`,
+    a:R`Perché in fisica l&rsquo;energia di molti sistemi lineari è una <b>forma quadratica</b> nel campo: energia elastica di una corda $\propto\int|\partial_x u|^2$, energia elettromagnetica $\propto\int(E^2+B^2)$, norma di uno stato quantistico $\int|\psi|^2$. Passando alla base di Fourier, Parseval dice che quella quantità si <b>ridistribuisce</b> fra i modi senza perdite: $|c_n|^2$ è letteralmente l&rsquo;energia (o la probabilità) del modo $n$. Lo spettro di potenza di un segnale è questa identità, misurata.`}
+  ]}
+]},
+
+/* ---------------- 06 · SENSO E ROTTE ---------------- */
+{ num:'06', title:'Il senso e le rotte fisiche', meta:'perché «la base giusta» è una strategia fisica, non un tecnicismo',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Il nucleo 08 dava distanza e completezza; qui una struttura in più — il prodotto scalare — trasforma quello spazio in una <b>geometria</b>: angoli, perpendicolarità, proiezioni, Pitagora. La convergenza uniforme del nucleo 07 diventa uno dei tre regimi possibili, non più l&rsquo;unico modo di dire &laquo;si avvicina&raquo;.</p>
+  <p><b>Il punto.</b> Fourier è cambio di base. Le formule integrali per $a_n,b_n$ sono proiezioni; le somme parziali sono le migliori approssimazioni possibili in media quadratica; Parseval è la conservazione della norma nel cambio di base. E la scelta della base <b>non è neutra</b>: si sceglie quella in cui l&rsquo;operatore che governa il problema diventa <b>diagonale</b>. Le armoniche $e^{inx}$ sono autofunzioni di $\frac{d^2}{dx^2}$ — e questo è il motivo per cui rendono banali le equazioni differenziali lineari a coefficienti costanti, dove la derivazione diventa moltiplicazione per $in$.</p>
+  <p><b>A valle.</b> Il nucleo 10 (Lebesgue) dà a $L^2$ la completezza che qui abbiamo usato senza dimostrarla; il nucleo 16 estende Fourier alle <b>distribuzioni</b> e alla trasformata su tutta la retta (dove lo spettro da discreto diventa continuo); il nucleo 17 generalizza le armoniche alle autofunzioni di un operatore di <b>Sturm&ndash;Liouville</b>, cioè alla base adattata al problema invece che all&rsquo;intervallo.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>Lo sviluppo su base ortonormale</b> in uno spazio di Hilbert, con $c_n=\langle f,e_n\rangle$ e $\sum|c_n|^2=\lVert f\rVert^2$.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`È letteralmente il formalismo. Gli stati sono vettori di $L^2$ (o di uno spazio di Hilbert astratto), $|\psi\rangle=\sum_n c_n|n\rangle$ <b>è</b> lo sviluppo su base ortonormale, e $c_n=\langle n|\psi\rangle$ è la proiezione di questa tappa. Parseval $\sum|c_n|^2=1$ è la <b>conservazione della probabilità</b>, e $|c_n|^2$ è la probabilità di misurare l&rsquo;autovalore $n$-esimo. La notazione di Dirac è la notazione del prodotto scalare.`},
+    {dove:'EDP e<br>corda vibrante', txt:R`La <b>separazione delle variabili</b> per $u_{tt}=c^2u_{xx}$ produce esattamente le armoniche: ogni modo evolve indipendentemente, e la soluzione generale è la sovrapposizione con i coefficienti fissati dal dato iniziale — cioè i suoi coefficienti di Fourier. Fourier ha inventato tutto questo (1807) per l&rsquo;<b>equazione del calore</b>, non per la matematica pura.`},
+    {dove:'Meccanica<br>statistica', txt:R`In un sistema invariante per traslazione (cristallo), i modi di Fourier <b>diagonalizzano</b> l&rsquo;hamiltoniana: le oscillazioni accoppiate degli atomi diventano oscillatori indipendenti, i <b>fononi</b>. Equipartizione e calori specifici (Debye) si calcolano modo per modo perché la base giusta ha spezzato il problema in pezzi non interagenti.`},
+    {dove:'Segnali e<br>misura', txt:R`Lo <b>spettro di potenza</b> è $|c_n|^2$; la funzione di correlazione e lo spettro sono legati da Parseval (Wiener&ndash;Khinchin). Ogni volta che un apparato misura &laquo;quanta energia c&rsquo;è a quella frequenza&raquo;, sta calcolando una proiezione su un elemento della base.`}
+   ],
+   domanda:R`Se scegliere la base giusta significa <b>diagonalizzare l&rsquo;evoluzione</b>, allora per un sistema quantistico la base giusta è quella degli autostati dell&rsquo;hamiltoniana: lì l&rsquo;evoluzione è solo una fase, $c_n(t)=c_n(0)e^{-iE_nt/\hbar}$, e nulla &laquo;succede&raquo;. Ma i sistemi complessi <b>termalizzano</b>: partendo da uno stato qualunque, le osservabili macroscopiche si stabilizzano su valori d&rsquo;equilibrio. Come può un&rsquo;evoluzione che nella base giusta è banale produrre irreversibilità apparente? La risposta candidata è l&rsquo;<b>ETH</b> (eigenstate thermalization hypothesis): non una proprietà dell&rsquo;evoluzione, ma degli <b>elementi di matrice</b> $\langle m|\hat O|n\rangle$ delle osservabili <i>in quella base</i> — che per un sistema caotico si comportano come quantità pseudo-casuali. Il linguaggio con cui questa domanda si formula è, parola per parola, quello di questo nucleo.`}
+]}
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo09-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 09 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 09-hilbert-fourier.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

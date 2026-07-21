@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 02 — Funzione implicita (Dini) e ottimizzazione</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">PERCORSO-MATEMATICA · Movimento I · Nucleo <b>02 — Funzione implicita (Dini) e ottimizzazione</b> · Analisi Vettoriale (Terracina), Blocco I</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 02: Funzione implicita (Dini) e ottimizzazione <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+/* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
+{ num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Blocco I · i due esercizi-tipo che questo nucleo ti fa chiudere',
+  blocchi:[
+  {t:'prosa', title:'I due esercizi che devi saper chiudere', tag:'mira d&rsquo;esame', html:R`
+  <p>Lo scritto di Terracina, Blocco I (funzioni di più variabili), mette in fila due esercizi che vivono di questo nucleo. La mappa dell&rsquo;Argonauta li isola così: <i>Es.&nbsp;1 &mdash; Dini / differenziabilità</i>; <i>Es.&nbsp;2 &mdash; ottimizzazione (Lagrange, Hessiana) su domini</i> (mappa Argonauta, §4, esame <code>20240704</code>, confermato da <code>20250127</code>).</p>
+  <div class="testo"><span class="src">Es.&nbsp;1 · funzione implicita (mappa Argonauta, Parte I.4)</span>
+  Sia $F(x,y)=x^3+y^3-3xy$. Verifica che $F(0,0)=0$ e che vicino a $(0,0)$ l&rsquo;equazione $F(x,y)=0$ definisce implicitamente $y=g(x)$ con $g(0)=0$. Calcola $g'(0)$ e la retta tangente alla curva. Dove <b>non</b> puoi risolvere in $y$?</div>
+  <div class="testo"><span class="src">Es.&nbsp;2 · ottimizzazione su dominio (mappa Argonauta, Parte I.6)</span>
+  Determina massimo e minimo <b>assoluti</b> di $f(x,y)=x^2+2y^2-x$ sul disco chiuso $K=\{x^2+y^2\le 1\}$. (Interno: punti critici e Hessiana; bordo: moltiplicatori di Lagrange.)</div>
+  <p>I due esercizi sembrano scollegati. Non lo sono: entrambi sono <b>una sola idea del nucleo&nbsp;01</b> &mdash; il gradiente è ortogonale agli insiemi di livello &mdash; letta in due direzioni. Dini la usa per dire <i>quando una curva di livello è il grafico di una funzione</i>; Lagrange la usa per dire <i>quando, su un vincolo, non resta direzione in cui crescere</i>. Questo nucleo costruisce le due letture dalla stessa radice.</p>
+  <p class="note"><b>Nota sulle fonti.</b> Gli scritti del <i>primo</i> esonero di Terracina non sono nella banca-dati (unico buco segnalato dall&rsquo;Argonauta, mappa §5). Il tipo di esercizio è documentato dal programma ufficiale (Parte I, punti 4 e 6) e dagli esami del secondo esonero <code>20240704</code>, <code>20250127</code>, da cui provengono le forme qui replicate.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Enunciare il <b>teorema di Dini</b> con le tre ipotesi ($F\in C^1$, $F(P_0)=0$, $\partial_y F(P_0)\neq0$) e dire cosa significa geometricamente ciascuna, senza recitarle a memoria.</li>
+  <li>Ricavare $g'(x)=-\dfrac{\partial_x F}{\partial_y F}$ derivando l&rsquo;identità $F(x,g(x))=0$, e scrivere la retta tangente a una curva di livello.</li>
+  <li>Riconoscere <b>dove Dini fallisce</b>: $\partial_y F=0$ (tangente verticale, si scambia il ruolo di $x$ e $y$) e $\nabla F=0$ (punto singolare, la curva può incrociarsi).</li>
+  <li>Trovare i punti critici liberi con $\nabla f=0$ e classificarli con l&rsquo;<b>Hessiana</b> (definita positiva/negativa/indefinita), sapendo quando il test è <b>inconcludente</b> (semidefinita).</li>
+  <li>Impostare i <b>moltiplicatori di Lagrange</b> $\nabla f=\lambda\nabla g$ capendo perché, e <b>controllare separatamente</b> i punti dove $\nabla g=0$ (qualificazione del vincolo) &mdash; il trabocchetto che costa l&rsquo;esercizio.</li>
+  <li>Chiudere l&rsquo;Es.&nbsp;2 completo: estremi assoluti su un compatto = interno (gradiente + Hessiana) $\cup$ bordo (Lagrange), poi confronto dei valori.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · IL TEOREMA DI DINI ---------------- */
+{ num:'01', title:'Dini: la funzione implicita', meta:'Quando $F(x,y)=0$ è il grafico $y=g(x)$ · enunciato, ipotesi, e la formula della derivata',
+  blocchi:[
+  {t:'prosa', title:'Il problema: risolvere un&rsquo;equazione che non sai risolvere', tag:'first principles', html:R`
+  <p>Un&rsquo;equazione come $x^3+y^3-3xy=0$ lega $x$ e $y$, ma <b>non</b> si risolve esplicitamente per $y$ con una formula elementare. Eppure il suo insieme soluzione $\{F=0\}$ è una <b>curva</b> nel piano, e vicino a un suo punto quella curva <i>ha l&rsquo;aria</i> di un grafico $y=g(x)$. La domanda di Dini è precisa: <b>quando</b> posso garantire che, in un intorno di un punto $P_0$, l&rsquo;insieme $\{F=0\}$ è il grafico di una funzione $y=g(x)$ regolare &mdash; anche senza mai scrivere $g$?</p>
+  <p>Il teorema non ti dà $g$ in forma chiusa. Ti dà tre cose: <b>l&rsquo;esistenza</b> di $g$, la sua <b>regolarità</b> ($C^1$), e la sua <b>derivata</b>. In un esame, la terza è ciò che calcoli; le prime due sono ciò che devi saper <i>giustificare</i>.</p>`},
+  {t:'prosa', title:'Il teorema di Dini (caso $\\mathbb{R}^2$)', tag:'enunciato', html:R`
+  <p><b>Teorema (Dini, funzione implicita).</b> Sia $A\subseteq\mathbb{R}^2$ aperto, $F:A\to\mathbb{R}$ di classe $C^1(A)$, e $P_0=(x_0,y_0)\in A$ tale che</p>
+  $$F(x_0,y_0)=0\qquad\text{e}\qquad \partial_y F(x_0,y_0)\neq0.$$
+  <p>Allora esistono un intorno $I$ di $x_0$, un intorno $J$ di $y_0$ e un&rsquo;unica funzione $g:I\to J$ di classe $C^1$ tali che, per $(x,y)\in I\times J$,</p>
+  $$F(x,y)=0\ \iff\ y=g(x),\qquad\text{con }g(x_0)=y_0.$$
+  <p>Inoltre la derivata di $g$ è</p>
+  $$g'(x)=-\frac{\partial_x F\big(x,g(x)\big)}{\partial_y F\big(x,g(x)\big)}. \tag{Dini}$$
+  <p>Tre parole sul <b>&laquo;localmente&raquo;</b>: il teorema non dice nulla su tutta la curva $\{F=0\}$, solo dentro il rettangolino $I\times J$ attorno a $P_0$. È un teorema <b>locale</b>: fuori da lì la curva può fare qualsiasi cosa (incrociarsi, tornare indietro, avere altri rami).</p>`},
+  {t:'gram', title:'Le tre ipotesi, una per una — cosa comprano', rows:[
+   [R`$F\in C^1$`, R`$F$ ha gradiente $\nabla F=(\partial_x F,\partial_y F)$ <b>continuo</b>. Serve per due cose: la <b>regola della catena</b> (per derivare $F(x,g(x))$) e per garantire che $\partial_y F\neq0$ non solo <b>in</b> $P_0$ ma in tutto un intorno (permanenza del segno). Senza $C^1$, la formula (Dini) potrebbe non avere senso.`],
+   [R`$F(P_0)=0$`, R`$P_0$ <b>sta sulla curva</b> di livello che stai studiando. Se $F(P_0)\neq0$, per continuità $F\neq0$ in un intorno e lì l&rsquo;insieme $\{F=0\}$ è <b>vuoto</b>: niente da risolvere. Il livello si sceglie sempre così che passi per il punto.`],
+   [R`$\partial_y F(P_0)\neq0$`, R`la condizione <b>di svolta</b>. Significa: lungo la <b>verticale</b> per $P_0$, $F$ varia (non è piatta in $y$), quindi puoi &laquo;risolvere per $y$&raquo;. Geometricamente: $\nabla F(P_0)$ <b>non è orizzontale</b>, cioè la tangente alla curva <b>non è verticale</b>. Se cade, Dini in $y$ non si applica (tappa 02).`],
+   [R`la tesi: $y=g(x)$`, R`la curva $\{F=0\}$, dentro $I\times J$, è <b>esattamente</b> il grafico di una funzione. In particolare: per ogni $x\in I$ c&rsquo;è <b>un solo</b> $y\in J$ con $F(x,y)=0$. È l&rsquo;unicità che rende &laquo;$g$ una funzione&raquo;, non una relazione multivoca.`]
+  ]},
+  {t:'reveal', title:'Da dove esce la formula della derivata', tag:'derivazione', steps:[
+   {label:'L&rsquo;identità di partenza', body:R`<p>Il teorema garantisce che, per ogni $x\in I$, il punto $\big(x,g(x)\big)$ sta sulla curva. Cioè vale l&rsquo;<b>identità</b>, vera per ogni $x$ (non solo in un punto): $$F\big(x,g(x)\big)=0\qquad \forall x\in I.$$ Un&rsquo;identità in $x$ si può <b>derivare rispetto a $x$</b>: entrambi i membri sono funzioni di $x$, e sono uguali, quindi hanno la stessa derivata.</p>`},
+   {label:'Regola della catena', body:R`<p>Il primo membro è la composizione $x\mapsto \big(x,g(x)\big)\mapsto F$. La regola della catena in due variabili (nucleo 01, differenziale) dà $$\frac{d}{dx}F\big(x,g(x)\big)=\partial_x F\big(x,g(x)\big)\cdot\frac{dx}{dx}+\partial_y F\big(x,g(x)\big)\cdot g'(x).$$ Il primo fattore $dx/dx=1$. Il secondo membro dell&rsquo;identità, $0$, ha derivata $0$. Uguagliando: $$\partial_x F\big(x,g(x)\big)+\partial_y F\big(x,g(x)\big)\,g'(x)=0.$$</p>`},
+   {label:'Isola la derivata', body:R`<p>Qui serve l&rsquo;ipotesi: $\partial_y F\neq0$ in un intorno (garantito da $C^1$ + permanenza del segno), quindi puoi <b>dividere</b>: $$g'(x)=-\frac{\partial_x F\big(x,g(x)\big)}{\partial_y F\big(x,g(x)\big)}.\qquad\blacksquare$$ Nota che $\partial_y F$ al denominatore <b>è</b> l&rsquo;ipotesi non nulla: la formula stessa mostra perché quella ipotesi è indispensabile. Dove $\partial_y F\to0$, $g'\to\infty$: la tangente diventa verticale.</p>
+   <div class="note">Non hai mai scritto $g$. Hai derivato un&rsquo;identità che <b>la contiene implicitamente</b>. È questo il senso di &laquo;derivazione implicita&raquo;: sfrutti $F(x,g(x))=0$ senza risolvere in $g$.</div>`}
+  ]},
+  {t:'esercizio', title:'Applicazione diretta: la retta tangente', src:'Es.&nbsp;1 tipo Terracina · $F(x,y)=x^3+y^3-3xy$',
+   testo:R`Sia $F(x,y)=x^3+y^3-3xy$ (folium di Cartesio). Verifica le ipotesi di Dini in $P_0=(0,0)$, calcola $g'(0)$ e scrivi la retta tangente alla curva $\{F=0\}$ in $P_0$.`,
+   steps:[
+    {label:'Le ipotesi', body:R`<p>$F$ è un polinomio: $F\in C^1(\mathbb{R}^2)$ (anzi $C^\infty$). Punto: $F(0,0)=0+0-0=0$, sta sulla curva. Parziali: $$\partial_x F=3x^2-3y,\qquad \partial_y F=3y^2-3x.$$ In $(0,0)$: $\partial_x F(0,0)=0$, $\partial_y F(0,0)=0$.</p>
+    <div class="note warn"><b>Stop.</b> $\partial_y F(0,0)=0$: l&rsquo;ipotesi di Dini <b>non è verificata</b> in $(0,0)$. Anzi $\nabla F(0,0)=(0,0)$: l&rsquo;origine è un <b>punto singolare</b>. Qui Dini non si applica e la curva, infatti, si <b>autointerseca</b> (due rami passano per l&rsquo;origine). Vedi tappa 02: questo è il caso-trappola, non l&rsquo;applicazione liscia.</div>`},
+    {label:'Sposta il punto dove Dini vive', body:R`<p>Prendiamo allora un punto <b>regolare</b> della stessa curva, ad esempio $P_1=(\tfrac32,\tfrac32)$: verifica $F=\tfrac{27}{8}+\tfrac{27}{8}-3\cdot\tfrac94=\tfrac{27}{4}-\tfrac{27}{4}=0$, ci sta. Qui $\partial_y F(\tfrac32,\tfrac32)=3\cdot\tfrac94-3\cdot\tfrac32=\tfrac{27}{4}-\tfrac{9}{2}=\tfrac{9}{4}\neq0$. Dini si applica: esiste $g$ con $g(\tfrac32)=\tfrac32$.</p>`},
+    {label:'La derivata e la tangente', body:R`<p>Con (Dini): $$g'\!\Big(\tfrac32\Big)=-\frac{\partial_x F}{\partial_y F}\bigg|_{(\frac32,\frac32)}=-\frac{3\cdot\frac94-3\cdot\frac32}{\frac94}=-\frac{\frac{27}{4}-\frac{9}{2}}{\frac94}=-\frac{9/4}{9/4}=-1.$$ La retta tangente in $P_1$ è $y-\tfrac32=g'(\tfrac32)\,(x-\tfrac32)$, cioè $$y=-\Big(x-\tfrac32\Big)+\tfrac32=-x+3.\qquad\blacksquare$$</p>
+    <div class="note">Controllo geometrico veloce: la tangente ha pendenza $-1$, coerente con $\partial_x F=\partial_y F$ nel punto (i due gradienti uguali danno $g'=-1$). E il gradiente $\nabla F(\tfrac32,\tfrac32)=(\tfrac94,\tfrac94)$ è ortogonale alla retta $y=-x+3$: gradiente $\perp$ curva di livello, nucleo 01.</div>`}
+   ],
+   nota:R`La morale d&rsquo;esame: <b>prima</b> controlli $\partial_y F(P_0)$. Se è $\neq0$, applichi (Dini) e vai. Se è $=0$, non ti impanicchi: o scambi i ruoli di $x,y$ (tappa 02), o &mdash; se anche $\partial_x F=0$ &mdash; il punto è singolare e Dini tace.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché nella formula $g'=-F_x/F_y$ compare $\partial_y F$ al denominatore e non $\partial_x F$? Cosa cambierebbe se volessi $x=h(y)$?`,
+    a:R`Perché stai risolvendo <b>per $y$</b>: derivi $F(x,g(x))=0$ rispetto a $x$ e devi isolare $g'$, che moltiplica $\partial_y F$. Se invece risolvi $x=h(y)$ (ipotesi $\partial_x F\neq0$), deriva $F(h(y),y)=0$ rispetto a $y$: ottieni $h'(y)=-\partial_y F/\partial_x F$, con i ruoli scambiati.`},
+   {q:R`Dini garantisce $g$ su tutto $\mathbb{R}$?`,
+    a:R`No. Garantisce $g$ solo su un <b>intorno</b> $I$ di $x_0$. È un teorema locale: fuori da $I\times J$ la curva $\{F=0\}$ può non essere più un grafico (altri rami, tangenti verticali, autointersezioni).`}
+  ]},
+  {t:'plot', title:'Il folium, il punto buono e il punto singolare',
+   intro:R`La curva $\{F=0\}$ con $F(x,y)=x^3+y^3-3xy$ (folium di Cartesio), la sua <b>tangente</b> nel punto regolare $P_1=(\tfrac32,\tfrac32)$ e i due punti che contano.`,
+   plots:[
+    {kind:'contour', f:'x*x*x+y*y*y-3*x*y', levels:[0], col:'#4c8dff', label:'curva F=0', width:2.4, xr:[-2.3,2.3], yr:[-2.3,2.3], height:420,
+     overlays:[{f:'x+y', levels:[3], col:'#5eead4', label:'tangente in P1: y=-x+3', dash:true, width:2}],
+     marks:[{x:1.5, y:1.5, label:'P1: Dini ok', col:'#8bd450', up:true},
+            {x:0, y:0, label:'origine: grad F=0, singolare', col:'#ff6b6b', hollow:true, left:true}]}
+   ],
+   leggi:R`Nella maggior parte dei suoi punti la curva è, <b>localmente</b>, un grafico $y=g(x)$: prendi $P_1=(\tfrac32,\tfrac32)$, lì $\partial_y F=\tfrac94\neq0$, Dini vale, e la retta azzurra tratteggiata $y=-x+3$ è la tangente che hai calcolato ($g'(\tfrac32)=-1$). Guarda invece l&rsquo;<b>origine</b>: la curva ci passa <b>due volte</b>, incrociandosi. Lì $\nabla F(0,0)=(0,0)$ — nessuna direzione privilegiata, nessuna tangente unica — e Dini <b>tace</b> (non c&rsquo;è nessun $y=g(x)$ né $x=h(y)$ che descriva <i>entrambi</i> i rami vicino a $0$). È la differenza fra un punto <b>regolare</b> (gradiente non nullo → localmente un grafico, tangente ben definita ortogonale a $\nabla F$) e un punto <b>singolare</b> (gradiente nullo → la curva può fare di tutto). La regola d&rsquo;esame vive in questa figura: <b>prima</b> guardi $\nabla F(P_0)$; se una parziale in $y$ è non nulla, procedi; se tutto il gradiente è nullo, sei nel caso-trappola della tappa 02.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Qual è il ruolo geometrico di $\partial_y F(P_0)\neq0$, in una parola?`,
+    a:R`&laquo;La tangente non è verticale.&raquo; $\nabla F=(\partial_x F,\partial_y F)$ è ortogonale alla curva; se $\partial_y F\neq0$ il gradiente non è orizzontale, quindi la tangente (a lui ortogonale) non è verticale, e la curva si proietta bene sull&rsquo;asse $x$ come grafico $y=g(x)$.`}
+  ]}
+]},
+
+/* ---------------- 02 · QUANDO DINI FALLISCE ---------------- */
+{ num:'02', title:'Quando Dini fallisce', meta:'$\\partial_y F=0$ (tangente verticale) · $\\nabla F=0$ (punto singolare) · il caso-trappola dell&rsquo;esame',
+  blocchi:[
+  {t:'prosa', title:'Due modi di fallire, molto diversi', tag:'profondità d&rsquo;esame', html:R`
+  <p>L&rsquo;ipotesi $\partial_y F(P_0)\neq0$ può cadere in due modi, e vanno distinti perché richiedono risposte opposte.</p>
+  <ul>
+  <li><b>$\partial_y F(P_0)=0$ ma $\partial_x F(P_0)\neq0$.</b> Il gradiente $\nabla F(P_0)$ c&rsquo;è (non è nullo), ma è <b>orizzontale</b>: la tangente alla curva è <b>verticale</b>. Non puoi scrivere $y=g(x)$, ma <b>puoi</b> scrivere $x=h(y)$. Il punto è regolare, solo &laquo;girato di 90°&raquo;: si applica Dini con i ruoli di $x$ e $y$ scambiati.</li>
+  <li><b>$\nabla F(P_0)=(0,0)$.</b> Entrambe le parziali si annullano: $P_0$ è un <b>punto critico di $F$</b>, cioè un <b>punto singolare</b> della curva. Qui Dini <b>tace del tutto</b>: la curva può avere una cuspide, un punto isolato, o <b>autointersecarsi</b> (due o più rami). Nessun singolo grafico la descrive.</li>
+  </ul>
+  <p>La formula $g'=-\partial_x F/\partial_y F$ vede da sé la differenza: nel primo caso il denominatore $\to0$ con numeratore $\neq0$, quindi $g'\to\pm\infty$ (pendenza verticale, coerente); nel secondo caso è $\tfrac00$, indeterminato &mdash; il sintomo algebrico che qui non c&rsquo;è una pendenza sola.</p>`},
+  {t:'esercizio', title:'Il cerchio: dove si risolve in $y$ e dove no', src:'Controesempio canonico · $F(x,y)=x^2+y^2-1$',
+   testo:R`Sia $F(x,y)=x^2+y^2-1$, la circonferenza $\{F=0\}$. In quali punti Dini permette di scrivere $y=g(x)$? Cosa succede in $(1,0)$ e $(-1,0)$? Calcola $g'$ dove esiste.`,
+   steps:[
+    {label:'Il gradiente', body:R`<p>$\partial_x F=2x$, $\partial_y F=2y$, quindi $\nabla F=(2x,2y)$. Sulla circonferenza $\nabla F=0$ solo in $(0,0)$, che <b>non</b> sta sulla curva ($F(0,0)=-1\neq0$). Dunque su $\{F=0\}$ <b>non ci sono punti singolari</b>: il cerchio è liscio ovunque.</p>`},
+    {label:'Dove $\\partial_y F\\neq0$', body:R`<p>$\partial_y F=2y\neq0$ $\iff y\neq0$: in tutti i punti della circonferenza <b>fuori dall&rsquo;asse $x$</b>, Dini dà $y=g(x)$. Ad esempio nel semicerchio superiore $g(x)=\sqrt{1-x^2}$, e $$g'(x)=-\frac{\partial_x F}{\partial_y F}=-\frac{2x}{2y}=-\frac{x}{y}=-\frac{x}{\sqrt{1-x^2}},$$ che è proprio la derivata di $\sqrt{1-x^2}$. La formula implicita e quella esplicita coincidono, come devono.</p>`},
+    {label:'I due punti critici del test: $(\\pm1,0)$', body:R`<p>In $(1,0)$: $\partial_y F=2\cdot0=0$, ma $\partial_x F=2\neq0$. Dini in $y$ <b>fallisce</b>: attorno a $(1,0)$ la circonferenza <b>non</b> è un grafico $y=g(x)$ (per ogni $x\lt1$ vicino a $1$ ci sono <b>due</b> $y$, uno sopra e uno sotto l&rsquo;asse). La tangente è <b>verticale</b> ($x=1$), coerente con $g'=-x/y\to\infty$.</p>`},
+    {label:'La riparazione: scambia i ruoli', body:R`<p>In $(1,0)$ hai $\partial_x F=2\neq0$: allora risolvi <b>$x=h(y)$</b>. Localmente $h(y)=\sqrt{1-y^2}$ (ramo destro), con $$h'(y)=-\frac{\partial_y F}{\partial_x F}=-\frac{2y}{2x}=-\frac{y}{x},\qquad h'(0)=0,$$ tangente orizzontale nel piano $(y,x)$, cioè verticale nel piano $(x,y)$: la stessa retta $x=1$. Il punto era regolare: bastava girarlo. $\blacksquare$</p>
+    <div class="note"><b>Regola operativa.</b> Su una curva $\{F=0\}$: se $\partial_y F\neq0$ risolvi in $y$; se $\partial_y F=0$ ma $\partial_x F\neq0$ risolvi in $x$; se $\nabla F=0$ sei in un punto singolare e nessuno dei due funziona &mdash; devi studiare la curva a mano.</div>`}
+   ],
+   nota:R`Il criterio generale: <b>almeno una</b> parziale non nulla ($\nabla F(P_0)\neq0$) basta a garantire che $\{F=0\}$ sia localmente un grafico &mdash; in $y$ o in $x$ a seconda di quale parziale sopravvive. La curva è &laquo;liscia&raquo; (una varietà 1-dimensionale) esattamente nei punti dove $\nabla F\neq0$. Questi si chiamano <b>punti regolari</b>.`},
+  {t:'prosa', title:'Il punto singolare: il folium della tappa 01', tag:'perché la trappola morde', html:R`
+  <p>Torniamo a $F=x^3+y^3-3xy$ in $(0,0)$, dove $\nabla F(0,0)=(0,0)$. Perché lì Dini non può funzionare, in concreto? Perché la curva <b>si autointerseca</b>: due rami distinti passano per l&rsquo;origine con due tangenti diverse. Vicino a $x=0$, per ogni $x\neq0$ piccolo, l&rsquo;equazione $F(x,y)=0$ ha <b>più di una</b> soluzione $y$ vicino a $0$ &mdash; quindi nessuna funzione $y=g(x)$ (che a ogni $x$ associa <i>un solo</i> $y$) può descrivere la curva lì.</p>
+  <p>Le due tangenti nell&rsquo;origine si leggono dai termini di grado più basso di $F$: $-3xy$ (grado 2) domina su $x^3+y^3$ (grado 3) vicino a $0$, e $-3xy=0$ dà le due rette $x=0$ e $y=0$. La curva è tangente a <b>entrambi</b> gli assi nell&rsquo;origine: un nodo. È il fallimento &laquo;$\tfrac00$&raquo; della formula, reso visibile.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Su $\{F=0\}$ trovi un punto con $\partial_y F=0$ e $\partial_x F=5$. Puoi ancora descrivere la curva localmente? Come? La tangente com&rsquo;è?`,
+    a:R`Sì: $\nabla F=(5,0)\neq0$, punto regolare. Risolvi $x=h(y)$ con $h'=-\partial_y F/\partial_x F=0$ nel punto: la tangente è <b>verticale</b> nel piano $(x,y)$. Solo &laquo;non in $y$&raquo;: la curva c&rsquo;è ed è liscia.`},
+   {q:R`Come distingui a colpo d&rsquo;occhio &laquo;tangente verticale&raquo; da &laquo;punto singolare&raquo; guardando $\nabla F$?`,
+    a:R`Tangente verticale: $\partial_y F=0$ ma $\nabla F\neq0$ (l&rsquo;altra parziale salva). Punto singolare: $\nabla F=0$ <b>tutto</b>. Nel primo caso ruoti; nel secondo studi la curva a mano (termini di grado minimo, possibili rami multipli).`}
+  ]}
+]},
+
+/* ---------------- 03 · ESTREMI LIBERI ---------------- */
+{ num:'03', title:'Estremi liberi: gradiente e Hessiana', meta:'$\\nabla f=0$ (Fermat) · Schwarz · classificazione con l&rsquo;Hessiana · quando il test è muto',
+  blocchi:[
+  {t:'prosa', title:'La condizione necessaria: gradiente nullo', tag:'first principles', html:R`
+  <p>Cerchiamo massimi e minimi <b>locali interni</b> di $f:A\to\mathbb{R}$, $A\subseteq\mathbb{R}^n$ aperto. &laquo;Interni&raquo; è la parola chiave: $x_0$ ha attorno una pallina intera dentro $A$, quindi ci si può muovere in <b>ogni</b> direzione. Se $x_0$ è un estremo locale, spostandosi in qualunque direzione $f$ non aumenta (per un massimo) o non diminuisce (per un minimo): a primo ordine, non deve esserci <b>nessuna direzione di salita</b>. Quella direzione, se esistesse, sarebbe $\nabla f(x_0)$ stesso.</p>`},
+  {t:'reveal', title:'Teorema di Fermat: estremo interno ⇒ $\\nabla f=0$', tag:'dimostrazione', steps:[
+   {label:'Riduci a una variabile', body:R`<p>Sia $x_0$ estremo locale interno e $f$ differenziabile. Fissa $i$ e guarda $f$ solo lungo l&rsquo;asse $i$: la funzione di una variabile $\varphi(t)=f(x_0+t\,e_i)$ ha un estremo locale in $t=0$ (perché $f$ ce l&rsquo;ha in $x_0$, e $x_0$ è interno, quindi $t=0$ è interno al dominio di $\varphi$).</p>`},
+   {label:'Fermat 1D', body:R`<p>Per il teorema di Fermat in una variabile, $\varphi'(0)=0$. Ma $\varphi'(0)=\partial_i f(x_0)$ per definizione di parziale. Questo vale per ogni $i$, quindi $$\nabla f(x_0)=(\partial_1 f,\dots,\partial_n f)(x_0)=0.\qquad\blacksquare$$</p>
+   <div class="note"><b>Necessaria, non sufficiente.</b> $\nabla f=0$ individua i <b>punti critici</b> (o stazionari). Ma un punto critico può essere massimo, minimo <b>oppure una sella</b>: $f(x,y)=x^2-y^2$ ha $\nabla f(0,0)=0$ e in $0$ non è né max né min (sale in $x$, scende in $y$). Serve il secondo ordine per decidere.</div>`}
+  ]},
+  {t:'prosa', title:'Il secondo ordine: Taylor e l&rsquo;Hessiana', tag:'lo strumento che decide', html:R`
+  <p>In un punto critico $\nabla f(x_0)=0$, l&rsquo;approssimazione lineare (nucleo 01) diventa <b>piatta</b>: $f(x_0+h)\approx f(x_0)$ a primo ordine. Per sapere se sali o scendi devi guardare il <b>secondo ordine</b>. La formula di Taylor al 2° ordine, con $\nabla f(x_0)=0$, è</p>
+  $$f(x_0+h)=f(x_0)+\tfrac12\,h^{\mathsf T} H_f(x_0)\,h+o(|h|^2), \tag{T2}$$
+  <p>dove $H_f(x_0)$ è la <b>matrice Hessiana</b>, le derivate seconde:</p>
+  $$H_f(x_0)=\begin{pmatrix}\partial_{11}f & \partial_{12}f & \cdots\\ \partial_{21}f & \partial_{22}f & \cdots\\ \vdots & & \ddots\end{pmatrix}(x_0),\qquad (H_f)_{ij}=\partial_i\partial_j f(x_0).$$
+  <p>Il segno di $f(x_0+h)-f(x_0)$ per $h$ piccolo è governato dalla <b>forma quadratica</b> $Q(h)=h^{\mathsf T}H_f h$. Se $Q\gt0$ per ogni $h\neq0$, ogni spostamento fa salire: <b>minimo</b>. Se $Q\lt0$ sempre: <b>massimo</b>. Se $Q$ cambia segno: <b>sella</b>.</p>`},
+  {t:'gram', title:'Schwarz e la classificazione — la grammatica del test', rows:[
+   [R`$\partial_i\partial_j f=\partial_j\partial_i f$`, R`<b>Teorema di Schwarz.</b> Se $f\in C^2$ (derivate seconde continue), le <b>miste sono uguali</b>: l&rsquo;ordine di derivazione non conta. Conseguenza: $H_f$ è una <b>matrice simmetrica</b>. È ciò che permette di diagonalizzarla con autovalori reali e di parlare di &laquo;definita positiva/negativa&raquo;.`],
+   [R`$H\succ0$ (def. positiva)`, R`$h^{\mathsf T}Hh\gt0$ per ogni $h\neq0$; equivalente: <b>tutti gli autovalori $\gt0$</b>. Allora $x_0$ è <b>minimo locale stretto</b>.`],
+   [R`$H\prec0$ (def. negativa)`, R`$h^{\mathsf T}Hh\lt0$ per ogni $h\neq0$; <b>tutti gli autovalori $\lt0$</b>. Allora $x_0$ è <b>massimo locale stretto</b>.`],
+   [R`$H$ indefinita`, R`autovalori di <b>segno misto</b> (almeno uno $\gt0$ e uno $\lt0$). Allora $x_0$ è un <b>punto di sella</b>: non è né max né min.`],
+   [R`$H$ semidefinita`, R`autovalori $\ge0$ (o $\le0$) con <b>almeno uno $=0$</b>, cioè $\det H=0$. Il test è <b>inconcludente</b>: il 2° ordine non decide, serve guardare oltre. Non concludere niente qui.`],
+   [R`caso $2\times2$`, R`con $H=\begin{pmatrix}f_{xx}&f_{xy}\\ f_{xy}&f_{yy}\end{pmatrix}$ e $\det H=f_{xx}f_{yy}-f_{xy}^2$: se $\det H\gt0$ e $f_{xx}\gt0\Rightarrow$ min; $\det H\gt0$ e $f_{xx}\lt0\Rightarrow$ max; $\det H\lt0\Rightarrow$ sella; $\det H=0\Rightarrow$ inconcludente.`]
+  ]},
+  {t:'reveal', title:'Perché il segno di $Q(h)$ decide (idea)', tag:'derivazione', steps:[
+   {label:'Il termine dominante', body:R`<p>Da (T2), $f(x_0+h)-f(x_0)=\tfrac12 Q(h)+o(|h|^2)$ con $Q(h)=h^{\mathsf T}Hh$. La forma quadratica è <b>omogenea di grado 2</b>: $Q(th)=t^2 Q(h)$. Scrivi $h=\rho\,u$ con $|u|=1$, $\rho=|h|$: $$f(x_0+h)-f(x_0)=\tfrac12\rho^2\,Q(u)+o(\rho^2)=\rho^2\Big[\tfrac12 Q(u)+\tfrac{o(\rho^2)}{\rho^2}\Big].$$</p>`},
+   {label:'Il resto non ce la fa a ribaltare il segno', body:R`<p>Se $H\succ0$, allora $Q(u)\ge m\gt0$ per ogni versore $u$ ($m=$ autovalore minimo, positivo, per compattezza della sfera). Per $\rho$ piccolo, $\big|o(\rho^2)/\rho^2\big|\lt\tfrac{m}{4}$, quindi la parentesi resta $\ge\tfrac{m}{4}\gt0$: $$f(x_0+h)-f(x_0)\ge\tfrac{m}{4}\rho^2\gt0.$$ Ogni spostamento fa <b>salire</b>: $x_0$ è minimo stretto. Con $H\prec0$, tutto specularmente: massimo. $\blacksquare$</p>`},
+   {label:'Perché la semidefinita non decide', body:R`<p>Se $H$ è semidefinita, esiste un versore $u_0$ con $Q(u_0)=0$: lungo quella direzione il 2° ordine <b>svanisce</b> e il segno lo decide il $o(\rho^2)$, cioè termini di ordine $\ge3$ che (T2) non vede. Esempio: $f=x^2+y^3$ ha in $0$ Hessiana $\mathrm{diag}(2,0)$ semidefinita; lungo $x=0$, $f=y^3$ cambia segno &mdash; sella. Ma $f=x^2+y^4$ ha la <b>stessa</b> Hessiana e in $0$ è un minimo. Stessa $H$, esiti opposti: ecco perché il test tace.</p>`}
+  ]},
+  {t:'esercizio', title:'Classificare i punti critici', src:'Tipo Es.&nbsp;2 (parte interna) · $f(x,y)=x^3+y^3-3xy$',
+   testo:R`Trova e classifica i punti critici di $f(x,y)=x^3+y^3-3xy$ su $\mathbb{R}^2$.`,
+   steps:[
+    {label:'Punti critici', body:R`<p>$\nabla f=(3x^2-3y,\ 3y^2-3x)=0$ dà il sistema $y=x^2$, $x=y^2$. Sostituendo: $x=(x^2)^2=x^4$, cioè $x^4-x=x(x^3-1)=0$, quindi $x=0$ o $x=1$. I punti critici sono $$P_a=(0,0),\qquad P_b=(1,1).$$</p>`},
+    {label:'L&rsquo;Hessiana', body:R`<p>Derivate seconde: $f_{xx}=6x$, $f_{yy}=6y$, $f_{xy}=-3$ (e $f_{yx}=-3$, Schwarz ok). Dunque $$H_f(x,y)=\begin{pmatrix}6x & -3\\ -3 & 6y\end{pmatrix},\qquad \det H=36xy-9.$$</p>`},
+    {label:'In $P_a=(0,0)$', body:R`<p>$H=\begin{pmatrix}0&-3\\-3&0\end{pmatrix}$, $\det H=-9\lt0$: Hessiana <b>indefinita</b>. $P_a$ è un <b>punto di sella</b>. (Coerente: sugli assi $f=x^3$ o $f=y^3$ cambiano segno.)</p>`},
+    {label:'In $P_b=(1,1)$', body:R`<p>$H=\begin{pmatrix}6&-3\\-3&6\end{pmatrix}$, $\det H=36-9=27\gt0$ e $f_{xx}=6\gt0$: Hessiana <b>definita positiva</b>. $P_b$ è un <b>minimo locale stretto</b>, con $f(1,1)=1+1-3=-1$. $\blacksquare$</p>
+    <div class="note">$f$ non ha massimo né minimo <b>assoluti</b> su $\mathbb{R}^2$ (per $x\to+\infty$, $f\to+\infty$; per $x\to-\infty$, $f\to-\infty$). Il minimo trovato è <b>solo locale</b>. La distinzione locale/assoluto conta: l&rsquo;Es.&nbsp;2 di Terracina chiede gli <b>assoluti</b>, e quelli su un dominio non compatto possono non esistere.</div>`}
+   ],
+   nota:R`Schema fisso per l&rsquo;interno del dominio: (1) $\nabla f=0$ &rarr; punti critici; (2) $H_f$ e $\det H$ (con $f_{xx}$) in ciascuno; (3) classifica. Se $\det H=0$, <b>non</b> scrivere &laquo;sella&raquo; per default: è inconcludente, va studiato a mano lungo la direzione degenere.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In un punto critico $\det H=0$ e $f_{xx}=4\gt0$. Uno studente scrive &laquo;minimo, perché $f_{xx}\gt0$&raquo;. Dov&rsquo;è l&rsquo;errore?`,
+    a:R`$\det H=0$ rende il test <b>inconcludente</b>: la condizione &laquo;$\det H\gt0$ e $f_{xx}\gt0$&raquo; per il minimo <b>non</b> è soddisfatta ($\det H\gt0$ è falsa). Con Hessiana semidefinita il 2° ordine non decide: occorre studiare $f$ lungo la direzione con autovalore nullo (termini di ordine superiore).`},
+   {q:R`Perché usi Schwarz prima ancora di classificare?`,
+    a:R`Perché senza $f\in C^2$ (miste continue e uguali) $H$ potrebbe <b>non essere simmetrica</b>, e allora non ha autovalori reali garantiti né senso &laquo;definita positiva&raquo;. Schwarz è ciò che legittima l&rsquo;intero criterio spettrale.`}
+  ]}
+]},
+
+/* ---------------- 04 · LAGRANGE ---------------- */
+{ num:'04', title:'Estremi vincolati: Lagrange', meta:'$\\nabla f=\\lambda\\nabla g$ · perché · qualificazione ($\\nabla g\\neq0$) · vincoli multipli',
+  blocchi:[
+  {t:'prosa', title:'Il problema cambia forma', tag:'perché non basta $\\nabla f=0$', html:R`
+  <p>Ottimizzare $f$ <b>sul vincolo</b> $\{g=0\}$ non è ottimizzare $f$ libera. Su una curva vincolo, il punto <b>non</b> è interno: non puoi muoverti in ogni direzione, solo <b>lungo il vincolo</b>. Quindi la condizione &laquo;$\nabla f=0$&raquo; è troppo forte: $f$ può benissimo avere gradiente non nullo in un massimo vincolato, purché quel gradiente <b>non abbia componente lungo il vincolo</b>. È questa l&rsquo;idea esatta di Lagrange.</p>`},
+  {t:'reveal', title:'La derivazione geometrica di $\\nabla f=\\lambda\\nabla g$', tag:'derivazione', steps:[
+   {label:'Le direzioni ammesse', body:R`<p>Sia $x_0$ un estremo di $f$ vincolato a $\{g=0\}$, con $\nabla g(x_0)\neq0$ (importante: tappa dopo). Muoversi <b>restando sul vincolo</b> significa muoversi lungo direzioni $v$ <b>tangenti</b> al vincolo. Dal nucleo 01: $\nabla g\perp$ insieme di livello $\{g=0\}$, quindi le direzioni tangenti al vincolo sono esattamente quelle con $$\nabla g(x_0)\cdot v=0.$$ Queste sono le direzioni <b>ammesse</b>: percorrendole, a primo ordine, resti su $\{g=0\}$.</p>`},
+   {label:'Stazionarietà lungo le direzioni ammesse', body:R`<p>Se $x_0$ è estremo vincolato, muovendosi lungo <b>qualunque</b> direzione ammessa $f$ non cresce a primo ordine: la derivata direzionale deve annullarsi. Dal nucleo 01, $\partial_v f=\nabla f\cdot v$. Quindi $$\nabla f(x_0)\cdot v=0\quad\text{per ogni }v\text{ con }\nabla g(x_0)\cdot v=0.$$ In parole: $\nabla f$ è ortogonale a <b>tutte</b> le direzioni ortogonali a $\nabla g$.</p>`},
+   {label:'Ortogonale a tutto un iperpiano ⇒ parallelo a $\\nabla g$', body:R`<p>L&rsquo;insieme dei $v$ con $\nabla g\cdot v=0$ è un <b>iperpiano</b> (dimensione $n-1$): tutto ciò che è perpendicolare a $\nabla g$. Un vettore ortogonale a un intero iperpiano deve giacere lungo la <b>retta</b> perpendicolare a quell&rsquo;iperpiano &mdash; cioè lungo $\nabla g$. Perciò $\nabla f(x_0)$ è <b>parallelo</b> a $\nabla g(x_0)$: esiste uno scalare $\lambda$ (il <b>moltiplicatore</b>) con $$\nabla f(x_0)=\lambda\,\nabla g(x_0).\qquad\blacksquare$$</p>
+   <div class="note">Lettura geometrica: nel punto ottimo, la curva di livello $\{f=\text{cost}\}$ è <b>tangente</b> al vincolo $\{g=0\}$. Se non lo fosse, attraverserebbe il vincolo, e lungo il vincolo ci sarebbe un lato dove $f$ cresce: potresti migliorare. Tangenza dei livelli $\iff$ gradienti allineati. È l&rsquo;ortogonalità gradiente$\perp$livello del nucleo 01, applicata <b>due volte</b> (a $f$ e a $g$) e incollata.</div>`}
+  ]},
+  {t:'plot', title:'Tangenza al vincolo: perché $\\nabla f\\parallel\\nabla g$',
+   intro:R`Le curve di livello di $f(x,y)=xy$ (iperboli) e il vincolo $g=x^2+y^2-2=0$ (cerchio di raggio $\sqrt2$). I quattro punti segnati sono le soluzioni di Lagrange dell&rsquo;esercizio qui sotto.`,
+   plots:[
+    {kind:'contour', f:'x*y', levels:[-1.5,-1,-0.5,0.5,1,1.5], col:'#5eead4', label:'livelli di f = xy', xr:[-1.9,1.9], yr:[-1.9,1.9], height:430,
+     overlays:[{f:'x*x+y*y', levels:[2], col:'#e0a94a', label:'vincolo g = 0', width:2.8}],
+     marks:[{x:1, y:1, label:'max f=1', col:'#8bd450', up:true},
+            {x:-1, y:-1, label:'max f=1', col:'#8bd450', left:true},
+            {x:1, y:-1, label:'min f=-1', col:'#ff6b6b'},
+            {x:-1, y:1, label:'min f=-1', col:'#ff6b6b', left:true, up:true}]}
+   ],
+   leggi:R`Segui il cerchio arancione con l&rsquo;occhio e guarda le iperboli che incontra. Nella maggior parte dei punti il vincolo <b>attraversa</b> una curva di livello: lì, camminando sul cerchio, passi da un livello di $f$ a uno diverso — $f$ sta ancora cambiando, non sei a un estremo. Solo nei <b>quattro punti segnati</b> l&rsquo;iperbole è <b>tangente</b> al cerchio: lì il vincolo e il livello si sfiorano senza incrociarsi, e camminando sul cerchio $f$ ha un massimo o un minimo. Tangenza di due curve significa <b>stessa direzione normale</b>: $\nabla f$ (⊥ all&rsquo;iperbole) e $\nabla g$ (⊥ al cerchio, cioè radiale) sono <b>allineati</b> — ecco $\nabla f=\lambda\nabla g$, visto prima di risolverlo. Nei due punti verdi $(\pm1,\pm1)$ l&rsquo;iperbole tangente è quella di livello $+1$ (massimo); nei due rossi $(\pm1,\mp1)$ è quella di livello $-1$ (minimo). Che <i>quale</i> sia max e quale min lo dica solo il confronto dei valori — non Lagrange — si legge qui: i quattro punti sono tutti stazionari vincolati, il segno lo dà l&rsquo;iperbole su cui cadono.`},
+  {t:'prosa', title:'Il metodo operativo: la Lagrangiana', tag:'come si usa', html:R`
+  <p>In pratica cerchi i punti stazionari vincolati risolvendo il sistema $\nabla f=\lambda\nabla g$ <b>insieme</b> al vincolo. Comodo impacchettarlo nella <b>funzione Lagrangiana</b> $$\mathcal L(x,\lambda)=f(x)-\lambda\,g(x),$$ e imporre $\nabla_{x,\lambda}\mathcal L=0$: le derivate in $x$ danno $\nabla f=\lambda\nabla g$, la derivata in $\lambda$ dà $-g(x)=0$, cioè il vincolo. Per $\mathbb{R}^2$ è il sistema di <b>tre equazioni</b> $$\partial_x f=\lambda\,\partial_x g,\qquad \partial_y f=\lambda\,\partial_y g,\qquad g(x,y)=0.$$ Le incognite sono $x,y,\lambda$. Risolvi, ottieni i candidati, e <b>confronti i valori di $f$</b> su di essi (Lagrange dà i candidati, non dice quale è max e quale min: quello lo decide il confronto).</p>`},
+  {t:'prosa', title:'La qualificazione del vincolo: il punto dove $\\nabla g=0$', tag:'il trabocchetto che costa l&rsquo;esercizio', html:R`
+  <p>La derivazione ha usato $\nabla g(x_0)\neq0$: solo così &laquo;$\nabla g\perp$ vincolo&raquo; individua un vero iperpiano di direzioni ammesse. Se $\nabla g(x_0)=0$, quel passaggio <b>crolla</b>: le direzioni ammesse non sono più l&rsquo;iperpiano $\{\nabla g\cdot v=0\}$ (che diventa tutto $\mathbb{R}^n$), e l&rsquo;equazione $\nabla f=\lambda\nabla g$ diventa $\nabla f=0$ &mdash; che l&rsquo;ottimo vincolato <b>non</b> deve soddisfare.</p>
+  <p>Conseguenza pratica, e trabocchetto n.1 dell&rsquo;Es.&nbsp;2: <b>Lagrange trova solo i punti dove $\nabla g\neq0$</b> (punti <b>regolari</b> del vincolo). I punti dove $\nabla g=0$ vanno <b>aggiunti a mano</b> alla lista dei candidati e testati separatamente. Se l&rsquo;estremo assoluto vive proprio lì, chi si fida solo del sistema di Lagrange lo <b>perde</b> e conclude sbagliando. La tappa 05, esercizio 2, mette in scena esattamente questo.</p>
+  <p class="note"><b>Checklist candidati.</b> L&rsquo;insieme dei candidati a estremo su $\{g=0\}$ è: (i) le soluzioni del sistema di Lagrange, <b>più</b> (ii) i punti del vincolo dove $\nabla g=0$. Su un dominio con bordo compatto, aggiungi anche (iii) gli spigoli/estremi degli archi. Poi confronti $f$ su tutti.</p>`},
+  {t:'prosa', title:'Vincoli multipli', tag:'estensione', html:R`
+  <p>Con $k$ vincoli $g_1=0,\dots,g_k=0$ (una varietà di dimensione $n-k$), le direzioni ammesse sono quelle ortogonali a <b>tutti</b> i $\nabla g_i$. Ripetendo l&rsquo;argomento, $\nabla f$ deve stare nello spazio generato dai gradienti dei vincoli: $$\nabla f=\sum_{i=1}^k\lambda_i\,\nabla g_i.$$ La qualificazione diventa: i vettori $\nabla g_1(x_0),\dots,\nabla g_k(x_0)$ devono essere <b>linearmente indipendenti</b>. Dove non lo sono, di nuovo, Lagrange va integrato a mano.</p>`},
+  {t:'esercizio', title:'Lagrange nudo: il meccanismo', src:'Applicazione diretta · $f=xy$ su $x^2+y^2=2$',
+   testo:R`Trova gli estremi di $f(x,y)=xy$ sul vincolo $g(x,y)=x^2+y^2-2=0$.`,
+   steps:[
+    {label:'Qualificazione', body:R`<p>$\nabla g=(2x,2y)$; sul vincolo $\nabla g=0$ solo in $(0,0)$, che <b>non</b> sta su $\{g=0\}$ ($g(0,0)=-2$). Quindi il vincolo è <b>ovunque regolare</b>: nessun punto extra da aggiungere. Lagrange trova tutto.</p>`},
+    {label:'Il sistema', body:R`<p>$\nabla f=(y,x)$. Sistema $\nabla f=\lambda\nabla g$: $$y=2\lambda x,\qquad x=2\lambda y,\qquad x^2+y^2=2.$$ Dalle prime due: $y=2\lambda x=2\lambda(2\lambda y)=4\lambda^2 y$, cioè $y(1-4\lambda^2)=0$.</p>`},
+    {label:'I rami', body:R`<p>Se $y=0$: dalla seconda $x=0$, ma $(0,0)$ viola il vincolo &mdash; scartato. Resta $4\lambda^2=1$, cioè $\lambda=\pm\tfrac12$. Per $\lambda=\tfrac12$: $y=x$, e $2x^2=2\Rightarrow x=\pm1$: punti $(1,1),(-1,-1)$. Per $\lambda=-\tfrac12$: $y=-x$, punti $(1,-1),(-1,1)$.</p>`},
+    {label:'Confronto dei valori', body:R`<p>$f(1,1)=f(-1,-1)=1$; $f(1,-1)=f(-1,1)=-1$. Quindi sul vincolo: <b>massimo</b> $f=1$ in $(\pm1,\pm1)$ (segni concordi), <b>minimo</b> $f=-1$ in $(\pm1,\mp1)$ (segni discordi). $\blacksquare$</p>
+    <div class="note">$\lambda$ non serve al risultato finale (è un intermedio), ma il suo valore ha significato: $\lambda=\partial f/\partial c$, il tasso con cui l&rsquo;ottimo cambia se sposti il livello del vincolo da $0$ a $c$. Questo &laquo;$\lambda=$ sensibilità&raquo; è la porta della Prolessi: in fisica $\lambda$ diventa una grandezza misurabile.</div>`}
+   ],
+   nota:R`Il vincolo $x^2+y^2=2$ è <b>compatto</b> (circonferenza): $f$ continua su un compatto ha max e min assoluti (Weierstrass), quindi i candidati di Lagrange <b>contengono</b> gli estremi assoluti &mdash; basta confrontare i valori. Su vincoli non compatti, prima verifica che gli estremi esistano.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché in un massimo vincolato $\nabla f$ può essere diverso da zero, mentre in un massimo libero deve essere zero?`,
+    a:R`Nel libero puoi muoverti in ogni direzione: se $\nabla f\neq0$ c&rsquo;è una direzione di salita, quindi non sei al massimo. Nel vincolato ti muovi solo lungo il vincolo: basta che $\nabla f$ non abbia componente <b>tangente</b> al vincolo. La componente ortogonale (lungo $\nabla g$) è libera di esistere: da lì $\nabla f=\lambda\nabla g$.</p>`},
+   {q:R`Risolvi il sistema di Lagrange, trovi i candidati, confronti $f$. Cosa potresti aver dimenticato prima di dichiarare l&rsquo;estremo assoluto?`,
+    a:R`I punti del vincolo dove $\nabla g=0$ (qualificazione): Lagrange non li vede. Vanno aggiunti alla lista e testati. Inoltre, su un dominio con bordo, gli spigoli/estremi degli archi. E verificare che gli estremi <b>esistano</b> (compattezza).`}
+  ]}
+]},
+
+/* ---------------- 05 · ESERCIZI ---------------- */
+{ num:'05', title:'Esercizi — tocca a te', meta:'Prova prima, poi rivela · uno completo (tipo Es.&nbsp;2 Terracina) e uno trabocchetto ($\\nabla g=0$)',
+  blocchi:[
+  {t:'prosa', title:'Istruzioni', tag:'come usarli', html:R`
+  <p>Copri le soluzioni, prendi carta, chiudi l&rsquo;esercizio da solo. Rivela un passo alla volta <b>solo dopo</b> aver tentato. L&rsquo;esercizio 1 è l&rsquo;Es.&nbsp;2 di Terracina nella forma piena: estremi <b>assoluti</b> su un compatto = interno (gradiente + Hessiana) $\cup$ bordo (Lagrange). L&rsquo;esercizio 2 monta la trappola della <b>qualificazione del vincolo</b> ($\nabla g=0$): l&rsquo;errore che perde l&rsquo;estremo assoluto.</p>`},
+  {t:'esercizio', title:'Esercizio 1 — estremi assoluti su un disco (standard)', src:'Es.&nbsp;2 tipo Terracina · $f=x^2+2y^2-x$ su $K=\{x^2+y^2\le1\}$',
+   testo:R`Determina massimo e minimo assoluti di $f(x,y)=x^2+2y^2-x$ sul disco chiuso $K=\{x^2+y^2\le1\}$.`,
+   steps:[
+    {label:'Esistenza', body:R`<p>$K$ è chiuso e limitato, cioè <b>compatto</b>; $f$ è continua. Per Weierstrass, max e min assoluti <b>esistono</b> e sono assunti. Li cerchi in due luoghi: <b>interno</b> $\{x^2+y^2\lt1\}$ (punti critici liberi) e <b>bordo</b> $\{x^2+y^2=1\}$ (Lagrange).</p>`},
+    {label:'Interno: punti critici', body:R`<p>$\nabla f=(2x-1,\ 4y)=0\Rightarrow x=\tfrac12,\ y=0$. Il punto $(\tfrac12,0)$ è interno ($\tfrac14\lt1$): candidato. Hessiana $H=\begin{pmatrix}2&0\\0&4\end{pmatrix}$, $\det H=8\gt0$, $f_{xx}=2\gt0$: minimo locale. Valore $f(\tfrac12,0)=\tfrac14-\tfrac12=-\tfrac14$.</p>`},
+    {label:'Bordo: Lagrange', body:R`<p>$g=x^2+y^2-1$, $\nabla g=(2x,2y)$, nullo solo in $(0,0)\notin\{g=0\}$: bordo regolare. Sistema $\nabla f=\lambda\nabla g$: $$2x-1=2\lambda x,\qquad 4y=2\lambda y,\qquad x^2+y^2=1.$$ Dalla seconda: $y(2-\lambda)=0\Rightarrow y=0$ oppure $\lambda=2$.</p>`},
+    {label:'I candidati di bordo', body:R`<p><b>Ramo $y=0$:</b> dal vincolo $x=\pm1$. Punti $(1,0)$ e $(-1,0)$. <b>Ramo $\lambda=2$:</b> la prima dà $2x-1=4x\Rightarrow x=-\tfrac12$, poi $y^2=1-\tfrac14=\tfrac34\Rightarrow y=\pm\tfrac{\sqrt3}{2}$. Punti $(-\tfrac12,\pm\tfrac{\sqrt3}{2})$.</p>`},
+    {label:'Confronto di tutti i valori', body:R`<p>$$f(\tfrac12,0)=-\tfrac14,\quad f(1,0)=1-1=0,\quad f(-1,0)=1+1=2,$$ $$f(-\tfrac12,\pm\tfrac{\sqrt3}{2})=\tfrac14+2\cdot\tfrac34+\tfrac12=\tfrac14+\tfrac32+\tfrac12=\tfrac94.$$ Confronto: il più piccolo è $-\tfrac14$, il più grande $\tfrac94$. Dunque <b>minimo assoluto</b> $-\tfrac14$ in $(\tfrac12,0)$ (interno); <b>massimo assoluto</b> $\tfrac94$ in $(-\tfrac12,\pm\tfrac{\sqrt3}{2})$ (bordo). $\blacksquare$</p>
+    <div class="note">Il massimo è sul bordo, il minimo dentro: tipico. Non fermarti al primo candidato &laquo;bello&raquo;: l&rsquo;Es.&nbsp;2 chiede gli <b>assoluti</b>, che escono <b>solo dal confronto numerico</b> di tutti i candidati (interno + tutti i rami di bordo).</div>`}
+   ],
+   nota:R`Struttura da ricopiare a ogni Es.&nbsp;2 su compatto: (1) Weierstrass garantisce l&rsquo;esistenza; (2) interno: $\nabla f=0$ (l&rsquo;Hessiana serve a <i>capire</i> il punto, ma per l&rsquo;assoluto conta il <b>valore</b>); (3) bordo: Lagrange, tutti i rami; (4) confronto dei valori. Quattro passi, sempre gli stessi.`},
+  {t:'esercizio', title:'Esercizio 2 — dove Lagrange da solo sbaglia (trabocchetto)', src:'Trappola qualificazione · $f=x$ sul vincolo $y^2=x^3$',
+   testo:R`Minimizza $f(x,y)=x$ sul vincolo $g(x,y)=x^3-y^2=0$ (una cuspide). Applicando solo il sistema di Lagrange sembra non esserci minimo. C&rsquo;è?`,
+   steps:[
+    {label:'La trappola, dichiarata', body:R`<p>L&rsquo;errore indotto: scrivere il sistema $\nabla f=\lambda\nabla g$, vederlo <b>senza soluzioni</b> sul vincolo, e concludere &laquo;non ci sono estremi&raquo;. Sbagliato: prima di fidarti del sistema, devi <b>controllare i punti dove $\nabla g=0$</b>. È lì che si nasconde la risposta.</p>`},
+    {label:'Il sistema di Lagrange', body:R`<p>$\nabla f=(1,0)$, $\nabla g=(3x^2,-2y)$. Sistema: $$1=3\lambda x^2,\qquad 0=-2\lambda y,\qquad x^3=y^2.$$ Seconda equazione: $\lambda=0$ oppure $y=0$. Se $\lambda=0$, la prima dà $1=0$: impossibile. Se $y=0$, dal vincolo $x^3=0\Rightarrow x=0$; ma allora la prima è $1=3\lambda\cdot0=0$: <b>impossibile</b>. Il sistema di Lagrange <b>non ha soluzioni</b>.</p>`},
+    {label:'Il punto non qualificato', body:R`<p>Perché nessuna soluzione? Guarda dove $\nabla g=0$: $(3x^2,-2y)=0\Rightarrow x=0,y=0$. Il punto $(0,0)$ <b>sta sul vincolo</b> ($0=0$) ed è <b>non qualificato</b> ($\nabla g=0$). Lagrange, per costruzione, non lo vede: va testato <b>a mano</b>.</p>`},
+    {label:'La curva, a mano', body:R`<p>Parametrizza il vincolo: $y^2=x^3\ge0$ impone $x\ge0$, e $x=t^2$, $y=t^3$ percorre la curva ($y^2=t^6=(t^2)^3=x^3$, ok). Allora $$f=x=t^2\ge0,$$ minimo in $t=0$, cioè nell&rsquo;origine. Il <b>minimo assoluto è $f=0$, assunto in $(0,0)$</b> &mdash; esattamente il punto che Lagrange aveva scartato. $\blacksquare$</p>
+    <div class="note warn"><b>Lezione.</b> &laquo;Il sistema di Lagrange non ha soluzioni&raquo; <b>non</b> significa &laquo;non ci sono estremi&raquo;. Significa che gli estremi, se esistono, vivono nei punti <b>non qualificati</b> ($\nabla g=0$) o all&rsquo;infinito. Controllare $\nabla g=0$ è un passo obbligato, non un extra.</div>`}
+   ],
+   nota:R`Geometricamente: nella cuspide $(0,0)$ il vincolo ha un punto a spillo, la nozione di &laquo;direzione tangente&raquo; degenera, e la condizione $\nabla f\parallel\nabla g$ perde senso ($\nabla g=0$ non ha direzione). L&rsquo;ottimo può abitare esattamente questi punti-spina. Regola: <b>lista candidati $=$ soluzioni di Lagrange $+$ punti con $\nabla g=0$ $+$ comportamento all&rsquo;infinito</b>.`}
+]},
+
+/* ---------------- 06 · IL SENSO ---------------- */
+{ num:'06', title:'Il senso: risolvere localmente, ottimizzare sotto vincolo', meta:'Significato di Dini e Lagrange · e dove riappaiono, con altri nomi',
+  blocchi:[
+  {t:'prosa', title:'Dini = il teorema che rende &laquo;curva&raquo; una parola operativa', tag:'significato', html:R`
+  <p>Dini dice una cosa profonda con apparenza tecnica: <b>vicino a un punto regolare, un&rsquo;equazione è una funzione</b>. L&rsquo;insieme $\{F=0\}$ &mdash; definito <i>implicitamente</i>, senza formula per $y$ &mdash; è localmente indistinguibile da un grafico $y=g(x)$, liscio, con pendenza calcolabile. È ciò che autorizza a chiamare $\{F=0\}$ una &laquo;curva&raquo; e a farci sopra geometria (tangenti, lunghezze, integrali di linea: nucleo 04).</p>
+  <p>Il gemello di Dini è il <b>teorema della funzione inversa</b>: se una mappa $\Phi$ ha differenziale invertibile in un punto ($\det J_\Phi\neq0$), allora è <b>localmente invertibile</b>, con inversa $C^1$. È lo stesso enunciato: &laquo;la condizione sul differenziale $\Rightarrow$ posso risolvere localmente&raquo;. La condizione $\partial_y F\neq0$ di Dini <b>è</b> l&rsquo;invertibilità del pezzo di jacobiana rispetto a $y$. Questo è il motore di ogni <b>cambio di coordinate</b> (polari, sferiche, cilindriche del nucleo integrali): un cambio di variabili è lecito, localmente, dove il jacobiano non si annulla.</p>`},
+  {t:'prosa', title:'Lagrange = ottimizzare quando non sei libero', tag:'significato', html:R`
+  <p>Lagrange traduce &laquo;sono vincolato&raquo; in un&rsquo;equazione. In un ottimo vincolato non c&rsquo;è &laquo;gradiente nullo&raquo;, c&rsquo;è <b>gradienti allineati</b>: $\nabla f\parallel\nabla g$. Il moltiplicatore $\lambda$ misura la <b>tensione del vincolo</b> &mdash; quanto l&rsquo;ottimo migliorerebbe se il vincolo si rilassasse: $\lambda=\partial f^*/\partial c$, con $c$ il livello del vincolo. Questa lettura di $\lambda$ come &laquo;prezzo ombra&raquo; è ciò che in fisica lo trasforma da artificio in <b>grandezza misurabile</b> &mdash; il fulcro della Prolessi.</p>`},
+  {t:'prosa', title:'A monte e a valle nel percorso', tag:'connessioni interne', html:R`
+  <p><b>A monte.</b> Tutto questo nucleo è <b>una</b> conseguenza del nucleo 01: $\nabla f\perp$ insieme di livello. Dini la usa per la curva $\{F=0\}$ (tangente $=$ ortogonale a $\nabla F$); Fermat la usa nel caso libero ($\nabla f=0$ perché nessuna direzione di salita); Lagrange la usa <b>due volte</b> ($\nabla f\parallel\nabla g$ perché entrambi ortogonali allo stesso livello). Un solo teorema del nucleo precedente, tre usi.</p>
+  <p><b>A valle.</b></p>
+  <ul>
+  <li><b>Curve e superfici</b> (nucleo 04): Dini è ciò che garantisce che i luoghi $\{F=0\}$, $\{F=0,G=0\}$ siano varietà lisce parametrizzabili &mdash; il presupposto di ogni parametrizzazione.</li>
+  <li><b>Schwarz e le derivate seconde</b> ritornano nella <b>formula di Taylor</b> multivariabile e in ogni analisi di stabilità (EDO autonome, ritratto di fase: nucleo EDO).</li>
+  <li><b>Il teorema della funzione inversa</b> è il ponte verso la <b>geometria differenziale</b> del III anno (carte, atlanti, varietà): una varietà è, letteralmente, ciò che Dini rende localmente un grafico.</li>
+  </ul>`},
+  {t:'prolessi', title:'Prolessi — i moltiplicatori sono grandezze fisiche',
+   oggetto:R`l&rsquo;ottimizzazione vincolata $\nabla f=\lambda\nabla g$ e la sua lettura $\lambda=\partial f^*/\partial c$ (il moltiplicatore come sensibilità dell&rsquo;ottimo al vincolo). Non cambierà l&rsquo;oggetto: cambierà solo cosa <b>è</b> quel $\lambda$ &mdash; e in fisica $\lambda$ ha un nome, un&rsquo;unità di misura e uno strumento che lo legge.`,
+   rotte:[
+    {dove:'Meccanica<br>statistica', txt:R`Il cuore. Massimizza l&rsquo;entropia $S=-k\sum_i p_i\ln p_i$ sotto <b>due vincoli</b>: normalizzazione $\sum_i p_i=1$ e energia media fissata $\sum_i p_i E_i=U$. La Lagrangiana $S-\alpha(\sum p_i-1)-\beta(\sum p_i E_i-U)$, stazionaria in $p_i$, dà $-k(\ln p_i+1)-\alpha-\beta E_i=0$, cioè la <b>distribuzione di Boltzmann</b> $p_i\propto e^{-\beta E_i/k}$. E i moltiplicatori <b>sono</b> le grandezze termodinamiche: $\beta=1/kT$ è il moltiplicatore dell&rsquo;energia, $\mu$ (potenziale chimico) è quello del numero di particelle. La temperatura <b>è</b> un moltiplicatore di Lagrange. Questo è oro per la tua rotta (stat mech, tesi ETH).`},
+    {dove:'Meccanica<br>quantistica', txt:R`Il principio variazionale. Lo stato fondamentale minimizza l&rsquo;energia $\langle\psi|H|\psi\rangle$ sotto il vincolo di normalizzazione $\langle\psi|\psi\rangle=1$. La Lagrangiana $\langle\psi|H|\psi\rangle-E\big(\langle\psi|\psi\rangle-1\big)$, stazionaria rispetto a $\langle\psi|$, dà $H|\psi\rangle-E|\psi\rangle=0$: l&rsquo;equazione di Schrödinger stazionaria $H|\psi\rangle=E|\psi\rangle$. Il moltiplicatore $\lambda$ <b>è</b> l&rsquo;energia $E$, l&rsquo;autovalore. La regola $\nabla f=\lambda\nabla g$ diventa, parola per parola, $H\psi=E\psi$: l&rsquo;autovalore è un moltiplicatore di Lagrange.`},
+    {dove:'Elettro-<br>magnetismo', txt:R`Qui la rotta forte è Dini, non Lagrange. Una superficie equipotenziale $\phi(x,y,z)=\text{cost}$ è localmente il grafico $z=g(x,y)$ dove $\partial_z\phi\neq0$, cioè dove $E_z=-\partial_z\phi\neq0$: il teorema della funzione implicita dice <b>dove</b> puoi risolvere per una coordinata. E ogni cambio di coordinate del campo (cartesiane$\to$sferiche) è lecito dove il jacobiano non si annulla &mdash; funzione inversa. Due rotte vere (stat mech, QM) valgono più di tre forzate: qui Dini serve i cambi di coordinate, non i moltiplicatori.`}
+   ],
+   domanda:R`In statistica, $\beta=1/kT$ compare come moltiplicatore del vincolo &laquo;energia media $=U$&raquo;: è la variabile <b>coniugata</b> all&rsquo;energia, e fissarla equivale a mettere il sistema a contatto con un bagno termico. Ma in un sistema <b>isolato</b> l&rsquo;energia è fissata esattamente, non in media: non c&rsquo;è nessun bagno, nessun vincolo &laquo;in media&raquo;. Allora: cosa fissa la temperatura di un singolo stato quantistico isolato? <br>&mdash; È la domanda dell&rsquo;<b>ETH</b> (eigenstate thermalization hypothesis): l&rsquo;ipotesi che un singolo autostato di energia di un sistema complesso <i>contenga già</i> un $\beta$ termico, come se fosse il bagno di sé stesso. Il moltiplicatore di Lagrange che qui è un artificio di calcolo, lì diventa il problema aperto attorno a cui ruota la tua tesi.`
+  }
+]}
+
+];
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo02-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 02 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 02-dini-ottimizzazione.html#04 apre direttamente la tappa 04 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
