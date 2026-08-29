@@ -204,29 +204,6 @@
       }
       if (leg.length) legend(g, leg, pad, w);
     }
-
-    // ---- iter2d: MAPPA ITERATA (q,p) -> (Q,P), orbite da piu semi -------------
-    // Nata per il nucleo sull ergodicita: la mappa standard mostra in UNA figura i
-    // tori KAM che sopravvivono e il mare caotico che li circonda. Un ritratto di
-    // fase (kind phase) non basta: li serve iterare, non integrare.
-    if (spec.kind === "iter2d") {
-      var FQ = fn2(spec.fq), FP = fn2(spec.fp);
-      var semi = spec.seeds || [], N = spec.iter || 400;
-      var COLS = [COL.c1, COL.c2, COL.c3, COL.c4, "#ff6b6b", "#7ab8e0", "#8bd450", "#ff9b6b"];
-      semi.forEach(function (S, si) {
-        var q = S[0], p = S[1];
-        g.fillStyle = S[2] || COLS[si % COLS.length];
-        for (var it = 0; it < N; it++) {
-          var Q = FQ(q, p), P = FP(q, p);
-          q = Q; p = P;
-          if (spec.wrapx) { var L = xr[1] - xr[0]; q = xr[0] + ((q - xr[0]) % L + L) % L; }
-          if (spec.wrapy) { var M = yr[1] - yr[0]; p = yr[0] + ((p - yr[0]) % M + M) % M; }
-          if (!isFinite(q) || !isFinite(p)) break;
-          if (q < xr[0] || q > xr[1] || p < yr[0] || p > yr[1]) continue;
-          g.fillRect(m.X(q) - 0.7, m.Y(p) - 0.7, 1.4, 1.4);
-        }
-      });
-    }
     // rings: [{r, x?, y?, col?, dash?, label?}] — cammini circolari di riferimento (circuitazione)
     if (spec.rings) spec.rings.forEach(function (R) {
       var cxr = R.x || 0, cyr = R.y || 0, col = R.col || '#ff9b6b';
