@@ -108,7 +108,11 @@
       f = fn1(spec.f); ys = [];
       var N = 400;
       for (var i = 0; i <= N; i++) { var x = xr[0] + (xr[1] - xr[0]) * i / N; var y = f(x); if (isFinite(y)) ys.push(y); }
-      if (!yr) { var lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys); var pd = (hi - lo) * 0.12 || 1; yr = [lo - pd, hi + pd]; }
+      // Se nessun campione e' finito (spec.f assente, o singolare su tutto il range)
+      // ys resta vuoto e Math.min.apply(null,[]) da' Infinity: yr diventa
+      // [Infinity,-Infinity] e la figura esce degenere SENZA errori. Serve la guardia:
+      // un plot che disegna nel vuoto e' peggio di uno che si lamenta.
+      if (!yr && ys.length) { var lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys); var pd = (hi - lo) * 0.12 || 1; yr = [lo - pd, hi + pd]; }
     }
     if (!yr) yr = spec.yr || [-3, 3];
     // isometria di default per i kind "metrici" (dove il cerchio DEVE essere un cerchio)
@@ -170,7 +174,9 @@
       }
     } else if (spec.kind === 'contour') {
       // strati: quello base (spec.f) + eventuali spec.overlays [{f, levels, col, label, dash}]
-      var strati = [{ f: spec.f, levels: spec.levels || [0.5, 1, 2, 3], col: spec.col, label: spec.label, dash: spec.dash }];
+      // `width` va copiato nello strato base: senza, uno spec che chiede width:2.4
+      // ottiene sempre 1.8 e nessuno se ne accorge — l'API prometteva e non manteneva.
+      var strati = [{ f: spec.f, levels: spec.levels || [0.5, 1, 2, 3], col: spec.col, label: spec.label, dash: spec.dash, width: spec.width }];
       if (spec.overlays) strati = strati.concat(spec.overlays);
       var G = 90, leg = [];
       strati.forEach(function (S, si) {
