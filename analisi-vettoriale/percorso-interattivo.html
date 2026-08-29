@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percorso saper-fare — Analisi Vettoriale</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--warnbg);border-bottom:1px solid #5c4a23;color:#e0b85a;
+    font-size:.82rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.2px;}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:270px;flex:0 0 270px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.92rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:840px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.3em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- SMISTATORE ---- */
+  .smist-intro{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin-bottom:22px;}
+  .smist-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:720px){.smist-grid{grid-template-columns:1fr;}}
+  .smist-card{border:1px solid var(--border);background:var(--panel);border-radius:12px;
+    padding:14px 16px;cursor:pointer;text-align:left;transition:.14s;color:var(--txt);}
+  .smist-card:hover{border-color:var(--accent);background:var(--panel2);}
+  .smist-card .spia{font-size:.95rem;}
+  .smist-card .arrow{display:block;margin-top:8px;font-size:.8rem;color:var(--accent2);}
+  .smist-card .cosa{font-size:.78rem;color:var(--muted);margin-top:2px;}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">SOSTANZA DA VERIFICARE — notte autonoma · la matematica dei blocchi non è ancora ratificata da Giuseppe</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> DATI — SMISTATORE + SAPER-FARE <<<  (inseriti dal Demiurgo)
+   =================================================================== */
+var SMIST = [
+  { target:'01', cosa:'EDO scalare del I ordine',
+    spia:R`$y'=f(t,y)$, $y(t_0)=y_0$, «problema di Cauchy», «monotonia / limiti / prolungabilità / globalità»` },
+  { target:'02', cosa:'analisi locale in un punto',
+    spia:R`$f(x,y)=\dfrac{\text{num.}}{(x^2+y^2)^\alpha}$, $f(0,0)=0$, «continua / derivabile / differenziabile», parametro $\alpha,\beta$` },
+  { target:'03', cosa:'funzione implicita',
+    spia:R`$F(x,y)=0$ o $F(x,y,z)=0$, «definisce implicitamente», «Dini», «retta / piano tangente», $g'(x_0)$` },
+  { target:'04', cosa:'ottimizzazione',
+    spia:R`«massimo e minimo di $f$ su $D$», vincolo $g=0$, «moltiplicatori di Lagrange», Hessiano` },
+  { target:'05', cosa:'successioni / serie di funzioni',
+    spia:R`$\sum_k f_k(x)$, $f_n(x)$, «converge puntualmente / uniformemente / totalmente», raggio, scambio $\int$–$\lim$` },
+  { target:'06', cosa:'curva 1D in $\mathbb{R}^3$',
+    spia:R`curva $=$ intersezione di <b>due</b> superfici, «parametrizzare», «regolare / semplice», $\int_\gamma f\,ds$, lavoro` },
+  { target:'07', cosa:'superficie 2D in $\mathbb{R}^3$',
+    spia:R`<b>una</b> equazione $z=f(x,y)$ o di rotazione o sferica, «area», «bordo $\partial\Sigma$», «versore normale»` },
+  { target:'08', cosa:'flusso da dominio 3D',
+    spia:R`«flusso uscente da $E$», $\iiint$, «volume del dominio», $\operatorname{div}F$, Gauss` },
+  { target:'09', cosa:'circuitazione',
+    spia:R`«circuitazione», «lavoro lungo curva chiusa», $\operatorname{rot}F$, Stokes, Green` },
+  { target:'10', cosa:'campo conservativo',
+    spia:R`«conservativo», «potenziale / primitiva», «forma esatta», $\operatorname{rot}F=0$, «semplicemente connesso»` }
+];
+var SF = [
+{ num:'01', title:'EDO / Problema di Cauchy',
+  meta:'Pool #1 · freq 10/10 e 11/11 (sempre presente) · priorità ALTA · Es.5 (talvolta Es.2)',
+  firma:R`<p>È l&rsquo;esercizio quasi sempre <b>ultimo</b> (Es.5). Riconoscibile all&rsquo;istante: un&rsquo;equazione $y'(t)=f(t,y)$ del <b>primo ordine scalare</b> con un <b>dato iniziale</b> $y(t_0)=y_0$, e una lista di domande: «esiste ed è unica? è prolungabile a tutto $\mathbb{R}$? è monotona? qual è il limite a $\pm\infty$?», spesso seguite da «risolvere esplicitamente». Parole-spia: <i>problema di Cauchy, soluzione massimale, prolungabilità, monotonia, limite, separazione di variabili, Bernoulli</i>.</p>
+  <p><b>Cosa NON confondere:</b> qui la variabile indipendente è $t$ e la funzione incognita è $y(t)$ (una sola funzione di una sola variabile). Non è il calcolo differenziale in più variabili (02/03). Il cuore non è la formula risolutiva: è il <b>ritratto qualitativo</b> ottenuto <i>senza</i> risolvere.</p>`,
+  idea:R`<p>Tre teoremi fanno tutto il lavoro pesante, e nessuno richiede di conoscere $y(t)$.</p>
+  <ul>
+  <li><b>Cauchy–Lipschitz (esistenza e unicità locali).</b> Se $f(t,u)$ è $C^1$ (o localmente lipschitziana in $u$) in un intorno di $(t_0,y_0)$, il problema ha <b>una e una sola</b> soluzione locale. L&rsquo;unicità è l&rsquo;arma vera: due soluzioni distinte non si toccano mai.</li>
+  <li><b>Soluzioni costanti come barriere.</b> Se $f(t,\bar u)=0$ per ogni $t$, allora $y\equiv\bar u$ è soluzione. Per l&rsquo;unicità, <b>nessun&rsquo;altra</b> soluzione può attraversare la retta $y=\bar u$. Il dato iniziale, incastrato fra due costanti, resta intrappolato lì per sempre — e questo dà limitatezza e segno di $y'$.</li>
+  <li><b>Teorema dell&rsquo;asintoto.</b> Se $y$ è monotona e limitata, $\ell=\lim_{t\to+\infty}y(t)$ esiste finito; se esiste anche $\lim y'(t)$, allora $\lim y'=0$. Uguagliando $f(t,\ell)\to0$ si legge <i>quale</i> costante è il limite (di solito la barriera più vicina).</li>
+  </ul>
+  <p>Sopra: la <b>globalità</b> (prolungabilità a tutto $\mathbb{R}$) segue dalla <b>sublinearità</b> $|f(t,u)|\le L_1(t)|u|+L_2(t)$ con $L_i$ continue — la soluzione non può esplodere in tempo finito.</p>`,
+  mossa:[
+    {label:'Forma normale e $C^1$', body:R`<p>Scrivi $y'=f(t,y)$; verifica $f\in C^1$ nell&rsquo;intorno di $(t_0,y_0)$ ⇒ esistenza-unicità locale.</p><div class="note"><b>Trappola</b> (<code>22gen24</code> sol.): la condizione è su $f(t,u)$ <b>come funzione delle due variabili indipendenti</b> $(t,u)$, non su $f(t,y(t))$ (che presuppone la soluzione già nota). Scrivere «$f(t,y(t))\in C^1$» è un errore concettuale segnalato in correzione.</div>`},
+    {label:'Soluzioni costanti (barriere)', body:R`<p>Risolvi $f(t,\bar u)=0$ in $\bar u$: sono le barriere. Colloca $y_0$ rispetto a esse.</p>`},
+    {label:R`Segno di $y'$ e monotonia`, body:R`<p>Nella striscia fra due barriere il segno di $f$ è costante: leggilo. Dà crescente/decrescente <b>senza risolvere</b>.</p><div class="note"><b>Trappola</b> (<code>20220124</code>): $y'=4t^3(1-e^{y})$ con $y>0$ dà $1-e^y<0$, ma $4t^3$ <b>cambia segno con $t$</b>. La monotonia non è globale: $y$ cresce per $t<0$, decresce per $t>0$, ha un massimo in $t=0$.</div>`},
+    {label:'Limiti', body:R`<p>Se $y$ è monotona e limitata da una barriera, il limite esiste; il <b>teorema dell&rsquo;asintoto</b> dà il valore (tipicamente la barriera).</p><div class="note"><b>Trappola</b> (<code>21lug25</code>): il teorema dell&rsquo;asintoto <b>non prova l&rsquo;esistenza</b> del limite, dà solo il valore <i>supposta</i> l&rsquo;esistenza. L&rsquo;esistenza va da monotonia + limitatezza. Non invertire l&rsquo;ordine.</div>`},
+    {label:'Globalità', body:R`<p>Cerca una stima $|f(t,u)|\le L_1(t)|u|+L_2(t)$: se c&rsquo;è, la soluzione è definita su tutto l&rsquo;intervallo dei $t$. Se $y$ è già intrappolata fra due barriere è limitata, e ciò basta.</p>`},
+    {label:'Risoluzione esplicita', body:R`<p>Separazione di variabili ($\int\frac{dy}{g(y)}=\int h(t)\,dt$); <b>Bernoulli</b> $y'+p(t)y=q(t)y^\alpha$ con $z=y^{1-\alpha}$ (lineare in $z$); lineare del I ordine con fattore integrante $e^{\int p}$. Trova l&rsquo;<b>intervallo massimale</b> dall&rsquo;espressione esplicita (dove il denominatore si annulla o l&rsquo;argomento di log/radice esce dal dominio).</p><div class="note"><b>Trappola</b> (<code>20230705</code>): dopo Bernoulli/separazione ottieni spesso $y$ da un&rsquo;equazione di 2° grado o da una radice — <b>scegli il ramo</b> compatibile col dato iniziale e col segno imposto ai passi precedenti.</div>`}
+  ],
+  esame:{ src:'Prova 24/01/2022, Es. 5 (20220124)',
+    testo:R`$y'(t)=4t^3\bigl(1-e^{y(t)}\bigr)$, $y(0)=\log 2$. Studiare esistenza/unicità, segno e monotonia, il massimo, e risolvere.`,
+    steps:[
+      {label:'Esistenza-unicità', body:R`<p>$f(t,u)=4t^3(1-e^{u})$ è $C^1$ su tutto $\mathbb{R}^2$ (polinomiale ed esponenziale): Cauchy–Lipschitz ⇒ soluzione locale unica per $(0,\log 2)$.</p>`},
+      {label:'Barriere', body:R`<p>$f(t,\bar u)=0\iff 1-e^{\bar u}=0\iff \bar u=0$. Unica soluzione costante $y\equiv0$. Il dato $y_0=\log2>0$ sta <b>sopra</b> la barriera; per unicità $y(t)>0$ per ogni $t$ nel dominio.</p>`},
+      {label:R`Segno di $y'$`, body:R`<p>Con $y>0$ si ha $1-e^{y}<0$, quindi $y'(t)=4t^3\cdot(\text{negativo})$ ha il segno di $-t^3$: $y'>0$ per $t<0$, $y'<0$ per $t>0$, $y'(0)=0$. Dunque $y$ <b>cresce</b> su $(-\infty,0)$ e <b>decresce</b> su $(0,+\infty)$: massimo assoluto in $t=0$, valore $y(0)=\log2$.</p>`},
+      {label:'Risoluzione (separazione)', body:R`<p>$\dfrac{dy}{1-e^{y}}=4t^3\,dt$. A sinistra, con $u=e^{y}$: $\int\frac{dy}{1-e^{y}}=\int\frac{du}{u(1-u)}=\log\frac{e^{y}}{e^{y}-1}+C$ (essendo $e^y>1$). A destra $\int 4t^3dt=t^4$. Imponendo $y(0)=\log2$:</p>$$y(t)=-\log\!\Bigl(1-\tfrac12 e^{-t^4}\Bigr).$$`},
+      {label:'Verifica di coerenza', body:R`<p>$y(0)=-\log(1-\tfrac12)=\log2$ ✓. Per $t\to\pm\infty$, $e^{-t^4}\to0$, quindi $y\to0^+$: la soluzione <b>scende verso la barriera $y=0$</b> da sopra, mai la tocca, ed è definita su tutto $\mathbb{R}$ (argomento del log sempre in $(0,1]$). Il massimo in $t=0$ vale $\log2$ come previsto. $\blacksquare$</p>`}
+    ],
+    nota:R`Il ritratto qualitativo (barriera, segno di $y'$, massimo in $0$, limiti $\to0$) era già completo prima di calcolare l&rsquo;integrale. La formula esplicita serve solo a confermarlo.` },
+  varianti:R`<p>Il tipo si muove lungo <b>due assi indipendenti</b>: <i>come si risolve</i> (tecnica esplicita) e <i>cosa si chiede</i> (ritratto qualitativo). Un esame ne combina uno di ciascuno.</p>
+  <p><b>Asse A — tecnica di risoluzione esplicita.</b></p>
+  <ul>
+  <li><b>Variabili separabili, soluzione esplicita</b> (la maggioranza: <code>20220124</code> Es.5 svolto, <code>04lug24</code> Es.5 $y'=\frac{y(y-2)}{1+t}$, <code>27gen25</code> Es.3 $y'=\frac{t(y-1)}{1+3y^2}$, <code>21lug25</code> Es.2). <i>Riconosci:</i> $f=g(y)\,h(t)$. <i>Cosa cambia:</i> dopo $\int\frac{dy}{g(y)}=\int h(t)\,dt$ isoli $y$; l&rsquo;insidia è il dominio massimale.</li>
+  <li><b>Separabili con soluzione implicita</b> (<code>22gen24</code> Es.5: $y'=\frac{y^2}{1+y^2}e^{t}$, $y(0)=2$). <i>Riconosci:</i> l&rsquo;integrale a sinistra non si inverte, resta $y-\frac1y=e^{t}+\frac12$. <i>Cosa cambia:</i> estrai $y$ da un&rsquo;<b>equazione di 2° grado</b> e scegli il ramo ($y>0$).</li>
+  <li><b>Bernoulli</b> $y'+p(t)y=q(t)y^\alpha$ (<code>20230705</code> Es.5 $z=y^{-2}$; <code>10feb22</code> Es.5 $6y'+y=e^{t}y^{-5}$ ⇒ $z=y^6$). <i>Cosa cambia:</i> sostituzione $z=y^{1-\alpha}$ <b>lineare in $z$</b>; in <code>10feb22</code> segue lo <b>sviluppo di Taylor al 2° ordine</b> della soluzione.</li>
+  <li><b>Lineare del I ordine</b> $y'+p(t)y=q(t)$ (fattore integrante $e^{\int p}$). <i>Cosa cambia:</i> formula chiusa, nessuna scelta di ramo.</li>
+  </ul>
+  <p><b>Asse B — la domanda qualitativa (senza risolvere).</b></p>
+  <ul>
+  <li><b>Monotonia da barriere costanti</b> (<code>04lug24</code>, <code>27gen25</code>, <code>21lug25</code>). <i>Cosa cambia:</i> il segno di $f$ nella striscia fra due barriere è costante ⇒ monotonia gratis.</li>
+  <li><b>Segno di $y'$ dipendente da $t$</b> (<code>20220124</code> Es.5, <code>27giu25</code> Es.5). <i>Riconosci:</i> $f=A(t)\,B(y)$ con $A(t)$ che <b>cambia segno</b>. <i>Cosa cambia:</i> monotonia <b>non</b> globale — massimo/minimo interno dove $A(t)=0$. La trappola più insidiosa.</li>
+  <li><b>Limite a $\pm\infty$ via teorema dell&rsquo;asintoto</b> (<code>21lug25</code> Es.2). <i>Cosa cambia:</i> esistenza da monotonia+limitatezza, valore dalla barriera più vicina. Non invertire i due passi.</li>
+  <li><b>Globalità / prolungabilità</b>: <i>sublinearità</i> $|f|\le L_1(t)|y|+L_2(t)$ (<code>22gen24</code> Es.5-ii, <code>27gen25</code>) quando $y$ cresce illimitata; <i>limitatezza a priori</i> fra barriere quando $y$ è già intrappolata.</li>
+  <li><b>Singolarità di $f$ sull&rsquo;asse</b> (<code>27giu25</code> Es.5: $y'=\frac{(y^2+1)y}{t}$). <i>Cosa cambia:</i> $f\notin C^1$ su $t=t_0$; l&rsquo;esistenza locale va argomentata a parte.</li>
+  </ul>
+  <p><b>Asse C — l&rsquo;oggetto è una successione, non una singola EDO.</b></p>
+  <ul>
+  <li><b>Successione di problemi</b> (<code>20230123</code> Es.5: $y_n'=x^3(y_n-3)\arctan y_n$, $y_n(0)=\frac1n$). <i>Cosa cambia:</i> barriere $0,3$ danno $0<y_n<3$; poi $\sup|y_n|=\frac1n\to0$ ⇒ convergenza <b>uniforme</b> a $0$, e scambio limite-integrale. È il <b>ponte col 05</b>.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$y'=\dfrac{y(y-2)}{1+t}$, $y(0)=1$, $t>-1$. Fra quali costanti resta $y$? È monotona?`, a:R`Barriere $0$ e $2$; $y(0)=1\in(0,2)$ ⇒ $0<y<2$ sempre; $y'<0$ nella striscia ⇒ decrescente.`},
+    {q:R`$y'=4t^3(1-e^y)$, $y(0)=\log2$: dove sta il massimo e quanto vale?`, a:R`$t=0$, valore $\log2$; errore da evitare: dire «sempre decrescente» ignorando il segno di $t^3$.`},
+    {q:R`$y'=\ln(1+y^2)(3-y)$, $y(0)=2$: quanto vale $\lim_{t\to+\infty}y(t)$ e con quale argomento?`, a:R`$3$; esistenza da monotonia+limitatezza, valore dal teorema dell&rsquo;asintoto.`}
+  ] },
+
+{ num:'02', title:'Differenziabilità in un punto',
+  meta:'Pool #9 · freq 5/11 e 6/10 · priorità ALTA (punto debole dichiarato) · spesso Es.1',
+  firma:R`<p>È spesso l&rsquo;<b>Es.1</b>. Riconoscibile: una funzione $f:\mathbb{R}^2\to\mathbb{R}$ (a volte $\mathbb{R}^3$) definita <b>a tratti</b> — un quoziente $\dfrac{\text{numeratore}}{(x^2+y^2)^\alpha}$ per $(x,y)\neq(0,0)$ e $f(0,0)=0$ a parte — con un <b>parametro</b> $\alpha$ o $\beta$, e la richiesta a catena: continuità, derivabilità, differenziabilità, derivate direzionali al variare del parametro. Parole-spia: <i>continua, derivabile, differenziabile, derivate direzionali, al variare di $\alpha$</i>.</p>
+  <p><b>Cosa NON confondere:</b> se c&rsquo;è un&rsquo;equazione $F(\cdots)=0$ da risolvere per una variabile, è Dini (03). Qui la funzione è <b>data esplicitamente</b> e il gioco è la gerarchia locale nell&rsquo;origine.</p>`,
+  idea:R`<p>La gerarchia è a senso unico:</p>$$C^1\text{ vicino a }0\ \Longrightarrow\ \text{differenziabile in }0\ \Longrightarrow\ \begin{cases}\text{continua in }0\\ \exists\,\partial_\nu f(0)\ \forall\nu,\ \partial_\nu f=\nabla f\cdot\nu\end{cases}$$<p>e <b>nessuna</b> freccia si inverte. Le tre proprietà si testano con tre limiti distinti nell&rsquo;origine.</p>
+  <ul>
+  <li><b>Continuità:</b> $\lim_{(x,y)\to0}f=0$, stimando $|f|\le C\rho^{p}$ con $\rho=\sqrt{x^2+y^2}$: se $p>0$, continua.</li>
+  <li><b>Derivabilità:</b> $f_x(0)=\lim_{h\to0}\frac{f(h,0)}{h}$, $f_y(0)=\lim_{k\to0}\frac{f(0,k)}{k}$. Quasi sempre $f$ è nulla sugli assi ⇒ $\nabla f(0)=(0,0)$.</li>
+  <li><b>Differenziabilità:</b> il resto normalizzato tende a zero, $\displaystyle\lim_{(x,y)\to0}\frac{f(x,y)-f(0)-\nabla f(0)\cdot(x,y)}{\sqrt{x^2+y^2}}=0$. Con $\nabla f(0)=0$ è $\lim f/\rho=0$: $|f|\le C\rho^{q}$ con $q>1$ la dà, un limite non nullo lungo $y=mx$ la nega.</li>
+  </ul>
+  <p>Col quoziente $(x^2+y^2)^\alpha$ tutto diventa aritmetica di esponenti: se il numeratore $\sim\rho^{p}$, allora $|f|\sim\rho^{p-2\alpha}$ (continuità) e $|f|/\rho\sim\rho^{p-2\alpha-1}$ (differenziabilità). Le <b>soglie</b> escono da $p-2\alpha>0$ e $p-2\alpha-1>0$: due soglie diverse.</p>`,
+  mossa:[
+    {label:'Continuità', body:R`<p>Stima il numeratore in potenze di $\rho$ (sviluppi notevoli: $\sin t\sim t$, $1-\cos t\sim t^2/2$, $e^t-1\sim t$, $\log(1+t)\sim t$). Ottieni $|f|\le C\rho^{p-2\alpha}$: continua sse $p-2\alpha>0$.</p><div class="note"><b>Trappola</b> (<code>20230504</code>): la soglia di continuità ($\beta<5/2$) è <b>diversa</b> da quella di differenziabilità ($\beta<2$). Non riusare la stessa disuguaglianza per entrambe.</div>`},
+    {label:'Derivabilità', body:R`<p>Calcola $f(h,0)$ e $f(0,k)$ <b>dalla definizione</b> (rapporto incrementale), non con le regole di derivazione.</p><div class="note"><b>Trappola</b> (<code>10feb22</code>, <code>14feb25</code>): se $f$ è a tratti con $f(0,0)=0$ separato, le regole della catena <b>non valgono in $0$</b> — la formula esplicita esiste solo fuori dall&rsquo;origine. Sempre dal limite.</div>`},
+    {label:'Differenziabilità', body:R`<p>Con $\nabla f(0)=(0,0)$, studia $f/\rho$ in polari. Se $|f|/\rho\le C\rho^{q}$ con $q>0$ <b>uniformemente in $\theta$</b>: differenziabile. Altrimenti cerca un controesempio lungo $y=x$ o $y=mx$: se il limite dipende da $\theta$ o è $\neq0$, non differenziabile.</p><div class="note"><b>Trappola</b> (<code>20230123</code>): $f$ può essere <b>derivabile ma non differenziabile</b> — lungo $y=x$ il resto normalizzato tende a una costante $\neq0$. È il caso più frequente: parziali esistenti non bastano.</div><div class="note"><b>Trappola</b> (in polari): $|f|\le C\rho^{q}$ vale solo se $C$ <b>non dipende da $\theta$</b>. Verifica che la stima sia uniforme.</div>`},
+    {label:'Derivate direzionali', body:R`<p>$\partial_\nu f(0)=\lim_{t\to0}\frac{f(t\nu_1,t\nu_2)}{t}$. Ricorda: $\lim_{t\to0}\frac{|t|^\alpha}{t}$ vale $0$ se $\alpha>1$, non esiste unico se $\alpha=1$, diverge se $\alpha<1$.</p><div class="note"><b>Trappola</b> (concettuale, <code>20220622</code>): la formula $\partial_\nu f=\nabla f\cdot\nu$ vale <b>solo se $f$ è differenziabile</b>. Se non lo è, le direzionali possono esistere ma non essere lineari in $\nu$ — vanno calcolate una per una dalla definizione.</div>`}
+  ],
+  esame:{ src:'Prova 22/06/2022, Es. 1 (20220622)',
+    testo:R`$f(x,y)=\dfrac{|y|^{\alpha}\tan(x^4)}{(x^2+y^2)^{2}}$ per $(x,y)\neq(0,0)$, $f(0,0)=0$, con $\alpha>0$. Studiare continuità, derivabilità, differenziabilità e derivate direzionali al variare di $\alpha$.`,
+    steps:[
+      {label:'Continuità', body:R`<p>$\tan(x^4)\sim x^4$, e $|x^4|\le\rho^4$, $|y|^\alpha\le\rho^\alpha$, $(x^2+y^2)^2=\rho^4$. Quindi $$|f|\le\frac{\rho^{\alpha}\cdot\rho^{4}}{\rho^{4}}=\rho^{\alpha}\xrightarrow{\rho\to0}0\quad\text{sse }\alpha>0.$$ Continua per ogni $\alpha>0$.</p>`},
+      {label:'Derivabilità', body:R`<p>Sugli assi: $f(x,0)=\dfrac{0\cdot\tan(x^4)}{x^4}=0$ e $f(0,y)=\dfrac{|y|^\alpha\cdot0}{y^4}=0$. Dunque $f_x(0,0)=f_y(0,0)=0$ e $\nabla f(0,0)=(0,0)$ per ogni $\alpha>0$.</p>`},
+      {label:'Differenziabilità', body:R`<p>Studio $\dfrac{|f|}{\rho}\le\dfrac{\rho^{\alpha}\cdot\rho^{4}}{\rho^{4}\cdot\rho}=\rho^{\alpha-1}\xrightarrow{\rho\to0}0$ sse $\alpha>1$. Differenziabile sse $\alpha>1$. Per $0<\alpha\le1$: <b>non</b> differenziabile pur essendo derivabile — la soglia ($\alpha>1$) è più alta di quella della continuità ($\alpha>0$).</p>`},
+      {label:'Derivate direzionali', body:R`<p>Lungo $\nu$ con $\nu_1\nu_2\neq0$: $\dfrac{f(t\nu_1,t\nu_2)}{t}\sim|t|^{\alpha}\dfrac{|\nu_2|^{\alpha}\nu_1^{4}}{t}$, netto $\frac{|t|^{\alpha}}{t}\to0$ sse $\alpha>1$. Per $\alpha>1$ tutte esistono ($=0=\nabla f\cdot\nu$); per $\alpha\le1$ non esistono lungo $\nu_1\nu_2\neq0$ (destra $\neq$ sinistra), pur esistendo quelle assiali. $\blacksquare$</p>`}
+    ],
+    nota:R`Le tre soglie ($\alpha>0$ continua, $\alpha>1$ differenziabile e direzionali) sono scalate: la differenziabilità è la condizione più forte, come prevede la gerarchia.` },
+  varianti:R`<p>La forma del <b>numeratore</b> decide tutto: fissa l&rsquo;esponente $p$ ($\sim\rho^{p}$), e da $p$ e $\alpha$ escono le soglie.</p>
+  <p><b>Numeratore prodotto di potenze / valori assoluti, con parametro.</b></p>
+  <ul>
+  <li><code>20220622</code> Es.1 (svolto): $\frac{|y|^\alpha\tan(x^4)}{(x^2+y^2)^2}$ — cont. sse $\alpha>0$, diff. sse $\alpha>1$. $p=\alpha+4$, denom. $\rho^4$; soglie di pura aritmetica.</li>
+  </ul>
+  <p><b>Numeratore con sviluppi notevoli.</b></p>
+  <ul>
+  <li><code>20230504</code> Es.1: $\frac{\sin y\,(1-\cos xy)}{(x^2+y^2)^\beta}$ — cont. sse $\beta<\frac52$, diff. sse $\beta<2$.</li>
+  <li><code>05mar24</code> Es.1: $\frac{xy\sin y\,(1-\cos x)}{(x^2+y^2)^\alpha}$ — cont. sse $\alpha<2$, diff. sse $\alpha<\frac52$.</li>
+  <li><code>10feb22</code> Es.1: $\frac{e^{x^4y^2}-1}{(x^2+y^2)^a}+xy$ — via $\frac{e^t-1}t\to1$ ci si riduce a $\frac{x^4y^2}{(x^2+y^2)^a}$: cont. sse $a<3$, diff. sse $a<\frac52$. <i>Cosa cambia:</i> <b>prima</b> sviluppi il numeratore per leggere $p$, <b>poi</b> conti le soglie.</li>
+  </ul>
+  <p><b>Due termini con soglie diverse</b> (<code>20230621</code> Es.1): $\frac{x^2\log(1+x^2y^2)}{(x^2+y^2)^\beta}+|xy|^\beta$. <i>Cosa cambia:</i> studi i due addendi <b>separatamente</b> (primo diff. sse $\beta<\frac52$, secondo sse $\beta>\frac12$) e <b>intersechi</b>: $\frac12<\beta<\frac52$. La più restrittiva vince.</p>
+  <p><b>Denominatore a esponente FISSO — «derivabile ma non differenziabile».</b></p>
+  <ul>
+  <li><code>20230123</code> Es.1: $\frac{(x^2+2xy)\sin(xy)}{(x^2+y^2)^{3/2}}$ — continua, ma lungo $y=x$ il resto normalizzato $\to3\neq0$: non differenziabile.</li>
+  <li><code>20230907</code> Es.1: $\frac{x^4+y^4-\sin(xy^2)}{x^2+y^2}$ — continua, parziali nulle, ma il limite del resto dipende da $\theta$: non differenziabile. <i>Cosa cambia:</i> non cerchi soglie — cerchi il <b>controesempio</b> lungo $y=mx$.</li>
+  </ul>
+  <p><b>Gradiente NON nullo nell&rsquo;origine</b> (<code>14feb25</code> Es.2): $\frac{\sin(x^3y^2)+x^3+2y^3}{x^2+y^2}$, $f(0,0)=0$. <i>Riconosci:</i> $f_x(0,0)=1$, $f_y(0,0)=2$. <i>Cosa cambia:</i> il resto va scritto col <b>gradiente completo</b> $f-f_x\,x-f_y\,y$.</p>
+  <p><b>Punto diverso dall&rsquo;origine</b> (<code>19giu24</code>): rapporto incrementale centrato in $(5,0)$ o $(0,1)$; l&rsquo;aritmetica delle soglie è identica.</p>
+  <p><b>Funzione ovunque $C^1$</b> (<code>22gen24</code> Es.1): $\sqrt{x^2+y^2+z^2+1}+x-z$, differenziabile su $\mathbb{R}^3$, $\nabla f(0)=(1,0,-1)$, $\partial_\nu f=\nu_1-\nu_3$. <i>Cosa cambia:</i> il test serve solo a <b>giustificare Dini</b> al punto successivo (ponte con 03).</p>`,
+  collaudo:[
+    {q:R`$f=\dfrac{|y|^\alpha\tan(x^4)}{(x^2+y^2)^2}$: per quali $\alpha$ è differenziabile in $0$ e per quali solo continua?`, a:R`Differenziabile sse $\alpha>1$; continua sse $\alpha>0$; nella fascia $0<\alpha\le1$ continua e derivabile ma non differenziabile.`},
+    {q:R`$f=\dfrac{\sin(x^3y^2)+x^3+2y^3}{x^2+y^2}$, $f(0,0)=0$: quanto valgono $f_x(0,0)$ e $f_y(0,0)$?`, a:R`$f_x=1$, $f_y=2$, dal rapporto incrementale $h^3/h^3$ e $2k^3/k^3$; non usare le regole di derivazione.`},
+    {q:R`Una funzione ha tutte le derivate direzionali in $0$: è differenziabile lì?`, a:R`No — l&rsquo;esistenza di tutte le direzionali non implica differenziabilità né continuità; serve il limite del resto normalizzato.`}
+  ] },
+{ num:'03', title:'Teorema di Dini',
+  meta:'Pool #10 · freq 5/11 e 4/10 · l&rsquo;alternativa dell&rsquo;Es.1 quando non c&rsquo;è la differenziabilità',
+  firma:R`<p>Un&rsquo;<b>equazione</b> $F(x,y)=0$ (o $F(x,y,z)=0$), la richiesta di mostrare che <b>definisce implicitamente</b> una funzione $y=g(x)$ (o $z=g(x,y)$) in un intorno di un punto, e di studiarne derivata, monotonia, punti critici, retta/piano tangente. Parole-spia: <i>definisce implicitamente, Teorema del Dini, funzione implicita, retta tangente, punto critico di $g$</i>.</p>
+  <p><b>Cosa NON confondere:</b> se la funzione è data esplicitamente come quoziente con $f(0,0)=0$, è differenziabilità (02). Qui c&rsquo;è un&rsquo;equazione da <i>risolvere localmente</i> per una variabile che <b>non si sa esplicitare</b>.</p>`,
+  idea:R`<p>Un luogo $\{F=0\}$ è, vicino a un suo punto, il grafico di una funzione <b>se la tangente non è verticale rispetto alla variabile che vuoi esplicitare</b>. Se $F\in C^1$, $F(P_0)=0$ e la parziale rispetto alla variabile-incognita è <b>non nulla</b> in $P_0$, allora esiste un&rsquo;unica $g\in C^1$ con $F(x,g(x))=0$ localmente. La derivata si ricava <b>derivando l&rsquo;identità</b> $F(x,g(x))=0$:</p>$$F_x+F_y\,g'(x)=0\ \Longrightarrow\ g'(x)=-\frac{F_x}{F_y},\qquad\text{e in 3D}\quad g_x=-\frac{F_x}{F_z},\ g_y=-\frac{F_y}{F_z}.$$<p>Nei <b>punti critici</b> ($g'=0$, cioè $F_x=0$) la natura si legge da $g''$. Derivando ancora e usando $g'=0$:</p>$$g''(x_0)=-\frac{F_{xx}(P_0)}{F_y(P_0)}\qquad\text{(valida SOLO se }g'(x_0)=0).$$`,
+  mossa:[
+    {label:'Trova i punti sul luogo', body:R`<p>Sostituisci il valore libero (es. $x=0$) e risolvi $F(0,y)=0$: dà i candidati $y_0,y_1,\dots$</p><div class="note"><b>Trappola</b> (<code>20230210</code>): controlla per calcolo diretto che $F(P_0)=0$ prima di applicare il teorema. Il punto deve stare sul luogo.</div>`},
+    {label:'Verifica l&rsquo;ipotesi di Dini', body:R`<p>Calcola $F_y(P_0)$ (o $F_z$ in 3D): se $\neq0$, il teorema si applica e $y=g(x)$ esiste localmente.</p><div class="note"><b>Trappola</b> (<code>27giu25</code>): l&rsquo;errore tipico è sbagliare la parziale e concludere $F_y=0$. Deriva con cura ogni addendo (prodotto sugli esponenziali). Se davvero $F_y(P_0)=0$ ma $F_x\neq0$, Dini vale nell&rsquo;<i>altra</i> direzione: $x=h(y)$.</div>`},
+    {label:R`Calcola $g'(P_0)=-F_x/F_y$`, body:R`<p>Se $g'\neq0$: monotonia (segno di $g'$) e retta tangente $y=g(x_0)+g'(x_0)(x-x_0)$.</p>`},
+    {label:R`Se $g'=0$ (punto critico)`, body:R`<p>Usa $g''=-F_{xx}/F_y$. Segno $>0$ ⇒ minimo, $<0$ ⇒ massimo.</p><div class="note"><b>Trappola</b> (<code>20220124</code>): la formula $g''=-F_{xx}/F_y$ è corretta <b>solo nei punti critici</b>. In generale compaiono anche $F_{xy}g'$ e $F_{yy}(g')^2$; usarla dove $g'\neq0$ dà un risultato sbagliato.</div>`},
+    {label:'Caso 3D ($z=g(x,y)$)', body:R`<p>$\nabla g=(-F_x/F_z,-F_y/F_z)$; piano tangente $z=g(x_0,y_0)+g_x(x-x_0)+g_y(y-y_0)$. Per la natura di un critico di $g$ serve l&rsquo;Hessiana di $g$ (si semplifica dove $\nabla g=0$).</p><div class="note"><b>Trappola</b> (<code>22gen24</code>): non confondere il <b>piano tangente al grafico di $g$</b> con il piano tangente a $\partial E$ se $E$ è un dominio 3D — hanno equazioni diverse.</div>`}
+  ],
+  esame:{ src:'Prova 24/01/2022, Es. 1 (20220124)',
+    testo:R`$F(x,y)=y^3\sin x+y^2-2y\,e^{x}-3-x=0$. Mostrare che vicino a $x=0$ il luogo è grafico di funzioni $y=g(x)$; studiarne i punti critici e la natura.`,
+    steps:[
+      {label:'Punti sul luogo', body:R`<p>In $x=0$: $\sin0=0$, $e^0=1$, quindi $F(0,y)=y^2-2y-3=0\iff(y-3)(y+1)=0$: candidati $y_0=-1$, $y_1=3$.</p>`},
+      {label:'Ipotesi di Dini', body:R`<p>$F_y=3y^2\sin x+2y-2e^{x}$. In $(0,-1)$: $F_y=-2-2=-4\neq0$. In $(0,3)$: $F_y=6-2=4\neq0$. Dini si applica in entrambi: esistono $g_0,g_1\in C^1$ con $g_0(0)=-1$, $g_1(0)=3$.</p>`},
+      {label:'Derivata prima', body:R`<p>$F_x=y^3\cos x-2y\,e^{x}-1$. In $(0,-1)$: $F_x=-1+2-1=0$. In $(0,3)$: $F_x=27-6-1=20$. Quindi $g_0'(0)=-\frac{0}{-4}=0$ (punto critico), $g_1'(0)=-\frac{20}{4}=-5\neq0$. $g_1$ decrescente in $0$; $g_0$ ha un critico da classificare.</p>`},
+      {label:'Derivata seconda in $(0,-1)$', body:R`<p>Lecito perché $g_0'(0)=0$. $F_{xx}=-y^3\sin x-2y\,e^{x}$; in $(0,-1)$: $F_{xx}=2$. Allora $g_0''(0)=-\frac{2}{-4}=\frac12>0$: <b>minimo locale</b> in $x=0$, valore $-1$. Retta tangente a $g_1$: $y=3-5x$. $\blacksquare$</p>`}
+    ],
+    nota:R`Tutto il ritratto (esistenza, monotonia di $g_1$, minimo di $g_0$) è uscito da valori di $F$ e delle sue derivate in due punti — mai si è dovuto esplicitare $g$.` },
+  varianti:R`<p>Tre assi: <b>quale variabile</b> si esplicita (chi ha la parziale $\neq0$), la <b>dimensione</b> (2D grafico $g(x)$, 3D grafico $g(x,y)$), e <b>cosa si chiede</b> (monotonia / natura del critico / tangente).</p>
+  <p><b>2D, incognita $y=g(x)$, con punto critico → $g''$.</b></p>
+  <ul>
+  <li><code>20220124</code> Es.1 (svolto): in $(0,-1)$ $g'=0$, $g''=\frac12>0$ ⇒ minimo.</li>
+  <li><code>20220504</code> Es.1: $y^2+x(e^y-e^2)-x^2-4=0$; in $x=0$ si ha $y=\pm2$; $F_x(0,2)=e^2-e^2=0$ ⇒ $g_1'(0)=0$, $g_1''=\frac12>0$ ⇒ minimo. <i>Cosa cambia:</i> scatta $g''=-F_{xx}/F_y$, valida <b>solo</b> perché $g'=0$.</li>
+  </ul>
+  <p><b>2D, incognita $x=h(y)$ (attenzione a chi è l&rsquo;incognita).</b></p>
+  <ul>
+  <li><code>20230210</code> Es.1: $x^3+ye^{x^2y^2}-3x^2=0$; si pone $y=0$ e si trova $x_0=0,\ x_1=3$; $F_y(x,0)=1\neq0$ garantisce $y=g(x)$; $x_1=3$ ha $g'(3)=-9\neq0$, $x_0=0$ è critico con minimo. <i>Cosa cambia:</i> guardi <b>quale</b> parziale è non nulla per decidere se esplicitare $y$ o $x$; confondere i ruoli scambia le formule.</li>
+  </ul>
+  <p><b>2D con $g'\neq0$ → monotonia e retta tangente.</b></p>
+  <ul>
+  <li><code>27giu25</code> Es.2: $F=(x^2+2y^2)e^{-x-y^2}$; in $(1,1)$, $F_y=-2e^{-2}\neq0$, $g'(1)=-\frac12$.</li>
+  <li><code>05mar24</code> Es.4: $\frac{\sin(\pi y)}{\pi}+e^{x^2-4}-y^2+(3+x)\arctan(y-1)=0$; prima si trovano i punti $P_1,P_2$ ($x=\pm2$), poi $F_y(P_i)\neq0$. <i>Cosa cambia:</i> ti fermi a $g'=-F_x/F_y$; <b>non</b> usi $g''$ (illecita dove $g'\neq0$).</li>
+  </ul>
+  <p><b>3D, $z=g(x,y)$: piano tangente e natura del critico.</b></p>
+  <ul>
+  <li><code>22gen24</code> Es.1: $\sqrt{x^2+y^2+z^2+1}+x-z=1$; $F_z(0,0,0)=-1\neq0$ ⇒ $z=g(x,y)$, piano tangente $z=x$. Dini a valle dell&rsquo;analisi di regolarità (ponte con 02).</li>
+  <li><code>20220907</code> Es.2: $e^z+x^2y^2z-e^{xy}+x^4-y^4=0$; $F_z(0,0,0)=1\neq0$ ⇒ $z=g(x,y)$; $\nabla g(0,0)=(0,0)$; $g_{xx}=g_{yy}=0$, $g_{xy}=1$, $\det H_g=-1<0$ ⇒ <b>sella</b>. <i>Cosa cambia:</i> serve l&rsquo;<b>Hessiana di $g$</b>, non la formula 2D di $g''$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$F(x,y)=y^3\sin x+y^2-2ye^x-3-x$: quali sono i due punti su $x=0$ e la natura del punto critico?`, a:R`$(0,-1)$ e $(0,3)$; in $(0,-1)$ minimo ($g''=1/2>0$); in $(0,3)$ nessun critico, $g'=-5$.`},
+    {q:R`In $(0,3)$ del punto precedente posso usare $g''=-F_{xx}/F_y$?`, a:R`No — vale solo dove $g'=0$; in $(0,3)$ è $g'=-5\neq0$, la formula darebbe un valore privo di senso.`},
+    {q:R`$F(x,y,z)=e^z+x^2y^2z-e^{xy}+x^4-y^4=0$ in $(0,0,0)$: che tipo di critico è di $g$?`, a:R`Sella, $\det H_g=-1<0$.`}
+  ] },
+
+{ num:'04', title:'Ottimizzazione (Lagrange)',
+  meta:'Pool #6 · freq 9/11 e 8/10 · una delle due opzioni dell&rsquo;Es.2 (con le serie, 05)',
+  firma:R`<p>«Determinare massimo e minimo (assoluti) di $f$ su $D$», oppure «trovare e classificare i punti critici». Il dominio $D$ è dato da <b>disuguaglianze</b> (compatto) o è tutto $\mathbb{R}^n$; il bordo da <b>uguaglianze</b> $g=0$. Parole-spia: <i>massimo, minimo, punti critici, Hessiana, moltiplicatori di Lagrange, vincolo, compatto</i>.</p>
+  <p><b>Cosa NON confondere:</b> se il vincolo è un&rsquo;equazione da esplicitare e si chiede la tangente, è Dini (03). Qui si cercano gli <b>estremi</b>, dentro il dominio e sul bordo.</p>`,
+  idea:R`<p>Due meccanismi, uno per l&rsquo;interno e uno per il bordo.</p>
+  <ul>
+  <li><b>Interno — Fermat + Hessiana.</b> Gli estremi interni annullano il gradiente. In 2D: $\det H>0$ e $f_{xx}>0$ ⇒ minimo; $\det H>0$ e $f_{xx}<0$ ⇒ massimo; $\det H<0$ ⇒ sella. In dimensione maggiore, tutti gli autovalori (o i minori principali).</li>
+  <li><b>Bordo — Lagrange.</b> In un estremo vincolato su $\{g=0\}$: $\nabla f=\lambda\nabla g$. Ragione geometrica: se $\nabla f$ avesse una componente <b>tangente</b> al vincolo potresti muoverti aumentando $f$ — non saresti in un estremo. Con <b>due</b> vincoli (curva in $\mathbb{R}^3$): $\det[\nabla f;\nabla g_1;\nabla g_2]=0$.</li>
+  <li><b>Esistenza — Weierstrass.</b> Se $D$ è <b>compatto</b> ($f$ continua) max e min esistono, fra i candidati (critici interni $\cup$ punti di Lagrange sul bordo). Se $D=\mathbb{R}^n$ e $f$ è <b>coerciva</b> ($f\to+\infty$), esiste il minimo assoluto.</li>
+  </ul>`,
+  mossa:[
+    {label:'Esistenza', body:R`<p>Verifica che $D$ è <b>chiuso e limitato</b> (Weierstrass) — o, su $\mathbb{R}^n$, la coercività.</p><div class="note"><b>Trappola</b> (<code>b02</code>): non applicare Weierstrass senza aver controllato la compattezza. Un dominio aperto o illimitato può non avere massimo.</div>`},
+    {label:'Critici interni', body:R`<p>Risolvi $\nabla f=0$; tieni solo le soluzioni <b>interne</b> a $D$.</p><div class="note"><b>Trappola</b> (<code>20230621</code>): verifica che il critico interno <b>appartenga</b> a $D$. Lì $P=(3,0)$ ma $2\cdot3^2=18>1$ ⇒ $P\notin D$: scartato.</div><div class="note"><b>Trappola</b> (<code>20230504</code>): al contrario, se $P$ è dentro $D$ va <b>incluso</b> — dimenticarlo fa perdere il vero minimo (è il caso dell&rsquo;esame svolto).</div>`},
+    {label:'Bordo con un vincolo', body:R`<p>Sistema $\nabla f=\lambda\nabla g$ (in 2D equivale a $f_xg_y-f_yg_x=0$) insieme a $g=0$. Risolvi.</p>`},
+    {label:'Bordo con due vincoli (curva 3D)', body:R`<p>$\det[\nabla f;\nabla g_1;\nabla g_2]=0$ con $g_1=0,g_2=0$. Tre equazioni in tre incognite; spesso escono casi $x=y$, $x=0$, ecc. da trattare a parte.</p>`},
+    {label:'Classifica per confronto', body:R`<p>Valuta $f$ in <b>tutti</b> i candidati (interni + di bordo) e confronta: il più grande è il max, il più piccolo il min.</p><div class="note"><b>Trappola</b> (2D): $\det H>0$ non distingue max da min — serve il segno di $f_{xx}$. In 3D $\det H>0$ non basta: guarda gli autovalori.</div>`}
+  ],
+  esame:{ src:'Prova 04/05/2023, Es. 5 (20230504)',
+    testo:R`$F(x,y)=x^2+y^2-5y$ su $D=\{1\le x^2+y^2\le16\}$ (corona circolare). Trovare massimo e minimo assoluti.`,
+    steps:[
+      {label:'Esistenza', body:R`<p>$D$ è chiuso e limitato (corona), $F$ continua: Weierstrass ⇒ max e min esistono.</p>`},
+      {label:'Critici interni', body:R`<p>$\nabla F=(2x,\,2y-5)=(0,0)\iff x=0,\ y=\tfrac52$. Il punto $P=(0,\tfrac52)$: $x^2+y^2=\tfrac{25}{4}=6.25\in[1,16]$ ✓, <b>interno</b>. $F(P)=\tfrac{25}{4}-\tfrac{25}{2}=-\tfrac{25}{4}$.</p>`},
+      {label:'Bordo interno $x^2+y^2=1$', body:R`<p>$(2x,2y-5)=\lambda(2x,2y)$. Dalla prima $x=0$ oppure $\lambda=1$; se $\lambda=1$ la seconda dà $-5=0$, impossibile. Quindi $x=0$, $y=\pm1$: $F(0,1)=-4$, $F(0,-1)=6$.</p>`},
+      {label:'Bordo esterno $x^2+y^2=16$', body:R`<p>Stesso conto: $x=0$, $y=\pm4$. $F(0,4)=-4$, $F(0,-4)=36$.</p>`},
+      {label:'Confronto', body:R`<p>Valori: $-\tfrac{25}{4}$ (interno $P$), $-4$, $6$, $-4$, $36$. Dunque $$\min_D F=F\Bigl(0,\tfrac52\Bigr)=-\tfrac{25}{4},\qquad \max_D F=F(0,-4)=36.$$ $\blacksquare$</p>`}
+    ],
+    nota:R`La vittoria è stata non dimenticare il critico interno $P$. Chi guarda solo il bordo trova $\min=-4$, sbagliato: il vero minimo sta dentro la corona.` },
+  varianti:R`<p>La famiglia è governata dal <b>dominio</b>: quanti vincoli, compatto o tutto $\mathbb{R}^n$, richiesta «assoluti su $D$» o «classifica i critici».</p>
+  <p><b>Compatto 2D: critici interni + Lagrange sul bordo.</b></p>
+  <ul>
+  <li><code>20230504</code> Es.5 (svolto): $x^2+y^2-5y$ su una <b>corona</b>; minimo nel critico <b>interno</b> $(0,\frac52)$.</li>
+  <li><code>10feb22</code> Es.2: $f$ su $\{3x^2+4y^2\le9\}$; interno solo $(0,0)$, poi Lagrange su $3x^2+4y^2=9$. <i>Cosa cambia:</i> la corona ha <b>due bordi</b> ($r=1$ e $r=16$); l&rsquo;insidia è dimenticare il critico interno.</li>
+  </ul>
+  <p><b>Critico interno da includere / da scartare.</b></p>
+  <ul>
+  <li><code>20230504</code>: $P=(0,\frac52)$ <b>dentro</b> $D$ → è il vero minimo.</li>
+  <li><code>20230621</code>: $P=(3,0)$ ma $18>1$ → $P\notin D$, scartato. <i>Cosa cambia:</i> verifica <b>sempre</b> $P\in\operatorname{int}(D)$ — la sorgente più comune di errore assoluto.</li>
+  </ul>
+  <p><b>Curva in $\mathbb{R}^3$, DUE vincoli (determinante $3\times3$).</b></p>
+  <ul>
+  <li><code>20230705</code> Es.2: $f=4-z$ su $\{x^2+y^2=8,\ x+y+z=1\}$; $\det[\dots]=0$ dà $-x+y=0$; candidati $(2,2,-3),(-2,-2,5)$; $\max=7$, $\min=-1$.</li>
+  <li><code>20230210</code> Es.2: $f=y^2+z^2-(x-1)^2$ su $\{4x^2+y^2+z^2=1,\ 2x-z=1\}$; il determinante dà $4(5x-1)y=0$, quattro candidati; $\min=-\frac14$, $\max=\frac15$. <i>Cosa cambia:</i> non $\nabla f=\lambda\nabla g$ ma l&rsquo;annullamento del <b>determinante $3\times3$</b>.</li>
+  </ul>
+  <p><b>Vincolo a potenze superiori</b> (<code>20220504</code> Es.2): $f=x^2+y^2-z^2$ su $x^4+y^4+2z^4\le1$; interno $O$, bordo con $\nabla g=(4x^3,4y^3,8z^3)$; $\max=\sqrt2$, $\min=-\frac1{\sqrt2}$. <i>Cosa cambia:</i> sistema più pesante; i candidati stanno spesso sugli assi.</p>
+  <p><b>Solo critici liberi + Hessiana (nessun bordo).</b></p>
+  <ul>
+  <li><code>27gen25</code> Es.2: $x^2-2xy+y^3+1$; $(0,0)$ sella ($\det H=-4$), $(\frac23,\frac23)$ minimo ($\det H=4>0$, $f_{xx}>0$).</li>
+  <li><code>09feb24</code> Es.2: $2x^3+yx^2+y^2z-9z$ in $\mathbb{R}^3$; carattere dall&rsquo;Hessiana $3\times3$. <i>Cosa cambia:</i> in 3D $\det H>0$ <b>non basta</b>.</li>
+  </ul>
+  <p><b>Su tutto $\mathbb{R}^n$: coercività o campo degenere</b> (<code>21lug25</code> Es.1): $x^2e^{yz}$; $F_x=0\Rightarrow x=0$; tutti i $(0,y,z)$ critici con $F=0$; $F\ge0$ ⇒ min $=0$, <b>massimo non esiste</b>. <i>Cosa cambia:</i> Weierstrass non si applica.</p>
+  <p><b>Embedded in una funzione implicita</b> (<code>22gen24</code>, <code>14feb25</code>): l&rsquo;estremo appare come critico di una $g$ del Dini — <b>ponte con 03</b>.</p>`,
+  collaudo:[
+    {q:R`$F=x^2+y^2-5y$ su $\{1\le x^2+y^2\le16\}$: dove stanno max e min?`, a:R`$\min=-25/4$ nel punto interno $(0,5/2)$; $\max=36$ in $(0,-4)$. Trappola evitata: includere il critico interno.`},
+    {q:R`$f=4-z$ su $\{x^2+y^2=8,\ x+y+z=1\}$: max e min?`, a:R`$\max=7$ in $(-2,-2,5)$, $\min=-1$ in $(2,2,-3)$.`},
+    {q:R`In 2D un critico ha $\det H=9>0$ e $f_{xx}=-3$: minimo, massimo o sella?`, a:R`Massimo — $\det H>0$ e $f_{xx}<0$.`}
+  ] },
+{ num:'05', title:'Serie e successioni di funzioni',
+  meta:'Pool #7 · freq 6/11 e 7/10 · l&rsquo;altra opzione dell&rsquo;Es.2 (con l&rsquo;ottimizzazione, 04)',
+  firma:R`<p>Una <b>successione</b> $f_n(x)$ o una <b>serie</b> $\sum_k f_k(x)$ di funzioni, con la richiesta a catena: convergenza puntuale, uniforme, totale; passare al limite sotto il segno di integrale (o derivata). Spesso un cambio di variabile smaschera una <b>serie di potenze</b>. Parole-spia: <i>converge puntualmente / uniformemente / totalmente, raggio di convergenza, scambio limite-integrale, Weierstrass, Leibniz, Abel</i>.</p>
+  <p><b>Cosa NON confondere:</b> qui l&rsquo;oggetto è una <i>famiglia</i> di funzioni indicizzata da $n$; il gioco è <b>in quale senso</b> converge, non calcolare un estremo (04).</p>`,
+  idea:R`<p>Tre nozioni di convergenza, sempre più forti, e un teorema che le usa.</p>
+  <ul>
+  <li><b>Puntuale:</b> per ogni $x$ fissato, $f_n(x)\to f(x)$. È debole: non basta per scambiare limiti con integrali.</li>
+  <li><b>Uniforme</b> su $I$: $\sup_{x\in I}|f_n(x)-f(x)|\to0$. La velocità non dipende da $x$. <b>Autorizza lo scambio</b> $\lim\int=\int\lim$ e $\lim f_n'=(\lim f_n)'$.</li>
+  <li><b>Totale</b> (serie): $\sum_k\sup_{x\in I}|f_k(x)|<\infty$. Per <b>Weierstrass</b> implica uniforme (e assoluta). Sufficiente, non necessaria.</li>
+  </ul>
+  <p>Quasi mai c&rsquo;è uniforme su tutto $\mathbb{R}$; la si ottiene su <b>compatti</b> $[a,b]$ o su $[a,+\infty)$ con $a>0$. Per una serie di potenze $\sum c_k y^k$ il <b>raggio</b> $\rho$ dà uniforme su ogni $[-\rho+\delta,\rho-\delta]$ (Abel), e gli <b>estremi</b> $y=\pm\rho$ vanno studiati a mano (Leibniz, confronto con l&rsquo;armonica). Lo <b>scambio</b> vale con uniforme sull&rsquo;intervallo d&rsquo;integrazione, oppure (termini $\ge0$) per convergenza monotona.</p>`,
+  mossa:[
+    {label:'Puntuale', body:R`<p>Fissa $x$, calcola $\lim_n f_n(x)$ (o studia la serie numerica $\sum_k f_k(x)$). Determina l&rsquo;insieme di convergenza e la funzione limite $f$.</p>`},
+    {label:'Uniforme su $I$', body:R`<p>Stima $\sup_{x\in I}|f_n(x)-f(x)|$ (derivando $f_n-f$ o maggiorando) e controlla se $\to0$.</p><div class="note"><b>Trappola</b> (<code>20240704</code>, <code>20240127</code>): la convergenza uniforme su tutto $\mathbb{R}$ è quasi sempre <b>falsa</b>. Per negarla, esibisci un $x_n$ dipendente da $n$ dove il resto resta grande (es. $f_n(n)\to\cos(1)/3\neq0$, oppure $x_n=\sqrt n$). Si recupera solo su compatti.</div>`},
+    {label:'Totale (serie)', body:R`<p>Calcola $M_k=\sup_{x\in I}|f_k(x)|$ e controlla $\sum M_k<\infty$ (Weierstrass): se sì, uniforme. Se no, non concludere nulla di negativo — la totale è solo sufficiente.</p>`},
+    {label:'Serie di potenze mascherata', body:R`<p>Se compare $\log^k x$, $e^{-kx}$, ecc., <b>sostituisci</b> $y=\log x$, $y=e^{-x}$… per ridurti a $\sum c_k y^k$; trova $\rho$; studia gli estremi $y=\pm\rho$ separatamente; poi <b>torna alla $x$</b>.</p><div class="note"><b>Trappola</b> (<code>20220706</code>, <code>20230621</code>): dimenticare di ritradurre l&rsquo;intervallo in $x$ dopo averlo trovato in $y$. E: gli estremi del raggio vanno sempre analizzati a parte (Leibniz da un lato, confronto con $\sum1/k$ dall&rsquo;altro).</div>`},
+    {label:'Scambio limite/integrale (o derivata)', body:R`<p>Se c&rsquo;è uniforme su $[a,b]$: $\lim_n\int_a^b f_n=\int_a^b f$. Per termini $\ge0$: convergenza monotona / confronto, che scambiano $\int\sum=\sum\int$.</p><div class="note"><b>Trappola</b> (<code>20240704</code>): puoi scambiare su $[0,\tfrac12]$ anche senza uniforme su tutto $[0,1]$ — basta l&rsquo;uniforme sul compatto d&rsquo;integrazione.</div><div class="note"><b>Trappola</b> (Leibniz): applicalo solo dopo aver verificato le <b>tre</b> condizioni $a_k>0$, $a_k$ decrescente, $a_k\to0$.</div>`}
+  ],
+  esame:{ src:'Prova 24/01/2022, Es. 2 (20220124)',
+    testo:R`$f_n(x)=\dfrac{x}{1+2^{-n}+x^2/n^2}$. Studiare convergenza puntuale su $\mathbb{R}$, uniforme su $\mathbb{R}$ e su $[1,2]$, e calcolare $\lim_n\int_1^2 f_n$.`,
+    steps:[
+      {label:'Puntuale', body:R`<p>Per $x$ fissato, $2^{-n}\to0$ e $x^2/n^2\to0$, quindi $f_n(x)\to\dfrac{x}{1}=x=:f(x)$ per ogni $x\in\mathbb{R}$.</p>`},
+      {label:'Uniforme su $\mathbb{R}$?', body:R`<p>No. $f_n(x)-x=\dfrac{-x(2^{-n}+x^2/n^2)}{1+2^{-n}+x^2/n^2}$. Il termine $x^3/n^2$ al numeratore cresce con $x$: prendendo $x_n=n$ il resto non tende a $0$. Dunque $\sup_{\mathbb{R}}|f_n-f|\not\to0$.</p>`},
+      {label:'Uniforme su $[1,2]$?', body:R`<p>Sì. Su $|x|\le2$ e denominatore $\ge1$: $|f_n(x)-x|\le 2\bigl(2^{-n}+\frac{4}{n^2}\bigr)\to0$, stima <b>indipendente da $x\in[1,2]$</b>: uniforme.</p>`},
+      {label:'Scambio', body:R`<p>Per l&rsquo;uniforme su $[1,2]$: $\lim_n\int_1^2 f_n=\int_1^2 x\,dx=\Bigl[\tfrac{x^2}{2}\Bigr]_1^2=\dfrac{4-1}{2}=\dfrac32$. $\blacksquare$</p>`}
+    ],
+    nota:R`L&rsquo;uniforme cade su $\mathbb{R}$ per colpa di $x^3/n^2$ (grande per $x$ grande) ma resiste su $[1,2]$ — è il pattern «uniforme sui compatti, non su tutto $\mathbb{R}$».` },
+  varianti:R`<p>Prima divisione: <b>successione</b> $f_n$ oppure <b>serie</b> $\sum f_k$. Poi il trucco che apre l&rsquo;esercizio (sostituzione, positività per lo scambio, derivazione termine a termine).</p>
+  <p><b>Successioni $f_n\to f$.</b></p>
+  <ul>
+  <li><b>Con parametro $a$</b> (<code>20220907</code> Es.1): $n^a\sin(x^2/n)$; limite $0$ se $a<1$, $x^2$ se $a=1$, $+\infty$ se $a>1$; scambio (caso $a=1$) $n\int_0^2\sin(x^2/n)\to\int_0^2 x^2=\frac83$. <i>Cosa cambia:</i> il parametro sposta la <b>funzione limite</b>, non solo la velocità.</li>
+  <li><b>Senza parametro, scambio su compatto</b> (<code>20220124</code> Es.2 svolto; <code>04lug24</code> Es.4 $x^n(1-x^n)$; <code>27gen25</code> Es.4 $\cos(x/n)\frac{nx+3}{n^2+2x^2}$). <i>Cosa cambia:</i> l&rsquo;uniforme cade su $\mathbb{R}$ (test $x_n=n$, $f_n(n)\to\cos1/3\neq0$; oppure $x_n=\sqrt n$) ma tiene sul compatto d&rsquo;integrazione: basta l&rsquo;uniforme lì.</li>
+  </ul>
+  <p><b>Serie di potenze mascherate (sostituzione $y=\phi(x)$).</b></p>
+  <ul>
+  <li><b>Log al numeratore</b> (<code>20220124</code>/<code>22gen24</code> Es.2): $\sum\frac{\log^k x}{3^{k+1}(k+e^{-k})}$; con $y=\frac{\log x}{3}$, raggio $\rho=1$; in $y=1$ diverge (armonica), in $y=-1$ converge (Leibniz); in $x$: $[e^{-3},e^3)$.</li>
+  <li><b>Esponenziale $e^{-kx}$</b> (<code>20230621</code> Es.2): $\sum\frac{1+k}{k^2}e^{-kx}$; con $y=e^{-x}>0$, raggio $1$; converge per $x>0$, totale su $[a,+\infty)$; l&rsquo;estremo $y=1$ ($x=0$) diverge. <i>Cosa cambia:</i> trovi $\rho$ in $y$, studi gli estremi a mano, poi <b>ritraduci</b> in $x$.</li>
+  </ul>
+  <p><b>Serie alternante con Leibniz + Weierstrass $M_n$</b> (<code>14feb25</code> Es.4): $\sum\frac{(-1)^n[\arctan(x^2)]^n}{\sqrt{n+3}}$. <i>Cosa cambia:</i> Leibniz per la puntuale (le <b>tre</b> condizioni), Weierstrass $M_n$ per l&rsquo;uniforme; convergenze giustificate con criteri diversi.</p>
+  <p><b>Scambio $\int\sum$ per positività / convergenza monotona</b> (<code>22gen24</code> Es.2-ii): con $f_k\ge0$ su $[1,10]$, $\int\sum=\sum\int$ <b>senza</b> uniforme — TCM. Utile quando i termini sono non negativi.</p>
+  <p><b>Derivazione termine a termine</b> (<code>19giu24</code> Es.4): $S(x)=\sum\frac{\log^n x}{n^2+1}$, si chiede $S'(1)$. <i>Cosa cambia:</i> prima verifichi l&rsquo;uniforme della <b>serie derivata</b> in un intorno di $x=1$, poi $S'(1)=\sum\frac{d}{dx}(\cdot)|_{x=1}$.</p>`,
+  collaudo:[
+    {q:R`$f_n(x)=\dfrac{x}{1+2^{-n}+x^2/n^2}$: converge uniformemente su $\mathbb{R}$? E su $[1,2]$?`, a:R`No su $\mathbb{R}$ (termine $x^3/n^2$); sì su $[1,2]$; $\lim\int_1^2 f_n=3/2$.`},
+    {q:R`$\sum_{k\ge1}\frac{1+k}{k^2}e^{-kx}$: per quali $x$ converge, e dove totalmente?`, a:R`Puntuale e assoluta per $x>0$; totale su $[a,+\infty)$ per ogni $a>0$; l&rsquo;estremo $y=1$ ($x=0$) diverge.`},
+    {q:R`$f_n=\cos(x/n)\frac{nx+3}{n^2+2x^2}$: converge uniformemente su $\mathbb{R}$?`, a:R`No — $f_n(n)\to\cos(1)/3\neq0$; sì su ogni compatto $[0,2]$.`}
+  ] },
+
+{ num:'06', title:'Curve: parametrizzazione e integrali di linea',
+  meta:'Pool #3 · freq 8/11 (+ ovunque come sotto-punto) · priorità ALTA (punto debole dichiarato)',
+  firma:R`<p>Un <b>sostegno di curva</b> come <i>sistema di due equazioni</i> in $\mathbb{R}^3$ (tipicamente un cilindro $x^2+y^2=R^2$ intersecato con un piano $z$ lineare), o come mappa $(x(t),y(t),z(t))$ già scritta, con la richiesta: parametrizzare, verificare regolare/semplice, calcolare $\int_\gamma f\,ds$ (I specie) o il lavoro $\int_\gamma F\cdot T\,ds$ (II specie). Compare quasi sempre come <b>primo sotto-punto</b> dell&rsquo;Es.4. Parole-spia: <i>sostegno, parametrizzare, regolare, semplice, ascissa curvilinea, lunghezza, lavoro, integrale di linea</i>.</p>
+  <p><b>Cosa NON confondere:</b> <b>due</b> equazioni ⇒ curva (qui); <b>una</b> equazione $z=f(x,y)$ ⇒ superficie (07). Il <i>bordo</i> di una superficie è una curva: è il ponte fra 06 e 07.</p>`,
+  idea:R`<p>Una curva è l&rsquo;immagine di un intervallo sotto $\gamma:[a,b]\to\mathbb{R}^3$. Due proprietà la rendono maneggiabile:</p>
+  <ul>
+  <li><b>Regolare:</b> $\gamma'(t)\neq0$ su $(a,b)$ — vettore tangente ben definito, niente spigoli. Basta che <i>una</i> componente di $\gamma'$ non si annulli.</li>
+  <li><b>Semplice:</b> $\gamma$ iniettiva su $(a,b)$. Per curve chiuse si accetta $\gamma(a)=\gamma(b)$: iniettiva su $[a,b)$.</li>
+  </ul>
+  <p>Gli integrali di linea pesano con l&rsquo;elemento d&rsquo;arco $ds=|\gamma'(t)|\,dt$:</p>$$\int_\gamma f\,ds=\int_a^b f(\gamma(t))\,|\gamma'(t)|\,dt\ (\text{I specie}),\qquad \int_\gamma F\cdot T\,ds=\int_a^b F(\gamma(t))\cdot\gamma'(t)\,dt\ (\text{II specie}).$$<p>La I specie non dipende dall&rsquo;orientazione ($|\gamma'|$); la II specie <b>sì</b> ($\gamma'$ cambia segno col verso). Ricetta cilindro: $x^2+y^2=R^2$ obbliga $x=R\cos t$, $y=R\sin t$, e la terza equazione dà $z(t)$.</p>`,
+  mossa:[
+    {label:'Leggi il sostegno', body:R`<p>Due equazioni in $\mathbb{R}^3$ = curva 1D. Se una è $x^2+y^2=R^2$ o $\frac{x^2}{a^2}+\frac{y^2}{b^2}=1$, parametrizza subito la parte $(x,y)$ con $(\cos,\sin)$ scalato.</p>`},
+    {label:'Ricava $z(t)$', body:R`<p>Sostituisci $x(t),y(t)$ nella terza equazione (di solito un piano $z=$ lineare).</p>`},
+    {label:'Regolarità', body:R`<p>Calcola $\gamma'(t)$; verifica $\gamma'\neq0$ su $(a,b)$. Per il cilindro, $(x',y')=(-R\sin t,R\cos t)$ non si annulla mai, quindi $|\gamma'|^2\ge R^2>0$.</p><div class="note"><b>Trappola</b> (<code>20220124</code>): non serve calcolare $|z'(t)|^2$. Usa $|\gamma'|^2\ge (x')^2+(y')^2=R^2>0$: la parte planare garantisce la regolarità, anche se $z'$ si annulla.</div><div class="note"><b>Trappola</b> (curve chiuse): la regolarità si chiede su $(0,2\pi)$, non agli estremi che coincidono.</div>`},
+    {label:'Semplicità', body:R`<p>Verifica l&rsquo;iniettività su $(a,b)$. $t\mapsto(\cos t,\sin t)$ è iniettiva su $[0,2\pi)$ ma non su $[0,2\pi]$: per curve chiuse è lecito.</p>`},
+    {label:'Integrale di linea', body:R`<p>I specie: $\int_a^b f(\gamma(t))|\gamma'(t)|\,dt$. II specie (lavoro): $\int_a^b F(\gamma(t))\cdot\gamma'(t)\,dt$; <b>prima</b> verifica se $F$ è conservativo (10): se lo è, il lavoro è $U(B)-U(A)$ e su curva chiusa è $0$.</p><div class="note"><b>Trappola</b> (bordo di superficie): il bordo di $\Sigma=\{(x,y,f(x,y)):(x,y)\in D\}$ è $\{(x,y,f(x,y)):(x,y)\in\partial D\}$ <b>in $\mathbb{R}^3$</b>, non $\partial D$ nel piano. Se $D$ è il disco di raggio $R$: $\gamma(t)=(R\cos t,R\sin t,f(R\cos t,R\sin t))$.</div>`}
+  ],
+  esame:{ src:'Prova 24/01/2022, Es. 4-i (20220124)',
+    testo:R`Parametrizzare e verificare regolare la curva $\gamma:\ z=x+3y+4,\ x^2+y^2=4$.`,
+    steps:[
+      {label:'Parametrizzazione', body:R`<p>$x^2+y^2=4$ è il cerchio di raggio $2$: pongo $x(t)=2\cos t$, $y(t)=2\sin t$, $t\in[0,2\pi]$. Sostituisco: $z(t)=2\cos t+6\sin t+4$. Dunque $\gamma(t)=(2\cos t,\ 2\sin t,\ 2\cos t+6\sin t+4)$.</p>`},
+      {label:'Regolarità', body:R`<p>$\gamma'(t)=(-2\sin t,\ 2\cos t,\ -2\sin t+6\cos t)$. Uso la disuguaglianza sulle prime due componenti: $$|\gamma'(t)|^2\ge 4\sin^2 t+4\cos^2 t=4>0\quad\forall t.$$ Il tangente non si annulla mai: $\gamma$ è <b>regolare</b> su $(0,2\pi)$, ed è <b>semplice</b> (iniettiva su $[0,2\pi)$, curva chiusa). $\blacksquare$</p>`}
+    ],
+    nota:R`Non ho toccato $z'(t)=-2\sin t+6\cos t$ (che si annulla per qualche $t$): la regolarità è già salva grazie a $(x')^2+(y')^2=4$. È il trucco che l&rsquo;esame premia.` },
+  varianti:R`<p>Le famiglie si distinguono per <b>come è dato il sostegno</b>: già pronto per la trigonometria, da ricavare per intersezione, o già esplicito. In parallelo cambia <i>cosa garantisce la regolarità</i> e <i>su quale intervallo</i>.</p>
+  <p><b>Sostegno = quadrica $\cap$ piano, direttamente parametrizzabile.</b></p>
+  <ul>
+  <li><b>Cilindro circolare $x^2+y^2=R^2$</b> (<code>20220124</code> Es.4 svolto; <code>20220504</code> Es.3 $\{x^2+y^2=9,z=x+y\}$; <code>20220706</code> Es.4 $\{x^2+y^2=1,z=4x+y+1\}$): $x=R\cos t$, $y=R\sin t$, $z$ dal piano; curva <b>chiusa</b>, $t\in[0,2\pi)$.</li>
+  <li><b>Cilindro ellittico / arco</b> (<code>20230210</code> Es.3): $\frac{x^2}4+y^2=1$, $y\ge0$ ⇒ $x=2\cos\phi$, $y=\sin\phi$, $\phi\in[0,\pi]$ (semiellisse). <i>Cosa cambia:</i> circolare → $R(\cos,\sin)$; ellittico → $(a\cos,b\sin)$; un semipiano taglia l&rsquo;intervallo del parametro.</li>
+  </ul>
+  <p><b>Sostegno = intersezione da RISOLVERE prima</b> (<code>10feb22</code> Es.3): paraboloide $\cap$ piano; sostituendo si riduce a $x^2+y^2=\frac14$ ⇒ $x=\frac12\cos t$, $y=\frac12\sin t$. <i>Cosa cambia:</i> <b>prima</b> elimini $z$ ed estrai il cerchio, <b>poi</b> parametrizzi.</p>
+  <p><b>Sostegno già ESPLICITO $(x(t),y(t),z(t))$.</b></p>
+  <ul>
+  <li>Spaziale (<code>20230504</code> Es.4): $(1+e^{t^2},\log(t^4+1),\sin((\pi t)^6))$, $t\in[0,1]$; regolare perché $x'(t)=2te^{t^2}\neq0$ su $(0,1)$ — <b>basta una componente</b>.</li>
+  <li>Piana (<code>20230705</code> Es.3): $(t^2+1,\arcsin t)$, $t\in[-\frac12,\frac12]$; <b>semplice</b> perché $\arcsin t$ iniettiva; regolare perché $(\arcsin t)'=\frac1{\sqrt{1-t^2}}\neq0$.</li>
+  </ul>
+  <p><b>Sostegno = BORDO di una superficie</b> (<code>20240704</code> Es.3): $\partial\Sigma$ del piano $z=4y+5$ su $x^2+(y-2)^2\le9$ è $\gamma(t)=(3\cos t,\,2+3\sin t,\,8+12\sin t)$. <i>Cosa cambia:</i> è l&rsquo;<b>immagine del cerchio-frontiera</b> sotto la parametrizzazione della superficie, una curva in $\mathbb{R}^3$ — <b>ponte con 07 e 09</b>.</p>
+  <p><b>Nota sull&rsquo;orientazione (I vs II specie).</b> La I specie $\int_\gamma f\,ds$ è insensibile al verso; la II specie (lavoro) <b>cambia segno</b>. <i>Cosa cambia:</i> per il lavoro controlla prima se $F$ è conservativo (10) — se sì, chiusa dà $0$, aperta $U(B)-U(A)$, senza integrare.</p>`,
+  collaudo:[
+    {q:R`$z=x+3y+4$, $x^2+y^2=4$: parametrizza e prova la regolarità.`, a:R`$\gamma=(2\cos t,2\sin t,2\cos t+6\sin t+4)$; $|\gamma'|^2\ge4>0$; regolare e semplice su $[0,2\pi)$.`},
+    {q:R`Perché per la regolarità di $\gamma$ del punto 1 non serve calcolare $z'(t)$?`, a:R`Perché $|\gamma'|^2\ge(x')^2+(y')^2=4>0$; la parte planare basta, anche se $z'$ si annulla.`},
+    {q:R`Il bordo del grafico $z=4y+5$ sopra il disco $x^2+(y-2)^2\le9$: che curva è?`, a:R`$\gamma(t)=(3\cos t,\,2+3\sin t,\,8+12\sin t)$, una curva in $\mathbb{R}^3$, non il cerchio nel piano.`}
+  ] },
+{ num:'07', title:'Superfici: area, versore normale, bordo',
+  meta:'Pool #2 · freq ≥10/11 e 9/10 · priorità ALTA (parametrizzazione, dominio, orientazione)',
+  firma:R`<p>Una <b>superficie</b> come <i>una sola equazione</i>: un grafico $z=f(x,y)$, una superficie di rotazione, un pezzo di sfera/cilindro con un vincolo. La richiesta: parametrizzare, calcolare l&rsquo;<b>area</b>, scrivere il <b>versore normale</b>, descrivere il <b>bordo</b> $\partial\Sigma$. È il cuore dell&rsquo;Es.3/Es.4. Parole-spia: <i>parametrizzare la superficie, area, versore normale, orientazione, bordo, terza componente positiva</i>.</p>
+  <p><b>Cosa NON confondere:</b> <b>una</b> equazione ⇒ superficie (qui); <b>due</b> ⇒ curva (06). Il dominio $D$ nel piano $(x,y)$ è la <i>proiezione</i> della superficie, non la superficie stessa.</p>`,
+  idea:R`<p>Una superficie parametrizzata è una mappa $X(u,v)$ da $D_{uv}\subset\mathbb{R}^2$ a $\mathbb{R}^3$. Le derivate $X_u,X_v$ sono i tangenti; il loro prodotto vettoriale è il normale, la cui <b>lunghezza è il fattore di dilatazione d&rsquo;area</b>:</p>$$dS=|X_u\times X_v|\,du\,dv,\qquad A(\Sigma)=\iint_{D_{uv}}|X_u\times X_v|\,du\,dv,\qquad \mathbf n=\frac{X_u\times X_v}{|X_u\times X_v|}.$$<p>Per un <b>grafico</b> $z=f(x,y)$, con $X=(x,y,f)$:</p>$$X_x\times X_y=(-f_x,-f_y,1),\qquad |X_x\times X_y|=\sqrt{1+f_x^2+f_y^2}.$$<p>La terza componente di $(-f_x,-f_y,1)$ è $+1$: la normale grezza del grafico punta <b>sempre verso l&rsquo;alto</b>. Il <b>bordo</b> è l&rsquo;immagine della frontiera: $\partial\Sigma=X(\partial D_{uv})$.</p>`,
+  mossa:[
+    {label:'Riconosci il tipo e scrivi $X(u,v)$', body:R`<p>Grafico, rotazione, sferica — con il suo dominio $D_{uv}$.</p>`},
+    {label:'Trova il dominio $D$ giusto', body:R`<p>Per un grafico, $D$ è la proiezione: leggila dai vincoli.</p><div class="note"><b>Trappola</b> (<code>20240704</code>): il vincolo «$x^2+y^2\le z$» con $z=4y+5$ <b>non</b> è un disco centrato nell&rsquo;origine: $x^2+y^2\le4y+5\iff x^2+(y-2)^2\le9$, disco di <b>centro $(0,2)$, raggio $3$</b>.</div><div class="note"><b>Trappola</b> (<code>20250127</code>): «$x^2+y^2\le9$» è il disco di raggio $3$ — non confondere $9$ (che è $R^2$) col raggio.</div>`},
+    {label:'Area', body:R`<p>Grafico: $\iint_D\sqrt{1+f_x^2+f_y^2}\,dx\,dy$. Se il fattore è costante (piano), è quella costante per Area$(D)$. Se il disco è traslato, polari <b>centrate nel centro del disco</b> ($x=x_0+\rho\cos\theta$, $y=y_0+\rho\sin\theta$, $J=\rho$).</p>`},
+    {label:'Versore normale col verso richiesto', body:R`<p>$(-f_x,-f_y,1)$ punta in alto. Se serve la 3ª componente negativa (o uscente da un solido dove $\Sigma$ sta sotto), prendi $(f_x,f_y,-1)$.</p><div class="note"><b>Trappola</b> (flusso/Gauss, <code>20230210</code>): «verso l&rsquo;alto» $\neq$ «uscente». Per una calotta inferiore o un paraboloide che chiude il solido da sotto, la normale uscente ha 3ª componente $<0$: cambia segno.</div>`},
+    {label:'Bordo', body:R`<p>$\partial\Sigma=X(\partial D)$. Per $D=\{x^2+y^2\le R^2\}$: $\gamma(t)=(R\cos t,R\sin t,f(R\cos t,R\sin t))$, una curva in $\mathbb{R}^3$ (ponte con 06).</p>`},
+    {label:'Non-grafici', body:R`<p>Sfera $X=(R\sin\phi\cos\theta,R\sin\phi\sin\theta,R\cos\phi)$, $|X_\phi\times X_\theta|=R^2\sin\phi$; rotazione attorno a $z$ del profilo $\gamma(v)$: $X=(\gamma(v)\cos\theta,\gamma(v)\sin\theta,v)$, $X_\theta\times X_v=(\gamma\cos\theta,\gamma\sin\theta,-\gamma\gamma')$.</p><div class="note"><b>Trappola</b> (<code>b02</code>): per sfera/cilindro <b>non</b> usare $\sqrt{1+f_x^2+f_y^2}$ (vale solo per i grafici): calcola $|X_u\times X_v|$ direttamente.</div>`}
+  ],
+  esame:{ src:'Prova 04/07/2024, Es. 3 (20240704)',
+    testo:R`$\Sigma:\ z=4y+5,\ x^2+y^2\le z$. Parametrizzare, trovare il dominio, calcolare l&rsquo;area, scrivere il bordo.`,
+    steps:[
+      {label:'Dominio', body:R`<p>$\Sigma$ è il grafico $z=4y+5$ ristretto a $x^2+y^2\le z=4y+5$: $$x^2+y^2\le 4y+5\iff x^2+(y-2)^2\le 9.$$ $D$ è il <b>disco di centro $(0,2)$ e raggio $3$</b> — non centrato nell&rsquo;origine.</p>`},
+      {label:'Parametrizzazione', body:R`<p>$X(x,y)=(x,\,y,\,4y+5)$, $(x,y)\in D$.</p>`},
+      {label:'Area', body:R`<p>$f_x=0$, $f_y=4$, quindi $\sqrt{1+f_x^2+f_y^2}=\sqrt{17}$ (costante). Allora $$A(\Sigma)=\sqrt{17}\cdot\text{Area}(D)=\sqrt{17}\cdot\pi\cdot3^2=9\pi\sqrt{17}.$$</p>`},
+      {label:'Versore normale', body:R`<p>$(-f_x,-f_y,1)=(0,-4,1)$, quindi $\mathbf n=\dfrac{(0,-4,1)}{\sqrt{17}}$ (3ª componente positiva).</p>`},
+      {label:'Bordo', body:R`<p>$\partial D$ è $x^2+(y-2)^2=9$, cioè $x=3\cos t$, $y=2+3\sin t$. Immagine sotto $X$: $$\partial\Sigma:\ \gamma(t)=(3\cos t,\,2+3\sin t,\,13+12\sin t),\qquad t\in[0,2\pi].$$ $\blacksquare$</p>`}
+    ],
+    nota:R`L&rsquo;unico passaggio delicato è il dominio. Chi legge «$x^2+y^2\le z$» e disegna un disco centrato nell&rsquo;origine sbaglia sia il raggio dell&rsquo;area sia il centro del bordo. La chiave è portare il vincolo a $(x-x_0)^2+(y-y_0)^2\le R^2$.` },
+  varianti:R`<p>Due assi: il <b>tipo di superficie</b> (grafico piano, curvo, rotazione, sfera, mantello) fissa la formula d&rsquo;area; il <b>dominio</b> (centrato, traslato, settoriale) fissa il cambio di coordinate e il bordo.</p>
+  <p><b>Grafico piano $z=$ lineare — fattore d&rsquo;area costante.</b></p>
+  <ul>
+  <li>Disco <b>centrato</b>: <code>20250127</code> Es.1 ($z=-2x-y+2$, $x^2+y^2\le9$, $\sqrt6$, area $9\sqrt6\,\pi$); <code>20220124</code> Es.4 ($z=x+3y+4$, $\sqrt{11}$); <code>20220706</code> Es.4 ($z=4x+y+1$, $3\sqrt2$).</li>
+  <li>Disco <b>traslato</b>: <code>20240704</code> Es.3 (svolto, centro $(0,2)$); <code>27giu25</code> Es.1 ($z=2x+4y-4$ su $(x-1)^2+(y-2)^2\le1$, $\sqrt{21}$). <i>Cosa cambia:</i> area $=$ numero $\times$ Area$(D)$; il centro si legge portando il vincolo a $(x-x_0)^2+(y-y_0)^2\le R^2$.</li>
+  </ul>
+  <p><b>Grafico curvo (paraboloide) — fattore d&rsquo;area variabile.</b></p>
+  <ul>
+  <li><code>20220622</code> Es.4: $z=1+\frac{x^2+y^2}2$ su $x^2+y^2\le16$; area $\int_0^{2\pi}\!\int_0^4\sqrt{1+\rho^2}\,\rho\,d\rho\,d\theta=\frac{2\pi}3(17\sqrt{17}-1)$.</li>
+  <li><code>20230907</code> Es.4: $z=2+x^2+(y-1)^2$ su $x^2+(y-1)^2\le1$; area $\frac{\pi}6(5\sqrt5-1)$. <i>Cosa cambia:</i> polari centrate nel centro del disco, integri $\sqrt{1+c\rho^2}\,\rho\,d\rho$.</li>
+  </ul>
+  <p><b>Dominio non-standard (più curve di frontiera)</b> (<code>09feb24</code> Es.4): $z=2x+2y+5$ su un dominio delimitato da tre curve, bordo formato da 4 archi. <i>Cosa cambia:</i> area element costante ($=3$), ma $\partial\Sigma$ è un&rsquo;<b>unione di archi</b> — elencati e orientati uno per uno.</p>
+  <p><b>Superficie di rotazione</b> (<code>22gen24</code> Es.4 intercapedine; <code>20220907</code> Es.4 profilo $1-\sqrt{1-z^2}$; <code>27gen25</code> Es.5 profilo $x=1+t^2$): $X=(\gamma(v)\cos\theta,\gamma(v)\sin\theta,v)$, normale $(\gamma\cos\theta,\gamma\sin\theta,-\gamma\gamma')$. <i>Cosa cambia:</i> <b>non</b> usi $\sqrt{1+|\nabla f|^2}$; il segno della 3ª componente $-\gamma\gamma'$ non è uniforme in $v$ — per il flusso uscente (ponte con 08) verifichi il verso caso per caso.</p>
+  <p><b>Pezzo di sfera / mantello cilindrico (non-grafici).</b></p>
+  <ul>
+  <li>Sfera con settore (<code>14feb25</code> Es.5: $0\le y\le x$ ⇒ $\theta\in[0,\frac\pi4]$; <code>20230123</code> Es.3 spicchio $x\ge0,y\ge0$): $|X_\phi\times X_\theta|=R^2\sin\phi$.</li>
+  <li>Mantello cilindrico (<code>20230210</code> $\Sigma_3$: $x^2+y^2=9$, $z\in[-4,4]$): $X=(R\cos\theta,R\sin\theta,z)$. <i>Cosa cambia:</i> la formula cartesiana <b>non vale</b> — $|X_u\times X_v|$ diretto ($R^2\sin\phi$ sfera, $R$ mantello); i vincoli settoriali fissano gli estremi di $\theta,\phi$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$z=4y+5$ con $x^2+y^2\le z$: qual è il dominio $D$ e l&rsquo;area di $\Sigma$?`, a:R`$D$ disco di centro $(0,2)$ raggio $3$; area $9\pi\sqrt{17}$. Trappola evitata: non è centrato nell&rsquo;origine.`},
+    {q:R`$z=1+\tfrac{x^2+y^2}{2}$ su $x^2+y^2\le16$: area?`, a:R`$\tfrac{2\pi}{3}(17\sqrt{17}-1)$, via polari e $\int\sqrt{1+\rho^2}\,\rho\,d\rho$.`},
+    {q:R`Per una calotta sferica di raggio $R$, il fattore d&rsquo;area è $\sqrt{1+f_x^2+f_y^2}$?`, a:R`No — quella formula vale solo per i grafici cartesiani; per la sfera $|X_\phi\times X_\theta|=R^2\sin\phi$.`}
+  ] },
+
+{ num:'08', title:'Volume e flusso: Teorema della divergenza',
+  meta:'Pool #4 · freq 11/11 e 9/10 (invariante) · priorità ALTA · è l&rsquo;Es.3, sempre presente',
+  firma:R`<p>Un <b>dominio 3D</b> $E$ delimitato da superfici (paraboloide + piano, sfera ∩ cilindro, cono + calotta…), un <b>campo</b> $F$, e la richiesta: calcolare il <b>volume</b> di $E$ e il <b>flusso uscente</b> di $F$ dalla frontiera $\partial E$, spesso «e il flusso attraverso la singola $\Sigma_i$». Parole-spia: <i>flusso uscente, volume del dominio, teorema della divergenza, $\operatorname{div}F$, frontiera $\partial E$</i>.</p>
+  <p><b>Cosa NON confondere:</b> se la curva è chiusa e si chiede la <b>circuitazione</b> ($\oint F\cdot T$), è Stokes (09). Qui l&rsquo;oggetto è il flusso attraverso una <b>superficie chiusa</b> che borda un solido.</p>`,
+  idea:R`<p>Il teorema della divergenza converte un integrale di superficie in uno di volume:</p>$$\iint_{\partial E}F\cdot\mathbf n\,dS=\iiint_E\operatorname{div}F\,dx\,dy\,dz,\qquad \operatorname{div}F=\partial_xF_1+\partial_yF_2+\partial_zF_3,$$<p>valido se $F\in C^1(\overline E)$ e $\mathbf n$ è la normale <b>uscente</b>. La divergenza misura la «sorgente» puntuale; sommandola sul volume si ha il flusso netto. Vantaggio: la $\operatorname{div}F$ è spesso <b>costante o semplice</b>, così il flusso è $(\operatorname{div}F)\cdot\text{Vol}(E)$ e resta solo un calcolo di volume (cilindriche per rotazione, sferiche per palle).</p>`,
+  mossa:[
+    {label:'Verifica $F\in C^1$', body:R`<p>Su $\overline E$ (altrimenti Gauss non si applica).</p>`},
+    {label:'Calcola $\operatorname{div}F$ subito', body:R`<p>È spesso costante: se lo è, il flusso sarà $\operatorname{div}F\cdot\text{Vol}(E)$.</p><div class="note"><b>Trappola</b> (<code>b02</code>): errore di segno in una parziale (con $\sin,\cos,e^x$): spesso i termini si <b>cancellano</b> e la divergenza è costante — un segno sbagliato la fa sembrare variabile. Ricontrolla.</div>`},
+    {label:'Descrivi $E$ e scegli le coordinate', body:R`<p>Cilindriche ($J=\rho$) per rotazione attorno a $z$; sferiche ($J=r^2\sin\phi$) per palle; traslate se decentrato.</p><div class="note"><b>Trappola</b> (<code>27giu25</code>): un cilindro <b>traslato</b> $(x-z)^2+y^2\le4$ non si parametrizza con cilindriche centrate — per ogni $z$ è un disco di centro $(z,0)$: integra per fette in $z$.</div><div class="note"><b>Trappola</b> (Jacobiano): non dimenticare il fattore $\rho$ (cilindriche) o $r^2\sin\phi$ (sferiche).</div>`},
+    {label:'Trova le superfici d&rsquo;intersezione', body:R`<p>Eguagliando le equazioni di frontiera (per $z$ o $\rho$): definiscono il dominio proiettato $D$ e gli estremi.</p>`},
+    {label:'Volume', body:R`<p>$\text{Vol}(E)=\iint_D(z_{\sup}-z_{\inf})\,dx\,dy$, oppure per fette $\int(\text{area fetta})\,dz$.</p>`},
+    {label:'Flusso', body:R`<p>$\iiint_E\operatorname{div}F$. Se $\operatorname{div}F$ è dispari in una variabile e $D$ è simmetrico, quei termini si annullano ($\int_0^{2\pi}\cos\theta=\int_0^{2\pi}\sin\theta=0$).</p>`},
+    {label:'Flusso su una singola superficie', body:R`<p>Calcola il flusso sulla superficie <b>più semplice</b> (spesso una faccia piana), poi ottieni l&rsquo;altra per <b>differenza</b> dal totale.</p><div class="note"><b>Trappola</b> (segno della normale, <code>20230210</code>): il verso uscente va imposto a mano. Per un grafico $z=g(x,y)$ la normale grezza $(-g_x,-g_y,1)$ punta in alto: uscente se chiude $E$ dall&rsquo;alto, entrante (⇒ cambia segno) se lo chiude dal basso.</div>`}
+  ],
+  esame:{ src:'Prova 10/02/2023, Es. 4 (20230210)',
+    testo:R`$E=\{x^2+y^2+z^2\le25,\ x^2+y^2\le9\}$ (palla di raggio $5$ ∩ cilindro di raggio $3$), $F=(x,y,z)$. Calcolare il flusso uscente da $\partial E$ e il flusso attraverso il mantello cilindrico $\Sigma_3$.`,
+    steps:[
+      {label:'Divergenza', body:R`<p>$\operatorname{div}F=1+1+1=3$ (costante). Quindi il flusso totale è $3\,\text{Vol}(E)$.</p>`},
+      {label:'Geometria', body:R`<p>La frontiera ha tre pezzi: calotta superiore $\Sigma_1:z=\sqrt{25-x^2-y^2}$, inferiore $\Sigma_2:z=-\sqrt{25-x^2-y^2}$ (su $D=\{x^2+y^2\le9\}$), e mantello $\Sigma_3:x^2+y^2=9,\ -4\le z\le4$ (dove $z=\pm\sqrt{25-9}=\pm4$).</p>`},
+      {label:'Volume', body:R`<p>Cilindriche, $\rho\in[0,3]$, quota da $-\sqrt{25-\rho^2}$ a $+\sqrt{25-\rho^2}$: $$\text{Vol}(E)=\int_0^{2\pi}\!\!\int_0^3 2\sqrt{25-\rho^2}\,\rho\,d\rho\,d\theta=2\pi\cdot\tfrac23(125-64)=\tfrac{244\pi}{3}.$$ Flusso totale: $\Phi(\partial E)=3\cdot\tfrac{244\pi}{3}=244\pi$.</p>`},
+      {label:'Flusso sulle calotte', body:R`<p>Su $\Sigma_1$, normale uscente $\propto(-z_x,-z_y,1)$; con $z_x=-x/z$, $z_y=-y/z$: $F\cdot\mathbf n\,dS=\tfrac{x^2+y^2+z^2}{z}\,dx\,dy=\tfrac{25}{\sqrt{25-\rho^2}}\,dx\,dy$. $$\Phi(\Sigma_1)=\int_0^{2\pi}\!\!\int_0^3\frac{25\,\rho}{\sqrt{25-\rho^2}}\,d\rho\,d\theta=50\pi(5-4)=50\pi.$$ Per simmetria $\Phi(\Sigma_2)=50\pi$.</p>`},
+      {label:'Mantello per differenza', body:R`<p>$$\Phi(\Sigma_3)=244\pi-50\pi-50\pi=144\pi.$$ $\blacksquare$ Verifica diretta: sul mantello $\mathbf n=(x,y,0)/3$, $F\cdot\mathbf n=3$; area $=2\pi\cdot3\cdot8=48\pi$; flusso $=3\cdot48\pi=144\pi$ ✓.</p>`}
+    ] },
+  varianti:R`<p>Due assi comandano: la <b>divergenza</b> (costante / semplice-dispari / variabile) decide quanto lavoro resta; la <b>geometria del dominio</b> decide le coordinate. Terzo asse: flusso totale o su una <b>singola</b> superficie (per differenza).</p>
+  <p><b>La divergenza.</b></p>
+  <ul>
+  <li><b>Costante ⇒ flusso $=\operatorname{div}F\cdot\text{Vol}(E)$</b> (<code>20230210</code> svolto, div $=3$; <code>20220706</code> Es.2 div $=8$; <code>19giu24</code> div $=2$; <code>22gen24</code> Es.4 div $=1$). <i>Cosa cambia:</i> tutto diventa un <b>calcolo di volume</b>; controlla che i termini si cancellino davvero.</li>
+  <li><b>Semplice ma dispari ⇒ flusso nullo per simmetria</b> (<code>20220124</code> Es.3, div $=y-1$ su dominio simmetrico ⇒ $0$). <i>Cosa cambia:</i> guarda la <b>parità</b>: i termini lineari muoiono.</li>
+  <li><b>Variabile ⇒ integra il campo con la stessa parametrizzazione</b> (<code>20230907</code> div $=4x$; <code>05mar24</code> div $=2x+y$; <code>27giu25</code> div $=2e^z+2$). <i>Cosa cambia:</i> non basta il volume; porti $\operatorname{div}F$ nelle coordinate e integri.</li>
+  </ul>
+  <p><b>La geometria del dominio.</b></p>
+  <ul>
+  <li><b>Paraboloide + sfera/piano</b> (<code>20220706</code>; <code>05mar24</code> paraboloide ∩ cono): cilindriche, <b>proiezione $D$ da risolvere</b> eguagliando le frontiere.</li>
+  <li><b>Sfera ∩ cilindro (tre superfici)</b> (<code>20230210</code> svolto): calotte + mantello; una diretta, mantello <b>per differenza</b>.</li>
+  <li><b>Solido di rotazione / per fette</b> (<code>20230907</code> Es.3: cono decentrato, area fetta $\pi(1-z)^2$, Vol $=\frac\pi3$): integri $\int(\text{area fetta})\,dz$ (o Guldino).</li>
+  <li><b>Intercapedine iperboloide–paraboloide</b> (<code>20230621</code> Es.4: $z^2+3\le x^2+y^2\le3z+1$, cilindriche $z\in[1,2]$).</li>
+  <li><b>Cilindro traslato</b> (<code>27giu25</code> Es.3: $(x-z)^2+y^2\le4$; <code>09feb24</code> calotta + cono): sezione a $z$ fisso = disco di <b>centro $(z,0)$</b> ⇒ integri per fette. <i>Cosa cambia:</i> se il centro dipende da $z$, le cilindriche standard non servono.</li>
+  </ul>
+  <p><b>La richiesta: flusso su una singola superficie</b> (<code>20230210</code>). <i>Cosa cambia:</i> calcoli il flusso sulla superficie <b>più facile</b> con la definizione e ottieni l&rsquo;altra come $\Phi(\partial E)-\Phi(\text{facile})$; imponi a mano il verso uscente.</p>`,
+  collaudo:[
+    {q:R`$E=\{x^2+y^2+z^2\le25,\ x^2+y^2\le9\}$, $F=(x,y,z)$: flusso totale e flusso sul mantello?`, a:R`Totale $244\pi$ ($=3\,\text{Vol}$, $\text{Vol}=244\pi/3$); mantello $144\pi$, meglio per differenza.`},
+    {q:R`$\operatorname{div}F=8$ su un solido di volume $V$: quanto vale il flusso uscente?`, a:R`$8V$; nessun integrale di superficie necessario.`},
+    {q:R`Perché per il cilindro traslato $(x-z)^2+y^2\le4$ non uso cilindriche centrate?`, a:R`Il centro del disco dipende da $z$ ($=(z,0)$); si integra per fette, disco per disco.`}
+  ] },
+{ num:'09', title:'Circuitazione: Teorema di Stokes (e Green)',
+  meta:'Pool #5 · freq 8/11 e 8/10 · di norma accoppiato a 07 (stessa superficie) nell&rsquo;Es.4',
+  firma:R`<p>Una <b>curva chiusa</b> $\gamma$ (spesso il bordo di una superficie già parametrizzata), un campo $F$, e la richiesta del <b>lavoro / circuitazione</b> $\oint_\gamma F\cdot T\,ds$. In $\mathbb{R}^2$ la stessa cosa si chiama <b>Green</b>. Parole-spia: <i>circuitazione, lavoro lungo la curva chiusa, teorema di Stokes, rotore, verso di percorrenza, orientazione</i>.</p>
+  <p><b>Cosa NON confondere:</b> se la superficie è chiusa e si chiede il <b>flusso</b> ($\iint F\cdot\mathbf n$), è Gauss (08). Se il campo è <b>conservativo</b>, la circuitazione su curva chiusa è $0$ e hai finito (10): sempre quel controllo prima.</p>`,
+  idea:R`<p>Stokes trasforma un integrale di linea lungo il bordo in un integrale di <b>flusso del rotore</b> attraverso qualunque superficie con quel bordo:</p>$$\oint_{\partial\Sigma}F\cdot T\,ds=\iint_\Sigma(\operatorname{rot}F)\cdot\mathbf n\,dS,\qquad
+  \operatorname{rot}F=\begin{vmatrix}\mathbf e_1&\mathbf e_2&\mathbf e_3\\ \partial_x&\partial_y&\partial_z\\ F_1&F_2&F_3\end{vmatrix},$$<p>valido se $F\in C^1$, $\Sigma$ regolare e orientabile, e l&rsquo;orientazione del bordo <b>compatibile</b> con la normale (mano destra). Componenti cicliche:</p>$$(\operatorname{rot}F)_1=\partial_yF_3-\partial_zF_2,\ (\operatorname{rot}F)_2=\partial_zF_1-\partial_xF_3,\ (\operatorname{rot}F)_3=\partial_xF_2-\partial_yF_1.$$<p>La libertà di scegliere $\Sigma$ è l&rsquo;arma: il bordo determina $\Sigma$, non viceversa, quindi scegli la superficie <b>più semplice</b> con quel bordo (di solito il disco/piano). In 2D il rotore si riduce a $\partial_xF_2-\partial_yF_1$ e Stokes diventa <b>Green</b>: $\oint_{\partial D}F\cdot T\,ds=\iint_D(\partial_xF_2-\partial_yF_1)\,dx\,dy$.</p>`,
+  mossa:[
+    {label:'Conservativo?', body:R`<p>Se $\operatorname{rot}F=0$ su un dominio semplicemente connesso, la circuitazione è $0$ (10): fermati. Altrimenti procedi.</p>`},
+    {label:'Scegli $\Sigma$ con bordo $\gamma$', body:R`<p>La più semplice possibile (piano/disco su cui $\gamma$ giace).</p><div class="note"><b>Trappola</b> (<code>b02</code>): se il bordo è un cerchio in un piano, prendi il <b>disco piano</b>, non la superficie curva originaria. Stessa circuitazione, calcolo molto più facile.</div>`},
+    {label:'Calcola $\operatorname{rot}F$ col determinante', body:R`<p>Esplicitamente.</p><div class="note"><b>Trappola</b> (<code>b02</code>): l&rsquo;errore classico è invertire la differenza (segno) o sbagliare la 2ª componente. Scrivi sempre il determinante; verifica se qualche componente si annulla per simmetria.</div>`},
+    {label:'Orienta', body:R`<p>Con $\Sigma$ grafico e $\mathbf n$ non normalizzata $(-f_x,-f_y,1)$ (3ª comp. $+$), il bordo va percorso <b>antiorario visto dall&rsquo;alto</b>. Se il testo impone la 3ª componente <b>negativa</b>, il verso è orario e l&rsquo;integrale cambia <b>segno</b>.</p><div class="note"><b>Trappola</b> (<code>20250127</code>): «normale con 3ª componente negativa» ⇒ usi $-(-f_x,-f_y,1)$, e l&rsquo;intera circuitazione prende un segno meno. Tienine conto una volta sola, con coerenza.</div>`},
+    {label:'Integra sul dominio', body:R`<p>Per $\Sigma$ grafico: $\iint_D\operatorname{rot}F(x,y,f(x,y))\cdot(-f_x,-f_y,1)\,dx\,dy$ (non normalizzare: il $dS$ è già compensato).</p><div class="note"><b>Trappola</b> (<code>b02</code>): <b>sostituisci</b> $z=f(x,y)$ dentro $\operatorname{rot}F$ <b>prima</b> di integrare; dimenticarlo lascia una $z$ libera nell&rsquo;integrando.</div><div class="note"><b>Trappola</b> (simmetria): su un disco centrato in $0$, $\iint_D x=\iint_D y=0$: i termini lineari spariscono, resta la costante $\times$ area.</div>`}
+  ],
+  esame:{ src:'Prova 27/01/2025, Es. 1-vi (20250127)',
+    testo:R`$F=(y^2+z^2+e^{x},\ xy+z+\cos y,\ 2xz+3yz+z^2)$; $\Sigma$ è il piano $z=-2x-y+2$ sul disco $D=\{x^2+y^2\le9\}$, con normale a <b>3ª componente negativa</b>. Calcolare la circuitazione lungo $\partial\Sigma$.`,
+    steps:[
+      {label:'Rotore', body:R`$$(\operatorname{rot}F)_1=3z-1,\quad (\operatorname{rot}F)_2=2z-2z=0,\quad (\operatorname{rot}F)_3=y-2y=-y.$$<p>Dunque $\operatorname{rot}F=(3z-1,\ 0,\ -y)$.</p>`},
+      {label:'Superficie e orientazione', body:R`<p>$\Sigma$ è il grafico $z=f=-2x-y+2$, $f_x=-2$, $f_y=-1$. Normale grezza $(-f_x,-f_y,1)=(2,1,1)$ (3ª comp. $+1$). Il testo vuole la 3ª componente <b>negativa</b>: uso $-(2,1,1)$, e la circuitazione prende un segno meno.</p>`},
+      {label:'Sostituisco $z=f$', body:R`<p>$3z-1=3(-2x-y+2)-1=-6x-3y+5$. Allora $\operatorname{rot}F|_\Sigma\cdot(2,1,1)=(-6x-3y+5)\cdot2+(-y)=-12x-7y+10$.</p>`},
+      {label:'Risultato', body:R`<p>Con l&rsquo;orientazione richiesta (segno meno): $$\oint F\cdot T\,ds=-\iint_D(-12x-7y+10)\,dx\,dy.$$ Su $D$ centrato, $\iint_D x=\iint_D y=0$, resta $\iint_D 10=10\cdot9\pi=90\pi$: $$\oint F\cdot T\,ds=-90\pi.$$ $\blacksquare$</p>`}
+    ],
+    nota:R`Due sole cose potevano rovinare il conto — sbagliare il segno della 2ª componente del rotore (qui $0$) e ignorare la 3ª componente negativa della normale. Il resto muore per simmetria.` },
+  varianti:R`<p>Tre assi: la <b>dimensione</b> (Green 2D vs Stokes 3D), la <b>superficie</b> (grafico piano, curva, o il disco piano scelto perché comodo), e l&rsquo;<b>orientazione</b> (3ª comp. $+$ o $-$). Asse trasversale: il <b>campo</b> (con parametro, o conservativo ⇒ $0$).</p>
+  <p><b>Green nel piano (Stokes 2D).</b></p>
+  <ul>
+  <li><code>22gen24</code> Es.3: settore $D=\{0\le y\le x,\ x^2+y^2\le4\}$, campo con parametro $a$; $\oint F\cdot T=(a-2)\iint_D=(a-2)\frac{4\sqrt2}3$ (polari, $\theta\in[0,\frac\pi4]$). <i>Cosa cambia:</i> rotore ridotto a $\partial_xF_2-\partial_yF_1$; il settore fissa gli estremi.</li>
+  </ul>
+  <p><b>Stokes su grafico piano — 3ª componente POSITIVA.</b></p>
+  <ul>
+  <li><code>20220124</code> Es.4-iv: $z=x+3y+4$ su disco raggio $2$; $(-f_x,-f_y,1)=(-1,-3,1)$; circuitazione $100\pi$.</li>
+  <li><code>20230705</code> Es.2-iii: $z=1-x-y$ su $x^2+y^2\le8$; $\operatorname{rot}F=(-y^2,-z,-x^2)$; lavoro $-40\pi$. <i>Cosa cambia:</i> bordo antiorario visto dall&rsquo;alto; sostituisci $z=f$ nel rotore prima di integrare.</li>
+  </ul>
+  <p><b>Stokes su grafico piano — 3ª componente NEGATIVA (il segno!).</b></p>
+  <ul>
+  <li><code>20250127</code> Es.1-vi (svolto): normale a 3ª comp. negativa ⇒ $-(-f_x,-f_y,1)$, circuitazione $-90\pi$.</li>
+  <li><code>05mar24</code> Es.3-v: $z=\sqrt3\,x+1$, normale 3ª comp. negativa, bordo orario. <i>Cosa cambia:</i> un <b>segno meno</b> globale, applicato una volta sola con coerenza.</li>
+  </ul>
+  <p><b>Stokes su superficie CURVA (normale non costante)</b> (<code>20230123</code> Es.3): spicchio di sfera, bordo = due semicirconferenze con verso opposto; $\operatorname{rot}F=(0,1+z,0)$, lavoro $\frac{9\pi}2$. <i>Cosa cambia:</i> $\mathbf n$ varia punto per punto — parametrizzazione sferica; il bordo può essere <b>unione di archi</b> con segni da comporre.</p>
+  <p><b>Scelta della superficie più semplice (Stokes «inverso»).</b> <i>Cosa cambia:</i> il bordo determina $\Sigma$ — prendi il <b>disco piano</b> bordato da quel cerchio, stessa circuitazione con calcolo minimo.</p>
+  <p><b>Campo con parametro / conservativo</b> (<code>20220706</code> Es.4): $\operatorname{rot}F=(0,2z-2az,0)$; se $a=1$ è conservativo (circuitazione $0$), altrimenti $2(a-1)\pi$. <i>Cosa cambia:</i> prima del calcolo controlla se per qualche valore $\operatorname{rot}F=0$ — lì la circuitazione è gratis (ponte con 10).</p>`,
+  collaudo:[
+    {q:R`$F=(y^2+z^2+e^x,\ xy+z+\cos y,\ 2xz+3yz+z^2)$, $\Sigma:z=-2x-y+2$ su $x^2+y^2\le9$, normale 3ª comp. negativa: circuitazione?`, a:R`$-90\pi$; i termini in $x,y$ muoiono per simmetria, resta $\pm10\cdot9\pi$ col segno dell&rsquo;orientazione.`},
+    {q:R`$\operatorname{rot}F=(0,2z-2az,0)$, curva su un piano: per quale $a$ la circuitazione è $0$ e perché?`, a:R`$a=1$, il campo diventa conservativo (rotore nullo).`},
+    {q:R`Il bordo di $\Sigma$ è un cerchio in un piano: quale superficie conviene usare in Stokes?`, a:R`Il disco piano bordato da quel cerchio, non la superficie originaria.`}
+  ] },
+
+{ num:'10', title:'Campi conservativi, potenziale, forme esatte',
+  meta:'Pool #8 · freq 7/11 e 3/10 · spesso il sotto-punto che precede Stokes nell&rsquo;Es.4',
+  firma:R`<p>«Stabilire se $F$ è conservativo», «trovare il parametro $a$ che lo rende conservativo», «calcolare il potenziale / la primitiva», «trovare $\Psi$ affinché la forma $\omega$ sia esatta», «calcolare il lavoro lungo una curva». Parole-spia: <i>conservativo, potenziale, primitiva, forma differenziale esatta, irrotazionale, semplicemente connesso</i>.</p>
+  <p><b>Cosa NON confondere:</b> $\operatorname{rot}F=0$ (irrotazionale, per la conservatività) con $\operatorname{div}F=0$ (solenoidale, riguarda il flusso, 08). E soprattutto: <b>irrotazionale $\neq$ conservativo</b> se il dominio ha buchi.</p>`,
+  idea:R`<p>$F$ è <b>conservativo</b> se esiste un potenziale $U$ con $F=\nabla U$; allora il lavoro dipende solo dagli estremi:</p>$$\int_\gamma F\cdot T\,ds=U(B)-U(A),\qquad \oint F\cdot T\,ds=0\text{ su ogni curva chiusa}.$$<p>La condizione locale necessaria è $\operatorname{rot}F=0$ (in 2D: $\partial_yF_1=\partial_xF_2$). È anche <b>sufficiente</b> — ma solo se il dominio è <b>semplicemente connesso</b> (senza buchi): lì ogni curva chiusa si contrae e Stokes forza a $0$ la circuitazione. Se il dominio ha un buco (es. $\mathbb{R}^2\setminus\{0\}$), esistono campi irrotazionali <b>non</b> conservativi: la loro circuitazione attorno al buco è $\neq0$. Ragione: la curva che avvolge il buco non borda alcuna superficie contenuta nel dominio, quindi Stokes non si applica.</p>`,
+  mossa:[
+    {label:'Calcola $\operatorname{rot}F$', body:R`<p>(2D: $\partial_xF_2-\partial_yF_1$). Se $\neq0$: <b>non</b> conservativo, fine (per il lavoro userai Stokes/Green, 09). Se $=0$: prosegui.</p>`},
+    {label:'Guarda il dominio', body:R`<p>Se è semplicemente connesso e $\operatorname{rot}F=0$: conservativo.</p><div class="note"><b>Trappola</b> (<code>20230907</code>): $\operatorname{rot}F=0$ <b>non basta</b> su un dominio bucato. Con $\mathbb{R}^2\setminus\{0\}$, un campo irrotazionale può avere circuitazione $\neq0$ attorno all&rsquo;origine. Verifica sempre la connessione semplice prima di dichiararlo conservativo.</div>`},
+    {label:'Parametro', body:R`<p>Se c&rsquo;è un parametro $a$, imponi $\operatorname{rot}F=0$ per trovarne il valore, poi costruisci il potenziale.</p>`},
+    {label:'Costruisci $U$', body:R`<p>Integra $U_x=F_1$ in $x$ (compare una «costante» $c(y,z)$); imponi $U_y=F_2$ per determinare $c$; infine $U_z=F_3$.</p><div class="note"><b>Trappola</b> (<code>b02</code>): la «costante» d&rsquo;integrazione dipende dalle <b>altre variabili</b> ($c(y,z)$, non un numero). Dimenticarlo perde termini misti.</div><div class="note"><b>Trappola</b> (<code>b01</code>): quando $F_1$ dipende sia da $x$ sia da $y$, deriva con cura il risultato parziale prima di confrontarlo con $F_2$.</div>`},
+    {label:'Lavoro', body:R`<p>Se conservativo: $U(B)-U(A)$ (chiuso ⇒ $0$). Se irrotazionale ma su dominio bucato: calcola la circuitazione lungo una curva <b>equivalente</b> (il cerchio unitario) attorno al buco, poi moltiplica per il <b>numero di giri con segno</b>.</p><div class="note"><b>Trappola</b> (verso, <code>20230907</code>): un giro <b>orario</b> cambia il segno; una parametrizzazione può fare più giri — contali. Lì il cerchio antiorario dà $-2\pi$, ma $\gamma(t)=(\sin2t,\cos2t)$, $t\in[0,\pi]$, fa un giro <b>orario</b>, quindi il lavoro è $+2\pi$.</div>`}
+  ],
+  esame:{ src:'Prova 07/09/2023, Es. 2 (20230907)',
+    testo:R`$F=\Bigl(\dfrac{-\alpha x+y}{x^2+y^2},\ \dfrac{\alpha y-x}{x^2+y^2}\Bigr)$ su $\mathbb{R}^2\setminus\{0\}$. (i) Per quale $\alpha$ è irrotazionale? (ii) È conservativo? (iii) Lavoro lungo il cerchio unitario antiorario, e lungo $\gamma(t)=(\sin2t,\cos2t)$, $t\in[0,\pi]$.`,
+    steps:[
+      {label:'(i) Irrotazionalità', body:R`<p>Serve $\partial_xF_2=\partial_yF_1$; il conto (quoziente) dà bilanciamento <b>solo per $\alpha=0$</b>. Per $\alpha=0$, $F=\bigl(\tfrac{y}{x^2+y^2},\tfrac{-x}{x^2+y^2}\bigr)$ e $\partial_yF_1=\dfrac{x^2-y^2}{(x^2+y^2)^2}=\partial_xF_2$. Irrotazionale <b>sse $\alpha=0$</b>.</p>`},
+      {label:'(ii) Conservativo?', body:R`<p>No, nemmeno per $\alpha=0$. Il dominio $\mathbb{R}^2\setminus\{0\}$ <b>non è semplicemente connesso</b>: $\operatorname{rot}F=0$ non implica conservatività. Lo conferma il punto seguente, dove la circuitazione attorno all&rsquo;origine è $\neq0$.</p>`},
+      {label:'(iii) Cerchio unitario antiorario', body:R`<p>$\gamma(t)=(\cos t,\sin t)$, $\gamma'=(-\sin t,\cos t)$; su $x^2+y^2=1$ il campo è $F=(\sin t,-\cos t)$. $$\oint F\cdot T\,ds=\int_0^{2\pi}(-\sin^2t-\cos^2t)\,dt=-2\pi.$$ La circuitazione attorno al buco è $-2\pi\neq0$: conferma la non-conservatività.</p>`},
+      {label:'Lungo $\gamma(t)=(\sin2t,\cos2t)$', body:R`<p>È il cerchio unitario percorso <b>una volta in senso orario</b>. Un giro orario $=-1$ giri antiorari, quindi $$L=(-1)\cdot(-2\pi)=+2\pi.$$ $\blacksquare$</p>`}
+    ],
+    nota:R`Irrotazionale ma non conservativo è IL trabocchetto del tipo. La circuitazione non nulla attorno all&rsquo;origine è la firma del dominio bucato; nota su una curva-campione, si trasporta a qualunque curva contando i giri con segno.` },
+  varianti:R`<p>L&rsquo;asse decisivo è il <b>dominio</b>: semplicemente connesso (allora $\operatorname{rot}F=0$ basta) o bucato (allora no, serve la circuitazione-campione). Secondo asse: <b>cosa si cerca</b> (verifica, parametro, funzione incognita, $\Psi$ per l&rsquo;esattezza, lavoro).</p>
+  <p><b>Dominio semplicemente connesso — verifica diretta + potenziale.</b></p>
+  <ul>
+  <li><code>20220706</code> Es.4: $\operatorname{rot}F=(0,2z-2az,0)$; conservativo sse $a=1$; $U=xy^2+xy+xz^2$.</li>
+  <li><code>20230504</code> Es.4: $U=\frac{x^2}2+xe^y+xz^2$. <i>Cosa cambia:</i> costruisci $U$ integrando $U_x=F_1$, poi $U_y=F_2$, $U_z=F_3$ (la «costante» dipende dalle altre variabili).</li>
+  </ul>
+  <p><b>Trovare il parametro / la funzione che rende conservativo.</b></p>
+  <ul>
+  <li><b>Parametro $a$</b> (<code>22gen24</code> Es.3: $F=(2x\cos(x^2+y)+axy,\ \cos(x^2+y)+x^2+1)$ ⇒ $a=2$, $U=\sin(x^2+y)+x^2y+y+k$; <code>20230705</code> Es.3 ⇒ $a=-1$, $U=-\frac{y}{1+x^2}$).</li>
+  <li><b>Funzione incognita $f(y)$</b> (<code>20230504</code> Es.4: $F=(x+f(y)+z^2,\ xf(y),\ 2xz)$; $\operatorname{rot}F=(0,0,f-f')$, nullo sse $f'=f$, cioè $f(y)=e^y$). <i>Cosa cambia:</i> con un parametro è un&rsquo;equazione algebrica, con una funzione è una <b>piccola EDO</b> ($f'=f$).</li>
+  </ul>
+  <p><b>Forma differenziale esatta con $\Psi$</b> (<code>21lug25</code> Es.5): $\omega=(z-2y)dx+(z-2x)dy+(x+y+\Psi(y))dz$; le condizioni d&rsquo;esattezza danno $\Psi'(y)=0$ ⇒ $\Psi$ costante; $U=xz-2xy+yz$. <i>Cosa cambia:</i> imponi <b>tutte</b> le uguaglianze incrociate; una determina $\Psi$.</p>
+  <p><b>Dominio BUCATO — irrotazionale $\neq$ conservativo</b> (<code>20230907</code> Es.2 svolto): su $\mathbb{R}^2\setminus\{0\}$, per $\alpha=0$ irrotazionale ma <b>non</b> conservativo; circuitazione attorno all&rsquo;origine $-2\pi$. <i>Cosa cambia:</i> $\operatorname{rot}F=0$ non conclude; calcoli la circuitazione su una <b>curva-campione</b> e la trasporti contando i giri con segno.</p>
+  <p><b>Campo 3D non conservativo ⇒ passa a Stokes</b> (<code>19giu24</code> Es.3): $\operatorname{rot}F=(0,1-3x^2,x^2)\neq0$. <i>Cosa cambia:</i> niente potenziale; per il lavoro usi Stokes (09).</p>
+  <p><b>Lavoro su curva APERTA via potenziale</b> (<code>20230210</code> Es.3: semiellisse da $(2,0)$ a $(-2,0)$, $L=U(-2,0)-U(2,0)=0$; <code>20220124</code> Es.4-ii non conservativo). <i>Cosa cambia:</i> nessun integrale — solo la <b>differenza di potenziale</b> agli estremi.</p>`,
+  collaudo:[
+    {q:R`$F=\bigl(\tfrac{y}{x^2+y^2},\tfrac{-x}{x^2+y^2}\bigr)$ su $\mathbb{R}^2\setminus\{0\}$: è irrotazionale? è conservativo?`, a:R`Irrotazionale sì; conservativo no — dominio bucato; circuitazione attorno a $0$ vale $-2\pi$ (cerchio antiorario).`},
+    {q:R`Lo stesso campo lungo $\gamma(t)=(\sin2t,\cos2t)$, $t\in[0,\pi]$: quanto vale il lavoro?`, a:R`$+2\pi$ — è un giro orario, segno opposto al cerchio antiorario.`},
+    {q:R`$F=(x+f(y)+z^2,\ xf(y),\ 2xz)$: quale $f$ lo rende conservativo e qual è il potenziale?`, a:R`$f(y)=e^y$ (da $f'=f$); $U=\tfrac{x^2}{2}+xe^y+xz^2$.`}
+  ] }
+];
+
+/* =================================================================== */
+var byId = {}; SF.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='av-sf-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Percorso'; nav.appendChild(h);
+  var gate=document.createElement('button');
+  gate.className='navitem'+(active==='gate'?' active':'');
+  gate.innerHTML='<span class="dot"></span><span class="nx">⌂</span><span>Scegli modalità</span>';
+  gate.onclick=function(){ showGate(); };
+  nav.appendChild(gate);
+  var home=document.createElement('button');
+  home.className='navitem'+(active==='home'?' active':'');
+  home.innerHTML='<span class="dot"></span><span class="nx">◆</span><span>Smistatore</span>';
+  home.onclick=function(){ showHome(); };
+  nav.appendChild(home);
+  SF.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showSF(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+function sectionOpen(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var b=document.createElement('button'); b.className='reveal-btn small'; b.textContent='Rivela risposta';
+    b.onclick=function(){ a.style.display='block'; typeset(a); b.disabled=true; b.classList.add('done'); b.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(b); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+
+function showGate(){
+  renderNav('gate');
+  var m=document.getElementById('main'); m.innerHTML='';
+  m.appendChild(elFromHTML('<div class="sfhead"><h1>Percorso saper-fare — Analisi Vettoriale</h1>'+
+    '<p class="sub">Secondo esonero · La Sapienza, Fisica · scritto 17 luglio 2026. Due modi di usarlo — scegli.</p></div>'));
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;margin-top:6px';
+  function card(icon,titolo,desc,cta,fn){
+    var b=document.createElement('button');
+    b.style.cssText='text-align:left;padding:24px;border:1px solid var(--line,#2a3550);border-radius:14px;'+
+      'background:var(--card,#141c30);color:inherit;cursor:pointer;transition:border-color .15s,transform .15s;'+
+      'display:flex;flex-direction:column;gap:10px;font:inherit';
+    b.onmouseover=function(){ b.style.borderColor='var(--accent,#5eead4)'; b.style.transform='translateY(-2px)'; };
+    b.onmouseout=function(){ b.style.borderColor='var(--line,#2a3550)'; b.style.transform='none'; };
+    b.innerHTML='<div style="font-size:1.7rem;line-height:1">'+icon+'</div>'+
+      '<h3 style="margin:0;font-size:1.2rem">'+titolo+'</h3>'+
+      '<p style="margin:0;font-size:.93rem;line-height:1.55;color:var(--muted,#93a1c0)">'+desc+'</p>'+
+      '<span style="margin-top:4px;font-weight:600;color:var(--accent,#5eead4)">'+cta+'</span>';
+    b.onclick=fn; return b;
+  }
+  grid.appendChild(card('◆','Smistatore',
+    'Parti da un esercizio: riconosci l&rsquo;oggetto-spia e l&rsquo;app ti manda al metodo giusto. Il «quale metodo» è metà della battaglia d&rsquo;esame.',
+    'Entra nello smistatore →', function(){ showHome(); }));
+  grid.appendChild(card('▶','Percorso',
+    'Studia in ordine i 10 saper-fare, da EDO (01) al blocco dei teoremi integrali (06–10). Impari il gesto, un tipo alla volta.',
+    'Inizia da 01 →', function(){ showSF('01'); }));
+  m.appendChild(grid);
+  window.scrollTo(0,0);
+}
+
+function showHome(){
+  renderNav('home');
+  var m=document.getElementById('main'); m.innerHTML='';
+  m.appendChild(elFromHTML('<div class="sfhead"><h1>Percorso saper-fare — Analisi Vettoriale</h1>'+
+    '<p class="sub">Secondo esonero · La Sapienza, Fisica. Il gemello operativo: allena il <i>gesto</i>, non ri-spiega la teoria.</p></div>'));
+
+  var intro=elFromHTML('<div class="smist-intro"><p style="margin-top:0"><b>Lo smistatore.</b> '+
+    'Leggi il testo dell&rsquo;esercizio, trova l&rsquo;oggetto-spia, apri il saper-fare giusto. '+
+    'Il «quale metodo» è metà della battaglia d&rsquo;esame.</p>'+
+    '<p style="margin-bottom:0;font-size:.9rem;color:var(--muted)"><b>Ambiguità frequenti.</b> '+
+    R`<b>Es.1 — differenziabilità o Dini?</b> Un quoziente con $(x^2+y^2)^\alpha$ al denominatore e $f(0,0)=0$ a parte è `+
+    '<b>02</b>; un&rsquo;equazione $F(\\cdots)=0$ da risolvere per una variabile è <b>03</b>. '+
+    '<b>Es.4 — Stokes o conservativi?</b> Prima controlla se il campo è conservativo (<b>10</b>): se lo è, su curva chiusa il '+
+    'lavoro è $0$ e su curva aperta $U(B)-U(A)$; altrimenti Stokes (<b>09</b>). '+
+    '<b>Curva o superficie?</b> <b>Due</b> equazioni in $\\mathbb{R}^3$ = curva (<b>06</b>); <b>una</b> = superficie (<b>07</b>); il '+
+    '<b>bordo</b> di una superficie è una curva — è il ponte fra i due.</p></div>');
+  typeset(intro); m.appendChild(intro);
+
+  var grid=document.createElement('div'); grid.className='smist-grid';
+  SMIST.forEach(function(row){
+    var b=document.createElement('button'); b.className='smist-card';
+    b.innerHTML='<div class="spia">'+row.spia+'</div><div class="cosa">'+row.cosa+'</div>'+
+      '<span class="arrow">→ '+row.target+' · '+byId[row.target].title+'</span>';
+    b.onclick=function(){ showSF(row.target); };
+    typeset(b); grid.appendChild(b);
+  });
+  m.appendChild(grid);
+
+  m.appendChild(elFromHTML('<section class="section"><h3>Ordine consigliato</h3>'+
+    '<div class="open-body"><p style="margin:0"><b>01</b> (EDO) è indipendente da tutto il resto e sempre presente: prima. '+
+    '<b>02 → 03</b> sono la coppia dell&rsquo;Es.1 (analisi locale / funzione implicita). <b>04 → 05</b> la coppia dell&rsquo;Es.2 '+
+    '(ottimizzazione / serie). <b>06 → 07 → 08 → 09 → 10</b> sono il <b>blocco dei teoremi integrali</b> in ordine di dipendenza: '+
+    'curve, superfici, flusso da un volume (Gauss), circuitazione (Stokes), infine il collasso a differenza di potenziale '+
+    '(conservativi). Le tre priorità dichiarate — <b>01, 06, 07</b> — vanno sapute senza esitazione: lì un errore di '+
+    'segno/orientazione/dominio invalida l&rsquo;intero esercizio.</p></div></section>'));
+  window.scrollTo(0,0);
+}
+
+function showSF(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+  if(s.note){ var n=elFromHTML('<div class="note warn">'+s.note+'</div>'); typeset(n); m.appendChild(n); }
+
+  m.appendChild(sectionOpen('La firma','riconoscere', s.firma));
+  m.appendChild(sectionOpen('L’idea','first principles', s.idea));
+
+  var mossa=document.createElement('section'); mossa.className='section';
+  mossa.innerHTML='<h3>La mossa<span class="tag">rivela un passo alla volta</span></h3>';
+  mossa.appendChild(revealBlock(s.mossa)); m.appendChild(mossa);
+
+  var es=document.createElement('section'); es.className='section';
+  es.innerHTML='<h3>Un esame, per intero<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+s.esame.src+'</span>'+s.esame.testo+'</div>');
+  typeset(testo); es.appendChild(testo);
+  es.appendChild(revealBlock(s.esame.steps));
+  if(s.esame.nota){ var en=elFromHTML('<div class="esame-nota">'+s.esame.nota+'</div>'); typeset(en); es.appendChild(en); }
+  m.appendChild(es);
+
+  m.appendChild(sectionOpen('Le varianti','la famiglia negli anni', s.varianti));
+
+  var col=document.createElement('section'); col.className='section';
+  col.innerHTML='<h3>Collaudo<span class="tag">provi, poi riveli</span></h3>';
+  col.appendChild(collaudoBlock(s.collaudo)); m.appendChild(col);
+
+  window.scrollTo(0,0);
+}
+
+window.addEventListener('DOMContentLoaded', showGate);
+</script>
+</body>
+</html>
