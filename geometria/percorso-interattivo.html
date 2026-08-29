@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percorso saper-fare — Geometria</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--warnbg);border-bottom:1px solid #5c4a23;color:#e0b85a;
+    font-size:.82rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.2px;}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:270px;flex:0 0 270px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.92rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:840px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.3em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- SMISTATORE ---- */
+  .smist-intro{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin-bottom:22px;}
+  .smist-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:720px){.smist-grid{grid-template-columns:1fr;}}
+  .smist-card{border:1px solid var(--border);background:var(--panel);border-radius:12px;
+    padding:14px 16px;cursor:pointer;text-align:left;transition:.14s;color:var(--txt);}
+  .smist-card:hover{border-color:var(--accent);background:var(--panel2);}
+  .smist-card .spia{font-size:.95rem;}
+  .smist-card .arrow{display:block;margin-top:8px;font-size:.8rem;color:var(--accent2);}
+  .smist-card .cosa{font-size:.78rem;color:var(--muted);margin-top:2px;}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">SOSTANZA DA VERIFICARE — notte autonoma · la matematica dei blocchi non è ancora ratificata da Giuseppe</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> DATI — SMISTATORE + SAPER-FARE <<<  (inseriti dal Demiurgo)
+   =================================================================== */
+var SMIST = [
+  { target:'01', cosa:'struttura lineare da montare/decidere',
+    spia:R`$\operatorname{Span}\{\dots\}$, $U\cap W$, $U\oplus W$, «è un sottospazio?», $\dim(U+W)$` },
+  { target:'02', cosa:'Rouché–Capelli parametrico',
+    spia:R`un sistema con un <b>parametro</b> ($k$, $t$, $a$) e «per quali valori… soluzioni»` },
+  { target:'03', cosa:'applicazione lineare',
+    spia:R`$f:V\to W$, $\ker$, $\operatorname{im}$, «matrice associata», «cambio di base», operatore su polinomi` },
+  { target:'04', cosa:'autostruttura',
+    spia:R`«è diagonalizzabile?», autovalori, $m_a$ vs $m_g$, matrice $C$ diagonalizzante` },
+  { target:'05', cosa:'Jordan / non-diagonalizzabile',
+    spia:R`autovalore <b>ripetuto</b> e «non diag.», $\operatorname{rk}(A-\lambda I)$, «sono simili?», blocchi` },
+  { target:'06', cosa:'metrica + ortogonalizzazione',
+    spia:R`prodotto scalare def. positivo, «base ortonormale», Gram–Schmidt` },
+  { target:'07', cosa:'teorema spettrale',
+    spia:R`matrice <b>simmetrica</b> da diagonalizzare, «ONB di autovettori», $W^\perp$` },
+  { target:'08', cosa:'segnatura',
+    spia:R`«segnatura», forma bilineare/quadratica, $\alpha$ nella forma, vettore <b>isotropo</b>` },
+  { target:'09', cosa:'operatori su matrici',
+    spia:R`$\langle A,B\rangle=\operatorname{tr}(A^\top B)$, «operatore simmetrico», «isometria», $T(A)=\pm A^\top$` },
+  { target:'10', cosa:'strutture su ℂ',
+    spia:R`$z$, $\bar z$, $M_{2,2}(\mathbb{C})$, «indipendenti su $\mathbb{C}$», $z^2=\pm\bar z^2$` },
+  { target:'11', cosa:'geometria analitica (raro dal 2017)',
+    spia:R`rette/piani in $E^3$/$\mathbb{R}^3$, distanze, rette sghembe` }
+];
+var SF = [
+{ num:'01', title:'Sottospazi vettoriali',
+  meta:'Tipo mappa #1 · freq 19/28 · diff 2–3/5 · 2013–2024 · base di tutto il corso',
+  firma:R`<p>Riconosci il tipo quando il testo contiene <b>oggetti lineari da mettere in relazione</b>: uno o due sottospazi dati per <code>Span{…}</code> (dall’interno, generatori) o per <b>equazioni cartesiane</b> $\{x : Ax=0\}$ (dall’esterno, vincoli), e ti chiede $\dim$, una base, $U+W$, $U\cap W$, o se $V=U\oplus W$. Oppure la variante-giudizio: «stabilire se il sottoinsieme $S$ è un sottospazio». Parole-spia: <i>Span, dimensione, somma, intersezione, somma diretta, complemento, è un sottospazio</i>.</p>
+  <p><b>Cosa NON confondere:</b> l’ambiente può essere $\mathbb{R}^n$, ma anche $M_{2,2}$, $\mathbb{R}[t]_{\le 2}$, spazi su $\mathbb{C}$ — la logica è <b>identica</b>, cambia solo che prima devi <i>coordinatizzare</i>. Vedi matrici o polinomi: scegli la base canonica dell’ambiente e sei tornato in $\mathbb{R}^n$.</p>`,
+  idea:R`<p>Un sottospazio è un sottoinsieme <b>chiuso per combinazione lineare</b> — traduzione algebrica di «oggetto piatto passante per l’origine». Tutto poggia su due fatti:</p>
+  <ul>
+  <li><b>Dualità Span ↔ equazioni.</b> Ogni sottospazio di $\mathbb{R}^n$ si scrive come immagine (Span di generatori) o come nucleo (soluzioni di $Ax=0$). Passare dall’uno all’altro è metà del lavoro.</li>
+  <li><b>Teorema del rango come contabilità:</b> $\dim U = n - (\text{n. di equazioni cartesiane indipendenti})$. Un sottospazio di dimensione $d$ in $\mathbb{R}^n$ ha esattamente $n-d$ equazioni indipendenti (la sua codimensione).</li>
+  </ul>
+  <p>Sopra c’è la <b>formula di Grassmann</b> $\dim(U+W)=\dim U+\dim W-\dim(U\cap W)$: ti dà la dimensione dell’intersezione <i>gratis</i>, senza costruirla.</p>`,
+  mossa:[
+    {label:'A · Da Span a base e dimensione', body:R`<p>Metti i generatori come <b>righe</b>, riduci a scala (Gauss): le operazioni di riga non cambiano lo spazio-riga. Le righe non nulle sono una base; il numero di pivot è $\dim$.</p>`},
+    {label:'B · Da equazioni a base', body:R`<p>Riduci $A$ a scala, conta le variabili libere ($=\dim$). Per ogni variabile libera poni $=1$ e le altre $=0$, risolvi le pivot: ottieni un vettore di base.</p>`},
+    {label:'C · Somma e intersezione', body:R`<p>Accatasta <i>tutti</i> i generatori di $U$ e $W$ in un’unica matrice, riduci, conta i pivot: quello è $\dim(U+W)$. Poi Grassmann per $\dim(U\cap W)$.</p><div class="note"><b>Trappola</b> (spreco di tempo): non costruire l’intersezione con un sistema se ti serve solo la sua <i>dimensione</i>. Grassmann te la dà per sottrazione. Costruiscila solo se chiedono una <i>base</i> di $U\cap W$.</div>`},
+    {label:'D · Somma diretta', body:R`<p>$U\oplus W$ (diretta) $\iff U\cap W=\{0\}\iff \dim(U+W)=\dim U+\dim W$. Per $V=U\oplus W$ servono <b>due</b> condizioni: $U\cap W=\{0\}$ <b>e</b> $\dim U+\dim W=\dim V$.</p><div class="note"><b>Trappola</b> (la più frequente): mostrare solo $\dim U+\dim W=\dim V$ <b>non basta</b>. Due piani in $\mathbb{R}^4$ possono avere dimensioni che sommano a 4 e intersecarsi in una retta. Verifica <i>anche</i> l’intersezione nulla.</div>`},
+    {label:'E · È un sottospazio?', body:R`<p>Prima il <b>test dello zero</b>: $0\in S$? Se no, hai finito (bocciato). Poi la <b>chiusura</b>: se la condizione è lineare-omogenea (tracce, componenti nulle, valutazioni $p(1)=0$) passa; se contiene un <b>prodotto, un determinante, una disuguaglianza, o un quantificatore su autovalori/radici</b>, cerca un <b>controesempio</b>.</p><div class="note"><b>Trappola</b> (dove si giocano i punti): $\{A:\det A=0\}$, $\{A:\ A\text{ diagonalizzabile}\}$, $\{A:\ p_A\text{ ha tutte radici reali}\}$ <b>non</b> sono sottospazi. $\{A:\operatorname{tr}A=0\}$, $\{A:a_{12}=a_{21}=0\}$ <b>sì</b>. E $\{\operatorname{tr}A=1\}$ <b>no</b> (la costante non nulla esclude lo zero: è affine).</div>`}
+  ],
+  esame:{ src:'prova 07/02/2024, Es. 2 (prova20240207)',
+    testo:R`In $M_{2,2}(\mathbb{R})$: $V=\operatorname{Span}\left\{\left(\begin{smallmatrix}1&0\\1&1\end{smallmatrix}\right),\left(\begin{smallmatrix}1&0\\1&2\end{smallmatrix}\right)\right\}$; $W=\left\{\left(\begin{smallmatrix}a&b\\c&d\end{smallmatrix}\right): c-b+a=0,\ 2a-c+d=0,\ a+3b-5c+2d=0\right\}$. Trovare equazioni cartesiane di $V$; $\dim V$ e $\dim W$; verificare $M_{2,2}(\mathbb{R})=V+W$.`,
+    steps:[
+      {label:'Coordinatizzo', body:R`<p>Con la base canonica $E_{11},E_{12},E_{21},E_{22}$, cioè $\left(\begin{smallmatrix}a&b\\c&d\end{smallmatrix}\right)\leftrightarrow(a,b,c,d)$. Allora $V=\operatorname{Span}\{(1,0,1,1),(1,0,1,2)\}$.</p>`},
+      {label:'Equazioni di V', body:R`<p>Entrambi i generatori hanno $b=0$ e $a=c$; sono due vincoli, e $\dim V=2$ (indipendenti: differiscono nella quarta coordinata), quindi in $\mathbb{R}^4$ servono $4-2=2$ equazioni. <b>Equazioni cartesiane di $V$: $b=0,\ a-c=0$.</b></p>`},
+      {label:'Dimensione di W', body:R`<p>Le tre equazioni, ridotte a scala, hanno la terza combinazione delle prime due (dipendente). Restano due equazioni indipendenti, quindi $\dim W=4-2=2$.</p>`},
+      {label:'V+W = M(2,2)?', body:R`<p>Uso Grassmann. $V\cap W$ soddisfa tutte le equazioni insieme: $b=0,\ a-c=0$ (da $V$) e $c-b+a=0,\ 2a-c+d=0$ (da $W$). Da $b=0$ e $a=c$: la terza dà $2a=0\Rightarrow a=c=0$; la quarta $d=0$. Unica soluzione $(0,0,0,0)$: <b>$\dim(V\cap W)=0$.</b> Grassmann: $\dim(V+W)=2+2-0=4=\dim M_{2,2}(\mathbb{R})$. Quindi $V+W=M_{2,2}(\mathbb{R})$, ed essendo l’intersezione nulla è pure <b>somma diretta</b>. $\blacksquare$</p>`}
+    ],
+    nota:R`La vittoria è stata <i>non</i> costruire $V\cap W$ come Span — bastavano le sue equazioni per vedere che dà solo lo zero. Grassmann fa il resto.` },
+  varianti:R`<ul>
+  <li><b>Standard $\mathbb{R}^4$</b> (<code>Compito23_9_14</code>, <code>Compito24_06_16</code>): $U$ per Span, $W$ per equazioni, chiede tutte le dimensioni e se $\mathbb{R}^4=U\oplus W$. Svolgimento canonico nel capitolo 1.</li>
+  <li><b>Su $M_{2,2}$</b> (<code>prova20240207</code> Es.2, sopra): identico previa coordinatizzazione.</li>
+  <li><b>Il commutante</b> (<code>soluzioniesame20200204</code> Es.2): $U=\{X:AX=XA\}$, $V=\{X:AX=-XA\}$ — sono sottospazi (condizioni lineari in $X$). Ponte verso il saper-fare 09.</li>
+  <li><b>Il giudizio non-standard</b> (<code>prova20190121</code> Es.3): lista di 5–7 insiemi, «quali sono sottospazi?». $U_2=\{\det=0\}$, $U_6$ (diag. per coniugio), $U_7$ (radici reali) <b>non</b> lo sono; controesempio $\left(\begin{smallmatrix}1&1\\-1&-1\end{smallmatrix}\right)+\left(\begin{smallmatrix}0&1\\0&0\end{smallmatrix}\right)$ per $\det=0$.</li>
+  <li><b>Polinomi con Ruffini</b> (<code>prova20190121</code> Es.4): $W=\{p:p(1)=p(2)=0\}=\operatorname{Span}\{(x-1)(x-2)\}$, $\dim W=1$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`In $\mathbb{R}^4$: $U=\operatorname{Span}\{(1,0,1,0),(0,1,0,1),(1,1,1,1)\}$, $W=\{x_1-x_3=0\}$. Quanto vale $\dim(U+W)$? È $U+W=\mathbb{R}^4$?`, a:R`$\dim(U+W)=3$; no, perché $U\subseteq W$.`},
+    {q:R`In $M_{2,2}(\mathbb{R})$, quali sono sottospazi: $\{A=A^\top\}$, $\{\det A=0\}$, $\{\operatorname{tr}A=1\}$?`, a:R`Solo il primo, $\dim 3$; il secondo no (controesempio $\det$); il terzo no (non contiene $0$).`},
+    {q:R`$W=\{p\in\mathbb{R}[x]_{\le 2}: p(1)=0\}$: qual è $\dim W$ e una base?`, a:R`$\dim 2$, base $\{x-1,\ x^2-1\}$.`}
+  ] },
+
+{ num:'02', title:'Sistemi lineari parametrici',
+  meta:'Tipo mappa #4 · freq 12/28 · diff 3/5 · 2013–2024',
+  firma:R`<p>Un sistema lineare in cui compare un <b>parametro</b> ($k$, $t$, $a$, $\alpha$) nei coefficienti, e la domanda è «per quali valori il sistema <b>ammette soluzioni</b> / ha soluzione unica / infinite soluzioni». Parole-spia: <i>al variare di, per quali valori, discutere la compatibilità</i>. L’oggetto è $Ax=b$ con $A=A(k)$ e/o $b=b(k)$.</p>
+  <p><b>Cosa NON confondere:</b> se il parametro è dentro una <b>forma bilineare</b> e si chiede la <i>segnatura</i>, è il saper-fare 08. Qui si parla di <i>compatibilità</i>, governata dai <b>ranghi</b>.</p>`,
+  idea:R`<p><b>Rouché–Capelli:</b> $Ax=b$ ha soluzioni $\iff \operatorname{rk}A=\operatorname{rk}(A\,|\,b)$. Se compatibile, lo spazio delle soluzioni è affine di dimensione $n-\operatorname{rk}A$ (una soluzione particolare $+$ tutto $\ker A$). Il metodo è <i>seguire come i due ranghi cambiano al variare del parametro</i>. I ranghi cambiano solo in un numero finito di <b>valori critici</b> — quelli che annullano un determinante. Fuori dai critici il comportamento è generico (rango pieno, soluzione unica); sui critici va guardato caso per caso.</p>`,
+  mossa:[
+    {label:'Trova i valori critici', body:R`<p>Per un sistema $n\times n$, calcola $\det A(k)$ e <b>fattorizzalo</b>; le radici sono i candidati critici. Fuori da essi $\operatorname{rk}A=n$, quindi soluzione unica.</p><div class="note"><b>Trappola</b> (perdi un valore): fattorizza bene $\det A(k)$. Es. ufficiale: $\det=-k(1-k)(2k-1)$ → tre critici $0,\tfrac12,1$, non due.</div>`},
+    {label:'Sostituisci in ogni critico, ricontrolla i due ranghi', body:R`<p>Non basta $\det A=0$: confronta $\operatorname{rk}A$ e $\operatorname{rk}(A|b)$ <i>in quel punto</i>.</p><div class="note"><b>Trappola</b> (la firma del tipo): $\det A=0$ <b>non implica</b> risolubilità. Se $\operatorname{rk}A$ scende ma $\operatorname{rk}(A|b)$ resta più alto, il sistema è <b>incompatibile</b> nel critico. Vedi $k=\tfrac12$.</div>`},
+    {label:'Scrivi le soluzioni in forma affine', body:R`<p>Per i critici compatibili: soluzione particolare $+ \ker A$. Se omogeneo la parte affine sparisce; se non-omogeneo e compatibile, <b>non dimenticarla</b>.</p><div class="note"><b>Trappola</b>: la soluzione non è solo $\operatorname{Span}(\ldots)$, è <i>punto</i> $+\operatorname{Span}(\ldots)$.</div>`},
+    {label:'Sistemi non quadrati o con due parametri', body:R`<p>Salta il determinante, vai di <b>Gauss diretto</b> trascinando i parametri, e imponi l’annullamento dei pivot man mano.</p>`}
+  ],
+  esame:{ src:'Appello 21/01/2019, Es. 1 (prova20190121)',
+    testo:R`Per quali $k\in\mathbb{R}$ il sistema ammette soluzioni: $$\begin{cases} kx+y-2z=1\\ (1-k^2)x+3kz=2k-1\\ (k^2+1)x+(k+1)y-2z=0\end{cases}$$`,
+    steps:[
+      {label:'Determinante e valori critici', body:R`<p>Riduco la 3ª riga sottraendo la 1ª, poi sviluppo:</p>$$\det A=\det\begin{pmatrix}k&1&-2\\1-k^2&0&3k\\ 1&0&2k\end{pmatrix}=-\det\begin{pmatrix}1-k^2&3k\\ 1&2k\end{pmatrix}=-\big(2k(1-k^2)-3k\big)=-k(1-k)(2k-1).$$<p>Si annulla per $k=0,\ \tfrac12,\ 1$. Per $k\notin\{0,\tfrac12,1\}$: $\operatorname{rk}A=3$, <b>soluzione unica</b>.</p>`},
+      {label:'k = 0', body:R`<p>$A=\left(\begin{smallmatrix}0&1&-2\\1&0&0\\1&1&-2\end{smallmatrix}\right)$: la terza riga è somma delle prime due, e lo stesso nella completa. $\operatorname{rk}A=\operatorname{rk}B=2$: <b>compatibile</b> ($\infty^1$ soluzioni).</p>`},
+      {label:'k = 1/2 (il trabocchetto)', body:R`<p>$A$ perde rango ($\operatorname{rk}A=2$), <b>ma</b> il minore $3\times3$ di destra di $B$ ha determinante $-\tfrac94\neq0$, quindi $\operatorname{rk}B=3$. Ranghi diversi → <b>NESSUNA soluzione</b>. $\det A=0$ ma incompatibile.</p>`},
+      {label:'k = 1', body:R`<p>$B=\left(\begin{smallmatrix}1&1&-2&1\\0&0&3&1\\2&2&-2&0\end{smallmatrix}\right)$, Gauss → $\left(\begin{smallmatrix}1&1&-2&1\\0&0&1&-1\\0&0&0&4\end{smallmatrix}\right)$: l’ultima riga $0=4$ è impossibile. <b>Nessuna soluzione</b>.</p>`},
+      {label:'Risposta', body:R`<p>Ammette soluzioni per $k\notin\{\tfrac12,1\}$ (unica se $k\neq 0,\tfrac12,1$; infinite se $k=0$). $\blacksquare$</p>`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Due parametri</b> (<code>prova20240207</code> Es.3): $\begin{cases}x-2y+z=b\\2x-ay+2z=7b\\-x+3y+az=0\end{cases}$. Gauss diretto porta al pivot $(a-4)(a+1)$ sull’ultima riga: unica per $a\neq4,-1$; casi $a=4,-1$ dipendono da $b$. Con $a=b=1$ l’ultima equazione svanisce → $\infty$ soluzioni, particolare $x=\tfrac{14}{3},y=\tfrac53,z=-\tfrac13$.</li>
+  <li><b>Parametro solo nel termine noto</b> (<code>Prova23_01_23_sol</code> Es.3): sistema $4\times4$ con $t$; unica per $t\neq3$, e per $t=3$ soluzione affine $\left(-\tfrac32,\tfrac12,\tfrac32,0\right)+\operatorname{Span}(3,0,-1,1)$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$\begin{cases}x+y+z=1\\x+ky+z=2\\x+y+kz=k\end{cases}$: per quali $k$ ha soluzione unica?`, a:R`$k\neq1$; il critico $k=1$ collassa le tre equazioni ($\operatorname{rk}A=1$), incompatibile perché i termini noti $1,2,1$ differiscono.`},
+    {q:R`Nell’esame svolto, quante soluzioni per $k=0$?`, a:R`$\infty^1$ — una retta affine.`},
+    {q:R`Vero o falso: se $\det A(k_0)=0$ allora il sistema è incompatibile in $k_0$.`, a:R`Falso — può essere compatibile con infinite soluzioni ($k=0$ sopra). Dipende dal confronto dei due ranghi.`}
+  ] },
+
+{ num:'03', title:'Applicazioni lineari',
+  meta:'Tipo mappa #5 · freq 11/28 · diff 3–4/5 · 2013–2024',
+  firma:R`<p>Una mappa $f:V\to W$ (spesso $V=W$, un <i>endomorfismo</i>) data da una formula: chiede <b>matrice associata</b> in basi assegnate, $\ker f$, $\operatorname{im}f$, iniettività/suriettività, isomorfismo, o la matrice dopo un <b>cambio di base</b>. Parole-spia: <i>applicazione/operatore lineare, nucleo, immagine, matrice associata, isomorfismo, $[f]_B$</i>. Sotto-caso insidioso: $f$ <b>operatore su polinomi</b> ($\mathbb{R}[t]_{\le2}$), spesso con derivate.</p>
+  <p><b>Cosa NON confondere:</b> se poi chiede autovalori/diagonalizzabilità → 04. Se $f$ opera su matrici con $\langle A,B\rangle=\operatorname{tr}(A^\top B)$ e chiede simmetrico/isometria → 09.</p>`,
+  idea:R`<p>Una mappa lineare è <b>completamente determinata da cosa fa a una base</b>. La <b>matrice associata</b> $[f]_{B\to C}$ ha per $j$-esima colonna le <b>coordinate di $f(e_j)$ rispetto a $C$</b>. Da lì tutto è lettura di $A$:</p>$$\ker f=\{x:Ax=0\},\qquad \operatorname{im}f=\text{spazio-colonna di }A,\qquad \underbrace{\dim\ker f+\dim\operatorname{im}f=\dim V}_{\text{teorema del rango}}.$$<p>$f$ iniettiva $\iff\ker f=\{0\}\iff\operatorname{rk}A=n$; suriettiva $\iff\operatorname{rk}A=\dim W$; isomorfismo $\iff A$ quadrata invertibile.</p>`,
+  mossa:[
+    {label:'Costruisci la matrice', body:R`<p>Fissa la base del dominio (canonica, o $1,t,t^2$ per polinomi). Applica $f$ a ciascun vettore base, esprimi il risultato <b>in coordinate</b> nella base del codominio, mettilo <b>in colonna</b>.</p><div class="note"><b>Trappola</b> (cambio base): le colonne di $[f]_B$ sono $f(e_j)$ <i>in coordinate rispetto a $B$</i>, non in coordinate standard, se $B$ non è la canonica.</div>`},
+    {label:'ker e non-isomorfismo a colpo d’occhio', body:R`<p>Se due colonne di $A$ sono <b>proporzionali</b> (o una nulla), $A$ è singolare → $f$ non è isomorfismo, e hai già un vettore di $\ker$. Altrimenti risolvi $Ax=0$.</p>`},
+    {label:'im', body:R`<p>Una base sono le colonne pivot di $A$. $\dim\operatorname{im}=\operatorname{rk}A$.</p>`},
+    {label:'Cambio di base', body:R`<p>Se $A=[f]$ nella base vecchia e $P$ ha per colonne i nuovi vettori base (in coordinate vecchie), allora $[f]_{\text{nuova}}=P^{-1}AP$.</p>`},
+    {label:'Operatori su polinomi', body:R`<p>Coordinatizza $p=a+bt+ct^2\leftrightarrow(a,b,c)$, calcola $f(1),f(t),f(t^2)$, incolonna. Da lì è identico a $\mathbb{R}^3$.</p><div class="note"><b>Trappola</b>: $\ker T\neq\ker T^2$ in generale. Se la domanda è su $T^2$, calcola la matrice di $A^2$, non riusare $\ker T$.</div>`}
+  ],
+  esame:{ src:'Appello 21/01/2019, Es. 2 (prova20190121)',
+    testo:R`$T:\mathbb{R}[t]_{\le2}\to\mathbb{R}[t]_{\le2}$, $$T(p)(t)=p(\sqrt2)\,t^2+p(0)\,t+p'(t).$$ Verificare che $T$ non è un isomorfismo e determinare una base di $\ker T$.`,
+    steps:[
+      {label:'Coordinatizzo e calcolo le immagini', body:R`<p>Base $1,t,t^2$:</p><ul><li>$p=1$: $T(1)=t+t^2\leftrightarrow(0,1,1)$.</li><li>$p=t$: $T(t)=1+\sqrt2\,t^2\leftrightarrow(1,0,\sqrt2)$.</li><li>$p=t^2$: $T(t^2)=2t+2t^2\leftrightarrow(0,2,2)$.</li></ul>`},
+      {label:'Matrice', body:R`$$A=\begin{pmatrix}0&1&0\\ 1&0&2\\ 1&\sqrt2&2\end{pmatrix}.$$<p>La prima e la terza colonna sono proporzionali ($(0,2,2)=2\,(0,1,1)$): $A$ singolare → $T$ <b>non è isomorfismo</b>.</p>`},
+      {label:'Nucleo', body:R`<p>Risolvo $Ax=0$: la 2ª riga dà $x_1+2x_3=0$, la 1ª riga dà $x_2=0$. Ponendo $x_3=1$: $x_1=-2,\ x_2=0$. <b>$\ker T=\operatorname{Span}\{-2+t^2\}$</b>, $\dim\ker T=1$, dunque $\dim\operatorname{im}T=2$: non iniettiva né suriettiva. $\blacksquare$</p>`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Operatore differenziale con ker = EDO</b> (<code>Prova23_01_23_sol</code> Es.4): $T(p)=(t+1)p''-2tp'+2p$ su $\mathbb{C}_2[t]$. Via algebrica: matrice $\left(\begin{smallmatrix}2&0&2\\0&0&2\\0&0&-2\end{smallmatrix}\right)$, $\ker T=\operatorname{Span}\{t\}$, $\operatorname{im}T=\operatorname{Span}\{1,\,1+t-t^2\}$, autovalori $2,0,-2$ (tre distinti → diagonalizzabile). Via analitica: $\ker T$ = soluzioni polinomiali dell’EDO. In esame la via algebrica è più sicura.</li>
+  <li><b>Endomorfismo di $\mathbb{R}^3$ da diagonalizzare</b> (<code>soluzioniesame20200204</code> Es.3): costruisci la matrice, prosegui nel 04.</li>
+  <li><b>Composizione / cambio base</b>: $[f]_C=P^{-1}[f]_BP$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$f(x,y,z)=(x+z,\,0,\,x+z)$. Trova $\dim\ker f$ e $\dim\operatorname{im}f$.`, a:R`La matrice ha rango 1 → $\dim\operatorname{im}=1$, $\dim\ker=2$.`},
+    {q:R`Nell’esame svolto, $\dim\operatorname{im}T$ e perché non suriettiva?`, a:R`$\dim\operatorname{im}T=2<3$; l’immagine è un piano proprio.`},
+    {q:R`$T(p)=p'$ su $\mathbb{R}[t]_{\le2}$: $\ker T$ e $\ker T^2$?`, a:R`$\ker T=\operatorname{Span}\{1\}$; $\ker T^2=\operatorname{Span}\{1,t\}$ — diversi.`}
+  ] },
+{ num:'04', title:'Diagonalizzabilità',
+  meta:'Tipo mappa #2 · freq 19/28 · diff 3–4/5 · 2014–2024',
+  firma:R`<p>Una matrice o endomorfismo con «<b>è diagonalizzabile?</b>», oppure «autovalori, autovettori, e $C$ tale che $C^{-1}AC$ diagonale». Parole-spia: <i>autovalori, autovettori, diagonalizzabile, molteplicità, matrice diagonalizzante</i>.</p>
+  <p><b>Cosa NON confondere:</b> autovalore <b>ripetuto e NON diagonalizzabile</b>, o «sono simili?»/Jordan → 05. Matrice <b>simmetrica</b> con base <b>ortonormale</b> di autovettori → 07.</p>`,
+  idea:R`<p>$A$ è diagonalizzabile $\iff$ esiste una <b>base di autovettori</b>. Il criterio passa dalle due molteplicità di ciascun $\lambda$:</p><ul><li><b>algebrica</b> $m_a(\lambda)$ = molteplicità di $\lambda$ come radice di $p_A(t)=\det(A-tI)$;</li><li><b>geometrica</b> $m_g(\lambda)=\dim\ker(A-\lambda I)=n-\operatorname{rk}(A-\lambda I)$.</li></ul><p>Vale sempre $1\le m_g\le m_a$. Il teorema:</p>$$\boxed{A\text{ diagonalizzabile}\iff m_g(\lambda)=m_a(\lambda)\ \text{per ogni }\lambda\ \text{(su un campo in cui } p_A \text{ si spezza)}.}$$<p>Corollario: se $A$ ($n\times n$) ha <b>$n$ autovalori distinti</b>, è automaticamente diagonalizzabile.</p>`,
+  mossa:[
+    {label:'Polinomio caratteristico', body:R`<p>$p_A(t)=\det(A-tI)$, fattorizza, leggi autovalori e $m_a$.</p>`},
+    {label:'Autovalori distinti?', body:R`<p>Se sono $n$ distinti → diagonalizzabile, salta al passo 4. Fine del dubbio.</p>`},
+    {label:'Autovalore ripetuto: calcola m_g', body:R`<p>$m_g=n-\operatorname{rk}(A-\lambda I)$.</p><div class="note"><b>Trappola</b> (la più comune): non fermarti dopo aver visto $m_a=2$. La diagonalizzabilità si decide <i>solo</i> dopo aver calcolato $m_g$. Se per anche un solo $\lambda$ risulta $m_g<m_a$, <b>non è diagonalizzabile</b> (sei nel 05).</div><div class="note"><b>Scorciatoia</b>: se $\operatorname{tr}A=\det A=0$ per una $2\times2$ non nulla, allora $\lambda_1=\lambda_2=0$ e $A\neq0$ non è simile a $0$ → <b>non diagonalizzabile</b>, senza calcoli.</div>`},
+    {label:'Autovettori e matrice C', body:R`<p>Per ogni $\lambda$ risolvi $(A-\lambda I)x=0$, prendi una base dell’autospazio. Impila gli autovettori come <b>colonne</b> di $C$: $C^{-1}AC=\operatorname{diag}(\lambda_i)$, nell’ordine delle colonne.</p><div class="note"><b>Trappola</b>: se la consegna chiede base <b>ortonormale</b> (caso simmetrico), normalizza alla fine — ma è il 07.</div>`}
+  ],
+  esame:{ src:'Appello 04/02/2020, Es. 3 (soluzioniesame20200204)',
+    testo:R`$F:\mathbb{R}^3\to\mathbb{R}^3$, $F(x_1,x_2,x_3)=(-x_1-3x_2-3x_3,\ 5x_2+6x_3,\ -3x_2-4x_3)$. Verificare che $F$ è diagonalizzabile e trovare $C$ con $C^{-1}AC$ diagonale.`,
+    steps:[
+      {label:'Matrice canonica', body:R`$$A=\begin{pmatrix}-1&-3&-3\\0&5&6\\0&-3&-4\end{pmatrix}.$$`},
+      {label:'Polinomio caratteristico', body:R`<p>Sviluppo lungo la prima colonna:</p>$$p_A(\lambda)=(-1-\lambda)\big[(5-\lambda)(-4-\lambda)+18\big]=(-1-\lambda)(\lambda^2-\lambda-2)=-(\lambda+1)^2(\lambda-2).$$<p>Autovalori $\lambda_1=-1$ ($m_a=2$), $\lambda_2=2$ ($m_a=1$).</p>`},
+      {label:'Molteplicità geometriche', body:R`<p>Per $\lambda_1=-1$: $A+I=\left(\begin{smallmatrix}0&-3&-3\\0&6&6\\0&-3&-3\end{smallmatrix}\right)$ ha rango 1 → $m_g=2=m_a$ ✓; autospazio base $\{(1,0,0),\ (0,1,-1)\}$. Per $\lambda_2=2$: rango 2, $m_g=1=m_a$ ✓, autospazio $\operatorname{Span}\{(1,-2,1)\}$.</p>`},
+      {label:'Conclusione e C', body:R`<p>$m_g=m_a$ per entrambi → <b>$F$ diagonalizzabile</b>.</p>$$C=\begin{pmatrix}1&0&1\\0&1&-2\\0&-1&1\end{pmatrix},\qquad C^{-1}AC=\begin{pmatrix}-1&0&0\\0&-1&0\\0&0&2\end{pmatrix}.\qquad\blacksquare$$`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Autovalori distinti, caso rapido</b> (<code>Prova23_01_23_sol</code> Es.2): $S=\left(\begin{smallmatrix}1&3&1\\0&1&0\\2&0&0\end{smallmatrix}\right)$, $p_S(t)=-(t-1)(t+1)(t-2)$ → tre distinti; autovettori $(3,-2,6),(1,0,1),(-1,0,2)$.</li>
+  <li><b>Il trabocchetto tr = det = 0</b> (<code>soluzioniesame20200204</code> Es.4): $A=\left(\begin{smallmatrix}1&i\\i&-1\end{smallmatrix}\right)$, $\operatorname{tr}A=0,\ \det A=-1-i^2=0$ → $\lambda_1=\lambda_2=0$; $A\neq0$ non simile a $0$ → <b>non diagonalizzabile</b>.</li>
+  <li><b>Endomorfismo per formula o su polinomi</b>: prima costruisci la matrice (03), poi applichi questa procedura.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$A=\left(\begin{smallmatrix}2&1\\0&2\end{smallmatrix}\right)$: diagonalizzabile?`, a:R`No — $\lambda=2$ con $m_a=2$ ma $A-2I=\left(\begin{smallmatrix}0&1\\0&0\end{smallmatrix}\right)$ ha rango 1, $m_g=1<2$.`},
+    {q:R`Nell’esame svolto, perché non basta $m_a(-1)=2$ per concludere?`, a:R`La diagonalizzabilità dipende da $m_g$; poteva essere $1$ (non-diag). Serviva il rango.`},
+    {q:R`Una $3\times3$ con autovalori $1,2,3$: quanti conti servono per diagonalizzarla?`, a:R`Nessun test di $m_g$ — tre distinti bastano; restano solo i tre autospazi per la $C$.`}
+  ] },
+
+{ num:'05', title:'Jordan e non-diagonalizzabilità',
+  meta:'Tipo mappa #10 · freq 6/28 · diff 4–5/5 · 2014–2024 · in salita',
+  firma:R`<p>Compare quando la diagonalizzazione <b>fallisce</b> o non è il punto: autovalore ripetuto con $m_g<m_a$, «$A$ e $B$ sono <b>simili</b>?», «è <b>triangolarizzabile</b>?», o forma di Jordan/blocchi. Parole-spia: <i>simili, forma canonica di Jordan, triangolarizzabile, nilpotente, blocchi</i>. Spesso seguito del 04 quando $m_g<m_a$.</p>
+  <p><b>Cosa NON confondere:</b> <b>triangolarizzabile</b> $\neq$ <b>diagonalizzabile</b>. Su $\mathbb{C}$ <i>ogni</i> matrice è triangolarizzabile; la diagonalizzabilità è molto più restrittiva. È la trappola-madre del tipo.</p>`,
+  idea:R`<p>Due matrici con lo <b>stesso polinomio caratteristico possono NON essere simili</b>: il polinomio vede solo autovalori e $m_a$, non la struttura degli autospazi. A distinguere è la <b>sequenza dei ranghi</b> $\operatorname{rk}(A-\lambda I)^k$, che conta e dimensiona i blocchi di Jordan. In particolare</p>$$m_g(\lambda)=n-\operatorname{rk}(A-\lambda I)=\text{numero di blocchi di Jordan per }\lambda.$$<p>Due matrici sono simili $\iff$ stessi autovalori <b>e</b> stessa sequenza di ranghi $\operatorname{rk}(A-\lambda I)^k$ per ogni $\lambda$.</p>`,
+  mossa:[
+    {label:'Polinomio caratteristico e m_a', body:R`<p>Se già gli spettri differiscono, non sono simili — fine.</p>`},
+    {label:'m_g per l’autovalore ripetuto', body:R`<p>$m_g=n-\operatorname{rk}(A-\lambda I)$. Se $m_g<m_a$: <b>non diagonalizzabile</b>.</p>`},
+    {label:'Confronto di due matrici con stesso spettro', body:R`<p>Confronta $\operatorname{rk}(A-\lambda I)$ (e se serve $\operatorname{rk}(A-\lambda I)^2$) con quelli di $B$. <b>Ranghi diversi ⇒ non simili.</b></p><div class="note"><b>Trappola</b> (documentata, <code>prova20240207</code>): lo stesso $p_A$ <b>non basta</b> per la similitudine. Serve il rango di $(A-\lambda I)$.</div>`},
+    {label:'Forma di Jordan n ≤ 3', body:R`<p>Con un solo $\lambda$ di $m_a=3$: $m_g=3$→ diagonale; $m_g=2$→ blocco $2\times2$ + $1\times1$; $m_g=1$→ unico blocco $3\times3$. Numero di blocchi $=m_g$, taglia dai ranghi delle potenze.</p><div class="note"><b>Trappola</b> (<code>ex_Fis8</code>): la base che triangolarizza <b>non è ortogonale</b> — non usare Gram–Schmidt, cerca gli autovettori generalizzati $\ker(A-\lambda I)^k$.</div>`}
+  ],
+  esame:{ src:'Prova 07/02/2024, Es. 1 (prova20240207)',
+    testo:R`$A=\begin{pmatrix}1&0&1\\0&-1&4\\0&-1&3\end{pmatrix}$. (a) autovalori; (b) $A$ diagonalizzabile? (c) $A$ e $B=\begin{pmatrix}1&0&0\\0&1&1\\0&0&1\end{pmatrix}$ sono simili?`,
+    steps:[
+      {label:'(a) Polinomio caratteristico', body:R`$$p_A(t)=(1-t)\big[(-1-t)(3-t)+4\big]=(1-t)(t^2-2t+1)=(1-t)(t-1)^2=-(t-1)^3.$$<p><b>Unico autovalore $\lambda=1$ con $m_a=3$.</b></p>`},
+      {label:'(b) Diagonalizzabile?', body:R`<p>$A-I=\begin{pmatrix}0&0&1\\0&-2&4\\0&-1&2\end{pmatrix}$: ultime due righe proporzionali, prima $(0,0,1)$ → rango $2$. Quindi $m_g=3-2=1<3$: <b>NON diagonalizzabile</b> (unico blocco $3\times3$).</p>`},
+      {label:'(c) A e B simili?', body:R`<p>$B$ ha anch’essa $\lambda=1$ con $m_a=3$, stesso $p_A=-(t-1)^3$. Ma $B-I=\begin{pmatrix}0&0&0\\0&0&1\\0&0&0\end{pmatrix}$ ha rango $1$ → $m_g(B)=2$. Poiché $m_g(A)=1\neq2=m_g(B)$, <b>NON sono simili</b>: struttura di Jordan diversa (blocco $3\times3$ vs $2\times2+1\times1$), pur avendo lo stesso polinomio. $\blacksquare$</p>`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Confronto di blocchi via rango delle potenze</b> (<code>prova20240207</code>): il cuore del tipo. Se $\operatorname{rk}(A-\lambda I)$ coincide, si sale a $\operatorname{rk}(A-\lambda I)^2$.</li>
+  <li><b>Triangolarizzazione esplicita</b> (<code>ex_Fis8</code>): base che rende $A$ triangolare su $\mathbb{C}$ — sempre possibile; autovettori e generalizzati, <b>non</b> GS.</li>
+  <li><b>«Non diagonalizzabile» con scorciatoia</b> (<code>soluzioniesame20200204</code> Es.4): $2\times2$ con $\operatorname{tr}=\det=0$ e $A\neq0$ → $\lambda=0$ doppio, blocco $2\times2$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$A=\left(\begin{smallmatrix}1&1&0\\0&1&0\\0&0&1\end{smallmatrix}\right)$: qual è $m_g(1)$ e quanti blocchi di Jordan?`, a:R`$A-I$ ha rango 1, $m_g=2$ → due blocchi ($2\times2$ e $1\times1$).`},
+    {q:R`Due $3\times3$ con lo stesso $p(t)=-(t-1)^3$ sono sempre simili?`, a:R`No — dipende da $\operatorname{rk}(A-I)$; è esattamente l’esame svolto.`},
+    {q:R`Su $\mathbb{C}$, $\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$ è triangolarizzabile? diagonalizzabile?`, a:R`Entrambe — autovalori $\pm i$ distinti → diagonalizzabile su $\mathbb{C}$, dunque triangolarizzabile.`}
+  ] },
+
+{ num:'06', title:'Prodotto scalare e Gram–Schmidt',
+  meta:'Tipo mappa #3a · freq 14/28 · diff 3–4/5 · 2013–2024',
+  note:R`<b>Nota di verifica interna.</b> Nell’esame svolto la relazione di dipendenza dei generatori è stata ricalcolata: refuso OCR nell’ufficiale (corretto: $2v_1-4v_2+v_3=0$). Vedi il flag dentro l’esame.`,
+  firma:R`<p>Ti danno un <b>prodotto scalare</b> (spesso non canonico) e chiedono (a) <b>verificare che è definito positivo</b>, e/o (b) una <b>base ortonormale</b> di $W$ via Gram–Schmidt, e/o (c) un <b>complemento ortogonale</b> $W^\perp$. Parole-spia: <i>prodotto scalare definito positivo, base ortonormale, ortogonalizzare, $W^\perp$</i>.</p>
+  <p><b>Cosa NON confondere:</b> matrice <b>simmetrica da diagonalizzare ortogonalmente</b> → 07. Forma di cui si chiede la <b>segnatura</b> (può essere indefinita) → 08. Qui il prodotto è definito positivo (una <i>metrica</i>) e il gioco è ortogonalizzare.</p>`,
+  idea:R`<p>$\langle\cdot,\cdot\rangle$ è definito positivo se $\langle X,X\rangle>0$ per ogni $X\neq0$. Due verifiche: <b>completamento dei quadrati</b> (somma di quadrati indipendenti a coefficienti positivi) o <b>criteri di Sylvester</b> (minori principali di testa $>0$). <b>Gram–Schmidt</b> rende ortogonale una base sottraendo le proiezioni:</p>$$w_i=v_i-\sum_{j<i}\frac{\langle v_i,w_j\rangle}{\langle w_j,w_j\rangle}\,w_j,\qquad u_i=\frac{w_i}{\sqrt{\langle w_i,w_i\rangle}}.$$<p>Le <b>norme si calcolano col prodotto scalare dato</b>, non col canonico.</p>`,
+  mossa:[
+    {label:'Definito positivo?', body:R`<p>Scrivi $\langle X,X\rangle$ e <b>completa i quadrati</b> finché è somma di quadrati indipendenti. Tutti i coefficienti $>0$ ⇒ definito positivo.</p>`},
+    {label:'Trova una vera base di W prima di ortogonalizzare', body:R`<p>Se i generatori sono più di $\dim W$, <b>scarta la ridondanza</b>.</p><div class="note"><b>Trappola</b> (la firma, <code>Prova23_01_23_sol</code> Es.1): Gram–Schmidt su <i>generatori dipendenti</i> produce un $w_i=0$ a metà e manda in errore. Verifica prima la dipendenza, poi ortogonalizza una <b>base</b>.</div>`},
+    {label:'Gram–Schmidt', body:R`<p>Con la formula sopra, <b>sempre col prodotto scalare assegnato</b> per proiezioni e norme.</p><div class="note"><b>Trappola</b>: ortogonale $\neq$ ortonormale. Se la consegna chiede ONB, <b>normalizza</b> dividendo per $\sqrt{\langle w_i,w_i\rangle}$. È l’errore più frequente qui.</div>`},
+    {label:'W perp', body:R`<p>$q\in W^\perp\iff\langle q,w\rangle=0$ per ogni generatore $w$ di $W$: equazioni lineari in $q$. Per polinomi con valutazioni, $\langle p,q\rangle=\sum p(a_i)q(a_i)$.</p>`}
+  ],
+  esame:{ src:'Prova 23/01/2023, Es. 1 (Prova23_01_23_sol)',
+    testo:R`In $\mathbb{R}^3$ con $\langle X,Y\rangle=x_1y_1+3x_2y_2+2x_3y_3+2x_2y_3+2x_3y_2$: (i) verificare definito positivo; (ii) base ortonormale di $W=\operatorname{Span}\{v_1,v_2,v_3\}$ con $v_1=(1,2,-2),\ v_2=(0,1,0),\ v_3=(-2,0,4)$.`,
+    steps:[
+      {label:'(i) Definito positivo', body:R`$$\langle X,X\rangle=x_1^2+3x_2^2+2x_3^2+4x_2x_3=x_1^2+x_2^2+2(x_2+x_3)^2.$$<p>(Verifica: $2(x_2+x_3)^2=2x_2^2+4x_2x_3+2x_3^2$; sommando $x_2^2$ dà $3x_2^2+4x_2x_3+2x_3^2$ ✓.) Somma di quadrati a coefficienti positivi → <b>definito positivo</b>.</p>`},
+      {label:'(ii) Dipendenza dei generatori', body:R`<p>$v_3=-2v_1+4v_2$ (verifica: $-2v_1=(-2,-4,4)$, $+4v_2=(0,4,0)$, somma $(-2,0,4)=v_3$ ✓). I tre sono dipendenti, $\dim W=2$: base $\{v_1,v_2\}$.</p><div class="note warn"><b>Flag di verifica (refuso OCR).</b> L’ufficiale scrive «$2v_1-2v_2+v_3=0$», ma il calcolo dà $2v_1-4v_2+v_3=0$ (cioè $v_3=-2v_1+4v_2$); la base $\{v_1,v_2\}$ e tutto il seguito ufficiale sono coerenti con <b>questa</b>. Da ricontrollare.</div>`},
+      {label:'Gram–Schmidt su {v1, v2}', body:R`<p>Prendo $w_1=v_2$. $\langle v_1,v_2\rangle=6-4=2$, $\langle v_2,v_2\rangle=3$.</p>$$w_2=v_1-\tfrac23 v_2=\left(1,\tfrac43,-2\right).$$<p>Norme: $\langle w_1,w_1\rangle=3$; $\langle w_2,w_2\rangle=1+3\cdot\tfrac{16}{9}+2\cdot4+4\cdot\tfrac43\cdot(-2)=\tfrac{11}{3}$.</p>`},
+      {label:'Base ortonormale', body:R`$$u_1=\frac{1}{\sqrt3}\,(0,1,0),\qquad u_2=\frac{\sqrt3}{\sqrt{11}}\left(1,\tfrac43,-2\right).\qquad\blacksquare$$`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Prodotto per valutazioni su polinomi</b> (<code>prova20190121</code> Es.4): $\langle p,q\rangle=p(0)q(0)+p(1)q(1)+p(2)q(2)$, $U=\{p(1)=0\}$, $V=\{p(2)=0\}$. $W=U\cap V=\operatorname{Span}\{(x-1)(x-2)\}$, e $W^\perp=\{q:q(0)=0\}=\operatorname{Span}\{x,x^2\}$ (poiché $\langle(x-1)(x-2),q\rangle=2q(0)$).</li>
+  <li><b>Sylvester</b>: quando il completamento dei quadrati è scomodo, controlla i minori principali di testa $>0$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`In $\mathbb{R}^2$ con $\langle X,Y\rangle=2x_1y_1+x_2y_2$: ortonormalizza $v_1=(1,0),v_2=(1,1)$.`, a:R`$u_1=(1/\sqrt2,0)$, $w_2=(0,1)$, $u_2=(0,1)$.`},
+    {q:R`Perché non si applica GS direttamente a $v_1,v_2,v_3$?`, a:R`Sono dipendenti, $\dim W=2$; GS sui tre darebbe un vettore nullo.`},
+    {q:R`La forma $\langle X,X\rangle=x_1^2-x_2^2$ è definito positivo?`, a:R`No — $X=(0,1)$ dà $-1<0$; è indefinita (materia del 08).`}
+  ] },
+{ num:'07', title:'Teorema spettrale',
+  meta:'Tipo mappa #3b · freq 14/28 · diff 3–4/5 · 2013–2024',
+  firma:R`<p>Una matrice <b>simmetrica reale</b> ($A=A^\top$), e la richiesta di una <b>base ortonormale di autovettori</b>, o «diagonalizzare ortogonalmente» ($Q$ ortogonale, $Q^\top A Q$ diagonale). Parole-spia: <i>simmetrica, base ortonormale di autovettori, $Q^\top AQ$, teorema spettrale, ortogonale</i>.</p>
+  <p><b>Cosa NON confondere:</b> se <b>non</b> è simmetrica → diagonalizzazione ordinaria (04), base non ortogonale. Se è una <i>forma bilineare</i> e chiede la <b>segnatura</b> → 08.</p>`,
+  idea:R`<p><b>Teorema spettrale (reale):</b> ogni matrice simmetrica reale $A$ è diagonalizzabile e ammette una <b>base ortonormale di autovettori</b> (prodotto canonico). Due conseguenze:</p><ul><li><b>Diagonalizzabilità garantita a priori:</b> non verificare $m_g=m_a$.</li><li><b>Autovettori di autovalori distinti sono ortogonali.</b> Se $Av=\lambda v$, $Aw=\mu w$ con $\lambda\neq\mu$: $\lambda\langle v,w\rangle=\langle Av,w\rangle=\langle v,Aw\rangle=\mu\langle v,w\rangle$, quindi $(\lambda-\mu)\langle v,w\rangle=0$ e $\langle v,w\rangle=0$. Se gli autovalori sono distinti, basta <b>normalizzare</b>.</li></ul>`,
+  mossa:[
+    {label:'Verifica A = A^T', body:R`<p>Spesso è dato. Da qui la diagonalizzabilità è certa: non perdere tempo con $m_g$.</p>`},
+    {label:'Polinomio caratteristico → autovalori', body:R`<p>Calcola $p_A(t)=\det(A-tI)$ e le radici.</p>`},
+    {label:'Autovettori', body:R`<p>Risolvi $(A-\lambda I)x=0$ per ciascun $\lambda$.</p>`},
+    {label:'Ortonormalizza', body:R`<p>Autovalori <b>distinti</b> → autovettori già ortogonali: solo <b>normalizza</b>. Autovalore <b>ripetuto</b> → applica <b>Gram–Schmidt dentro l’autospazio</b>, poi normalizza (autospazi di autovalori diversi restano ortogonali).</p><div class="note"><b>Trappola</b> (<code>soluzioniesame20200204</code> Es.5): «ortogonale» $\neq$ «ortonormale». La consegna chiede la <b>ONB</b>: normalizza dividendo per la lunghezza. Consegnare la base non normalizzata è risposta incompleta.</div>`},
+    {label:'Matrice Q', body:R`<p>Autovettori normalizzati in colonna; $Q$ ortogonale ($Q^\top=Q^{-1}$), $Q^\top AQ=\operatorname{diag}(\lambda_i)$.</p>`}
+  ],
+  esame:{ src:'Appello 04/02/2020, Es. 5 (soluzioniesame20200204)',
+    testo:R`$A=\begin{pmatrix}3&1&0\\1&3&1\\0&1&3\end{pmatrix}$. Dire perché è diagonalizzabile e trovare una base ortonormale (canonica di $\mathbb{R}^3$) di autovettori.`,
+    steps:[
+      {label:'Perché diagonalizzabile', body:R`<p>$A$ è <b>simmetrica</b> → teorema spettrale: diagonalizzabile con autovettori ortonormalizzabili, nessun test di molteplicità.</p>`},
+      {label:'Polinomio caratteristico', body:R`$$p_A(t)=(3-t)\big[(3-t)^2-1\big]-(3-t)=(3-t)\big[(3-t)^2-2\big].$$<p>Autovalori $\lambda_1=3$, e $(3-t)^2=2\Rightarrow \lambda_{2,3}=3\pm\sqrt2$. <b>Tre distinti</b> → autovettori automaticamente ortogonali.</p>`},
+      {label:'Autovettori', body:R`<p>Per $\lambda_1=3$: $x_2=0$, $x_1+x_3=0$ → $v_1=(1,0,-1)$. Per $3\mp\sqrt2$: $v_2=(1,-\sqrt2,1)$, $v_3=(1,\sqrt2,1)$. A due a due ortogonali (come promesso dal teorema).</p>`},
+      {label:'Normalizzo', body:R`<p>$\|v_1\|=\sqrt2$, $\|v_2\|=\|v_3\|=2$:</p>$$u_1=\tfrac{1}{\sqrt2}(1,0,-1),\quad u_2=\tfrac12(1,-\sqrt2,1),\quad u_3=\tfrac12(1,\sqrt2,1).\qquad\blacksquare$$`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Autovalore ripetuto in matrice simmetrica</b>: l’autospazio ha dimensione $\ge2$; gli autovettori vanno ortogonalizzati con Gram–Schmidt <i>internamente</i>, poi normalizzati.</li>
+  <li><b>$W^\perp$ e proiezioni ortogonali</b>: spesso lo stesso esame chiede anche il complemento ortogonale (ponte col 06).</li>
+  <li><b>«È simmetrica/hermitiana/unitaria?»</b> (<code>soluzioniesame20200204</code> Es.4): in campo complesso il teorema spettrale vale per matrici <i>hermitiane</i> ($\bar A^\top=A$), non simmetriche.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$A=\left(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right)$: autovalori e ONB di autovettori.`, a:R`$\lambda=1,3$; $u_1=\tfrac1{\sqrt2}(1,-1)$, $u_2=\tfrac1{\sqrt2}(1,1)$.`},
+    {q:R`Nell’esame svolto, perché gli autovettori sono ortogonali senza fare Gram–Schmidt?`, a:R`Autovalori distinti + matrice simmetrica → ortogonalità automatica.`},
+    {q:R`Vero o falso: una matrice diagonalizzabile ha sempre una base ortonormale di autovettori.`, a:R`Falso — solo se simmetrica/normale; una diagonalizzabile qualunque ha base di autovettori non ortogonale.`}
+  ] },
+
+{ num:'08', title:'Forme bilineari e segnatura',
+  meta:'Tipo mappa #8 · freq 7/28 · diff 4/5 · 2016–2024 · in forte salita',
+  firma:R`<p>Una <b>forma bilineare simmetrica</b> $\varphi$ (o quadratica $q(x)=\varphi(x,x)$), spesso con <b>parametro $\alpha$</b>: matrice associata, <b>segnatura</b>, valori di $\alpha$ per cui è <b>degenere</b>, un <b>vettore isotropo</b>, o base ortonormale generalizzata. Parole-spia: <i>forma bilineare simmetrica, segnatura, definita/indefinita, isotropo, degenere, indice di Witt, al variare di $\alpha$</i>.</p>
+  <p><b>Cosa NON confondere:</b> se è definita positiva e chiede solo di ortogonalizzare → 06. Se la matrice simmetrica va diagonalizzata come <b>operatore</b> → 07. Qui la forma può essere <b>indefinita</b>: il punto è contare i segni.</p>`,
+  idea:R`<p>Una forma bilineare simmetrica è rappresentata da una <b>matrice simmetrica</b> $A$ con $\varphi(x,y)=x^\top A y$. <b>Legge d’inerzia di Sylvester</b>: il numero di coefficienti positivi $p$, negativi $q$, nulli $r$ è <b>invariante</b>. $(p,q)$ è la <b>segnatura</b>. Tre letture: segni degli <b>autovalori</b> di $A$; <b>completamento dei quadrati</b>; <b>minori principali</b>.</p><ul><li><b>Radicale:</b> $\{x:\varphi(x,y)=0\ \forall y\}=\ker A$. Degenere $\iff\ker A\neq\{0\}\iff\det A=0$; $r=\dim\ker A$.</li><li><b>Vettore isotropo:</b> $x\neq0$ con $q(x)=0$. Esiste $\iff$ la forma <b>non è definita</b>. Indice di Witt $=\min(p,q)$.</li></ul><div class="note"><b>Trappola</b> (<code>soluzioniesame20200204</code> Es.5): radicale e isotropi sono diversi. Un vettore può essere isotropo ($q(x)=0$) senza stare nel radicale.</div>`,
+  mossa:[
+    {label:'Scrivi la matrice simmetrica A', body:R`<p>Il coefficiente di $x_ix_j$ ($i\neq j$) nella quadratica si <b>divide per due</b> e va in $a_{ij}=a_{ji}$.</p>`},
+    {label:'Se c’è α: calcola det A(α)', body:R`<p>Gli zeri sono i <b>valori critici</b> dove la forma degenera e la segnatura può cambiare. La segnatura è <b>costante su ogni intervallo</b> tra due critici (salta solo quando un autovalore attraversa lo zero).</p><div class="note"><b>Trappola</b>: calcola il <b>rango prima della segnatura</b>. Il numero di autovalori nulli ($r$) fissa quanto spazio resta per $p+q$.</div>`},
+    {label:'Segnatura su ciascun tratto', body:R`<p>Valuta i segni: autovalori, regola di Cartesio sul polinomio caratteristico, o minori principali. Su ogni intervallo di $\alpha$ prendi un valore-campione e conta.</p>`},
+    {label:'Vettore isotropo', body:R`<p>Se indefinita, cercane uno leggero: se manca il quadrato di una variabile ($a_{kk}=0$), allora $e_k$ è isotropo subito.</p>`},
+    {label:'Radicale (se degenere)', body:R`<p>Risolvi $A(\alpha_{\text{crit}})\,x=0$.</p>`}
+  ],
+  esame:{ src:'Prova 09/07/2024, Es. 3 (scritto Geometria 2024-07-09)',
+    testo:R`In $\mathbb{R}^3$, $$\varphi(x,y)=\alpha x_1y_1+x_2y_2+5x_3y_3-2x_1y_3-2x_3y_1+x_2y_3+x_3y_2.$$ (1) valori di $\alpha$ per cui $\varphi$ è degenere; (2) $\ker\varphi$ per tali valori; (3) segnatura al variare di $\alpha$.`,
+    steps:[
+      {label:'Matrice della forma', body:R`$$A=\begin{pmatrix}\alpha&0&-2\\0&1&1\\-2&1&5\end{pmatrix}.$$<div class="note warn"><b>Ambiguità nel sorgente.</b> Il commento del .md sul dimezzamento dei termini misti è internamente incoerente (indica $a_{23}=\tfrac12$ e poi $a_{23}=1$); la matrice e il seguito assumono $a_{23}=1$, coerente col termine già simmetrizzato $x_2y_3+x_3y_2$. Da verificare.</div>`},
+      {label:'(1) Degenere', body:R`<p>$\det A=\alpha(5-1)-0+(-2)(0+2)=4\alpha-4=4(\alpha-1)$. Si annulla per <b>$\alpha=1$</b>.</p>`},
+      {label:'(2) ker φ per α = 1', body:R`<p>Risolvo $\left(\begin{smallmatrix}1&0&-2\\0&1&1\\-2&1&5\end{smallmatrix}\right)x=0$: $x_1=2x_3$, $x_2=-x_3$; la 3ª è dipendente. <b>$\ker\varphi=\operatorname{Span}\{(2,-1,1)\}$</b>, $r=1$.</p>`},
+      {label:'(3) Segnatura al variare di α', body:R`<p>Cambia solo in $\alpha=1$ (Cartesio sul caratteristico):</p><ul><li>$\alpha<1$: segnatura $(2,1)$ — indefinita;</li><li>$\alpha>1$: $(3,0)$ — definita positiva;</li><li>$\alpha=1$: $(2,0)$ con nullità $1$.</li></ul><p>Attraversando $\alpha=1$ un autovalore va da negativo a positivo passando per $0$: degenerazione e salto coincidono. $\blacksquare$</p>`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Forma su polinomi con derivate</b> (<code>prova20240207</code> Es.4): $\langle p,q\rangle=p(0)q(0)-p'(0)q''(0)-q'(0)p''(0)+p''(0)q(0)+p(0)q''(0)$. Matrice $\left(\begin{smallmatrix}1&0&2\\0&0&-2\\2&-2&0\end{smallmatrix}\right)$, $\det=-4\neq0$; $\langle1,1\rangle=1>0$ → segnatura $(2,1)$. ONB generalizzata: $u_1=1,\ u_2=2(t-\tfrac12),\ u_3=\tfrac{t^2-2}{2}$.</li>
+  <li><b>Segnatura da matrice già diagonalizzabile</b> (<code>geomefis24.1.22</code> Es.3): $A=\left(\begin{smallmatrix}4&-2&-2\\-2&4&-2\\-2&-2&4\end{smallmatrix}\right)$, autovalori $0$ e $6$ (doppio) → segnatura $(2,0)$ con nullità $1$, letta dai segni. Ponte col 07.</li>
+  <li><b>Isotropo immediato</b> (<code>soluzioniesame20200204</code> Es.5): $q(x)=3x_1^2+x_2^2+x_3^2+2x_1x_4$ manca $x_4^2$ → $e_4$ dà $q=0$: isotropo senza calcoli.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$q(x)=x_1^2+2x_2^2-3x_3^2$: segnatura? esiste un isotropo?`, a:R`$(2,1)$; sì, es. $x_1=\sqrt3,x_2=0,x_3=1$ dà $3-3=0$.`},
+    {q:R`Nell’esame svolto, perché la segnatura salta esattamente in $\alpha=1$?`, a:R`È l’unico $\alpha$ con $\det A=0$; solo lì un autovalore attraversa lo zero.`},
+    {q:R`Per $q(x)=x_1x_2$ in $\mathbb{R}^2$: qual è il radicale e quali gli isotropi?`, a:R`Radicale $=\{0\}$ ($\det=-\tfrac14\neq0$); isotropi $=\{x_1=0\}\cup\{x_2=0\}$, gli assi.`}
+  ] },
+
+{ num:'09', title:'Operatori simmetrici e isometrie',
+  meta:'Tipo mappa #9 · freq 7/28 · diff 4/5 · 2013–2024',
+  firma:R`<p>Ambiente $M_n(\mathbb{R})$ (o $M_n(\mathbb{C})$) con $\langle A,B\rangle=\operatorname{tr}(A^\top B)$, e un <b>operatore</b> $f$ — tipicamente $f(A)=\pm A^\top$, $f(A)=AX$, $f(A)=XA$, $f(A)=XAX^{-1}$ — da verificare <b>simmetrico</b> (autoaggiunto) e/o <b>isometria</b>. Parole-spia: <i>$\operatorname{tr}(A^\top B)$, operatore simmetrico/autoaggiunto, isometria, $\|f(A)\|=\|A\|$, trasposta</i>.</p>
+  <p><b>Cosa NON confondere:</b> non è diagonalizzazione (07); qui la <i>matrice</i> è un <b>vettore</b> in dimensione $n^2$. Simmetrico e isometria sono <b>proprietà diverse</b>, da dimostrare separatamente.</p>`,
+  idea:R`<p>$\langle A,B\rangle=\operatorname{tr}(A^\top B)=\sum_{i,j}a_{ij}b_{ij}$ è il <b>prodotto di Frobenius</b>: identifica $M_n$ con $\mathbb{R}^{n^2}$, definito positivo, $\|A\|^2=\operatorname{tr}(A^\top A)=\sum a_{ij}^2$. Due <b>proprietà della traccia</b> evitano i calcoli a entrate:</p>$$\operatorname{tr}(C)=\operatorname{tr}(C^\top),\qquad \operatorname{tr}(CD)=\operatorname{tr}(DC).$$<p>Con esse: $f$ <b>simmetrico</b> $\iff\langle f(A),B\rangle=\langle A,f(B)\rangle$; $f$ <b>isometria</b> $\iff\langle f(A),f(B)\rangle=\langle A,B\rangle$ (equivale a $\|f(A)\|=\|A\|$ per polarizzazione).</p>`,
+  mossa:[
+    {label:'Scrivi il prodotto come traccia', body:R`<p>$\langle f(A),B\rangle=\operatorname{tr}(f(A)^\top B)$.</p>`},
+    {label:'Sostituisci f e manovra con trasposizione e ciclicità', body:R`<p>Fai comparire dall’altra parte $\langle A,f(B)\rangle$ (simmetria) o $\langle A,B\rangle$ (isometria).</p><div class="note"><b>Trappola</b> (efficienza, <code>Prova23_01_23_sol</code> Es.5): non espandere entrata per entrata. Usa $\operatorname{tr}(CD)=\operatorname{tr}(DC)$ e $\operatorname{tr}(C)=\operatorname{tr}(C^\top)$: due-tre passaggi.</div>`},
+    {label:'Simmetria e isometria separatamente', body:R`<div class="note"><b>Trappola</b> (concettuale): «simmetrico» non implica «isometria», e viceversa. Due dimostrazioni distinte.</div><div class="note"><b>Trappola</b> (campo complesso): in $M_n(\mathbb{C})$ il prodotto giusto è hermitiano $\langle A,B\rangle=\operatorname{tr}(\bar A^\top B)$; «simmetrica» ($A^\top=A$) $\neq$ «hermitiana» ($\bar A^\top=A$).</div>`}
+  ],
+  esame:{ src:'Prova 23/01/2023, Es. 5 (Prova23_01_23_sol)',
+    testo:R`In $M_2(\mathbb{R})$ con $\langle A,B\rangle=\operatorname{tr}(A^\top B)$, sia $f(A)=-A^\top$. (i) $f$ è simmetrico; (ii) $f$ è un’isometria.`,
+    steps:[
+      {label:'(i) Simmetria', body:R`<p>Con $f(A)^\top=(-A^\top)^\top=-A$:</p>$$\langle f(A),B\rangle=\operatorname{tr}(-AB)=\operatorname{tr}\big((-AB)^\top\big)=\operatorname{tr}(-B^\top A^\top)=\operatorname{tr}(-A^\top B^\top).$$<p>E $\langle A,f(B)\rangle=\operatorname{tr}\big(A^\top(-B^\top)\big)=\operatorname{tr}(-A^\top B^\top)$. Coincidono → <b>$f$ simmetrico</b>. ✓</p>`},
+      {label:'(ii) Isometria', body:R`$$\langle f(A),f(B)\rangle=\operatorname{tr}\big((-A)(-B^\top)\big)=\operatorname{tr}(AB^\top)=\operatorname{tr}\big((AB^\top)^\top\big)=\operatorname{tr}(BA^\top)=\operatorname{tr}(A^\top B)=\langle A,B\rangle.$$<p>Quindi $\|f(A)\|=\|A\|$: <b>$f$ è un’isometria</b>. $\blacksquare$</p>`}
+    ],
+    nota:R`Il gesto vincente: mai toccato le entrate. Solo trasposizione (sposta il $^\top$) e ciclicità (ruota i fattori nella traccia).` },
+  varianti:R`<ul>
+  <li><b>Il commutante come sottospazio</b> (<code>soluzioniesame20200204</code> Es.2): $U=\{X:AX=XA\}$, $V=\{X:AX=-XA\}$ per $A=\left(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\right)$: svolgi $AX,XA$, uguaglia componente a componente ($U:x_3=0,x_1=x_4$, $\dim 2$; $V=\{0\}$). È un problema di <i>sottospazio</i> (01).</li>
+  <li><b>$f(A)=AX$ o $XAX^{-1}$</b>: stessa tecnica — dentro una traccia e ciclicità. Se $X$ ortogonale ($X^{-1}=X^\top$) → isometria.</li>
+  <li><b>Classificazione</b> (<code>soluzioniesame20200204</code> Es.4): verifica diretta $A^\top\overset?=A$, $\bar A^\top\overset?=A$, $A\bar A^\top\overset?=I$.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`$f(A)=A^\top$ (senza il segno meno): simmetrico? isometria?`, a:R`Sì a entrambe — stessi conti senza il segno; $\|A^\top\|=\|A\|$.`},
+    {q:R`Quale proprietà della traccia trasforma $\operatorname{tr}(-B^\top A^\top)$ in $\operatorname{tr}(-A^\top B^\top)$?`, a:R`La ciclicità $\operatorname{tr}(CD)=\operatorname{tr}(DC)$.`},
+    {q:R`Perché $\|A\|^2=\operatorname{tr}(A^\top A)$ è sempre $\ge0$?`, a:R`$\operatorname{tr}(A^\top A)=\sum_{i,j}a_{ij}^2$, somma di quadrati.`}
+  ] },
+{ num:'10', title:'Numeri complessi e strutture su ℂ',
+  meta:'Tipo mappa #6 · freq 9/28 · diff 3/5 · 2019–2024 · in salita',
+  firma:R`<p>Compaiono $z$, $\bar z$, il campo $\mathbb{C}$, lo spazio $M_{2,2}(\mathbb{C})$, o «indipendenti <b>su $\mathbb{C}$</b> o <b>su $\mathbb{R}$</b>?». Tipi ricorrenti: equazione in $z,\bar z$ (es. $z^2=\pm\bar z^2$); sottoinsieme di $M_{2,2}(\mathbb{C})$; confronto $\dim_{\mathbb{C}}$ vs $\dim_{\mathbb{R}}$. Parole-spia: <i>coniugato, $\mathbb{C}$, hermitiana, indipendenti su $\mathbb{C}$/su $\mathbb{R}$, $M_{2,2}(\mathbb{C})$</i>.</p>
+  <p><b>Cosa NON confondere:</b> «è sottospazio?» in $M_{2,2}(\mathbb{C})$ resta il 01. «Simmetrica vs hermitiana» tocca il 09.</p>`,
+  idea:R`<p>Tre fatti generano il tipo:</p><ul><li><b>Fattorizza invece di sviluppare.</b> $z^2-\bar z^2=(z+\bar z)(z-\bar z)$, con $z+\bar z=2\operatorname{Re}z$, $z-\bar z=2i\operatorname{Im}z$: traduce l’equazione in condizioni geometriche sul piano, senza sviluppare $(a+ib)^2$.</li><li><b>$\mathbb{C}$-spazio vs $\mathbb{R}$-spazio.</b> Dimensione $n$ su $\mathbb{C}$ → $2n$ su $\mathbb{R}$. $M_{2,2}(\mathbb{C})$: $\dim_{\mathbb{C}}=4$, $\dim_{\mathbb{R}}=8$. Indipendenza <b>su $\mathbb{C}$</b> è più debole ($1$ e $i$: indipendenti su $\mathbb{R}$, dipendenti su $\mathbb{C}$).</li><li><b>Condizioni non-lineari mascherate</b> (come nel 01) sono le stesse trappole in ambiente complesso.</li></ul>`,
+  mossa:[
+    {label:'Equazioni in z, z-bar', body:R`<p>Porta tutto a un membro e <b>fattorizza</b> in $z\pm\bar z$, $z\pm i\bar z$. Ogni fattore $=0$ è una retta nel piano di Gauss; la soluzione è l’unione.</p><div class="note"><b>Trappola</b>: non sviluppare $(a+ib)^2$ come primo istinto — più lungo, errori di segno. La fattorizzazione è la via.</div>`},
+    {label:'Sottospazi di M(2,2,ℂ)', body:R`<p>Coordinatizza sulle 4 entrate complesse, applica il test del 01. Condizioni lineari-omogenee → sottospazi; dimensione su $\mathbb{C}$ salvo richiesta.</p><div class="note"><b>Trappola</b> (<code>prova20190121</code> Es.3): $\{A:p_A\text{ ha radici reali}\}$ e $\{A\text{ diag. per coniugio}\}$ <b>non</b> sono sottospazi.</div>`},
+    {label:'Indipendenza su ℂ vs su ℝ', body:R`<p>«Su $\mathbb{C}$»: coefficienti complessi, sistema con incognite complesse. «Su $\mathbb{R}$»: ogni entrata complessa come due reali.</p>`}
+  ],
+  esame:{ src:'Appello 04/02/2020, Es. 1 (soluzioniesame20200204)',
+    testo:R`In $\mathbb{C}$ risolvere $$z^2=\bar z^2\qquad\text{e}\qquad z^2=-\bar z^2,\qquad z=a+ib.$$`,
+    steps:[
+      {label:'Riscrivo come prodotti nulli', body:R`$$z^2-\bar z^2=(z+\bar z)(z-\bar z)=0,\qquad z^2+\bar z^2=(z+i\bar z)(z-i\bar z)=0.$$<p>Con $z=x+iy$: $z+\bar z=2x$, $z-\bar z=2iy$, $z+i\bar z=(x+y)+i(x+y)$, $z-i\bar z=(x-y)+i(x-y)$.</p>`},
+      {label:'Prima equazione', body:R`<p>$(2x)(2iy)=0\iff x=0\ \text{oppure}\ y=0$: <b>la coppia degli assi coordinati</b> (immaginari puri e reali puri).</p>`},
+      {label:'Seconda equazione', body:R`<p>$\big[(x+y)+i(x+y)\big]\big[(x-y)+i(x-y)\big]=0$: ciascun fattore si annulla per $x+y=0$ o $x-y=0$: <b>la coppia delle bisettrici</b>. $\blacksquare$</p>`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Sottospazio di $M_{2,2}(\mathbb{C})$</b> (<code>scritto Geometria 2024-07-09</code> Es.1): $U=\{a_{11}=a_{12},\ a_{21}=0\}$ è sottospazio, base $\left\{\left(\begin{smallmatrix}1&1\\0&0\end{smallmatrix}\right),\left(\begin{smallmatrix}0&0\\0&1\end{smallmatrix}\right)\right\}$.</li>
+  <li><b>Giudizio a 7 sottoinsiemi</b> (<code>prova20190121</code> Es.3): sono sottospazi $U_1(\operatorname{tr}=0)$, $U_4(a_{12}=a_{21}=0)$; non lo sono $U_2(\det=0)$, $U_6$ (diag. per coniugio), $U_7$ (spettro reale). Ponte col 01.</li>
+  <li><b>Hermitiana/unitaria?</b> (<code>soluzioniesame20200204</code> Es.4): $A=\left(\begin{smallmatrix}1&i\\i&-1\end{smallmatrix}\right)$ è simmetrica ma <b>non</b> hermitiana né unitaria; $\operatorname{tr}=\det=0$ → non diagonalizzabile.</li>
+  </ul>`,
+  collaudo:[
+    {q:R`Risolvi $z=\bar z$ in $\mathbb{C}$.`, a:R`$z-\bar z=2iy=0\Rightarrow y=0$: l’asse reale.`},
+    {q:R`In $M_{2,2}(\mathbb{C})$, qual è $\dim_{\mathbb{C}}$ e $\dim_{\mathbb{R}}$?`, a:R`4 e 8.`},
+    {q:R`$1$ e $i$ come vettori di $\mathbb{C}$: indipendenti su $\mathbb{R}$? su $\mathbb{C}$?`, a:R`Su $\mathbb{R}$ sì (base di $\mathbb{C}\cong\mathbb{R}^2$); su $\mathbb{C}$ no, $i=i\cdot1$.`}
+  ] },
+
+{ num:'11', title:'Geometria analitica in E³',
+  meta:'Tipo mappa #7 · freq 7/28 · diff 2/5 · 2013–2016 (raro dal 2017)',
+  note:R`<b>Nota di corpus.</b> Tipo <b>uscito dagli esami dal 2017</b> (zero occorrenze 2019–2024). L’esame qui sotto è un <b>esempio ricostruito dal metodo canonico</b>, non tratto dalla banca-dati. Blocco tenuto asciutto, priorità bassa per la sessione attuale.`,
+  firma:R`<p>Rette e piani in $\mathbb{R}^3$ ($E^3$), con richieste metriche: piano per una retta e un punto, <b>distanza</b> punto-piano o tra rette sghembe, <b>posizione reciproca</b>. Parole-spia: <i>retta, piano, distanza, rette sghembe/incidenti/parallele, prodotto vettoriale</i>.</p>
+  <p><b>Cosa NON confondere:</b> è geometria affine-metrica in dimensione 3, non algebra astratta. Strumenti: prodotto scalare (angoli, distanze), vettoriale (normali, aree), misto (volumi, complanarità).</p>`,
+  idea:R`<ul><li><b>Retta:</b> $r:\ P+t\,\vec v$ o intersezione di due piani.</li><li><b>Piano:</b> $ax+by+cz+d=0$ con <b>normale</b> $\vec n=(a,b,c)$.</li><li><b>Prodotto vettoriale $\vec u\times\vec v$:</b> ortogonale a entrambi; serve per la normale e per la distanza tra sghembe.</li><li><b>Prodotto misto $\det[\vec a,\vec b,\vec c]$:</b> nullo $\iff$ i tre vettori sono <b>complanari</b>.</li></ul><p>Formule cardine:</p>$$\operatorname{dist}(P_0,\pi)=\frac{|a x_0+b y_0+c z_0+d|}{\sqrt{a^2+b^2+c^2}},\qquad \operatorname{dist}(r_1,r_2)=\frac{\big|(P_2-P_1)\cdot(\vec v_1\times\vec v_2)\big|}{\|\vec v_1\times\vec v_2\|}.$$`,
+  mossa:[
+    {label:'Posizione reciproca di due rette', body:R`<p>$\vec v_1\parallel\vec v_2$ (proporzionali)? → <b>parallele</b> (o coincidenti). Altrimenti prodotto misto $\det[\,P_2-P_1,\ \vec v_1,\ \vec v_2\,]$: $=0$ → <b>incidenti</b>; $\neq0$ → <b>sghembe</b>.</p><div class="note"><b>Trappola</b>: la sghembezza richiede <b>due</b> condizioni — non parallelismo <i>e</i> non complanarità. Verificarne una sola sbaglia.</div>`},
+    {label:'Piano per una retta e un punto Q ∉ r', body:R`<p>I due direttori del piano sono $\vec v$ e $Q-P$; la normale è $\vec n=\vec v\times(Q-P)$; imponi il passaggio per $P$ per trovare $d$.</p>`},
+    {label:'Distanza punto-piano', body:R`<p>Formula diretta (ricorda il valore assoluto e la norma della normale).</p>`},
+    {label:'Distanza tra sghembe', body:R`<p>$\vec v_1\times\vec v_2$ dà la direzione della perpendicolare comune; proietta $P_2-P_1$ su di essa (prodotto misto normalizzato).</p>`}
+  ],
+  esame:{ src:'Esempio ricostruito dal metodo (E³ assente dal corpus)',
+    testo:R`$r_1:\ (1,0,0)+t(1,1,0)$ e $r_2:\ (0,1,0)+s(0,1,1)$. (a) posizione reciproca; (b) se sghembe, la loro distanza.`,
+    steps:[
+      {label:'(a) Posizione reciproca', body:R`<p>Direttori $\vec v_1=(1,1,0)$, $\vec v_2=(0,1,1)$: non proporzionali → non parallele. Con $P_2-P_1=(-1,1,0)$:</p>$$\det\begin{pmatrix}-1&1&0\\1&1&0\\0&1&1\end{pmatrix}=1\cdot\det\begin{pmatrix}-1&1\\1&1\end{pmatrix}=1\cdot(-1-1)=-2\neq0.$$<p>(sviluppo lungo la terza colonna). Prodotto misto $\neq0$ → le rette sono <b>sghembe</b>.</p>`},
+      {label:'(b) Distanza', body:R`<p>$\vec v_1\times\vec v_2=(1,-1,1)$, $\|\vec v_1\times\vec v_2\|=\sqrt3$. Il prodotto misto $(P_2-P_1)\cdot(\vec v_1\times\vec v_2)=(-1,1,0)\cdot(1,-1,1)=-2$.</p>$$\operatorname{dist}(r_1,r_2)=\frac{|-2|}{\sqrt3}=\frac{2}{\sqrt3}=\frac{2\sqrt3}{3}.\qquad\blacksquare$$`}
+    ] },
+  varianti:R`<ul>
+  <li><b>Piano per tre punti</b>: normale via $(B-A)\times(C-A)$.</li>
+  <li><b>Retta come intersezione di due piani</b>: direttore $\vec v=\vec n_1\times\vec n_2$.</li>
+  <li><b>Distanza punto-retta</b>: $\operatorname{dist}(Q,r)=\dfrac{\|(Q-P)\times\vec v\|}{\|\vec v\|}$.</li>
+  <li><b>Angolo</b> tra rette/piani: dal prodotto scalare dei direttori/normali (valore assoluto per l’angolo acuto).</li>
+  </ul>`,
+  collaudo:[
+    {q:R`Distanza del punto $(1,1,1)$ dal piano $x+y+z=0$.`, a:R`$\tfrac{|3|}{\sqrt3}=\sqrt3$.`},
+    {q:R`$r_1:(0,0,0)+t(1,0,0)$ e $r_2:(0,1,0)+s(1,0,0)$: che posizione?`, a:R`Parallele (stesso direttore) e distinte, distanza 1.`},
+    {q:R`Il prodotto misto di $P_2-P_1,\vec v_1,\vec v_2$ vale $0$: le rette non parallele sono sghembe o incidenti?`, a:R`Incidenti — complanari e non parallele.`}
+  ] }
+];
+
+/* =================================================================== */
+var byId = {}; SF.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='geo-sf-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Percorso'; nav.appendChild(h);
+  var gate=document.createElement('button');
+  gate.className='navitem'+(active==='gate'?' active':'');
+  gate.innerHTML='<span class="dot"></span><span class="nx">⌂</span><span>Scegli modalità</span>';
+  gate.onclick=function(){ showGate(); };
+  nav.appendChild(gate);
+  var home=document.createElement('button');
+  home.className='navitem'+(active==='home'?' active':'');
+  home.innerHTML='<span class="dot"></span><span class="nx">◆</span><span>Smistatore</span>';
+  home.onclick=function(){ showHome(); };
+  nav.appendChild(home);
+  SF.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showSF(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+function sectionOpen(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var b=document.createElement('button'); b.className='reveal-btn small'; b.textContent='Rivela risposta';
+    b.onclick=function(){ a.style.display='block'; typeset(a); b.disabled=true; b.classList.add('done'); b.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(b); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+
+function showGate(){
+  renderNav('gate');
+  var m=document.getElementById('main'); m.innerHTML='';
+  m.appendChild(elFromHTML('<div class="sfhead"><h1>Percorso saper-fare — Geometria</h1>'+
+    '<p class="sub">Algebra Lineare · Diverio · La Sapienza. Due modi di usarlo — scegli.</p></div>'));
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;margin-top:6px';
+  function card(icon,titolo,desc,cta,fn){
+    var b=document.createElement('button');
+    b.style.cssText='text-align:left;padding:24px;border:1px solid var(--line,#2a3550);border-radius:14px;'+
+      'background:var(--card,#141c30);color:inherit;cursor:pointer;transition:border-color .15s,transform .15s;'+
+      'display:flex;flex-direction:column;gap:10px;font:inherit';
+    b.onmouseover=function(){ b.style.borderColor='var(--accent,#5eead4)'; b.style.transform='translateY(-2px)'; };
+    b.onmouseout=function(){ b.style.borderColor='var(--line,#2a3550)'; b.style.transform='none'; };
+    b.innerHTML='<div style="font-size:1.7rem;line-height:1">'+icon+'</div>'+
+      '<h3 style="margin:0;font-size:1.2rem">'+titolo+'</h3>'+
+      '<p style="margin:0;font-size:.93rem;line-height:1.55;color:var(--muted,#93a1c0)">'+desc+'</p>'+
+      '<span style="margin-top:4px;font-weight:600;color:var(--accent,#5eead4)">'+cta+'</span>';
+    b.onclick=fn; return b;
+  }
+  grid.appendChild(card('◆','Smistatore',
+    'Parti da un esercizio: riconosci l’oggetto-spia e l’app ti manda al metodo giusto. Il «quale metodo» è metà della battaglia d’esame.',
+    'Entra nello smistatore →', function(){ showHome(); }));
+  grid.appendChild(card('▶','Percorso',
+    'Studia in ordine gli 11 saper-fare, dal motore (01–03) alla direzione attuale del corso (08–10). Impari il gesto, un tipo alla volta.',
+    'Inizia da 01 →', function(){ showSF('01'); }));
+  m.appendChild(grid);
+  window.scrollTo(0,0);
+}
+
+function showHome(){
+  renderNav('home');
+  var m=document.getElementById('main'); m.innerHTML='';
+  m.appendChild(elFromHTML('<div class="sfhead"><h1>Percorso saper-fare — Geometria</h1>'+
+    '<p class="sub">Algebra Lineare · Diverio · La Sapienza. Il gemello operativo: allena il <i>gesto</i>, non ri-spiega la teoria.</p></div>'));
+
+  var intro=elFromHTML('<div class="smist-intro"><p style="margin-top:0"><b>Lo smistatore.</b> '+
+    'Leggi il testo dell’esercizio, trova l’oggetto-spia, apri il saper-fare giusto. '+
+    'Il «quale metodo» è metà della battaglia d’esame.</p>'+
+    '<p style="margin-bottom:0;font-size:.9rem;color:var(--muted)"><b>Ambiguità frequenti.</b> Matrice simmetrica: se va '+
+    '<b>diagonalizzata</b> è 07, se ci definisci una <b>forma</b> e chiedi la <b>segnatura</b> è 08. Operatore su polinomi: '+
+    'ker/im è 03, con un prodotto scalare e ortonormale è 06. «È sottospazio?» è 01, ma se la condizione è $\\det=0$ o '+
+    '«diagonalizzabile» la risposta è <b>no</b>.</p></div>');
+  typeset(intro); m.appendChild(intro);
+
+  var grid=document.createElement('div'); grid.className='smist-grid';
+  SMIST.forEach(function(row){
+    var b=document.createElement('button'); b.className='smist-card';
+    b.innerHTML='<div class="spia">'+row.spia+'</div><div class="cosa">'+row.cosa+'</div>'+
+      '<span class="arrow">→ '+row.target+' · '+byId[row.target].title+'</span>';
+    b.onclick=function(){ showSF(row.target); };
+    typeset(b); grid.appendChild(b);
+  });
+  m.appendChild(grid);
+
+  m.appendChild(elFromHTML('<section class="section"><h3>Ordine consigliato</h3>'+
+    '<div class="open-body"><p style="margin:0">01 → 02 → 03 costruiscono il motore. 04 → 05 sono la coppia autostruttura '+
+    '(diagonalizzo / e quando non posso). 06 → 07 la coppia metrica. 08 → 09 → 10 sono la <b>direzione attuale del corso</b> '+
+    '(in salita 2019–2024, in tutti gli esami recenti). 11 (E³) è uscito dal corpus dal 2017: ultimo, leggero, storico.</p></div></section>'));
+  window.scrollTo(0,0);
+}
+
+function showSF(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+  if(s.note){ var n=elFromHTML('<div class="note warn">'+s.note+'</div>'); typeset(n); m.appendChild(n); }
+
+  m.appendChild(sectionOpen('La firma','riconoscere', s.firma));
+  m.appendChild(sectionOpen('L’idea','first principles', s.idea));
+
+  var mossa=document.createElement('section'); mossa.className='section';
+  mossa.innerHTML='<h3>La mossa<span class="tag">rivela un passo alla volta</span></h3>';
+  mossa.appendChild(revealBlock(s.mossa)); m.appendChild(mossa);
+
+  var es=document.createElement('section'); es.className='section';
+  es.innerHTML='<h3>Un esame, per intero<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+s.esame.src+'</span>'+s.esame.testo+'</div>');
+  typeset(testo); es.appendChild(testo);
+  es.appendChild(revealBlock(s.esame.steps));
+  if(s.esame.nota){ var en=elFromHTML('<div class="esame-nota">'+s.esame.nota+'</div>'); typeset(en); es.appendChild(en); }
+  m.appendChild(es);
+
+  m.appendChild(sectionOpen('Le varianti','la famiglia negli anni', s.varianti));
+
+  var col=document.createElement('section'); col.className='section';
+  col.innerHTML='<h3>Collaudo<span class="tag">provi, poi riveli</span></h3>';
+  col.appendChild(collaudoBlock(s.collaudo)); m.appendChild(col);
+
+  window.scrollTo(0,0);
+}
+
+window.addEventListener('DOMContentLoaded', showGate);
+</script>
+</body>
+</html>
