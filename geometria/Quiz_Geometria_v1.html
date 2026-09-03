@@ -270,10 +270,30 @@ var Q = {"sottospazi":[{"pool":"sottospazi","src":"tipo 1 · Span e dipendenza",
 /* ===== ENGINE ===== */
 var S = { units:[], ui:0, si:0, correct:0, total:0, answered:false };
 
-/* TRACCIA innestata (quiz_innesta_traccia.py) — il quiz ricorda le risposte. */
+/* TRACCIA innestata v2 (quiz_innesta_traccia.py) — il quiz ricorda le risposte E LE CONSEGNA DA SOLO.
+
+   Il quiz vive su GitHub Pages: pagina statica, non puo' scrivere su disco. Fino
+   al 3 settembre l'unica uscita era un bottone «esporta» che scaricava un .jsonl,
+   e in 35 giorni non e' mai stato cliccato: `02-accademico/esiti/` e' rimasta
+   vuota mentre il tracciamento girava. Requisito di Giuseppe, 2 agosto: nessun
+   gesto manuale.
+
+   Ora i tentativi vanno da soli alla bocca di Oceano — il ricevitore locale che
+   si accende al login — su http://127.0.0.1:8077/atti. Passa da HTTPS a HTTP
+   perche' il loopback e' un'origine «potentially trustworthy» e non conta come
+   mixed content; verso l'IP di rete locale sarebbe bloccata, ed e' per questo
+   che dal telefono la consegna diretta non funziona (li' resta il paracadute).
+
+   La regola che tiene: un record e' CONSEGNATO solo quando il ricevitore lo ha
+   confermato (`_c`). Se Oceano e' giu', se il PC e' spento, se e' il telefono:
+   niente si perde, si accumula in localStorage, e alla prima apertura utile la
+   coda si svuota da sola. Il bottone «esporta» non e' piu' la strada: e' il
+   paracadute, e compare solo quando la consegna e' fallita e c'e' arretrato. */
 var TRACCIA = (function(){
   var CHIAVE = 'navicella.quiz.attempts.v1';
-  var attivo = true;
+  var BOCCA  = 'http://127.0.0.1:8077/atti';
+  var ATTESA = 4000;            /* si consegna a raffiche, non a ogni click */
+  var attivo = true, inVolo = false, ultimoEsito = null, timer = null;
   try { window.localStorage.setItem('__t','1'); window.localStorage.removeItem('__t'); }
   catch(e){ attivo = false; }
   function leggi(){
@@ -284,6 +304,15 @@ var TRACCIA = (function(){
     if(!attivo) return;
     try { window.localStorage.setItem(CHIAVE, JSON.stringify(a)); } catch(e){}
   }
+  /* impronta: la stessa che usa la navicella (atti.py) per riconoscere un
+     doppione. Serve a ritrovare i record dopo la consegna, perche' l'array puo'
+     essere cresciuto mentre la richiesta era in volo. */
+  function impronta(r){ return [r.ts, r.corso, r.pool, r.ui, r.si].join(''); }
+  function daConsegnare(a){
+    var f = [], i;
+    for(i=0;i<a.length;i++){ if(!a[i]._c) f.push(a[i]); }
+    return f;
+  }
   function registra(rec){
     if(!attivo) return;
     var a = leggi();
@@ -292,7 +321,37 @@ var TRACCIA = (function(){
     a.push(rec);
     if(a.length > 5000) a = a.slice(-5000);
     scrivi(a);
-    aggiornaBottone();
+    programma();
+  }
+  function programma(){
+    if(timer) return;
+    timer = setTimeout(function(){ timer = null; consegna(); }, ATTESA);
+  }
+  function consegna(subito){
+    if(!attivo || inVolo) return;
+    var coda = daConsegnare(leggi());
+    if(!coda.length) return;
+    var corpo = coda.map(function(r){ return JSON.stringify(r); }).join('\n')+'\n';
+    var mandati = {}, i;
+    for(i=0;i<coda.length;i++){ mandati[impronta(coda[i])] = 1; }
+    inVolo = true;
+    /* fetch e non sendBeacon: Chrome, per una richiesta da sito pubblico verso
+       la rete privata, pretende un preflight — e il beacon non sa farlo.
+       keepalive perche' la chiusura della scheda non tronchi l'ultima raffica
+       (non e' garantito quando c'e' un preflight: per questo la raffica e'
+       corta, e cio' che non parte parte alla prossima apertura). */
+    fetch(BOCCA, {method:'POST', mode:'cors', keepalive:!!subito,
+                  headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:corpo})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(esito){
+        var a = leggi(), n = 0;
+        for(var j=0;j<a.length;j++){
+          if(!a[j]._c && mandati[impronta(a[j])]){ a[j]._c = 1; n++; }
+        }
+        scrivi(a); inVolo = false; ultimoEsito = 'ok';
+        annuncia(n, esito && esito.totale);
+      })
+      .catch(function(){ inVolo = false; ultimoEsito = 'no'; aggiornaBottone(); });
   }
   function esporta(){
     var a = leggi(); if(!a.length) return;
@@ -308,25 +367,47 @@ var TRACCIA = (function(){
     if(!confirm('Cancellare i tentativi salvati in questo browser?')) return;
     scrivi([]); aggiornaBottone();
   }
-  function aggiornaBottone(){
-    var b = document.getElementById('tracciaBtn'); var n = leggi().length;
+  function riquadro(){
+    var b = document.getElementById('tracciaBtn');
     if(!b){
-      if(!n) return;
       b = document.createElement('div'); b.id='tracciaBtn';
       b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;'
         +'font:600 13px/1.2 system-ui,sans-serif;display:flex;gap:6px;align-items:center;'
-        +'background:#1f2937;color:#fff;padding:8px 12px;border-radius:10px;'
-        +'box-shadow:0 2px 10px rgba(0,0,0,.25);cursor:pointer;opacity:.92';
-      b.title='Scarica i tentativi come .jsonl da consegnare alla navicella';
-      b.onclick=esporta; document.body.appendChild(b);
-      var x=document.createElement('span'); x.textContent='×';
-      x.style.cssText='margin-left:6px;opacity:.6;padding:0 3px'; x.title='Svuota';
-      x.onclick=function(ev){ ev.stopPropagation(); svuota(); };
-      b.appendChild(x);
+        +'padding:8px 12px;border-radius:10px;color:#fff;'
+        +'box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:.92';
+      document.body.appendChild(b);
     }
-    if(!n){ b.remove(); return; }
-    if(b.firstChild && b.firstChild.nodeType===3) b.firstChild.nodeValue='↓ esporta '+n+' risposte';
-    else b.insertBefore(document.createTextNode('↓ esporta '+n+' risposte'), b.firstChild);
+    return b;
+  }
+  /* Consegnato: si dice, non si chiede. Due secondi e mezzo e sparisce — non e'
+     un bottone, e' la ricevuta. */
+  function annuncia(n, totale){
+    var b = document.getElementById('tracciaBtn');
+    if(b) b.remove();
+    if(!n) return;
+    b = riquadro();
+    b.style.background = '#14532d'; b.style.cursor = 'default'; b.onclick = null;
+    b.textContent = '↑ ' + n + (n===1?' risposta consegnata':' risposte consegnate')
+                  + (totale ? ' · ' + totale + ' in archivio' : '');
+    setTimeout(function(){ if(b && b.parentNode) b.remove(); }, 2500);
+  }
+  /* Il paracadute. Compare SOLO se la consegna automatica non passa e c'e'
+     arretrato: cosi' un bottone visibile significa sempre qualcosa. */
+  function aggiornaBottone(){
+    var n = daConsegnare(leggi()).length;
+    var b = document.getElementById('tracciaBtn');
+    if(!n || ultimoEsito !== 'no'){ if(b) b.remove(); return; }
+    b = riquadro();
+    b.style.background = '#1f2937'; b.style.cursor = 'pointer';
+    b.title = 'La navicella non risponde su ' + BOCCA + ' (Oceano spento, o sei '
+            + 'sul telefono). Le risposte sono al sicuro qui nel browser: '
+            + 'scaricale e finiranno in archivio al prossimo avvio.';
+    b.textContent = '↓ esporta ' + n + ' risposte';
+    b.onclick = esporta;
+    var x = document.createElement('span'); x.textContent = '×';
+    x.style.cssText = 'margin-left:6px;opacity:.6;padding:0 3px'; x.title = 'Svuota';
+    x.onclick = function(ev){ ev.stopPropagation(); svuota(); };
+    b.appendChild(x);
   }
   var ultimoGiusto = 0, ultimoVisto = null;
   /* famiglia "meccanica": un solo aggancio, l'esito dalla variazione di correctCount */
@@ -340,8 +421,22 @@ var TRACCIA = (function(){
     registra({ pool: (q && q._pool) || null, ui: st.idx, si: 0,
                esito: giusto, primo: true, tipo: (q && q.type) || null });
   }
-  return { registra:registra, esporta:esporta, daStato:daStato,
-           conta:function(){ return leggi().length; }, aggiorna:aggiornaBottone };
+  /* I tre momenti in cui si prova a consegnare, oltre alla raffica: all'apertura
+     (svuota l'arretrato di ieri e del telefono, se e' lo stesso browser), quando
+     la pagina passa in secondo piano, e quando se ne va. */
+  try {
+    if(document.readyState === 'loading')
+      document.addEventListener('DOMContentLoaded', function(){ consegna(); });
+    else setTimeout(function(){ consegna(); }, 600);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'hidden') consegna(true);
+    });
+    window.addEventListener('pagehide', function(){ consegna(true); });
+  } catch(e){}
+  return { registra:registra, esporta:esporta, daStato:daStato, consegna:consegna,
+           conta:function(){ return leggi().length; },
+           inSospeso:function(){ return daConsegnare(leggi()).length; },
+           aggiorna:aggiornaBottone };
 })();
 
 
