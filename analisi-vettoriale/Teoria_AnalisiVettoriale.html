@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teoria — Analisi Vettoriale (orale)</title>
+
+<!--
+  Allenatore di TEORIA per l'orale di Analisi Vettoriale.
+
+  Perche' e' un oggetto diverso dal quiz. Il quiz di AV (555 domande) allena a RISOLVERE:
+  ti da' un esercizio e vuole un numero. L'orale chiede l'altra abilita' — enunciare,
+  dimostrare, riconoscere quale ipotesi regge il teorema e cosa crolla se cade. Sono due
+  cose diverse e il materiale che c'era copriva solo la prima.
+
+  Il modo d'uso e' quello che conta, ed e' il motivo per cui la risposta sta nascosta:
+  leggi la domanda, RISPONDI AD ALTA VOCE come faresti davanti all'esaminatore, e solo
+  dopo scopri il modello. Se la scopri prima, stai leggendo un libro, non allenandoti.
+-->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+:root{
+  --sfondo:#14161a; --carta:#1c1f26; --carta2:#22262f;
+  --testo:#e8e6e1; --tenue:#9aa0aa; --linea:#333947;
+  --caldo:#d9a441; --freddo:#6fa8dc; --ok:#7fb069; --no:#c9736a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sfondo);color:var(--testo);
+     font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+     padding:0 0 4rem}
+header{background:var(--carta);border-bottom:1px solid var(--linea);
+       padding:1rem 1.2rem;position:sticky;top:0;z-index:10}
+h1{margin:0;font-size:1.05rem;font-weight:600;letter-spacing:.01em}
+.sotto{color:var(--tenue);font-size:.82rem;margin-top:.2rem}
+main{max-width:900px;margin:0 auto;padding:1.2rem}
+
+.barra{display:flex;gap:.4rem;flex-wrap:wrap;margin:.9rem 0 1.3rem}
+.barra button{background:var(--carta2);color:var(--testo);border:1px solid var(--linea);
+  border-radius:999px;padding:.32rem .8rem;font-size:.82rem;cursor:pointer}
+.barra button.on{background:var(--freddo);color:#10131a;border-color:var(--freddo);font-weight:600}
+
+.conta{color:var(--tenue);font-size:.8rem;margin-bottom:.8rem}
+.conta b{color:var(--testo)}
+
+.scheda{background:var(--carta);border:1px solid var(--linea);border-radius:10px;
+        padding:1.1rem 1.2rem;margin-bottom:1rem}
+.tag{display:inline-block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;
+     color:var(--caldo);border:1px solid var(--caldo);border-radius:4px;
+     padding:.08rem .42rem;margin-bottom:.55rem;opacity:.85}
+.dom{font-size:1.02rem;margin:0 0 .9rem}
+.azioni{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.azioni button{background:transparent;color:var(--freddo);border:1px solid var(--freddo);
+  border-radius:6px;padding:.34rem .85rem;font-size:.85rem;cursor:pointer}
+.azioni button:hover{background:var(--freddo);color:#10131a}
+.azioni .so{color:var(--ok);border-color:var(--ok)}
+.azioni .so:hover{background:var(--ok);color:#10131a}
+.azioni .nonso{color:var(--no);border-color:var(--no)}
+.azioni .nonso:hover{background:var(--no);color:#10131a}
+.esito{font-size:.8rem;color:var(--tenue);margin-left:.2rem}
+
+.modello{display:none;margin-top:1rem;padding-top:.9rem;border-top:1px dashed var(--linea);
+         font-size:.97rem}
+.modello.vis{display:block}
+.modello b{color:var(--caldo);font-weight:600}
+.prov{color:var(--tenue);font-size:.74rem;margin-top:.8rem;font-style:italic}
+
+.vuoto{color:var(--tenue);text-align:center;padding:3rem 1rem}
+.katex{font-size:1.02em}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:.2rem 0}
+@media(max-width:600px){ main{padding:.8rem} .scheda{padding:.9rem} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Teoria — Analisi Vettoriale</h1>
+  <div class="sotto">Allenamento per l'orale: enunciare e dimostrare, non risolvere.
+    Rispondi ad alta voce <em>prima</em> di scoprire il modello.</div>
+</header>
+
+<main>
+  <div class="barra" id="barra"></div>
+  <div class="conta" id="conta"></div>
+  <div id="lista"></div>
+</main>
+
+<!-- I blocchi di teoria. Ogni nuovo blocco = una riga in piu', niente da toccare sotto. -->
+<script>var LAV = {};</script>
+<script src="frags-teoria/campi.js"></script>
+
+<script>
+var ETICHETTE = {
+  campi: "Campi e forme differenziali"
+};
+
+var stato = {};
+try { stato = JSON.parse(localStorage.getItem("teoria-av") || "{}"); } catch (e) { stato = {}; }
+function salva() { try { localStorage.setItem("teoria-av", JSON.stringify(stato)); } catch (e) {} }
+
+var pool = Object.keys(LAV);
+var scelto = pool[0] || null;
+
+function rendi() {
+  var barra = document.getElementById("barra");
+  barra.innerHTML = "";
+  pool.forEach(function (p) {
+    var b = document.createElement("button");
+    b.textContent = ETICHETTE[p] || p;
+    if (p === scelto) b.className = "on";
+    b.onclick = function () { scelto = p; rendi(); };
+    barra.appendChild(b);
+  });
+
+  var unita = (LAV[scelto] || []);
+  var viste = unita.filter(function (u, i) { return stato[scelto + ":" + i]; }).length;
+  var sapute = unita.filter(function (u, i) { return stato[scelto + ":" + i] === "so"; }).length;
+  document.getElementById("conta").innerHTML =
+    "<b>" + unita.length + "</b> unità · <b>" + viste + "</b> passate · <b>" + sapute + "</b> segnate «la so»";
+
+  var lista = document.getElementById("lista");
+  lista.innerHTML = "";
+  if (!unita.length) { lista.innerHTML = '<div class="vuoto">Nessun blocco caricato.</div>'; return; }
+
+  unita.forEach(function (u, i) {
+    var chiave = scelto + ":" + i;
+    var d = document.createElement("div");
+    d.className = "scheda";
+
+    var tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = u.topic || "teoria";
+    d.appendChild(tag);
+
+    var q = document.createElement("div");
+    q.className = "dom";
+    q.textContent = u.q || "";
+    d.appendChild(q);
+
+    var mod = document.createElement("div");
+    mod.className = "modello";
+    mod.innerHTML = u.model || "";
+    if (u.prov) {
+      var pr = document.createElement("div");
+      pr.className = "prov";
+      pr.textContent = u.prov;
+      mod.appendChild(pr);
+    }
+
+    var az = document.createElement("div");
+    az.className = "azioni";
+
+    var mostra = document.createElement("button");
+    mostra.textContent = "Mostra il modello";
+    mostra.onclick = function () {
+      mod.classList.toggle("vis");
+      mostra.textContent = mod.classList.contains("vis") ? "Nascondi" : "Mostra il modello";
+      if (mod.classList.contains("vis")) katexSu(mod);
+    };
+    az.appendChild(mostra);
+
+    ["so", "nonso"].forEach(function (v) {
+      var b = document.createElement("button");
+      b.className = v;
+      b.textContent = v === "so" ? "La so" : "Da rivedere";
+      b.onclick = function () {
+        stato[chiave] = (stato[chiave] === v) ? null : v;
+        salva(); rendi();
+      };
+      az.appendChild(b);
+    });
+
+    if (stato[chiave]) {
+      var e = document.createElement("span");
+      e.className = "esito";
+      e.textContent = stato[chiave] === "so" ? "· segnata come saputa" : "· da rivedere";
+      az.appendChild(e);
+    }
+
+    d.appendChild(az);
+    d.appendChild(mod);
+    lista.appendChild(d);
+    katexSu(q);
+  });
+}
+
+function katexSu(el) {
+  if (!window.renderMathInElement) return;
+  window.renderMathInElement(el, {
+    delimiters: [
+      { left: "$$", right: "$$", display: true },
+      { left: "$", right: "$", display: false }
+    ],
+    throwOnError: false
+  });
+}
+
+window.addEventListener("load", function () { rendi(); });
+</script>
+</body>
+</html>
