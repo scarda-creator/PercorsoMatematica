@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nucleo 12b — Serie di Laurent: la scrittura di una funzione attorno a una singolarità</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Movimento III · Nucleo <b>12b — Serie di Laurent: la corona, i coefficienti, la classificazione delle singolarità</b> · Metodi Matematici della Fisica</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 12b: Serie di Laurent <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+identita: come si scrive una funzione attorno a un punto in cui esplode, e perche' quella scrittura contiene gia' tutto il resto
+serve:    11-olomorfe, 12-cauchy
+apre:     13-residui, 14-continuazione
+strumenti: serie geometrica · serie di potenze · singolarita' isolate
+prove:    A1 della mappa esercizi — 19 appelli su 19
+MOVIMENTO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo nucleo', meta:'Metodi · l’argomento presente in ogni singolo appello: Laurent, residui, integrale su curva',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>La serie di Taylor scrive una funzione olomorfa come somma di potenze $(z-z_0)^0,(z-z_0)^1,(z-z_0)^2,\dots$: tutte con esponente $\ge0$. Funziona finché $f$ è regolare attorno a $z_0$. Ma l'oggetto che domina Metodi è l'opposto: una funzione che <b>esplode</b> in $z_0$ — $\frac{1}{z}$, $\frac{e^z}{z^3}$, $\frac{1}{\sin z}$. Per scriverle servono anche le potenze <b>negative</b> $(z-z_0)^{-1},(z-z_0)^{-2},\dots$, e la somma bilatera che ne nasce è la <b>serie di Laurent</b>:
+  $$f(z)=\sum_{n=-\infty}^{+\infty}a_n\,(z-z_0)^n.$$
+  In una frase: <i>la serie di Laurent è come si scrive una funzione attorno a un punto in cui esplode — e quella scrittura contiene già tutto il resto</i>, perché un solo coefficiente, $a_{-1}$, è il <b>residuo</b>, e il residuo è ciò che rende calcolabili gli integrali per contorni di tutto il nucleo 13.</p>
+  <p><b>Perché proprio questo.</b> Sulla mappa degli appelli di Metodi, la voce A1 — «serie di Laurent, residui, integrale su curva» — compare in <b>19 esami su 19</b>: è l'unico argomento presente in ogni singola prova. Non è un tema fra i tanti, è il tema.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Dire <b>perché</b> una serie di Laurent vive in una <b>corona</b> $r\lt|z-z_0|\lt R$ e non in un disco, e individuare i due raggi.</li>
+  <li>Calcolare i coefficienti coi <b>modi pratici veri</b> — serie note, serie geometrica riscritta nelle due direzioni, divisione fra serie, fratti semplici — senza toccare la formula integrale.</li>
+  <li>Riconoscere che <b>lo stesso punto ha sviluppi diversi in corone diverse</b>, e non cadere nel trabocchetto d'esame per eccellenza.</li>
+  <li>Classificare una singolarità isolata in <b>eliminabile / polo di ordine $m$ / essenziale</b> leggendo la parte principale, con un criterio operativo che non sbaglia.</li>
+  <li>Leggere il <b>residuo</b> $a_{-1}$ e passare da qui al teorema dei residui (nucleo 13) senza salti. Gestire, quando serve, il <b>punto all'infinito</b>.</li>
+  </ul>
+  <p>Questo movimento è autosufficiente: tutto ciò che gli serve — l'integrale fondamentale, la formula di Cauchy, la deformazione dei cammini — è richiamato qui dentro al momento dell'uso. I prerequisiti naturali sono l'olomorfia (nucleo 11) e il teorema di Cauchy (nucleo 12); ciò che apre sono i residui (nucleo 13) e la continuazione analitica (nucleo 14).</p>`}
+]},
+
+/* ---------------- 01 · PERCHÉ UNA CORONA ---------------- */
+{ num:'01', title:'Perché una corona, e non un disco', meta:'parte regolare + parte principale · raggio interno $r$ e raggio esterno $R$ · la corona di convergenza',
+  blocchi:[
+  {t:'reveal', title:'Due serie, due regioni, una sola intersezione', tag:'costruzione', steps:[
+   {label:'La parte regolare vive dentro un disco', body:R`<p>La metà a esponenti $\ge0$,
+   $$\sum_{n\ge0}a_n\,(z-z_0)^n,$$
+   è una serie di potenze ordinaria: converge in un <b>disco</b> $|z-z_0|\lt R$, dove $R$ è il suo raggio di convergenza. Dentro quel disco la somma è olomorfa; fuori, diverge. Questa parte si chiama <b>parte regolare</b>: è esattamente ciò che sa fare Taylor.</p>`},
+   {label:'La parte principale vive fuori da un disco', body:R`<p>La metà a esponenti $\lt0$ si scrive con la variabile $w=\dfrac{1}{z-z_0}$:
+   $$\sum_{n\le -1}a_n\,(z-z_0)^n=\sum_{m\ge1}a_{-m}\,w^{m}.$$
+   È di nuovo una serie di potenze, ma in $w$: converge per $|w|\lt 1/r$, cioè per $|z-z_0|\gt r$. Quindi la parte a potenze negative — la <b>parte principale</b> — converge <b>all'esterno</b> di un disco di raggio $r$. È la parte che Taylor non può avere, e che descrive la singolarità.</p>`},
+   {label:'La somma bilatera converge dove convergono entrambe', body:R`<p>La serie di Laurent completa converge dove convergono <b>tutt'e due</b> le metà: in $|z-z_0|\lt R$ <b>e</b> $|z-z_0|\gt r$. L'intersezione è
+   $$r\lt|z-z_0|\lt R,$$
+   cioè una <b>corona</b> (un anello) centrata in $z_0$. Se $r\lt R$ la corona è non vuota e la serie ha senso; il caso $r=0$ dà il <b>disco forato</b> $0\lt|z-z_0|\lt R$, che è la situazione tipica quando $z_0$ è proprio la singolarità. Ecco la risposta alla domanda del titolo: <b>Laurent vive in una corona perché è la somma di due serie con regioni di convergenza complementari — un dentro e un fuori — e la loro intersezione è un anello.</b></p>`}
+  ]},
+  {t:'prosa', title:'Dove stanno i due raggi: li dettano le singolarità', tag:'il perché che serve', html:R`
+  <p>I raggi $r$ e $R$ non sono liberi: una funzione $f$ assegnata, e un centro $z_0$ scelto, fissano la corona. La regola è la stessa che per Taylor (nucleo 12, tappa 03: il raggio di convergenza è la distanza dalla singolarità più vicina), applicata due volte:</p>
+  <ul>
+  <li><b>$R$ = distanza da $z_0$ alla singolarità più vicina che sta <i>più lontano</i> di dove vogliamo convergere</b> — in pratica il bordo esterno della corona è la prima singolarità che si incontra allontanandosi;</li>
+  <li><b>$r$ = distanza da $z_0$ alla singolarità che limita dall'<i>interno</i></b> — il bordo interno è la prima singolarità che si incontra avvicinandosi a $z_0$ (se la singolarità è proprio $z_0$, allora $r=0$).</li>
+  </ul>
+  <p>Le singolarità di $f$ dividono il piano in anelli concentrici attorno a $z_0$, e <b>in ciascun anello</b> c'è una serie di Laurent. Questo è il seme del trabocchetto della tappa 04: una funzione con due poli genera due corone, con due sviluppi diversi.</p>`},
+  {t:'plot', title:'La corona di convergenza: fra il raggio interno e quello esterno',
+   intro:R`Il centro $z_0$, il raggio interno $r$ (fissato dalla singolarità più vicina) e il raggio esterno $R$ (la singolarità successiva). La serie di Laurent converge solo nell'anello fra i due.`,
+   plots:[
+    {kind:'func2d', xr:[-2.4,2.4], yr:[-2.4,2.4], equal:true, ticks:true, height:360,
+     title:'corona  r < |z - z0| < R  attorno a z0',
+     curves:[{f:'0*x', col:'#0e1117', width:0.1}],
+     rings:[{r:0.8, col:'#ff9b6b', width:2.2, dash:true, label:'r (interno)'},
+            {r:1.9, col:'#b98cff', width:2.2, dash:true, label:'R (esterno)'}],
+     marks:[{x:0, y:0, label:'z0', col:'#4c8dff', up:true},
+            {x:0.8, y:0, label:'singolarità a distanza r', col:'#ff6b6b'},
+            {x:-1.34, y:1.34, label:'singolarità a distanza R', col:'#ff6b6b', up:true, left:true}]}
+   ],
+   leggi:R`La serie di Laurent converge nell'anello compreso fra i due cerchi tratteggiati, e <b>solo lì</b>. Dentro il cerchio arancione ($|z-z_0|\lt r$) diverge la parte principale; fuori dal cerchio viola ($|z-z_0|\gt R$) diverge la parte regolare. I due raggi sono le distanze da $z_0$ alle singolarità che bordano l'anello: <b>la geometria della corona è scritta nelle singolarità di $f$</b>, non la si sceglie. Se la singolarità più vicina è $z_0$ stesso, il cerchio arancione degenera nel punto $z_0$ ($r=0$) e la corona diventa il disco forato $0\lt|z-z_0|\lt R$: è il caso che si incontra in quasi tutti gli esercizi d'esame, dove si sviluppa attorno alla singolarità da studiare.`}
+]},
+
+/* ---------------- 02 · IL TEOREMA DI LAURENT ---------------- */
+{ num:'02', title:'Il teorema di Laurent: enunciato e dimostrazione', meta:'esistenza · formula integrale dei coefficienti · unicità per corona',
+  blocchi:[
+  {t:'prosa', title:'Lo strumento che serve: l’integrale fondamentale', tag:'grammatica', html:R`
+  <p>Tutta la dimostrazione poggia su un solo integrale, che conviene avere sotto mano. Su un cerchio $|z-z_0|=\rho$ percorso una volta in senso antiorario, parametrizzando $z=z_0+\rho e^{i\theta}$, $dz=i\rho e^{i\theta}d\theta$:
+  $$\oint_{|z-z_0|=\rho}(z-z_0)^n\,dz=\int_0^{2\pi}\rho^{n}e^{in\theta}\,i\rho e^{i\theta}\,d\theta=i\rho^{n+1}\!\int_0^{2\pi}e^{i(n+1)\theta}\,d\theta=\begin{cases}2\pi i,& n=-1\\[2pt] 0,& n\in\mathbb{Z},\ n\ne-1.\end{cases}$$
+  L'ultima uguaglianza è il fatto chiave: $\int_0^{2\pi}e^{ik\theta}d\theta$ vale $2\pi$ se $k=0$ e $0$ per ogni altro intero $k$ (una rotazione completa di un esponenziale non banale torna al punto di partenza con media nulla). <b>Solo la potenza $-1$ sopravvive all'integrazione su una curva chiusa.</b> Lo useremo due volte: per provare la formula dei coefficienti, e per provarne l'unicità.</p>`},
+  {t:'reveal', title:'Enunciato e dimostrazione in quattro mosse', tag:'derivazione', steps:[
+   {label:'Enunciato', body:R`<p><b>Teorema di Laurent.</b> Se $f$ è olomorfa nella corona $A=\{\,r\lt|z-z_0|\lt R\,\}$, allora in tutta $A$ si sviluppa come
+   $$f(z)=\sum_{n=-\infty}^{+\infty}a_n\,(z-z_0)^n,\qquad a_n=\frac{1}{2\pi i}\oint_{\gamma}\frac{f(\zeta)}{(\zeta-z_0)^{n+1}}\,d\zeta,$$
+   dove $\gamma$ è un qualunque cerchio $|\zeta-z_0|=\rho$ con $r\lt\rho\lt R$. Lo sviluppo è <b>unico</b> in quella corona.</p>`},
+   {label:'Isola $f(w)$ con due cerchi (Cauchy sull’anello)', body:R`<p>Fissa un punto $w$ nella corona. Scegli due cerchi concentrici $C_1$ (raggio $\rho_1$) e $C_2$ (raggio $\rho_2$) con $r\lt\rho_1\lt|w-z_0|\lt\rho_2\lt R$. La regione compresa fra $C_1$ e $C_2$ è dentro la corona, quindi $f$ è olomorfa lì, e la formula di Cauchy (nucleo 12) applicata a questa regione anulare dà $w$ come differenza di due integrali:
+   $$f(w)=\frac{1}{2\pi i}\oint_{C_2}\frac{f(\zeta)}{\zeta-w}\,d\zeta\;-\;\frac{1}{2\pi i}\oint_{C_1}\frac{f(\zeta)}{\zeta-w}\,d\zeta.$$
+   Il segno meno sul cerchio interno è l'orientazione: il bordo dell'anello è $C_2$ antiorario <b>meno</b> $C_1$ antiorario.</p>`},
+   {label:'Sul cerchio esterno nasce la parte regolare', body:R`<p>Su $C_2$ vale $|\zeta-z_0|=\rho_2\gt|w-z_0|$, quindi $\left|\frac{w-z_0}{\zeta-z_0}\right|\lt1$ e la serie geometrica converge uniformemente:
+   $$\frac{1}{\zeta-w}=\frac{1}{(\zeta-z_0)-(w-z_0)}=\frac{1}{\zeta-z_0}\cdot\frac{1}{1-\frac{w-z_0}{\zeta-z_0}}=\sum_{n\ge0}\frac{(w-z_0)^n}{(\zeta-z_0)^{n+1}}.$$
+   La convergenza uniforme autorizza lo scambio serie–integrale (nucleo 07), e l'integrale su $C_2$ diventa $\sum_{n\ge0}a_n(w-z_0)^n$ con $a_n=\frac{1}{2\pi i}\oint_{C_2}\frac{f(\zeta)}{(\zeta-z_0)^{n+1}}d\zeta$: le <b>potenze non negative</b>.</p>`},
+   {label:'Sul cerchio interno nasce la parte principale', body:R`<p>Su $C_1$ vale $|\zeta-z_0|=\rho_1\lt|w-z_0|$, quindi ora il rapporto piccolo è $\frac{\zeta-z_0}{w-z_0}$. Con il segno meno davanti:
+   $$-\frac{1}{\zeta-w}=\frac{1}{w-\zeta}=\frac{1}{(w-z_0)-(\zeta-z_0)}=\sum_{m\ge0}\frac{(\zeta-z_0)^m}{(w-z_0)^{m+1}}.$$
+   Scambiando serie e integrale, l'integrale su $C_1$ dà $\sum_{m\ge0}(w-z_0)^{-m-1}\cdot\frac{1}{2\pi i}\oint_{C_1}f(\zeta)(\zeta-z_0)^m\,d\zeta$. Ponendo $n=-m-1$ (cioè $n\le-1$) il coefficiente è $a_n=\frac{1}{2\pi i}\oint_{C_1}\frac{f(\zeta)}{(\zeta-z_0)^{n+1}}d\zeta$: le <b>potenze negative</b>. Infine, per la deformazione dei cammini (nucleo 12) l'integrando $\frac{f(\zeta)}{(\zeta-z_0)^{n+1}}$ è olomorfo nella corona, dunque $C_1$ e $C_2$ si possono entrambi rimpiazzare con un unico $\gamma$: tutti gli $a_n$ hanno la stessa formula. $\blacksquare$</p>`},
+   {label:'Unicità (qui è dove torna l’integrale fondamentale)', body:R`<p>Supponi che in $A$ valga $f(z)=\sum_n b_n(z-z_0)^n$ con qualunque scelta di coefficienti $b_n$ che renda la serie uniformemente convergente su $\gamma$. Moltiplica per $(z-z_0)^{-k-1}$ e integra su $\gamma$ termine a termine (lecito per la convergenza uniforme):
+   $$\oint_\gamma \frac{f(z)}{(z-z_0)^{k+1}}dz=\sum_n b_n\oint_\gamma (z-z_0)^{n-k-1}dz=\sum_n b_n\cdot 2\pi i\,\delta_{n,k}=2\pi i\,b_k,$$
+   perché per l'integrale fondamentale l'unico termine superstite è $n-k-1=-1$, cioè $n=k$. Quindi $b_k=\frac{1}{2\pi i}\oint_\gamma\frac{f}{(z-z_0)^{k+1}}dz=a_k$: i coefficienti sono <b>forzati</b>, e lo sviluppo è unico. $\blacksquare$</p>`}
+  ]},
+  {t:'prosa', title:'Perché la teoria è fatta così, e cosa cade se cade un’ipotesi', tag:'struttura', html:R`
+  <p>Tre osservazioni sulle ipotesi, perché sapere <b>cosa regge</b> un teorema vale quanto saperlo enunciare.</p>
+  <ul>
+  <li><b>L'ipotesi vera è «olomorfa nella corona», non «nel disco».</b> Il teorema non chiede nulla a $f$ <b>dentro</b> il cerchio interno: lì $f$ può esplodere, avere poli, essere del tutto indefinita. Chiede solo olomorfia nell'anello aperto. È questo che permette alle potenze negative di esistere — sono la traccia di ciò che succede nel buco che la corona circonda, informazione raccolta dall'integrale su un cerchio che sta <b>attorno</b> al buco senza attraversarlo.</li>
+  <li><b>L'unicità è PER corona, non globale.</b> I coefficienti $a_n$ dipendono dal cerchio $\gamma$ solo attraverso <b>quale corona</b> lo contiene: finché $\gamma$ resta nella stessa corona, la deformazione dei cammini garantisce lo stesso valore. Ma se $f$ ha più corone (più singolarità a distanze diverse da $z_0$), cambiare corona cambia i coefficienti. «Lo sviluppo di Laurent» senza dichiarare la corona è un'espressione mal posta: è il nodo della tappa 04.</li>
+  <li><b>Se la singolarità non è isolata, non c'è corona forata.</b> Perché esista un disco forato $0\lt|z-z_0|\lt\rho$ su cui $f$ è olomorfa, $z_0$ deve essere una singolarità <b>isolata</b>: deve avere un intorno libero da altre singolarità. Se invece le singolarità si <b>addensano</b> verso $z_0$ (come in $\frac{1}{\sin(1/z^2)}$ in $0$), nessun anello di olomorfia tocca $z_0$, la serie di Laurent in $z_0$ non esiste, e il teorema dei residui non è applicabile lì. Lo riprendiamo nella tappa 06.</li>
+  </ul>`}
+]},
+
+/* ---------------- 03 · I COEFFICIENTI, IN PRATICA ---------------- */
+{ num:'03', title:'Come si calcolano i coefficienti (i modi veri)', meta:'serie note · serie geometrica riscritta · divisione fra serie · fratti semplici',
+  blocchi:[
+  {t:'prosa', title:'La formula integrale è la definizione, non il metodo', tag:'regola operativa', html:R`
+  <p>La formula $a_n=\frac{1}{2\pi i}\oint_\gamma\frac{f}{(\zeta-z_0)^{n+1}}d\zeta$ serve a <b>dimostrare</b> il teorema e a <b>definire</b> i coefficienti, ma calcolare i coefficienti con essa significherebbe fare un integrale per ciascun $n$ — lavoro enorme e circolare (quegli integrali sono proprio ciò che Laurent serve a evitare). All'esame i coefficienti si ottengono <b>manipolando serie note</b>. Quattro mosse coprono tutto:</p>
+  <ul>
+  <li><b>Serie note composte.</b> Parti dagli sviluppi che sai a memoria — $e^w=\sum \frac{w^n}{n!}$, $\sin w=w-\frac{w^3}{6}+\cdots$, $\cos w=1-\frac{w^2}{2}+\frac{w^4}{24}-\cdots$, $\frac{1}{1-w}=\sum w^n$ — e sostituisci $w$ con ciò che serve (anche $w=1/z$, che produce le potenze negative: $e^{1/z}=\sum\frac{1}{n!}z^{-n}$).</li>
+  <li><b>Serie geometrica riscritta nella direzione giusta.</b> $\frac{1}{1-w}=\sum_{n\ge0}w^n$ converge <b>solo</b> per $|w|\lt1$. Per sviluppare $\frac{1}{z-a}$ scegli la forma con $|w|\lt1$: se $|z-z_0|\lt|a-z_0|$ raccogli $a$, se $|z-z_0|\gt|a-z_0|$ raccogli $z$. È questa scelta a decidere la corona.</li>
+  <li><b>Divisione fra serie.</b> Quando $f=N/D$ con $D$ che ha uno zero di ordine $k$ in $z_0$: scrivi $D=c_k(z-z_0)^k\big[1+u(z)\big]$ con $u\to0$, da cui $\frac1D=\frac{1}{c_k(z-z_0)^k}\big[1-u+u^2-\cdots\big]$, moltiplica per la serie di $N$ e raccogli le potenze. È la via robusta per i poli di ordine $\ge2$.</li>
+  <li><b>Fratti semplici.</b> Per una funzione razionale, spezza prima in $\frac{A}{z-a}+\frac{B}{z-b}+\cdots$ (metodo di copertura di Heaviside: $A=\lim_{z\to a}(z-a)f$), poi sviluppa ogni fratto con la serie geometrica. Ogni fratto ha la sua corona naturale.</li>
+  </ul>`},
+  {t:'esercizio', title:'Tre sviluppi, tre metodi diversi',
+   src:'palestra — scegliere il metodo prima di calcolare',
+   testo:R`Nel disco forato $0\lt|z|\lt\infty$ (o $0\lt|z|\lt1$ dove indicato), sviluppare in Laurent attorno a $z_0=0$: (a) $\dfrac{e^z}{z^2}$; (b) $\dfrac{\sin z}{z^4}$; (c) $z^2 e^{1/z}$.`,
+   steps:[
+    {label:'(a) serie nota composta', body:R`<p>Parti da $e^z=1+z+\frac{z^2}{2}+\frac{z^3}{6}+\cdots$ e dividi per $z^2$:
+    $$\frac{e^z}{z^2}=\frac{1}{z^2}+\frac{1}{z}+\frac12+\frac{z}{6}+\cdots$$
+    Parte principale $\frac{1}{z^2}+\frac{1}{z}$: <b>polo di ordine 2</b>, e il residuo (coefficiente di $z^{-1}$) è $1$. Valido per ogni $z\ne0$, perché l'unica singolarità è $0$.</p>`},
+    {label:'(b) serie nota + attenzione all’ordine', body:R`<p>$\sin z=z-\frac{z^3}{6}+\frac{z^5}{120}-\cdots$ ha uno zero <b>semplice</b> in $0$; diviso $z^4$:
+    $$\frac{\sin z}{z^4}=\frac{1}{z^3}-\frac{1}{6z}+\frac{z}{120}-\cdots$$
+    Parte principale $\frac{1}{z^3}-\frac{1}{6z}$: <b>polo di ordine 3</b> (non 4! lo zero del numeratore abbassa di uno), residuo $-\frac16$. Nota che il termine $z^{-2}$ è assente perché $\sin$ è dispari.</p>`},
+    {label:'(c) sostituzione $w=1/z$: potenze negative infinite', body:R`<p>$e^{1/z}=\sum_{n\ge0}\frac{1}{n!}z^{-n}=1+\frac1z+\frac{1}{2z^2}+\frac{1}{6z^3}+\cdots$; moltiplica per $z^2$:
+    $$z^2e^{1/z}=z^2+z+\frac12+\frac{1}{6z}+\frac{1}{24z^2}+\cdots$$
+    La parte principale ha <b>infiniti</b> termini: singolarità <b>essenziale</b>. Il residuo è il coefficiente di $z^{-1}$, che viene dal termine $z^2\cdot\frac{1}{3!}z^{-3}$: $\ a_{-1}=\frac{1}{3!}=\frac16$. $\blacksquare$</p>`}
+   ],
+   nota:R`Criterio di scelta: <b>una funzione nota fratto una potenza di $z$</b> → dividi la serie nota (a, b); <b>un esponenziale/seno di $1/z$</b> → sostituisci $w=1/z$ (c). In nessuno dei tre casi serve la formula integrale, e in nessuno conviene la formula del residuo per poli: lo sviluppo dà l'ordine del polo, la parte principale e il residuo in un colpo solo.`}
+]},
+
+/* ---------------- 04 · CORONE DIVERSE, SVILUPPI DIVERSI ---------------- */
+{ num:'04', title:'Lo stesso punto, corone diverse: il trabocchetto', meta:'il caso $\\frac{1}{z(z-1)}$ in due corone · tre poli, tre corone · quale corona dà il residuo',
+  blocchi:[
+  {t:'prosa', title:'L’errore che l’esame aspetta', tag:'trabocchetto dichiarato', html:R`
+  <div class="note warn"><b>La trappola.</b> «Sviluppa $\frac{1}{z(z-1)}$ in serie di Laurent centrata in $0$» è una richiesta <b>mal posta</b> finché non si dice in quale corona. Le due singolarità $0$ e $1$ dividono il piano in due anelli attorno a $0$ — $0\lt|z|\lt1$ e $|z|\gt1$ — e <b>in ciascuno la serie è diversa</b>. Chi dà una sola risposta ha già sbagliato; chi la dà senza nominare la corona non ha capito la domanda.</div>`},
+  {t:'esercizio', title:'$\\frac{1}{z(z-1)}$ nelle sue due corone',
+   src:'tipo standard d’appello — la domanda è sempre «in quale corona»',
+   testo:R`Sviluppare $f(z)=\dfrac{1}{z(z-1)}$ in serie di Laurent centrata in $z_0=0$, in ciascuna delle corone $0\lt|z|\lt1$ e $|z|\gt1$. Classificare la singolarità in $0$ e dare il residuo in $0$.`,
+   steps:[
+    {label:'Fratti semplici', body:R`<p>$\dfrac{1}{z(z-1)}=\dfrac{A}{z}+\dfrac{B}{z-1}$ con $A=\lim_{z\to0}z f=\frac{1}{0-1}=-1$ e $B=\lim_{z\to1}(z-1)f=\frac{1}{1}=1$ (copertura di Heaviside). Dunque
+    $$f(z)=\frac{1}{z-1}-\frac{1}{z}.$$
+    Il termine $-\frac1z$ è già una potenza negativa; tutto dipende da come si sviluppa $\frac{1}{z-1}$, e questo cambia con la corona.</p>`},
+    {label:'Corona interna $0\\lt|z|\\lt1$', body:R`<p>Qui $|z|\lt1$, quindi raccogli in modo che la ragione geometrica sia $z$: $\ \frac{1}{z-1}=-\frac{1}{1-z}=-\sum_{n\ge0}z^n$. Sommando $-\frac1z$:
+    $$f(z)=-\frac1z-1-z-z^2-\cdots$$
+    Parte principale: il solo $-\frac1z$. Quindi in $0$ c'è un <b>polo semplice</b>, e il residuo è $a_{-1}=-1$. (Controllo: $\lim_{z\to0}z f=\frac{1}{0-1}=-1$. Concorda.)</p>`},
+    {label:'Corona esterna $|z|\\gt1$', body:R`<p>Ora $|1/z|\lt1$, quindi la ragione giusta è $1/z$: $\ \frac{1}{z-1}=\frac1z\cdot\frac{1}{1-1/z}=\sum_{n\ge0}z^{-n-1}=\frac1z+\frac{1}{z^2}+\cdots$. Sommando $-\frac1z$, il termine $z^{-1}$ si cancella:
+    $$f(z)=\frac{1}{z^2}+\frac{1}{z^3}+\frac{1}{z^4}+\cdots$$
+    <b>Nessun termine in $z^{-1}$</b>: in questa corona il coefficiente $a_{-1}$ è $0$. $\blacksquare$</p>
+    <div class="note">Niente contraddizione, e vale la pena afferrarla: il <b>residuo in $0$</b> è definito dallo sviluppo nella corona che <b>tocca</b> la singolarità $0$, cioè $0\lt|z|\lt1$, e vale $-1$. Il coefficiente $a_{-1}$ della corona esterna misura invece $\frac{1}{2\pi i}\oint f$ su un cerchio grande, che racchiude <b>entrambi</b> i poli $0$ e $1$; e infatti $\mathrm{Res}_0+\mathrm{Res}_1=-1+1=0$, coerente con l'assenza del termine $\frac1z$. <b>La corona esterna conosce la somma dei residui, non i singoli.</b></div>`}
+   ],
+   nota:R`Regola che vale sempre: il <b>residuo</b> in una singolarità si legge nello sviluppo della corona <b>interna</b>, quella forata attorno a quella singolarità. Il coefficiente $a_{-1}$ di una corona più esterna è un altro numero, legato alla somma dei residui racchiusi.`},
+  {t:'prosa', title:'Più poli, più corone: la regola generale', tag:'generalizzazione', html:R`
+  <p>Il conto si estende senza sorprese. Per $\dfrac{1}{z(z-1)(z-3)}$ centrata in $z_0=0$, le singolarità stanno a distanza $0,1,3$: delimitano <b>tre</b> corone,
+  $$0\lt|z|\lt1,\qquad 1\lt|z|\lt3,\qquad |z|\gt3,$$
+  e in ciascuna ogni fratto $\frac{1}{z-a}$ si sviluppa nella direzione imposta dal confronto $|z|$ contro $|a|$: geometrica in $z/a$ se $|z|\lt|a|$, in $a/z$ se $|z|\gt|a|$. Tre corone, tre serie. In generale, $k$ singolarità a moduli distinti generano $k+1$ regioni anulari concentriche in $z_0$, ciascuna con il suo sviluppo.</p>`},
+  {t:'plot', title:'Le due corone di $\\frac{1}{z(z-1)}$',
+   intro:R`I due poli $0$ (il centro stesso) e $1$ tagliano il piano in due anelli attorno a $0$: il disco forato $0\lt|z|\lt1$ e l'esterno $|z|\gt1$.`,
+   plots:[
+    {kind:'func2d', xr:[-2.3,2.3], yr:[-2.3,2.3], equal:true, ticks:true, height:360,
+     title:'corona interna 0<|z|<1  e  corona esterna |z|>1',
+     curves:[{f:'0*x', col:'#0e1117', width:0.1}],
+     rings:[{r:1, col:'#5eead4', width:2.4, dash:true, label:'|z|=1 (confine)'}],
+     marks:[{x:0, y:0, label:'z=0 polo (centro)', col:'#ff6b6b', up:true, left:true},
+            {x:1, y:0, label:'z=1 polo', col:'#ff6b6b'}]}
+   ],
+   leggi:R`Il cerchio verde $|z|=1$ passa per il polo $z=1$ e separa le due corone. <b>Dentro</b> (disco forato attorno a $z=0$) lo sviluppo ha l'unico termine negativo $-\frac1z$: qui si legge $\mathrm{Res}(f,0)=-1$. <b>Fuori</b>, lo sviluppo è di sole potenze $z^{-2},z^{-3},\dots$ e non ha $z^{-1}$: è l'anello che racchiude tutti e due i poli, e il suo $a_{-1}=0$ è la somma $\mathrm{Res}_0+\mathrm{Res}_1$. Nessuna corona attraversa il polo $z=1$: il confine è proprio il cerchio che ci passa sopra, perché una serie di Laurent vive in un anello di <b>olomorfia</b>, e sul polo l'olomorfia cade.`}
+]},
+
+/* ---------------- 05 · PARTE PRINCIPALE E CLASSIFICAZIONE ---------------- */
+{ num:'05', title:'La parte principale e le tre singolarità', meta:'eliminabile · polo di ordine $m$ · essenziale · il criterio operativo',
+  blocchi:[
+  {t:'prosa', title:'La parte principale è il segnale della singolarità', tag:'definizione', html:R`
+  <p>Nello sviluppo di Laurent nella corona forata $0\lt|z-z_0|\lt\rho$ (quella che tocca $z_0$), la somma delle potenze negative
+  $$\sum_{n\lt0}a_n\,(z-z_0)^n$$
+  si chiama <b>parte principale</b>. È l'unica parte che Taylor non può produrre, e il suo aspetto classifica completamente la singolarità isolata $z_0$. Tre casi, e uno solo vale per ogni $f$.</p>`},
+  {t:'gram', title:'Le tre singolarità isolate — come si riconoscono', rows:[
+   [R`<b>eliminabile</b>`, R`parte principale <b>assente</b> ($a_n=0$ per ogni $n\lt0$). Equivalente: $\lim_{z\to z_0}f$ esiste finito, oppure $f$ è limitata vicino a $z_0$ (teorema di Riemann). Si «ripara» ridefinendo $f(z_0)$. Residuo $=0$. Esempio: $\frac{\sin z}{z}=1-\frac{z^2}{6}+\cdots$ in $0$.`],
+   [R`<b>polo di ordine $m$</b>`, R`parte principale <b>finita</b>, che si arresta a $(z-z_0)^{-m}$ (con $a_{-m}\ne0$). Equivalente: $|f|\to+\infty$, e $(z-z_0)^m f(z)$ ha limite finito non nullo. Il residuo è $a_{-1}$, che in generale <b>non</b> è $a_{-m}$. Esempio: $\frac{e^z}{z^3}$, polo di ordine $3$ in $0$.`],
+   [R`<b>essenziale</b>`, R`parte principale con <b>infiniti</b> termini. Il limite non esiste in alcun senso: per <b>Casorati–Weierstrass</b> l'immagine di ogni intorno forato è densa in $\mathbb{C}$ (e per il grande teorema di Picard $f$ assume ogni valore, tranne al più uno, infinite volte). Esempio: $e^{1/z}=\sum\frac{1}{n!\,z^n}$.`],
+   [R`<b>zeri (per contare gli ordini)</b>`, R`$f$ ha uno zero di ordine $k$ in $z_0$ se $f=(z-z_0)^k g$ con $g(z_0)\ne0$. Regola: in un quoziente $\frac{N}{D}$, ordine del polo $=(\text{ord. zero di }D)-(\text{ord. zero di }N)$, se positivo; altrimenti $z_0$ è uno zero o è eliminabile.`]
+  ]},
+  {t:'prosa', title:'Il criterio operativo: sviluppa, non semplificare', tag:'come non sbagliare', html:R`
+  <p>Davanti a un quoziente, il metodo che non sbaglia è sempre lo stesso:</p>
+  <ol>
+  <li>sviluppa <b>numeratore</b> e <b>denominatore</b> in serie fino al loro primo termine non nullo;</li>
+  <li>conta l'ordine dello zero di ciascuno;</li>
+  <li>ordine del polo $=$ (zero di $D$) $-$ (zero di $N$);</li>
+  <li>se il polo è di ordine basso e l'integrando è semplice, usa la formula del residuo; se l'ordine è alto o compaiono funzioni trascendenti intrecciate, <b>dividi le serie e leggi $a_{-1}$</b>.</li>
+  </ol>
+  <div class="note warn"><b>Le due insidie più frequenti.</b> (1) <b>L'argomento composto.</b> $\cos(z^2)-1\sim-\frac{(z^2)^2}{2}=-\frac{z^4}{2}$ ha zero di ordine $4$, non $2$: chi sviluppa $\cos z-1$ invece di $\cos(z^2)-1$ sbaglia l'ordine del polo. (2) <b>Lo zero del numeratore che abbassa il polo.</b> $\frac{\sin z}{z^2}$ ha polo <b>semplice</b> (non doppio), perché $\sin z$ ha uno zero in $0$: $\frac{\sin z}{z^2}=\frac1z-\frac{z}{6}+\cdots$. Verificare l'ordine <b>prima</b> di applicare la formula del residuo è obbligatorio: la formula del polo semplice su un polo doppio dà un numero privo di senso.</div>`},
+  {t:'plot', title:'Una singolarità essenziale vista dall’alto: $|e^{1/z}|$',
+   intro:R`Curve di livello di $\left|e^{1/z}\right|=e^{\,\mathrm{Re}(1/z)}=e^{\,x/(x^2+y^2)}$ attorno a $z=0$. Il comportamento «selvaggio» di Casorati–Weierstrass ha una forma visibile.`,
+   plots:[
+    {kind:'contour', f:'exp(x/(x*x+y*y+1e-9))', xr:[-1.4,1.4], yr:[-1.4,1.4], height:360,
+     levels:[0.2,0.5,1,2,4], col:'#4c8dff', label:'|e^(1/z)| = costante',
+     marks:[{x:0, y:0, label:'essenziale z=0', col:'#ff6b6b', up:true, left:true}]}
+   ],
+   leggi:R`I livelli si accalcano asimmetricamente attorno all'origine. Avvicinandosi a $0$ lungo il <b>semiasse reale positivo</b> ($x\gt0$, $y=0$) si ha $1/z=1/x\to+\infty$ e $|e^{1/z}|\to+\infty$; lungo il <b>semiasse negativo</b> ($x\lt0$) si ha $1/x\to-\infty$ e $|e^{1/z}|\to0$; lungo l'asse immaginario $1/z$ è immaginario puro e $|e^{1/z}|=1$. <b>Tre direzioni, tre limiti diversi: nessun limite esiste.</b> È la differenza netta rispetto a un polo, dove $|f|\to+\infty$ da ogni direzione in modo ordinato. Questa è la firma grafica dell'infinità di termini nella parte principale.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Classifica in $z=0$ e dà il residuo: $\dfrac{1-\cos z}{z^3}$.`,
+    a:R`<b>Polo semplice, residuo $\frac12$.</b> $1-\cos z=\frac{z^2}{2}-\frac{z^4}{24}+\cdots$ ha zero di ordine $2$; diviso $z^3$ (zero di ordine $3$) dà polo di ordine $3-2=1$. Lo sviluppo $\frac{1}{2z}-\frac{z}{24}+\cdots$ ha $a_{-1}=\frac12$. (Criterio: <b>criterio dell'ordine di zeri e poli</b>, con lettura diretta di $a_{-1}$.)`},
+   {q:R`Perché $e^{1/z}$ in $0$ non è un polo, per quanto se ne prenda alto l'ordine?`,
+    a:R`Perché nessuna potenza $z^m$ la rende limitata: $z^m e^{1/z}\to+\infty$ lungo l'asse reale positivo per ogni $m$, quindi $z^m e^{1/z}$ non è mai olomorfa in $0$ — e la definizione di polo di ordine $m$ richiede esattamente che $(z-z_0)^m f$ sia olomorfa con limite finito non nullo. Lo sviluppo $1+\frac1z+\frac{1}{2z^2}+\cdots$ ha infiniti termini negativi: per la <b>definizione di singolarità essenziale</b> (parte principale infinita) è essenziale. Il residuo esiste comunque, $a_{-1}=1$, e si legge solo dallo sviluppo.`}
+  ]}
+]},
+
+/* ---------------- 06 · IL PUNTO ALL'INFINITO ---------------- */
+{ num:'06', title:'Il punto all’infinito e le singolarità non isolate', meta:'residuo all’infinito $z=1/w$ · somma dei residui $=0$ · quando $z_0$ non è isolata',
+  blocchi:[
+  {t:'reveal', title:'Il residuo all’infinito', tag:'derivazione', steps:[
+   {label:'Cosa significa "sviluppare attorno a $\\infty$"', body:R`<p>Per studiare $f$ «all'infinito» si pone $z=\frac1w$ e si guarda $w\to0$. Una serie di Laurent di $f$ valida in $|z|\gt\rho$ (la corona più esterna) diventa una serie in $w$ attorno a $w=0$. Il <b>residuo all'infinito</b> è definito in modo che continui a valere il legame integrale, tenendo conto che la sostituzione porta $dz=-\frac{1}{w^2}dw$ e inverte l'orientazione del cammino:
+   $$\mathrm{Res}_\infty f=-\,\mathrm{Res}_{w=0}\!\left[\frac{1}{w^2}\,f\!\left(\frac1w\right)\right].$$
+   Il <b>segno meno</b> è la parte che si dimentica più spesso: viene dal $-\frac{1}{w^2}$ del differenziale. In modo equivalente, $\mathrm{Res}_\infty f$ è $-$ il coefficiente di $z^{-1}$ dello sviluppo di Laurent di $f$ nella corona esterna.</p>`},
+   {label:'Il teorema della somma dei residui', body:R`<p>Se $f$ è olomorfa su tutta la sfera di Riemann tranne un numero <b>finito</b> di singolarità isolate (poli finiti, nessun taglio), allora la somma di <b>tutti</b> i residui, incluso quello all'infinito, è nulla:
+   $$\sum_{\text{poli finiti}}\mathrm{Res}(f,z_j)\;+\;\mathrm{Res}_\infty f=0.$$
+   La ragione, in una riga: su un cerchio $|z|=\mathcal R$ grandissimo che racchiude tutti i poli finiti, l'integrale vale $2\pi i\sum_{\text{finiti}}\mathrm{Res}$ guardandolo da dentro, e $-2\pi i\,\mathrm{Res}_\infty$ guardandolo come cammino attorno all'infinito (orientazione opposta); uguagliando, i due membri danno la somma nulla. <b>Uso pratico:</b> per integrare su un contorno che racchiude molti poli, spesso conviene calcolare l'unico $\mathrm{Res}_\infty$ invece di tanti residui finiti.</p>`}
+  ]},
+  {t:'esercizio', title:'Un integrale con il residuo all’infinito',
+   src:'tipo d’appello — una scorciatoia che vale punti',
+   testo:R`Calcolare $\displaystyle\oint_{|z|=5}\frac{z^2}{(z-1)(z+2)(z-3)}\,dz$, sfruttando il residuo all'infinito.`,
+   steps:[
+    {label:'Inquadramento: dove sono i poli, e come decade $f$', body:R`<p>I poli finiti sono $1,-2,3$, tutti con modulo $\lt5$: <b>tutti interni</b> a $|z|=5$. All'infinito $f\sim\frac{z^2}{z^3}=\frac1z$: il termine $z^{-1}$ è presente, quindi $\mathrm{Res}_\infty$ può essere non nullo (se $f$ decadesse come $z^{-2}$ o più in fretta, sarebbe $0$).</p>`},
+    {label:'Calcola $\\mathrm{Res}_\\infty$ con la sostituzione', body:R`<p>$\frac{1}{w^2}f(1/w)=\frac{1}{w^2}\cdot\frac{w^{-2}}{(w^{-1}-1)(w^{-1}+2)(w^{-1}-3)}=\frac1w\cdot\frac{1}{(1-w)(1+2w)(1-3w)}$. È un polo semplice in $w=0$; il residuo è il valore del fattore regolare in $w=0$: $\frac{1}{(1)(1)(1)}=1$. Quindi $\mathrm{Res}_\infty f=-1$.</p>`},
+    {label:'Chiudi con la somma dei residui', body:R`<p>Per il teorema della somma, $\sum_{\text{finiti}}\mathrm{Res}=-\,\mathrm{Res}_\infty f=+1$. Poiché $|z|=5$ racchiude tutti i poli finiti,
+    $$\oint_{|z|=5}f\,dz=2\pi i\sum_{\text{finiti}}\mathrm{Res}=2\pi i\cdot1=2\pi i.\qquad\blacksquare$$
+    Un residuo al posto di tre: è la convenienza del metodo quando i poli interni sono molti.</p>`}
+   ],
+   nota:R`Il teorema della somma vale <b>solo</b> in assenza di tagli (funzioni polidrome): con un taglio la sfera di Riemann non è coperta da sole singolarità isolate, e $\mathrm{Res}_\infty$ va calcolato dalla sostituzione, non dedotto dalla somma.`},
+  {t:'collaudo', title:'Controllo lampo — quando il metodo dei residui non si applica', items:[
+   {q:R`Che singolarità ha $f(z)=\dfrac{1}{\sin(1/z^2)}$ in $z=0$, e si può usare il teorema dei residui lì?`,
+    a:R`<b>Singolarità non isolata</b>: i poli sono dove $\frac{1}{z^2}=k\pi$, cioè $z=\pm(k\pi)^{-1/2}$ per $k=1,2,\dots$, infiniti e <b>addensati</b> verso $0$ (già $k=1$ dà $|z|\approx0{,}56\lt1$, e decrescono). Ogni intorno forato di $0$ contiene altri poli: per la <b>definizione di singolarità isolata</b>, $0$ non lo è, non ha una corona forata $0\lt|z|\lt\rho$, non ha sviluppo di Laurent lì, e il teorema dei residui <b>non è applicabile in $0$</b>. Per integrare su un cerchio che li racchiude tutti si passa al residuo all'infinito. È l'errore che l'appello chiede apposta di evitare.`}
+  ]}
+]},
+
+/* ---------------- 07 · IL RESIDUO, IL PONTE VERSO I CONTORNI ---------------- */
+{ num:'07', title:'Il residuo: $a_{-1}$, e il ponte verso il nucleo 13', meta:'$\\oint f=2\\pi i\\,a_{-1}$ · perché un solo coefficiente basta · cosa consegna al teorema dei residui',
+  blocchi:[
+  {t:'reveal', title:'Perché proprio $a_{-1}$, e nient’altro', tag:'il nodo', steps:[
+   {label:'Integra la serie di Laurent su un cerchio', body:R`<p>Prendi lo sviluppo nella corona forata, $f(z)=\sum_n a_n(z-z_0)^n$, e integra su un cerchietto $\gamma$ attorno a $z_0$ (dentro la corona). Per la convergenza uniforme lo scambio serie–integrale è lecito:
+   $$\oint_\gamma f(z)\,dz=\sum_n a_n\oint_\gamma (z-z_0)^n\,dz.$$
+   Ma l'integrale fondamentale della tappa 02 dice che $\oint_\gamma(z-z_0)^n dz=2\pi i$ se $n=-1$ e $0$ altrimenti. <b>Tutti i termini collassano, tranne uno:</b>
+   $$\oint_\gamma f(z)\,dz=2\pi i\,a_{-1}.$$</p>`},
+   {label:'Definizione di residuo, e il ponte verso il nucleo 13', body:R`<p>Quel coefficiente privilegiato si chiama <b>residuo</b>: $\mathrm{Res}(f,z_0):=a_{-1}$. È l'unica informazione dello sviluppo che sopravvive all'integrazione su una curva chiusa — e questo è tutto ciò che serve per calcolare integrali. Il <b>teorema dei residui</b> (nucleo 13) non è che la versione con più singolarità: si deforma un contorno qualunque nella somma di cerchietti, ognuno contribuisce col suo $2\pi i\,a_{-1}$, e
+   $$\oint_\gamma f(z)\,dz=2\pi i\sum_{z_j\ \text{interni}}\mathrm{Res}(f,z_j).$$
+   Da qui in avanti — integrali reali per contorni, lemma di Jordan, contorni con tagli, poli sull'asse — è il nucleo 13. Questo movimento gli consegna esattamente l'oggetto che gli serve: il modo di leggere $a_{-1}$ da una qualunque funzione, in qualunque modo sia fatta la sua singolarità.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$\displaystyle\oint_{|z|=1}z^2 e^{1/z}\,dz$ quanto vale?`,
+    a:R`$\frac{\pi i}{3}$. Dalla tappa 03, $z^2e^{1/z}$ ha in $0$ una singolarità essenziale con $a_{-1}=\frac16$; l'unica singolarità dentro $|z|=1$ è $0$, quindi per il <b>teorema dei residui</b> $\oint=2\pi i\cdot\frac16=\frac{\pi i}{3}$. La trappola «$f$ ha una primitiva, integrale nullo» non vale: $f$ <b>non</b> è olomorfa nel disco (ha l'essenziale in $0$).`},
+   {q:R`In $\frac{1}{z(z-1)}$ sulla corona $|z|\gt1$ hai trovato $a_{-1}=0$. Perché questo <b>non</b> significa $\mathrm{Res}(f,0)=0$?`,
+    a:R`Perché il residuo in $0$ si legge nella corona che <b>tocca</b> $0$ (cioè $0\lt|z|\lt1$), dove $a_{-1}=-1$. Il coefficiente $a_{-1}=0$ della corona esterna è $\frac{1}{2\pi i}\oint f$ su un cerchio grande, che per il <b>teorema dei residui</b> vale $\mathrm{Res}_0+\mathrm{Res}_1=-1+1=0$: è la somma, non il singolo. Confondere «$a_{-1}$ di una corona qualunque» con «il residuo» è l'errore concettuale che la tappa 04 previene.`}
+  ]}
+]},
+
+/* ---------------- 08 · ESERCIZI ---------------- */
+{ num:'08', title:'Esercizi — tocca a te', meta:'ordine del polo con argomento composto · polo doppio via divisione · fratti semplici e residui · residuo all’infinito',
+  blocchi:[
+  {t:'esercizio', title:'(1) $\\dfrac{\\sin z}{\\cos(z^2)-1}$ in $z=0$: ordine, parte principale, integrale',
+   src:'esercizio guidato — la trappola dell’argomento composto',
+   testo:R`Per $f(z)=\dfrac{\sin z}{\cos(z^2)-1}$: determinare l'ordine del polo in $z=0$, la parte principale, e $\displaystyle\oint_\Gamma f\,dz$ per una $\Gamma$ antioraria che circonda solo $0$.`,
+   steps:[
+    {label:'Ordine del polo (attenzione all’argomento)', body:R`<p>Numeratore: $\sin z=z-\frac{z^3}{6}+\cdots$, zero di ordine $1$. Denominatore: $\cos(u)-1=-\frac{u^2}{2}+\cdots$ con $u=z^2$, quindi $\cos(z^2)-1=-\frac{z^4}{2}+\cdots$, zero di ordine <b>4</b> (non $2$: l'argomento è $z^2$). Polo di ordine $4-1=3$.</p>`},
+    {label:'Parte principale per divisione', body:R`<p>$\frac{\sin z}{\cos(z^2)-1}=\frac{z-\frac{z^3}{6}+\cdots}{-\frac{z^4}{2}\left(1-\frac{z^4}{12}+\cdots\right)}=-\frac{2}{z^4}\Big(z-\frac{z^3}{6}+\cdots\Big)\Big(1+\frac{z^4}{12}+\cdots\Big)=-\frac{2}{z^3}+\frac{1}{3z}+\cdots$
+    La parte principale è $-\frac{2}{z^3}+\frac{1}{3z}$ (il termine $z^{-2}$ è assente, di nuovo per la disparità di $\sin$). Il residuo è il coefficiente di $z^{-1}$: $a_{-1}=\frac13$, che nasce da $-2\cdot(-\frac16)$.</p>`},
+    {label:'Integrale', body:R`<p>Solo $a_{-1}$ conta: $a_{-3}=-2$ non contribuisce. Per il teorema dei residui
+    $$\oint_\Gamma f\,dz=2\pi i\,\mathrm{Res}(f,0)=2\pi i\cdot\frac13=\frac{2\pi i}{3}.\qquad\blacksquare$$</p>`}
+   ],
+   nota:R`Il passo che fa perdere punti è il primo: sviluppare $\cos z-1$ (ordine $2$) invece di $\cos(z^2)-1$ (ordine $4$). Quando l'argomento di una funzione nota non è $z$ ma una sua potenza, si sostituisce <b>prima</b> e si sviluppa dopo.`},
+  {t:'esercizio', title:'(2) $\\dfrac{3+z}{z^2(z+2)}$: fratti semplici, residui, le due corone',
+   src:'esercizio guidato — il residuo è $a_{-1}$, non $a_{-2}$',
+   testo:R`Per $f(z)=\dfrac{3+z}{z^2(z+2)}$: scomporre in fratti semplici, dare $\mathrm{Res}(f,0)$ e $\mathrm{Res}(f,-2)$, e il coefficiente di $z^{-1}$ nelle corone $0\lt|z|\lt2$ e $|z|\gt2$.`,
+   steps:[
+    {label:'Fratti semplici', body:R`<p>$\frac{3+z}{z^2(z+2)}=\frac Az+\frac{B}{z^2}+\frac{C}{z+2}$, cioè $3+z=Az(z+2)+B(z+2)+Cz^2$. In $z=0$: $3=2B\Rightarrow B=\frac32$. In $z=-2$: $1=4C\Rightarrow C=\frac14$. Coefficiente di $z^2$: $0=A+C\Rightarrow A=-\frac14$. (Verifica sul coefficiente di $z$: $2A+B=-\frac12+\frac32=1$. Concorda.) Dunque $f=-\frac{1}{4z}+\frac{3}{2z^2}+\frac{1}{4(z+2)}$.</p>`},
+    {label:'I residui', body:R`<p>Il residuo è <b>sempre</b> il coefficiente di $(z-z_0)^{-1}$. In $z=0$ è $A=-\frac14$ — <b>non</b> $B=\frac32$, che è $a_{-2}$. In $z=-2$ (polo semplice) è $C=\frac14$. Quindi $\mathrm{Res}(f,0)=-\frac14$, $\mathrm{Res}(f,-2)=\frac14$.</p>`},
+    {label:'Il coefficiente $z^{-1}$ nelle due corone', body:R`<p>In $0\lt|z|\lt2$: $\frac{1}{4(z+2)}=\frac{1}{8}\sum_{n\ge0}\left(-\frac z2\right)^n$ aggiunge solo potenze $\ge0$, quindi $a_{-1}=A=-\frac14=\mathrm{Res}(f,0)$. In $|z|\gt2$: $\frac{1}{4(z+2)}=\frac{1}{4z}\cdot\frac{1}{1+2/z}=\frac{1}{4z}-\frac{1}{2z^2}+\cdots$ aggiunge $+\frac{1}{4z}$, che con $-\frac{1}{4z}$ dà $a_{-1}=0=\mathrm{Res}(f,0)+\mathrm{Res}(f,-2)$. $\blacksquare$ La corona esterna vede la somma dei residui.</p>`}
+   ],
+   nota:R`Trappola classica: prendere il coefficiente di $z^{-2}$ (qui $\frac32$) come residuo. Il residuo è per definizione $a_{-1}$, anche quando $a_{-2}$ è più grande e più visibile.`},
+  {t:'esercizio', title:'(3) $\\dfrac{e^z}{z^2(z-1)}$: due poli, due ordini, due residui',
+   src:'esercizio guidato — la formula del polo doppio, passo per passo',
+   testo:R`Per $f(z)=\dfrac{e^z}{z^2(z-1)}$: classificare i poli finiti e calcolare $\mathrm{Res}(f,0)$ e $\mathrm{Res}(f,1)$.`,
+   steps:[
+    {label:'Classificazione', body:R`<p>$e^z$ è intera e $e^0=1\ne0$: non crea né zeri né poli. Gli ordini vengono dal denominatore: $z^2$ dà un <b>polo doppio</b> in $0$, $(z-1)$ un <b>polo semplice</b> in $1$.</p>`},
+    {label:'Residuo in $1$ (polo semplice)', body:R`<p>$\mathrm{Res}(f,1)=\lim_{z\to1}(z-1)f=\frac{e^z}{z^2}\Big|_{1}=e$.</p>`},
+    {label:'Residuo in $0$ (polo doppio: una derivata)', body:R`<p>Per il polo di ordine $2$: $\mathrm{Res}(f,0)=\frac{1}{1!}\lim_{z\to0}\frac{d}{dz}\big[z^2 f\big]=\lim_{z\to0}\frac{d}{dz}\frac{e^z}{z-1}$. Regola del quoziente: $\frac{d}{dz}\frac{e^z}{z-1}=\frac{e^z(z-1)-e^z}{(z-1)^2}=\frac{e^z(z-2)}{(z-1)^2}$, che in $z=0$ vale $\frac{1\cdot(-2)}{(-1)^2}=-2$. Dunque $\mathrm{Res}(f,0)=-2$. $\blacksquare$</p>
+    <div class="note"><b>Il controllo che smaschera l'errore tipico:</b> chi dimentica la derivata e scrive $z^2 f\big|_0=\frac{e^0}{0-1}=-1$ ottiene $-1$, non $-2$. Il residuo di un polo doppio è il coefficiente di $z^{1}$ nello sviluppo di $z^2 f$ attorno a $0$, e si estrae con <b>una</b> derivata, non valutando.</div>`}
+   ],
+   nota:R`Per un polo di ordine $m$ si moltiplica per $(z-z_0)^m$, si deriva $m-1$ volte e si divide per $(m-1)!$. Con $m=2$: una derivata, diviso $1!$. Valutare senza derivare dà $a_{-m}$, non il residuo.`},
+  {t:'collaudo', title:'Diagnostica rapida — classifica senza calcolare tutto', items:[
+   {q:R`Classifica in $z=0$: (a) $\dfrac{e^z-1}{z^2}$; (b) $\dfrac1z\sin\dfrac1z$; (c) $\dfrac{z}{e^z-1}$.`,
+    a:R`(a) <b>polo semplice</b>: $e^z-1\sim z$ (zero di ordine $1$), quindi $\frac{e^z-1}{z^2}=\frac1z+\frac12+\cdots$. (b) <b>essenziale</b>: $\sin\frac1z=\frac1z-\frac{1}{6z^3}+\cdots$ ha infiniti termini negativi, e $\frac1z$ non cambia la natura. (c) <b>eliminabile</b>: $\frac{z}{e^z-1}\to\frac{z}{z}=1$ per $z\to0$, limite finito (teorema di Riemann; è la generatrice dei numeri di Bernoulli). Criterio usato: <b>criterio dell'ordine di zeri e poli</b> (a, c) e <b>definizione di singolarità essenziale</b> via parte principale infinita (b).`},
+   {q:R`$\dfrac{1}{(z^2+1)^2}$ in $z=i$: ordine del polo e residuo.`,
+    a:R`<b>Polo doppio, residuo $-\frac i4$.</b> Scritto $\frac{1}{(z-i)^2(z+i)^2}$, per la <b>formula del residuo per polo di ordine $2$</b>: $\mathrm{Res}=\lim_{z\to i}\frac{d}{dz}\frac{1}{(z+i)^2}=\lim_{z\to i}\frac{-2}{(z+i)^3}=\frac{-2}{(2i)^3}=\frac{-2}{-8i}=\frac{1}{4i}=-\frac i4$. Il residuo di un polo doppio non è nullo in generale: dipende dalla derivata prima.`}
+  ]}
+]},
+
+/* ---------------- 09 · SENSO E ROTTE ---------------- */
+{ num:'09', title:'Il senso e le rotte fisiche', meta:'la parte principale come misura del buco, e la sua eco nella fisica',
+  blocchi:[
+  {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
+  <p><b>A monte.</b> L'olomorfia rigida del nucleo 11 e la formula di Cauchy del nucleo 12 reggono tutto: la serie di Laurent nasce spezzando il nucleo di Cauchy in due serie geometriche, una per la parte regolare e una per la parte principale. La corona non è un dettaglio tecnico — è l'impronta geometrica di quante e dove sono le singolarità.</p>
+  <p><b>Il punto, in una frase riusabile:</b> <i>la parte principale misura il buco, e un solo suo coefficiente — $a_{-1}$ — è tutto ciò che un integrale su una curva chiusa riesce a vedere</i>. Classificare una singolarità è leggere quanti termini ha la parte principale: zero (eliminabile), un numero finito $m$ (polo), infiniti (essenziale).</p>
+  <p><b>A valle.</b> Il nucleo 13 trasforma $a_{-1}$ in una macchina di calcolo per integrali reali; il nucleo 14 spinge la stessa analiticità fino alla continuazione oltre il dominio di partenza.</p>`},
+  {t:'prolessi', title:'Dove riappare questo nucleo, nella fisica che farai',
+   oggetto:R`<b>Lo sviluppo di Laurent</b> di una funzione attorno a una singolarità, con la parte principale che classifica il tipo e $a_{-1}$ che resta dopo l'integrazione.`,
+   rotte:[
+    {dove:'Propagatori e<br>funzioni di Green', txt:R`Un propagatore come $\frac{1}{\omega-\omega_0+i\epsilon}$ è una funzione con un <b>polo semplice</b>: la sua parte principale (un solo termine $\frac{a_{-1}}{\omega-\omega_0}$) porta tutta la fisica del modo. Antitrasformarlo è leggere quel residuo — la tecnica è interamente nel nucleo 13, ma l'oggetto è il Laurent di qui.`},
+    {dove:'Risonanze,<br>ordine del polo', txt:R`Un polo <b>doppio</b> in una funzione di risposta segnala uno smorzamento critico o una degenerazione di modi; un polo semplice, una risonanza netta. L'<b>ordine</b> della singolarità — cioè dove si ferma la parte principale — è un'informazione fisica, non un tecnicismo: distingue regimi dinamici diversi.`},
+    {dove:'Serie asintotiche e<br>singolarità essenziali', txt:R`Le espansioni che in fisica «non convergono ma servono» (perturbazioni in QED, WKB) sono legate a singolarità <b>essenziali</b> nel parametro: una parte principale con infiniti termini è la firma analitica del fatto che la serie è asintotica, non convergente. Il comportamento selvaggio di $e^{1/z}$ è il prototipo.`},
+    {dove:'Meccanica statistica<br>a $T$ finita', txt:R`Le somme di Matsubara sulle frequenze immaginarie $i\omega_n$ si calcolano introducendo una funzione con poli <b>semplici</b> proprio in quei punti e leggendone i residui: un intero formalismo costruito sul saper scrivere e leggere sviluppi di Laurent attorno a poli assegnati.`}
+   ],
+   domanda:R`Classificare una singolarità è un'operazione netta: eliminabile, polo di ordine $m$, essenziale — tre caselle disgiunte, decise dal numero di termini della parte principale. Ma nei sistemi complessi questa nettezza si sfuma: una funzione di risposta con un <b>grappolo fittissimo</b> di poli semplici vicini all'asse reale, presa a risoluzione finita, è <b>indistinguibile</b> da un oggetto con una singolarità di natura diversa. <b>Domanda che porti avanti:</b> quando un sistema termalizza o decoere, la sua funzione di risposta sta davvero cambiando il <i>tipo</i> di singolarità, o sta solo accumulando poli finché la distinzione fra «polo» e «taglio» (una linea continua di singolarità) cessa di avere senso operativo? La classificazione pulita del caso isolato e la singolarità <b>non isolata</b> della tappa 06 sono forse i due estremi di un continuo che la fisica dei molti corpi abita nel mezzo — ed è lì che vivono decoerenza ed ETH.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleo12b-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo 12b · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: 12b-laurent.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
