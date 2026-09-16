@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento em-01 — Il campo elettrico: dalla forza fra cariche al campo, e come si integra una distribuzione</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Elettromagnetismo · Movimento <b>em-01 — Il campo elettrico: perché conviene smettere di parlare di forze fra cariche e parlare di campo</b> · Focardi</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'elettromagnetismo';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["campo-vettoriale"] = {"nome":"Campo vettoriale","riga":"Una funzione che a ogni punto dello spazio associa un vettore, scritta $\\mathbf{F}(x,y,z)=F_x\\,\\hat{\\imath}+F_y\\,\\hat{\\jmath}+F_z\\,\\hat{k}$ con le tre componenti funzioni del punto.","serve":"È il modo di dire «c'è qualcosa in ogni punto dello spazio, e ha una direzione». Serve perché permette di smettere di ragionare su coppie di oggetti che si attraggono a distanza e di ragionare su una proprietà dello spazio: la sorgente prepara il campo, e chi arriva dopo sente solo ciò che trova dove si trova.","esempio":"Il campo di una carica puntiforme $q$ nell'origine è $\\mathbf{E}=\\dfrac{q}{4\\pi\\varepsilon_0 r^{2}}\\hat{r}$: la direzione è radiale, il modulo dipende solo dalla distanza. Con $q=1$ e $4\\pi\\varepsilon_0=1$, nel punto $(3,4,0)$ si ha $r=5$, quindi il modulo vale $\\tfrac{1}{25}$ e il versore è $\\left(\\tfrac35,\\tfrac45,0\\right)$: la componente lungo $x$ è $\\tfrac{3}{125}$.","pieno":{"file":"04-campi-vettoriali.html","tappa":"00","come":"la trattazione completa, nel nucleo sui campi vettoriali di Analisi Vettoriale"},"qui":{"elettromagnetismo":{"serve":"È l'oggetto che l'intero corso studia: $\\mathbf{E}$ e $\\mathbf{B}$ sono campi vettoriali, e le quattro equazioni di Maxwell sono affermazioni su come le loro derivate spaziali si legano alle sorgenti. Tutto ciò che si impara dopo — flusso, circuitazione, divergenza, rotore — è un modo di interrogare un campo vettoriale.","esempio":"Per la carica puntiforme in $(3,4,0)$ con $q=1$ e $4\\pi\\varepsilon_0=1$: $r=5$, modulo $\\tfrac{1}{25}$, e la componente lungo $x$ vale $\\tfrac{3}{125}$. Le tre componenti non sono tre campi separati: ruotando gli assi si mescolano fra loro, ed è quello che rende $\\mathbf{E}$ un vettore e non una terna di numeri."}},"controllo":[{"tipo":"uguale","sinistra":"sqrt(3**2+4**2)","vale":"5","dove":"esempio","appare":"r=5"},{"tipo":"uguale","sinistra":"1/sqrt(3**2+4**2)**2","vale":"1/25","dove":"esempio","appare":"\\tfrac{1}{25}"},{"tipo":"uguale","sinistra":"(1/5**2)*(3/5)","vale":"3/125","dove":"esempio","appare":"\\tfrac{3}{125}"},{"tipo":"uguale","sinistra":"sqrt(3**2+4**2)","vale":"5","dove":"qui.elettromagnetismo.esempio","appare":"r=5"},{"tipo":"uguale","sinistra":"(1/5**2)*(3/5)","vale":"3/125","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac{3}{125}"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo em-01: Il campo elettrico <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+identita: perche' conviene smettere di parlare di forze fra cariche e parlare di campo
+serve:    — (e' la radice del corso)
+apre:     em-02-flusso-e-gauss, em-03-potenziale
+strumenti: campo vettoriale
+prove:    77 compiti su 100 lo toccano, densita' 6.3, dal 2008 al 2021
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"limite","espr":"z/(R**2+z**2)**Rational(3,2)*z**2","var":"z","a":"oo",
+  "vale":"1","ipotesi":{"z":"positive","R":"positive"},
+  "dove":"03","appare":"\\dfrac{1}{z^{2}}"},
+
+ {"tipo":"uguale","sinistra":"diff(z/(R**2+z**2)**Rational(3,2), z)",
+  "vale":"(R**2-2*z**2)/(R**2+z**2)**Rational(5,2)",
+  "dove":"04","appare":"(R^2-2z^2)}{(R^{2}+z^{2})^{5/2}"},
+
+ {"tipo":"uguale","sinistra":"(1/(4*pi))*2/d**2*d","vale":"1/(2*pi*d)",
+  "dove":"04","appare":"\\lambda}{2\\pi\\varepsilon_0 d"},
+
+ {"tipo":"uguale","sinistra":"2/(4*pi*R)","vale":"1/(2*pi*R)",
+  "dove":"04","appare":"\\lambda}{2\\pi\\varepsilon_0R"},
+
+ {"tipo":"uguale","sinistra":"(1/(2*pi))*(1/(pi*R))/R","vale":"1/(2*pi**2*R**2)",
+  "dove":"04","appare":"2\\pi^{2}\\varepsilon_0R^{2}"},
+
+ {"tipo":"uguale","sinistra":"2*r*d/r**4","vale":"2*d/r**3",
+  "ipotesi":{"r":"positive","d":"positive"},
+  "dove":"05","appare":"2p}{4\\pi\\varepsilon_0r^{3}"},
+
+ {"tipo":"uguale","sinistra":"(1/sqrt(2))/(1+Rational(1,2))**Rational(3,2)",
+  "vale":"2/(3*sqrt(3))","dove":"04","appare":"\\dfrac{2}{3\\sqrt3}"},
+
+ {"tipo":"limite","espr":"1-z/sqrt(R**2+z**2)","var":"R","a":"oo","vale":"1",
+  "ipotesi":{"R":"positive","z":"positive"},"dove":"04","appare":"\\to 1"},
+
+ {"tipo":"integrale","espr":"sin(t)","var":"t","da":"0","a":"pi","vale":"2",
+  "dove":"04","appare":"\\cdot 2"},
+
+ {"tipo":"integrale","espr":"1/(d**2+y**2)**Rational(3,2)","var":"y",
+  "da":"-oo","a":"oo","vale":"2/d**2","ipotesi":{"d":"positive"},
+  "dove":"04","appare":"\\dfrac{2}{d^{2}}"},
+
+ {"tipo":"uguale","sinistra":"2/(1+1)**Rational(3,2)","vale":"sqrt(2)/2",
+  "dove":"05","appare":"\\dfrac{\\sqrt2}{2}"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Elettromagnetismo · la radice del corso · 77 prove su 100 lo toccano',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>Due cariche ferme si attraggono o si respingono con una forza che Coulomb misurò nel 1785:
+  $$\mathbf{F}_{12}=\frac{1}{4\pi\varepsilon_0}\frac{q_1q_2}{r^{2}}\,\hat r_{12}.$$
+  È una legge completa: date le cariche e le posizioni, la forza si calcola. E allora la domanda vera di questo movimento non è «quanto vale la forza» — è <b>perché tutti i libri, subito dopo averla scritta, la abbandonano</b> e introducono un oggetto nuovo, il campo, che all'inizio sembra soltanto la stessa cosa divisa per $q$.</p>
+  <p>In una frase: <i>si passa al campo perché la forza è una proprietà di una coppia, mentre il campo è una proprietà dello spazio</i> — e l'unica delle due che sopravvive quando le cariche si muovono, quando l'informazione viaggia a velocità finita, e quando lo spazio vuoto deve poter trasportare energia. Tutto il corso è il racconto di come quell'oggetto, introdotto qui per comodità, si scopre essere più reale delle cariche che lo generano.</p>
+  <p><b>Ma attenzione a dove si spende il tempo.</b> Le cento prove d'esame di questo corso, dal 2008 al 2021, non chiedono quasi mai di discutere il concetto di campo. Chiedono di <b>calcolarlo</b>: <span class="av">dipolo</span> in 43 compiti, <span class="av">filo</span> in 41, <span class="av">disco</span> in 37, <span class="av">anello</span> in 26. «Linee di campo» compare una volta sola. La parte tecnica di questo movimento è quindi una sola cosa, ed è quella su cui insiste: <b>come si integra il campo di una distribuzione continua</b>.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Dire <b>perché</b> il campo non è solo «la forza per unità di carica», e cosa si romperebbe restando a Coulomb.</li>
+  <li>Impostare da zero il campo di una <b>distribuzione continua</b>: scegliere $dq$, scrivere $d\mathbf{E}$, <b>usare la simmetria per uccidere le componenti</b> prima di integrare — che è il passo dove si vince o si perde tempo.</li>
+  <li>Avere in mano, derivati e non memorizzati, i quattro casi che tornano sempre: <b>anello, disco, filo, semicirconferenza</b>.</li>
+  <li>Riconoscere il <b>dipolo</b>, e sapere perché il suo campo va come $1/r^3$ e non come $1/r^2$.</li>
+  <li>Sapere dove questo movimento <b>consegna</b>: la struttura $1/r^2$ è esattamente ciò che rende vera la legge di Gauss, e Gauss è <code>em-02</code>.</li>
+  </ul>`},
+  {t:'prolessi', title:'Dove porta', html:R`
+  <p>Il risultato che qui appare come un fatto di calcolo — il campo di una carica va come $1/r^{2}$ — in <b>em-02</b> diventa una proprietà geometrica: il flusso attraverso una superficie chiusa non dipende dalla distanza, perché l'area cresce come $r^{2}$ esattamente quanto il campo cala. In <b>em-03</b> lo stesso $1/r^{2}$ diventa il gradiente di $1/r$, e il campo si scopre conservativo.</p>`}
+  ]},
+
+/* ---------------- 01 · COULOMB E IL SUO GUASTO ---------------- */
+{ num:'01', title:'Coulomb, e cosa non regge nell’azione a distanza', meta:'la legge · le due ipotesi nascoste · perché si abbandona',
+  blocchi:[
+  {t:'prosa', title:'La legge, e le due ipotesi che nasconde', tag:'first principles', html:R`
+  <p>La legge di Coulomb, scritta per bene:
+  $$\mathbf{F}_{12}=\frac{1}{4\pi\varepsilon_0}\frac{q_1q_2}{|\mathbf{r}_1-\mathbf{r}_2|^{2}}\,\hat r_{12},\qquad \frac{1}{4\pi\varepsilon_0}\simeq 8{,}99\cdot10^{9}\ \mathrm{N\,m^2/C^2}.$$
+  Il pedice conta: $\hat r_{12}$ è il versore che va <b>da 2 verso 1</b>, cioè verso la carica su cui la forza agisce. Sbagliare verso è l'errore più banale e più frequente d'esame.</p>
+  <p>Dentro questa formula ci sono <b>due ipotesi non scritte</b>, ed è utile vederle subito perché sono esattamente ciò che il corso smonterà:</p>
+  <ul>
+  <li><b>Le cariche sono ferme.</b> Non compare il tempo. Se $q_2$ si muove, quando $q_1$ se ne accorge?</li>
+  <li><b>La forza è istantanea.</b> $\mathbf{r}_1$ e $\mathbf{r}_2$ sono valutate allo <i>stesso</i> istante. Ma allora spostando $q_2$ si manderebbe un segnale a velocità infinita.</li>
+  </ul>`},
+  {t:'reveal', title:'Perché questo è un guasto e non un dettaglio', html:R`
+  <p>Immagina di spostare bruscamente $q_2$. Secondo Coulomb, $q_1$ sente subito una forza diversa: l'informazione «mi sono mossa» ha attraversato lo spazio in tempo zero. In <b>em-12</b> si dimostrerà che quell'informazione viaggia invece a $c$, e che nel frattempo <b>l'energia sta da qualche parte</b> — non sulla prima carica, non ancora sulla seconda.</p>
+  <p>Quel «da qualche parte» è il campo. Ecco perché non è un artificio di calcolo: è l'unico posto in cui l'energia può stare mentre viaggia. Il conto esplicito di quanta energia ci sia si fa in <b>em-06</b>.</p>`},
+  {t:'prosa', title:'Il principio di sovrapposizione, e la sua fragilità', tag:'struttura', html:R`
+  <p>Con più cariche, le forze si sommano vettorialmente:
+  $$\mathbf{F}_1=\sum_{k\ne1}\frac{1}{4\pi\varepsilon_0}\frac{q_1q_k}{r_{1k}^{2}}\,\hat r_{1k}.$$
+  È un'affermazione <b>fisica</b>, non matematica: dice che la presenza di $q_3$ non altera il modo in cui $q_2$ agisce su $q_1$. Sperimentalmente regge benissimo; teoricamente è la linearità delle equazioni di Maxwell, e cade nei materiali non lineari e nell'elettrodinamica quantistica ad altissimi campi.</p>
+  <p>Vale la pena tenerlo presente: <b>tutto il calcolo integrale di questo movimento poggia su questo principio</b>. Integrare il contributo di ogni pezzetto di carica ha senso solo perché i pezzetti non si disturbano a vicenda.</p>`}
+  ]},
+
+/* ---------------- 02 · IL CAMPO ---------------- */
+{ num:'02', title:'Il campo: definizione, e cosa cambia davvero', meta:'la carica di prova · il limite $q_0\\to0$ · campo come proprietà dello spazio',
+  blocchi:[
+  {t:'prosa', title:'La definizione operativa', tag:'first principles', html:R`
+  <p>Si mette nel punto $P$ una <b>carica di prova</b> $q_0$, si misura la forza, si divide:
+  $$\mathbf{E}(P)=\lim_{q_0\to0}\frac{\mathbf{F}(P)}{q_0}.$$
+  Il limite non è pedanteria: una carica di prova vera <b>disturba</b> le sorgenti, perché le attira o le respinge (in <b>em-04</b> si vedrà che su un conduttore le sposta davvero). Il limite dice: il campo è ciò che c'è <i>prima</i> che tu arrivi a misurarlo.</p>
+  <p>Per una carica puntiforme $q$ nell'origine, dividendo Coulomb per $q_0$:
+  $$\mathbf{E}(\mathbf{r})=\frac{1}{4\pi\varepsilon_0}\frac{q}{r^{2}}\,\hat r.$$
+  È un <span class="str" data-str="campo-vettoriale">campo vettoriale</span>, si misura in $\mathrm{N/C}$, che in <b>em-03</b> si scoprirà uguale a $\mathrm{V/m}$.</p>`},
+  {t:'gram', title:'Le tre letture della stessa formula', rows:[
+    ['$\\mathbf{F}=q_0\\mathbf{E}$','<b>come si usa.</b> Dato il campo, la forza su una carica qualsiasi messa lì.'],
+    ['$\\mathbf{E}=\\mathbf{F}/q_0$','<b>come si misura.</b> La definizione operativa: metti, misura, dividi.'],
+    ['$\\mathbf{E}(\\mathbf{r})$ nota ovunque','<b>cosa è.</b> Una funzione dello spazio, indipendente da chi la sonda: la sorgente l’ha preparata e se ne è andata.']
+  ]},
+  {t:'reveal', title:'Il cambio che sembra banale e non lo è', html:R`
+  <p>Dividere per $q_0$ sembra un gesto di comodità: si toglie di mezzo la carica di prova per non doverla riscrivere ogni volta. Ma il risultato ha una proprietà che la forza non aveva: <b>esiste anche dove non c'è niente</b>.</p>
+  <p>La forza fra due cariche è un numero che riguarda una <i>coppia</i>: senza la seconda carica non ha senso. Il campo in un punto vuoto è definito lo stesso, e dice cosa succederebbe. Da oggetto relazionale a proprietà locale: è questo il passo, ed è lo stesso passo che in <b>em-02</b> permetterà di scrivere una legge <i>puntuale</i> ($\nabla\cdot\mathbf{E}=\rho/\varepsilon_0$) invece che una legge su coppie.</p>`}
+  ]},
+
+/* ---------------- 03 · IL METODO PER IL CONTINUO ---------------- */
+{ num:'03', title:'Dal discreto al continuo: il metodo, una volta per tutte', meta:'$dq=\\lambda\\,dl$ · $\\sigma\\,dA$ · $\\rho\\,dV$ · la simmetria PRIMA dell’integrale',
+  blocchi:[
+  {t:'prosa', title:'I quattro passi, e sono sempre gli stessi', tag:'metodo', html:R`
+  <p>La somma su cariche discrete diventa un integrale:
+  $$\mathbf{E}(P)=\frac{1}{4\pi\varepsilon_0}\int\frac{dq}{r^{2}}\,\hat r.$$
+  Scritta così è inutilizzabile — $\hat r$ cambia direzione punto per punto, e non si integra un versore variabile distrattamente. I quattro passi che rendono il conto meccanico:</p>
+  <ol>
+  <li><b>Scegli $dq$</b> secondo la dimensione della distribuzione: $dq=\lambda\,dl$ (filo, anello, bacchetta), $dq=\sigma\,dA$ (disco, piano, guscio), $dq=\rho\,dV$ (sfera piena).</li>
+  <li><b>Scrivi $dE$</b>, il <i>modulo</i> del contributo del pezzetto: $dE=\dfrac{1}{4\pi\varepsilon_0}\dfrac{dq}{r^{2}}$, con $r$ la distanza dal pezzetto al punto $P$.</li>
+  <li><b>Uccidi le componenti con la simmetria.</b> Per ogni pezzetto, cerca il suo gemello che annulla una componente. Ciò che resta è una sola direzione, e allora si integra uno scalare.</li>
+  <li><b>Integra</b>, con gli estremi giusti, e <b>controlla i limiti</b>: da lontano deve tornare una carica puntiforme.</li>
+  </ol>`},
+  {t:'reveal', title:'Il passo 3 è quello che separa chi finisce in tempo', html:R`
+  <p>All'esame il passo 3 vale più del passo 4. Un integrale vettoriale in tre componenti su una geometria curva è quasi sempre fuori portata in mezz'ora; lo stesso problema, dopo aver osservato che due componenti su tre si cancellano a coppie, diventa un integrale elementare.</p>
+  <p><b>La regola pratica:</b> disegna la distribuzione, prendi un pezzetto, e chiediti «quale altro pezzetto dà un contributo che cancella parte di questo?». Se la figura ha un asse di simmetria, <b>sopravvive solo la componente lungo quell'asse</b>. Se non ce l'ha — una semicirconferenza, una bacchetta vista di sbieco — sopravvivono due componenti e si integrano separatamente.</p>`},
+  {t:'prosa', title:'Il controllo che salva dagli errori: il limite lontano', tag:'collaudo', html:R`
+  <p>Ogni risultato va provato da lontano. Una distribuzione di carica totale $Q$, vista da molto distante, <b>non può distinguersi da una carica puntiforme</b>: il campo deve andare come $1/r^{2}$ con coefficiente $Q/4\pi\varepsilon_0$.</p>
+  <p>Per l'anello, che si ricaverà fra poco, il campo sull'asse è $E_z=\dfrac{1}{4\pi\varepsilon_0}\dfrac{Qz}{(R^{2}+z^{2})^{3/2}}$. Per $z\gg R$ il denominatore va come $z^{3}$, quindi $E_z\to\dfrac{Q}{4\pi\varepsilon_0}\cdot\dfrac{1}{z^{2}}$: giusto. Un risultato che non supera questo controllo è sbagliato, e il controllo costa dieci secondi.</p>`}
+  ]},
+
+/* ---------------- 04 · I QUATTRO CASI ---------------- */
+{ num:'04', title:'I quattro casi che cadono sempre', meta:'anello · disco · filo · semicirconferenza — derivati, non memorizzati',
+  blocchi:[
+  {t:'prosa', title:'Anello, sull’asse', tag:'derivazione', html:R`
+  <p>Anello di raggio $R$, carica $Q$ uniforme, punto $P$ sull'asse a distanza $z$ dal centro.</p>
+  <p><b>Simmetria.</b> Ogni pezzetto ha il suo diametralmente opposto: le componenti radiali si cancellano a coppie, sopravvive solo $E_z$. Ogni pezzetto dista $r=\sqrt{R^{2}+z^{2}}$ da $P$, uguale per tutti, e la sua componente lungo l'asse si ottiene moltiplicando per $\cos\theta=z/\sqrt{R^{2}+z^{2}}$.</p>
+  $$E_z=\frac{1}{4\pi\varepsilon_0}\int\frac{dq}{R^{2}+z^{2}}\cdot\frac{z}{\sqrt{R^{2}+z^{2}}}=\frac{1}{4\pi\varepsilon_0}\frac{z}{(R^{2}+z^{2})^{3/2}}\int dq$$
+  $$\boxed{\;E_z=\frac{1}{4\pi\varepsilon_0}\frac{Qz}{(R^{2}+z^{2})^{3/2}}\;}$$
+  <p>L'integrale è uscito dal segno perché $r$ e $\cos\theta$ sono <i>gli stessi</i> per ogni pezzetto: è tutto qui il motivo per cui l'anello è il caso più facile, e per cui conviene ricondurci il disco.</p>`},
+  {t:'reveal', title:'Dove il campo dell’anello è massimo (domanda d’esame ricorrente)', html:R`
+  <p>In $z=0$ il campo è nullo (per simmetria), e per $z\to\infty$ tende a zero: quindi c'è un massimo. Derivando:
+  $$\frac{d}{dz}\frac{z}{(R^{2}+z^{2})^{3/2}}=\frac{(R^2-2z^2)}{(R^{2}+z^{2})^{5/2}},$$
+  che si annulla per $z=\dfrac{R}{\sqrt2}$. Il valore massimo vale $\dfrac{Q}{4\pi\varepsilon_0R^{2}}\cdot\dfrac{2}{3\sqrt3}$.</p>
+  <p>Il fattore adimensionale $\dfrac{2}{3\sqrt3}\simeq0{,}385$ dice che il massimo è circa il 38% di quanto varrebbe il campo di tutta la carica concentrata a distanza $R$: l'anello è «meno efficiente» perché la sua carica è sparpagliata.</p>`},
+  {t:'prosa', title:'Disco, sull’asse — l’anello integrato', tag:'derivazione', html:R`
+  <p>Disco di raggio $R$, densità superficiale $\sigma$. Si taglia in anelli di raggio $s$ e spessore $ds$: ognuno porta $dq=\sigma\,2\pi s\,ds$, e per ognuno vale il risultato appena trovato.</p>
+  $$E_z=\frac{1}{4\pi\varepsilon_0}\int_0^{R}\frac{z\,\sigma\,2\pi s\,ds}{(s^{2}+z^{2})^{3/2}}=\frac{\sigma z}{2\varepsilon_0}\left[-\frac{1}{\sqrt{s^{2}+z^{2}}}\right]_0^{R}$$
+  $$\boxed{\;E_z=\frac{\sigma}{2\varepsilon_0}\left(1-\frac{z}{\sqrt{R^{2}+z^{2}}}\right)\;}$$
+  <p><b>Il limite che conta.</b> Per $R\to\infty$ la frazione va a zero e la parentesi $\to 1$: resta $E=\dfrac{\sigma}{2\varepsilon_0}$, il campo del <b>piano infinito</b>, che non dipende dalla distanza. È un risultato da avere in testa: si ritroverà identico in <b>em-02</b> con Gauss, in tre righe invece che in due integrali.</p>`},
+  {t:'prosa', title:'Filo infinito', tag:'derivazione', html:R`
+  <p>Filo rettilineo infinito, densità lineare $\lambda$, punto $P$ a distanza $d$. Coordinata $y$ lungo il filo, origine nel piede della perpendicolare.</p>
+  <p><b>Simmetria.</b> Il pezzetto in $+y$ e quello in $-y$ cancellano la componente parallela al filo: resta solo la componente perpendicolare, con $\cos\theta=d/\sqrt{d^{2}+y^{2}}$.</p>
+  $$E=\frac{\lambda}{4\pi\varepsilon_0}\int_{-\infty}^{+\infty}\frac{d\,dy}{(d^{2}+y^{2})^{3/2}}=\frac{\lambda d}{4\pi\varepsilon_0}\cdot\dfrac{2}{d^{2}}$$
+  $$\boxed{\;E=\frac{\lambda}{2\pi\varepsilon_0 d}\;}$$
+  <p>Il $1/d$ invece di $1/d^{2}$ è la firma di una sorgente <b>estesa in una direzione</b>: da vicino non vedi una carica, vedi una linea. Il disco, esteso in due, dà $1/d^{0}$.</p>`},
+  {t:'prosa', title:'Semicirconferenza, al centro — quando la simmetria non basta', tag:'derivazione', html:R`
+  <p>Semicirconferenza di raggio $R$, carica $Q$ uniforme, campo nel <b>centro</b>. Qui l'asse di simmetria è uno solo, e sopravvive una sola componente — ma per vederlo bisogna parametrizzare.</p>
+  <p>Densità $\lambda=\dfrac{Q}{\pi R}$; il pezzetto ad angolo $\theta$ porta $dq=\lambda R\,d\theta$, dista $R$ dal centro, e la sua componente lungo l'asse di simmetria pesa $\sin\theta$:</p>
+  $$E=\frac{\lambda R}{4\pi\varepsilon_0R^{2}}\int_0^{\pi}\sin\theta\,d\theta=\frac{\lambda}{4\pi\varepsilon_0R}\cdot 2=\frac{\lambda}{2\pi\varepsilon_0R}$$
+  $$\boxed{\;E=\frac{Q}{2\pi^{2}\varepsilon_0R^{2}}\;}$$
+  <p>Il $\pi^{2}$ a denominatore sorprende sempre, e viene da due posti diversi: un $\pi$ da $\lambda=Q/\pi R$, l'altro dal $4\pi\varepsilon_0$. Vale la pena rifare il conto e vedere i due $\pi$ separati, invece di fidarsi della formula.</p>`}
+  ]},
+
+/* ---------------- 05 · IL DIPOLO ---------------- */
+{ num:'05', title:'Il dipolo: la configurazione più frequente dell’esame', meta:'momento $\\mathbf{p}$ · campo assiale e equatoriale · $1/r^3$ · il momento meccanico',
+  blocchi:[
+  {t:'prosa', title:'Definizione e campo lontano', tag:'derivazione', html:R`
+  <p>Due cariche $+q$ e $-q$ a distanza $d$. Si definisce il <b>momento di dipolo</b> $\mathbf{p}=q\,\mathbf{d}$, orientato <i>dalla negativa alla positiva</i>.</p>
+  <p>Sull'asse, a distanza $r\gg d$ dal centro, i due contributi quasi si cancellano — ed è proprio la quasi-cancellazione a dare la legge di potenza:</p>
+  $$E_{\text{ass}}=\frac{q}{4\pi\varepsilon_0}\left[\frac{1}{(r-d/2)^{2}}-\frac{1}{(r+d/2)^{2}}\right]\simeq\frac{q}{4\pi\varepsilon_0}\cdot\frac{2rd}{r^{4}}=\frac{2p}{4\pi\varepsilon_0r^{3}}$$
+  <p>Sul piano equatoriale, con lo stesso sviluppo, esce la metà e con verso opposto a $\mathbf{p}$:</p>
+  $$E_{\text{eq}}=\frac{p}{4\pi\varepsilon_0r^{3}}.$$
+  <p><b>Il fatto strutturale:</b> il campo va come $1/r^{3}$, non $1/r^{2}$. Da lontano la carica totale è zero, quindi il termine $1/r^{2}$ sparisce e resta il primo termine non nullo dello sviluppo. È il primo esempio di una gerarchia — monopolo, dipolo, quadrupolo — in cui ogni ordine cala di una potenza in più.</p>`},
+  {t:'reveal', title:'Il rapporto assiale/equatoriale, e un controllo numerico', html:R`
+  <p>A parità di distanza, $E_{\text{ass}}/E_{\text{eq}}=2$: sull'asse il campo è esattamente il doppio. È una di quelle relazioni che all'esame si usano per controllare un risultato in tre secondi.</p>
+  <p>Un controllo del passaggio approssimato: con $r=1$ e $d$ piccolo, $\dfrac{2}{(1+1)^{3/2}}=\dfrac{\sqrt2}{2}$ — il tipo di identità numerica che conviene verificare a mano quando si semplifica un'espressione, invece di fidarsi della penna.</p>`},
+  {t:'prosa', title:'Il dipolo in campo esterno: forza nulla, momento no', tag:'struttura', html:R`
+  <p>Un dipolo immerso in un campo <b>uniforme</b> $\mathbf{E}$ sente forza totale nulla ($+q\mathbf{E}-q\mathbf{E}=0$) ma un <b>momento meccanico</b>
+  $$\boldsymbol{\tau}=\mathbf{p}\times\mathbf{E},$$
+  che tende ad allinearlo al campo. L'energia potenziale associata è $U=-\mathbf{p}\cdot\mathbf{E}$, minima quando $\mathbf{p}$ è parallelo a $\mathbf{E}$.</p>
+  <p>In campo <b>non</b> uniforme compare anche una forza netta, e questo è il meccanismo per cui un pettine carico attira pezzetti di carta neutra: il campo non uniforme del pettine prima <i>induce</i> un dipolo, poi lo tira. È il ponte verso <b>em-05</b>, dove la stessa cosa succede a ogni molecola di un dielettrico.</p>`}
+  ]},
+
+/* ---------------- 06 · LA STRUTTURA ---------------- */
+{ num:'06', title:'Perché l’esponente è esattamente 2', meta:'lo strato che il programma d’esame non contiene · cosa cadrebbe se cadesse',
+  blocchi:[
+  {t:'prosa', title:'Non è una misura fortunata: è una struttura', tag:'struttura', html:R`
+  <p>L'esponente $2$ in $1/r^{2}$ sembra un dato sperimentale, e storicamente lo è stato. Ma è legato a tre cose che senza di esso crollerebbero, e vale la pena vederle prima di incontrarle:</p>
+  <ul>
+  <li><b>Il flusso è invariante</b> (<b>em-02</b>). Attraverso una sfera di raggio $r$ il campo vale $\propto1/r^{2}$ e l'area vale $4\pi r^{2}$: il prodotto non dipende da $r$. È vero <i>solo</i> con l'esponente 2, e su questo poggia tutta la legge di Gauss.</li>
+  <li><b>Il campo dentro un guscio carico è nullo</b>. Newton dimostrò lo stesso per la gravità, e la dimostrazione usa la compensazione esatta fra l'area di un cono ($\propto r^{2}$) e l'intensità ($\propto1/r^{2}$). Cavendish ne fece la misura più precisa dell'esponente proprio cercando campo dentro un conduttore cavo.</li>
+  <li><b>Il fotone ha massa nulla</b>. In elettrodinamica, un fotone massivo darebbe un potenziale di Yukawa $e^{-\mu r}/r$ invece di $1/r$. I limiti sperimentali su $|n-2|$ sono oggi dell'ordine di $10^{-16}$, e sono al tempo stesso limiti sulla massa del fotone.</li>
+  </ul>`},
+  {t:'reveal', title:'Cosa succede se cade un’ipotesi', html:R`
+  <p><b>Se cadesse la linearità</b> (sovrapposizione), tutto il calcolo integrale del punto 03 sarebbe illegittimo: non si potrebbe sommare il contributo dei pezzetti. Succede davvero nei dielettrici a campo altissimo e nel vuoto quantistico.</p>
+  <p><b>Se l'esponente non fosse 2</b>, il flusso dipenderebbe dal raggio, Gauss non sarebbe una legge ma un'approssimazione, e la forma locale $\nabla\cdot\mathbf{E}=\rho/\varepsilon_0$ non esisterebbe. Metà del corso è costruita su quell'esponente.</p>
+  <p><b>Se le cariche si muovono</b>, tutto questo movimento resta valido solo come approssimazione statica: la correzione è il campo magnetico (<b>em-08</b>) e la sua nascita relativistica.</p>`}
+  ]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'presi dalla forma che ricorre nelle prove 2008-2021',
+  blocchi:[
+  {t:'esercizio', title:'1 · Bacchetta finita, sull’asse', html:R`
+  <p>Bacchetta di lunghezza $L$, carica $Q$ uniforme, punto $P$ sull'asse della bacchetta a distanza $a$ dall'estremo più vicino. Calcola $E(P)$ e verifica il limite $a\gg L$.</p>`,
+   sol:R`<p>Qui <b>non</b> serve la simmetria: tutti i contributi sono già paralleli. Con $\lambda=Q/L$ e $x$ misurata da $P$:
+   $$E=\frac{\lambda}{4\pi\varepsilon_0}\int_a^{a+L}\frac{dx}{x^{2}}=\frac{\lambda}{4\pi\varepsilon_0}\left(\frac1a-\frac1{a+L}\right)=\frac{Q}{4\pi\varepsilon_0\,a(a+L)}.$$
+   Per $a\gg L$ il denominatore $\to a^{2}$ e si ritrova la carica puntiforme. <b>Il controllo va sempre fatto</b>: se non tornasse, l'errore è quasi sempre negli estremi di integrazione.</p>`},
+  {t:'esercizio', title:'2 · Due dischi affacciati', html:R`
+  <p>Due dischi coassiali di raggio $R$ e densità $+\sigma$ e $-\sigma$, a distanza $h\ll R$. Campo in mezzo, e fuori.</p>`,
+   sol:R`<p>Con $h\ll R$ ciascuno è quasi un piano infinito: $\sigma/2\varepsilon_0$ ciascuno. In mezzo i due contributi hanno <b>lo stesso verso</b> e si sommano: $E=\sigma/\varepsilon_0$. Fuori hanno verso opposto e si cancellano: $E\simeq0$. È il condensatore piano, che si ritroverà in <b>em-04</b>.</p>`},
+  {t:'esercizio', title:'3 · Anello con un pezzo mancante', html:R`
+  <p>Anello di raggio $R$ e densità $\lambda$ a cui manca un archetto di lunghezza $\ell\ll R$. Campo al <b>centro</b>.</p>`,
+   sol:R`<p>Trucco della <b>sovrapposizione con segno</b>: anello completo (campo nullo al centro, per simmetria) meno un archetto di carica $\lambda\ell$ posto a distanza $R$. Quindi
+   $$E=\frac{\lambda\ell}{4\pi\varepsilon_0R^{2}},$$
+   diretto <i>verso</i> il buco se $\lambda>0$. Ricostruire l'oggetto come «tutto meno un pezzo» è il metodo più redditizio di questo movimento, e ricorre in molte prove.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché nel campo dell'anello l'integrale $\int dq$ esce dal segno di integrale, e nel disco no?</li>
+  <li>Il campo del piano infinito non dipende dalla distanza. Non viola il buon senso?</li>
+  <li>Perché il dipolo va come $1/r^{3}$ e non come $1/r^{2}$?</li>
+  <li>In quale dei quattro casi la simmetria <b>non</b> uccide due componenti su tre, e perché?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perché per l'anello $r$ e $\cos\theta$ sono uguali per ogni pezzetto; nel disco cambiano col raggio $s$, quindi restano dentro.</li>
+   <li>No: allontanandosi il campo di ogni pezzetto cala, ma si «vede» una porzione di piano più grande, e le due cose si compensano esattamente. È lo stesso bilanciamento che rende invariante il flusso.</li>
+   <li>Perché la carica totale è nulla: il termine $1/r^{2}$ si cancella fra le due cariche e sopravvive il primo ordine successivo.</li>
+   <li>Nella semicirconferenza: non c'è il gemello diametralmente opposto, quindi si cancella solo una componente e l'altra va integrata.</li>
+   </ol>`}
+  ]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa consegna · dove si ritrova in Quantistica e in Statistica',
+  blocchi:[
+  {t:'prosa', title:'Cosa consegna questo movimento', tag:'sintesi', html:R`
+  <p>Due cose, e sono di natura diversa. La prima è <b>un metodo</b>: scegli $dq$, scrivi $dE$, uccidi le componenti con la simmetria, integra, controlla il limite lontano. Funziona identico in magnetostatica (<b>em-08</b>) con Biot-Savart al posto di Coulomb, e vale metà dei punti di ogni prova d'esame.</p>
+  <p>La seconda è <b>un oggetto</b>: il campo, introdotto qui come scorciatoia e destinato a diventare il protagonista. In <b>em-02</b> smette di essere un modo di scrivere la forza e diventa qualcosa che ha un flusso; in <b>em-06</b> qualcosa che ha energia; in <b>em-12</b> qualcosa che viaggia da solo, senza cariche, alla velocità della luce.</p>`},
+  {t:'prolessi', title:'Le rotte fuori dal corso', html:R`
+  <p><b>Verso la Quantistica.</b> Il potenziale coulombiano $1/r$ che nascerà in <b>em-03</b> è esattamente il potenziale dell'atomo di idrogeno: l'unico problema quantistico a tre dimensioni risolubile esattamente, e la ragione per cui l'idrogeno è il banco di prova di tutta la teoria.</p>
+  <p><b>Verso la Statistica.</b> L'interazione $1/r$ è a <i>lungo raggio</i>: non decade abbastanza in fretta perché l'energia di un sistema di cariche sia proporzionale al volume. È il motivo per cui i plasmi e i sistemi gravitazionali hanno una termodinamica anomala — e il motivo per cui in un conduttore la carica va tutta sulla superficie (<b>em-04</b>).</p>`}
+  ]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoem-01-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo em-01 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: em-01-campo-elettrico.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
