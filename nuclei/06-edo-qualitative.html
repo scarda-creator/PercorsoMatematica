@@ -90,6 +90,23 @@
     border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
   .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
 
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
   /* ---- PROLESSI (preannuncio fisico) ---- */
   .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
   .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
@@ -184,14 +201,71 @@ function typeset(el){
 function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
 
 /* ===================================================================
-   >>> CONTENUTO — Nucleo 04: Campi vettoriali <<<
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'analisi-vettoriale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo 06: EDO qualitative: esistenza e unicità, metodi risolutivi, ritratto di fase <<<
    Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
-   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
    Tutta la matematica in R`...` (String.raw). Nelle formule si usano
    \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
    =================================================================== */
 
 var TAPPE = [
+
+
 
 /* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
 { num:'00', title:'Perché questo nucleo', meta:'AV Terracina, Parte IV · risolvere quando si può, capire il comportamento quando non si può',
@@ -423,13 +497,14 @@ var TAPPE = [
    domanda:R`Quando un sistema deterministico &laquo;dimentica&raquo; le sue condizioni iniziali? Le equazioni sono reversibili e conservano il volume (Liouville), eppure il caffè si raffredda e non si riscalda mai da solo. La domanda che porti alla tesi: come nasce l&rsquo;<b>irreversibilità</b> termodinamica da una dinamica microscopicamente reversibile? La sensibilità alle condizioni iniziali (esponenti di Lyapunov) produce <b>mescolamento</b>, e il mescolamento è il ponte fra il ritratto di fase reversibile e la freccia del tempo — il filo che, via il paradosso di Loschmidt, arriva a ETH e alla decoerenza.`}
 ]}
 
+
 ];
 
 
 /* =================================================================== */
 var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
 
-var VKEY='pm-nucleo04-visited';
+var VKEY='pm-nucleo06-visited';
 function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
 function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
 var SEEN = loadSeen();
@@ -586,7 +661,7 @@ function showTappa(num){
   window.scrollTo(0,0);
 }
 
-/* deep-link: 04-campi-vettoriali.html#03 apre direttamente la tappa 03 */
+/* deep-link: 06-edo-qualitative.html#03 apre direttamente la tappa 03 */
 window.addEventListener('DOMContentLoaded', function(){
   var h=(location.hash||'').replace('#','');
   showTappa(byId[h]?h:'00');

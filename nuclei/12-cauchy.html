@@ -90,6 +90,23 @@
     border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
   .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
 
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
   /* ---- PROLESSI (preannuncio fisico) ---- */
   .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
   .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
@@ -184,9 +201,69 @@ function typeset(el){
 function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
 
 /* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'metodi-e-modelli';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["serie-di-potenze"] = {"nome":"Serie di potenze","riga":"Una somma $\\sum_{n\\ge0}a_n(x-x_0)^{n}$, che converge dentro un intervallo (in campo complesso: un disco) di raggio $R$ centrato in $x_0$ e diverge fuori.","serve":"È la classe di serie di funzioni che si comporta meglio di tutte: dentro il raggio converge uniformemente sui compatti, quindi si deriva e si integra termine a termine infinite volte, e i coefficienti sono quelli di Taylor. Il raggio si calcola col rapporto $|a_{n+1}/a_n|$ o con Cauchy–Hadamard, e sul bordo non si sa niente a priori: va studiato a parte.","esempio":"Per $\\sum_{n\\ge0}\\dfrac{x^{n}}{n!}$ il rapporto fra coefficienti consecutivi tende a $0$: il raggio è infinito e la somma è $e^{x}$ su tutto $\\mathbb{R}$. Per $\\sum_{n\\ge1}n\\,x^{n}$ tende invece a $1$, quindi $R=1$, e in $x=\\tfrac12$ la somma vale $2$.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio, la derivazione termine a termine e l'identità con Taylor, nel nucleo sulle serie di funzioni"},"qui":{"metodi-e-modelli":{"serve":"In campo complesso la serie di potenze non è una classe fra altre: è la definizione stessa di analitica, e il teorema che olomorfa $=$ analitica dice che ogni funzione derivabile in senso complesso è già una serie di potenze. Il raggio smette anche di essere un conto sui coefficienti e diventa geometria: è la distanza dal centro alla singolarità più vicina — ed è il primo dei due raggi della corona di Laurent.","esempio":"La regola geometrica spiega i raggi reali che sembravano arbitrari: $\\dfrac{1}{1+x^{2}}$ è liscia su tutto $\\mathbb{R}$, ma il suo sviluppo in $0$ ha raggio $1$, perché in $\\pm i$ la funzione esplode e $|i|=1$. Dentro quel raggio il conto chiude: in $z=\\tfrac12$ la serie $1-z^{2}+z^{4}-\\cdots$ vale $\\tfrac45$."}},"controllo":[{"tipo":"limite","espr":"1/(n+1)","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $0$"},{"tipo":"limite","espr":"(n+1)/n","var":"n","a":"oo","vale":"1","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $1$"},{"tipo":"somma","espr":"n*(1/2)**n","var":"n","da":"1","a":"oo","vale":"2","dove":"esempio","appare":"vale $2$"},{"tipo":"uguale","sinistra":"Abs(I)","vale":"1","dove":"qui.metodi-e-modelli.esempio","appare":"|i|=1"},{"tipo":"somma","espr":"(-1)**n*(1/2)**(2*n)","var":"n","da":"0","a":"oo","vale":"4/5","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac45"}]};
+STRUM["singolarita-isolate"] = {"nome":"Singolarità isolate","riga":"Un punto $z_0$ in cui $f$ non è definita ma è olomorfa in tutto un disco forato $0\\lt|z-z_0|\\lt\\rho$ attorno, e che la parte principale del suo Laurent classifica in eliminabile, polo di ordine $m$, o essenziale.","serve":"È la classificazione che decide quale strumento si applica: parte principale assente vuol dire eliminabile (limite finito, residuo nullo); parte principale che si arresta a $(z-z_0)^{-m}$ vuol dire polo di ordine $m$ (e $|f|\\to\\infty$); infiniti termini vuol dire essenziale, e lì nessun limite esiste in alcun senso. Il criterio operativo non è guardare la funzione ma contare gli zeri: in un quoziente, ordine del polo $=$ zero del denominatore meno zero del numeratore.","esempio":"In $z=0$: $\\dfrac{\\sin z}{z}$ è eliminabile, perché il limite vale $1$ e la si ripara ridefinendola lì. $\\dfrac{1-\\cos z}{z^{3}}$ ha un polo semplice e non triplo, perché $1-\\cos z$ ha uno zero doppio e $3-2=1$: infatti $z\\cdot\\dfrac{1-\\cos z}{z^{3}}$ tende a $\\tfrac12$, che è anche il residuo. $e^{1/z}$ è essenziale: $z^{m}e^{1/z}$ se ne va lungo l'asse reale positivo per ogni $m$, e nessuna potenza la rende limitata.","pieno":{"file":"12b-laurent.html","tappa":"05","come":"le tre specie, i criteri equivalenti e le due insidie sull'ordine, nel nucleo su Laurent"},"controllo":[{"tipo":"limite","espr":"sin(z)/z","var":"z","a":"0","vale":"1","dove":"esempio","appare":"vale $1$"},{"tipo":"limite","espr":"(1-cos(z))/z**2","var":"z","a":"0","vale":"1/2","dove":"esempio","appare":"\\tfrac12"},{"tipo":"uguale","sinistra":"3-2","vale":"1","dove":"esempio","appare":"3-2=1"}]};
+STRUM["stima-ML"] = {"nome":"Stima ML","riga":"Il modulo di un integrale di cammino non supera il massimo del modulo dell'integrando per la lunghezza del cammino: $\\left|\\int_\\gamma f\\,dz\\right|\\le M\\,L$.","serve":"È l'unico strumento con cui si dimostra che un pezzo di contorno svanisce, e quindi è ciò che regge ogni calcolo di integrale reale per residui: si maggiora l'integrando sull'arco, si moltiplica per la lunghezza dell'arco, e si manda il raggio a infinito o a zero. Dove un testo scrive «l'arco aggiunto non contribuisce», sotto c'è una stima ML fatta oppure taciuta.","esempio":"Sull'arco $C_R$ del semipiano superiore, di raggio $R\\gt 1$, per $f(z)=\\dfrac{1}{z^{2}+1}$ vale $|z^{2}+1|\\ge R^{2}-1$, quindi $M=\\dfrac{1}{R^{2}-1}$; la lunghezza dell'arco è $L=\\pi R$. La stima dà allora $\\left|\\int_{C_R}f\\,dz\\right|\\le\\dfrac{\\pi R}{R^{2}-1}$, che per $R=10$ vale $\\dfrac{10\\pi}{99}$ e tende a $0$ per $R\\to\\infty$: l'arco svanisce.","pieno":{"file":"13-residui.html","tappa":"03","come":"i conti che mandano a zero l'arco, uno per ciascuno dei quattro sottotipi d'esame, nel nucleo dei residui"},"qui":{"metodi-e-modelli":{"serve":"È il passo che chiude il contorno. Un integrale reale $\\int_{-\\infty}^{+\\infty}f(x)\\,dx$ si calcola per residui solo se il semicerchio che lo trasforma in un cammino chiuso dà contributo nullo, e la stima ML è ciò che lo dimostra. La regola pratica che ne discende: l'arco svanisce quando $|f|$ decade più in fretta di $1/|z|$, cioè quando $\\deg Q\\ge\\deg P+2$ per $f=P/Q$.","esempio":"Per $f=\\dfrac{1}{z^{4}+1}$ su $C_R$ si ha $M=\\dfrac{1}{R^{4}-1}$ e $L=\\pi R$, quindi $\\left|\\int_{C_R}f\\right|\\le\\dfrac{\\pi R}{R^{4}-1}$, che per $R=2$ vale $\\dfrac{2\\pi}{15}$ e va a $0$. Con $f=\\dfrac{1}{z^{2}+1}$ il denominatore supera il numeratore di due gradi e basta; con $f=\\dfrac{z}{z^{2}+1}$ il margine è di un grado solo, la stima ML dà $\\dfrac{\\pi R^{2}}{R^{2}-1}$, che non tende a $0$, e per chiudere serve il lemma di Jordan."}},"controllo":[{"tipo":"limite","espr":"pi*R/(R**2-1)","var":"R","a":"oo","vale":"0","dove":"esempio","appare":"0"},{"tipo":"uguale","sinistra":"pi*10/(10**2-1)","vale":"10*pi/99","dove":"esempio","appare":"\\dfrac{10\\pi}{99}"},{"tipo":"uguale","sinistra":"pi*2/(2**4-1)","vale":"2*pi/15","dove":"qui.metodi-e-modelli.esempio","appare":"\\dfrac{2\\pi}{15}"},{"tipo":"limite","espr":"pi*R**2/(R**2-1)","var":"R","a":"oo","vale":"pi","dove":"qui.metodi-e-modelli.esempio","appare":"\\dfrac{\\pi R^{2}}{R^{2}-1}"}]};
+STRUM["serie-geometrica"] = {"nome":"Serie geometrica","riga":"La somma $\\sum_{n\\ge 0} q^{n}$ vale $\\dfrac{1}{1-q}$ se $|q|\\lt 1$, e non esiste se $|q|\\ge 1$.","serve":"È l'unica serie di cui si conosce la somma in forma chiusa senza fatica, e per questo diventa il metro di tutte le altre: una serie si studia maggiorandola con una geometrica (criterio del rapporto, criterio della radice) o riconoscendola come geometrica travestita.","esempio":"Con $q=\\tfrac12$: $1+\\tfrac12+\\tfrac14+\\cdots=\\dfrac{1}{1-\\tfrac12}=2$. Con $q=-\\tfrac13$: $\\dfrac{1}{1+\\tfrac13}=\\tfrac34$. Con $q=1$ le somme parziali sono $N+1$ e se ne vanno: la formula $1/(1-q)$ non è una scorciatoia da usare fuori dal suo raggio.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio $R=1$, il grafico delle somme parziali e la cassetta dei trucchi che parte da qui, nella tappa sulle serie di potenze"},"qui":{"metodi-e-modelli":{"serve":"È il motore della serie di Laurent: lo sviluppo di $\\dfrac{1}{z-a}$ in potenze di $z$ o di $1/z$ è una geometrica, e quale delle due si sceglie decide in quale corona si sta sviluppando. Tutta la parte principale di Laurent nasce da qui.","esempio":"Per $\\dfrac{1}{z-2}$ con $|z|\\lt 2$ si scrive $-\\tfrac12\\cdot\\dfrac{1}{1-z/2}=-\\sum_{n\\ge0}\\dfrac{z^{n}}{2^{n+1}}$; in $z=1$ entrambi i membri valgono $-1$. Per $|z|\\gt 2$ si raccoglie invece $z$ e viene $\\sum_{n\\ge0}\\dfrac{2^{n}}{z^{n+1}}$, cioè solo potenze negative; in $z=4$ entrambi i membri valgono $\\tfrac12$."},"elettromagnetismo":{"serve":"Compare ogni volta che una configurazione si ripete con un fattore costante — catene di cariche immagine fra due piani conduttori, riflessioni multiple in una cavità — e la somma chiusa è ciò che rende il conto finito invece che infinito.","esempio":"Una carica fra due piani paralleli genera immagini a distanze crescenti, e il contributo al potenziale è una somma del tipo $\\sum_{n\\ge0} r^{n}$ con $r\\lt 1$ fissato dalla geometria. Con una riflettività $r=\\tfrac14$ la serie vale $\\tfrac43$: la catena è infinita, il potenziale no."}},"controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"0","a":"oo","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"somma","espr":"(-1/3)**n","var":"n","da":"0","a":"oo","vale":"3/4","dove":"esempio","appare":"\\tfrac34"},{"tipo":"somma","espr":"-1**n/2**(n+1)","var":"n","da":"0","a":"oo","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"somma","espr":"2**n/4**(n+1)","var":"n","da":"0","a":"oo","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"},{"tipo":"somma","espr":"(1/4)**n","var":"n","da":"0","a":"oo","vale":"4/3","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac43"},{"tipo":"uguale","sinistra":"1/(1-2)","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"uguale","sinistra":"1/(4-2)","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"}]};
+STRUM["corona-di-convergenza"] = {"nome":"Corona di convergenza","riga":"L'anello $r\\lt|z-z_0|\\lt R$ dove converge una serie di Laurent: l'intersezione fra il disco in cui vive la parte regolare e l'esterno del disco in cui vive la parte principale.","serve":"Serve a capire perché Laurent abita un anello e non un disco: le potenze $\\ge0$ convergono dentro $|z-z_0|\\lt R$, quelle negative — che nella variabile $w=1/(z-z_0)$ sono di nuovo potenze positive — convergono fuori da $|z-z_0|\\gt r$, e la somma bilatera ha senso solo dove valgono entrambe. I due raggi non si scelgono: li dettano le singolarità di $f$, e per questo lo stesso centro genera più corone, ciascuna col suo sviluppo.","esempio":"Per $f(z)=\\dfrac{1}{(z-1)(z-3)}$ con centro $z_0=0$ le singolarità in $1$ e in $3$ tagliano il piano in tre regioni — $|z|\\lt1$, la corona $1\\lt|z|\\lt3$ e $|z|\\gt3$ — cioè tre sviluppi diversi della stessa funzione. Nella corona intermedia si scrive $f=-\\tfrac12\\left(\\sum_{n\\ge0}\\dfrac{z^{n}}{3^{n+1}}+\\sum_{n\\ge0}\\dfrac{1}{z^{n+1}}\\right)$: in $z=2$ le due somme valgono $1$ e $1$, e il totale $-1$ è il valore vero di $f(2)$.","pieno":{"file":"12b-laurent.html","tappa":"01","come":"i due raggi e la loro origine nelle singolarità di $f$, nel nucleo su Laurent"},"controllo":[{"tipo":"somma","espr":"2**n/3**(n+1)","var":"n","da":"0","a":"oo","vale":"1","dove":"esempio","appare":"valgono $1$"},{"tipo":"somma","espr":"(1/2)**(n+1)","var":"n","da":"0","a":"oo","vale":"1","dove":"esempio","appare":"$1$ e $1$"},{"tipo":"uguale","sinistra":"-(1/2)*(1+1)","vale":"-1","dove":"esempio","appare":"totale $-1$"},{"tipo":"uguale","sinistra":"1/((2-1)*(2-3))","vale":"-1","dove":"esempio","appare":"$-1$"}]};
+STRUM["residuo"] = {"nome":"Residuo","riga":"Il coefficiente $a_{-1}$ dello sviluppo di Laurent attorno a una singolarità isolata, cioè l'unico termine che sopravvive all'integrazione su un cerchietto attorno al punto.","serve":"È il numero che trasforma un integrale in una somma: tutto il resto della serie integra a zero su un giro chiuso, e resta $2\\pi i$ per la somma dei residui. Tre formule coprono quasi tutto — polo semplice $\\lim(z-z_0)f$; quoziente con polo semplice $P(z_0)/Q'(z_0)$, la più rapida perché non chiede di fattorizzare; polo di ordine $m$ con la derivata $(m-1)$-esima — e per l'ordine alto o per una singolarità essenziale conviene invece dividere le serie e leggere il coefficiente di $(z-z_0)^{-1}$.","esempio":"Con $f=\\dfrac{z}{z^{2}+1}$ in $z_0=i$ la formula del quoziente dà $\\dfrac{P(i)}{Q'(i)}=\\dfrac{i}{2i}=\\tfrac12$, senza fattorizzare nulla. Per $\\dfrac{e^{z}}{(z-2)^{3}}$ in $2$ il polo è di ordine $3$ e la formula con la derivata seconda dà $\\tfrac{e^{2}}{2}$. Per $\\dfrac{\\cos z-1}{z^{5}}$ in $0$ le formule sono peggio dello sviluppo: da $\\cos z-1=-\\tfrac{z^{2}}{2}+\\tfrac{z^{4}}{24}-\\cdots$ il coefficiente di $z^{-1}$ si legge direttamente, e vale $\\tfrac1{24}$.","pieno":{"file":"13-residui.html","tappa":"01","come":"le tre formule, il criterio di scelta e i casi svolti, nel nucleo sui residui"},"controllo":[{"tipo":"uguale","sinistra":"I/(2*I)","vale":"1/2","dove":"esempio","appare":"\\tfrac12"},{"tipo":"uguale","sinistra":"exp(2)/factorial(2)","vale":"exp(2)/2","dove":"esempio","appare":"\\tfrac{e^{2}}{2}"},{"tipo":"uguale","sinistra":"series(cos(z)-1, z, 0, 5).removeO()","vale":"-z**2/2 + z**4/24","dove":"esempio","appare":"-\\tfrac{z^{2}}{2}+\\tfrac{z^{4}}{24}"},{"tipo":"uguale","sinistra":"1/factorial(4)","vale":"1/24","dove":"esempio","appare":"\\tfrac1{24}"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
    >>> CONTENUTO — Nucleo 12: Teorema e formula di Cauchy <<<
    Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
-   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
    Tutta la matematica in R`...` (String.raw). Nelle formule si usano
    \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
    =================================================================== */
@@ -206,8 +283,8 @@ var TAPPE = [
   <ul>
   <li>Calcolare un integrale di linea complesso con la parametrizzazione, e riconoscere quando <b>non serve calcolarlo</b> (Cauchy).</li>
   <li>Applicare la <b>formula di Cauchy</b> e la sua versione per le derivate, che è il modo più rapido per certi integrali su cerchi.</li>
-  <li>Dire perché olomorfa $\Rightarrow$ <b>analitica</b> (sviluppabile in serie di potenze) e usare il <b>raggio di convergenza</b> = distanza dalla singolarità più vicina.</li>
-  <li>Sviluppare in <b>serie di Laurent</b> in una corona assegnata (attenzione: la corona cambia lo sviluppo!) e classificare una singolarità isolata in <b>eliminabile / polo di ordine $m$ / essenziale</b>.</li>
+  <li>Dire perché olomorfa $\Rightarrow$ <b>analitica</b> (sviluppabile in <span class="str" data-str="serie-di-potenze">serie di potenze</span>) e usare il <b>raggio di convergenza</b> = distanza dalla singolarità più vicina.</li>
+  <li>Sviluppare in <b>serie di Laurent</b> in una corona assegnata (attenzione: la corona cambia lo sviluppo!) e classificare una <span class="str" data-str="singolarita-isolate">singolarità isolata</span> in <b>eliminabile / polo di ordine $m$ / essenziale</b>.</li>
   </ul>`}
 ]},
 
@@ -221,7 +298,7 @@ var TAPPE = [
   $$\int_\gamma f\,dz=\int_\gamma(u\,dx-v\,dy)+i\int_\gamma(v\,dx+u\,dy).$$</p>
   <p>Due strumenti che servono sempre:</p>
   <ul>
-  <li><b>Stima ML:</b> $\left|\int_\gamma f\,dz\right|\le \max_{\gamma}|f|\cdot L(\gamma)$. È come si dimostra che un contributo &laquo;svanisce&raquo; (l&rsquo;arco all&rsquo;infinito del nucleo 13).</li>
+  <li><b><span class="str" data-str="stima-ML">Stima ML</span>:</b> $\left|\int_\gamma f\,dz\right|\le \max_{\gamma}|f|\cdot L(\gamma)$. È come si dimostra che un contributo &laquo;svanisce&raquo; (l&rsquo;arco all&rsquo;infinito del nucleo 13).</li>
   <li><b>L&rsquo;integrale fondamentale:</b> su $|z-z_0|=r$ percorso una volta in senso antiorario,
   $$\oint\frac{dz}{(z-z_0)^n}=\begin{cases}2\pi i,& n=1\\ 0,& n\in\mathbb{Z},\ n\ne1.\end{cases}$$
   Si verifica in due righe con $z=z_0+re^{i\theta}$, $dz=ire^{i\theta}d\theta$. <b>Tutto il calcolo dei residui è questo integrale, più la linearità.</b></li>
@@ -292,7 +369,7 @@ var TAPPE = [
   {t:'reveal', title:'Ogni olomorfa è somma della propria serie di potenze', tag:'derivazione', steps:[
    {label:'Il trucco: la serie geometrica dentro il nucleo di Cauchy', body:R`<p>Sia $f$ olomorfa nel disco $|z-z_0|\lt R$ e $\gamma$ un cerchio di raggio $r\lt R$ centrato in $z_0$. Per $|w-z_0|\lt r$ scrivi
    $$\frac{1}{z-w}=\frac{1}{(z-z_0)-(w-z_0)}=\frac{1}{z-z_0}\cdot\frac{1}{1-\frac{w-z_0}{z-z_0}}=\sum_{n\ge0}\frac{(w-z_0)^n}{(z-z_0)^{n+1}},$$
-   serie geometrica che converge <b>uniformemente</b> su $\gamma$ perché il rapporto ha modulo $|w-z_0|/r\lt1$ costante.</p>`},
+   <span class="str" data-str="serie-geometrica">serie geometrica</span> che converge <b>uniformemente</b> su $\gamma$ perché il rapporto ha modulo $|w-z_0|/r\lt1$ costante.</p>`},
    {label:'Scambia serie e integrale', body:R`<p>La convergenza uniforme <b>autorizza</b> lo scambio (nucleo 07 — è esattamente il teorema che serviva). Sostituendo nella formula di Cauchy:
    $$f(w)=\frac{1}{2\pi i}\oint\frac{f(z)}{z-w}dz=\sum_{n\ge0}\left(\frac{1}{2\pi i}\oint\frac{f(z)}{(z-z_0)^{n+1}}dz\right)(w-z_0)^n=\sum_{n\ge0}\frac{f^{(n)}(z_0)}{n!}(w-z_0)^n.$$
    <b>Olomorfa $\Rightarrow$ analitica</b>: la serie di Taylor non solo esiste, ma converge a $f$ in tutto il disco. $\blacksquare$</p>
@@ -324,12 +401,12 @@ var TAPPE = [
 { num:'04', title:'Serie di Laurent e classificazione delle singolarità', meta:'sviluppo in una corona · parte principale · eliminabile, polo di ordine $m$, essenziale',
   blocchi:[
   {t:'prosa', title:'Quando c&rsquo;è un buco, servono anche le potenze negative', tag:'costruzione', html:R`
-  <p>Taylor sviluppa in un <b>disco</b>. Se la funzione ha una singolarità nel centro, il disco non è disponibile: si lavora in una <b>corona</b> $r\lt|z-z_0|\lt R$, e lo sviluppo giusto è quello di <b>Laurent</b>:
+  <p>Taylor sviluppa in un <b>disco</b>. Se la funzione ha una singolarità nel centro, il disco non è disponibile: si lavora in una <b><span class="str" data-str="corona-di-convergenza">corona</span></b> $r\lt|z-z_0|\lt R$, e lo sviluppo giusto è quello di <b>Laurent</b>:
   $$f(z)=\sum_{n=-\infty}^{+\infty}a_n(z-z_0)^n,\qquad a_n=\frac{1}{2\pi i}\oint_\gamma\frac{f(z)}{(z-z_0)^{n+1}}\,dz,$$
   con $\gamma$ un qualunque cerchio dentro la corona. La parte con $n\lt0$ si chiama <b>parte principale</b>: è ciò che Taylor non può avere e che misura la gravità della singolarità.</p>
   <p><b>Il coefficiente $a_{-1}$ ha uno statuto speciale:</b> integrando termine a termine, tutti i termini danno zero tranne quello di $n=-1$ (l&rsquo;integrale fondamentale della tappa 01), quindi
   $$\oint_\gamma f(z)\,dz=2\pi i\,a_{-1}.$$
-  Quel numero si chiama <b>residuo</b>, ed è tutto il nucleo 13.</p>
+  Quel numero si chiama <b><span class="str" data-str="residuo">residuo</span></b>, ed è tutto il nucleo 13.</p>
   <div class="note warn"><b>Trabocchetto classico.</b> Lo sviluppo di Laurent <b>dipende dalla corona</b>. $f=\frac{1}{z(z-1)}$ ha uno sviluppo in $0\lt|z|\lt1$ e uno <b>diverso</b> in $|z|\gt1$: nella prima si espande $\frac{1}{z-1}=-\sum z^n$, nella seconda $\frac{1}{z-1}=\frac1z\frac{1}{1-1/z}=\sum z^{-n-1}$. Un esercizio che chiede &laquo;lo sviluppo di Laurent&raquo; senza specificare la corona è mal posto: <b>la corona va sempre dichiarata</b>.</div>`},
   {t:'gram', title:'Le tre singolarità isolate — come si riconoscono', rows:[
    [R`<b>eliminabile</b>`, R`parte principale <b>assente</b>. Equivalente: $\lim_{z\to z_0}f(z)$ esiste finito, oppure $f$ è limitata vicino a $z_0$ (teorema di Riemann). Esempio: $\frac{\sin z}{z}$ in $0$. Si &laquo;ripara&raquo; ridefinendo $f(z_0)$. Residuo $=0$.`],

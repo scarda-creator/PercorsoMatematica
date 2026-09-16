@@ -62,6 +62,38 @@ function tagliNudi(s) {
          (s.match(/(?<![a-zA-Z"'])[<>]\s*\d/g) || []).length;
 }
 
+/* Il testo della SOLA tappa dichiarata, ritagliato dal nucleo montato. Le tappe sono
+ * oggetti `{ num:'NN', ... }` in fila dentro TAPPE: si taglia dal proprio `num` al `num`
+ * successivo, e per l'ultima fino in fondo. Torna null se il taglio non si trova, perche'
+ * un controllo che non sa cosa sta leggendo deve dirlo invece di assolvere. */
+function ritagliaTappa(html, tappa) {
+  const q = tappa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const inizio = html.search(new RegExp("\\{\\s*num\\s*:\\s*'" + q + "'"));
+  if (inizio < 0) return null;
+  const resto = html.slice(inizio + 1);
+  const dopo = resto.search(/\{\s*num\s*:\s*'/);
+  return dopo < 0 ? resto : resto.slice(0, dopo);
+}
+
+/* Le parole del nome dello strumento compaiono nel testo? Controllo volutamente DEBOLE —
+ * lo stesso di audit-rimandi.js — perche' l'alternativa e' non controllare affatto: si
+ * spogliano accenti, entita' HTML e maiuscole, si buttano le parole vuote e si confronta
+ * sul prefisso, cosi' «isolate» trova «isolata» e «convergenza» trova «convergono». */
+const VUOTE = new Set(['di', 'del', 'della', 'dei', 'delle', 'il', 'lo', 'la', 'i', 'gli',
+                       'le', 'un', 'uno', 'una', 'e', 'ed', 'in', 'su', 'a', 'da', 'per',
+                       'con', 'al', 'alla']);
+function spoglia(s) {
+  return s.replace(/&[a-z]+;/gi, ' ')
+          .normalize('NFD').replace(/[̀-ͯ]/g, '')
+          .toLowerCase();
+}
+function nomina(corpo, nome) {
+  const testo = spoglia(corpo);
+  const parole = spoglia(nome).split(/[^a-z0-9]+/).filter(p => p && !VUOTE.has(p));
+  if (!parole.length) return true;
+  return parole.every(p => testo.includes(p.slice(0, 6)));
+}
+
 function verifica(file) {
   const via = path.join(DIR, file);
   const guai = [];
@@ -96,6 +128,22 @@ function verifica(file) {
         const h = fs.readFileSync(dove, 'utf8');
         const re = new RegExp("num\\s*:\\s*'" + s.pieno.tappa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'");
         if (!re.test(h)) guai.push('`pieno.tappa` ' + s.pieno.tappa + ' non esiste in ' + s.pieno.file);
+        else {
+          /* Terzo cancello, aggiunto il 2026-09-16 e la ragione e' un caso vero: `stima-ML`
+           * dichiarava `13-residui.html#02`, che ESISTE ma e' la tappa del teorema dei residui
+           * e non nomina mai la stima ML. Una tappa che esiste non e' una tappa che tratta lo
+           * strumento, e il lettore che clicca «Tutto il resto» atterra dove non c'e' niente.
+           * Il controllo e' lo stesso, debole e utile, di audit-rimandi.js: le parole del nome
+           * dello strumento devono comparire DENTRO la tappa dichiarata, non altrove nel file. */
+          const corpo = ritagliaTappa(h, s.pieno.tappa);
+          if (corpo === null) {
+            guai.push('`pieno.tappa` ' + s.pieno.tappa + ': non sono riuscito a isolarne il testo in ' + s.pieno.file);
+          } else if (!nomina(corpo, s.nome)) {
+            guai.push('`pieno.tappa` ' + s.pieno.tappa + ' esiste in ' + s.pieno.file +
+                      ' ma non nomina mai «' + s.nome + '»: il rimando «Tutto il resto» atterra ' +
+                      'su una tappa che parla d\'altro');
+          }
+        }
       }
     }
   }
