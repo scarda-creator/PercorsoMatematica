@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento me-00 — I numeri complessi: cosa sono davvero, e perché la forma polare è la sola in cui il prodotto ha senso geometrico</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Metodi e Modelli · Movimento <b>me-00 — I numeri complessi: dalla chiusura algebrica alla rotazione che diventa un prodotto</b> · Caprini ed Esposito, lezioni 1-3</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'metodi-e-modelli';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["serie-di-potenze"] = {"nome":"Serie di potenze","riga":"Una somma $\\sum_{n\\ge0}a_n(x-x_0)^{n}$, che converge dentro un intervallo (in campo complesso: un disco) di raggio $R$ centrato in $x_0$ e diverge fuori.","serve":"È la classe di serie di funzioni che si comporta meglio di tutte: dentro il raggio converge uniformemente sui compatti, quindi si deriva e si integra termine a termine infinite volte, e i coefficienti sono quelli di Taylor. Il raggio si calcola col rapporto $|a_{n+1}/a_n|$ o con Cauchy–Hadamard, e sul bordo non si sa niente a priori: va studiato a parte.","esempio":"Per $\\sum_{n\\ge0}\\dfrac{x^{n}}{n!}$ il rapporto fra coefficienti consecutivi tende a $0$: il raggio è infinito e la somma è $e^{x}$ su tutto $\\mathbb{R}$. Per $\\sum_{n\\ge1}n\\,x^{n}$ tende invece a $1$, quindi $R=1$, e in $x=\\tfrac12$ la somma vale $2$.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio, la derivazione termine a termine e l'identità con Taylor, nel nucleo sulle serie di funzioni"},"qui":{"metodi-e-modelli":{"serve":"In campo complesso la serie di potenze non è una classe fra altre: è la definizione stessa di analitica, e il teorema che olomorfa $=$ analitica dice che ogni funzione derivabile in senso complesso è già una serie di potenze. Il raggio smette anche di essere un conto sui coefficienti e diventa geometria: è la distanza dal centro alla singolarità più vicina — ed è il primo dei due raggi della corona di Laurent.","esempio":"La regola geometrica spiega i raggi reali che sembravano arbitrari: $\\dfrac{1}{1+x^{2}}$ è liscia su tutto $\\mathbb{R}$, ma il suo sviluppo in $0$ ha raggio $1$, perché in $\\pm i$ la funzione esplode e $|i|=1$. Dentro quel raggio il conto chiude: in $z=\\tfrac12$ la serie $1-z^{2}+z^{4}-\\cdots$ vale $\\tfrac45$."}},"controllo":[{"tipo":"limite","espr":"1/(n+1)","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $0$"},{"tipo":"limite","espr":"(n+1)/n","var":"n","a":"oo","vale":"1","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $1$"},{"tipo":"somma","espr":"n*(1/2)**n","var":"n","da":"1","a":"oo","vale":"2","dove":"esempio","appare":"vale $2$"},{"tipo":"uguale","sinistra":"Abs(I)","vale":"1","dove":"qui.metodi-e-modelli.esempio","appare":"|i|=1"},{"tipo":"somma","espr":"(-1)**n*(1/2)**(2*n)","var":"n","da":"0","a":"oo","vale":"4/5","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac45"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo me-00: I numeri complessi <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        me-00 — i numeri complessi
+identita:  cosa sono davvero, e perché la rappresentazione polare è la sola in cui il prodotto ha senso geometrico
+copre:     A.1 — Introduzione ai numeri complessi: operazioni e rappresentazione geometrica
+serve:     — (è la radice del modulo di analisi complessa)
+apre:      me-01 (11-olomorfe.html) · me-01b (14-continuazione.html) · me-03 (12b-laurent.html)
+strumenti: serie-di-potenze
+fonti:     programma Caprini-Esposito, lezioni 1-3 (26-27/02, 02/03) · Bonciani, Appunti di Analisi Complessa, cap. 1 · Calogero, cap. 8 (che questo materiale lo dà per noto)
+generata:  2026-09-17 dal ciclo notturno, sulla mappa rifatta sul programma vero
+MOVIMENTO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Metodi · la radice del modulo di analisi complessa: lezioni 1-3 del programma di Caprini',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>La storia che si racconta a scuola è che i <b>numeri complessi</b> nascono per dare una soluzione a $x^2+1=0$. È vera e non spiega niente: nessuno costruisce una teoria intera per accontentare un'equazione. La ragione per cui un fisico ci vive dentro è un'altra, ed è tutta in una riga:</p>
+  <p style="text-align:center"><i>nella rappresentazione polare, moltiplicare due numeri complessi vuol dire <b>moltiplicare i moduli e sommare gli angoli</b>.</i></p>
+  <p>Cioè: la <b>rotazione</b> — che nel piano reale è una matrice, un oggetto che non si moltiplica per un numero — diventa la moltiplicazione per un numero. Da lì discende tutto il resto: le oscillazioni si scrivono come esponenziali invece che come coppie seno-coseno, le identità trigonometriche diventano contabilità di esponenti, e le funzioni analitiche (movimento me-01) possono avere una derivata sola invece di due derivate parziali indipendenti. In una frase: <i>i numeri complessi sono il campo in cui la geometria del piano diventa algebra di un solo simbolo</i>.</p>
+  <p><b>Quanto in profondità, e perché così.</b> Sulle 26 prove d'esame di Metodi in banca dati, questo movimento è nominato esplicitamente in <b>4</b>: non è un tema d'esame, è uno <b>strumento</b> che tutti gli altri temi usano. Quindi qui non si va a fondo per il gusto di andarci: si copre per intero il programma delle lezioni 1-3, e ogni pezzo è orientato a ciò che lo consumerà dopo — la forma polare verso l'esponenziale complesso, la radice ennesima verso i punti di diramazione, la disuguaglianza triangolare verso le stime degli integrali.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Dire <b>perché</b> $\mathbb{C}$ è un campo ma <b>non</b> è un insieme ordinato, e quale conseguenza operativa ha (nessuna disuguaglianza fra complessi: si disuguaglia sempre fra moduli).</li>
+  <li>Passare da $x+iy$ a $re^{i\theta}$ e ritorno senza sbagliare quadrante, distinguendo $\arg(z)$ da $\mathrm{Arg}(z)$.</li>
+  <li>Usare il <b>coniugato</b> come strumento di conto — razionalizzare un rapporto, estrarre parte reale e immaginaria, provare che le radici complesse di un polinomio reale vanno in coppia.</li>
+  <li>Giustificare la <b>formula di Eulero</b> e ricavarne de Moivre, la potenza ennesima e le identità trigonometriche.</li>
+  <li>Calcolare la <b>radice ennesima</b> di un complesso sapendo che i valori sono $n$ e dove stanno, e riconoscere che quella multivocità è già il seme della polidromia (me-01b).</li>
+  <li>Dimostrare la <b>disuguaglianza triangolare</b> e la sua forma inversa, che sono l'unico modo di stimare una quantità complessa.</li>
+  </ul>
+  <p>Questo movimento non ha prerequisiti dentro il corso: è la radice. Ciò che apre è l'intero modulo di analisi complessa, a partire dalle funzioni analitiche (me-01).</p>`}
+]},
+
+/* ---------------- 01 · PERCHÉ ESISTE C ---------------- */
+{ num:'01', title:'Perché $\\mathbb{C}$ esiste, e cosa si guadagna e si perde', meta:'la catena delle chiusure · coppie ordinate · campo · e la perdita dell\'ordine',
+  blocchi:[
+  {t:'reveal', title:'La catena delle chiusure: ogni insieme nuovo ripara un\'operazione', tag:'costruzione', steps:[
+   {label:'$\\mathbb{N}$ chiude la somma, non la differenza', body:R`<p>Se $n_1,n_2\in\mathbb{N}$ allora $n_1+n_2\in\mathbb{N}$: la somma non fa mai uscire. La differenza sì — $n_1-n_2$ resta naturale solo se $n_1>n_2$. Per chiudere anche quella si allarga a $\mathbb{Z}$.</p>`},
+   {label:'$\\mathbb{Z}$ chiude la differenza, non il quoziente', body:R`<p>Il rapporto $z_1/z_2$ di due interi in generale non è intero. Si allarga a $\mathbb{Q}$.</p>`},
+   {label:'$\\mathbb{Q}$ non chiude la radice; $\\mathbb{R}$ non chiude la radice dei negativi', body:R`<p>La radice quadrata di $2$ non è razionale: si allarga a $\mathbb{R}$. Ma la radice quadrata di un numero <b>negativo</b> non è reale, e l'allargamento successivo è $\mathbb{C}$. Si definisce l'<b>unità immaginaria</b> $i=\sqrt{-1}$, cioè $i^2=-1$, e l'equazione $x^2+1=0$ acquista le due soluzioni $x=\pm i$.</p>`},
+   {label:'Il vero punto d\'arrivo: qui la catena si ferma', body:R`<p>La differenza fra questo allargamento e i precedenti è che <b>è l'ultimo</b>. Il teorema fondamentale dell'algebra dice che ogni polinomio a coefficienti complessi di grado $n$ ha esattamente $n$ radici in $\mathbb{C}$ (contate con molteplicità): $\mathbb{C}$ è <b>algebricamente chiuso</b>, e non esiste un'equazione polinomiale che costringa a inventare un insieme più grande. Le due cose vanno dette insieme, altrimenti $\mathbb{C}$ sembra una toppa fra le tante invece che il punto in cui il problema finisce.</p>`}
+  ]},
+  {t:'prosa', title:'La definizione onesta: coppie ordinate, non «radici di numeri negativi»', tag:'costruzione', html:R`
+  <p>Scrivere $i=\sqrt{-1}$ è comodo e logicamente scivoloso: il simbolo di radice è definito su $\mathbb{R}$, e usarlo per definire l'oggetto che serve a estenderlo è circolare. La definizione pulita non nomina la radice affatto.</p>
+  <p><b>Definizione.</b> $\mathbb{C}$ è l'insieme delle <b>coppie ordinate</b> $(x,y)$ con $x,y\in\mathbb{R}$, con le operazioni
+  $$(x_1,y_1)+(x_2,y_2)=(x_1+x_2,\;y_1+y_2),\qquad (x_1,y_1)\cdot(x_2,y_2)=(x_1x_2-y_1y_2,\;x_1y_2+x_2y_1).$$
+  La regola del prodotto non è arbitraria: è l'unica che rende $(0,1)\cdot(0,1)=(-1,0)$, cioè che fa esistere un elemento il cui quadrato è $-1$. Ribattezzato $i=(0,1)$ e identificato $x$ con $(x,0)$, ogni coppia si scrive
+  $$z=x+iy,$$
+  e il prodotto diventa il prodotto ordinario dei binomi con l'unica regola aggiuntiva $i^2=-1$. Da qui in poi si usa sempre la notazione $x+iy$, ma la definizione sotto è questa: <b>una coppia di reali con una moltiplicazione inventata apposta</b>.</p>
+  <p>I due reali si chiamano <b>parte reale</b> e <b>parte immaginaria</b>, $x=\Re(z)$ e $y=\Im(z)$, e la scrittura è <b>unica</b>: se $x+iy=x'+iy'$ allora $(x-x')=i(y'-y)$, e un reale può eguagliare un immaginario puro solo se sono entrambi nulli.</p>`},
+  {t:'gram', title:'Cosa $\\mathbb{C}$ è, e cosa non è', rows:[
+   [R`<b>è un campo</b>`, R`somma e prodotto sono commutativi, associativi, distributivi; ci sono lo zero $(0,0)$ e l'uno $(1,0)$; ogni $z$ ha l'opposto $-z$ e ogni $z\ne0$ ha il reciproco $z^{-1}$. Tutta l'algebra dei reali — raccogliere, semplificare, risolvere sistemi lineari — vale identica.`],
+   [R`<b>è algebricamente chiuso</b>`, R`ogni polinomio non costante ha una radice. È la proprietà che rende sensato parlare di «poli» e «zeri» di una funzione razionale contandoli tutti (me-03, me-04), e che fa funzionare la scomposizione in fratti semplici senza casi residui.`],
+   [R`<b>NON è ordinato</b>`, R`non esiste una relazione $\lt$ compatibile con le operazioni. Scrivere $z_1\lt z_2$ è privo di significato. <b>Conseguenza operativa</b>: ogni volta che serve una disuguaglianza si passa ai <b>moduli</b>, che sono reali — è per questo che la tappa 06 esiste e che tutte le stime di Metodi sono stime su $|f|$.`],
+   [R`<b>NON è più «grande» di $\\mathbb{R}$ come insieme</b>`, R`c'è una corrispondenza biunivoca fra $\mathbb{C}$ e $\mathbb{R}\times\mathbb{R}$: come cardinalità non si è guadagnato nulla. Si è guadagnata una <b>struttura</b>, cioè un prodotto. È un buon promemoria che in matematica la sostanza sta nelle operazioni, non negli elementi.`]
+  ]},
+  {t:'prosa', title:'Da dove arriva davvero, in fisica: l\'oscillatore armonico', tag:'il perché che serve', html:R`
+  <p>L'equazione del moto armonico $y''+y=0$ si risolve cercando soluzioni esponenziali $y(t)\sim e^{\alpha t}$, il che dà l'equazione indiciale $\alpha^2+1=0$, cioè proprio $x^2+1=0$. Con $\alpha_{1,2}=\pm i$ la soluzione generale si scrive
+  $$y(t)=\tilde A\,e^{it}+\tilde B\,e^{-it},$$
+  mentre per altra via si sa che le due soluzioni reali indipendenti sono $\sin t$ e $\cos t$. Le due scritture devono coincidere: se ne deduce che $\tilde A$ e $\tilde B$ sono complessi (e, come si vedrà nella tappa 02, <b>coniugati fra loro</b>, perché $y$ è reale) e che l'esponenziale immaginario ha a che fare con seno e coseno. Quel «ha a che fare» è la <b>formula di Eulero</b>, tappa 04.</p>
+  <p>Questa non è una curiosità storica: è il motivo per cui in tutta la fisica ondulatoria si scrive $e^{i(kx-\omega t)}$ e si prende la parte reale alla fine. Non è una scorciatoia di notazione — è il fatto che l'operazione «sfasa di $\varphi$» è la moltiplicazione per $e^{i\varphi}$, e le moltiplicazioni si compongono senza formule di addizione.</p>`}
+]},
+
+/* ---------------- 02 · CONIUGIO, MODULO, RECIPROCO ---------------- */
+{ num:'02', title:'Coniugio, modulo, reciproco: la grammatica dei conti', meta:'$\\bar z$ come operazione · $|z|^2=z\\bar z$ · razionalizzare · radici coniugate',
+  blocchi:[
+  {t:'prosa', title:'Le tre definizioni, e perché il coniugato è quella che lavora', tag:'grammatica', html:R`
+  <p>Il <b>modulo</b> di $z=x+iy$ è il reale non negativo $|z|=\sqrt{x^2+y^2}$, e vale $0$ se e solo se $z=0$. Il <b>coniugato</b> è $\bar z=x-iy$: lo stesso numero con la parte immaginaria ribaltata, cioè il riflesso rispetto all'asse reale nel piano della tappa 03.</p>
+  <p>Il coniugato non è un ornamento: è lo strumento con cui si fanno i conti, perché <b>trasforma una quantità complessa in una reale</b>. I tre fatti da cui discende tutto:
+  $$z\bar z=(x+iy)(x-iy)=x^2+y^2=|z|^2,\qquad \Re(z)=\frac{z+\bar z}{2},\qquad \Im(z)=\frac{z-\bar z}{2i}.$$
+  Il primo è quello che si usa cento volte: per dividere per un complesso si moltiplica sopra e sotto per il coniugato del denominatore, e il denominatore diventa reale.
+  $$\frac{1}{z}=\frac{1}{x+iy}\cdot\frac{x-iy}{x-iy}=\frac{x-iy}{x^2+y^2}=\frac{\bar z}{|z|^2}.$$
+  Questa è anche la formula del <b>reciproco</b>, e vale per ogni $z\ne0$: è la prova costruttiva che $\mathbb{C}$ è un campo.</p>`},
+  {t:'gram', title:'Le proprietà che si usano senza ripensarci', rows:[
+   [R`<b>coniugio</b>`, R`$\overline{z_1\pm z_2}=\bar z_1\pm\bar z_2$, $\overline{z_1z_2}=\bar z_1\bar z_2$, $\overline{(z_1/z_2)}=\bar z_1/\bar z_2$, $\bar{\bar z}=z$. Il coniugio è un <b>automorfismo</b> del campo: passa attraverso ogni operazione razionale. È esattamente la proprietà che serve nel teorema delle radici coniugate, qui sotto.`],
+   [R`<b>modulo</b>`, R`$|\bar z|=|z|$, $|z_1z_2|=|z_1||z_2|$, $|z_1/z_2|=|z_1|/|z_2|$. Il modulo è <b>moltiplicativo</b> — e <b>non</b> additivo: su una somma si ha solo la disuguaglianza triangolare (tappa 06).`],
+   [R`<b>parti</b>`, R`$|\Re(z)|\le|z|$ e $|\Im(z)|\le|z|$, con uguaglianza solo quando l'altra parte è nulla. Due disuguaglianze elementari che sono il primo passo di quasi ogni stima.`],
+   [R`<b>identità del parallelogramma</b>`, R`$|z_1+z_2|^2+|z_1-z_2|^2=2(|z_1|^2+|z_2|^2)$: si prova espandendo con $|w|^2=w\bar w$. È la stessa identità che in me-06 caratterizza le norme che vengono da un prodotto scalare — e non è un caso: $\mathbb{C}$ con $\langle z_1,z_2\rangle=\bar z_1 z_2$ è uno spazio di Hilbert di dimensione uno.`]
+  ]},
+  {t:'reveal', title:'Le radici complesse di un polinomio reale vanno in coppia', tag:'derivazione', steps:[
+   {label:'L\'enunciato', body:R`<p>Sia $\sum_{k=0}^{N}a_kz^k=0$ un'equazione a coefficienti <b>reali</b>, cioè $\bar a_k=a_k$. Se $z_0$ è radice, allora anche $\bar z_0$ lo è.</p>`},
+   {label:'La dimostrazione, in una riga', body:R`<p>Basta coniugare l'identità $\sum_k a_kz_0^k=0$ e usare che il coniugio passa attraverso somme e prodotti:
+   $$0=\overline{\sum_k a_k z_0^k}=\sum_k \bar a_k\,\bar z_0^{\,k}=\sum_k a_k\,\bar z_0^{\,k},$$
+   che è l'equazione originale valutata in $\bar z_0$. $\blacksquare$</p>`},
+   {label:'Perché ci interessa in fisica, e non solo in algebra', body:R`<p>È la ragione strutturale per cui le soluzioni <b>reali</b> di un'equazione differenziale a coefficienti reali si scrivono come $\tilde Ae^{i\omega t}+\tilde Be^{-i\omega t}$ con $\tilde B=\bar{\tilde A}$: i due esponenti sono radici coniugate dell'equazione indiciale, e la somma di un numero col suo coniugato è reale ($z+\bar z=2\Re(z)$). Torna nella tappa 01 come promessa mantenuta, e tornerà in me-11 ogni volta che si cercano soluzioni oscillanti di un'equazione reale.</p>`}
+  ]},
+  {t:'esercizio', title:'Due conti che sono il collaudo della grammatica',
+   src:'palestra — razionalizzare, e la radice quadrata senza forma polare',
+   testo:R`(a) Scrivere $\dfrac{1+i}{2-i}$ nella forma $x+iy$. (b) Trovare tutte le $w$ con $w^2=3+4i$, senza usare la forma polare. (c) Calcolare $|(1+i)(1-2i)|$ in due modi.`,
+   steps:[
+    {label:'(a) moltiplica per il coniugato del denominatore', body:R`<p>Il denominatore $2-i$ ha coniugato $2+i$, e $(2-i)(2+i)=|2-i|^2=5$. Quindi
+    $$\frac{1+i}{2-i}=\frac{(1+i)(2+i)}{5}=\frac{2+i+2i+i^2}{5}=\dfrac{1+3i}{5},$$
+    cioè parte reale $1/5$ e parte immaginaria $3/5$. La mossa è sempre la stessa: <b>il coniugato rende reale il denominatore</b>.</p>`},
+    {label:'(b) sistema fra parte reale e parte immaginaria', body:R`<p>Poni $w=\alpha+i\beta$ e imponi $(\alpha+i\beta)^2=3+4i$. Separando le parti:
+    $$\alpha^2-\beta^2=3,\qquad 2\alpha\beta=4.$$
+    Sommando i quadrati delle due si ottiene $(\alpha^2+\beta^2)^2=3^2+4^2=25$, cioè $\alpha^2+\beta^2=5$ (positivo per costruzione). Con la prima: $\alpha^2=4$, $\beta^2=1$. Il segno lo decide la seconda equazione, che impone $\alpha\beta>0$, cioè segni <b>concordi</b>. Restano due valori opposti:
+    $$w=\pm(2+i),\qquad\text{e infatti}\quad (2+i)^2=3+4i.$$
+    In generale la formula che nasce da questo sistema è $\sqrt{x+iy}=\pm\left[\sqrt{\tfrac12(x+|z|)}+i\,\mathrm{sgn}(y)\sqrt{\tfrac12(-x+|z|)}\right]$ per $y\ne0$: gli argomenti sotto radice sono automaticamente non negativi perché $|z|\ge|x|$. <b>La radice quadrata di un complesso ha sempre due valori opposti</b>, che coincidono solo per $z=0$ — ed è il primo incontro con la multivocità, che nella tappa 05 diventa la regola generale.</p>`},
+    {label:'(c) il modulo è moltiplicativo', body:R`<p>Primo modo, moltiplicando: $(1+i)(1-2i)=1-2i+i+2=3-i$, il cui modulo è $\sqrt{9+1}=\sqrt{10}$. Secondo modo, usando la moltiplicatività: $|1+i|\,|1-2i|=\sqrt2\cdot\sqrt5$. Coincidono, e il secondo modo è quello che si usa quando i fattori sono tanti — in me-04, stimare il modulo di un integrando fattorizzato è esattamente questo conto.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · IL PIANO DI ARGAND E LA FORMA POLARE ---------------- */
+{ num:'03', title:'Il piano di Argand e la rappresentazione polare', meta:'$z$ come vettore · $r$ e $\\theta$ · $\\arg$ multivoco contro $\\mathrm{Arg}$ principale · il prodotto diventa geometria',
+  blocchi:[
+  {t:'prosa', title:'Il piano di Argand: la rappresentazione, e cosa ci si vede', tag:'grammatica', html:R`
+  <p>La corrispondenza biunivoca fra $\mathbb{C}$ e $\mathbb{R}\times\mathbb{R}$ si disegna: a $z=x+iy$ si associa il punto di ascissa $x$ e ordinata $y$. Quel disegno si chiama <b>piano di Argand</b> (o di Argand-Gauss), con l'asse orizzontale detto asse reale e quello verticale asse immaginario.</p>
+  <p>Sul piano di Argand le operazioni della tappa 01 acquistano una forma visibile: la <b>somma</b> è la regola del parallelogramma, esattamente come per i vettori di $\mathbb{R}^2$; la <b>coniugazione</b> è la riflessione rispetto all'asse reale; la <b>moltiplicazione per un reale</b> $a>1$ è una dilatazione; la moltiplicazione per $i$ manda $x+iy$ in $-y+ix$, cioè è una <b>rotazione di un quarto di giro</b> in senso antiorario. Il <b>modulo</b> è la distanza dall'origine.</p>
+  <p>Una sola operazione resta opaca in coordinate cartesiane: il <b>prodotto</b> di due complessi generici, la cui formula $(x_1x_2-y_1y_2)+i(x_1y_2+x_2y_1)$ non suggerisce nessuna figura. È il segnale che le coordinate sono sbagliate, non che l'operazione sia brutta.</p>`},
+  {t:'reveal', title:'La rappresentazione polare, e la trappola dell\'argomento', tag:'costruzione', steps:[
+   {label:'Le coordinate giuste', body:R`<p>Si passa alle coordinate polari del piano: $x=r\cos\theta$, $y=r\sin\theta$, da cui la <b>rappresentazione polare</b>
+   $$z=r(\cos\theta+i\sin\theta),\qquad r=|z|\ge0,\qquad \theta=\arg(z).$$
+   Il raggio è il modulo, già noto. Il nuovo oggetto è l'angolo $\theta$, detto <b>argomento</b> di $z$.</p>`},
+   {label:'L\'argomento non è un numero: è una classe', body:R`<p>Qui sta la sottigliezza che produce metà degli errori d'esame. L'angolo che individua $z$ è definito solo <b>a meno di giri interi</b>: $\theta$ e $\theta+2k\pi$ con $k\in\mathbb{Z}$ danno lo stesso punto. Quindi $\arg(z)$ è un insieme di valori, non un valore. Si sceglie allora un rappresentante, l'<b>argomento principale</b> $\mathrm{Arg}(z)$, con la convenzione
+   $$-\pi\lt\mathrm{Arg}(z)\le\pi,\qquad \arg(z)=\mathrm{Arg}(z)+2k\pi.$$
+   Per $z=0$ l'argomento non è definito: l'origine non ha direzione.</p>`},
+   {label:'Come si calcola $\\mathrm{Arg}$ senza sbagliare quadrante', body:R`<p>La formula inversa ingenua $\theta=\arctan(y/x)$ è <b>insufficiente</b>, perché l'arcotangente ha codominio $(-\pi/2,\pi/2)$ e manda nello stesso valore punti del primo e del terzo quadrante. La forma corretta:
+   $$\mathrm{Arg}(z)=\begin{cases}\arctan(y/x)+\pi & x\lt0,\ y\gt0\\[2pt] \arctan(y/x) & x\gt0\\[2pt] \arctan(y/x)-\pi & x\lt0,\ y\lt0\end{cases}$$
+   con i casi $x=0$ trattati a parte ($\mathrm{Arg}=\pi/2$ se $y>0$, $-\pi/2$ se $y<0$). Esempio da tenere a mente: per $z=-1+i$ l'arcotangente dà $\arctan(-1)=-\pi/4$, che è nel quarto quadrante, mentre il punto sta nel secondo; correggendo di $\pi$ si ottiene $\mathrm{Arg}(-1+i)=\tfrac{3\pi}{4}$. <b>Il segno di $x$ e $y$ va guardato prima di premere arcotangente</b>, sempre.</p>`},
+   {label:'La discontinuità che ci porteremo dietro per tutto il corso', body:R`<p>La scelta $-\pi\lt\mathrm{Arg}\le\pi$ è arbitraria ma necessaria, e ha un prezzo: $\mathrm{Arg}$ <b>salta</b> di $2\pi$ attraversando il semiasse reale negativo. Quella linea di salto è il primo esempio di <b>taglio</b>, e l'ambiguità di $2k\pi$ che l'ha resa necessaria è il primo esempio di <b>polidromia</b>. Non è un dettaglio tecnico da archiviare: è l'oggetto di me-01b, e tutto il mestiere del logaritmo complesso e delle radici sta già qui in embrione.</p>`}
+  ]},
+  {t:'prosa', title:'Il prodotto, finalmente: moduli si moltiplicano, argomenti si sommano', tag:'il perché che serve', html:R`
+  <p>Con $z_1=r_1(\cos\theta_1+i\sin\theta_1)$ e $z_2=r_2(\cos\theta_2+i\sin\theta_2)$, il prodotto si calcola e si riconoscono le formule di addizione:
+  $$z_1z_2=r_1r_2\left[(\cos\theta_1\cos\theta_2-\sin\theta_1\sin\theta_2)+i(\cos\theta_1\sin\theta_2+\cos\theta_2\sin\theta_1)\right]=r_1r_2\left[\cos(\theta_1+\theta_2)+i\sin(\theta_1+\theta_2)\right].$$
+  Cioè
+  $$|z_1z_2|=|z_1||z_2|,\qquad \arg(z_1z_2)=\arg(z_1)+\arg(z_2).$$
+  <b>Moltiplicare per $z_2$ è dilatare di $|z_2|$ e ruotare di $\arg(z_2)$.</b> Ecco la frase della tappa 00, dimostrata: la rotazione è diventata una moltiplicazione.</p>
+  <p><b>Attenzione alla seconda riga.</b> Vale per $\arg$, cioè fra classi, e <b>non</b> per $\mathrm{Arg}$: la somma di due argomenti principali può uscire dall'intervallo $(-\pi,\pi]$, e allora va riportata dentro sottraendo $2\pi$. Scrivere $\mathrm{Arg}(z_1z_2)=\mathrm{Arg}(z_1)+\mathrm{Arg}(z_2)$ è falso in generale — e sbagliarlo su un taglio, in me-01b, costa l'esercizio intero.</p>
+  <p>Analogamente, dall'espressione del reciproco segue $|1/z|=1/|z|$ e $\arg(1/z)=-\arg(z)$, quindi per il rapporto $|z_1/z_2|=|z_1|/|z_2|$ e $\arg(z_1/z_2)=\arg(z_1)-\arg(z_2)$.</p>`},
+  {t:'plot', title:'Il prodotto sul piano di Argand: gli angoli si sommano',
+   intro:R`Due numeri $z_1$ e $z_2$ di moduli $1{,}2$ e $1{,}4$ e argomenti $30^\circ$ e $50^\circ$, e il loro prodotto: modulo $1{,}68$, argomento $80^\circ$. La circonferenza tratteggiata ha raggio $|z_1z_2|$.`,
+   plots:[
+    {kind:'func2d', xr:[-0.4,2.0], yr:[-0.4,2.0], equal:true, ticks:true, height:360,
+     title:'z1 · z2  —  moduli moltiplicati, argomenti sommati',
+     curves:[{f:'0*x', col:'#0e1117', width:0.1}],
+     rings:[{r:1.68, col:'#b98cff', width:1.6, dash:true}],
+     segs:[{x1:0,y1:0,x2:1.039,y2:0.6, col:'#4c8dff', arrow:true},
+           {x1:0,y1:0,x2:0.900,y2:1.072, col:'#ff9b6b', arrow:true},
+           {x1:0,y1:0,x2:0.292,y2:1.654, col:'#6bdc9b', arrow:true}],
+     marks:[{x:1.039, y:0.6, label:'z1  (r=1.2, 30°)', col:'#4c8dff'},
+            {x:0.900, y:1.072, label:'z2  (r=1.4, 50°)', col:'#ff9b6b'},
+            {x:0.292, y:1.654, label:'z1z2  (r=1.68, 80°)', col:'#6bdc9b', up:true}]}
+   ],
+   leggi:R`Il vettore verde non è né la somma né la proiezione dei due: è più <b>lungo</b> di entrambi (perché $1{,}2\cdot1{,}4=1{,}68$) e più <b>inclinato</b> di entrambi (perché $30^\circ+50^\circ=80^\circ$). Questa è l'unica figura da ricordare di tutta la tappa: se i moduli sono maggiori di uno il prodotto allontana dall'origine, se sono minori la avvicina, e in ogni caso ruota. Sul cerchio unitario ($r=1$) la moltiplicazione è <b>solo</b> rotazione — ed è la ragione per cui $e^{i\theta}$, che vive lì, descrive le fasi.`}
+]},
+
+/* ---------------- 04 · LA FORMULA DI EULERO ---------------- */
+{ num:'04', title:'La formula di Eulero e la potenza $n$-esima', meta:'$e^{i\\theta}=\\cos\\theta+i\\sin\\theta$ · de Moivre · la trigonometria come contabilità di esponenti',
+  blocchi:[
+  {t:'reveal', title:'La giustificazione via serie (e perché è una giustificazione, non una dimostrazione)', tag:'derivazione', steps:[
+   {label:'La richiesta', body:R`<p>Si vuole dare senso a $e^{i\theta}$. Il criterio è: qualunque cosa sia, deve <b>conservare la proprietà che definisce l'esponenziale</b>, cioè $\frac{d}{d\theta}e^{a\theta}=a\,e^{a\theta}$, anche quando $a=i$.</p>`},
+   {label:'Lo sviluppo in serie', body:R`<p>Assunta quella regola, si sviluppa in <span class="str" data-str="serie-di-potenze">serie di potenze</span> attorno a $\theta=0$, usando $i^2=-1$, $i^3=-i$, $i^4=1$ e così via:
+   $$e^{i\theta}=1+i\theta-\frac{\theta^2}{2!}-i\frac{\theta^3}{3!}+\frac{\theta^4}{4!}+\cdots$$</p>`},
+   {label:'Si separano le due parti, e si riconoscono', body:R`<p>Raccogliendo i termini senza $i$ e quelli con $i$:
+   $$e^{i\theta}=\left(1-\frac{\theta^2}{2!}+\frac{\theta^4}{4!}-\cdots\right)+i\left(\theta-\frac{\theta^3}{3!}+\frac{\theta^5}{5!}-\cdots\right)=\cos\theta+i\sin\theta.$$
+   Le due serie sono esattamente quelle di coseno e seno. Questa è la <b>formula di Eulero</b>, e con essa la rappresentazione polare diventa
+   $$z=r e^{i\theta}.$$</p>`},
+   {label:'Perché è ancora una giustificazione', body:R`<p>Due passaggi sono stati assunti e non provati: che la regola di derivazione valga per esponente immaginario, e che si possa riordinare la serie separando le parti. Entrambi si dimostrano davvero solo quando $e^z$ è <b>definita</b> come somma della sua serie di potenze su tutto $\mathbb{C}$ e se ne prova la convergenza assoluta — cosa che si fa in me-01. Qui la formula si <b>adotta</b>, e lo si dichiara. È la stessa onestà che Bonciani mette nel rimandare la dimostrazione al capitolo delle funzioni analitiche.</p>`}
+  ]},
+  {t:'prosa', title:'Cosa si guadagna subito: de Moivre e la potenza $n$-esima', tag:'regola operativa', html:R`
+  <p>Con la forma esponenziale, elevare a potenza è banale, perché gli esponenti si sommano:
+  $$z^n=\left(re^{i\theta}\right)^n=r^n e^{in\theta}=r^n\left[\cos(n\theta)+i\sin(n\theta)\right].$$
+  Per $r=1$ questa è la <b>formula di de Moivre</b>, $(\cos\theta+i\sin\theta)^n=\cos(n\theta)+i\sin(n\theta)$. In pratica: <b>si eleva il modulo, si moltiplica l'angolo</b>. Confrontare con lo sforzo di espandere $(x+iy)^n$ col binomio di Newton dice tutto sul perché conviene passare in polare prima di calcolare.</p>
+  <p>Due esempi che è utile saper fare a mente. Primo: $1+i$ ha modulo $\sqrt2$ e argomento $\pi/4$, quindi $(1+i)^8=(\sqrt2)^8e^{i2\pi}=16$. Secondo: $1+i\sqrt3$ ha modulo $2$ e argomento $\pi/3$, quindi $(1+i\sqrt{3})^3=8e^{i\pi}=-8$. Nessuno dei due si farebbe volentieri in cartesiane.</p>`},
+  {t:'prosa', title:'La trigonometria smette di essere un elenco di formule', tag:'sintesi', html:R`
+  <p>Invertendo la formula di Eulero (scrivendola per $\theta$ e per $-\theta$ e sommando o sottraendo) si ottengono le <b>rappresentazioni esponenziali</b>
+  $$\cos\theta=\frac{e^{i\theta}+e^{-i\theta}}{2},\qquad \sin\theta=\frac{e^{i\theta}-e^{-i\theta}}{2i}.$$
+  Da qui ogni identità trigonometrica diventa un conto di esponenti. Le formule di addizione sono la proprietà $e^{i(\alpha+\beta)}=e^{i\alpha}e^{i\beta}$ letta per parti; le formule di duplicazione sono de Moivre con $n=2$; le formule di Werner (prodotto in somma) sono la distributiva applicata a quattro esponenziali. <b>Non c'è niente da ricordare oltre a Eulero.</b></p>
+  <p>Questa è anche la porta d'ingresso a due tecniche che si useranno di continuo: in me-04 gli integrali trigonometrici su $[0,2\pi]$ si risolvono ponendo $z=e^{i\theta}$ e trasformandoli in integrali sul cerchio unitario, proprio grazie a queste due formule; e in me-10 la serie di Fourier in forma esponenziale è più maneggevole di quella in seni e coseni per la stessa ragione.</p>`}
+]},
+
+/* ---------------- 05 · RADICE n-ESIMA E RADICI DELL'UNITÀ ---------------- */
+{ num:'05', title:'La radice $n$-esima e le radici dell\'unità', meta:'$n$ valori distinti · poligono regolare · somma nulla · e il primo seme della polidromia',
+  blocchi:[
+  {t:'reveal', title:'Perché le radici sono esattamente $n$', tag:'derivazione', steps:[
+   {label:'L\'equazione da risolvere', body:R`<p>Si dice <b>radice ennesima</b> di $z$ ogni $w\in\mathbb{C}$ tale che $z=w^n$. Scrivendo $w=\rho e^{i\varphi}$ e $z=|z|e^{i\theta}$ e usando la potenza della tappa 04, l'equazione $|z|e^{i\theta}=\rho^ne^{in\varphi}$ si spezza in due condizioni <b>reali</b>: una sui moduli e una sugli argomenti.</p>`},
+   {label:'Il modulo è forzato, l\'argomento no', body:R`<p>Sui moduli: $|z|=\rho^n$, che fra i reali positivi ha <b>una</b> sola soluzione $\rho=\sqrt[n]{|z|}$. Sugli argomenti: $n\varphi=\theta+2k\pi$ con $k\in\mathbb{Z}$, perché l'uguaglianza fra argomenti è vera solo a meno di giri interi — è la multivocità della tappa 03 che torna a chiedere il conto. Quindi
+   $$w_k=\sqrt[n]{|z|}\;e^{i\left(\frac{\theta+2k\pi}{n}\right)},\qquad k=0,1,\dots,n-1.$$</p>`},
+   {label:'Perché ci si ferma a $k=n-1$', body:R`<p>Passando da $k$ a $k+n$ l'argomento cresce di $2\pi$, cioè si torna sullo stesso punto: i valori distinti sono esattamente $n$, e da $k=n$ in poi si ripetono. Hanno <b>tutti lo stesso modulo</b> $\sqrt[n]{|z|}$ e argomenti spaziati di $2\pi/n$: stanno dunque su una circonferenza, ai vertici di un <b>poligono regolare di $n$ lati</b>. Il caso $n=2$ dà i due valori opposti già visti in cartesiane nella tappa 02; il caso $n=3$ dà un triangolo equilatero.</p>`}
+  ]},
+  {t:'plot', title:'Le sei radici dell\'unità: un esagono regolare',
+   intro:R`Le soluzioni di $w^6=1$: sei punti sul cerchio unitario, spaziati di $60^\circ$, il primo dei quali è $1$.`,
+   plots:[
+    {kind:'func2d', xr:[-1.5,1.5], yr:[-1.5,1.5], equal:true, ticks:true, height:360,
+     title:'w^6 = 1  —  i vertici di un esagono inscritto nel cerchio unitario',
+     curves:[{f:'0*x', col:'#0e1117', width:0.1}],
+     rings:[{r:1, col:'#b98cff', width:2, dash:true}],
+     marks:[{x:1, y:0, label:'k=0', col:'#6bdc9b'},
+            {x:0.5, y:0.866, label:'k=1', col:'#6bdc9b', up:true},
+            {x:-0.5, y:0.866, label:'k=2', col:'#6bdc9b', up:true, left:true},
+            {x:-1, y:0, label:'k=3', col:'#6bdc9b', left:true},
+            {x:-0.5, y:-0.866, label:'k=4', col:'#6bdc9b', left:true},
+            {x:0.5, y:-0.866, label:'k=5', col:'#6bdc9b'}]}
+   ],
+   leggi:R`I sei punti sono $e^{ik\pi/3}$ per $k=0,\dots,5$, cioè $1$, $\tfrac12+i\tfrac{\sqrt3}{2}$, $-\tfrac12+i\tfrac{\sqrt3}{2}$, $-1$, $-\tfrac12-i\tfrac{\sqrt3}{2}$, $\tfrac12-i\tfrac{\sqrt3}{2}$. Due cose da leggere nella figura. La prima: le radici sono <b>simmetriche rispetto all'asse reale</b>, perché $w^6=1$ è un'equazione a coefficienti reali e vale il teorema delle radici coniugate della tappa 02 — la figura e il teorema dicono la stessa cosa. La seconda: i sei vettori, sommati testa-coda, chiudono un esagono e tornano all'origine; la loro somma è zero, e non per caso.`},
+  {t:'prosa', title:'Le radici dell\'unità, e perché la loro somma è nulla', tag:'derivazione', html:R`
+  <p>Le <b>radici dell'unità</b> sono il caso $z=1$, cioè $|z|=1$ e $\theta=0$:
+  $$w_k=e^{i\frac{2k\pi}{n}},\qquad k=0,1,\dots,n-1.$$
+  Sono i vertici di un poligono regolare inscritto nel cerchio unitario, con un vertice in $1$. Servono come <b>mattoni</b>: le radici ennesime di un $z$ qualsiasi si ottengono prendendone una e moltiplicandola per tutte le radici ennesime dell'unità, perché moltiplicare per $w_k$ significa ruotare di $2k\pi/n$ senza cambiare il modulo.</p>
+  <p>La loro somma è nulla, e lo si vede in due modi. <b>Algebricamente</b>, sono le $n$ radici del polinomio $w^n-1$, e la somma delle radici è meno il coefficiente di $w^{n-1}$, che qui è zero. <b>Con la serie geometrica</b>, ponendo $q=e^{2\pi i/n}$ la somma $\sum_{k=0}^{n-1}q^k$ è una geometrica finita di ragione $q$, quindi vale $\frac{q^n-1}{q-1}$; ma $q$ è una radice ennesima dell'unità, dunque il numeratore è nullo, e il denominatore non lo è perché $q\ne1$ per $n\ge2$. Dunque
+  $$\sum_{k=0}^{n-1}e^{i\frac{2k\pi}{n}}=0.$$
+  Non è una curiosità: è la relazione di <b>ortogonalità discreta</b> che regge la trasformata di Fourier discreta, ed è il motivo per cui in un reticolo cristallino le somme sulle fasi dei siti si annullano tranne quando il vettore d'onda è un vettore del reticolo reciproco. Quella cancellazione, in fisica dello stato solido, si chiama condizione di Laue.</p>`},
+  {t:'prosa', title:'Qui nasce la polidromia, ed è bene saperlo da subito', tag:'prolessi interna', html:R`
+  <p>La radice ennesima non è una funzione: a un ingresso associa $n$ uscite. Finché si risolve un'equazione la cosa è innocua — si elencano le $n$ soluzioni e si va avanti. Diventa il problema centrale del corso appena si vuole <b>una funzione</b> $w(z)=\sqrt[n]{z}$, perché bisogna scegliere quale delle $n$ uscite prendere, e la scelta non si può fare in modo continuo su tutto il piano.</p>
+  <p>Il motivo si vede già nella formula: se $z$ fa un giro completo attorno all'origine, $\theta$ cresce di $2\pi$ e l'argomento di $w_0$ cresce di $2\pi/n$ — <b>non si torna al valore di partenza</b>, si finisce sulla radice successiva. Solo dopo $n$ giri si chiude. L'origine è dunque un punto speciale, che si chiamerà <b>punto di diramazione</b>, e la linea lungo cui si decide di far avvenire il salto si chiamerà <b>taglio</b>. È l'oggetto di me-01b, e quel movimento si limita a dare nomi e tecnica a ciò che è già tutto scritto nella condizione $n\varphi=\theta+2k\pi$.</p>`}
+]},
+
+/* ---------------- 06 · LA DISUGUAGLIANZA TRIANGOLARE ---------------- */
+{ num:'06', title:'La disuguaglianza triangolare: l\'unico modo di stimare un complesso', meta:'dimostrazione · forma inversa · e perché senza ordine restano solo i moduli',
+  blocchi:[
+  {t:'reveal', title:'Dimostrazione, e dove entra ciascuna ipotesi', tag:'derivazione', steps:[
+   {label:'Il punto di partenza: i reali sono ordinati, i complessi no', body:R`<p>$|z|$, $\Re(z)$ e $\Im(z)$ sono numeri <b>reali</b>, e su $\mathbb{R}$ le disuguaglianze hanno senso. Da $|z|^2=\Re(z)^2+\Im(z)^2$ seguono subito
+   $$|\Re(z)|\le|z|,\qquad |\Im(z)|\le|z|.$$
+   Tutta la dimostrazione consiste nel ricondurre una disuguaglianza fra complessi a queste due, che sono fra reali.</p>`},
+   {label:'Si espande il modulo quadro della somma', body:R`<p>Usando $|w|^2=w\bar w$ e $\overline{z_1+z_2}=\bar z_1+\bar z_2$:
+   $$|z_1+z_2|^2=(z_1+z_2)(\bar z_1+\bar z_2)=|z_1|^2+z_1\bar z_2+\bar z_1 z_2+|z_2|^2=|z_1|^2+2\Re(z_1\bar z_2)+|z_2|^2,$$
+   dove l'ultimo passaggio usa che $\bar z_1z_2$ è il coniugato di $z_1\bar z_2$, e che $w+\bar w=2\Re(w)$.</p>`},
+   {label:'Si maggiora la parte reale con il modulo', body:R`<p>Per la prima disuguaglianza del passo 1, $\Re(z_1\bar z_2)\le|z_1\bar z_2|=|z_1||z_2|$, e quindi
+   $$|z_1+z_2|^2\le|z_1|^2+2|z_1||z_2|+|z_2|^2=\left(|z_1|+|z_2|\right)^2.$$
+   Estraendo la radice quadrata fra quantità non negative si ottiene la <b>disuguaglianza triangolare</b>
+   $$|z_1+z_2|\le|z_1|+|z_2|.\qquad\blacksquare$$</p>`},
+   {label:'Quando vale l\'uguaglianza', body:R`<p>Il solo passaggio in cui si è perso qualcosa è $\Re(w)\le|w|$, che è un'uguaglianza se e solo se $w$ è reale non negativo. Quindi vale l'uguale esattamente quando $z_1\bar z_2\ge0$, cioè quando $z_1$ e $z_2$ hanno lo <b>stesso argomento</b> (o uno dei due è nullo): i due vettori sono allineati e concordi, e il «triangolo» degenera in un segmento. È la stessa condizione geometrica del triangolo reale — un lato è minore della somma degli altri due, uguale solo se è schiacciato.</p>`}
+  ]},
+  {t:'prosa', title:'Le due forme che si usano davvero', tag:'regola operativa', html:R`
+  <p>Per induzione la disuguaglianza si estende a $n$ addendi, $|z_1+\cdots+z_n|\le|z_1|+\cdots+|z_n|$, e per passaggio al limite alle serie e agli integrali — è quest'ultima estensione, $\left|\int_\gamma f\,dz\right|\le\int_\gamma|f|\,|dz|$, la forma in cui si incontrerà in me-02 come base della <b>stima ML</b>.</p>
+  <p>La seconda forma è quella che serve per maggiorare un <b>denominatore</b>, ed è la più dimenticata. Da $|z_1|=|z_1-z_2+z_2|\le|z_1-z_2|+|z_2|$ si ricava $|z_1|-|z_2|\le|z_1-z_2|$, e scambiando i ruoli si ottiene la <b>disuguaglianza triangolare inversa</b>
+  $$\left||z_1|-|z_2|\right|\le|z_1-z_2|.$$
+  A cosa serve: se bisogna stimare $\left|\frac{1}{z^2+1}\right|$ su una circonferenza di raggio $R$ grande, si scrive $|z^2+1|\ge|z|^2-1$, che sul cerchio $|z|=R$ vale $R^2-1$, e quindi il modulo è minore di $\frac{1}{R^2-1}$. <b>La disuguaglianza diretta maggiora i numeratori, quella inversa minora i denominatori</b>, e insieme coprono ogni stima che si farà nel lemma del cerchio grande e nel lemma di Jordan (me-04).</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché non ha senso chiedersi se $1+i$ sia maggiore di $2$?`,
+    a:R`Perché $\mathbb{C}$ <b>non è un insieme ordinato</b>: non esiste un ordine compatibile con le operazioni di campo. Se ne esistesse uno, da $i\ne0$ seguirebbe $i>0$ oppure $i<0$, e in entrambi i casi $i^2>0$, cioè $-1>0$: assurdo. Il confronto si fa sempre fra i <b>moduli</b>, che sono reali — e infatti $|1+i|=\sqrt2<2$.`},
+   {q:R`$\mathrm{Arg}(z_1z_2)=\mathrm{Arg}(z_1)+\mathrm{Arg}(z_2)$: vero o falso?`,
+    a:R`<b>Falso in generale.</b> La somma vale per $\arg$, che è definito a meno di $2k\pi$. Controesempio: $z_1=z_2=e^{i3\pi/4}$ hanno $\mathrm{Arg}=3\pi/4$ ciascuno, ma il prodotto è $e^{i3\pi/2}=e^{-i\pi/2}$, il cui argomento principale è $-\pi/2$ e non $3\pi/2$. La somma degli argomenti principali è uscita dall'intervallo $(-\pi,\pi]$ e va riportata dentro.`},
+   {q:R`Quante sono le soluzioni di $w^4=-16$, e dove stanno?`,
+    a:R`Quattro. Si scrive $-16=16e^{i\pi}$, da cui $\rho=\sqrt[4]{16}=2$ e $\varphi=\frac{\pi+2k\pi}{4}$ per $k=0,1,2,3$: gli argomenti sono $\pi/4$, $3\pi/4$, $5\pi/4$, $7\pi/4$. Stanno sulla circonferenza di raggio $2$, ai vertici di un <b>quadrato</b> ruotato di $45^\circ$, cioè sulle bisettrici dei quadranti: $\pm\sqrt2\pm i\sqrt2$ in tutte e quattro le combinazioni di segno.`},
+   {q:R`Come si stima $\left|\dfrac{e^{iz}}{z^3+z}\right|$ su $|z|=R$ con $R$ grande e $\Im(z)\ge0$?`,
+    a:R`Numeratore con la diretta, denominatore con l'inversa. Sopra: $|e^{iz}|=e^{-\Im(z)}\le1$ per $\Im(z)\ge0$ (ed è questa la ragione per cui in me-04 il cerchio si chiude nel semipiano superiore e non in quello inferiore). Sotto: $|z^3+z|\ge|z|^3-|z|$, che sul cerchio $|z|=R$ vale $R^3-R$. Quindi il modulo è minore di $\frac{1}{R^3-R}$, che tende a zero come $R^{-3}$ — abbastanza in fretta perché l'integrale sul semicerchio, lungo $\pi R$, svanisca.`}
+  ]}
+]},
+
+/* ---------------- 07 · DOVE RIAPPARE ---------------- */
+{ num:'07', title:'Dove riappare questo movimento', meta:'la fase · il cerchio unitario · le radici come simmetrie',
+  blocchi:[
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il numero complesso in forma polare</b> $z=re^{i\theta}$, con il prodotto che moltiplica i moduli e somma gli angoli, e la radice ennesima che ha $n$ valori disposti su un poligono regolare.`,
+   rotte:[
+    {dove:'Meccanica quantistica:<br>la fase', txt:R`Uno stato quantistico è un vettore a componenti complesse, e la <b>fase</b> $e^{i\varphi}$ è ciò che distingue la sovrapposizione dalla miscela statistica: l'interferenza è la somma di due complessi, non di due probabilità. Il fatto che una fase globale non sia osservabile — che $|\psi\rangle$ e $e^{i\varphi}|\psi\rangle$ siano lo stesso stato — è la stessa multivocità dell'argomento vista qui, promossa a principio fisico.`},
+    {dove:'Oscillazioni e onde:<br>l\'ampiezza complessa', txt:R`Scrivere $x(t)=\Re\left(Ae^{i\omega t}\right)$ con $A$ complessa impacchetta ampiezza e fase in un solo numero, e trasforma le equazioni differenziali del regime forzato in equazioni algebriche. L'impedenza complessa di un circuito è esattamente questo: un rapporto fra due complessi, il cui modulo dà l'attenuazione e il cui argomento dà lo sfasamento.`},
+    {dove:'Stato solido:<br>le radici dell\'unità', txt:R`Le radici $n$-esime dell'unità sono le fasi dei siti di un reticolo periodico con condizioni al contorno cicliche, e la loro somma nulla è la condizione di interferenza distruttiva che seleziona i vettori del reticolo reciproco. La trasformata di Fourier discreta è, letteralmente, un cambio di base costruito con queste radici.`},
+    {dove:'Tutto il resto<br>di Metodi', txt:R`Il modulo e l'argomento sono gli oggetti su cui si stima (me-02, me-04), la multivocità dell'argomento è la polidromia (me-01b), l'esponenziale complesso è la funzione intera da cui parte lo studio delle analitiche (me-01) e il nucleo delle serie e trasformate di Fourier (me-10). Nessun altro movimento del corso è usato da tanti altri, ed è per questo che sta alla radice del grafo.`}
+   ]}
+]}
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"conjugate(x+I*y)/Abs(x+I*y)**2","vale":"1/(x+I*y)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"\\frac{\\bar z}{|z|^2}"},
+
+ {"tipo":"uguale","sinistra":"1/(x+I*y)","vale":"(x-I*y)/(x**2+y**2)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"\\frac{x-iy}{x^2+y^2}"},
+
+ {"tipo":"uguale","sinistra":"(x+I*y)*(x-I*y)","vale":"x**2+y**2",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"x^2+y^2"},
+
+ {"tipo":"uguale","sinistra":"Abs(x+I*y)**2","vale":"x**2+y**2",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"|z|^2"},
+
+ {"tipo":"uguale","sinistra":"Abs(x+I*y)**2","vale":"(x+I*y)*conjugate(x+I*y)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"w\\bar w"},
+
+ {"tipo":"uguale","sinistra":"conjugate(conjugate(x+I*y))","vale":"x+I*y",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"=z"},
+
+ {"tipo":"uguale","sinistra":"conjugate((x1+I*y1)/(x2+I*y2))",
+  "vale":"conjugate(x1+I*y1)/conjugate(x2+I*y2)",
+  "ipotesi":{"x1":"real","y1":"real","x2":"real","y2":"real"},
+  "dove":"02","appare":"\\bar z_1/\\bar z_2"},
+
+ {"tipo":"uguale","sinistra":"Abs((x1+I*y1)/(x2+I*y2))",
+  "vale":"Abs(x1+I*y1)/Abs(x2+I*y2)",
+  "ipotesi":{"x1":"real","y1":"real","x2":"real","y2":"real"},
+  "dove":"02","appare":"|z_1|/|z_2|"},
+
+ {"tipo":"uguale","sinistra":"Abs((a+I*b)+(c+I*d))**2+Abs((a+I*b)-(c+I*d))**2",
+  "vale":"2*(Abs(a+I*b)**2+Abs(c+I*d)**2)",
+  "ipotesi":{"a":"real","b":"real","c":"real","d":"real"},
+  "dove":"02","appare":"2(|z_1|^2+|z_2|^2)"},
+
+ {"tipo":"uguale","sinistra":"conjugate(I)**2+1","vale":"0",
+  "dove":"02","appare":"=0"},
+
+ {"tipo":"uguale","sinistra":"(x+I*y)+conjugate(x+I*y)","vale":"2*x",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"2\\Re(z)"},
+
+ {"tipo":"uguale","sinistra":"(1+I)/(2-I)","vale":"(1+3*I)/5",
+  "dove":"02","appare":"\\dfrac{1+3i}{5}"},
+
+ {"tipo":"uguale","sinistra":"(2-I)*(2+I)","vale":"5",
+  "dove":"02","appare":"=5"},
+
+ {"tipo":"uguale","sinistra":"(2+I)**2","vale":"3+4*I",
+  "dove":"02","appare":"3+4i"},
+
+ {"tipo":"uguale","sinistra":"3**2+4**2","vale":"25",
+  "dove":"02","appare":"=25"},
+
+ {"tipo":"uguale","sinistra":"2**2-1**2","vale":"3",
+  "dove":"02","appare":"=3"},
+
+ {"tipo":"uguale","sinistra":"2*2*1","vale":"4",
+  "dove":"02","appare":"=4"},
+
+ {"tipo":"uguale","sinistra":"Abs(2+I)**2-4","vale":"1",
+  "dove":"02","appare":"=1"},
+
+ {"tipo":"uguale","sinistra":"(1+I)*(1-2*I)","vale":"3-I",
+  "dove":"02","appare":"3-i"},
+
+ {"tipo":"uguale","sinistra":"Abs((1+I)*(1-2*I))","vale":"sqrt(10)",
+  "dove":"02","appare":"\\sqrt{10}"},
+
+ {"tipo":"uguale","sinistra":"Abs(1+I)*Abs(1-2*I)","vale":"sqrt(2)*sqrt(5)",
+  "dove":"02","appare":"\\sqrt2\\cdot\\sqrt5"},
+
+ {"tipo":"uguale","sinistra":"atan(-1)","vale":"-pi/4",
+  "dove":"03","appare":"-\\pi/4"},
+
+ {"tipo":"uguale","sinistra":"arg(-1+I)","vale":"3*pi/4",
+  "dove":"03","appare":"\\tfrac{3\\pi}{4}"},
+
+ {"tipo":"uguale","sinistra":"Abs(1/(x+I*y))","vale":"1/Abs(x+I*y)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"03","appare":"1/|z|"},
+
+ {"tipo":"uguale","sinistra":"arg(1/(1+I))","vale":"-arg(1+I)",
+  "dove":"03","appare":"-\\arg(z)"},
+
+ {"tipo":"uguale","sinistra":"Abs((x1+I*y1)/(x2+I*y2))",
+  "vale":"Abs(x1+I*y1)/Abs(x2+I*y2)",
+  "ipotesi":{"x1":"real","y1":"real","x2":"real","y2":"real"},
+  "dove":"03","appare":"|z_1|/|z_2|"},
+
+ {"tipo":"uguale","sinistra":"arg((1+I)/(1-I))","vale":"arg(1+I)-arg(1-I)",
+  "dove":"03","appare":"\\arg(z_1)-\\arg(z_2)"},
+
+ {"tipo":"uguale","sinistra":"Rational(12,10)*Rational(14,10)","vale":"Rational(168,100)",
+  "dove":"03","appare":"1{,}68"},
+
+ {"tipo":"uguale","sinistra":"30+50","vale":"80",
+  "dove":"03","appare":"80^\\circ"},
+
+ {"tipo":"derivata","espr":"exp(a*t)","rispetto":["t"],"vale":"a*exp(a*t)",
+  "dove":"04","appare":"a\\,e^{a\\theta}"},
+
+ {"tipo":"uguale","sinistra":"I**2","vale":"-1",
+  "dove":"04","appare":"=-1"},
+
+ {"tipo":"uguale","sinistra":"I**3","vale":"-I",
+  "dove":"04","appare":"=-i"},
+
+ {"tipo":"uguale","sinistra":"I**4","vale":"1",
+  "dove":"04","appare":"=1"},
+
+ {"tipo":"uguale","sinistra":"exp(I*t).rewrite(cos)","vale":"cos(t)+I*sin(t)",
+  "ipotesi":{"t":"real"},
+  "dove":"04","appare":"\\cos\\theta+i\\sin\\theta"},
+
+ {"tipo":"uguale","sinistra":"exp(I*n*t).rewrite(cos)","vale":"cos(n*t)+I*sin(n*t)",
+  "ipotesi":{"t":"real","n":"integer"},
+  "dove":"04","appare":"\\cos(n\\theta)+i\\sin(n\\theta)"},
+
+ {"tipo":"uguale","sinistra":"(1+I)**8","vale":"16",
+  "dove":"04","appare":"=16"},
+
+ {"tipo":"uguale","sinistra":"(1+I*sqrt(3))**3","vale":"-8",
+  "dove":"04","appare":"=-8"},
+
+ {"tipo":"uguale","sinistra":"(exp(I*t)+exp(-I*t))/2","vale":"cos(t)",
+  "ipotesi":{"t":"real"},
+  "dove":"04","appare":"\\frac{e^{i\\theta}+e^{-i\\theta}}{2}"},
+
+ {"tipo":"uguale","sinistra":"simplify((exp(I*t)-exp(-I*t))/(2*I))","vale":"sin(t)",
+  "ipotesi":{"t":"real"},
+  "dove":"04","appare":"\\frac{e^{i\\theta}-e^{-i\\theta}}{2i}"},
+
+ {"tipo":"uguale","sinistra":"exp(I*(a+b))","vale":"exp(I*a)*exp(I*b)",
+  "ipotesi":{"a":"real","b":"real"},
+  "dove":"04","appare":"e^{i\\alpha}e^{i\\beta}"},
+
+ {"tipo":"uguale","sinistra":"simplify(Abs(1+I)*exp(I*arg(1+I)).rewrite(cos))","vale":"1+I",
+  "dove":"05","appare":"|z|e^{i\\theta}"},
+
+ {"tipo":"uguale","sinistra":"(rho*exp(I*phi))**n","vale":"rho**n*exp(I*n*phi)",
+  "ipotesi":{"rho":"positive","phi":"real","n":"integer"},
+  "dove":"05","appare":"\\rho^ne^{in\\varphi}"},
+
+ {"tipo":"uguale","sinistra":"exp(2*pi*I)","vale":"1",
+  "dove":"05","appare":"=1"},
+
+ {"tipo":"somma","espr":"exp(2*pi*I*k/6)","var":"k","da":"0","a":"5","vale":"0",
+  "dove":"05","appare":"=0"},
+
+ {"tipo":"uguale","sinistra":"exp(I*pi/3).rewrite(cos)","vale":"Rational(1,2)+sqrt(3)*I/2",
+  "dove":"05","appare":"\\tfrac12+i\\tfrac{\\sqrt3}{2}"},
+
+ {"tipo":"uguale","sinistra":"Abs(x+I*y)**2","vale":"x**2+y**2",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"06","appare":"\\Re(z)^2+\\Im(z)^2"},
+
+ {"tipo":"uguale","sinistra":"Abs(x+I*y)**2","vale":"(x+I*y)*conjugate(x+I*y)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"06","appare":"w\\bar w"},
+
+ {"tipo":"uguale","sinistra":"conjugate((a+I*b)+(c+I*d))",
+  "vale":"conjugate(a+I*b)+conjugate(c+I*d)",
+  "ipotesi":{"a":"real","b":"real","c":"real","d":"real"},
+  "dove":"06","appare":"\\bar z_1+\\bar z_2"},
+
+ {"tipo":"uguale","sinistra":"Abs((a+I*b)+(c+I*d))**2",
+  "vale":"a**2+b**2+2*(a*c+b*d)+c**2+d**2",
+  "ipotesi":{"a":"real","b":"real","c":"real","d":"real"},
+  "dove":"06","appare":"|z_1|^2+2\\Re(z_1\\bar z_2)+|z_2|^2"},
+
+ {"tipo":"uguale","sinistra":"(a+I*b)+conjugate(a+I*b)","vale":"2*a",
+  "ipotesi":{"a":"real","b":"real"},
+  "dove":"06","appare":"2\\Re(w)"},
+
+ {"tipo":"uguale","sinistra":"(A+B)**2","vale":"A**2+2*A*B+B**2",
+  "ipotesi":{"A":"positive","B":"positive"},
+  "dove":"06","appare":"\\left(|z_1|+|z_2|\\right)^2"},
+
+ {"tipo":"disuguaglianza","sinistra":"Abs(1+I)","destra":"2","relazione":"<",
+  "dove":"06","appare":"\\sqrt2<2"},
+
+ {"tipo":"uguale","sinistra":"exp(I*3*pi/4)*exp(I*3*pi/4)","vale":"exp(-I*pi/2)",
+  "dove":"06","appare":"e^{-i\\pi/2}"},
+
+ {"tipo":"uguale","sinistra":"(sqrt(2)+I*sqrt(2))**4","vale":"-16",
+  "dove":"06","appare":"=-16"},
+
+ {"tipo":"uguale","sinistra":"Abs(exp(I*(a+I*b)))","vale":"exp(-b)",
+  "ipotesi":{"a":"real","b":"real"},
+  "dove":"06","appare":"e^{-\\Im(z)}\\le1"}
+]
+CONTROLLO*/
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleome-00-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo me-00 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: me-00-numeri-complessi.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
