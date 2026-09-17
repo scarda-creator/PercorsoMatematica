@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento ms-03 — Il calcolo delle probabilità come lo usa la fisica statistica: due forme, e basta</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Meccanica Statistica · Movimento <b>ms-03 — Il calcolo delle probabilità come lo usa la fisica statistica: la densità di una grandezza derivata, e il salto da una particella a N</b> · Huang · Landau-Lifsits</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'meccanica-statistica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo ms-03: Il calcolo delle probabilità come lo usa la fisica statistica <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:       ms-03
+identita: le poche cose sulle probabilita' che servono davvero, e perche' con 10^23
+          particelle le fluttuazioni relative spariscono
+serve:    ms-00
+apre:     ms-04 (microcanonico), ms-07 (il mestiere del canonico)
+strumenti: —
+copre:    A.3 del programma — «Calcolo delle probabilita': assiomi, proprieta',
+          distribuzioni notevoli»
+prove:    24 compiti su 47 (misurato il 17-09), 73 menzioni, densita' 3.0. Ma il numero
+          da solo dice poco: contate a mano, le domande di probabilita' del corpus hanno
+          DUE forme e nessuna terza. Forma A — «calcolare la densita' di probabilita'
+          p(eps) dell'energia di singola particella», «la probabilita' che una data
+          particella abbia energia eps<0», «la densita' di particelle rho(r)»: e' un
+          cambio di variabile piu' una marginalizzazione. Forma B — «la probabilita'
+          P_N(n) che nella regione D vi siano n particelle», «che vi siano piu' di N/2
+          particelle nella regione», «che la probabilita' che n != n_medio sia
+          esponenzialmente piccola in N»: e' la binomiale e il suo limite.
+perche:   non e' un capitolo di probabilita'. E' la MACCHINA con cui si passa da un peso
+          sullo spazio delle fasi alla risposta numerica che l'esame chiede — e la
+          macchina e' la stessa in tutti e quindici i movimenti, mentre il peso cambia.
+          Scritta qui, prima che i pesi arrivino, non va riscritta tre volte.
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"integrale","espr":"sqrt(b/(2*pi*m))*exp(-b*p**2/(2*m))","var":"p","da":"-oo","a":"oo",
+  "vale":"1",
+  "ipotesi":{"b":"positive","m":"positive","p":"real"},
+  "dove":"02","appare":"\\sqrt{\\frac{\\beta}{2\\pi m}}"},
+
+ {"tipo":"derivata","espr":"pi*2*m*e","rispetto":["e"],
+  "vale":"2*pi*m",
+  "ipotesi":{"m":"positive","e":"positive"},
+  "dove":"02","appare":"2\\pi m"},
+
+ {"tipo":"derivata","espr":"(4/3)*pi*(2*m*e)**(3/2)","rispetto":["e"],
+  "vale":"4*pi*m*sqrt(2*m*e)",
+  "ipotesi":{"m":"positive","e":"positive"},
+  "dove":"02","appare":"4\\pi m\\sqrt{2m\\varepsilon}"},
+
+ {"tipo":"integrale","espr":"b*exp(-b*e)","var":"e","da":"0","a":"oo",
+  "vale":"1",
+  "ipotesi":{"b":"positive","e":"positive"},
+  "dove":"02","appare":"\\beta e^{-\\beta\\varepsilon}"},
+
+ {"tipo":"integrale","espr":"e*b*exp(-b*e)","var":"e","da":"0","a":"oo",
+  "vale":"1/b",
+  "ipotesi":{"b":"positive","e":"positive"},
+  "dove":"02","appare":"kT"},
+
+ {"tipo":"integrale","espr":"(2/sqrt(pi))*b**(3/2)*sqrt(e)*exp(-b*e)","var":"e","da":"0","a":"oo",
+  "vale":"1",
+  "ipotesi":{"b":"positive","e":"positive"},
+  "dove":"02","appare":"\\frac{2}{\\sqrt\\pi}\\beta^{3/2}\\sqrt{\\varepsilon}\\,e^{-\\beta\\varepsilon}"},
+
+ {"tipo":"integrale","espr":"e*(2/sqrt(pi))*b**(3/2)*sqrt(e)*exp(-b*e)","var":"e","da":"0","a":"oo",
+  "vale":"3/(2*b)",
+  "ipotesi":{"b":"positive","e":"positive"},
+  "dove":"02","appare":"\\tfrac32 kT"},
+
+ {"tipo":"integrale","espr":"b*k*r*exp(-b*k*r**2/2)","var":"r","da":"0","a":"oo",
+  "vale":"1",
+  "ipotesi":{"b":"positive","k":"positive","r":"positive"},
+  "dove":"02","appare":"\\beta k\\,r\\,e^{-\\beta k r^{2}/2}"},
+
+ {"tipo":"integrale","espr":"b*k*r*exp(-b*k*r**2/2)","var":"r","da":"0","a":"L",
+  "vale":"1-exp(-b*k*L**2/2)",
+  "ipotesi":{"b":"positive","k":"positive","r":"positive","L":"positive"},
+  "dove":"02","appare":"1-e^{-\\beta k L^{2}/2}"},
+
+ {"tipo":"integrale","espr":"b*k*r**2*exp(-b*k*r**2/2)","var":"r","da":"0","a":"oo",
+  "vale":"sqrt(pi/(2*b*k))",
+  "ipotesi":{"b":"positive","k":"positive","r":"positive"},
+  "dove":"02","appare":"\\sqrt{\\frac{\\pi}{2\\beta k}}"},
+
+ {"tipo":"derivata","espr":"(1-p+p*s)**N","rispetto":["s"],
+  "vale":"N*p*(1-p+p*s)**(N-1)",
+  "ipotesi":{"p":"positive","s":"positive","N":"positive"},
+  "dove":"03","appare":"Np\\,(1-p+ps)^{N-1}"},
+
+ {"tipo":"derivata","espr":"(1-p+p*s)**N","rispetto":["s","s"],
+  "vale":"N*(N-1)*p**2*(1-p+p*s)**(N-2)",
+  "ipotesi":{"p":"positive","s":"positive","N":"positive"},
+  "dove":"03","appare":"N(N-1)p^{2}(1-p+ps)^{N-2}"},
+
+ {"tipo":"uguale","sinistra":"N*(N-1)*p**2 + N*p - (N*p)**2","vale":"N*p*(1-p)",
+  "ipotesi":{"p":"positive","N":"positive"},
+  "dove":"03","appare":"Np(1-p)"},
+
+ {"tipo":"limite","espr":"(1-lam/N)**N","var":"N","a":"oo",
+  "vale":"exp(-lam)",
+  "ipotesi":{"lam":"positive","N":"positive"},
+  "dove":"03","appare":"e^{-\\lambda}"},
+
+ {"tipo":"uguale","sinistra":"sqrt(N*p*(1-p))/(N*p)","vale":"sqrt((1-p)/p)/sqrt(N)",
+  "ipotesi":{"p":"positive","N":"positive"},
+  "dove":"04","appare":"\\sqrt{\\frac{1-p}{p}}\\;\\frac{1}{\\sqrt N}"},
+
+ {"tipo":"uguale","sinistra":"p*log(p/p)+(1-p)*log((1-p)/(1-p))","vale":"0",
+  "ipotesi":{"p":"positive"},
+  "dove":"04","appare":"I(p)=0"},
+
+ {"tipo":"derivata","espr":"x*log(x/p)+(1-x)*log((1-x)/(1-p))","rispetto":["x","x"],
+  "vale":"1/x+1/(1-x)",
+  "ipotesi":{"p":"positive","x":"positive"},
+  "dove":"04","appare":"\\dfrac1x+\\dfrac1{1-x}"},
+
+ {"tipo":"disuguaglianza","sinistra":"1/sqrt(10**23)","relazione":"<","destra":"4*10**(-12)",
+  "dove":"04","appare":"4\\cdot10^{-12}"},
+
+ {"tipo":"derivata","espr":"pi*p**2","rispetto":["p"],
+  "vale":"2*pi*p",
+  "ipotesi":{"p":"positive"},
+  "dove":"02","appare":"2\\pi p"},
+
+ {"tipo":"derivata","espr":"(4/3)*pi*p**3","rispetto":["p"],
+  "vale":"4*pi*p**2",
+  "ipotesi":{"p":"positive"},
+  "dove":"02","appare":"4\\pi p^2"},
+
+ {"tipo":"uguale","sinistra":"1-(1-exp(-b*k*L**2/2))","vale":"exp(-b*k*L**2/2)",
+  "ipotesi":{"b":"positive","k":"positive","L":"positive"},
+  "dove":"02","appare":"e^{-\\beta kL^{2}/2}"},
+
+ {"tipo":"uguale","sinistra":"1-(1-exp(-b*k*L**2/2))","vale":"exp(-b*k*L**2/2)",
+  "ipotesi":{"b":"positive","k":"positive","L":"positive"},
+  "dove":"03","appare":"e^{-\\beta kL^{2}/2}"},
+
+ {"tipo":"integrale","espr":"e-t","var":"t","da":"0","a":"e",
+  "vale":"e**2/2",
+  "ipotesi":{"e":"positive","t":"positive"},
+  "dove":"02","appare":"\\varepsilon^2/2"},
+
+ {"tipo":"somma","espr":"binomial(3,n)*p**n*(1-p)**(3-n)*s**n","var":"n","da":"0","a":"3",
+  "vale":"(1-p+p*s)**3",
+  "ipotesi":{"p":"positive","s":"positive"},
+  "dove":"03","appare":"(1-p+ps)"},
+
+ {"tipo":"uguale","sinistra":"N*(N-1)*p**2*(1-p+p*1)**(N-2)","vale":"N*(N-1)*p**2",
+  "ipotesi":{"p":"positive","N":"positive"},
+  "dove":"03","appare":"N(N-1)p^{2}"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché questo movimento', meta:'non è un capitolo di probabilità · è la macchina che trasforma un peso in un numero',
+  blocchi:[
+  {t:'prosa', title:'Il programma dice «assiomi, proprietà, distribuzioni notevoli». Le prove dicono un’altra cosa.', tag:'misura', html:R`
+  <p>Il punto A.3 del programma è scritto come il sommario di un libro di probabilità. Ma le quarantasette prove d&rsquo;esame in banca dati, lette una per una, pongono <b>due sole domande</b> — e nessuna terza. Sono queste, citate testualmente dai compiti:</p>
+  <table>
+  <tr><th>forma</th><th>come compare nelle prove</th><th>che cos&rsquo;è, tecnicamente</th></tr>
+  <tr><td><b>A</b><br>una particella</td><td>«Calcolare la densità di probabilità $p(\varepsilon)$ dell&rsquo;energia di singola particella»<br>«Calcolare la probabilità $Q(\varepsilon\lt 0)$ che una data particella abbia energia $\varepsilon\lt 0$»<br>«Calcolare la densità di particelle $\rho(r)$ al variare di $T$»<br>«la probabilità che una data particella abbia energia cinetica $\lt kT$»</td><td><b>marginalizzazione</b> (si integra via ciò che non si guarda) + <b>cambio di variabile</b> con il suo jacobiano</td></tr>
+  <tr><td><b>B</b><br>da una a $N$</td><td>«Calcolare la probabilità $P_N(n;T)$ che nella regione $D$ vi siano $n$ particelle»<br>«la probabilità che vi siano più di $N/2$ particelle nella regione»<br>«la probabilità che solo 18 particelle siano nella regione»<br>«la probabilità che $n\neq\bar n$ è esponenzialmente piccola in $N$»</td><td><b>distribuzione binomiale</b>, e i suoi due limiti (Poisson, gaussiana)</td></tr>
+  </table>
+  <p>Contate: 24 prove su 47 contengono almeno una delle due. La forma A compare da sola in dodici, la forma B in sei, e in sei compaiono <b>insieme</b> — perché la B si nutre della A: prima si calcola $p$, la probabilità che <i>una</i> particella soddisfi la condizione, e poi la si eleva a $N$ particelle.</p>
+  <p>Questo movimento scrive quelle due macchine, e non altro. Il teorema del limite centrale c&rsquo;è, ma alla tappa 04 e per la ragione giusta — non come «distribuzione notevole», bensì come la risposta alla domanda <i>perché la termodinamica esiste</i>. Quella è una domanda d&rsquo;orale, e si vede: nel corpus non compare mai come esercizio.</p>`},
+  {t:'prosa', title:'Il patto di questo movimento: il peso è un parametro', tag:'grammatica', html:R`
+  <p>C&rsquo;è una scelta, qui, che vale la pena dichiarare perché cambia come si legge il resto. In questo movimento <b>non si dice da dove viene il peso</b> $w(p,q)$ con cui si mediano le cose. Il peso uniforme sul guscio di energia arriva in <b>ms-04</b>, il peso di Boltzmann $e^{-\beta H}$ in <b>ms-06</b>: sono i due teoremi centrali del corso e hanno i loro movimenti.</p>
+  <p>Qui si costruisce la <b>macchina che sta a valle del peso</b>, e la si costruisce con $w$ generico. La ragione è che la macchina è <i>la stessa</i> in tutti e quindici i movimenti — classico o quantistico, canonico o gran canonico — mentre il peso cambia cinque volte. Scritta una volta qui, non va riscritta cinque.</p>
+  <p>Negli esempi il peso di Boltzmann compare comunque, perché senza un peso concreto gli esempi sarebbero vuoti. Quando compare è <b>annunciato e non dimostrato</b>: si scrive $w\propto e^{-\beta H}$ e si va avanti, con il debito segnato. Chi legge in ordine può prendere quei conti per buoni; chi torna qui dopo ms-06 li ritrova giustificati.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Data una densità su uno spazio a più variabili, ricavare la densità di <b>qualunque</b> grandezza che ne dipenda — energia, distanza, modulo dell&rsquo;impulso — senza esitare sul jacobiano.</li>
+  <li>Scrivere $d^2r=2\pi r\,dr$ e $d^3r=4\pi r^2dr$ sapendo <b>perché</b>, e quindi sapendo cosa scrivere quando la simmetria non è sferica.</li>
+  <li>Usare la delta di Dirac come <b>macchina per cambiare variabile</b>, e la sua identità operativa $\delta(\varepsilon-H)=\partial_\varepsilon\,\theta(\varepsilon-H)$ — la tecnica con cui in ogni prova si calcola la densità degli stati.</li>
+  <li>Passare da una particella a $N$ con la <b>binomiale</b>, e sapere quale dei due limiti — Poisson o gaussiana — si applica alla situazione che si ha davanti.</li>
+  <li>Stimare in una riga <b>quanto</b> sono piccole le fluttuazioni relative, e dire in che senso preciso la termodinamica è una legge invece che una tendenza.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · LA GRAMMATICA ---------------- */
+{ num:'01', title:'Una densità di probabilità, e le tre operazioni', meta:'normalizzare · marginalizzare · cambiare variabile — e l’errore che costa l’esercizio',
+  blocchi:[
+  {t:'prosa', title:'Densità, non probabilità', tag:'grammatica', html:R`
+  <p>Su una variabile continua non esiste «la probabilità che $x$ valga $x_0$»: vale zero. Esiste la <b>densità</b> $p(x)$, definita dal fatto che $p(x)\,dx$ è la probabilità che la variabile cada nell&rsquo;intervallo $[x,x+dx)$. Due conseguenze pratiche, e la seconda è quella che in sede d&rsquo;esame separa:</p>
+  <ul>
+  <li><b>La densità ha dimensioni.</b> Se $x$ è una lunghezza, $p(x)$ è l&rsquo;inverso di una lunghezza. È il controllo più veloce che esista su un risultato: una $p(\varepsilon)$ che non abbia le dimensioni di $1/$energia è sbagliata, e lo si vede senza rifare il conto.</li>
+  <li><b>La densità non è invariante per cambio di variabile.</b> La <i>probabilità</i> lo è — l&rsquo;evento «la particella sta in quel guscio» non cambia se lo si descrive con $r$ o con $\varepsilon$ — ma la densità no, perché è una probabilità <i>per unità</i> di qualcosa, e l&rsquo;unità cambia. Da qui il jacobiano, e da qui l&rsquo;errore sistematico di cui alla tappa 01.3.</li>
+  </ul>
+  <p>Normalizzazione: $\int p(x)\,dx=1$ sul dominio intero. Va verificata <b>sempre</b>, e non per scrupolo formale: è l&rsquo;unico modo di fissare la costante moltiplicativa, e nelle prove la costante è quasi sempre l&rsquo;unica cosa che distingue una risposta giusta da una che ha la forma giusta.</p>`},
+  {t:'prosa', title:'Marginalizzare: integrare via ciò che non si guarda', tag:'first principles', html:R`
+  <p>Lo stato di una particella sta in $2d$ variabili — $d$ coordinate e $d$ impulsi. Una domanda d&rsquo;esame ne guarda quasi sempre <b>una funzione sola</b>: la distanza dall&rsquo;origine, l&rsquo;energia, il modulo dell&rsquo;impulso. Le altre non spariscono: si integrano via.</p>
+  $$p(r)=\int d^dp\int d^dq\;w(p,q)\;\big[\text{la condizione che fissa }r\big]\Big/\!\int d^dp\,d^dq\;w(p,q).$$
+  <p>Il denominatore è la normalizzazione, e conviene tenerlo simbolico fino alla fine: in moltissime prove <b>si cancella</b> contro un pezzo del numeratore, e portarselo dietro in forma esplicita fa perdere dieci minuti. Nella prova del 24/01/2024, per esempio, l&rsquo;integrale sugli impulsi compare identico sopra e sotto e non va calcolato mai — si scrive che si semplifica, e si prosegue.</p>
+  <div class="note"><b>Quando la fattorizzazione è lecita.</b> Se l&rsquo;hamiltoniana è $H=p^2/2m+V(q)$, il peso $e^{-\beta H}$ si spezza nel prodotto $e^{-\beta p^2/2m}\,e^{-\beta V(q)}$, e l&rsquo;integrale sugli impulsi si separa da quello sulle posizioni. È il motivo per cui le prove danno <i>sempre</i> quella forma di $H$: garantisce che la parte cinetica sia una costante universale, e che tutta la fisica del problema stia in $V$. Con un termine di interazione $V(q_i-q_j)$ la fattorizzazione cade, e il problema diventa un problema di ricerca — nelle 47 prove non compare mai.</div>`},
+  {t:'reveal', title:'Cambiare variabile: la regola, e l’errore che costa l’esercizio', tag:'derivazione', steps:[
+   {label:'La regola, dedotta invece che ricordata', body:R`<p>Si vuole la densità di $y=f(x)$ a partire da quella di $x$. Si parte da ciò che <b>è</b> invariante — la probabilità dell&rsquo;evento:
+   $$p_Y(y)\,|dy| = p_X(x)\,|dx| \qquad\Longrightarrow\qquad p_Y(y)=p_X\!\big(x(y)\big)\left|\frac{dx}{dy}\right|.$$
+   Il valore assoluto non è decorazione: una densità è positiva, e $dx/dy$ può essere negativo (se $f$ decresce). In più dimensioni $|dx/dy|$ diventa il modulo del determinante jacobiano.</p>
+   <p><b>Se $f$ non è invertibile</b>, ogni ramo contribuisce e si sommano:
+   $$p_Y(y)=\sum_{i}\frac{p_X(x_i)}{|f'(x_i)|},\qquad x_i:\ f(x_i)=y.$$
+   Caso concreto che compare nelle prove: $\varepsilon=p^2/2m$ in una dimensione ha <b>due</b> rami, $p=\pm\sqrt{2m\varepsilon}$, e dimenticarne uno dimezza la risposta.</p>`},
+   {label:'L’errore sistematico, e come si vede da fuori', body:R`<p>L&rsquo;errore è scrivere $p_Y(y)=p_X(x(y))$, cioè <b>sostituire e basta</b>. È attraente perché sembra ovvio, ed è sbagliato per la ragione detta sopra: la densità è una probabilità per unità di $y$, e passando da $x$ a $y$ l&rsquo;unità si dilata o si comprime di un fattore $|dx/dy|$.</p>
+   <p>Si riconosce dall&rsquo;esterno, senza ricontrollare il conto, con <b>due</b> prove da cinque secondi:</p>
+   <ul>
+   <li><b>Normalizzazione</b>: se $\int p_Y\,dy\neq1$ manca il jacobiano (o è sbagliato).</li>
+   <li><b>Dimensioni</b>: $p_X$ e $p_Y$ hanno dimensioni <i>diverse</i> se $x$ e $y$ non sono la stessa grandezza. Se il risultato ha le dimensioni della densità di partenza, il jacobiano non c&rsquo;è.</li>
+   </ul>
+   <p>Vale la pena farle entrambe prima di consegnare: costano dieci secondi e coprono l&rsquo;unico errore che in questo corso si ripete.</p>`},
+   {label:'Il caso radiale non è una formula: è questo cambio di variabile', body:R`<p>Le scritture che si usano senza pensarci,
+   $$d^2r=2\pi r\,dr,\qquad d^3r=4\pi r^2\,dr,$$
+   <b>sono</b> il cambio di variabile da $(x,y)$ o $(x,y,z)$ alla sola $r$, con l&rsquo;integrazione sugli angoli già fatta. Il fattore $2\pi r$ è la circonferenza, $4\pi r^2$ la superficie della sfera: è la «quantità di spazio» che sta a distanza $r$, ed è per questo che <b>una densità uniforme nello spazio non dà una densità uniforme in $r$</b>. Se $p(x,y)=\,$cost, allora $p(r)\propto r$: sembra più probabile stare lontani, e la ragione è che lontano c&rsquo;è più posto.</p>
+   <p>Saperlo dedurre invece che ricordarlo serve quando la simmetria non è quella: in un problema con simmetria cilindrica in tre dimensioni il fattore è $2\pi\rho\,d\rho\,dz$, e nessuna formula memorizzata lo dà.</p>`},
+   {label:'La delta come macchina per cambiare variabile', body:R`<p>C&rsquo;è un modo di scrivere la stessa operazione che non richiede di invertire $f$, e che è la forma in cui compare in <i>ogni</i> soluzione d&rsquo;esame del corpus:
+   $$p_Y(y)=\int dx\;p_X(x)\,\delta\big(y-f(x)\big).$$
+   La delta seleziona i punti dove $f(x)=y$ e produce da sola il fattore $1/|f'|$ — è l&rsquo;identità $\delta(f(x))=\sum_i\delta(x-x_i)/|f'(x_i)|$. Il vantaggio pratico è enorme: <b>non serve invertire nulla</b>, e i rami molteplici si contano da soli.</p>
+   <p>L&rsquo;identità operativa che si usa davvero, e che conviene tenere a mente come una riga sola:
+   $$\delta(\varepsilon-H)=\frac{\partial}{\partial\varepsilon}\,\theta(\varepsilon-H).$$
+   Si scambia l&rsquo;integrale con la derivata e ci si ritrova a calcolare il <b>volume</b> della regione $\{H\lt \varepsilon\}$ — che è un integrale elementare — invece di un integrale con una delta dentro. È la tecnica con cui nella tappa 02 si ricava la densità degli stati in due righe, e la si ritrova identica nei compiti del 2019 e del 2024.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una particella è distribuita uniformemente su un disco di raggio $R$. Qual è la densità di probabilità della distanza $r$ dal centro, e qual è $\langle r\rangle$?`,
+    a:R`Uniforme sul disco significa $p(x,y)=1/(\pi R^2)$. Passando a $r$ con $d^2r=2\pi r\,dr$: $p(r)=2r/R^2$ per $0\le r\le R$. Si controlla subito che $\int_0^R 2r/R^2\,dr=1$. Il valor medio è $\langle r\rangle=\int_0^R r\cdot(2r/R^2)\,dr=\tfrac23R$ — <b>non</b> $R/2$, che è la risposta che si ottiene dimenticando il jacobiano e trattando $r$ come uniforme. La differenza fra $2R/3$ e $R/2$ è esattamente il peso del fattore $r$, cioè il fatto che lontano dal centro c&rsquo;è più area.`},
+   {q:R`Perché nella forma $p_Y(y)=\int p_X(x)\,\delta(y-f(x))\,dx$ non compare esplicitamente nessun jacobiano, se il jacobiano ci deve essere?`,
+    a:R`Perché lo produce la delta. L&rsquo;identità $\delta(f(x)-y)=\sum_i\delta(x-x_i)/|f'(x_i)|$ <i>è</i> la regola del cambio di variabile, scritta in una forma che non richiede di invertire $f$ a mano. Il jacobiano c&rsquo;è, e viene fuori quando si esegue l&rsquo;integrale. Questa è la ragione pratica per cui tutte le soluzioni d&rsquo;esame del corpus partono di lì: <b>il formalismo fa il lavoro che altrimenti fa lo studente</b>, e i casi con più rami — $\varepsilon=p^2/2m$, o un potenziale non monotòno come quelli della prova del 23/01/2019 — si contano da soli invece di dover essere ricordati.`}
+  ]}
+]},
+
+/* ---------------- 02 · FORMA A ---------------- */
+{ num:'02', title:'Forma A · la densità di una grandezza derivata', meta:'la domanda più frequente del corpus · quattro passi, tre esempi che ricorrono',
+  blocchi:[
+  {t:'prosa', title:'La ricetta, in quattro passi', tag:'metodo', html:R`
+  <p>Ogni domanda di forma A si risolve con la stessa sequenza. Vale la pena eseguirla nell&rsquo;ordine anche quando sembra ovvia, perché è l&rsquo;ordine che rende visibili le semplificazioni.</p>
+  <ol>
+  <li><b>Scrivere il peso non normalizzato</b> sullo spazio delle fasi. Con l&rsquo;hamiltoniana delle prove, $w\propto e^{-\beta p^2/2m}\,e^{-\beta V(q)}$, già fattorizzato.</li>
+  <li><b>Marginalizzare</b>: integrare via tutte le variabili che la domanda non nomina. Se la grandezza cercata dipende solo da $q$, l&rsquo;integrale sugli impulsi è una costante che si cancellerà — non calcolarlo.</li>
+  <li><b>Cambiare variabile</b> verso la grandezza chiesta, con il jacobiano o con la delta.</li>
+  <li><b>Normalizzare</b>, e usare la normalizzazione come collaudo.</li>
+  </ol>`},
+  {t:'reveal', title:'Esempio 1 — la densità dell’energia di singola particella, e perché la dimensione cambia tutto', tag:'l’esercizio che compare sei volte', steps:[
+   {label:'Il pezzo cinetico, in una dimensione', body:R`<p>Con $w\propto e^{-\beta p^2/2m}$, la costante si fissa dalla normalizzazione dell&rsquo;integrale gaussiano:
+   $$p(p)=\sqrt{\frac{\beta}{2\pi m}}\;e^{-\beta p^{2}/2m},\qquad \int_{-\infty}^{+\infty}p(p)\,dp=1.$$
+   È la maxwelliana degli impulsi, e in questa forma non richiede nulla di ms-06: è solo la gaussiana normalizzata.</p>`},
+   {label:'In due dimensioni: la densità dell’energia è piatta', body:R`<p>In $d=2$ il peso sugli impulsi è $e^{-\beta p^2/2m}$, e la misura radiale nel piano degli impulsi si ottiene derivando l&rsquo;area del disco $\pi p^{2}$ rispetto al raggio: $2\pi p$, per $dp$. Il cambio di variabile a $\varepsilon=p^2/2m$ dà $d\varepsilon=p\,dp/m$, quindi quella misura diventa $2\pi m\,d\varepsilon$ — <b>il jacobiano cancella esattamente il fattore $p$</b>. Perciò
+   $$p(\varepsilon)=\beta e^{-\beta\varepsilon},\qquad \int_0^\infty p(\varepsilon)\,d\varepsilon=1,\qquad \langle\varepsilon\rangle=kT.$$
+   L&rsquo;energia cinetica di una particella libera in due dimensioni è distribuita <b>esponenzialmente</b>, senza alcun prefattore. Lo stesso conto letto al contrario è la densità degli stati: $\displaystyle\int d^2p\,\delta(\varepsilon-p^2/2m)=\frac{\partial}{\partial\varepsilon}\big[\pi\,(2m\varepsilon)\big]=2\pi m$, <b>costante</b>.</p>
+   <p>Che in $d=2$ la densità degli stati di una particella libera sia costante non è una curiosità: è la ragione per cui in due dimensioni <b>non</b> c&rsquo;è condensazione di Bose-Einstein per una particella libera, e per cui le prove che chiedono la condensazione in $d=2$ mettono <i>sempre</i> un potenziale confinante $V(r)$ — che cambia la densità degli stati da costante a crescente. Il conto di ms-13 comincia qui.</p>`},
+   {label:'In tre dimensioni: compare la radice', body:R`<p>In tre dimensioni la misura radiale è la derivata del volume della sfera $\tfrac43\pi p^{3}$, cioè $4\pi p^2$ per $dp$; con la stessa sostituzione il jacobiano lascia un fattore $\sqrt\varepsilon$:
+   $$p(\varepsilon)=\frac{2}{\sqrt\pi}\beta^{3/2}\sqrt{\varepsilon}\,e^{-\beta\varepsilon},\qquad \int_0^\infty p(\varepsilon)\,d\varepsilon=1,\qquad \langle\varepsilon\rangle=\tfrac32 kT.$$
+   Il valor medio è l&rsquo;<b>equipartizione</b>, ritrovata per una strada diversa da quella di ms-00: mezzo $kT$ per grado di libertà quadratico, tre gradi. E la densità degli stati corrispondente è $\displaystyle\frac{\partial}{\partial\varepsilon}\Big[\tfrac43\pi(2m\varepsilon)^{3/2}\Big]=4\pi m\sqrt{2m\varepsilon}$, cioè $\propto\sqrt\varepsilon$ — la forma che si userà in ms-12 per il gas di Fermi in tre dimensioni.</p>
+   <div class="note"><b>Il filo che vale la pena vedere adesso.</b> Passando da $d=2$ a $d=3$ è cambiato solo il jacobiano, e con esso è cambiata la <i>forma</i> di $p(\varepsilon)$ da esponenziale pura a esponenziale per $\sqrt\varepsilon$. Tutte le differenze qualitative fra i gas quantistici in dimensioni diverse — c&rsquo;è o non c&rsquo;è condensazione, come va $C_V$ a bassa $T$ — discendono da questo unico fattore. Non è un dettaglio tecnico messo all&rsquo;inizio: è il parametro da cui dipende il secondo tempo del corso.</div>`}
+  ]},
+  {t:'reveal', title:'Esempio 2 — l’oscillatore radiale del compito 24/01/2024, smontato', tag:'una prova vera, dall’inizio alla fine', steps:[
+   {label:'Il testo, e cosa chiede davvero', body:R`<p>$N$ particelle identiche non interagenti in due dimensioni, $H=p^2/2m+V(r)$ con $V(r)=\tfrac12kr^2$. Chiede: l&rsquo;entropia per particella, la <b>densità di particelle $\rho(r)$</b> e la pressione $P(r)$, e la <b>probabilità $P(M,N)$ di trovare $M\le N$ particelle con $r\gt L$</b>. I punti 2 e 3 sono forma A e forma B in fila, ed è la configurazione più comune del corpus.</p>`},
+   {label:'La densità radiale, in tre righe', body:R`<p>Si scrive la probabilità che <i>una</i> particella stia a distanza $r$: l&rsquo;integrale sugli impulsi è lo stesso sopra e sotto e si cancella, il jacobiano radiale in due dimensioni è $2\pi r\,dr$, e resta
+   $$p(r)\propto r\,e^{-\beta k r^{2}/2}.$$
+   La costante si fissa dalla normalizzazione, e l&rsquo;integrale è elementare con la sostituzione $y=\beta kr^2/2$:
+   $$p(r)=\beta k\,r\,e^{-\beta k r^{2}/2},\qquad \int_0^\infty p(r)\,dr=1.$$
+   La densità di superficie è allora $\rho(r)=N\,p(r)/(2\pi r)$ — si moltiplica per il numero di particelle e si divide per l&rsquo;<b>elemento di area</b>, non per $dr$. È il passaggio in cui si sbaglia: $p(r)$ è una densità <i>rispetto a $r$</i>, $\rho(r)$ è una densità <i>per unità di superficie</i>, e fra le due c&rsquo;è di nuovo un jacobiano.</p>`},
+   {label:'La probabilità cumulata, e il valor medio', body:R`<p>La probabilità che una particella stia <b>entro</b> $L$ è l&rsquo;integrale di $p(r)$ da $0$ a $L$, e con la stessa sostituzione viene in chiuso:
+   $$p=\int_0^{L}\beta k\,r\,e^{-\beta k r^{2}/2}\,dr=1-e^{-\beta k L^{2}/2}.$$
+   Questa $p$ è ciò che la forma B prenderà in ingresso alla tappa 03 — la domanda chiede $r\gt L$, quindi lì servirà il complemento $1-p=e^{-\beta kL^{2}/2}$. Per completezza, il valor medio della distanza:
+   $$\langle r\rangle=\int_0^\infty r\,p(r)\,dr=\sqrt{\frac{\pi}{2\beta k}},$$
+   che scala come $\sqrt{kT/k}$: a temperatura più alta la nuvola si allarga come la radice di $T$, come deve essere per un potenziale armonico.</p>
+   <p><b>Il controllo che chiude.</b> Per $L\to\infty$ si ha $p\to1$: tutte le particelle stanno da qualche parte. Per $L\to0$, $p\simeq\beta kL^2/2\to0$. Entrambi i limiti sono corretti, e verificarli costa due secondi.</p>`}
+  ]},
+  {t:'gram', title:'Le tre densità che l’esame chiede, e come si distinguono', rows:[
+   ['$p(r)\\,dr$','probabilità che <b>una</b> particella abbia distanza in $[r,r+dr)$','adimensionale il prodotto; $p$ ha dimensioni di $1/$lunghezza; $\\int_0^\\infty p\\,dr=1$'],
+   ['$\\rho(r)$','numero di particelle per unità di <b>volume</b> (o area) a distanza $r$','$\\rho=N\\,p(r)/(\\text{elemento di volume})$; il suo integrale sul volume dà il numero totale di particelle'],
+   ['$g(\\varepsilon)$','densità degli <b>stati</b>: quanti stati per unità di energia','<b>non</b> normalizzata; $g=\\int d^dp\\,d^dq\\,\\delta(\\varepsilon-H)/h^d$, e il suo integrale conta stati, non probabilità']
+  ]},
+  {t:'prosa', title:'La densità degli stati è la stessa operazione, senza la normalizzazione', tag:'il ponte verso il secondo tempo del corso', html:R`
+  <p>Vale la pena metterle in fila perché nelle prove compaiono nella stessa pagina e si confondono. $p(\varepsilon)$ e $g(\varepsilon)$ si calcolano con <b>lo stesso identico integrale</b>, con due differenze sole: $g$ non porta il peso di Boltzmann, e $g$ non si normalizza a uno.</p>
+  $$g(\varepsilon)=\frac{g_s}{h^d}\int d^dp\,d^dq\;\delta\big(\varepsilon-H(p,q)\big),\qquad\qquad p(\varepsilon)=\frac{g(\varepsilon)\,e^{-\beta\varepsilon}}{\int g\,e^{-\beta\varepsilon}d\varepsilon}.$$
+  <p>La prima è <b>geometria dello spazio delle fasi</b> e non sa nulla della temperatura; la seconda è la prima pesata. Il fattore $g_s=2S+1$ è la degenerazione di spin, e $h^d$ è la costante che rende il conto adimensionale — arrivano entrambi da ms-05 e ms-11 e qui si prendono per buoni.</p>
+  <p><b>Perché questa distinzione è il ponte.</b> Tutto il secondo tempo del corso — Fermi, Bose, condensazione, corpo nero — si fa <i>sostituendo</i> il peso: al posto di $e^{-\beta\varepsilon}$ si mette $1/(e^{\beta(\varepsilon-\mu)}\pm1)$, e $g(\varepsilon)$ <b>resta identica</b>, perché è geometria. Chi ha capito qui che $g$ è indipendente dal peso, in ms-11 deve imparare una formula sola invece di rifare tutti i conti.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In due dimensioni con potenziale armonico $V=\tfrac12kr^2$, la densità degli stati di singola particella è $g(\varepsilon)\propto\varepsilon$. Da dove viene il fattore $\varepsilon$, visto che la parte cinetica in $d=2$ dà una costante?`,
+    a:R`Dal potenziale. Scrivendo $\delta(\varepsilon-H)$ come derivata della $\theta$, si calcola il volume della regione $\{p^2/2m+\tfrac12kr^2\lt \varepsilon\}$ nello spazio delle fasi a quattro dimensioni. Le due sostituzioni $t=p^2/2m$ e $y=kr^2/2$ rendono <b>piatte</b> entrambe le misure — è il conto della tappa 02, fatto due volte — e resta l&rsquo;area del triangolo $\{t+y\lt \varepsilon\}$, cioè $\int_0^{\varepsilon}(\varepsilon-t)\,dt=\varepsilon^2/2$. Derivando rispetto a $\varepsilon$ si ottiene $g\propto\varepsilon$. La regola generale: <b>ogni grado di libertà quadratico nell&rsquo;hamiltoniana aggiunge mezza potenza di $\varepsilon$ al volume</b> — due nei momenti e due nelle posizioni fanno quattro mezzi, cioè la seconda potenza, e la derivata la abbassa di uno. È ciò che permette di scrivere $g$ a occhio per tutti i potenziali delle prove, e di sapere in anticipo se ci sarà condensazione.`},
+   {q:R`Una prova chiede «la probabilità che una data particella abbia energia cinetica $\lt kT$» in tre dimensioni. Si può rispondere senza calcolare nulla di nuovo?`,
+    a:R`Sì: è l&rsquo;integrale della $p(\varepsilon)$ tridimensionale già scritta, da $0$ a $kT$, cioè $\dfrac{2}{\sqrt\pi}\displaystyle\int_0^1\sqrt{u}\,e^{-u}\,du$ con $u=\beta\varepsilon$ — un <b>numero puro</b>, indipendente da $T$ e da $m$. Che sia un numero puro è il punto interessante e vale come risposta d&rsquo;orale: la soglia $kT$ scala insieme alla distribuzione, quindi la frazione di particelle sotto la soglia è la stessa a ogni temperatura. Vale circa $0{,}43$. Le prove che pongono questa domanda misurano se si è capito che $\beta$ e la soglia si cancellano, non la capacità di calcolare una gamma incompleta.`}
+  ]}
+]},
+
+/* ---------------- 03 · FORMA B ---------------- */
+{ num:'03', title:'Forma B · da una particella a N', meta:'la binomiale, e i suoi due limiti · «quante particelle ci sono in quella regione»',
+  blocchi:[
+  {t:'prosa', title:'Perché è sempre una binomiale, e perché è lecito', tag:'first principles', html:R`
+  <p>La domanda è sempre la stessa: «qual è la probabilità che <b>$n$ delle $N$</b> particelle soddisfino una certa condizione». La risposta è sempre la stessa, e ha due ingredienti:</p>
+  <ol>
+  <li>si calcola con la <b>forma A</b> la probabilità $p$ che <i>una</i> particella soddisfi la condizione;</li>
+  <li>le $N$ particelle sono <b>indipendenti</b>, quindi il conteggio è binomiale:
+  $$P_N(n)=\binom{N}{n}p^{\,n}(1-p)^{\,N-n}.$$</li>
+  </ol>
+  <p>Il secondo passo va giustificato, perché è il punto in cui un orale può fermare. <b>Sono davvero indipendenti?</b> Sì, e per una ragione precisa: se le particelle non interagiscono, il peso congiunto si fattorizza, $w(\{p_i,q_i\})=\prod_i w_1(p_i,q_i)$, e una densità congiunta che si fattorizza <i>è</i> la definizione di indipendenza. Non è un&rsquo;approssimazione, è un&rsquo;identità — ed è di nuovo un regalo dell&rsquo;hamiltoniana di singola particella che tutte le prove danno.</p>
+  <div class="note">L&rsquo;indipendenza cade in due casi, ed è utile sapere quali perché segnano il confine del corso. <b>Con interazioni</b>: $V(q_i-q_j)$ accoppia le particelle e la fattorizzazione muore — è la fisica statistica dei sistemi interagenti, fuori programma. <b>Con particelle quantistiche identiche</b>: la simmetrizzazione della funzione d&rsquo;onda correla le occupazioni anche <i>senza</i> interazione, ed è esattamente il motivo per cui in ms-11 si passa al gran canonico invece di continuare a contare a mano. La binomiale di questa tappa è quindi uno strumento <b>del caso classico</b>, e quando in una prova compare dopo la parte quantistica, è perché quella domanda è tornata classica.</div>`},
+  {t:'reveal', title:'Media e varianza, dalla funzione generatrice', tag:'derivazione', steps:[
+   {label:'La generatrice, e perché conviene', body:R`<p>Sommare $n\binom{N}{n}p^n(1-p)^{N-n}$ a mano si può, ma è laborioso e si sbaglia. La strada corta è la <b>funzione generatrice</b>
+   $$G(s)\equiv\sum_{n=0}^{N}P_N(n)\,s^{\,n}=(1-p+ps)^{N},$$
+   dove l&rsquo;ultima uguaglianza è il binomio di Newton letto al contrario — chi vuole convincersene la scriva per $N=3$, dove i quattro termini si sommano a $(1-p+ps)^{3}$. In $s=1$ la parentesi vale uno, e quindi $G(1)=1$: è la normalizzazione, gratis.</p>
+   <p>Il trucco è che <b>derivare rispetto a $s$ fa scendere un fattore $n$</b>. Quindi $G'(1)=\langle n\rangle$ e $G''(1)=\langle n(n-1)\rangle$, e le due derivate sono elementari:
+   $$G'(s)=Np\,(1-p+ps)^{N-1},\qquad G''(s)=N(N-1)p^{2}(1-p+ps)^{N-2}.$$</p>`},
+   {label:'I due numeri', body:R`<p>Valutando in $s=1$, dove la parentesi vale $1$:
+   $$\langle n\rangle=Np,\qquad \langle n(n-1)\rangle=N(N-1)p^{2}.$$
+   La varianza si ricompone osservando che il momento secondo è il fattoriale più la media:
+   $$\sigma^{2}=N(N-1)p^{2}+Np-(Np)^{2}=Np(1-p).$$
+   Due controlli immediati: la varianza si annulla per $p=0$ e per $p=1$ (se l&rsquo;esito è certo non fluttua), ed è massima per $p=1/2$. Sono i controlli che si fanno prima di usarla, e costano una riga.</p>`}
+  ]},
+  {t:'prosa', title:'I due limiti, e quale si applica quando', tag:'la scelta che decide l’esercizio', html:R`
+  <p>Con $N\sim10^{23}$ nessuno calcola un coefficiente binomiale. Si prende un limite — e sbagliare limite è un errore che si porta dietro tutto il resto dell&rsquo;esercizio, quindi il criterio va saputo.</p>
+  <table>
+  <tr><th>regime</th><th>limite</th><th>forma</th><th>quando nelle prove</th></tr>
+  <tr><td>$N\to\infty$, $p\to0$, con $\lambda=Np$ <b>finito</b></td><td><b>Poisson</b></td><td>$P(n)=\dfrac{\lambda^{n}}{n!}e^{-\lambda}$</td><td>regione <b>piccola</b> rispetto al sistema: «quante particelle nel guscio», «probabilità che ce ne siano almeno 2»</td></tr>
+  <tr><td>$N\to\infty$, $p$ <b>fissato</b>, $Np(1-p)\gg1$</td><td><b>gaussiana</b><br>(de Moivre&ndash;Laplace)</td><td>$P(n)\simeq\dfrac{e^{-(n-Np)^{2}/2\sigma^{2}}}{\sqrt{2\pi\sigma^{2}}}$</td><td>regione <b>macroscopica</b>: «più di $N/2$ particelle nella metà sinistra»</td></tr>
+  </table>
+  <p>Il limite di Poisson si ottiene in una riga dal termine dominante: $\left(1-\lambda/N\right)^{N}\to e^{-\lambda}$, e il coefficiente binomiale $\binom{N}{n}p^n\to\lambda^n/n!$. La sua firma è che <b>media e varianza coincidono</b>, entrambe $\lambda$ — infatti $Np(1-p)\to Np$ quando $p\to0$. Se in un esercizio la varianza viene diversa dalla media in regime rarefatto, c&rsquo;è un errore.</p>
+  <p>Il limite gaussiano è il teorema del limite centrale applicato a $n=\sum_i X_i$, somma di $N$ variabili indipendenti che valgono $1$ o $0$. Qui non serve dimostrarlo — serve sapere che <b>vale per la somma, non per i singoli</b>, e che la larghezza cresce come $\sqrt N$ mentre la media cresce come $N$. Quel rapporto è tutta la tappa 04.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel compito del 24/01/2024, dopo aver trovato $p=1-e^{-\beta kL^{2}/2}$, la domanda chiede la probabilità di trovare $M$ particelle con $r\gt L$. Qual è la risposta, e qual è la trappola?`,
+    a:R`$P(M,N)=\dbinom{N}{M}(1-p)^{M}p^{\,N-M}$. La trappola è l&rsquo;<b>orientamento</b>: $p$ era stata calcolata come probabilità di stare <i>entro</i> $L$, mentre la domanda chiede $r\gt L$, quindi la probabilità del singolo evento contato è il complemento $1-p=e^{-\beta kL^{2}/2}$ e va all&rsquo;esponente $M$. Scambiare i due dà una risposta che ha la forma giusta ed è sbagliata — e non lo si vede né dalle dimensioni né dalla normalizzazione, perché entrambe le versioni sono normalizzate. L&rsquo;unico controllo che lo scova è un <b>limite</b>: per $L\to\infty$ nessuna particella sta oltre $L$, quindi deve venire $P(0,N)\to1$. Con l&rsquo;orientamento giusto $1-p\to0$ e il limite torna; con quello sbagliato no.`},
+   {q:R`Perché una regione piccola chiede Poisson e una macroscopica chiede la gaussiana, se la binomiale è esatta in entrambi i casi?`,
+    a:R`Perché sono due modi diversi di far esplodere lo stesso limite, e ciascuno tiene fisso ciò che nell&rsquo;altro degenera. Con $p$ fissato, $\sigma=\sqrt{Np(1-p)}\sim\sqrt N\to\infty$: la distribuzione si allarga in assoluto e conviene descriverla con la sua forma continua, la gaussiana. Con $\lambda=Np$ fissato, invece, $n$ resta un <b>numero piccolo e intero</b> — zero, una, due particelle nel guscio — e una gaussiana centrata in $\lambda\sim1$ è assurda: darebbe probabilità non nulla a $n$ negativo. La domanda operativa da farsi è sempre la stessa: <b>quante particelle mi aspetto</b>? Se la risposta è «poche», Poisson; se è «un numero macroscopico», gaussiana.`}
+  ]}
+]},
+
+/* ---------------- 04 · PERCHÉ 10^23 FA ESISTERE LA TERMODINAMICA ---------------- */
+{ num:'04', title:'Perché $10^{23}$ fa esistere la termodinamica', meta:'la fluttuazione relativa · e la forma forte: esponenzialmente piccola in $N$',
+  blocchi:[
+  {t:'prosa', title:'Il conto in una riga, e il numero che ne esce', tag:'first principles', html:R`
+  <p>Dalla tappa 03: media $Np$, deviazione standard $\sqrt{Np(1-p)}$. Il rapporto è ciò che conta, perché è quello che un esperimento misura:</p>
+  $$\frac{\sigma}{\langle n\rangle}=\frac{\sqrt{Np(1-p)}}{Np}=\sqrt{\frac{1-p}{p}}\;\frac{1}{\sqrt N}.$$
+  <p>Il primo fattore è di ordine uno per una regione non patologica; tutto sta nel secondo. Con $N=10^{23}$ e $p=1/2$ la fluttuazione relativa si riduce a $1/\sqrt{10^{23}}$, che è minore di $4\cdot10^{-12}$: il numero di particelle nella metà sinistra di una scatola è metà del totale con undici cifre decimali esatte, sempre, senza che nessuna legge lo imponga.</p>
+  <p><b>Questo è il motivo per cui esiste la termodinamica.</b> Non perché le fluttuazioni siano vietate, ma perché sono al di sotto della risoluzione di qualunque strumento. Una grandezza il cui valore relativo fluttua di $10^{-12}$ si comporta, per ogni scopo pratico, come un numero — e i «numeri» della termodinamica sono esattamente questi. Il secondo principio, letto qui, dice che il sistema si trova nella configurazione schiacciantemente più probabile; e «schiacciantemente» ha ora una misura.</p>`},
+  {t:'reveal', title:'La forma forte, che l’esame chiede per nome', tag:'grandi deviazioni', steps:[
+   {label:'Perché $1/\\sqrt N$ non basta', body:R`<p>Nel corpus la domanda compare in questa forma: «mostrare che la probabilità che $n\neq\bar n$ è <b>esponenzialmente piccola in $N$</b>». La stima $\sigma/\langle n\rangle\sim N^{-1/2}$ non risponde: dice che le deviazioni <i>tipiche</i> sono piccole, non che quelle <b>grandi</b> siano rare. Sono due affermazioni diverse, e la seconda è più forte.</p>
+   <p>La domanda giusta è: qual è la probabilità che la <i>frazione</i> $x=n/N$ si discosti da $p$ di una quantità fissata, indipendente da $N$? La risposta ha la forma
+   $$P\big(n\simeq xN\big)\;\approx\;e^{-N\,I(x)},\qquad I(x)=x\ln\frac{x}{p}+(1-x)\ln\frac{1-x}{1-p},$$
+   che si ottiene dalla binomiale con la formula di Stirling. La funzione $I$ si chiama <b>funzione di rate</b>.</p>`},
+   {label:'Le due proprietà che dicono tutto', body:R`<p>$I$ ha due proprietà, e insieme contengono sia la legge dei grandi numeri sia il teorema del limite centrale.</p>
+   <ul>
+   <li><b>$I(p)=0$</b>, e $I'(p)=0$: la funzione si annulla — e vi ha un minimo — esattamente nel valore medio. Quindi $x=p$ non è soppresso, e ogni altro $x$ lo è come $e^{-N\,I(x)}$. Con $N=10^{23}$ e $I$ anche solo di ordine $10^{-3}$, la soppressione è $e^{-10^{20}}$: non «raro», <b>mai</b>.</li>
+   <li><b>La curvatura nel minimo</b> è $I''(x)=\dfrac1x+\dfrac1{1-x}$, che in $x=p$ vale $\dfrac{1}{p(1-p)}$. Sviluppando $I$ al secondo ordine attorno a $p$ si ottiene $e^{-N(x-p)^2/2p(1-p)}$, cioè <b>proprio la gaussiana</b> della tappa 03, con la sua varianza $Np(1-p)$.</li>
+   </ul>
+   <p>Il teorema del limite centrale è dunque il <b>primo termine</b> dello sviluppo delle grandi deviazioni attorno al minimo: descrive bene le fluttuazioni di ordine $\sqrt N$ e male quelle di ordine $N$, che invece sono dominate dalla forma completa di $I$. Saper dire questa frase, all&rsquo;orale, è la differenza fra aver studiato le distribuzioni e aver capito perché contano.</p>`}
+  ]},
+  {t:'prosa', title:'Il debito che questo movimento contrae, e chi lo salda', tag:'sintesi operativa', html:R`
+  <p>Due cose sono state usate qui senza essere dimostrate, e conviene averle scritte perché non diventino buchi invisibili.</p>
+  <ul>
+  <li><b>Il peso $e^{-\beta H}$</b>. Usato in tutti gli esempi della tappa 02, annunciato e non derivato. Lo salda <b>ms-06</b>, a partire dal microcanonico di ms-04. Chi vuole la catena completa la trova lì; chi sta preparando lo scritto può usarlo prima, perché nelle prove è dato.</li>
+  <li><b>La formula di Stirling</b>, $\ln N!\simeq N\ln N-N$, usata per ricavare $I(x)$. È lo stesso strumento con cui in ms-04 si ricava l&rsquo;entropia dal conteggio di stati, e in ms-05 il fattore $N!$ del paradosso di Gibbs. Il suo trattamento asintotico serio — con il termine $\sqrt{2\pi N}$ e il controllo dell&rsquo;errore — sta nel nucleo <b>19 · asintotica</b> del percorso di Metodi, tappa sul metodo di Laplace.</li>
+  </ul>
+  <p><b>E una cosa è stata restituita.</b> La regola «ogni grado di libertà quadratico aggiunge mezza potenza di $\varepsilon$ al volume dello spazio delle fasi», ricavata al collaudo della tappa 02, è ciò che permette di scrivere $g(\varepsilon)$ a occhio per tutti i potenziali delle prove. Vale la pena tornarci sopra prima di ms-11: è l&rsquo;unico pezzo di questo movimento che si usa in <i>ogni</i> esercizio del secondo tempo del corso.</p>`},
+  {t:'prolessi', title:'Dove va, da qui',
+   oggetto:R`<b>La macchina</b>: dato un peso sullo spazio delle fasi, la densità di qualunque grandezza derivata (forma A), e il conteggio su $N$ particelle indipendenti (forma B). Più la ragione per cui con $N$ grande i conteggi diventano numeri.`,
+   rotte:[
+    {dove:'ms-04<br>microcanonico', txt:R`Il primo peso concreto: uniforme sul guscio di energia. L&rsquo;entropia $S=k\ln\Omega$ è un <b>conteggio di stati</b>, cioè la stessa operazione della tappa 02 senza normalizzazione — e Stirling, usato qui per $I(x)$, lì produce l&rsquo;estensività.`},
+    {dove:'ms-06 · ms-07<br>canonico', txt:R`Il peso di Boltzmann, e poi il suo mestiere. <b>ms-07</b> è il movimento più esaminato del corso, ed è la tappa 02 di qui ripetuta su ogni potenziale che le prove usano: buca, oscillatore, gravità, gas relativistico.`},
+    {dove:'ms-11 → ms-13<br>quantistico', txt:R`La $g(\varepsilon)$ costruita qui <b>non cambia</b>: cambia solo il peso, da $e^{-\beta\varepsilon}$ a $1/(e^{\beta(\varepsilon-\mu)}\pm1)$. E il fatto che in $d=2$ la $g$ libera sia costante è la ragione per cui la condensazione richiede un potenziale confinante.`},
+    {dove:'la tesi<br>ETH e decoerenza', txt:R`La domanda di questo movimento — perché una media su tanti gradi di libertà produce un numero e non una distribuzione — è la stessa che la <i>eigenstate thermalization hypothesis</i> pone per i sistemi quantistici isolati, dove non c&rsquo;è nessun bagno termico a fare la media. La soppressione esponenziale in $N$ vista qui è l&rsquo;antenato classico di quell&rsquo;argomento.`}
+   ],
+   domanda:R`<b>La domanda da tenere aperta.</b> Tutto questo movimento poggia sull&rsquo;indipendenza: le particelle non interagiscono, il peso si fattorizza, e da lì discendono la binomiale, il $1/\sqrt N$ e la soppressione esponenziale. Ma nessun sistema reale è non interagente — e la termodinamica funziona <b>anche</b> per i liquidi, i solidi, i sistemi vicino a una transizione di fase.<br><br>Come può reggere una conclusione la cui unica ipotesi è falsa? La risposta breve è che l&rsquo;indipendenza non serve davvero: serve che le <b>correlazioni siano a corto raggio</b>, così che un sistema macroscopico si possa vedere come tanti blocchi quasi indipendenti, e il conto del $\sqrt N$ riparta sul numero di blocchi. La risposta lunga è che questo <i>fallisce</i> esattamente nel punto critico di una transizione di fase, dove la lunghezza di correlazione diverge, i blocchi non esistono più e le fluttuazioni tornano macroscopiche. È lì che nasce la fisica statistica moderna — il gruppo di rinormalizzazione, l&rsquo;universalità — e la si intravede già in ms-13, quando la condensazione di Bose-Einstein produce la prima non-analiticità del corso.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoms-03-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo ms-03 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: ms-03-probabilita.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
