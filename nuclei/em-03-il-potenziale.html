@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento em-03 — Il potenziale: uno scalare al posto di un vettore, e il conto che em-02 lasciava a meta'</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Elettromagnetismo · Movimento <b>em-03 — Il potenziale: perche' il campo elettrostatico ne ammette uno, e cosa vuol dire che e' conservativo</b> · Focardi · Lacava</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'elettromagnetismo';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["gradiente"] = {"nome":"Gradiente","riga":"Il vettore $\\nabla f=(\\partial_xf,\\partial_yf,\\partial_zf)$: punta nella direzione in cui $f$ cresce più in fretta, e il suo modulo è quel tasso di crescita.","serve":"Trasforma una funzione scalare in un campo vettoriale, e lo fa in modo che la derivata di $f$ lungo una direzione $\\hat u$ sia $\\nabla f\\cdot\\hat u$: il gradiente contiene tutte le derivate direzionali in un oggetto solo. La proprietà che si usa per disegnare è l'altra: il gradiente è perpendicolare alle superfici di livello di $f$, quindi conoscere il potenziale basta a sapere dove vanno le linee di campo.","esempio":"Per $f(x,y,z)=x^{2}+y^{2}+z^{2}$ il gradiente è $(2x,2y,2z)$, cioè $2\\mathbf r$: radiale, quindi perpendicolare alle sfere di livello, come dev'essere. Le superfici $f=\\text{cost}$ sono sfere e il gradiente le buca ad angolo retto.","pieno":{"file":"04-campi-vettoriali.html","tappa":"02","come":"l'operatore $\\nabla$, le derivate direzionali e l'ortogonalità ai livelli, nel nucleo sui campi vettoriali"},"qui":{"elettromagnetismo":{"serve":"Il campo elettrostatico è meno il gradiente del potenziale, $\\mathbf E=-\\nabla V$, e il segno meno dice che $\\mathbf E$ punta verso i potenziali decrescenti — dove una carica positiva scivolerebbe da sola. Poiché il gradiente è ortogonale alle superfici di livello, le linee di campo sono ovunque perpendicolari alle equipotenziali: è il modo più rapido per disegnare un campo di cui si conosce il potenziale, e l'unico controllo veloce su un disegno sbagliato.","esempio":"Per la carica puntiforme il potenziale è $V=\\dfrac{q}{4\\pi\\varepsilon_0 r}$, e la componente radiale del campo è $-\\dfrac{dV}{dr}=\\dfrac{q}{4\\pi\\varepsilon_0r^{2}}$: il potenziale va come $1/r$, il campo come $1/r^{2}$, e il quadrato nasce dalla derivata, non da un'ipotesi in più. Chi ricorda solo una delle due formule può sempre ricavare l'altra."}},"controllo":[{"tipo":"derivata","espr":"x**2+y**2+z**2","rispetto":["x"],"vale":"2*x","dove":"esempio","appare":"(2x,2y,2z)"},{"tipo":"derivata","espr":"x**2+y**2+z**2","rispetto":["z"],"vale":"2*z","dove":"esempio","appare":"2\\mathbf r"},{"tipo":"derivata","espr":"-q/(4*pi*e0*r)","rispetto":["r"],"vale":"q/(4*pi*e0*r**2)","dove":"qui.elettromagnetismo.esempio","appare":"\\dfrac{q}{4\\pi\\varepsilon_0r^{2}}"}]};
+STRUM["campo-conservativo"] = {"nome":"Campo conservativo","riga":"Un campo che è il gradiente di una funzione, $\\mathbf F=\\nabla U$, e che perciò compie lungo un cammino un lavoro deciso solo dagli estremi.","serve":"Le tre proprietà — esiste un potenziale, il lavoro non dipende dal cammino, la circuitazione su ogni chiusa è nulla — sono equivalenti, e all'esame si usa quella che costa meno. Il rotore nullo è invece una condizione soltanto NECESSARIA: diventa sufficiente unicamente se il dominio è semplicemente connesso, e dimenticare quella clausola è l'errore classico, perché il controesempio non è patologico ma è il campo attorno a un filo.","esempio":"Il campo $\\mathbf F=(2xy,\\,x^{2})$ ha potenziale $U=x^{2}y$, perché $\\partial_xU=2xy$ e $\\partial_yU=x^{2}$; quindi il lavoro da $(0,0)$ a $(1,1)$ vale $U(1,1)-U(0,0)=1$, lungo qualunque cammino si scelga fra i due punti.","pieno":{"file":"04-campi-vettoriali.html","tappa":"05","come":"le tre caratterizzazioni equivalenti, la costruzione del potenziale per integrazione e il ruolo del dominio, nel nucleo sui campi vettoriali"},"qui":{"elettromagnetismo":{"serve":"In elettrostatica $\\mathbf E$ è conservativo, e l'intero apparato del potenziale $V$ poggia su questo: il lavoro per spostare una carica da $A$ a $B$ è $q(V_A-V_B)$ qualunque strada prenda, e solo per questo ha senso parlare di energia potenziale di una configurazione. La proprietà cade appena $\\mathbf B$ varia nel tempo: per Faraday la circuitazione di $\\mathbf E$ su una chiusa vale $-\\dfrac{d\\Phi_B}{dt}$, e un campo con circuitazione non nulla non ammette potenziale scalare.","esempio":"Per la carica puntiforme, il lavoro del campo di Coulomb su una carica di prova unitaria che va da $r_1$ a $r_2$ è $\\displaystyle\\int_{r_1}^{r_2}\\dfrac{q}{4\\pi\\varepsilon_0r^{2}}\\,dr=\\dfrac{q}{4\\pi\\varepsilon_0}\\left(\\dfrac{1}{r_1}-\\dfrac{1}{r_2}\\right)$: dipende solo dai due raggi, e l'angolo percorso non compare da nessuna parte. È la stessa cosa che dire $V\\propto 1/r$."}},"controllo":[{"tipo":"derivata","espr":"x**2*y","rispetto":["x"],"vale":"2*x*y","dove":"esempio","appare":"2xy"},{"tipo":"derivata","espr":"x**2*y","rispetto":["y"],"vale":"x**2","dove":"esempio","appare":"x^{2}"},{"tipo":"uguale","sinistra":"1**2*1-0**2*0","vale":"1","dove":"esempio","appare":"=1"},{"tipo":"integrale","espr":"q/(4*pi*e0*r**2)","var":"r","da":"r1","a":"r2","vale":"q/(4*pi*e0)*(1/r1-1/r2)","ipotesi":{"r":"positive","r1":"positive","r2":"positive"},"dove":"qui.elettromagnetismo.esempio","appare":"\\left(\\dfrac{1}{r_1}-\\dfrac{1}{r_2}\\right)"}]};
+STRUM["teorema-di-stokes"] = {"nome":"Teorema di Stokes","riga":"La circuitazione di un campo lungo una curva chiusa è il flusso del suo rotore attraverso una qualunque superficie che quella curva borda: $\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r=\\int_S(\\nabla\\times\\mathbf F)\\cdot\\hat n\\,dS$.","serve":"Dice che la circuitazione dipende solo dal bordo e non dalla superficie scelta — ed è la licenza a deformare la superficie a piacere, che in fisica si usa continuamente. Letto nell'altro verso dà il significato del rotore: la circuitazione per unità di area, nel limite di un cappio piccolo. Il verso della normale e quello di percorrenza del bordo vanno legati dalla regola della mano destra, altrimenti il segno è casuale.","esempio":"Per il vortice $\\mathbf F=(-y,x,0)$ il rotore ha solo componente $z$, che vale $\\partial_x(x)-\\partial_y(-y)=2$. Sul disco di raggio $R$ nel piano $xy$ il flusso del rotore è quindi $2$ per l'area, $2\\pi R^{2}$; la circuitazione diretta sul cerchio, dove $\\mathbf F\\cdot d\\mathbf r$ vale $R^{2}\\,dt$, dà $\\int_0^{2\\pi}R^{2}\\,dt=2\\pi R^{2}$.","pieno":{"file":"05-teoremi-integrali.html","tappa":"03","come":"l'enunciato, l'orientazione coerente bordo-normale e l'indipendenza dalla superficie, nel nucleo dei teoremi integrali"},"qui":{"elettromagnetismo":{"serve":"È il ponte fra la forma integrale e la forma locale delle due leggi di circuitazione: Ampère, $\\oint\\mathbf B\\cdot d\\mathbf r=\\mu_0 I$, diventa $\\nabla\\times\\mathbf B=\\mu_0\\mathbf J$; Faraday, $\\oint\\mathbf E\\cdot d\\mathbf r=-\\dfrac{d\\Phi_B}{dt}$, diventa $\\nabla\\times\\mathbf E=-\\partial_t\\mathbf B$. E regge l'affermazione più usata dell'elettrostatica: se il rotore di $\\mathbf E$ è nullo su un dominio senza buchi, ogni circuitazione è nulla e il campo è conservativo.","esempio":"Per il filo rettilineo infinito percorso da una corrente il campo ha modulo $\\dfrac{\\mu_0 I}{2\\pi r}$ ed è tangente ai cerchi concentrici, quindi la circuitazione su un cerchio di raggio $r$ è $\\dfrac{\\mu_0 I}{2\\pi r}\\cdot 2\\pi r=\\mu_0 I$: il raggio scompare. Stokes dice che lo stesso valore si ottiene su qualunque cappio che allacci il filo, anche storto — è il bordo a contare, non la forma."}},"controllo":[{"tipo":"uguale","sinistra":"diff(x,x)-diff(-y,y)","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"integrale","espr":"R**2","var":"t","da":"0","a":"2*pi","vale":"2*pi*R**2","dove":"esempio","appare":"2\\pi R^{2}"},{"tipo":"uguale","sinistra":"mu0*Ic/(2*pi*r)*2*pi*r","vale":"mu0*Ic","dove":"qui.elettromagnetismo.esempio","appare":"\\mu_0 I"}]};
+STRUM["rotore"] = {"nome":"Rotore","riga":"Il campo $\\nabla\\times\\mathbf F$, la cui componente lungo $\\hat n$ misura la circuitazione di $\\mathbf F$ per unità di area attorno a $\\hat n$.","serve":"È la girandola locale: dove il rotore è nullo, una paletta infinitesima immersa nel campo non gira. Da qui il criterio più usato — un campo con rotore nullo su un dominio semplicemente connesso è conservativo — e la doppia ipotesi non è pedanteria: su un dominio bucato il criterio salta, e il controesempio (il vortice attorno a un filo escluso) è proprio il caso che si incontra in fisica.","esempio":"Il vortice $\\mathbf F=(-y,x)$ ha rotore $\\partial_x(x)-\\partial_y(-y)=2$: gira davvero, ed è costante su tutto il piano. Il campo radiale $\\mathbf F=(x,y)$ ha invece rotore $\\partial_x(y)-\\partial_y(x)=0$: si allontana dall'origine senza ruotare, e infatti è il gradiente di $\\tfrac12(x^{2}+y^{2})$.","pieno":{"file":"04-campi-vettoriali.html","tappa":"03","come":"divergenza e rotore insieme, con le loro letture geometriche e il calcolo in componenti, nel nucleo sui campi vettoriali"},"qui":{"elettromagnetismo":{"serve":"Le due equazioni di Maxwell col rotore sono quelle che accoppiano i campi: $\\nabla\\times\\mathbf E=-\\partial_t\\mathbf B$ e $\\nabla\\times\\mathbf B=\\mu_0\\mathbf J+\\mu_0\\varepsilon_0\\partial_t\\mathbf E$. Il rotore nullo di $\\mathbf E$ in statica è ciò che autorizza a scrivere il potenziale; appena $\\mathbf B$ varia nel tempo quel rotore non è più nullo, e il potenziale scalare da solo smette di bastare. Il rotore è quindi il posto esatto in cui l'elettrostatica finisce.","esempio":"Che non possa esistere un potenziale scalare quando $\\mathbf B$ varia si vede dall'identità $\\nabla\\times(\\nabla V)$, che è nulla per ogni $V$: se $\\mathbf E$ fosse $-\\nabla V$ il suo rotore sarebbe zero, mentre Faraday lo vuole uguale a $-\\partial_t\\mathbf B$. Sul campione $V=xy$ il gradiente è $(y,x)$ e il conto è $\\partial_x(x)-\\partial_y(y)=0$, come per qualunque altro $V$."}},"controllo":[{"tipo":"uguale","sinistra":"diff(x,x)-diff(-y,y)","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"uguale","sinistra":"diff(y,x)-diff(x,y)","vale":"0","dove":"esempio","appare":"=0"},{"tipo":"uguale","sinistra":"diff(diff(x*y,y),x)-diff(diff(x*y,x),y)","vale":"0","dove":"qui.elettromagnetismo.esempio","appare":"=0"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo em-03: Il potenziale <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+identita: perche' il campo elettrostatico ammette un potenziale, e cosa vuol dire che e' conservativo
+serve:    em-01 (il campo elettrico), em-02 (flusso e Gauss)
+apre:     em-04-conduttori, em-06-energia-del-campo
+strumenti: gradiente, rotore, campo conservativo, teorema di Stokes
+prove:    74 compiti su 100 lo toccano, densita' 4.2; «differenza di potenziale» in 37,
+          dipolo in 41 (e in 23 insieme al potenziale), sfera/guscio in 28,
+          sistemi a strati in 29 — «campo conservativo» in 5, «gradiente» in 3,
+          circuitazione ELETTROSTATICA in ZERO
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"integrale","espr":"q0*Qt/(4*pi*e0*r**2)","var":"r","da":"rA","a":"rB",
+  "vale":"q0*Qt/(4*pi*e0)*(1/rA-1/rB)",
+  "ipotesi":{"r":"positive","rA":"positive","rB":"positive"},
+  "dove":"01","appare":"\\dfrac{1}{r_A}-\\dfrac{1}{r_B}"},
+
+ {"tipo":"uguale","sinistra":"q0*Qt/(4*pi*e0*rA)-q0*Qt/(4*pi*e0*rB)",
+  "vale":"q0*Qt/(4*pi*e0)*(1/rA-1/rB)",
+  "ipotesi":{"rA":"positive","rB":"positive"},
+  "dove":"01","appare":"\\dfrac{q_0Q}{4\\pi\\varepsilon_0 r_A}-\\dfrac{q_0Q}{4\\pi\\varepsilon_0 r_B}"},
+
+ {"tipo":"uguale","sinistra":"q0*Qt/(4*pi*e0)*(1/rA-1/rA)","vale":"0",
+  "ipotesi":{"rA":"positive"},
+  "dove":"01","appare":"0"},
+
+ {"tipo":"uguale","sinistra":"q0*Qt/(4*pi*e0*rA)-q0*Qt/(4*pi*e0*rB)",
+  "vale":"q0*Qt/(4*pi*e0)*(1/rA-1/rB)",
+  "ipotesi":{"rA":"positive","rB":"positive"},
+  "dove":"01","appare":"U(r_A)-U(r_B)"},
+
+ {"tipo":"integrale","espr":"q/(4*pi*e0*s**2)","var":"s","da":"r","a":"oo",
+  "vale":"q/(4*pi*e0*r)",
+  "ipotesi":{"r":"positive","s":"positive"},
+  "dove":"02","appare":"\\dfrac{q}{4\\pi\\varepsilon_0 r}"},
+
+ {"tipo":"integrale","espr":"lam/(2*pi*e0*s)","var":"s","da":"r","a":"R",
+  "vale":"lam/(2*pi*e0)*log(R/r)",
+  "ipotesi":{"r":"positive","R":"positive","s":"positive","lam":"positive"},
+  "dove":"02","appare":"\\log\\dfrac{R}{r}"},
+
+ {"tipo":"limite","espr":"log(R/r)","var":"R","a":"oo","vale":"oo",
+  "ipotesi":{"R":"positive","r":"positive"},
+  "dove":"02","appare":"diverge"},
+
+ {"tipo":"derivata","espr":"-q/(4*pi*e0*r)","rispetto":["r"],
+  "vale":"q/(4*pi*e0*r**2)",
+  "ipotesi":{"r":"positive"},
+  "dove":"03","appare":"\\dfrac{q}{4\\pi\\varepsilon_0 r^{2}}"},
+
+ {"tipo":"derivata","espr":"V0","rispetto":["x"],"vale":"0",
+  "dove":"03","appare":"0"},
+
+ {"tipo":"integrale","espr":"Qt/(4*pi*e0*s**2)","var":"s","da":"r","a":"oo",
+  "vale":"Qt/(4*pi*e0*r)",
+  "ipotesi":{"r":"positive","s":"positive"},
+  "dove":"04","appare":"\\dfrac{Q}{4\\pi\\varepsilon_0 r}"},
+
+ {"tipo":"integrale","espr":"Qt*s/(4*pi*e0*R**3)","var":"s","da":"r","a":"R",
+  "vale":"Qt*(R**2-r**2)/(8*pi*e0*R**3)",
+  "ipotesi":{"r":"positive","R":"positive","s":"positive"},
+  "dove":"04","appare":"\\dfrac{Q\\left(R^{2}-r^{2}\\right)}{8\\pi\\varepsilon_0R^{3}}"},
+
+ {"tipo":"uguale","sinistra":"Qt/(4*pi*e0*R)+Qt*(R**2-r**2)/(8*pi*e0*R**3)",
+  "vale":"Qt*(3-r**2/R**2)/(8*pi*e0*R)",
+  "ipotesi":{"r":"positive","R":"positive"},
+  "dove":"04","appare":"\\left(3-\\dfrac{r^{2}}{R^{2}}\\right)"},
+
+ {"tipo":"uguale","sinistra":"Qt*(3-R**2/R**2)/(8*pi*e0*R)","vale":"Qt/(4*pi*e0*R)",
+  "ipotesi":{"R":"positive"},
+  "dove":"04","appare":"\\dfrac{Q}{4\\pi\\varepsilon_0R}"},
+
+ {"tipo":"uguale","sinistra":"Qt*(3-0**2/R**2)/(8*pi*e0*R)","vale":"3*Qt/(8*pi*e0*R)",
+  "ipotesi":{"R":"positive"},
+  "dove":"04","appare":"\\dfrac{3Q}{8\\pi\\varepsilon_0R}"},
+
+ {"tipo":"derivata","espr":"-Qt*(3-r**2/R**2)/(8*pi*e0*R)","rispetto":["r"],
+  "vale":"Qt*r/(4*pi*e0*R**3)",
+  "ipotesi":{"r":"positive","R":"positive"},
+  "dove":"04","appare":"\\dfrac{Q\\,r}{4\\pi\\varepsilon_0R^{3}}"},
+
+ {"tipo":"integrale","espr":"Q1/(4*pi*e0*s**2)","var":"s","da":"r","a":"R2",
+  "vale":"Q1/(4*pi*e0)*(1/r-1/R2)",
+  "ipotesi":{"r":"positive","R2":"positive","s":"positive"},
+  "dove":"04","appare":"\\dfrac{1}{r}-\\dfrac{1}{R_2}"},
+
+ {"tipo":"uguale","sinistra":"Q1/(4*pi*e0)*(1/r-1/R2)+(Q1+Q2)/(4*pi*e0*R2)",
+  "vale":"Q1/(4*pi*e0*r)+Q2/(4*pi*e0*R2)",
+  "ipotesi":{"r":"positive","R2":"positive"},
+  "dove":"04","appare":"\\dfrac{Q_1}{4\\pi\\varepsilon_0 r}+\\dfrac{Q_2}{4\\pi\\varepsilon_0R_2}"},
+
+ {"tipo":"integrale","espr":"Qt*2*pi*s/(4*pi*e0*pi*R**2*sqrt(s**2+z**2))","var":"s","da":"0","a":"R",
+  "vale":"Qt*(sqrt(R**2+z**2)-z)/(2*pi*e0*R**2)",
+  "ipotesi":{"z":"positive","R":"positive","s":"positive"},
+  "dove":"05","appare":"\\sqrt{R^{2}+z^{2}}-z"},
+
+ {"tipo":"derivata","espr":"-sig*(sqrt(R**2+z**2)-z)/(2*e0)","rispetto":["z"],
+  "vale":"sig*(1-z/sqrt(R**2+z**2))/(2*e0)",
+  "ipotesi":{"z":"positive","R":"positive"},
+  "dove":"05","appare":"1-\\dfrac{z}{\\sqrt{R^{2}+z^{2}}}"},
+
+ {"tipo":"limite","espr":"sig*(1-z/sqrt(R**2+z**2))/(2*e0)","var":"z","a":"0",
+  "vale":"sig/(2*e0)",
+  "ipotesi":{"z":"positive","R":"positive"},
+  "dove":"05","appare":"\\dfrac{\\sigma}{2\\varepsilon_0}"},
+
+ {"tipo":"derivata","espr":"-Qt/(4*pi*e0*sqrt(z**2+R**2))","rispetto":["z"],
+  "vale":"Qt*z/(4*pi*e0*(z**2+R**2)**Rational(3,2))",
+  "ipotesi":{"z":"positive","R":"positive"},
+  "dove":"05","appare":"\\left(z^{2}+R^{2}\\right)^{3/2}"},
+
+ {"tipo":"uguale","sinistra":"(Qt/(pi*R**2))*R**2/(4*e0*z)","vale":"Qt/(4*pi*e0*z)",
+  "ipotesi":{"R":"positive","z":"positive"},
+  "dove":"05","appare":"\\dfrac{Q}{4\\pi\\varepsilon_0 z}"},
+
+ {"tipo":"uguale","sinistra":"1/(r-a*c/2)-1/(r+a*c/2)","vale":"a*c/(r**2-a**2*c**2/4)",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"r^{2}-\\dfrac{a^{2}\\cos^{2}\\theta}{4}"},
+
+ {"tipo":"limite","espr":"r**2*a*c/(r**2-a**2*c**2/4)","var":"r","a":"oo","vale":"a*c",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"a\\cos\\theta"},
+
+ {"tipo":"derivata","espr":"-p*cos(t)/(4*pi*e0*r**2)","rispetto":["r"],
+  "vale":"2*p*cos(t)/(4*pi*e0*r**3)",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"\\dfrac{2p\\cos\\theta}{4\\pi\\varepsilon_0r^{3}}"},
+
+ {"tipo":"uguale","sinistra":"-diff(p*cos(t)/(4*pi*e0*r**2), t)/r",
+  "vale":"p*sin(t)/(4*pi*e0*r**3)",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"\\dfrac{p\\sin\\theta}{4\\pi\\varepsilon_0r^{3}}"},
+
+ {"tipo":"uguale","sinistra":"sqrt((2*cos(t))**2+sin(t)**2)","vale":"sqrt(1+3*cos(t)**2)",
+  "ipotesi":{"t":"real"},
+  "dove":"06","appare":"\\sqrt{1+3\\cos^{2}\\theta}"},
+
+ {"tipo":"uguale","sinistra":"2*p*cos(0)/(4*pi*e0*r**3)","vale":"p/(2*pi*e0*r**3)",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"\\dfrac{p}{2\\pi\\varepsilon_0r^{3}}"},
+
+ {"tipo":"uguale",
+  "sinistra":"diff(r**2*diff(Qt*(3-r**2/R**2)/(8*pi*e0*R), r), r)/r**2",
+  "vale":"-3*Qt/(4*pi*e0*R**3)",
+  "ipotesi":{"r":"positive","R":"positive"},
+  "dove":"07","appare":"-\\dfrac{3Q}{4\\pi\\varepsilon_0R^{3}}"},
+
+ {"tipo":"uguale","sinistra":"-(3*Qt/(4*pi*R**3))/e0","vale":"-3*Qt/(4*pi*e0*R**3)",
+  "ipotesi":{"R":"positive"},
+  "dove":"07","appare":"\\rho=\\dfrac{3Q}{4\\pi R^{3}}"},
+
+ {"tipo":"uguale","sinistra":"-(3*Qt/(4*pi*R**3))/e0","vale":"-3*Qt/(4*pi*e0*R**3)",
+  "ipotesi":{"R":"positive"},
+  "dove":"07","appare":"\\rho}{\\varepsilon_0"},
+
+ {"tipo":"uguale",
+  "sinistra":"diff(k*y/(x**2+y**2+z**2)**Rational(3,2), x)-diff(k*x/(x**2+y**2+z**2)**Rational(3,2), y)",
+  "vale":"0",
+  "ipotesi":{"x":"real","y":"real","z":"real"},
+  "dove":"07","appare":"0\\;}"},
+
+ {"tipo":"uguale","sinistra":"1/(d/5)-4/(d-d/5)","vale":"0",
+  "ipotesi":{"d":"positive"},
+  "dove":"08","appare":"x=\\dfrac{d}{5}"},
+
+ {"tipo":"uguale","sinistra":"1/(d/3)-4/(d+d/3)","vale":"0",
+  "ipotesi":{"d":"positive"},
+  "dove":"08","appare":"x=-\\dfrac{d}{3}"},
+
+ {"tipo":"uguale","sinistra":"1/d**2-4/(d+d)**2","vale":"0",
+  "ipotesi":{"d":"positive"},
+  "dove":"08","appare":"x=-d"},
+
+ {"tipo":"uguale","sinistra":"Q1/(4*pi*e0*R1)+Q2/(4*pi*e0*R2)+Q3/(4*pi*e0*R3)",
+  "vale":"(Q1/R1+Q2/R2+Q3/R3)/(4*pi*e0)",
+  "ipotesi":{"R1":"positive","R2":"positive","R3":"positive"},
+  "dove":"08","appare":"\\dfrac{1}{4\\pi\\varepsilon_0}\\left(\\dfrac{Q_1}{R_1}+\\dfrac{Q_2}{R_2}+\\dfrac{Q_3}{R_3}\\right)"},
+
+ {"tipo":"uguale","sinistra":"Q1/(4*pi*e0*R2)+Q2/(4*pi*e0*R2)+Q3/(4*pi*e0*R3)",
+  "vale":"((Q1+Q2)/R2+Q3/R3)/(4*pi*e0)",
+  "ipotesi":{"R2":"positive","R3":"positive"},
+  "dove":"08","appare":"\\dfrac{Q_1+Q_2}{R_2}+\\dfrac{Q_3}{R_3}"},
+
+ {"tipo":"uguale",
+  "sinistra":"(Q1/R1+Q2/R2+Q3/R3)/(4*pi*e0)-(Q1+Q2+Q3)/(4*pi*e0*R3)",
+  "vale":"(Q1*(1/R1-1/R3)+Q2*(1/R2-1/R3))/(4*pi*e0)",
+  "ipotesi":{"R1":"positive","R2":"positive","R3":"positive"},
+  "dove":"08","appare":"Q_1\\left(\\dfrac{1}{R_1}-\\dfrac{1}{R_3}\\right)"},
+
+ {"tipo":"uguale","sinistra":"(Qt/(pi*R**2))*R**2/(4*e0*z)","vale":"Qt/(4*pi*e0*z)",
+  "ipotesi":{"R":"positive","z":"positive"},
+  "dove":"08","appare":"\\dfrac{Q}{4\\pi\\varepsilon_0z}"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Elettromagnetismo · 74 prove su 100 lo toccano · «differenza di potenziale» in 37',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>In <b>em-01</b> il campo si calcolava integrando un <b>vettore</b>: tre componenti, e la simmetria chiamata a uccidere quelle che si cancellano. In <b>em-02</b> la legge di Gauss lo dava in tre righe, ma solo dove la simmetria aveva già fatto metà del lavoro. Qui compare la terza via, ed è quella che il resto del corso userà di più: al campo elettrostatico si associa una funzione <b>scalare</b> $V$, un numero per ogni punto dello spazio, dalla quale il campo intero si riottiene con una derivata. Che quella funzione <i>esista</i> non è un postulato e non si dà per noto — <b>lo dimostriamo</b> nella tappa 01, con il conto.</p>
+  <p>In una frase: <i>il lavoro del campo elettrostatico su una carica che va da $A$ a $B$ non dipende dal cammino, e quindi esiste una funzione dei soli punti la cui differenza vale quel lavoro</i>. Da lì in avanti si sommano numeri invece di vettori — e sommare numeri è la ragione per cui questo movimento esiste.</p>
+  <p><b>Dove si spende il tempo, misurato.</b> Sulle 100 prove del corso con testo leggibile, «potenziale» compare in <b>74</b>, «differenza di potenziale» in <b>37</b>. Ma la forma della domanda non è quella dei libri. Le prove di Bini chiedono quasi sempre <i>il potenziale come integrale del campo</i>, regione per regione, su un sistema a strati che <b>em-02</b> ha già risolto a metà: «trovare il potenziale come integrale del campo elettrico», «determinare i potenziali delle superfici possiamo calcolare esplicitamente i campi e integrando». Ventotto prove chiedono il potenziale di una sfera o di un guscio, ventinove hanno la struttura a strati, e sono in larga parte le stesse.</p>
+  <p><b>E due parole che i libri usano e le prove no.</b> «Campo conservativo» compare in <b>5</b> prove, «gradiente» in <b>3</b>, «superficie equipotenziale» in <b>4</b>, «volt» in <b>2</b>. Peggio: «circuitazione» compare in ventisette prove, ma disambiguando ogni singola occorrenza per contesto sono <b>trentasei magnetiche</b> (Ampère) e <b>sette elettriche</b>, e tutte e sette sono <b>Faraday</b> — cioè il caso in cui la circuitazione di $\mathbf E$ <i>non</i> è nulla. La circuitazione elettrostatica $\oint\mathbf E\cdot d\mathbf l=0$, che è l'enunciato-cardine di questa tappa, nelle prove compare <b>zero volte</b>. Ci si torna nella tappa 07, perché la conseguenza è contro-intuitiva.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li><b>Dimostrare</b> che il campo di una carica puntiforme è conservativo — con il conto, non con un appello all'autorità — e dire in quale riga il cammino sparisce.</li>
+  <li>Eseguire il <b>secondo tempo del metodo a strati</b>: preso $E(r)$ regione per regione da <b>em-02</b>, ottenere $V(r)$ integrando <i>dall'esterno verso l'interno</i>, e raccordare. È la forma di ventinove prove.</li>
+  <li>Andare nei <b>due versi</b>: $V$ dal campo per integrazione, $\mathbf E$ da $V$ per gradiente. E sapere quale dei due conviene, che non è sempre lo stesso.</li>
+  <li>Calcolare $V$ per <b>integrazione diretta</b> di $dq/r$ — sull'asse di un anello, di un disco — e ricavarne il campo derivando. È la strada che <b>em-01</b> non aveva, e che accorcia il conto di un ordine.</li>
+  <li>Il <b>dipolo</b>: il potenziale in approssimazione di grande distanza, e il campo completo — <i>tutte e due</i> le componenti — ottenuto da una sola derivata.</li>
+  <li>Scegliere lo <b>zero del potenziale</b>, e sapere quando l'infinito non è una scelta ammessa.</li>
+  </ul>`},
+  {t:'prolessi', title:'Dove porta', html:R`
+  <p>Questo movimento è la <b>chiave dei conduttori</b>. In <b>em-04</b> un conduttore in equilibrio si rivelerà un <i>volume equipotenziale</i>, e la capacità sarà definita come $C=Q/\Delta V$: senza $V$ quella definizione non si può nemmeno scrivere. «Condensatore» compare in 56 prove su 100 e «capacità» in 48 — i due numeri più alti di tutta la misura — e poggiano interamente su questa tappa.</p>
+  <p>In <b>em-06</b> l'energia elettrostatica di una configurazione si scriverà come somma di $q_iV_i$, e la domanda «dove sta l'energia» nascerà proprio dal confronto fra quella scrittura e $\tfrac12\varepsilon_0E^{2}$. E in <b>em-10</b> la proprietà dimostrata qui <b>cade</b>: con $\mathbf B$ variabile la circuitazione di $\mathbf E$ non è più nulla, un potenziale scalare non basta più, e nasce il potenziale vettore.</p>`}
+  ]},
+
+/* ---------------- 01 · IL LAVORO ---------------- */
+{ num:'01', title:'Il lavoro di Coulomb, e la conservatività che si vede invece di assumerla', meta:'la proiezione radiale · dipende solo dai raggi · cammino chiuso · sovrapposizione',
+  blocchi:[
+  {t:'prosa', title:'Il conto, e la riga in cui il cammino sparisce', tag:'derivazione', html:R`
+  <p>Carica $Q$ ferma nell'origine, carica di prova $q_0$ che va da $A$ a $B$ lungo un cammino <b>qualunque</b>. Il lavoro della forza di Coulomb è
+  $$W_{A\to B}=\int_A^B\mathbf F\cdot d\mathbf l=\int_A^B F\,\left|d\mathbf l\right|\cos\vartheta ,$$
+  con $\vartheta$ l'angolo fra la forza (radiale) e lo spostamento.</p>
+  <p><b>Qui sta tutto.</b> La quantità $\left|d\mathbf l\right|\cos\vartheta$ è la <i>proiezione dello spostamento sulla direzione radiale</i>, e la proiezione di uno spostamento sulla direzione radiale è, per definizione, la variazione di distanza dall'origine: $\left|d\mathbf l\right|\cos\vartheta=dr$. La parte di spostamento perpendicolare al raggio — quella che fa girare attorno alla carica — <b>non compare affatto</b>, perché la forza le è ortogonale e il prodotto scalare la annulla. Dell'intero cammino, contorto quanto si vuole, sopravvive una sola informazione: quanto si è cambiato raggio.</p>
+  <p>Quindi l'integrale di linea, che era su una curva nello spazio, diventa un integrale ordinario fra due numeri:
+  $$W_{A\to B}=\int_{r_A}^{r_B}\frac{q_0Q}{4\pi\varepsilon_0r^{2}}\,dr=\frac{q_0Q}{4\pi\varepsilon_0}\left(\dfrac{1}{r_A}-\dfrac{1}{r_B}\right).$$
+  <b>Dipende solo da $r_A$ e $r_B$</b>: non dalla forma della curva, non dagli angoli percorsi, non dal tempo impiegato. Due cammini qualsiasi fra gli stessi estremi danno lo stesso lavoro.</p>`},
+  {t:'reveal', title:'Il cammino chiuso, e perché non è un corollario ovvio', html:R`
+  <p>Se il cammino si chiude, $r_B=r_A$, e
+  $$W=\frac{q_0Q}{4\pi\varepsilon_0}\left(\frac{1}{r_A}-\frac{1}{r_A}\right)=0:$$
+  <b>il lavoro su un cammino chiuso e' nullo</b>. Sembra una riscrittura, ed è invece l'enunciato che verrà usato: un campo per cui $\oint\mathbf F\cdot d\mathbf l=0$ su <i>ogni</i> curva chiusa è detto conservativo, e le due formulazioni — indipendenza dal cammino, circuitazione nulla — sono equivalenti perché due cammini da $A$ a $B$, percorrendo il secondo all'indietro, formano una curva chiusa.</p>
+  <p><b>Cosa sarebbe successo con un altro esponente.</b> Niente: la conservatività <i>non</i> dipende dall'esponente $2$. Qualunque forza centrale $F(r)\hat r$, con $F$ funzione del solo modulo, passa lo stesso identico argomento — la proiezione radiale è la stessa e l'integrale resta fra due raggi. <b>È il punto in cui questa tappa si stacca da em-02</b>, dove invece l'esponente $2$ era tutto: la legge di Gauss muore con $r^{-(2+\epsilon)}$, il potenziale no. Sono due proprietà indipendenti della stessa forza, e un esame che le confonde chiede di dimostrare Gauss dalla conservatività, cosa che non si può fare.</p>`},
+  {t:'prosa', title:'Energia potenziale, e la sovrapposizione che estende tutto', tag:'derivazione', html:R`
+  <p>Un lavoro che dipende solo dagli estremi si può scrivere come <i>differenza dei valori di una funzione</i> calcolata negli estremi. Posto
+  $$U(r)=\frac{q_0Q}{4\pi\varepsilon_0 r},$$
+  si ha infatti $W_{A\to B}=\dfrac{q_0Q}{4\pi\varepsilon_0 r_A}-\dfrac{q_0Q}{4\pi\varepsilon_0 r_B}=U(r_A)-U(r_B)$. La funzione $U$ è l'<b>energia potenziale</b> della coppia di cariche, ed è definita a meno di una costante additiva: la scelta fatta qui — $U\to 0$ per $r\to\infty$ — è quella che rende $U$ uguale al lavoro che il campo compie portando la carica dalla sua posizione fino all'infinito.</p>
+  <p><b>Il segno, e l'errore che ricorre.</b> $W_{A\to B}=U_A-U_B$, non $U_B-U_A$: il campo compie lavoro <i>positivo</i> quando l'energia potenziale <i>diminuisce</i>. Per cariche dello stesso segno $U\gt0$ e decresce allontanandosi, coerente con la repulsione; per cariche opposte $U\lt0$ e cresce (verso lo zero) allontanandosi, coerente con l'attrazione. Chi ricorda il segno a memoria lo sbaglia; chi ricorda <i>quale delle due situazioni spinge da sola</i> non lo sbaglia mai.</p>
+  <p><b>Da una carica a tutte.</b> Il campo di una distribuzione è la somma dei campi delle sue parti (<b>em-01</b>), l'integrale di linea è lineare, e una somma di quantità ciascuna indipendente dal cammino è indipendente dal cammino. Quindi <b>ogni</b> campo elettrostatico è conservativo, comunque siano disposte le cariche che lo generano — non serve nessuna simmetria, a differenza di quanto serviva per usare Gauss. È una proprietà che si paga una volta sola e vale sempre.</p>`}
+  ]},
+
+/* ---------------- 02 · IL POTENZIALE ---------------- */
+{ num:'02', title:'Il potenziale: togliere la carica di prova, e scegliere lo zero', meta:'$V=U/q_0$ · il segno meno · il volt · quando l’infinito non è ammesso',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e perché è una proprietà del campo', tag:'first principles', html:R`
+  <p>Nella formula di $U$ la carica di prova $q_0$ compare come fattore moltiplicativo, e solo lì. Dividendola via resta una funzione che dipende <i>unicamente</i> dalle cariche sorgenti e dal punto: il <b>potenziale elettrostatico</b>
+  $$V=\frac{U}{q_0},\qquad V(B)-V(A)=-\int_A^B\mathbf E\cdot d\mathbf l,\qquad W_{A\to B}=q\left(V_A-V_B\right).$$
+  È la stessa operazione che in <b>em-01</b> aveva trasformato la forza in campo: si toglie di mezzo la sonda, e resta una proprietà dello spazio. Con un vantaggio in più rispetto a quel passaggio — $\mathbf E$ era un vettore, $V$ è un <b>numero</b>.</p>
+  <p><b>Il segno meno non è una convenzione arbitraria.</b> Viene da $W=q(V_A-V_B)$: perché una carica positiva lasciata libera si muova spontaneamente <i>verso il potenziale più basso</i>, il lavoro dev'essere positivo quando $V$ diminuisce. Il potenziale è, letteralmente, una quota: le cariche positive cadono verso il basso, le negative verso l'alto.</p>
+  <p>Per la carica puntiforme, integrando il campo dal punto fino all'infinito:
+  $$V(r)=\int_r^{\infty}\frac{q}{4\pi\varepsilon_0s^{2}}\,ds=\dfrac{q}{4\pi\varepsilon_0 r}.$$
+  Va come $1/r$, mentre il campo va come $1/r^{2}$: una potenza in meno, ed è sempre così, perché $V$ è l'integrale di $E$ lungo un raggio.</p>`},
+  {t:'gram', title:'Le tre scritture, e quale serve quando', rows:[
+    ['$\\displaystyle-\\int_A^B\\mathbf E\\cdot d\\mathbf l$','<b>la definizione operativa</b>, e vale $V(B)-V(A)$. È quella che le prove usano: noto $E$ da Gauss, si integra. Il segno meno e il verso del cammino sono l’unica cosa da non sbagliare.'],
+    ['$W_{A\\to B}=q\\left(V_A-V_B\\right)$','<b>il ponte con la meccanica.</b> Con la conservazione dell’energia dà la velocità di una carica accelerata da una ddp — sessantasei prove contengono una velocità o un’accelerazione, e quasi tutte passano di qui.'],
+    ['$V(P)=\\displaystyle\\frac{1}{4\\pi\\varepsilon_0}\\int\\frac{dq}{r}$','<b>la scorciatoia scalare.</b> Vale solo con lo zero all’infinito, ma quando vale evita del tutto il campo: si somma un numero per ogni $dq$, senza componenti. Tappa 05.']
+  ]},
+  {t:'reveal', title:'Lo zero del potenziale — e il caso in cui l’infinito è vietato', html:R`
+  <p>Solo le <i>differenze</i> di potenziale hanno significato fisico: $V$ è definito a meno di una costante, e fissarla si chiama scegliere il riferimento. La scelta $V(\infty)=0$ è comoda e quasi universale, ma <b>funziona soltanto per distribuzioni di estensione finita</b>, quelle il cui campo cala almeno come $1/r^{2}$.</p>
+  <p>Per un filo indefinito, dove <b>em-02</b> ha dato $E=\dfrac{\lambda}{2\pi\varepsilon_0 r}$:
+  $$V(r)-V(R)=\int_r^{R}\frac{\lambda}{2\pi\varepsilon_0 s}\,ds=\frac{\lambda}{2\pi\varepsilon_0}\log\dfrac{R}{r},$$
+  e per $R\to\infty$ il logaritmo <b>diverge</b>. Un potenziale nullo all'infinito, lì, non esiste: si è costretti a scegliere come zero una distanza finita $R$ qualunque, e la costante resta nel risultato. Lo stesso accade per il piano indefinito, dove $E=\sigma/2\varepsilon_0$ è costante e $V$ cresce linearmente senza limite.</p>
+  <p><b>E non è un caso di scuola</b>: fili e lastre indefinite compaiono in trentatré prove su cento. Quando la traccia chiede «la differenza di potenziale fra…» e non «il potenziale in…», spesso è perché il potenziale assoluto non sarebbe definito — e accorgersene fa risparmiare il tentativo sbagliato.</p>`},
+  {t:'prosa', title:'Il volt, e perché nelle prove non si vede', tag:'unità', html:R`
+  <p>L'unità di $V$ nel SI è il <b>volt</b>: $1\,\text{V}=1\,\text{J}/\text{C}$. Da lì il campo elettrico, che finora si sarebbe scritto in newton su coulomb, si esprime più spesso in <b>volt su metro</b> — e le due unità sono la stessa cosa, come si vede da $E=-dV/dx$.</p>
+  <p>La misura dice che «volt» compare in <b>2</b> prove su cento ed «elettronvolt» in <b>1</b>: le prove di Bini sono simboliche quasi ovunque, e il numero si chiede alla fine o non si chiede. Vale però conoscere l'<b>elettronvolt</b>, $1\,\text{eV}=1{,}6\cdot10^{-19}\,\text{J}$, perché è l'energia acquistata da una carica elementare attraverso una ddp di un volt — cioè, per costruzione, il ponte fra questa tappa e tutta la fisica atomica: gli ordini di grandezza della Quantistica sono eV, e quel numero nasce qui.</p>`}
+  ]},
+
+/* ---------------- 03 · LE DUE DIREZIONI ---------------- */
+{ num:'03', title:'Le due direzioni: il campo dal potenziale, e il gradiente', meta:'$\\mathbf E=-\\nabla V$ · superfici equipotenziali · il caso radiale',
+  blocchi:[
+  {t:'prosa', title:'Invertire la definizione', tag:'derivazione', html:R`
+  <p>La definizione $dV=-\mathbf E\cdot d\mathbf l$ si può leggere al contrario. Scrivendo lo spostamento infinitesimo in componenti, $d\mathbf l=(dx,dy,dz)$:
+  $$dV=-\left(E_x\,dx+E_y\,dy+E_z\,dz\right),$$
+  e confrontando con il differenziale di una funzione di tre variabili, $dV=\dfrac{\partial V}{\partial x}dx+\dfrac{\partial V}{\partial y}dy+\dfrac{\partial V}{\partial z}dz$, l'uguaglianza deve valere per <i>ogni</i> spostamento, quindi componente per componente:
+  $$E_x=-\frac{\partial V}{\partial x},\quad E_y=-\frac{\partial V}{\partial y},\quad E_z=-\frac{\partial V}{\partial z}\qquad\Longleftrightarrow\qquad \boxed{\;\mathbf E=-\nabla V\;}$$
+  dove $\nabla V$ è il <span class="str" data-str="gradiente">gradiente</span> di $V$.</p>
+  <p><b>Il contenuto fisico del gradiente, in una riga:</b> il gradiente punta nella direzione di <i>massima crescita</i> della funzione, e il suo modulo è la ripidità in quella direzione. Quindi $\mathbf E$ punta dove $V$ <i>decresce</i> più in fretta, e vale quanto quella pendenza. È di nuovo l'immagine della quota — il campo elettrico è la pendenza del terreno, con il verso della discesa.</p>`},
+  {t:'reveal', title:'Le superfici equipotenziali sono ortogonali al campo, e la dimostrazione è una riga', html:R`
+  <p>Una superficie equipotenziale è il luogo dei punti con $V$ costante. Muovendosi su di essa, $dV=0$; ma $dV=-\mathbf E\cdot d\mathbf l$, quindi $\mathbf E\cdot d\mathbf l=0$ per <b>ogni</b> spostamento tangente alla superficie. Un vettore ortogonale a tutte le direzioni tangenti è ortogonale alla superficie: <b>le linee di campo tagliano le equipotenziali ad angolo retto</b>, sempre.</p>
+  <p>Corollario che si usa senza accorgersene: <i>spostare una carica lungo un'equipotenziale non costa lavoro</i>. E, al contrario, se in una regione $V$ è costante allora tutte le derivate sono nulle e <b>$\mathbf E=0$</b> lì dentro — non «piccolo», esattamente zero. Sarà l'argomento con cui <b>em-04</b> mostrerà che il campo dentro un conduttore cavo è nullo, ed è la stessa cosa detta al contrario.</p>
+  <p>La parola «equipotenziale» compare in 4 prove su 100 e «gradiente» in 3: sono strumenti di <i>visione</i> più che di calcolo, e servono per capire una figura in dieci secondi invece che per produrre un numero. Dove invece il gradiente produce davvero il numero è il dipolo, tappa 06.</p>`},
+  {t:'prosa', title:'Il caso radiale, e il controllo che chiude il cerchio', tag:'collaudo', html:R`
+  <p>Quando $V$ dipende dal solo modulo $r$, tutta la faccenda si riduce a una derivata ordinaria:
+  $$E_r=-\frac{dV}{dr},$$
+  e questa è la forma che si usa in tutte le geometrie a strati. Sulla carica puntiforme:
+  $$-\frac{d}{dr}\left(\frac{q}{4\pi\varepsilon_0 r}\right)=\dfrac{q}{4\pi\varepsilon_0 r^{2}},$$
+  che è Coulomb. Il cerchio si chiude: si era ottenuto $V$ integrando $E$, e derivando $V$ si riottiene $E$.</p>
+  <p><b>Quale dei due versi conviene.</b> Non c'è una risposta unica, e saper scegliere vale minuti d'esame:</p>
+  <ul>
+  <li><b>Da $\mathbf E$ a $V$</b> quando la simmetria è alta e Gauss dà il campo in tre righe: allora l'integrazione è banale e si passa di lì. È la strada di ventinove prove a strati (tappa 04).</li>
+  <li><b>Da $V$ a $\mathbf E$</b> quando la simmetria è <i>bassa</i> e il campo avrebbe più componenti indipendenti: allora si calcola prima lo scalare — che si somma senza proiezioni — e si deriva dopo. È la strada dell'asse di un disco e, soprattutto, del dipolo (tappe 05 e 06).</li>
+  </ul>
+  <p>La regola pratica: <b>quante componenti ha il campo?</b> Una sola, per simmetria, e si va per Gauss; due o più, e conviene il potenziale.</p>`}
+  ]},
+
+/* ---------------- 04 · IL METODO A STRATI, SECONDO TEMPO ---------------- */
+{ num:'04', title:'Il metodo a strati, secondo tempo: da $E(r)$ a $V(r)$', meta:'si integra dall’esterno · sfera piena · guscio · due superfici · i raccordi',
+  blocchi:[
+  {t:'prosa', title:'La ricetta, e l’unica cosa nuova rispetto a em-02', tag:'metodo', html:R`
+  <p>Ventinove prove su cento hanno la struttura a strati, e ventotto chiedono il potenziale di una sfera o di un guscio: sono in larga parte le stesse prove, e la richiesta arriva sempre <i>dopo</i> quella del campo. Il movimento <b>em-02</b> ha lasciato il conto a metà; questa tappa lo chiude.</p>
+  <ol>
+  <li><b>Prendi $E(r)$ regione per regione</b> — è già fatto, è il risultato di <b>em-02</b>.</li>
+  <li><b>Fissa lo zero</b>. Per una distribuzione finita: $V(\infty)=0$.</li>
+  <li><b>Integra dall'esterno verso l'interno</b>, e questa è l'unica cosa nuova: $V(r)=\displaystyle\int_r^{\infty}E(s)\,ds$, spezzando l'integrale ai confini fra le regioni, perché in ciascuna l'espressione di $E$ è diversa.</li>
+  <li><b>Raccorda</b>: $V$ dev'essere <b>continuo</b> ai confini — sempre, anche dove $E$ salta. Un salto di $V$ richiederebbe un campo infinito.</li>
+  </ol>
+  <p><b>Perché dall'esterno, e non dall'interno.</b> Perché l'unico valore noto in partenza è quello all'infinito. Partendo dal centro si avrebbe una costante indeterminata da inseguire fino alla fine. È l'errore più frequente su questo tipo di esercizio, e costa l'intero punteggio della domanda, non una parte.</p>
+  <p><b>E la regola che rende V più facile di E</b>, e che in <b>em-02</b> non aveva analogo: $V$ è uno <i>scalare</i>, quindi i contributi di più distribuzioni <b>si sommano come numeri</b>, senza componenti e senza angoli. Dove per il campo serviva la simmetria, per il potenziale spesso basta l'addizione.</p>`},
+  {t:'prosa', title:'Sfera uniformemente carica: il conto che compare ovunque', tag:'derivazione', html:R`
+  <p>Carica $Q$ uniforme nel volume di una sfera di raggio $R$. Da <b>em-02</b>:
+  $$E(r)=\frac{Q}{4\pi\varepsilon_0r^{2}}\;(r\gt R),\qquad E(r)=\frac{Q\,r}{4\pi\varepsilon_0R^{3}}\;(r\lt R).$$
+  <p><b>Fuori</b> ($r\gt R$), un solo pezzo di integrale:
+  $$V(r)=\int_r^{\infty}\frac{Q}{4\pi\varepsilon_0s^{2}}\,ds=\dfrac{Q}{4\pi\varepsilon_0 r},$$
+  <b>identico al potenziale di una carica puntiforme</b>. Come per il campo, da fuori la sfera è indistinguibile da un punto.</p>
+  <p><b>Dentro</b> ($r\lt R$), due pezzi: da $r$ a $R$ con il campo interno, e da $R$ all'infinito con quello esterno — cioè il valore già trovato $V(R)=\dfrac{Q}{4\pi\varepsilon_0R}$. Il primo pezzo vale
+  $$\int_r^{R}\frac{Q\,s}{4\pi\varepsilon_0R^{3}}\,ds=\dfrac{Q\left(R^{2}-r^{2}\right)}{8\pi\varepsilon_0R^{3}},$$
+  e sommando:
+  $$V(r)=\frac{Q}{8\pi\varepsilon_0R}\left(3-\dfrac{r^{2}}{R^{2}}\right)\qquad (r\le R).$$
+  <p><b>I tre controlli, e sono quelli che l'esame premia.</b> In $r=R$ la formula interna dà $\dfrac{Q}{4\pi\varepsilon_0R}$, che è quella esterna: continuo. Al centro $V(0)=\dfrac{3Q}{8\pi\varepsilon_0R}$, cioè una volta e mezzo il valore in superficie — <i>finito</i>, e questo è già un risultato: il potenziale al centro di una distribuzione di volume non diverge, mentre quello di una carica puntiforme sì. E derivando: $-\dfrac{d}{dr}V_{\text{int}}=\dfrac{Q\,r}{4\pi\varepsilon_0R^{3}}$, che è il campo interno di partenza.</p>`},
+  {t:'reveal', title:'Il guscio, e il trabocchetto che separa', html:R`
+  <p>Carica $Q$ sulla sola superficie di una sfera di raggio $R$. Da <b>em-02</b>, dentro il campo è <b>nullo</b>. Ne segue che dentro $V$ è <b>costante</b> — e la domanda che separa è: costante quanto?</p>
+  <p>Non zero. Costante e pari al valore che ha sulla superficie, perché $V$ è continuo:
+  $$V(r)=\frac{Q}{4\pi\varepsilon_0R}\quad\text{per ogni } r\le R .$$
+  <p><b>Campo nullo non vuol dire potenziale nullo</b>, e la confusione fra le due cose è l'errore più costoso del movimento, perché non produce un numero assurdo — produce uno zero plausibile. Il potenziale misura il lavoro che servirebbe a <i>portare lì</i> una carica da infinito, e quel lavoro c'è stato tutto nel tratto esterno: una volta entrati, non se ne fa più, ma non si restituisce nemmeno quello già fatto.</p>
+  <p>La stessa frase, girata, è il fatto centrale di <b>em-04</b>: un conduttore è un volume dove $\mathbf E=0$, dunque è tutto allo stesso potenziale — <i>non</i> a potenziale zero.</p>`},
+  {t:'prosa', title:'Due superfici concentriche: la forma vera delle prove', tag:'derivazione', html:R`
+  <p>La configurazione che le prove chiamano «i potenziali delle superfici sferiche»: due gusci concentrici di raggi $R_1\lt R_2$, con cariche $Q_1$ e $Q_2$. Con il metodo dichiarato, per $R_1\lt r\lt R_2$ si spezza in due:
+  $$V(r)=\int_r^{R_2}\frac{Q_1}{4\pi\varepsilon_0s^{2}}\,ds+V(R_2)=\frac{Q_1}{4\pi\varepsilon_0}\left(\dfrac{1}{r}-\dfrac{1}{R_2}\right)+\frac{Q_1+Q_2}{4\pi\varepsilon_0R_2},$$
+  perché fra i due gusci il campo è quello del solo $Q_1$, mentre fuori è quello della somma. Semplificando:
+  $$V(r)=\dfrac{Q_1}{4\pi\varepsilon_0 r}+\dfrac{Q_2}{4\pi\varepsilon_0R_2}\qquad (R_1\lt r\lt R_2).$$
+  <p><b>Ed è qui che si vede il guadagno.</b> Quel risultato si poteva scrivere direttamente, senza integrare niente: il potenziale è la <i>somma</i> di quello dei due gusci presi singolarmente, e il guscio esterno — dentro cui ci si trova — contribuisce con la sua costante $Q_2/4\pi\varepsilon_0R_2$, mentre quello interno — fuori dal quale ci si trova — contribuisce come una carica puntiforme. <b>Due righe di tabella al posto di due integrali.</b></p>
+  <p>La tabella da avere in testa è di due voci sole, e copre la quasi totalità dei sistemi a strati sferici:</p>`},
+  {t:'gram', title:'Il contributo di un guscio di raggio $R$ e carica $Q$', rows:[
+    ['sono <b>fuori</b> ($r\\gt R$)','$V=\\dfrac{Q}{4\\pi\\varepsilon_0 r}$ — come una carica puntiforme nel centro.'],
+    ['sono <b>dentro</b> ($r\\lt R$)','$V=\\dfrac{Q}{4\\pi\\varepsilon_0 R}$ — una <b>costante</b>, che non dipende da dove sono.'],
+    ['<b>si sommano</b>','$V$ è uno scalare: il potenziale totale è la somma dei contributi, guscio per guscio, senza proiezioni. Per il campo questo non si poteva fare.']
+  ]}
+  ]},
+
+/* ---------------- 05 · L'INTEGRAZIONE DIRETTA ---------------- */
+{ num:'05', title:'La strada che em-01 non aveva: integrare $dq/r$', meta:'nessuna componente da uccidere · asse dell’anello · disco · e il campo per derivazione',
+  blocchi:[
+  {t:'prosa', title:'Perché questa strada è più corta, e di quanto', tag:'first principles', html:R`
+  <p>Per il potenziale vale la sovrapposizione come per il campo, ma senza vettori. Con lo zero all'infinito, ogni elemento $dq$ a distanza $r$ dal punto $P$ contribuisce $\dfrac{dq}{4\pi\varepsilon_0r}$, e i contributi si sommano come numeri:
+  $$V(P)=\frac{1}{4\pi\varepsilon_0}\int\frac{dq}{r}.$$
+  <p><b>Il confronto con em-01 è il punto.</b> Lì, per il campo di un disco sull'asse, servivano: scegliere $dq$, scrivere il suo campo come vettore, riconoscere che le componenti radiali si cancellano a coppie per simmetria, tenere solo la componente assiale moltiplicando per $\cos\vartheta$, e <i>poi</i> integrare. Cinque passi, e il terzo è quello dove si sbaglia. Qui i passi sono due: scrivere $r$ in funzione della variabile d'integrazione, e integrare. <b>Nessuna componente da uccidere, perché non ci sono componenti.</b></p>
+  <p>Il prezzo è che si ottiene $V$ e non $\mathbf E$ — ma il campo si riprende derivando, e sull'asse di un solido di rotazione la derivata è una sola. Le prove lo dicono con queste parole: «calcolare, in funzione di $z$, il potenziale elettrostatico sull'asse $z$», e poco dopo «$E$ lungo $z$ si può trovare dal gradiente del potenziale».</p>`},
+  {t:'prosa', title:'Anello e disco, e i campi che ne discendono', tag:'derivazione', html:R`
+  <p><b>Anello</b> di raggio $R$ e carica $Q$, punto sull'asse a quota $z$. Tutti gli elementi dell'anello stanno alla <i>stessa</i> distanza $\sqrt{z^{2}+R^{2}}$ dal punto, quindi l'integrale non ha nemmeno bisogno di essere fatto:
+  $$V(z)=\frac{1}{4\pi\varepsilon_0}\frac{Q}{\sqrt{z^{2}+R^{2}}},\qquad E_z=-\frac{dV}{dz}=\frac{Q\,z}{4\pi\varepsilon_0\left(z^{2}+R^{2}\right)^{3/2}}.$$
+  In <b>em-01</b> lo stesso campo era costato un integrale vettoriale con la proiezione; qui è una derivata di una funzione elementare. <b>È la ragione per cui questa tappa esiste.</b></p>
+  <p><b>Disco</b> di raggio $R$ e carica $Q$ uniforme, cioè $\sigma=\dfrac{Q}{\pi R^{2}}$. Si scompone in anelli di raggio $s$ e spessore $ds$, ciascuno con carica $dq=\sigma\,2\pi s\,ds$, e si somma il contributo di ciascuno con la formula dell'anello:
+  $$V(z)=\int_0^{R}\frac{\sigma\,2\pi s\,ds}{4\pi\varepsilon_0\sqrt{s^{2}+z^{2}}}=\frac{\sigma}{2\varepsilon_0}\left(\sqrt{R^{2}+z^{2}}-z\right)\qquad(z\gt0),$$
+  e derivando si ottiene il campo:
+  $$E_z=-\frac{dV}{dz}=\frac{\sigma}{2\varepsilon_0}\left(1-\dfrac{z}{\sqrt{R^{2}+z^{2}}}\right).$$
+  <p>La radice quadrata è il tratto caratteristico: compare qui, e ricompare identica in ogni geometria a disco del corso.</p>`},
+  {t:'reveal', title:'Due limiti che collaudano tutto il movimento', html:R`
+  <p><b>Vicinissimo al disco</b> ($z\to0^{+}$): il rapporto $z/\sqrt{R^{2}+z^{2}}$ tende a zero e resta
+  $$E_z\to\dfrac{\sigma}{2\varepsilon_0},$$
+  che è esattamente il piano indefinito di <b>em-02</b>. Da molto vicino, un disco finito è un piano infinito — e i due movimenti, arrivati per strade opposte, danno lo stesso numero.</p>
+  <p><b>Lontanissimo</b> ($z\gg R$): sviluppando $\sqrt{R^{2}+z^{2}}=z\sqrt{1+R^{2}/z^{2}}\simeq z\left(1+\dfrac{R^{2}}{2z^{2}}\right)$, il potenziale diventa $V\simeq\dfrac{\sigma R^{2}}{4\varepsilon_0 z}=\dfrac{Q}{4\pi\varepsilon_0 z}$: la carica puntiforme. Deve essere così, e verificarlo costa dieci secondi.</p>
+  <p>Questi due controlli sono il modo in cui si scopre un errore di conto <i>senza rifare il conto</i>, e valgono per ogni risultato di questo corso: <b>guardare da vicino e guardare da lontano</b>. Da vicino si deve ritrovare la geometria locale (piano, filo); da lontano, sempre, la carica totale puntiforme — a meno che la carica totale non sia nulla, e allora quello che resta è il dipolo della prossima tappa.</p>`}
+  ]},
+
+/* ---------------- 06 · IL DIPOLO ---------------- */
+{ num:'06', title:'Il dipolo: il caso in cui il potenziale paga davvero', meta:'41 prove su 100 · lo sviluppo a grande distanza · le due componenti da una derivata',
+  blocchi:[
+  {t:'prosa', title:'Perché questa tappa è la più lunga del movimento', tag:'misura', html:R`
+  <p>Il dipolo compare in <b>41 prove su 100</b>, con 220 menzioni; «momento di dipolo» in 30; e in <b>23</b> prove dipolo e potenziale compaiono insieme. In <b>em-01</b> era già il primo oggetto per frequenza (43 prove). È, in termini di conteggio puro, l'oggetto più presente dell'intero corso di elettrostatica, e una prova lo dice testualmente: «calcolato <i>in approssimazione di dipolo a partire dal potenziale</i>».</p>
+  <p>Non è un caso che sia qui e non in <b>em-01</b>. Il campo di dipolo ha <b>due componenti indipendenti</b>, radiale e trasversa, e calcolarle direttamente da Coulomb significa fare due integrali vettoriali con due proiezioni diverse. Dal potenziale — uno scalare, una riga — escono <i>entrambe</i> con due derivate. È il caso esemplare della regola della tappa 03: più componenti ha il campo, più conviene il potenziale.</p>`},
+  {t:'prosa', title:'Il potenziale a grande distanza', tag:'derivazione', html:R`
+  <p>Due cariche $+q$ e $-q$ a distanza $a$, con il <b>momento di dipolo</b> $\mathbf p=q\,\mathbf a$ diretto dalla negativa alla positiva. Punto $P$ a distanza $r$ dal centro, con $\theta$ l'angolo fra $\mathbf p$ e la direzione di $P$. Il potenziale è la somma di due numeri:
+  $$V=\frac{q}{4\pi\varepsilon_0}\left(\frac{1}{r_+}-\frac{1}{r_-}\right).$$
+  <p>Per $r\gg a$, i due raggi valgono $r_\pm\simeq r\mp\dfrac{a}{2}\cos\theta$ (la proiezione di mezzo braccio sulla direzione di $P$), e la differenza si fa esattamente:
+  $$\frac{1}{r-\frac{a\cos\theta}{2}}-\frac{1}{r+\frac{a\cos\theta}{2}}=\frac{a\cos\theta}{r^{2}-\dfrac{a^{2}\cos^{2}\theta}{4}}.$$
+  <p>Moltiplicando per $r^{2}$ e mandando $r\to\infty$, il denominatore perde il termine in $a^{2}$ e resta $a\cos\theta$: cioè, al prim'ordine in $a/r$,
+  $$\boxed{\;V(r,\theta)=\frac{1}{4\pi\varepsilon_0}\frac{p\cos\theta}{r^{2}}=\frac{1}{4\pi\varepsilon_0}\frac{\mathbf p\cdot\hat r}{r^{2}}\;}$$
+  <p><b>Va come $1/r^{2}$, non come $1/r$</b>: una potenza più rapida del monopolo, perché a grande distanza le due cariche quasi si annullano e resta solo il loro <i>sbilanciamento</i>. È il primo termine non nullo di uno sviluppo — lo sviluppo in multipoli — di cui questo corso vede il secondo gradino e la Quantistica userà tutti gli altri.</p>`},
+  {t:'prosa', title:'Il campo, da una sola derivata per componente', tag:'derivazione', html:R`
+  <p>Il gradiente in coordinate sferiche, per una funzione di $r$ e $\theta$, ha due componenti: $E_r=-\dfrac{\partial V}{\partial r}$ e $E_\theta=-\dfrac{1}{r}\dfrac{\partial V}{\partial\theta}$. Applicate a $V=\dfrac{p\cos\theta}{4\pi\varepsilon_0r^{2}}$:
+  $$E_r=\dfrac{2p\cos\theta}{4\pi\varepsilon_0r^{3}},\qquad E_\theta=\dfrac{p\sin\theta}{4\pi\varepsilon_0r^{3}} .$$
+  <p><b>Il modulo</b> segue dal teorema di Pitagora, e il fattore angolare si semplifica: $\sqrt{4\cos^{2}\theta+\sin^{2}\theta}=\sqrt{1+3\cos^{2}\theta}$, quindi
+  $$E=\frac{p}{4\pi\varepsilon_0r^{3}}\sqrt{1+3\cos^{2}\theta}.$$
+  <p><b>I due casi che si chiedono all'esame.</b> Sull'<b>asse</b> del dipolo ($\theta=0$): $E_\theta=0$ e $E=E_r=\dfrac{2p}{4\pi\varepsilon_0r^{3}}=\dfrac{p}{2\pi\varepsilon_0r^{3}}$, parallelo a $\mathbf p$ — ed è il risultato che <b>em-01</b> aveva ottenuto per via diretta, ritrovato qui in una riga. Sul <b>piano equatoriale</b> ($\theta=\pi/2$): $E_r=0$ e $E=E_\theta=\dfrac{p}{4\pi\varepsilon_0r^{3}}$, cioè <b>metà</b> del valore assiale, e diretto <i>antiparallelo</i> a $\mathbf p$. Il rapporto due-a-uno fra asse ed equatore è la cosa da ricordare, perché è l'unica che non si ricava in dieci secondi.</p>
+  <p>Il campo va come $1/r^{3}$: ancora una potenza in più rispetto al potenziale, come sempre.</p>`},
+  {t:'reveal', title:'Il dipolo in un campo esterno: coppia ed energia', html:R`
+  <p>La faccia opposta: non il campo <i>prodotto</i> dal dipolo, ma cosa gli fa un campo esterno uniforme $\mathbf E$. Le due cariche subiscono forze uguali e opposte — risultante nulla, quindi nessuna traslazione — ma applicate in punti diversi, quindi <b>coppia</b> non nulla:
+  $$\boldsymbol\tau=\mathbf p\times\mathbf E,\qquad U=-\mathbf p\cdot\mathbf E .$$
+  <p>L'energia è minima quando $\mathbf p$ è allineato con $\mathbf E$: <b>un dipolo in un campo tende a orientarsi lungo il campo</b>. In un campo <i>non</i> uniforme la risultante non è più nulla e il dipolo viene anche attirato verso le zone di campo intenso — è il motivo per cui un corpo neutro è attratto da una bacchetta carica, e la cosa non ha niente di misterioso.</p>
+  <p>Queste due righe compaiono in sole 5 prove, ma sono l'ingresso di <b>em-05</b>: un dielettrico è un mezzo fatto di dipoli che si orientano, e la polarizzazione $\mathbf P$ è il momento di dipolo per unità di volume. Tutto il capitolo dei dielettrici è questa tappa moltiplicata per il numero di Avogadro.</p>`}
+  ]},
+
+/* ---------------- 07 · LA STRUTTURA ---------------- */
+{ num:'07', title:'La struttura: circuitazione, rotore, e l’equazione di Poisson', meta:'le tre proprietà equivalenti · il dominio semplicemente connesso · l’equazione di Poisson · e la parola che l’esame non usa',
+  blocchi:[
+  {t:'prosa', title:'Tre enunciati, una cosa sola', tag:'first principles', html:R`
+  <p>Quanto dimostrato nella tappa 01 si può dire in tre modi, e sono <b>equivalenti</b> — è il contenuto della scheda <span class="str" data-str="campo-conservativo">campo conservativo</span>:</p>
+  <ol>
+  <li><b>esiste $V$</b> tale che $\mathbf E=-\nabla V$;</li>
+  <li><b>il lavoro non dipende dal cammino</b>, $\displaystyle\int_A^B\mathbf E\cdot d\mathbf l$ dipende solo da $A$ e $B$;</li>
+  <li><b>la circuitazione è nulla</b>, $\displaystyle\oint_\gamma\mathbf E\cdot d\mathbf l=0$ su ogni curva chiusa $\gamma$.</li>
+  </ol>
+  <p>All'esame si usa quella che costa meno, e di solito è la terza — perché una circuitazione nulla su un rettangolo scelto bene dà un'equazione fra due campi in due regioni, senza calcolare niente.</p>
+  <p>Passando da (3) alla forma locale con il <span class="str" data-str="teorema-di-stokes">teorema di Stokes</span>, $\oint_{\partial S}\mathbf E\cdot d\mathbf l=\int_S\left(\nabla\times\mathbf E\right)\cdot\hat n\,dS$, e chiedendo che l'integrale si annulli per <i>ogni</i> superficie — lo stesso argomento di arbitrarietà che in <b>em-02</b> aveva prodotto la forma locale di Gauss:
+  $$\boxed{\;\nabla\times\mathbf E=0\;}$$
+  che è la <b>terza equazione di Maxwell</b>, nella sua versione statica. Il <span class="str" data-str="rotore">rotore</span> nullo e la divergenza $\nabla\cdot\mathbf E=\dfrac{\rho}{\varepsilon_0}$ di <b>em-02</b> insieme determinano il campo elettrostatico completamente, date le condizioni al contorno: sono le due metà della stessa descrizione.</p>
+  <p><b>Il controllo esplicito, che vale la pena fare una volta.</b> Per la carica puntiforme in cartesiane, $\mathbf E=\dfrac{k\,(x,y,z)}{\left(x^{2}+y^{2}+z^{2}\right)^{3/2}}$ con $k=\dfrac{q}{4\pi\varepsilon_0}$. La componente $z$ del rotore è $\partial_xE_y-\partial_yE_x$, e derivando le due espressioni si ottengono due termini identici che si elidono: il rotore è nullo componente per componente, non «trascurabile». Le altre due componenti seguono per simmetria degli indici, e per sovrapposizione il risultato si estende a qualunque distribuzione.</p>`},
+  {t:'reveal', title:'Il rotore nullo è necessario, sufficiente solo a una condizione', html:R`
+  <p>La catena «rotore nullo $\Rightarrow$ esiste il potenziale» <b>non è gratuita</b>: vale solo se il dominio è <i>semplicemente connesso</i>, cioè se ogni curva chiusa vi si può contrarre a un punto senza uscirne. Altrimenti il rotore può essere nullo ovunque e il potenziale non esistere lo stesso.</p>
+  <p>Il controesempio non è patologico ed è dentro questo corso: il campo magnetico attorno a un filo percorso da corrente ha rotore nullo <i>fuori dal filo</i>, ma la sua circuitazione su una curva che gira attorno al filo vale $\mu_0i\ne0$ (<b>em-08</b>). La ragione è che quel dominio — lo spazio meno una retta — non è semplicemente connesso, e la curva che abbraccia il filo non si contrae.</p>
+  <p>In elettrostatica il problema non si pone, perché la conservatività l'abbiamo dimostrata <i>direttamente</i> nella tappa 01, senza passare dal rotore. Ma la clausola va saputa, perché è esattamente ciò che rende diverso il magnetismo — ed è la domanda d'orale che distingue chi ha capito da chi ha imparato.</p>`},
+  {t:'prosa', title:'Poisson: mettere insieme le due metà', tag:'derivazione', html:R`
+  <p>Sostituendo $\mathbf E=-\nabla V$ nella forma locale di Gauss $\nabla\cdot\mathbf E=\dfrac{\rho}{\varepsilon_0}$ si ottiene un'unica equazione nella sola incognita $V$:
+  $$\nabla\cdot\left(-\nabla V\right)=\frac{\rho}{\varepsilon_0}\;\Longrightarrow\;\boxed{\;\nabla^{2}V=-\frac{\rho}{\varepsilon_0}\;}$$
+  l'<b>equazione di Poisson</b>, che nelle regioni vuote diventa l'equazione di <b>Laplace</b> $\nabla^{2}V=0$. È il modo in cui l'elettrostatica si scrive come <i>un</i> problema di analisi: un'equazione differenziale, delle condizioni al contorno, e la soluzione è unica.</p>
+  <p><b>Il controllo sulla sfera uniforme.</b> Dentro, la tappa 04 ha dato $V=\dfrac{Q}{8\pi\varepsilon_0R}\left(3-\dfrac{r^{2}}{R^{2}}\right)$. Il laplaciano radiale è $\nabla^{2}V=\dfrac{1}{r^{2}}\dfrac{d}{dr}\left(r^{2}\dfrac{dV}{dr}\right)$, e il conto dà $-\dfrac{3Q}{4\pi\varepsilon_0R^{3}}$. Dall'altra parte, la densità è $\rho=\dfrac{3Q}{4\pi R^{3}}$, quindi $-\rho/\varepsilon_0$ vale lo stesso numero. <b>Torna</b>, e il controllo lega insieme tre tappe di due movimenti diversi.</p>`},
+  {t:'reveal', title:'La parola che le prove non usano — e il trabocchetto che ne segue', html:R`
+  <p>Questa tappa è la più importante del movimento per l'orale e la meno redditizia per lo scritto, e conviene saperlo in anticipo invece di scoprirlo studiando. «Campo conservativo» compare in <b>5</b> prove su 100, «rotore» in <b>4</b>, «integrale di linea» in <b>3</b>.</p>
+  <p><b>Ma il dato interessante è un altro, ed è contro-intuitivo.</b> «Circuitazione» compare in ventisette prove — sembrerebbe la parola-chiave di questa tappa. Disambiguando ogni occorrenza dal contesto, però, sono trentasei magnetiche (teorema di Ampère) e sette elettriche, e <b>tutte e sette sono Faraday</b>: spire in campo variabile, dove la circuitazione di $\mathbf E$ vale $-\dfrac{d\Phi_B}{dt}$ e <i>non è nulla</i>.</p>
+  <p>Cioè: nelle prove di questo corso, la circuitazione del campo elettrico compare <b>soltanto dove la proprietà dimostrata qui è caduta</b>. Chi impara «circuitazione» come sinonimo di «uguale a zero» sbaglia esattamente l'unico esercizio in cui quella parola gli comparirà davanti. La formulazione giusta da portarsi dietro è: <i>la circuitazione di $\mathbf E$ è nulla in elettrostatica, e questo è ciò che permette il potenziale; appena $\mathbf B$ varia nel tempo non lo è più, e il potenziale scalare non basta</i> (<b>em-10</b>).</p>`}
+  ]},
+
+/* ---------------- 08 · ESERCIZI ---------------- */
+{ num:'08', title:'Esercizi — tocca a te', meta:'presi dalla forma che ricorre nelle prove 2008-2021',
+  blocchi:[
+  {t:'esercizio', title:'1 · I potenziali di tre superfici sferiche', html:R`
+  <p>Tre gusci sferici concentrici, di raggi $R_1\lt R_2\lt R_3$, portano cariche $Q_1$, $Q_2$, $Q_3$ distribuite uniformemente sulle rispettive superfici. Calcola il potenziale di ciascuna delle tre superfici, e la differenza di potenziale $V_1-V_3$.</p>`,
+   sol:R`<p><b>Senza integrare niente</b>, con la tabella della tappa 04: ogni guscio contribuisce $Q/4\pi\varepsilon_0R$ se ci si trova dentro di esso, e $Q/4\pi\varepsilon_0 r$ se fuori. Sulla superficie del guscio più interno si è dentro a tutti e tre (e su quello di raggio $R_1$ si è «sopra», che dà lo stesso valore):
+   $$V_1=\dfrac{1}{4\pi\varepsilon_0}\left(\dfrac{Q_1}{R_1}+\dfrac{Q_2}{R_2}+\dfrac{Q_3}{R_3}\right).$$
+   <p>Su $R_2$ si è fuori dal primo e dentro al terzo, e i due termini con $R_2$ si raccolgono:
+   $$V_2=\dfrac{1}{4\pi\varepsilon_0}\left(\dfrac{Q_1+Q_2}{R_2}+\dfrac{Q_3}{R_3}\right).$$
+   <p>Su $R_3$ si è fuori da tutti:
+   $$V_3=\dfrac{Q_1+Q_2+Q_3}{4\pi\varepsilon_0R_3}.$$
+   <p><b>La differenza</b> si semplifica bene, e il terzo guscio sparisce:
+   $$V_1-V_3=\dfrac{1}{4\pi\varepsilon_0}\left[Q_1\left(\dfrac{1}{R_1}-\dfrac{1}{R_3}\right)+Q_2\left(\dfrac{1}{R_2}-\dfrac{1}{R_3}\right)\right].$$
+   <b>Ed è giusto che sparisca</b>: $Q_3$ contribuisce la stessa costante a tutti i punti interni a $R_3$, e una costante uguale nei due punti non sopravvive a una differenza. Il controllo vale come verifica dell'intero conto.</p>`},
+  {t:'esercizio', title:'2 · Dove si annulla $V$, dove si annulla $\\mathbf E$', html:R`
+  <p>Due cariche puntiformi, $q$ nell'origine e $-4q$ in $x=d$ (con $q\gt0$), sull'asse $x$. (a) In quali punti dell'asse il <b>potenziale</b> si annulla? (b) In quale punto si annulla il <b>campo</b>? (c) Perché non sono gli stessi punti?</p>`,
+   sol:R`<p><b>(a)</b> Il potenziale si annulla dove i due contributi, di segno opposto, hanno lo stesso modulo: la distanza dalla carica $-4q$ dev'essere il <b>quadruplo</b> della distanza da $q$, perché $V$ va come l'inverso della distanza. Fra le due cariche la condizione dà $x=\dfrac{d}{5}$; a sinistra di entrambe, posto $x=-u$ con $u\gt0$, la stessa condizione dà $u=d/3$, cioè $x=-\dfrac{d}{3}$. A destra di $x=d$ non c'è soluzione, perché lì la carica maggiore è anche la più vicina. <b>Due punti.</b></p>
+   <p><b>(b)</b> Il campo si annulla dove i due contributi sono antiparalleli <i>e</i> di modulo uguale, e poiché il modulo va come l'inverso del <b>quadrato</b> della distanza, la condizione è che la distanza da $-4q$ sia il <b>doppio</b> di quella da $q$. Serve stare fuori dal segmento, dalla parte della carica minore: con $x=-u$ si ottiene $u=d$, cioè $x=-d$. <b>Uno solo</b>, e non coincide con nessuno dei due precedenti.</p>
+   <p><b>(c)</b> Perché sono condizioni diverse su oggetti diversi. $V$ è uno <i>scalare</i> e si annulla dove due contributi di segno opposto hanno lo stesso modulo — e i moduli vanno come $1/r$. $\mathbf E$ è un <i>vettore</i> e si annulla dove due contributi si cancellano <b>come vettori</b>, quindi devono essere antiparalleli <i>e</i> di modulo uguale — e i moduli vanno come $1/r^{2}$. Due leggi di potenza diverse e un vincolo di direzione in più: sarebbe un caso se cadessero nello stesso punto.</p>
+   <p><b>La lezione che l'esame chiede:</b> $V=0$ non implica $\mathbf E=0$, e $\mathbf E=0$ non implica $V=0$. Nel punto $x=d/5$ il potenziale è nullo ma il campo è intenso; nel punto $x=-d$ il campo è nullo ma il potenziale non lo è. L'unica implicazione vera è quella della tappa 03, e vale su una <i>regione</i>, non in un punto: se $V$ è costante in tutto un volume, lì $\mathbf E=0$.</p>`},
+  {t:'esercizio', title:'3 · Potenziale sull’asse, e campo per derivazione', html:R`
+  <p>Un disco di raggio $R$ porta una densità superficiale uniforme $\sigma\gt0$. (a) Ricava $V(z)$ sull'asse. (b) Ricavane $E_z$. (c) Verifica i due limiti $z\to0^{+}$ e $z\gg R$, e di' quale movimento deve restituire ciascuno.</p>`,
+   sol:R`<p><b>(a)</b> Anelli di raggio $s$, spessore $ds$, carica $dq=\sigma2\pi s\,ds$, tutti a distanza $\sqrt{s^{2}+z^{2}}$ dal punto:
+   $$V(z)=\frac{1}{4\pi\varepsilon_0}\int_0^{R}\frac{\sigma\,2\pi s\,ds}{\sqrt{s^{2}+z^{2}}}=\frac{\sigma}{2\varepsilon_0}\left(\sqrt{R^{2}+z^{2}}-z\right).$$
+   <b>(b)</b> $E_z=-\dfrac{dV}{dz}=\dfrac{\sigma}{2\varepsilon_0}\left(1-\dfrac{z}{\sqrt{R^{2}+z^{2}}}\right)$, positivo per $\sigma\gt0$, come dev'essere: il campo di una carica positiva si allontana dal disco.</p>
+   <p><b>(c)</b> Per $z\to0^{+}$ si ha $E_z\to\dfrac{\sigma}{2\varepsilon_0}$, che è il <b>piano indefinito di em-02</b>: da vicino il disco non ha bordi. Per $z\gg R$ il potenziale tende a $\dfrac{\sigma R^{2}}{4\varepsilon_0z}$, e sostituendo $\sigma=\dfrac{Q}{\pi R^{2}}$ diventa $\dfrac{Q}{4\pi\varepsilon_0z}$: è la <b>carica puntiforme di em-01</b>, cioè da lontano il disco è un punto. Un risultato che non passa tutti e due questi controlli è sbagliato, e ci si accorge dell'errore senza rifare l'integrale.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>In quale riga esatta della dimostrazione della tappa 01 il cammino sparisce, e perché l'esponente $2$ non c'entra niente?</li>
+  <li>Dentro un guscio sferico carico il campo è nullo. Quanto vale il potenziale, e perché quella risposta non è zero?</li>
+  <li>Perché per un filo indefinito non si può porre $V(\infty)=0$, e cosa si fa allora?</li>
+  <li>Il potenziale di dipolo va come $1/r^{2}$ e il suo campo come $1/r^{3}$: da dove viene la potenza in più, ogni volta?</li>
+  <li>La circuitazione di $\mathbf E$ compare in sette prove su cento, e in tutte e sette non è nulla. Come si concilia con l'enunciato di questa tappa?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Nella riga in cui $\left|d\mathbf l\right|\cos\vartheta$ diventa $dr$: la componente di spostamento ortogonale al raggio è annullata dal prodotto scalare con una forza radiale, e dell'intero cammino resta solo la variazione di raggio. L'esponente non c'entra perché l'argomento usa <i>soltanto</i> che la forza sia centrale — qualunque $F(r)\hat r$ lo supera. È la differenza con Gauss, che invece muore se l'esponente cambia.</li>
+   <li>Vale $\dfrac{Q}{4\pi\varepsilon_0R}$, costante. Non è zero perché $V$ è continuo e quello è il valore sulla superficie: il lavoro per portare una carica da infinito fino al guscio è stato fatto tutto nel tratto esterno, e non viene restituito entrando. Campo nullo dice che $V$ non <i>cambia</i>, non che sia nullo.</li>
+   <li>Perché $E\propto1/r$ e il suo integrale è un logaritmo, che diverge: il lavoro per portare una carica all'infinito da un filo indefinito è infinito. Si sceglie come zero una distanza finita arbitraria, e nel risultato resta un $\log(R/r)$ — quindi hanno senso solo le differenze di potenziale, che è poi ciò che la traccia chiede.</li>
+   <li>Dal fatto che $\mathbf E=-\nabla V$: derivare rispetto a una lunghezza abbassa di uno l'esponente. Vale per ogni multipolo — monopolo $1/r$ e $1/r^{2}$, dipolo $1/r^{2}$ e $1/r^{3}$ — e permette di controllare a occhio se un campo e il suo potenziale sono compatibili.</li>
+   <li>Sono situazioni diverse. L'enunciato di questa tappa è <i>elettrostatico</i>: cariche ferme, campi costanti nel tempo. Le sette prove sono tutte di induzione, dove $\mathbf B$ varia e la legge di Faraday dà per la circuitazione di $\mathbf E$ il valore $-\dfrac{d\Phi_B}{dt}$, che non è nullo. Lì il campo elettrico <b>non è conservativo</b> e non ammette potenziale scalare — la proprietà dimostrata qui è caduta, e con essa tutto l'apparato di $V$.</li>
+   </ol>`}
+  ]},
+
+/* ---------------- 09 · IL SENSO ---------------- */
+{ num:'09', title:'Il senso, e le rotte', meta:'cosa consegna · dove si ritrova in Quantistica e in Statistica',
+  blocchi:[
+  {t:'prosa', title:'Cosa consegna questo movimento', tag:'sintesi', html:R`
+  <p><b>Uno scalare al posto di un vettore</b>, ed è tutta qui la ragione d'essere del potenziale. Tre volte, in questo movimento, la stessa cosa si è calcolata in meno passi che in <b>em-01</b>: il campo sull'asse di un anello, quello di un disco, quello di un dipolo — quest'ultimo con <i>entrambe</i> le componenti, che per via diretta sarebbero costate due integrali vettoriali. La regola da portare avanti è quella della tappa 03: una sola componente per simmetria, e si va di Gauss; due o più, e conviene passare dal potenziale.</p>
+  <p><b>E un metodo completato.</b> Il conto a strati di <b>em-02</b> — simmetria, superficie, $Q_{\text{int}}(r)$, raccordi — aveva un secondo tempo che lì mancava: integrare dall'esterno verso l'interno, spezzando ai confini, e raccordare per continuità. Insieme, i due movimenti risolvono per intero la geometria che ricorre in ventinove prove su cento.</p>
+  <p>Restano <b>due enunciati strutturali</b> che all'orale si chiedono di dimostrare e allo scritto quasi mai: $\nabla\times\mathbf E=0$, terza equazione di Maxwell nella sua versione statica, gemella del $\nabla\cdot\mathbf E=\rho/\varepsilon_0$ di <b>em-02</b>; e l'equazione di Poisson, che le fonde in una sola equazione differenziale per $V$. In <b>em-11</b> staranno una accanto all'altra, e la prima delle due acquisterà un membro destro.</p>`},
+  {t:'prolessi', title:'Le rotte fuori dal corso', html:R`
+  <p><b>Verso la Quantistica.</b> Nell'equazione di Schrödinger per l'atomo di idrogeno il termine di energia potenziale è $-\dfrac{e^{2}}{4\pi\varepsilon_0r}$: è <i>letteralmente</i> il potenziale calcolato nella tappa 02, moltiplicato per la carica dell'elettrone. Tutta la struttura dei livelli atomici — la degenerazione accidentale in $\ell$, le serie spettrali, la formula di Rydberg — discende dall'andamento $1/r$ di quella funzione, cioè dall'esponente $2$ di Coulomb, e cambierebbe interamente se fosse un altro. E la Poisson di questa tappa, con $\rho$ costruito dalla densità di probabilità degli elettroni, è il cuore dell'approssimazione di Hartree: un atomo a molti elettroni è un problema di elettrostatica autoconsistente.</p>
+  <p><b>Verso la Statistica.</b> Il fatto che l'energia di una configurazione di cariche si scriva con i potenziali reciproci rende l'energia di un sistema a $N$ corpi una somma a coppie di termini $1/r$ — l'interazione a lungo raggio per eccellenza, quella per cui l'energia <i>non</i> è estensiva e la termodinamica ordinaria fa fatica. Il rimedio è lo <b>schermaggio</b>: in un plasma ogni carica si circonda di un contro-strato e il potenziale, invece di $1/r$, diventa $\dfrac{e^{-r/\lambda_D}}{r}$, dove $\lambda_D$ è la lunghezza di Debye. È il potenziale di Yukawa, ed è il meccanismo con cui un'interazione a lungo raggio riesce a comportarsi come una a corto raggio — il ponte fra questo movimento e la meccanica statistica dei sistemi carichi, che <b>em-02</b> aveva già annunciato dall'altro capo.</p>`}
+  ]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoem-03-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo em-03 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: em-03-il-potenziale.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
