@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento em-02 — Flusso e Gauss: la legge di Coulomb riscritta, e il metodo che risolve i sistemi a strati</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Elettromagnetismo · Movimento <b>em-02 — Flusso e Gauss: la legge di Gauss è la legge di Coulomb riscritta, e riscritta meglio</b> · Focardi · Lacava</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'elettromagnetismo';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["flusso-di-un-campo"] = {"nome":"Flusso di un campo","riga":"L'integrale $\\iint_S\\mathbf F\\cdot\\hat n\\,dS$: quanta parte del campo attraversa la superficie, contata col segno che l'orientazione stabilisce.","serve":"Traduce «quanto passa attraverso» in un numero, e il numero dipende da due scelte che vanno dichiarate entrambe: la superficie e il verso della normale. Su una superficie chiusa la convenzione è normale uscente, e allora un flusso positivo significa che dentro c'è una sorgente netta. Dove il campo è parallelo alla superficie il contributo è nullo: conta solo la componente normale, mai il modulo.","esempio":"Per il campo radiale $\\mathbf F=\\mathbf r$ sulla sfera di raggio $R$ la normale uscente è $\\hat r$, e la componente normale vale $R$ in ogni punto, costante: il flusso è quel valore per l'area, $\\Phi=R\\cdot4\\pi R^{2}=4\\pi R^{3}$. Per $R=2$ fa $32\\pi$.","pieno":{"file":"03-curve-superfici.html","tappa":"04","come":"la definizione, il ruolo dell'orientazione e l'indipendenza dalla parametrizzazione, nel nucleo su curve e superfici"},"qui":{"elettromagnetismo":{"serve":"Il flusso di $\\mathbf E$ attraverso una superficie chiusa è l'unica cosa che la legge di Gauss controlla: dice quanto esce in totale, non quanto vale $\\mathbf E$ punto per punto. Da un solo numero si risale al campo soltanto se si sa già in che direzione punta e da cosa dipende — e quello lo decide la simmetria della distribuzione, non il teorema. Per questo la superficie si sceglie: dove $\\mathbf E$ è costante e normale, il flusso diventa modulo per area.","esempio":"Per una carica puntiforme $q$ al centro di una sfera di raggio $R$ il campo ha modulo $\\dfrac{q}{4\\pi\\varepsilon_0R^{2}}$ ed è ovunque normale alla sfera, quindi $\\Phi=\\dfrac{q}{4\\pi\\varepsilon_0R^{2}}\\cdot4\\pi R^{2}=\\dfrac{q}{\\varepsilon_0}$: il raggio è sparito. È il motivo per cui la legge di Gauss è una legge e non un conto — vale per qualunque superficie chiusa che racchiuda la carica."}},"controllo":[{"tipo":"uguale","sinistra":"R*4*pi*R**2","vale":"4*pi*R**3","dove":"esempio","appare":"4\\pi R^{3}"},{"tipo":"uguale","sinistra":"4*pi*2**3","vale":"32*pi","dove":"esempio","appare":"32\\pi"},{"tipo":"uguale","sinistra":"q/(4*pi*e0*R**2)*4*pi*R**2","vale":"q/e0","dove":"qui.elettromagnetismo.esempio","appare":"\\dfrac{q}{\\varepsilon_0}"},{"tipo":"derivata","espr":"q/(4*pi*e0*R**2)*4*pi*R**2","rispetto":["R"],"vale":"0","dove":"qui.elettromagnetismo.esempio","appare":"il raggio è sparito"}]};
+STRUM["simmetrie"] = {"nome":"Simmetrie","riga":"L'insieme delle trasformazioni che lasciano identica la sorgente, e che perciò devono lasciare identico anche il campo che ne nasce.","serve":"È il ragionamento che decide la FORMA del campo prima di calcolarlo, e senza il quale la legge di Gauss non serve a niente: Gauss dà un solo numero — il flusso totale — e da un numero si ricava un campo soltanto se si sa già in che direzione punta e da quali variabili dipende. L'argomento ha una forma sola: se una trasformazione lascia identica la distribuzione di carica, lascia identico il campo; quindi ogni componente che quella trasformazione cambierebbe deve essere nulla, e ogni variabile che essa sposta non può comparire.","esempio":"Per un filo infinito uniformemente carico, la traslazione lungo il filo e la rotazione attorno a esso lasciano la carica identica: $\\mathbf E$ non può dipendere né da $z$ né dall'angolo. La riflessione nel piano perpendicolare al filo manderebbe $E_z$ in $-E_z$ lasciando uguale la sorgente, quindi $E_z=0$; resta la sola componente radiale $E_r(r)$. Solo a quel punto il cilindro coassiale è la superficie giusta, e Gauss dà $E_r\\cdot 2\\pi rL=\\dfrac{\\lambda L}{\\varepsilon_0}$, da cui $E_r=\\dfrac{\\lambda}{2\\pi\\varepsilon_0 r}$.","debito":"nessun nucleo del percorso tratta l'argomento di simmetria come strumento a sé: qui c'è la forma dell'argomento e non la sua giustificazione, che è di teoria dei gruppi e sta fuori dal percorso costruito finora. Quello che il percorso copre è il pezzo di destra — l'integrale di flusso, nel nucleo 03 tappa 04 — non il pezzo di sinistra che decide quale superficie scegliere.","controllo":[{"tipo":"uguale","sinistra":"(lam/(2*pi*e0*r))*2*pi*r*L","vale":"lam*L/e0","dove":"esempio","appare":"\\dfrac{\\lambda L}{\\varepsilon_0}"}]};
+STRUM["teorema-della-divergenza"] = {"nome":"Teorema della divergenza","riga":"Il flusso uscente da una superficie chiusa è l'integrale della divergenza sul volume che racchiude: $\\oint_{\\partial V}\\mathbf F\\cdot\\hat n\\,dS=\\int_V\\nabla\\cdot\\mathbf F\\,dV$.","serve":"Scambia una domanda sul bordo con una sul volume. A destra c'è la divergenza, che è la densità di sorgente punto per punto; a sinistra il totale che esce. Si usa nei due versi: per calcolare un flusso scomodo con un integrale di volume comodo, e — in fisica soprattutto — per passare da una legge integrale a una legge locale, perché se due integrali di volume coincidono per OGNI volume allora coincidono gli integrandi.","esempio":"Per $\\mathbf F=\\mathbf r=(x,y,z)$ la divergenza vale $3$, quindi sulla palla di raggio $R$ il membro destro è $3\\cdot\\tfrac43\\pi R^{3}=4\\pi R^{3}$; il membro sinistro, calcolato come flusso, è il modulo $R$ per l'area $4\\pi R^{2}$, e dà lo stesso numero.","pieno":{"file":"05-teoremi-integrali.html","tappa":"02","come":"l'enunciato, la dimostrazione a fette e le ipotesi vere sul dominio, nel nucleo dei teoremi integrali"},"qui":{"elettromagnetismo":{"serve":"È il passaggio che trasforma la legge di Gauss integrale nella prima equazione di Maxwell, $\\nabla\\cdot\\mathbf E=\\rho/\\varepsilon_0$, e la conservazione della carica nell'equazione di continuità $\\nabla\\cdot\\mathbf J+\\partial_t\\rho=0$. La mossa è sempre la stessa: si scrive la legge su un volume arbitrario, si porta il flusso dentro come integrale di divergenza, e si osserva che un integrale nullo su OGNI volume obbliga l'integrando a essere nullo. L'arbitrarietà del volume non è un dettaglio: è tutta la dimostrazione.","esempio":"Per il campo di una carica puntiforme, di modulo $\\dfrac{q}{4\\pi\\varepsilon_0r^{2}}$ e diretto radialmente, la divergenza è nulla ovunque tranne nell'origine: in coordinate sferiche la divergenza di un campo radiale si scrive con $\\partial_r\\!\\left(r^{2}E_r\\right)$, e qui $r^{2}E_r$ non dipende da $r$, quindi la derivata fa $0$. Tutta la carica è finita nel punto escluso, ed è esattamente il buco che la $\\delta$ di Dirac serve a riempire."}},"controllo":[{"tipo":"uguale","sinistra":"diff(x,x)+diff(y,y)+diff(z,z)","vale":"3","dove":"esempio","appare":"vale $3$"},{"tipo":"uguale","sinistra":"3*(4/3)*pi*R**3","vale":"4*pi*R**3","dove":"esempio","appare":"4\\pi R^{3}"},{"tipo":"derivata","espr":"r**2*(q/(4*pi*e0*r**2))","rispetto":["r"],"vale":"0","dove":"qui.elettromagnetismo.esempio","appare":"la derivata fa $0$"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo em-02: Flusso e Gauss <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+identita: la legge di Gauss e' la legge di Coulomb riscritta — e riscritta meglio
+serve:    em-01 (il campo elettrico)
+apre:     em-04-conduttori, em-05-dielettrici
+strumenti: flusso di un campo, simmetrie, teorema della divergenza
+prove:    88 compiti su 100 lo toccano, densita' 3.0; «teorema di Gauss» nominato in 37,
+          sistemi a strati in 19, superficie cilindrica in 19, sferica in 14,
+          forma locale in 6 — «superficie gaussiana» in ZERO
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"integrale","espr":"2*pi*sin(t)","var":"t","da":"0","a":"pi","vale":"4*pi",
+  "dove":"02","appare":"\\Omega_{\\text{tot}}=4\\pi"},
+
+ {"tipo":"uguale","sinistra":"2*pi*r**2*(1-cos(T))/r**2","vale":"2*pi*(1-cos(T))",
+  "ipotesi":{"r":"positive"},
+  "dove":"02","appare":"2\\pi\\left(1-\\cos\\Theta\\right)"},
+
+ {"tipo":"integrale","espr":"2*pi*r**2*sin(t)","var":"t","da":"0","a":"T",
+  "vale":"2*pi*r**2*(1-cos(T))",
+  "dove":"02","appare":"2\\pi r^{2}\\left(1-\\cos\\Theta\\right)"},
+
+ {"tipo":"uguale","sinistra":"(q/(4*pi*e0*r**2))*r**2","vale":"q/(4*pi*e0)",
+  "dove":"02","appare":"q}{4\\pi\\varepsilon_0}\\,d\\Omega"},
+
+ {"tipo":"uguale","sinistra":"q/(4*pi*e0*r**2)*4*pi*r**2","vale":"q/e0",
+  "dove":"02","appare":"q}{\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"q1/e0+q2/e0","vale":"(q1+q2)/e0",
+  "dove":"02","appare":"Q_{\\text{int}}}{\\varepsilon_0"},
+
+ {"tipo":"derivata","espr":"q/(4*pi*e0*r**2)*4*pi*r**2","rispetto":["r"],"vale":"0",
+  "dove":"02","appare":"non dipende da $r$"},
+
+ {"tipo":"uguale","sinistra":"Qi/(4*pi*e0*r**2)*4*pi*r**2","vale":"Qi/e0",
+  "dove":"04","appare":"Q_{\\text{int}}(r)}{\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(Qi/e0)/(4*pi*r**2)","vale":"Qi/(4*pi*e0*r**2)",
+  "dove":"04","appare":"Q_{\\text{int}}(r)}{r^{2}"},
+
+ {"tipo":"uguale","sinistra":"(Rational(4,3)*pi*r**3*rho/e0)/(4*pi*r**2)","vale":"rho*r/(3*e0)",
+  "ipotesi":{"r":"positive"},
+  "dove":"04","appare":"\\rho\\,r}{3\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(Qt/(Rational(4,3)*pi*R**3))*r/(3*e0)","vale":"Qt*r/(4*pi*e0*R**3)",
+  "dove":"04","appare":"Q\\,r}{4\\pi\\varepsilon_0R^{3}"},
+
+ {"tipo":"uguale","sinistra":"Qt*R/(4*pi*e0*R**3)","vale":"Qt/(4*pi*e0*R**2)",
+  "dove":"04","appare":"Q}{4\\pi\\varepsilon_0R^{2}"},
+
+ {"tipo":"integrale","espr":"rho0*(x/R)**a*4*pi*x**2","var":"x","da":"0","a":"r",
+  "vale":"4*pi*rho0*r**(a+3)/((a+3)*R**a)",
+  "ipotesi":{"a":"positive","R":"positive","r":"positive","x":"positive"},
+  "dove":"04","appare":"4\\pi\\rho_0\\,r^{\\alpha+3}}{(\\alpha+3)R^{\\alpha}"},
+
+ {"tipo":"uguale","sinistra":"(4*pi*rho0*r**(a+3)/((a+3)*R**a))/(4*pi*e0*r**2)",
+  "vale":"rho0*r**(a+1)/(e0*(a+3)*R**a)",
+  "ipotesi":{"a":"positive","R":"positive","r":"positive"},
+  "dove":"04","appare":"\\rho_0\\,r^{\\alpha+1}}{\\varepsilon_0(\\alpha+3)R^{\\alpha}"},
+
+ {"tipo":"uguale","sinistra":"(4*pi*rho0*R**3/(a+3))/(4*pi*e0*R**2)",
+  "vale":"rho0*R/(e0*(a+3))",
+  "ipotesi":{"a":"positive","R":"positive"},
+  "dove":"04","appare":"\\rho_0R}{\\varepsilon_0(\\alpha+3)"},
+
+ {"tipo":"integrale","espr":"rho0*(x/R)**a*4*pi*x**2","var":"x","da":"0","a":"R",
+  "vale":"4*pi*rho0*R**3/(a+3)",
+  "ipotesi":{"a":"positive","R":"positive","x":"positive"},
+  "dove":"04","appare":"4\\pi\\rho_0R^{3}}{\\alpha+3"},
+
+ {"tipo":"uguale","sinistra":"(rho*pi*r**2*L/e0)/(2*pi*r*L)","vale":"rho*r/(2*e0)",
+  "ipotesi":{"r":"positive","L":"positive"},
+  "dove":"04","appare":"\\rho\\,r}{2\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(lam*L/e0)/(2*pi*r*L)","vale":"lam/(2*pi*e0*r)",
+  "dove":"04","appare":"\\lambda}{2\\pi\\varepsilon_0 r"},
+
+ {"tipo":"uguale","sinistra":"(lam*L+rho*pi*(r**2-r1**2)*L)/(2*pi*r*L*e0)",
+  "vale":"(lam+rho*pi*(r**2-r1**2))/(2*pi*e0*r)",
+  "dove":"04","appare":"\\lambda+\\rho\\pi\\left(r^{2}-r_1^{2}\\right)"},
+
+ {"tipo":"uguale","sinistra":"(sig*A/e0)/(2*A)","vale":"sig/(2*e0)",
+  "dove":"05","appare":"\\sigma}{2\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(rho*2*x*A/e0)/(2*A)","vale":"rho*x/e0",
+  "dove":"05","appare":"\\rho\\,x}{\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(rho*2*d*A/e0)/(2*A)","vale":"rho*d/e0",
+  "dove":"05","appare":"\\rho\\,d}{\\varepsilon_0"},
+
+ {"tipo":"integrale","espr":"a*y/e0","var":"y","da":"-d","a":"x",
+  "vale":"a*(x**2-d**2)/(2*e0)",
+  "dove":"05","appare":"a\\left(x^{2}-d^{2}\\right)}{2\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"sig/(2*e0)-sig/(2*e0)","vale":"0",
+  "dove":"05","appare":"=0"},
+
+ {"tipo":"uguale","sinistra":"sig/(2*e0)+sig/(2*e0)","vale":"sig/e0",
+  "dove":"05","appare":"\\sigma}{\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"diff(r**2*rho*r/(3*e0), r)/r**2","vale":"rho/e0",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"\\rho}{\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"diff(r**2*rho*r/(3*e0), r)","vale":"rho*r**2/e0",
+  "ipotesi":{"r":"positive"},
+  "dove":"06","appare":"\\rho r^{2}}{\\varepsilon_0"},
+
+ {"tipo":"derivata","espr":"r**2*(Qt/(4*pi*e0*r**2))","rispetto":["r"],"vale":"0",
+  "dove":"06","appare":"la derivata è nulla"},
+
+ {"tipo":"uguale","sinistra":"rho*r/(3*e0)-rho*(r-d)/(3*e0)","vale":"rho*d/(3*e0)",
+  "dove":"07","appare":"\\rho\\,\\mathbf d}{3\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(q/e0)/6","vale":"q/(6*e0)",
+  "dove":"07","appare":"q}{6\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(q/e0)/8","vale":"q/(8*e0)",
+  "dove":"07","appare":"q}{8\\varepsilon_0"},
+
+ {"tipo":"uguale","sinistra":"(q/(8*e0))/3","vale":"q/(24*e0)",
+  "dove":"07","appare":"q}{24\\varepsilon_0"},
+
+ {"tipo":"integrale","espr":"(c/x)*4*pi*x**2","var":"x","da":"0","a":"r",
+  "vale":"2*pi*c*r**2","ipotesi":{"r":"positive","x":"positive"},
+  "dove":"07","appare":"2\\pi c\\,r^{2}"},
+
+ {"tipo":"uguale","sinistra":"(2*pi*c*r**2)/(4*pi*e0*r**2)","vale":"c/(2*e0)",
+  "ipotesi":{"r":"positive"},
+  "dove":"07","appare":"c}{2\\varepsilon_0"},
+
+ {"tipo":"integrale","espr":"rho2*4*pi*x**2","var":"x","da":"R1","a":"r",
+  "vale":"4*pi*rho2*(r**3-R1**3)/3",
+  "dove":"07","appare":"\\pi\\rho_2\\left(r^{3}-R_1^{3}\\right)"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Elettromagnetismo · 88 prove su 100 lo toccano · «teorema di Gauss» nominato in 37',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>In <b>em-01</b> il campo di una distribuzione si calcolava integrando: scegli $dq$, uccidi le componenti con la simmetria, integra. Funziona sempre e costa caro. Qui compare un teorema che, in una manciata di casi, dà lo stesso risultato in tre righe — e il prezzo da pagare è che <b>quei casi bisogna saperli riconoscere</b>.</p>
+  <p>In una frase: <i>il flusso del campo elettrico attraverso una superficie chiusa vale la carica racchiusa diviso $\varepsilon_0$, e niente altro</i>. Non dipende dalla forma della superficie, non dipende da dove stanno le cariche dentro, non dipende dalle cariche fuori. È la legge di Coulomb riscritta — la dimostrazione userà esattamente l'esponente $2$ e nient'altro — ma riscritta in una forma che sopravvive quando Coulomb muore: vale anche per campi che variano nel tempo, e diventa la <b>prima delle quattro equazioni di Maxwell</b> (<b>em-11</b>).</p>
+  <p><b>Dove si spende il tempo, misurato.</b> Sulle 103 prove del corso con testo leggibile, «teorema di Gauss» compare in <b>37</b>. Ma la forma della domanda non è quella dei libri. Le prove di Bini chiedono quasi sempre la stessa cosa: un <b>sistema a strati</b> — cilindro dentro cilindro, guscio dentro sfera, con densità diverse in ogni regione — e il campo <b>regione per regione</b>. Diciannove prove hanno questa struttura, con cinquantuno occorrenze di intervalli scritti $r_1\lt r\lt r_2$. La simmetria <b>cilindrica</b> batte la sferica 19 a 14. E l'espressione «superficie gaussiana», che tutti i testi didattici usano, nelle prove compare <b>zero volte</b>.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li><b>Dimostrare</b> la legge di Gauss con l'angolo solido, nei due casi (carica dentro, carica fuori) — e dire in quale riga esatta della dimostrazione entra l'esponente $2$ di Coulomb.</li>
+  <li>Sapere cosa Gauss <b>non</b> dà: un solo numero, il flusso. Da un numero si risale al campo <i>soltanto</i> se la simmetria ha già detto in che direzione punta e da quali variabili dipende.</li>
+  <li>Eseguire il <b>metodo a strati</b>: identificare la simmetria, scegliere la superficie, scrivere $Q_{\text{int}}(r)$ regione per regione, e raccordare ai bordi. È il pane quotidiano di quest'esame.</li>
+  <li>Avere derivati, non memorizzati: <b>sfera uniforme</b> (dentro lineare, fuori puntiforme), <b>guscio</b> (dentro zero), <b>densità non uniforme</b> $\rho(r)$, <b>cilindro e cavo coassiale</b>, <b>piano e lastra spessa</b>.</li>
+  <li>Passare dalla forma integrale alla <b>forma locale</b> $\nabla\cdot\mathbf E=\rho/\varepsilon_0$, e saper dire perché il passaggio richiede che il volume sia <i>arbitrario</i>.</li>
+  </ul>`},
+  {t:'prolessi', title:'Dove porta', html:R`
+  <p>Questo movimento è un <b>utensile</b>, e i due movimenti che lo aprono lo usano senza quasi aggiungere fisica nuova. In <b>em-04</b> la superficie chiusa si mette dentro un conduttore, dove il campo è nullo: allora il flusso è zero, e Gauss dice che la carica netta racchiusa è zero — da cui lo schermo elettrostatico e le cariche indotte. In <b>em-05</b> lo stesso identico teorema si riscrive per il vettore spostamento $\mathbf D$, e le cariche di polarizzazione spariscono dal conto: quattordici prove su 103 applicano Gauss a $\mathbf D$, e il metodo che si impara qui è già tutto.</p>
+  <p>Più avanti, la forma locale di questa tappa è la <b>prima equazione di Maxwell</b> (<b>em-11</b>), e sarà l'unica delle quattro a non cambiare mai una virgola dal giorno in cui viene scritta.</p>`}
+  ]},
+
+/* ---------------- 01 · IL FLUSSO ---------------- */
+{ num:'01', title:'Il flusso: che cos’è, e la convenzione che decide il segno', meta:'l’origine idrodinamica · componente normale · normale uscente',
+  blocchi:[
+  {t:'prosa', title:'Da dove viene la parola', tag:'first principles', html:R`
+  <p>«Flusso» nasce in idrodinamica, e conviene tenerlo a mente perché è l'unico modo per cui il nome ha senso. Un condotto percorso da un fluido di densità $\rho$ a velocità uniforme $\mathbf v$: in un intervallo $\Delta t$, attraverso una sezione piana $S$ di normale $\hat n$, passa una massa
+  $$\Delta m=\rho\,v\,S\,\Delta t\cos\alpha=\rho\,\Delta t\;\mathbf v\cdot\hat n\,S,$$
+  con $\alpha$ l'angolo fra $\mathbf v$ e $\hat n$. Il coseno non è un ornamento: se il fluido scorre <i>parallelo</i> alla sezione, attraverso quella sezione non passa niente, e infatti $\cos 90^\circ=0$.</p>
+  <p>La quantità $\mathbf v\cdot\hat n\,S$ — la portata divisa per la densità — si chiama flusso, e il nome viene poi <b>esteso a un campo vettoriale qualunque</b>, anche quando non c'è niente che scorra. Per un campo $\mathbf A$ e un elemento di superficie $d\mathbf S=\hat n\,dS$:
+  $$d\Phi=\mathbf A\cdot\hat n\,dS\equiv\mathbf A\cdot d\mathbf S,\qquad \Phi(\mathbf A)=\int_S\mathbf A\cdot\hat n\,dS.$$
+  Questo è il <span class="str" data-str="flusso-di-un-campo">flusso di un campo</span>: uno <b>scalare</b>, che può essere positivo o negativo.</p>`},
+  {t:'reveal', title:'La convenzione che, se si sbaglia, ribalta il risultato', html:R`
+  <p>Il segno del flusso dipende da come si orienta $\hat n$, e su una superficie aperta la scelta è libera — va solo <b>dichiarata</b>. Su una <b>superficie chiusa</b> invece la convenzione è fissa e universale: <b>$\hat n$ punta verso l'esterno</b>.</p>
+  <p>Con quella convenzione il segno acquista un significato fisico immediato: flusso uscente positivo vuol dire che là dentro c'è una <i>sorgente</i> netta; negativo, un <i>pozzo</i>. È la stessa lettura del condotto — esce più roba di quanta ne entra solo se dentro qualcuno la sta producendo.</p>
+  <p><b>L'errore d'esame</b>, e ricorre: calcolare il flusso su una superficie chiusa prendendo la normale «verso la carica» perché sembra naturale, e consegnare un segno sbagliato in tutte le regioni. La normale uscente è uscente rispetto alla <i>superficie</i>, non rispetto a niente altro.</p>`},
+  {t:'gram', title:'Tre modi di leggere lo stesso integrale', rows:[
+    ['$\\Phi=\\displaystyle\\int_S\\mathbf A\\cdot\\hat n\\,dS$','<b>la definizione.</b> Somma della componente <i>normale</i>, pesata sull’area. La componente tangente non contribuisce mai.'],
+    ['$\\Phi=A\\,S$ quando $\\mathbf A\\perp S$ e costante','<b>il caso che si cerca.</b> Tutta la strategia del movimento sta nello scegliere una superficie su cui questo sia vero.'],
+    ['$\\displaystyle\\oint_{\\Sigma}\\mathbf A\\cdot\\hat n\\,dS$','<b>superficie chiusa</b> (il cerchietto), normale uscente per convenzione. È l’unico caso in cui il flusso ha una legge propria.']
+  ]}
+  ]},
+
+/* ---------------- 02 · LA DIMOSTRAZIONE ---------------- */
+{ num:'02', title:'La dimostrazione: angolo solido, e dove entra l’esponente 2', meta:'$d\\Omega=dS\\cos\\alpha/r^2$ · carica dentro · carica fuori · la cancellazione non banale',
+  blocchi:[
+  {t:'prosa', title:'L’angolo solido, in due righe', tag:'strumento', html:R`
+  <p>L'angolo piano misura una porzione di piano come rapporto fra arco e raggio: $\theta=s/R$, e l'angolo giro vale $2\pi$. L'angolo solido è la stessa idea in tre dimensioni: un cono di vertice $O$ intercetta, su una sfera di raggio $R$ centrata in $O$, una calotta di area $dS_{\text{sfera}}$, e si definisce
+  $$d\Omega=\frac{dS_{\text{sfera}}}{R^{2}}.$$
+  <b>Il rapporto non dipende da $R$</b> — raddoppiando il raggio la calotta quadruplica — ed è questo che rende $d\Omega$ una proprietà del cono e non della sfera scelta per misurarlo. È adimensionale, come il radiante.</p>
+  <p>L'angolo solido totale si ottiene integrando su tutta la sfera. In coordinate polari l'elemento di superficie a colatitudine $\theta$ è $dS=2\pi r^{2}\sin\theta\,d\theta$ (perimetro $2\pi r\sin\theta$ per spessore $r\,d\theta$), quindi la calotta di semiapertura $\Theta$ ha area
+  $$S=\int_0^{\Theta}2\pi r^{2}\sin\theta\,d\theta=2\pi r^{2}\left(1-\cos\Theta\right),\qquad \Omega=\frac{S}{r^{2}}=2\pi\left(1-\cos\Theta\right),$$
+  e per $\Theta=\pi$ si ottiene $\Omega_{\text{tot}}=4\pi$. Questa formula serve due volte: qui, e negli esercizi in cui il flusso va calcolato attraverso una porzione di superficie invece che attraverso il tutto.</p>`},
+  {t:'prosa', title:'Il flusso elementare di una carica puntiforme', tag:'derivazione', html:R`
+  <p>Carica $q$ in $O$, superficie chiusa $\Sigma$ qualunque. Dal vertice $O$ si traccia un cono di angolo solido infinitesimo $d\Omega$: esso intercetta su $\Sigma$ un elemento $dS$, generalmente <b>obliquo</b>, mentre la calotta sferica perpendicolare all'asse del cono ha area $dS_{\text{sfera}}=dS\cos\alpha$ (con $\alpha$ l'angolo fra le due normali). Il campo è radiale, quindi il prodotto scalare $\mathbf E\cdot\hat n\,dS$ si riduce a $E\cos\alpha\,dS$, e
+  $$d\Phi=\frac{1}{4\pi\varepsilon_0}\frac{q}{r^{2}}\cos\alpha\,dS=\frac{q}{4\pi\varepsilon_0}\frac{dS_{\text{sfera}}}{r^{2}}=\frac{q}{4\pi\varepsilon_0}\,d\Omega.$$
+  <p><b>Leggere l'ultimo passaggio lentamente.</b> Il risultato dipende <i>solo</i> da $d\Omega$: non dall'orientazione di $dS$, non dalla sua distanza. Due elementi di superficie completamente diversi, visti da $O$ sotto lo stesso angolo solido, danno lo stesso flusso — uno è più grande e più lontano, l'altro più piccolo e più vicino, e le due cose si compensano esattamente.</p>`},
+  {t:'reveal', title:'Perché quella cancellazione NON è banale (Lacava)', html:R`
+  <p>Nella riga sopra si sono semplificati due $r^{2}$, e sembra algebra. Non lo è: <b>i due $r^{2}$ hanno origini diverse</b>.</p>
+  <p>Quello al <i>numeratore</i> viene dalla definizione di angolo solido, cioè dalla <b>geometria</b> dello spazio euclideo tridimensionale: $dS_{\text{sfera}}=r^{2}d\Omega$ è vero e basta. Quello al <i>denominatore</i> viene dalla <b>legge di Coulomb</b>, cioè da un fatto sperimentale. Se la forza andasse come $r^{-(2+\epsilon)}$, la semplificazione lascerebbe un $r^{-\epsilon}$ in piedi, il flusso dipenderebbe dalla superficie scelta, e la legge di Gauss <b>non esisterebbe</b>: sarebbe un'approssimazione.</p>
+  <p>È il legame che <b>em-01</b> aveva annunciato dall'altro capo — Cavendish che cerca carica dentro un conduttore cavo, e i limiti odierni su $|n-2|$ letti come limiti sulla massa del fotone. Qui si vede il punto esatto in cui l'esponente entra: <b>una riga sola</b>, e tutto il resto del corso ci poggia sopra.</p>`},
+  {t:'prosa', title:'I due casi, e la legge', tag:'derivazione', html:R`
+  <p><b>Carica interna.</b> Da $O$ si possono tracciare coni in tutte le direzioni, e ciascuno taglia $\Sigma$ un numero <i>dispari</i> di volte (almeno una). Integrando su tutto l'angolo solido:
+  $$\Phi_{\Sigma}(\mathbf E)=\oint d\Phi=\frac{q}{4\pi\varepsilon_0}\oint d\Omega=\frac{q}{4\pi\varepsilon_0}\cdot 4\pi=\frac{q}{\varepsilon_0}.$$
+  <b>Carica esterna.</b> Ogni cono uscente da $O$ taglia $\Sigma$ un numero <i>pari</i> di volte, e i tagli si appaiano: nel primo il campo forma con la normale uscente un angolo ottuso ($\cos\alpha\lt 0$, flusso entrante), nel secondo un angolo acuto ($\cos\alpha\gt 0$, flusso uscente). I due contributi hanno lo stesso $|d\Omega|$ e segno opposto: si cancellano a coppie, e il flusso totale è <b>nullo</b>.</p>
+  <p>Per il principio di sovrapposizione — il campo totale è la somma dei campi, e l'integrale è lineare — si somma su tutte le cariche, e restano solo quelle dentro:</p>
+  $$\boxed{\;\Phi_{\Sigma}(\mathbf E)=\oint_{\Sigma}\mathbf E\cdot\hat n\,dS=\frac{1}{\varepsilon_0}\sum_i^{\text{int}}q_i=\frac{Q_{\text{int}}}{\varepsilon_0}\;}$$
+  <p>Nel continuo, $\displaystyle Q_{\text{int}}=\int_{V}\rho\,dV$ esteso al solo volume racchiuso.</p>
+  <p><b>Un controllo che vale la pena fare una volta.</b> Sulla sfera di raggio $r$ centrata sulla carica, il campo vale $\dfrac{q}{4\pi\varepsilon_0r^{2}}$ ed è ovunque normale: il flusso è modulo per area, $\dfrac{q}{4\pi\varepsilon_0r^{2}}\cdot 4\pi r^{2}=\dfrac{q}{\varepsilon_0}$, e <b>non dipende da $r$</b>. Il campo cala come $1/r^{2}$, l'area cresce come $r^{2}$: è la stessa compensazione, vista senza coni.</p>`},
+  {t:'reveal', title:'E al contrario: da Gauss si riottiene Coulomb', html:R`
+  <p>La deduzione si può percorrere all'indietro. Assumendo <i>vera</i> la legge di Gauss e aggiungendo l'ipotesi — non deducibile dal teorema, ma di simmetria — che il campo di una carica puntiforme isolata sia radiale e di modulo dipendente solo da $r$, la sfera concentrica dà $E(r)\cdot 4\pi r^{2}=\dfrac{q}{\varepsilon_0}$, cioè Coulomb.</p>
+  <p>Quindi le due leggi sono <b>equivalenti nel caso statico</b>. Ma non hanno lo stesso destino: Coulomb parla di forze fra cariche ferme e smette di valere appena si muovono; Gauss continua a valere <i>identica</i> per campi variabili nel tempo, e per questo è lei, non Coulomb, a entrare fra le equazioni di Maxwell. Il movimento <b>em-10</b> mostrerà il campo elettrico perdere la proprietà di essere conservativo; la legge di Gauss non la perderà mai.</p>`}
+  ]},
+
+/* ---------------- 03 · GAUSS DÀ UN NUMERO ---------------- */
+{ num:'03', title:'Gauss dà un numero: è la simmetria che dà il campo', meta:'cosa il teorema non dice · le tre simmetrie · la superficie giusta',
+  blocchi:[
+  {t:'prosa', title:'Il malinteso centrale, e va sciolto subito', tag:'first principles', html:R`
+  <p>La legge di Gauss è un'equazione scalare: a sinistra un integrale, a destra un numero. <b>Non determina il campo.</b> Determina un solo dato aggregato — quanto ne esce in totale da quella superficie — e da un numero non si ricava una funzione.</p>
+  <p>Due conseguenze precise, ed entrambe cadono all'esame:</p>
+  <ul>
+  <li><b>Il flusso dipende solo dalle cariche interne; il campo no.</b> Se fuori dalla superficie c'è dell'altra carica, essa contribuisce a $\mathbf E$ in <i>ogni</i> punto di $\Sigma$, ma il suo contributo al flusso totale è zero. Chiedere «quanto vale $\mathbf E$ su $\Sigma$» e «quanto vale il flusso» sono domande diverse, e solo la seconda ha risposta immediata.</li>
+  <li><b>Gauss diventa utile solo dove la simmetria ha già fatto metà del lavoro</b>: quando si sa in anticipo che $\mathbf E$ è normale alla superficie scelta e costante in modulo su di essa. Allora, e solo allora, $\oint\mathbf E\cdot\hat n\,dS=E\cdot S$, e l'equazione scalare basta perché l'incognita è diventata un numero.</li>
+  </ul>`},
+  {t:'prosa', title:'L’argomento di simmetria ha una forma sola', tag:'metodo', html:R`
+  <p>Il ragionamento che decide la forma del campo prima di calcolarlo è sempre lo stesso, ed è quello delle <span class="str" data-str="simmetrie">simmetrie</span>: <i>se una trasformazione lascia identica la distribuzione di carica, deve lasciare identico il campo</i>. Da cui: ogni componente che quella trasformazione cambierebbe è nulla, e ogni variabile che essa sposta non può comparire.</p>
+  <p>Applicato ai tre casi che coprono quasi tutte le prove:</p>`},
+  {t:'gram', title:'Le tre simmetrie, la superficie, e il flusso che ne esce', rows:[
+    ['<b>sferica</b> — $\\rho=\\rho(r)$','rotazioni attorno al centro ⟹ $\\mathbf E=E(r)\\hat r$. Superficie: <b>sfera concentrica</b> di raggio $r$. Flusso: $E(r)\\cdot4\\pi r^{2}$.'],
+    ['<b>cilindrica</b> — filo o cilindro infinito','traslazioni lungo l’asse e rotazioni attorno ⟹ nessuna dipendenza da $z$ né dall’angolo; riflessione nel piano ortogonale ⟹ $E_z=0$. Resta $\\mathbf E=E(r)\\hat r$ radiale <i>dall’asse</i>. Superficie: <b>cilindro coassiale</b> di raggio $r$ e lunghezza $L$. Flusso: $E(r)\\cdot 2\\pi r L$ — le basi non contribuiscono, il campo è loro parallelo.'],
+    ['<b>piana</b> — piano o lastra indefinita','traslazioni nel piano ⟹ $\\mathbf E$ dipende solo dalla distanza $x$; riflessione nel piano ⟹ $\\mathbf E$ è ortogonale alla lastra. Superficie: <b>cilindretto a cavallo</b>, basi $A$ parallele alla lastra. Flusso: $E\\cdot 2A$ — la superficie laterale non contribuisce.']
+  ]},
+  {t:'reveal', title:'Perché «superficie gaussiana» non serve come parola', html:R`
+  <p>I testi didattici chiamano così la superficie chiusa che si sceglie, e nelle 103 prove di questo corso l'espressione compare <b>zero volte</b>. Non è un caso di gergo: è che la superficie non è un oggetto della fisica, è una <i>scelta</i> di chi risolve. Il teorema vale per qualunque superficie chiusa; quella buona è buona solo perché su di essa il flusso si scrive come modulo per area.</p>
+  <p>La conseguenza operativa è che non esiste la domanda «qual è la superficie gaussiana di questo problema». Esiste la domanda: <b>su quale superficie so già quanto vale $E$?</b> — e la risposta la dà la tabella qui sopra, che sono tre righe e coprono quasi tutto.</p>`}
+  ]},
+
+/* ---------------- 04 · I SISTEMI A STRATI ---------------- */
+{ num:'04', title:'I sistemi a strati: il pane di quest’esame', meta:'$Q_{\\text{int}}(r)$ regione per regione · sfera · guscio · $\\rho(r)$ · cavo coassiale',
+  blocchi:[
+  {t:'prosa', title:'La ricetta, e l’unico passo che cambia', tag:'metodo', html:R`
+  <p>Diciannove prove su 103 hanno la stessa struttura: una geometria a più regioni concentriche, ciascuna con la sua densità, e la richiesta di $\mathbf E$ in tutte. La procedura è meccanica, e conviene averla come procedura perché all'esame il tempo è la risorsa scarsa.</p>
+  <ol>
+  <li><b>Riconosci la simmetria</b> (sferica, cilindrica, piana) e scrivi subito la forma del campo. Questo passo non si salta: è ciò che rende Gauss utilizzabile.</li>
+  <li><b>Scegli la superficie</b> passante per il punto dove vuoi il campo, e scrivi il flusso — $E(r)4\pi r^{2}$, $E(r)2\pi rL$, $E\cdot2A$.</li>
+  <li><b>Calcola $Q_{\text{int}}(r)$</b>, e questo è <i>l'unico passo che cambia da una regione all'altra</i>. È un integrale di $\rho$ sul volume racchiuso — spesso banale, a volte no.</li>
+  <li><b>Dividi</b>: $E=\dfrac{Q_{\text{int}}(r)}{\varepsilon_0\cdot(\text{area})}$.</li>
+  <li><b>Raccorda e controlla.</b> Ai confini fra regioni il campo deve essere continuo (a meno che lì non ci sia una densità <i>superficiale</i>, che invece produce un salto). Da molto lontano deve tornare il campo della carica totale, puntiforme.</li>
+  </ol>
+  <p>Per la simmetria sferica il passo 3 si scrive una volta per tutte:
+  $$E(r)\cdot4\pi r^{2}=\frac{Q_{\text{int}}(r)}{\varepsilon_0},\qquad Q_{\text{int}}(r)=\int_0^{r}\rho(r')\,4\pi r'^{2}\,dr'\;\Longrightarrow\;E(r)=\frac{1}{4\pi\varepsilon_0}\frac{Q_{\text{int}}(r)}{r^{2}}.$$
+  <b>Questa formula dice una cosa forte:</b> a distanza $r$ il campo è quello che si avrebbe se tutta la carica interna a $r$ fosse concentrata nel centro, e <i>tutta la carica esterna a $r$ non contasse niente</i>. Per la gravità è il teorema di Newton sui gusci, e la ragione è la stessa: l'esponente 2.</p>`},
+  {t:'prosa', title:'Sfera uniformemente carica', tag:'derivazione', html:R`
+  <p>Carica $Q$ distribuita uniformemente nel volume di una sfera di raggio $R$: $\rho=\dfrac{Q}{\frac43\pi R^{3}}$.</p>
+  <p><b>Fuori</b> ($r\gt R$): $Q_{\text{int}}=Q$, e si ritrova la carica puntiforme
+  $$E(r)=\frac{1}{4\pi\varepsilon_0}\frac{Q}{r^{2}}.$$
+  <b>Dentro</b> ($r\lt R$): la carica racchiusa è solo quella della sferetta di raggio $r$, cioè $\frac43\pi r^{3}\rho$, e dividendo per $4\pi r^{2}$:
+  $$E(r)=\frac{\rho\,r}{3\varepsilon_0}=\frac{Q\,r}{4\pi\varepsilon_0R^{3}}.$$
+  Il campo cresce <b>linearmente</b> dal centro. È il contrario dell'intuizione da carica puntiforme — e la ragione è che avvicinandosi al centro si perde carica ($\propto r^{3}$) più in fretta di quanto si guadagni in vicinanza ($\propto 1/r^{2}$).</p>
+  <p><b>Il raccordo.</b> In $r=R$ la formula interna dà $\dfrac{QR}{4\pi\varepsilon_0R^{3}}=\dfrac{Q}{4\pi\varepsilon_0R^{2}}$, esattamente la formula esterna. Il campo è continuo, come deve essere: non c'è nessuna densità superficiale sulla buccia. <b>Questo controllo costa cinque secondi e trova quasi tutti gli errori di conto.</b></p>`},
+  {t:'prosa', title:'Guscio sottile, e il fatto storico che ne dipende', tag:'derivazione', html:R`
+  <p>Carica $Q$ distribuita uniformemente sulla sola <i>superficie</i> di una sfera di raggio $R$.</p>
+  <p><b>Fuori</b> ($r\gt R$): identico a prima, $E=\dfrac{1}{4\pi\varepsilon_0}\dfrac{Q}{r^{2}}$.<br>
+  <b>Dentro</b> ($r\lt R$): la carica racchiusa è <b>zero</b>, quindi il flusso è zero su ogni sfera interna; e poiché per simmetria $E$ è costante su di essa, $E=0$ <i>ovunque</i> dentro, non solo in media.</p>
+  <p>Stavolta il campo <b>salta</b> in $r=R$, da $0$ a $\dfrac{Q}{4\pi\varepsilon_0R^{2}}$: la discontinuità è la firma di una densità superficiale. La regola generale — che <b>em-04</b> userà continuamente — è che attraversando una superficie carica con densità $\sigma$ la componente normale di $\mathbf E$ salta di $\sigma/\varepsilon_0$.</p>
+  <p>Questo risultato è più vecchio di Coulomb. Nel 1767 Priestley osservò, ripetendo un esperimento di Franklin, che dentro una scatola metallica carica non c'è carica; ne dedusse che la forza deve andare come l'inverso del quadrato, perché <i>solo</i> con quell'esponente il campo interno si annulla. Cavendish ne fece nel 1773 una misura quantitativa ($|\epsilon|\le 0{,}02$), Maxwell la ripeté un secolo dopo arrivando a $5\cdot10^{-5}$. La catena logica è quella di questa tappa, percorsa all'indietro.</p>`},
+  {t:'prosa', title:'Densità non uniforme: il caso che separa', tag:'derivazione', html:R`
+  <p>Il caso in cui il passo 3 smette di essere banale, e che nelle prove di questo corso compare regolarmente. Sfera di raggio $R$ con
+  $$\rho(r)=\rho_0\left(\frac{r}{R}\right)^{\alpha},\qquad \alpha\gt 0 .$$
+  <p>La carica interna a $r$ va integrata a gusci, $dq=\rho(r')\,4\pi r'^{2}dr'$:
+  $$Q_{\text{int}}(r)=\int_0^{r}\rho_0\left(\frac{r'}{R}\right)^{\alpha}4\pi r'^{2}\,dr'=\frac{4\pi\rho_0\,r^{\alpha+3}}{(\alpha+3)R^{\alpha}},$$
+  e dividendo per $4\pi\varepsilon_0r^{2}$:
+  $$E(r)=\frac{\rho_0\,r^{\alpha+1}}{\varepsilon_0(\alpha+3)R^{\alpha}}\qquad (r\le R).$$
+  <p><b>Due controlli, e sono quelli che l'esame premia.</b> Per $\alpha=0$ si deve ritrovare la sfera uniforme: $E=\dfrac{\rho_0 r}{3\varepsilon_0}$, e infatti torna. E in $r=R$: $E(R)=\dfrac{\rho_0R}{\varepsilon_0(\alpha+3)}$, che deve coincidere con $\dfrac{Q_{\text{tot}}}{4\pi\varepsilon_0R^{2}}$ — e infatti $Q_{\text{tot}}=\dfrac{4\pi\rho_0R^{3}}{\alpha+3}$ dà proprio quello.</p>
+  <p>Fuori ($r\gt R$) il campo è quello della carica totale, $E=\dfrac{Q_{\text{tot}}}{4\pi\varepsilon_0r^{2}}$: nessun conto nuovo, perché il passo 3 è saturo.</p>`},
+  {t:'prosa', title:'Simmetria cilindrica: filo, cilindro pieno, cavo coassiale', tag:'derivazione', html:R`
+  <p>È la geometria più frequente delle prove (19 contro 14 della sferica), e il conto base è tre righe. Superficie: cilindro coassiale di raggio $r$ e lunghezza $L$; le <b>basi non contribuiscono</b>, perché il campo è radiale e quindi giace nel loro piano.</p>
+  <p><b>Filo infinito</b>, densità lineare $\lambda$: $Q_{\text{int}}=\lambda L$, flusso $E\cdot2\pi rL$, da cui
+  $$E(r)=\frac{\lambda L/\varepsilon_0}{2\pi rL}=\frac{\lambda}{2\pi\varepsilon_0 r}.$$
+  La $L$ sparisce, come deve: il filo è infinito e nessuna lunghezza può comparire nel risultato. In <b>em-01</b> lo stesso risultato è costato un integrale improprio su tutta la retta; qui è una divisione. <b>È la ragione per cui questo movimento esiste.</b></p>
+  <p><b>Cilindro pieno</b> di raggio $R$ e densità $\rho$, dentro ($r\lt R$): $Q_{\text{int}}=\rho\pi r^{2}L$, e $E=\dfrac{\rho\,r}{2\varepsilon_0}$ — di nuovo lineare in $r$, ma col $2$ al posto del $3$ della sfera. Il numero che cambia è la dimensionalità: la carica cresce come $r^{2}$ e non come $r^{3}$.</p>
+  <p><b>Il sistema a strati.</b> Filo con densità $\lambda$ sull'asse, circondato da un guscio cilindrico di densità di volume $\rho$ fra $r_1$ e $r_2$. Tre regioni, e in ciascuna cambia solo $Q_{\text{int}}$:</p>
+  <ul>
+  <li>$r\lt r_1$: solo il filo, $E=\dfrac{\lambda}{2\pi\varepsilon_0 r}$;</li>
+  <li>$r_1\lt r\lt r_2$: il filo più la parte di guscio già racchiusa, $Q_{\text{int}}=\left[\lambda+\rho\pi\left(r^{2}-r_1^{2}\right)\right]L$, quindi $E=\dfrac{\lambda+\rho\pi\left(r^{2}-r_1^{2}\right)}{2\pi\varepsilon_0 r}$;</li>
+  <li>$r\gt r_2$: tutto, $E=\dfrac{\lambda+\rho\pi\left(r_2^{2}-r_1^{2}\right)}{2\pi\varepsilon_0 r}$.</li>
+  </ul>
+  <p>Il raccordo in $r_1$ e in $r_2$ è automatico (basta sostituire), ed è il controllo da fare. Si noti che <b>la risposta nell'ultima regione è quella di un filo equivalente</b> che porti tutta la carica per unità di lunghezza: da fuori, il sistema a strati è indistinguibile da un filo solo.</p>`},
+  {t:'reveal', title:'Quando gli strati sono conduttori o dielettrici', html:R`
+  <p>Nelle prove vere gli strati sono quasi sempre <b>conduttori</b> (cavo coassiale, guaina) o <b>dielettrici</b>, e allora compaiono due fatti nuovi che qui non si possono ancora usare: dentro un conduttore in equilibrio $\mathbf E=0$, e in un dielettrico conviene applicare Gauss al vettore spostamento $\mathbf D$ invece che a $\mathbf E$.</p>
+  <p><b>Ma il metodo non cambia di una riga.</b> Nel conduttore si scrive $E=0$ e si <i>deduce</i> da Gauss la carica indotta sulle superfici (<b>em-04</b>); nel dielettrico si scrive il flusso di $\mathbf D$ pari alla sola carica <i>libera</i> racchiusa, e si divide per $\varepsilon$ alla fine (<b>em-05</b>). La tabella delle simmetrie, la scelta della superficie e il conto regione per regione restano esattamente questi. Quattordici prove su 103 fanno Gauss su $\mathbf D$: chi ha capito questa tappa ne ha già fatto l'ottanta per cento.</p>`}
+  ]},
+
+/* ---------------- 05 · PIANI E LASTRE ---------------- */
+{ num:'05', title:'Piani e lastre: la simmetria che perde la distanza', meta:'$\\sigma/2\\varepsilon_0$ · lastra spessa · densità variabile · il doppio strato',
+  blocchi:[
+  {t:'prosa', title:'Il piano indefinito, in tre righe', tag:'derivazione', html:R`
+  <p>Piano indefinito con densità superficiale $\sigma$ uniforme. La simmetria dice che $\mathbf E$ è ortogonale al piano e dipende al più dalla distanza; la riflessione nel piano dice che da una parte e dall'altra i moduli sono uguali e i versi opposti.</p>
+  <p>Superficie: un cilindretto a cavallo del piano, con le due basi di area $A$ parallele a esso. La superficie laterale non contribuisce ($\mathbf E$ le è parallelo), le due basi contribuiscono ugualmente:
+  $$E\cdot 2A=\frac{\sigma A}{\varepsilon_0}\;\Longrightarrow\;\boxed{\;E=\frac{\sigma}{2\varepsilon_0}\;}$$
+  <b>Non dipende dalla distanza.</b> In <b>em-01</b> lo stesso risultato era arrivato come limite $R\to\infty$ del disco, dopo due integrazioni; qui è una riga, e in più si vede <i>perché</i>: allontanandosi, il campo di ogni pezzetto cala, ma si «vede» una porzione di piano più grande, e l'area cresce esattamente quanto il campo cala.</p>
+  <p>Una $A$ che sparisce in un risultato è sempre un buon segno: l'area del cilindretto è una scelta di chi risolve, e non può comparire nella risposta.</p>`},
+  {t:'prosa', title:'Lastra di spessore finito', tag:'derivazione', html:R`
+  <p>Lastra indefinita di spessore $2d$ (da $-d$ a $+d$) con densità di volume $\rho$ uniforme. Cilindretto simmetrico rispetto al piano centrale, basi $A$, che si estende da $-x$ a $+x$.</p>
+  <p><b>Dentro</b> ($|x|\lt d$): la carica racchiusa è $\rho\cdot 2xA$, e
+  $$E\cdot 2A=\frac{\rho\,2xA}{\varepsilon_0}\;\Longrightarrow\;E(x)=\frac{\rho\,x}{\varepsilon_0},$$
+  lineare, nulla al centro per simmetria. <b>Fuori</b> ($|x|\gt d$): la carica racchiusa satura a $\rho\cdot2dA$, e $E=\dfrac{\rho\,d}{\varepsilon_0}$, costante — che è il piano infinito con $\sigma_{\text{eff}}=2\rho d$, cioè tutta la carica della lastra schiacciata su un piano. Torna.</p>`},
+  {t:'prosa', title:'Densità che varia nello spessore — una prova vera', tag:'derivazione', html:R`
+  <p>La variante che compare nelle prove: lastra da $-d$ a $+d$ con $\rho(x)=a\,x$, quindi <b>carica totale nulla</b> e campo nullo a sinistra della lastra. Qui conviene già la forma locale della tappa 06, integrata: la derivata $dE_x/dx$ vale $\rho(x)/\varepsilon_0$, e la condizione al bordo sinistro è $E_x(-d)=0$, quindi
+  $$E_x(x)=\int_{-d}^{x}\frac{a\,y}{\varepsilon_0}\,dy=\frac{a\left(x^{2}-d^{2}\right)}{2\varepsilon_0}\qquad (|x|\le d).$$
+  <p>Il campo è <b>negativo</b> dentro la lastra (per $a\gt 0$), si annulla a <i>entrambi</i> i bordi $x=\pm d$, e ha minimo al centro. Che si annulli anche in $+d$ non è un caso: fuori la carica totale è zero, quindi il campo deve essere nullo da tutte e due le parti, e la formula lo conferma da sola. <b>È un controllo che la traccia non chiede e che dice se il conto regge.</b></p>`},
+  {t:'reveal', title:'Il doppio strato, e perché fuori non c’è niente', html:R`
+  <p>Due piani paralleli con $+\sigma$ e $-\sigma$. Ciascuno dà $\sigma/2\varepsilon_0$ ovunque: <b>in mezzo</b> i due contributi hanno lo stesso verso e si sommano, $E=\dfrac{\sigma}{\varepsilon_0}$; <b>fuori</b> hanno verso opposto e si cancellano, $E=0$.</p>
+  <p>È il condensatore piano, e qui è ottenuto per pura sovrapposizione — non serve nessuna proprietà dei conduttori, che arriveranno in <b>em-04</b>. Notare che applicare Gauss a un cilindretto che racchiuda <i>entrambi</i> i piani dà flusso nullo, coerente con carica netta nulla, ma non dice affatto che il campo sia nullo dentro: è di nuovo il malinteso della tappa 03, e questo è l'esempio più pulito per vederlo.</p>`}
+  ]},
+
+/* ---------------- 06 · LA FORMA LOCALE ---------------- */
+{ num:'06', title:'La forma locale: da una legge sulle superfici a una legge sui punti', meta:'teorema della divergenza · il cubetto di Focardi · l’arbitrarietà del volume',
+  blocchi:[
+  {t:'prosa', title:'Il passaggio, e l’ipotesi che lo regge', tag:'derivazione', html:R`
+  <p>La legge di Gauss è <i>integrale</i>: parla di una superficie chiusa e di tutto ciò che sta dentro. Una legge locale parlerebbe invece di un punto, e il ponte fra le due è il <span class="str" data-str="teorema-della-divergenza">teorema della divergenza</span>:
+  $$\oint_{\Sigma}\mathbf A\cdot\hat n\,dS=\int_{V}\nabla\cdot\mathbf A\,dV,\qquad \nabla\cdot\mathbf A=\frac{\partial A_x}{\partial x}+\frac{\partial A_y}{\partial y}+\frac{\partial A_z}{\partial z}.$$
+  Applicandolo alla legge di Gauss scritta nel continuo, e scrivendo $dq=\rho\,dV$:
+  $$\int_{V}\nabla\cdot\mathbf E\,dV=\oint_{\Sigma}\mathbf E\cdot\hat n\,dS=\frac{1}{\varepsilon_0}\int_{V}\rho\,dV\;\Longrightarrow\;\int_{V}\left(\nabla\cdot\mathbf E-\frac{\rho}{\varepsilon_0}\right)dV=0 .$$
+  <p><b>Qui sta l'unico passo delicato.</b> Un integrale nullo non obbliga l'integrando a essere nullo — potrebbe cambiare segno e compensarsi. Ma quell'integrale è nullo per <i>ogni</i> volume $V$, perché la legge di Gauss vale per ogni superficie chiusa; e una funzione continua il cui integrale si annulla su ogni volume, compresi volumi arbitrariamente piccoli attorno a ogni punto, è identicamente nulla. <b>L'arbitrarietà del volume non è un dettaglio della dimostrazione: è la dimostrazione.</b></p>
+  $$\boxed{\;\nabla\cdot\mathbf E=\frac{\rho}{\varepsilon_0}\;}$$
+  <p>È la <b>prima equazione di Maxwell</b>, e dice in forma puntuale che le sorgenti del campo elettrico — i punti da cui le linee escono o in cui convergono — sono le cariche, e soltanto loro.</p>`},
+  {t:'reveal', title:'La stessa cosa con un cubetto, e in cambio si giustifica il teorema', html:R`
+  <p>Esiste una via diretta che non presuppone il teorema della divergenza — anzi lo <i>produce</i>, ed è quella che Focardi sceglie. Si prende un cubetto di spigoli $dx,dy,dz$ con un vertice nell'origine, e si calcola il flusso sulle sue sei facce. Per le due perpendicolari all'asse $x$, con uno sviluppo di Taylor al prim'ordine $\left(E_x\right)_{dx}\simeq\left(E_x\right)_0+\dfrac{\partial E_x}{\partial x}dx$:
+  $$d\Phi_x=\left[\left(E_x\right)_{dx}-\left(E_x\right)_0\right]dy\,dz=\frac{\partial E_x}{\partial x}\,dx\,dy\,dz .$$
+  Sommando le tre coppie di facce, $d\Phi=\left(\nabla\cdot\mathbf E\right)dV$; e poiché per Gauss $d\Phi=\rho\,dV/\varepsilon_0$, segue $\nabla\cdot\mathbf E=\dfrac{\rho}{\varepsilon_0}$.</p>
+  <p><b>E il regalo:</b> riempiendo un volume qualunque di cubetti, i flussi attraverso le facce a contatto si cancellano a due a due (normali uscenti opposte), e sopravvive solo il flusso attraverso la superficie esterna. Quindi $\displaystyle\oint_{\Sigma}\mathbf E\cdot d\mathbf S=\int_{V}\nabla\cdot\mathbf E\,dV$ — che è il teorema della divergenza, ottenuto per strada e valido per <i>qualunque</i> campo vettoriale, non solo per $\mathbf E$.</p>`},
+  {t:'prosa', title:'Due letture che chiudono il cerchio', tag:'collaudo', html:R`
+  <p><b>Un campo uniforme non ha cariche dentro.</b> Se $\mathbf E$ è costante in una regione, tutte le derivate parziali sono nulle, quindi $\nabla\cdot\mathbf E=0$ e $\rho=0$ ovunque lì. Le sorgenti di un campo uniforme stanno <i>fuori</i> dalla regione in cui è uniforme — sulle superfici che la delimitano, come nel doppio strato della tappa 05, dove il campo è discontinuo e la divergenza non è nemmeno definita.</p>
+  <p><b>Il controllo sulla sfera uniforme.</b> Dentro si era trovato $E_r=\dfrac{\rho\,r}{3\varepsilon_0}$. In coordinate sferiche, per un campo radiale, $\nabla\cdot\mathbf E=\dfrac{1}{r^{2}}\dfrac{\partial}{\partial r}\left(r^{2}E_r\right)$; qui $r^{2}E_r$ vale $\dfrac{\rho r^{3}}{3\varepsilon_0}$, la sua derivata fa $\dfrac{\rho r^{2}}{\varepsilon_0}$, e dividendo per $r^{2}$ resta $\dfrac{\rho}{\varepsilon_0}$. <b>Torna.</b> Fuori invece $r^{2}E_r$ vale la costante $\dfrac{Q}{4\pi\varepsilon_0}$, la derivata è nulla, e la divergenza è zero: lì la carica non c'è. La forma locale e quella integrale si controllano a vicenda, e questo è il modo di usarle.</p>
+  <p><b>Quanto conta all'esame:</b> poco, direttamente — «divergenza» compare in 6 prove su 103. Ma è la riga da cui nasce metà del corso teorico, e all'orale è esattamente la cosa che si chiede di <i>dimostrare</i>, non di applicare.</p>`}
+  ]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'presi dalla forma che ricorre nelle prove 2008-2021',
+  blocchi:[
+  {t:'esercizio', title:'1 · Sfera con cavità non concentrica', html:R`
+  <p>Una sfera di raggio $R$ e densità uniforme $\rho$ ha al suo interno una cavità sferica <b>vuota</b> di raggio $R'$, il cui centro dista $d$ dal centro della sfera grande (con $R'+d\lt R$). Calcola il campo <b>dentro la cavità</b>.</p>`,
+   sol:R`<p><b>Sovrapposizione con segno</b>, il trucco più redditizio di questa geometria: l'oggetto è una sfera piena di densità $+\rho$ <i>più</i> una sfera di densità $-\rho$ e raggio $R'$ centrata a distanza $d$. Nessuna delle due, presa da sola, ha cavità — e per entrambe vale il risultato della tappa 04.</p>
+   <p>In un punto della cavità, individuato da $\mathbf r$ dal primo centro e da $\mathbf r'=\mathbf r-\mathbf d$ dal secondo:
+   $$\mathbf E=\frac{\rho\,\mathbf r}{3\varepsilon_0}-\frac{\rho\,(\mathbf r-\mathbf d)}{3\varepsilon_0}=\frac{\rho\,\mathbf d}{3\varepsilon_0}.$$
+   <b>Il campo nella cavità è uniforme</b> — non dipende dal punto, solo dal vettore che separa i due centri. È un risultato che sorprende e che si ricorda proprio per questo; e la verifica di coerenza c'è: per $d=0$ (cavità concentrica) il campo è nullo, come deve essere per un guscio.</p>`},
+  {t:'esercizio', title:'2 · Il flusso attraverso una faccia, senza integrali', html:R`
+  <p>(a) Una carica $q$ sta sulla normale a un quadrato di lato $a$, passante per il centro, a distanza $a/2$. Quanto vale il flusso attraverso il quadrato? (b) E se $q$ è posta in un <b>vertice</b> di un cubo di spigolo $a$, quanto vale il flusso attraverso una delle tre facce che non toccano quel vertice?</p>`,
+   sol:R`<p><b>(a)</b> Il calcolo diretto è sgradevole; la simmetria lo evita. Si costruisce il cubo di spigolo $a$ di cui il quadrato è una faccia, in modo che $q$ ne occupi il centro. Il flusso totale attraverso il cubo vale $q/\varepsilon_0$ per Gauss, e le sei facce sono equivalenti per simmetria: attraverso il quadrato passa $\dfrac{q}{6\varepsilon_0}$.</p>
+   <p><b>(b)</b> Con la carica su un vertice, quel cubo occupa un ottavo dello spazio attorno a $q$: il flusso attraverso l'intero cubo è $\dfrac{q}{8\varepsilon_0}$. Le tre facce che <i>toccano</i> il vertice sono parallele al campo lungo la loro giacitura e ricevono flusso nullo; le altre tre sono equivalenti fra loro e si dividono il totale, quindi $\dfrac{q}{24\varepsilon_0}$ ciascuna.</p>
+   <p>Nessuno dei due si risolve con un integrale, ed entrambi sono esercizi sull'angolo solido travestiti.</p>`},
+  {t:'esercizio', title:'3 · Tre regioni, con una densità che varia', html:R`
+  <p>Una sfera di raggio $R_1$ ha densità $\rho(r)=\dfrac{c}{r}$ (con $c$ costante); attorno, fra $R_1$ e $R_2$, c'è un guscio di densità uniforme $\rho_2$. Trova $E(r)$ nelle tre regioni e verifica i raccordi.</p>`,
+   sol:R`<p><b>$r\lt R_1$:</b> $Q_{\text{int}}=\displaystyle\int_0^{r}\frac{c}{r'}4\pi r'^{2}dr'=2\pi c\,r^{2}$, quindi $E=\dfrac{2\pi c r^{2}}{4\pi\varepsilon_0 r^{2}}=\dfrac{c}{2\varepsilon_0}$: <b>campo costante</b>, un risultato che si ottiene solo con questa densità e che vale la pena riconoscere. (Il $1/r$ della densità compensa esattamente il $1/r^{2}$ del campo.)</p>
+   <p><b>$R_1\lt r\lt R_2$:</b> $Q_{\text{int}}=2\pi cR_1^{2}+\dfrac43\pi\rho_2\left(r^{3}-R_1^{3}\right)$, e si divide per $4\pi\varepsilon_0r^{2}$.</p>
+   <p><b>$r\gt R_2$:</b> stessa espressione con $R_2$ al posto di $r$ al numeratore — cioè la carica totale, e il campo va come $1/r^{2}$.</p>
+   <p><b>I raccordi:</b> in $r=R_1$ la seconda formula si riduce a $\dfrac{2\pi cR_1^{2}}{4\pi\varepsilon_0R_1^{2}}=\dfrac{c}{2\varepsilon_0}$, che è la prima. Continuo, e deve esserlo: non c'è nessuna densità superficiale sui confini. Se non tornasse, l'errore sarebbe negli estremi dell'integrale.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Una carica sta appena <i>fuori</i> da una superficie chiusa. Il flusso è nullo. Il campo sulla superficie è nullo?</li>
+  <li>In quale riga esatta della dimostrazione di Gauss entra l'esponente $2$ della legge di Coulomb, e cosa succederebbe se fosse $2+\epsilon$?</li>
+  <li>Dentro una sfera uniformemente carica il campo cresce con $r$; dentro un guscio è nullo. Perché due comportamenti così diversi, se il teorema è lo stesso?</li>
+  <li>Perché nel cilindro coassiale la lunghezza $L$ scompare dal risultato, e perché è giusto che scompaia?</li>
+  <li>Perché il passaggio alla forma locale richiede che la legge valga per <i>ogni</i> volume, e non basta che valga per uno?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>No, e questa è la domanda che separa. Il campo di quella carica è diverso da zero in ogni punto della superficie; è la sua <i>somma pesata sulle normali</i> a essere nulla, perché ogni cono entra ed esce. Gauss vincola il flusso, non il campo.</li>
+   <li>Nella riga in cui $d\Phi$, scritto come $\dfrac{q}{4\pi\varepsilon_0}\dfrac{dS_{\text{sfera}}}{r^{2}}$, diventa $\dfrac{q}{4\pi\varepsilon_0}\,d\Omega$: l'$r^{2}$ del numeratore è geometria, quello del denominatore è Coulomb. Con $2+\epsilon$ resterebbe $r^{-\epsilon}$, il flusso dipenderebbe dalla superficie e non ci sarebbe nessuna legge.</li>
+   <li>Perché cambia $Q_{\text{int}}(r)$, che è l'unica cosa che il teorema guarda: nella sfera piena cresce come $r^{3}$ e vince sul $1/r^{2}$; nel guscio è identicamente zero all'interno. Stesso teorema, dato diverso in ingresso.</li>
+   <li>Perché $Q_{\text{int}}=\lambda L$ e l'area laterale è $2\pi rL$: la stessa $L$ compare sopra e sotto. Ed è giusto perché $L$ è la lunghezza del cilindro che <i>ho scelto io</i>, non una proprietà del filo — se comparisse nel risultato, il risultato dipenderebbe da una mia scelta arbitraria.</li>
+   <li>Perché un integrale nullo su un solo volume ammette integrandi non nulli che si compensano. È la validità su volumi arbitrariamente piccoli attorno a ogni punto che forza l'integrando a zero punto per punto.</li>
+   </ol>`}
+  ]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa consegna · dove si ritrova in Quantistica e in Statistica',
+  blocchi:[
+  {t:'prosa', title:'Cosa consegna questo movimento', tag:'sintesi', html:R`
+  <p><b>Un utensile e una legge, e vanno tenuti distinti.</b> L'utensile è il metodo a strati: simmetria, superficie, $Q_{\text{int}}(r)$, raccordi. È ciò che risolve diciannove prove su cento così come sono scritte, e i movimenti <b>em-04</b> e <b>em-05</b> lo useranno senza cambiarlo — solo con $\mathbf E=0$ dentro i conduttori, o con $\mathbf D$ al posto di $\mathbf E$ nei dielettrici.</p>
+  <p>La legge è un'altra cosa. $\nabla\cdot\mathbf E=\rho/\varepsilon_0$ dice che il campo elettrico ha <b>sorgenti puntuali</b> — le cariche — e in <b>em-08</b> si scoprirà che il campo magnetico non ne ha ($\nabla\cdot\mathbf B=0$, e la ragione è che i monopoli magnetici non esistono). Le due equazioni sono gemelle e quella differenza è tutta la differenza fra elettricità e magnetismo. In <b>em-11</b> staranno una sotto l'altra, prima e seconda delle quattro.</p>`},
+  {t:'prolessi', title:'Le rotte fuori dal corso', html:R`
+  <p><b>Verso la Quantistica.</b> La forma locale, unita al potenziale di <b>em-03</b>, dà l'equazione di Poisson $\nabla^{2}V=-\rho/\varepsilon_0$: la stessa equazione che, con $\rho$ costruito dalla densità di probabilità degli elettroni, è il cuore dell'approssimazione di Hartree per gli atomi a molti elettroni. Un atomo è un problema di elettrostatica autoconsistente.</p>
+  <p><b>Verso la Statistica.</b> Il fatto che il campo dentro un guscio sia nullo — e quindi che una distribuzione sferica possa essere sostituita dalla sola carica interna — è la stessa proprietà che permette l'approssimazione di <i>campo medio</i> nei plasmi: ogni carica vede la sola carica netta racchiusa in un raggio, e quel raggio è la lunghezza di Debye. È l'unico modo in cui un'interazione a lungo raggio riesce a comportarsi come una a corto raggio, ed è il ponte fra questo movimento e la termodinamica dei sistemi carichi.</p>`}
+  ]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoem-02-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo em-02 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: em-02-flusso-e-gauss.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
