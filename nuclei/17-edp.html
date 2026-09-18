@@ -274,8 +274,63 @@ serve:     me-10 (09-hilbert-fourier.html)
 apre:      me-12 (da costruire)
 strumenti: residuo
 fonti:     note Esposito §13 (pp. 81-85); programma: Petrini 4.1-4.3 e 5.1-5.2, Calogero 7.2-7.3, Zanghì cap. 7 e 11
-generata:  2026-09-17 da mappa.json — non modificare a mano, si cambia la mappa
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"x*diff(1/x,x)-diff(x,x)*(1/x)","vale":"-2/x",
+  "ipotesi":{"x":"positive"},
+  "dove":"01","appare":"-\\frac2x"},
+
+ {"tipo":"uguale","sinistra":"x**2*diff(x,x,2)+x*diff(x,x)-x","vale":"0",
+  "ipotesi":{"x":"positive"},
+  "dove":"01","appare":"x^2f''+xf'-f=0"},
+
+ {"tipo":"uguale","sinistra":"exp(x)*diff(exp(2*x),x)-diff(exp(x),x)*exp(2*x)","vale":"exp(3*x)",
+  "ipotesi":{"x":"real"},
+  "dove":"01","appare":"W=e^{3x}"},
+
+ {"tipo":"uguale","sinistra":"exp(3*x)*diff(x*exp(3*x),x)-diff(exp(3*x),x)*(x*exp(3*x))",
+  "vale":"exp(6*x)","ipotesi":{"x":"real"},
+  "dove":"01","appare":"W=e^{6x}"},
+
+ {"tipo":"uguale","sinistra":"a*(a-1)+a-1","vale":"a**2-1",
+  "dove":"01","appare":"\\alpha^2-1=0"},
+
+ {"tipo":"uguale","sinistra":"a*(a-1)+3*a+1","vale":"(a+1)**2",
+  "dove":"01","appare":"\\alpha^2+2\\alpha+1=(\\alpha+1)^2"},
+
+ {"tipo":"limite","espr":"(exp(r*x)-exp(x))/(r-1)","var":"r","a":"1","vale":"x*exp(x)",
+  "ipotesi":{"x":"real"},
+  "dove":"01","appare":"\\frac{e^{r_2x}-e^{r_1x}}{r_2-r_1}"},
+
+ {"tipo":"uguale","sinistra":"diff(sin(x),x,2)+sin(x)","vale":"0",
+  "ipotesi":{"x":"real"},
+  "dove":"02","appare":"\\sin x"},
+
+ {"tipo":"simbolico","dove":"01","appare":"W'=-\\dfrac{a_1}{a_2}W",
+  "perche":"e' l'enunciato della formula di Abel per coefficienti generici a_1, a_2: un'identita' fra funzioni non specificate, verificata sull'esempio di Eulero due righe piu' sotto"},
+
+ {"tipo":"simbolico","dove":"01","appare":"r^2+br+c=0",
+  "perche":"e' l'equazione caratteristica scritta con coefficienti generici b e c: la forma del metodo, non un conto"},
+
+ {"tipo":"simbolico","dove":"01","appare":"a_2(x)f''+a_1(x)f'+a_0(x)f=j(x)",
+  "perche":"e' la forma generale dell'equazione che si sta studiando: l'impostazione del problema, non un risultato"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\det\\begin{pmatrix}f_1&f_2\\\\ f_1'&f_2'\\end{pmatrix}",
+  "perche":"e' la riscrittura del wronskiano come determinante, cioe' una notazione equivalente della definizione data due simboli prima"},
+
+ {"tipo":"simbolico","dove":"01","appare":"f''-6f'+9f=e^{2x}",
+  "perche":"e' il testo dell'esercizio d'appello citato: la sorgente e' un dato, e cio' che qui si calcola (base e wronskiano) e' asserito a parte"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\partial_tu=\\kappa\\partial_x^2u",
+  "perche":"e' l'equazione del calore, cioe' l'oggetto di cui si discute la buona posizione: una definizione, non un valore"},
+
+ {"tipo":"simbolico","dove":"02","appare":"e^{-\\kappa k^2t}",
+  "perche":"e' il fattore di evoluzione del modo k, ricavato in tappa 04 (il calore): qui viene richiamato per leggerne il segno, non ricalcolato"}
+]
+CONTROLLO*/
 
 /* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
 { num:'00', title:'Perché questo nucleo', meta:'chiusura del percorso · tre equazioni, tre fisiche, un solo metodo',
@@ -287,8 +342,93 @@ MOVIMENTO*/
   <p>Questo nucleo non introduce strumenti nuovi: <b>usa quelli costruiti</b>. Separazione di variabili e Fourier (nuclei 09 e 15), autofunzioni di Sturm&ndash;Liouville (nucleo 16), funzioni di Green (nucleo 15), e per le antitrasformate i residui (nucleo 13). È la verifica che il percorso serviva a qualcosa.</p>`}
 ]},
 
-/* ---------------- 01 · LAPLACE ---------------- */
-{ num:'01', title:'Laplace e Poisson: l’equilibrio', meta:'$\\Delta u=0$ · proprietà della media e principio del massimo · Green del laplaciano = potenziale coulombiano',
+/* ---------------- 01 · LE ODE LINEARI DEL SECONDO ORDINE ---------------- */
+{ num:'01', title:'Le ODE lineari del secondo ordine: la struttura che regge tutto il resto', meta:'spazio delle soluzioni di dimensione 2 · wronskiano e formula di Abel · coefficienti costanti · equazione di Eulero',
+  blocchi:[
+  {t:'prosa', title:'Perche si comincia da qui, e non dalle EDP', tag:'architettura', html:R`
+  <p>Il movimento si chiama «ODE ed EDP» e l&rsquo;ordine non è casuale. Ogni metodo delle tappe successive — separazione delle variabili, sviluppo in modi, funzioni di Green — <b>riduce un&rsquo;equazione alle derivate parziali a una famiglia di equazioni ordinarie</b>. La separazione di $\Delta u=0$ produce ODE radiali; il calore su un segmento produce $X''=-\lambda X$; e la funzione di Green (me-12) si costruisce <i>interamente</i> con le soluzioni dell&rsquo;omogenea di una ODE. Chi non ha in mano questa tappa non può fare quelle: si trova a cercare «la formula della Green» invece di costruirla.</p>
+  <p>Il quadro in una riga: per $\;a_2(x)f''+a_1(x)f'+a_0(x)f=j(x)\;$ con $a_2\ne0$ su un intervallo, <b>le soluzioni dell&rsquo;omogenea formano uno spazio vettoriale di dimensione esattamente 2</b>, e la soluzione generale della completa è <i>una</i> soluzione particolare più quello spazio. Tutto il mestiere consiste in due mosse: trovare due soluzioni indipendenti dell&rsquo;omogenea, e agganciarci la particolare.</p>`},
+  {t:'prosa', title:'Il wronskiano: come si riconosce lindipendenza, e perche non si annulla mai a meta', tag:'grammatica', html:R`
+  <p>Date due soluzioni $f_1,f_2$ dell&rsquo;omogenea si definisce il <b>wronskiano</b>
+  $$W(x)=f_1(x)f_2'(x)-f_1'(x)f_2(x)=\det\begin{pmatrix}f_1&f_2\\ f_1'&f_2'\end{pmatrix}.$$
+  Due fatti, ed è tutto quello che serve:</p>
+  <ul>
+   <li><b>$W\ne0$ in un punto $\iff$ $f_1,f_2$ sono indipendenti</b> (e allora $W\ne0$ ovunque);</li>
+   <li><b>formula di Abel</b>: $W'=-\dfrac{a_1}{a_2}W$, quindi
+   $$W(x)=W(x_0)\,\exp\!\left(-\int_{x_0}^{x}\frac{a_1(t)}{a_2(t)}dt\right).$$
+   Il wronskiano si calcola <b>senza conoscere le soluzioni</b>, e soprattutto: essendo un esponenziale, <b>o è identicamente nullo o non si annulla mai</b>. Non esiste il caso «indipendenti qui, dipendenti là».</li>
+  </ul>
+  <p>Questa dicotomia è il motivo per cui nella funzione di Green (me-12) il wronskiano sta al <b>denominatore</b> senza che nessuno si preoccupi di dove si annulla: se non è identicamente zero, la formula è valida su tutto l&rsquo;intervallo. E quando invece <i>è</i> zero, non è un incidente di calcolo: vuol dire che le due soluzioni selezionate dai due bordi sono proporzionali, cioè che il problema omogeneo ha una soluzione non banale — e allora la Green non esiste.</p>`},
+  {t:'reveal', title:'I due casi che cadono agli scritti', tag:'esame', steps:[
+   {label:'Coefficienti costanti: lequazione caratteristica', body:R`
+   <p>Per $f''+bf'+cf=0$ si cerca $f=e^{rx}$ e si ottiene $r^2+br+c=0$. Tre casi, e il terzo è quello che si sbaglia:</p>
+   <ul>
+    <li><b>radici reali distinte</b> $r_1\ne r_2$: $f_1=e^{r_1x}$, $f_2=e^{r_2x}$. Esempio d&rsquo;appello: $f''-3f'+2f$ dà $r=1,2$, e $W=e^{3x}$.</li>
+    <li><b>radici complesse coniugate</b> $r=\alpha\pm i\beta$: si prendono le combinazioni reali $e^{\alpha x}\cos\beta x$ ed $e^{\alpha x}\sin\beta x$. Oscillazione smorzata: è l&rsquo;oscillatore.</li>
+    <li><b>radice doppia</b> $r_0$: l&rsquo;esponenziale ne dà <b>una sola</b>, e la seconda è $xe^{r_0x}$ — il fattore $x$ non si indovina, esce dalla riduzione d&rsquo;ordine (o dal limite $r_2\to r_1$ di $\frac{e^{r_2x}-e^{r_1x}}{r_2-r_1}$). Esempio d&rsquo;appello: $f''-6f'+9f=e^{2x}$ dà $r_0=3$, base $\{e^{3x},xe^{3x}\}$ e $W=e^{6x}$.</li>
+   </ul>`},
+   {label:'Lequazione di Eulero, e il trucco che la rende banale', body:R`
+   <p>$$a\,x^2f''+b\,xf'+c\,f=0$$
+   ha i coefficienti che crescono con la stessa potenza con cui le derivate abbassano: si cerca <b>$f=x^\alpha$</b> e si ottiene un&rsquo;equazione algebrica in $\alpha$. È l&rsquo;equazione più frequente negli scritti di questo corso, perché compare in ogni problema con simmetria radiale.</p>
+   <p>Esempio, e si ritrova identico in due appelli: $x^2f''+xf'-f=0$ dà $\alpha(\alpha-1)+\alpha-1=\alpha^2-1=0$, quindi $\alpha=\pm1$, base $\{x,1/x\}$, e
+   $$W(x)=x\cdot\Big(-\frac{1}{x^2}\Big)-1\cdot\frac1x=-\frac2x.$$
+   <b>Il controllo con Abel:</b> qui $a_1/a_2=1/x$, quindi $W\propto\exp(-\int dx/x)=1/x$. Torna, e ha richiesto zero conoscenza delle soluzioni.</p>
+   <div class="note"><b>Perché funziona, e serve saperlo quando l&rsquo;esponente è doppio:</b> la sostituzione $x=e^t$ trasforma l&rsquo;equazione di Eulero in una a <b>coefficienti costanti</b> in $t$. Quindi i tre casi sono gli stessi di prima, tradotti: radici distinte $\to x^{\alpha_1},x^{\alpha_2}$; radice doppia $\to x^{\alpha_0}$ e $x^{\alpha_0}\log x$ (il $\log x$ è il $t$ di prima); radici complesse $\to x^{\alpha}\cos(\beta\log x)$. <b>Non è un secondo metodo da imparare: è il primo, in altre coordinate.</b></div>`}
+  ]},
+  {t:'plot', title:'I tre regimi delle radici, visti',
+   intro:R`Le soluzioni di $f''+bf'+cf=0$ al variare del discriminante: due esponenziali, un esponenziale col fattore $x$, un&rsquo;oscillazione smorzata.`,
+   plots:[
+    {kind:'func2d', xr:[0,3.2], yr:[-1.2,2.2], height:340,
+     title:'radici distinte, radice doppia, radici complesse: tre comportamenti dalla stessa equazione',
+     xlabel:'x', ylabel:'f(x)',
+     curves:[
+      {f:'exp(-x)-exp(-2*x)', col:'#5eead4', width:2.2, label:'distinte: e^-x - e^-2x'},
+      {f:'x*exp(-x)', col:'#d8a13a', width:2.2, label:'doppia: x e^-x'},
+      {f:'exp(-0.5*x)*sin(3*x)', col:'#b98cff', width:2.2, label:'complesse: e^-x/2 sin 3x'}
+     ],
+     segs:[{x1:0, y1:0, x2:3.2, y2:0, col:'#4d5a6b', width:1}]}
+   ],
+   leggi:R`<b>Il caso della radice doppia (oro) è quello che si riconosce a occhio</b>: sale, ha un massimo e poi decade — è il caso <i>critico</i>, quello che in fisica separa il regime sovrasmorzato da quello oscillante, e non a caso è il più rapido a tornare all&rsquo;equilibrio senza oltrepassarlo. Il fattore $x$ non è un artificio matematico: è ciò che rende quella curva diversa da un semplice esponenziale. Il caso complesso (viola) oscilla dentro un inviluppo esponenziale, e il caso a radici distinte (verde) è una differenza di due decadimenti — con la memoria, in un compito, che se le due radici sono vicine la curva somiglia moltissimo a quella oro: è la continuità del limite $r_2\to r_1$ che genera il fattore $x$.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In un esercizio di funzione di Green trovi $W=0$. Che cosa scrivi?`,
+    a:R`Che le soluzioni selezionate dalle due condizioni al bordo sono <b>proporzionali</b>, quindi il problema omogeneo ha una soluzione non banale, l&rsquo;operatore ristretto a quel dominio <b>non è invertibile</b> e <b>la funzione di Green non esiste</b>. Per la formula di Abel non può esserci una via di mezzo — $W$ è un esponenziale, o è sempre zero o non lo è mai — quindi non ha senso «provare in un altro punto». La risposta richiesta è la diagnosi, non un conto alternativo.`},
+   {q:R`$x^2f''+3xf'+f=0$: qual è la base delle soluzioni?`,
+    a:R`Eulero con $\alpha(\alpha-1)+3\alpha+1=\alpha^2+2\alpha+1=(\alpha+1)^2$: <b>radice doppia</b> $\alpha=-1$. La base è quindi $\{x^{-1},\,x^{-1}\log x\}$ — il logaritmo è il «fattore $x$» del caso a coefficienti costanti, tradotto dalla sostituzione $x=e^t$. Chi si ferma a $x^{-1}$ consegna uno spazio di dimensione 1 per un&rsquo;equazione del secondo ordine, che è impossibile.`}
+  ]}
+]},
+
+/* ---------------- 02 · IL PROBLEMA BEN POSTO ---------------- */
+{ num:'02', title:'Problema ben posto: quali dati, e quanti', meta:'i tre requisiti di Hadamard · dati iniziali contro dati al bordo · e perche il calore allindietro non e ben posto',
+  blocchi:[
+  {t:'prosa', title:'I tre requisiti, e il terzo e quello che si dimentica', tag:'first principles', html:R`
+  <p>Un&rsquo;equazione differenziale da sola non individua niente: servono i <b>dati</b>. Secondo Hadamard un problema è <b>ben posto</b> se valgono tutte e tre:</p>
+  <ol>
+   <li><b>esistenza</b> di una soluzione;</li>
+   <li><b>unicità</b>;</li>
+   <li><b>dipendenza continua dai dati</b>: se i dati cambiano poco, la soluzione cambia poco.</li>
+  </ol>
+  <p>Il terzo è quello che si tende a saltare, ed è il più fisico dei tre: i dati di un problema reale vengono da misure, quindi sono noti con un errore. Se una perturbazione piccolissima del dato produce una soluzione completamente diversa, <b>la soluzione esiste ma non serve a niente</b> — non è calcolabile, non è misurabile, non è predizione.</p>`},
+  {t:'prosa', title:'Quanti dati, e di quale specie', tag:'regola operativa', html:R`
+  <p>Per una ODE di ordine $n$ servono <b>$n$ condizioni</b>, ed è la dimensione dello spazio delle soluzioni omogenee a dirlo. Ma <i>quali</i> condizioni cambia tutto:</p>
+  <ul>
+   <li><b>Problema ai valori iniziali</b> (Cauchy): $f(x_0)$ e $f'(x_0)$ nello <b>stesso punto</b>. Con coefficienti continui esiste ed è unica — teorema di Cauchy-Lipschitz — <b>sempre</b>. È il problema della dinamica: dato lo stato adesso, il futuro è determinato.</li>
+   <li><b>Problema ai limiti</b> (Sturm-Liouville): una condizione in $a$ e una in $b$. Qui <b>l&rsquo;esistenza e l&rsquo;unicità non sono garantite</b>: dipendono dall&rsquo;equazione e dai bordi. È il problema della statica e delle configurazioni di equilibrio, ed è quello delle funzioni di Green.</li>
+  </ul>
+  <p><b>La differenza non è formale, ed è il punto della tappa.</b> $f''+f=0$ con $f(0)=0$, $f'(0)=1$ ha l&rsquo;unica soluzione $\sin x$. La stessa equazione con $f(0)=0$ e $f(\pi)=0$ ha <b>infinite</b> soluzioni, tutte le $c\sin x$; e con $f(0)=0$, $f(\pi)=1$ <b>non ne ha nessuna</b>. Stessa equazione, stesso numero di dati, tre esiti diversi — e questo è esattamente il caso $W=0$ della tappa precedente, visto dall&rsquo;altro lato: $\pi$ è un autovalore del problema al bordo.</p>
+  <div class="note"><b>Il legame con l&rsquo;alternativa di Fredholm (me-07):</b> o il problema omogeneo ha solo la soluzione nulla — e allora la completa ha una e una sola soluzione per ogni sorgente — oppure ha soluzioni non banali, e allora la completa ne ha infinite o nessuna, a seconda che la sorgente sia ortogonale al nucleo. Le tre righe qui sopra sono i tre rami di quell&rsquo;alternativa scritti in un esempio.</div>`},
+  {t:'prosa', title:'Il calore allindietro: esistenza si, dipendenza continua no', tag:'collegamento', html:R`
+  <p>L&rsquo;equazione del calore $\partial_tu=\kappa\partial_x^2u$ con dato iniziale a $t=0$ è ben posta per $t>0$. <b>All&rsquo;indietro no</b>, e vale la pena vedere perché con Fourier: il modo $k$ evolve come $e^{-\kappa k^2t}$, quindi per $t>0$ le alte frequenze sono <b>schiacciate</b> — la soluzione si liscia, e due dati iniziali diversissimi nei dettagli fini danno soluzioni quasi identiche. Andando all&rsquo;indietro, $e^{+\kappa k^2|t|}$: le alte frequenze <b>esplodono</b>, e un errore di misura di $10^{-10}$ su una frequenza alta diventa un errore macroscopico. La soluzione formalmente esiste; la <b>dipendenza continua</b> è persa, e il problema è mal posto.</p>
+  <p>È la stessa irreversibilità della tappa 04, detta nel linguaggio dei dati invece che in quello dell&rsquo;entropia: <b>il calore distrugge informazione sulle scale piccole, e nessun problema ben posto può recuperarla</b>. Le onde, che invece conservano l&rsquo;energia in ogni modo, sono ben poste in entrambi i versi del tempo — e infatti si integrano all&rsquo;indietro senza problemi.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché un problema ai valori iniziali è sempre risolubile e uno ai limiti no?`,
+    a:R`Perché le due condizioni iniziali fissano <b>direttamente</b> le due costanti della combinazione generale, in un sistema lineare il cui determinante è il wronskiano <b>nel punto $x_0$</b> — e quello non è mai zero. Le condizioni al bordo invece producono un sistema il cui determinante coinvolge i valori delle soluzioni in <b>due punti diversi</b>, e quel determinante può annullarsi: succede esattamente quando esiste un modo dell&rsquo;omogenea che rispetta entrambi i bordi, cioè un autovalore.`},
+   {q:R`Come si riconosce a colpo d&rsquo;occhio se un problema al bordo sarà singolare?`,
+    a:R`Si risolve l&rsquo;omogenea e si guarda se una sua soluzione non banale soddisfa <b>entrambe</b> le condizioni. Se sì, $W$ dei due candidati è nullo, la Green non esiste, e il valore del parametro per cui succede è un autovalore. Negli scritti di questo corso la domanda è quasi sempre mascherata: «si discuta poi il caso in cui le condizioni al bordo sono…» — è lì che chiedono questo.`}
+  ]}
+]},
+
+/* ---------------- 03 · LAPLACE ---------------- */
+{ num:'03', title:'Laplace e Poisson: l’equilibrio', meta:'$\\Delta u=0$ · proprietà della media e principio del massimo · Green del laplaciano = potenziale coulombiano',
   blocchi:[
   {t:'prosa', title:'Cosa dice l’equazione', tag:'costruzione', html:R`
   <p>$\Delta u=0$ descrive uno stato <b>stazionario</b>: potenziale elettrostatico in assenza di cariche, temperatura all&rsquo;equilibrio, flusso incomprimibile irrotazionale. Con sorgente diventa <b>Poisson</b>: $\Delta u=-\rho/\varepsilon_0$.</p>
@@ -311,7 +451,7 @@ MOVIMENTO*/
 ]},
 
 /* ---------------- 02 · CALORE ---------------- */
-{ num:'02', title:'Il calore: irreversibilità e regolarizzazione', meta:'nucleo gaussiano · smorzamento $e^{-\\alpha k^2t}$ delle alte frequenze · non si integra all’indietro',
+{ num:'04', title:'Il calore: irreversibilità e regolarizzazione', meta:'nucleo gaussiano · smorzamento $e^{-\\alpha k^2t}$ delle alte frequenze · non si integra all’indietro',
   blocchi:[
   {t:'reveal', title:'La soluzione fondamentale, via Fourier', tag:'derivazione', steps:[
    {label:'Trasforma in $x$', body:R`<p>Da $u_t=\alpha u_{xx}$, trasformando secondo Fourier in $x$ (nucleo 15: $\widehat{u_{xx}}=-k^2\hat u$):
@@ -341,7 +481,7 @@ MOVIMENTO*/
 ]},
 
 /* ---------------- 03 · ONDE ---------------- */
-{ num:'03', title:'Le onde: propagazione, d’Alembert, cono di luce', meta:'$u=F(x-ct)+G(x+ct)$ · dominio di dipendenza · energia conservata, reversibile',
+{ num:'05', title:'Le onde: propagazione, d’Alembert, cono di luce', meta:'$u=F(x-ct)+G(x+ct)$ · dominio di dipendenza · energia conservata, reversibile',
   blocchi:[
   {t:'prosa', title:'La formula di d’Alembert e cosa insegna', tag:'costruzione', html:R`
   <p>In una dimensione $u_{tt}=c^2u_{xx}$ si fattorizza: $\big(\partial_t-c\partial_x\big)\big(\partial_t+c\partial_x\big)u=0$, da cui la soluzione generale
@@ -365,7 +505,7 @@ MOVIMENTO*/
 ]},
 
 /* ---------------- 04 · IL FILO COMUNE ---------------- */
-{ num:'04', title:'Il filo comune: separazione, spettro, classificazione', meta:'un solo metodo per tutte e tre · ellittico/parabolico/iperbolico · dove si è già visto tutto',
+{ num:'06', title:'Il filo comune: separazione, spettro, classificazione', meta:'un solo metodo per tutte e tre · ellittico/parabolico/iperbolico · dove si è già visto tutto',
   blocchi:[
   {t:'gram', title:'Le tre equazioni a confronto', rows:[
    [R`<b>Laplace</b> $\Delta u=0$`, R`<b>ellittica</b>. Nessun tempo: equilibrio. Dati sul <b>bordo</b> di un dominio. Soluzioni $C^\infty$ (anzi analitiche). Principio del massimo. Il dato al bordo si smorza entrando.`],
@@ -380,7 +520,7 @@ MOVIMENTO*/
 ]},
 
 /* ---------------- 05 · ESERCIZI ---------------- */
-{ num:'05', title:'Esercizi — tocca a te', meta:'calore su un segmento · onde con dato a tratti · Laplace nel disco',
+{ num:'07', title:'Esercizi — tocca a te', meta:'calore su un segmento · onde con dato a tratti · Laplace nel disco',
   blocchi:[
   {t:'esercizio', title:'Calore su $[0,\\pi]$ con dato iniziale $\\sin x+\\tfrac12\\sin3x$',
    src:'esercizio-tipo — la separazione applicata',
@@ -401,7 +541,7 @@ MOVIMENTO*/
 ]},
 
 /* ---------------- 06 · SENSO E ROTTE ---------------- */
-{ num:'06', title:'Il senso e le rotte fisiche — e la fine del percorso', meta:'dove arriva tutto questo, e la domanda che resta aperta',
+{ num:'08', title:'Il senso e le rotte fisiche — e la fine del percorso', meta:'dove arriva tutto questo, e la domanda che resta aperta',
   blocchi:[
   {t:'prosa', title:'Cosa chiude il percorso', tag:'sintesi', html:R`
   <p><b>A monte c&rsquo;è tutto.</b> Topologia e differenziale (nuclei 00&ndash;01) per dire cosa significa liscio; Dini e ottimizzazione (02) per i vincoli; curve, superfici e campi (03&ndash;04) per il linguaggio vettoriale; i teoremi integrali (05) che diventano le leggi di conservazione; le EDO (06) che qui sono la parte temporale; serie, spazi, Hilbert (07&ndash;10) per avere una base e potersi fidare dei limiti; la complessa (11&ndash;14) per i residui, le antitrasformate e l&rsquo;analiticità come causalità; distribuzioni e operatori (15&ndash;16) per le sorgenti puntiformi e lo spettro.</p>

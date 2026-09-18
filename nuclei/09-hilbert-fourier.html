@@ -271,10 +271,66 @@ id:        me-10 — serie e trasformata di Fourier
 identita:  scomporre in frequenze, e cosa si conserva mentre lo fai
 copre:     F.3 — Analisi di Fourier: serie di Fourier, trasformata di Fourier, trasformata di Laplace
 serve:     me-08 (me-08-l2-basi-di-funzioni.html), me-09 (15-distribuzioni.html)
-apre:      me-10b (da costruire), me-11 (17-edp.html)
+apre:      me-10b (me-10b-trasformata-di-laplace.html), me-11 (17-edp.html)
 fonti:     note Esposito §10-11 (pp. 57-77); programma: Zanghì 12.1-12.5 e cap. 13, Calogero 5.1-5.3 e 5.6-5.8
-generata:  2026-09-17 da mappa.json — non modificare a mano, si cambia la mappa
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"integrale","espr":"exp(I*(-3)*t)+exp(I*(-2)*t)+exp(I*(-1)*t)+1+exp(I*t)+exp(I*2*t)+exp(I*3*t)",
+  "var":"t","da":"-pi","a":"pi","vale":"2*pi","ipotesi":{"t":"real"},
+  "dove":"05","appare":"\\int_{-\\pi}^{\\pi}D_N(t)\\,dt=1"},
+
+ {"tipo":"uguale","sinistra":"sin((3+Rational(1,2))*t)/sin(t/2)",
+  "vale":"exp(I*(-3)*t)+exp(I*(-2)*t)+exp(I*(-1)*t)+1+exp(I*t)+exp(I*2*t)+exp(I*3*t)",
+  "ipotesi":{"t":"real"},
+  "dove":"05","appare":"\\frac{\\sin\\big[(N+\\tfrac12)t\\big]}{\\sin(t/2)}"},
+
+ {"tipo":"limite","espr":"Integral(x*sin(n*x),(x,0,1)).doit()","var":"n","a":"oo","vale":"0",
+  "ipotesi":{"n":"positive","x":"real"},
+  "dove":"05","appare":"\\to0"},
+
+ {"tipo":"uguale","sinistra":"(1+0)/2","vale":"Rational(1,2)",
+  "dove":"06","appare":"\\frac{1+0}{2}=\\frac12"},
+
+ {"tipo":"integrale","espr":"exp(-2*Abs(x))","var":"x","da":"-oo","a":"oo","vale":"1",
+  "ipotesi":{"x":"real"},
+  "dove":"06","appare":"\\int e^{-2|x|}dx=1"},
+
+ {"tipo":"integrale","espr":"4/(1+k**2)**2/(2*pi)","var":"k","da":"-oo","a":"oo","vale":"1",
+  "ipotesi":{"k":"real"},
+  "dove":"06","appare":"\\frac{1}{2\\pi}\\int\\frac{4}{(1+k^2)^2}dk=1"},
+
+ {"tipo":"uguale","sinistra":"I/(k+I)","vale":"1/(1-I*k)",
+  "ipotesi":{"k":"real"},
+  "dove":"06","appare":"\\dfrac{1}{1-ik}"},
+
+ {"tipo":"uguale","sinistra":"1/(1+I*0)**2+1/(1-I*0)","vale":"2",
+  "dove":"06","appare":"\\hat f(0)=1+1=2"},
+
+ {"tipo":"simbolico","dove":"06","appare":"\\widehat{f'}(k)=ik\\,\\hat f(k)",
+  "perche":"e' una proprieta' generale della trasformata, enunciata per simboli: non un valore calcolato su una funzione particolare"},
+
+ {"tipo":"simbolico","dove":"06","appare":"\\widehat{f*g}=\\hat f\\cdot\\hat g",
+  "perche":"teorema di convoluzione enunciato in forma simbolica, dimostrato altrove (me-10b, me-12)"},
+
+ {"tipo":"integrale","espr":"exp(-s*x)","var":"x","da":"0","a":"oo","vale":"1/s",
+  "ipotesi":{"s":"positive","x":"real"},
+  "dove":"06","appare":"\\frac1s"},
+
+ {"tipo":"integrale","espr":"x*exp(-s*x)","var":"x","da":"0","a":"oo","vale":"1/s**2",
+  "ipotesi":{"s":"positive","x":"real"},
+  "dove":"06","appare":"\\frac1{s^2}"},
+
+ {"tipo":"uguale","sinistra":"(-diff(1/s,s)).subs(s,1+I*k)","vale":"1/(1+I*k)**2",
+  "ipotesi":{"s":"positive","k":"real"},
+  "dove":"06","appare":"\\dfrac{1}{(1+ik)^2}"},
+
+ {"tipo":"simbolico","dove":"05","appare":"\\ell=\\frac{f(x^+)+f(x^-)}{2}",
+  "perche":"e' la DEFINIZIONE del valore a cui si applica il teorema del Dini nei punti di salto, non un conto"}
+]
+CONTROLLO*/
 
 
 /* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
@@ -509,8 +565,86 @@ MOVIMENTO*/
    leggi:R`Nel mezzo dell&rsquo;intervallo $S_{10}$ è quasi indistinguibile dalla retta: la serie ricostruisce $x$. Agli <b>estremi</b> tutte le somme parziali sono costrette a tornare a $0$ — sono somme di seni, che in $\pm\pi$ valgono zero — e lì compare di nuovo l&rsquo;<b>orecchia di Gibbs</b>, perché l&rsquo;estensione periodica ha un salto di ampiezza $2\pi$. È la figura da tenere a mente quando all&rsquo;esame si chiede &laquo;quanto vale la serie in $x=\pi$&raquo;: la risposta $0$ non è un caso particolare, è ciò che il grafico <b>obbliga</b> a fare. Nota anche la differenza col grafico precedente: qui l&rsquo;errore lontano dai salti cala visibilmente più in fretta, coerente col fatto che i coefficienti $2/n$ hanno lo stesso ordine ma la funzione è &laquo;meno spigolosa&raquo; all&rsquo;interno.`}
 ]},
 
-/* ---------------- 05 · ESERCIZI ---------------- */
-{ num:'05', title:'Esercizi — tocca a te', meta:'coseni per una funzione pari · Parseval al quarto ordine · riconoscere il regime di convergenza',
+/* ---------------- 05 · CONVERGENZA PUNTUALE: DIRICHLET, RIEMANN-LEBESGUE, DINI ---------------- */
+{ num:'05', title:'Perche la serie converge davvero, e a che cosa converge nei salti', meta:'nucleo di Dirichlet · lemma di Riemann-Lebesgue · condizione del Dini · nei salti: la semisomma',
+  blocchi:[
+  {t:'prosa', title:'La somma parziale e un integrale, non una somma', tag:'costruzione', html:R`
+  <p>Fin qui la convergenza in $L^2$ è stata gratis: è la geometria di uno spazio di Hilbert (tappa 02). Ma «$S_N(x)\to f(x)$ <b>in quel punto lì</b>» è un&rsquo;altra domanda, e la risposta non può venire dall&rsquo;ortogonalità — serve guardare la somma parziale da vicino.</p>
+  <p>Si sostituiscono i coefficienti dentro la somma e si scambia somma e integrale:
+  $$S_N(x)=\sum_{|n|\le N}c_ne^{inx}=\frac{1}{2\pi}\int_{-\pi}^{\pi}f(y)\underbrace{\sum_{|n|\le N}e^{in(x-y)}}_{D_N(x-y)}dy.$$
+  La somma geometrica al centro si chiude in forma chiusa ed è il <b>nucleo di Dirichlet</b>
+  $$D_N(t)=\sum_{|n|\le N}e^{int}=\frac{\sin\big[(N+\tfrac12)t\big]}{\sin(t/2)},\qquad \frac{1}{2\pi}\int_{-\pi}^{\pi}D_N(t)\,dt=1.$$
+  <b>La somma parziale è quindi una media pesata di $f$</b>, con peso $D_N$. Tutto il comportamento della serie in un punto è il comportamento di quel peso.</p>
+  <div class="note">$D_N$ ha un picco alto $2N+1$ in $t=0$ e oscilla rapidamente altrove, ma <b>non è una delta</b>: il suo integrale del valore assoluto diverge come $\log N$. È esattamente questa mancanza che produce il <b>fenomeno di Gibbs</b> — la serie di Fourier non è una «media locale» innocua, e le code oscillanti del nucleo pesano.</div>`},
+  {t:'plot', title:'Il nucleo di Dirichlet: il picco che stringe e le code che non spariscono',
+   intro:R`$D_N(t)=\sin[(N+\frac12)t]/\sin(t/2)$ per $N=4$ e $N=12$. È il peso con cui $S_N$ media la funzione attorno al punto.`,
+   plots:[
+    {kind:'func2d', xr:[-3.15,3.15], yr:[-7,26], height:360,
+     title:'D_N: il picco cresce come 2N+1 e si stringe, ma le code oscillanti restano',
+     xlabel:'t', ylabel:'D_N(t)',
+     curves:[
+      {f:'abs(sin(x/2))<1e-6 ? 9 : sin(4.5*x)/sin(x/2)', col:'#5eead4', width:2.0, label:'N=4'},
+      {f:'abs(sin(x/2))<1e-6 ? 25 : sin(12.5*x)/sin(x/2)', col:'#b98cff', width:1.6, label:'N=12'}
+     ],
+     segs:[{x1:-3.15, y1:0, x2:3.15, y2:0, col:'#4d5a6b', width:1}],
+     marks:[{x:0, y:25, label:'2N+1', col:'#d8a13a', up:true, left:true}]}
+   ],
+   leggi:R`Il picco centrale <b>stringe</b> al crescere di $N$ e questo è ciò che fa convergere la serie dove $f$ è regolare: la media pesata si concentra sempre di più su un intorno piccolo. Ma le <b>code non si schiacciano</b>: oscillano solamente più in fretta, e la loro area in valore assoluto <i>cresce</i> come $\log N$. È da lì che nasce Gibbs, ed è la differenza fra questo nucleo e una vera approssimazione dell&rsquo;identità (il nucleo di Fejér, che invece è positivo e non produce Gibbs). Visivamente: <b>un nucleo che oscilla sotto lo zero può «sparare» oltre il valore della funzione</b>, e infatti lo fa, sempre del 9% del salto.`},
+  {t:'prosa', title:'I due teoremi che chiudono la questione', tag:'grammatica', html:R`
+  <p><b>Lemma di Riemann-Lebesgue.</b> Se $g$ è sommabile, $\displaystyle\int g(t)\,e^{i\lambda t}dt\to0$ per $\lambda\to\infty$. In parole: <b>le oscillazioni sempre più rapide cancellano tutto ciò che non oscilla con loro</b>. Conseguenza immediata: i coefficienti di Fourier di una funzione sommabile tendono a zero, $c_n\to0$ — e ogni volta che in un conto compare un integrale contro un seno a frequenza altissima, la risposta è zero.</p>
+  <p><b>Condizione del Dini.</b> Fissato $x$, se esiste $\delta>0$ tale che
+  $$\int_{0}^{\delta}\frac{|f(x+t)+f(x-t)-2\ell|}{t}\,dt<\infty,$$
+  allora $S_N(x)\to\ell$. È una condizione <b>locale</b>: la convergenza in un punto dipende solo da come si comporta $f$ <i>vicino</i> a quel punto, per quanto brutta sia altrove. La dimostrazione è tutta qui: si scrive $S_N(x)-\ell$ come integrale contro $D_N$, si spezza il seno di $D_N$, e ciò che resta è un integrale a cui si applica Riemann-Lebesgue — <b>il denominatore $t$ del Dini serve esattamente a rendere sommabile la funzione a cui lo si applica</b>.</p>
+  <p><b>Il corollario che si usa all&rsquo;esame.</b> Se $f$ è regolare a tratti, in ogni punto il Dini vale con
+  $$\ell=\frac{f(x^+)+f(x^-)}{2}:$$
+  dove $f$ è continua la serie dà $f(x)$, e <b>nei salti dà la semisomma dei limiti laterali</b>. Non è una convenzione: è ciò a cui la media pesata da $D_N$ non può che tendere, visto che il nucleo è <b>pari</b> e pesa i due lati allo stesso modo.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`L&rsquo;onda quadra vale $+1$ a destra di $0$ e $-1$ a sinistra. Quanto vale la sua serie di Fourier in $x=0$, e perché non serve calcolare niente?`,
+    a:R`Vale $0$: la semisomma di $+1$ e $-1$. Non serve calcolare perché tutti i termini sono seni, che in $0$ si annullano — ma la ragione strutturale è migliore: $D_N$ è pari, quindi pesa i due lati del salto allo stesso modo, e la media pesata di $+1$ e $-1$ con pesi uguali fa zero <b>qualunque sia $N$</b>.`},
+   {q:R`Perché Riemann-Lebesgue non basta da solo a dimostrare la convergenza puntuale?`,
+    a:R`Perché dice che i coefficienti vanno a zero, non che la <b>somma</b> converge al valore giusto: una serie può avere termini infinitesimi e divergere. Serve un&rsquo;ipotesi sulla <b>regolarità locale</b> di $f$ nel punto — ed è il Dini — per poter applicare Riemann-Lebesgue alla funzione giusta. Che poi è il motivo per cui esistono funzioni continue la cui serie di Fourier diverge in un punto: continuità non implica Dini.`}
+  ]}
+]},
+
+/* ---------------- 06 · DALLA SERIE ALLA TRASFORMATA ---------------- */
+{ num:'06', title:'La trasformata di Fourier: quando il periodo diventa infinito', meta:'dal discreto al continuo · convenzioni e derivate · Plancherel · lo scritto del 16/11/2023',
+  blocchi:[
+  {t:'prosa', title:'Il passaggio al limite, e perche la somma diventa integrale', tag:'costruzione', html:R`
+  <p>Su $[-L/2,L/2]$ le frequenze permesse sono $k_n=\frac{2\pi n}{L}$, distanziate di $\Delta k=\frac{2\pi}{L}$. Mandando $L\to\infty$ la spaziatura va a zero: <b>lo spettro smette di essere discreto e diventa continuo</b>, la somma sui modi diventa un integrale, e i coefficienti $c_n$ diventano una funzione $\hat f(k)$:
+  $$f(x)=\int_{-\infty}^{\infty}\frac{dk}{2\pi}\,\hat f(k)\,e^{ikx},\qquad \hat f(k)=\int_{-\infty}^{\infty}dx\,f(x)\,e^{-ikx}.$$
+  <b>Non è una nuova teoria</b>: è lo stesso sviluppo su una base ortonormale della tappa 02, con l&rsquo;indice che da intero diventa reale. Le esponenziali $e^{ikx}$ non stanno in $L^2$ — la base è impropria, e questo è esattamente il punto che si sistema con le distribuzioni (me-09).</p>
+  <div class="note"><b>Le convenzioni cambiano da libro a libro e all&rsquo;esame si perdono punti lì.</b> Il $2\pi$ può stare tutto nell&rsquo;antitrasformata (convenzione usata qui e nelle note del corso), oppure diviso $1/\sqrt{2\pi}$ su entrambe, oppure assorbito scrivendo $e^{-2\pi ikx}$. <b>Si dichiara la convenzione all&rsquo;inizio del compito e non la si cambia più</b>: metà degli errori di segno e di fattore nascono da un cambio di convenzione a metà esercizio.</div>`},
+  {t:'prosa', title:'Le tre proprieta che servono davvero', tag:'regola operativa', html:R`
+  <ul>
+   <li><b>Derivata in prodotto.</b> $\widehat{f'}(k)=ik\,\hat f(k)$. È tutto il motivo per cui Fourier risolve le equazioni differenziali lineari a coefficienti costanti: derivare diventa moltiplicare, un&rsquo;equazione differenziale diventa un&rsquo;equazione algebrica (e da lì si arriva a me-11 e me-12).</li>
+   <li><b>Convoluzione in prodotto.</b> $\widehat{f*g}=\hat f\cdot\hat g$. È la ragione per cui la funzione di Green si calcola in spazio di Fourier.</li>
+   <li><b>Plancherel.</b> $\displaystyle\int|f(x)|^2dx=\int\frac{dk}{2\pi}|\hat f(k)|^2$: <b>la trasformata conserva l&rsquo;energia</b>. È l&rsquo;esatto analogo continuo di Parseval (tappa 02) — là la norma del vettore era la somma dei quadrati dei coefficienti, qui è l&rsquo;integrale. Detto in una riga: la trasformata di Fourier è una <b>isometria</b> di $L^2$ in sé.</li>
+  </ul>
+  <p>Controllo numerico su un caso che vale la pena ricordare: per $f(x)=e^{-|x|}$ si ha $\hat f(k)=\frac{2}{1+k^2}$ (una lorentziana), e Plancherel dà $\int e^{-2|x|}dx=1$ da una parte e $\frac{1}{2\pi}\int\frac{4}{(1+k^2)^2}dk=1$ dall&rsquo;altra. <b>Le due strade danno lo stesso numero</b>, ed è il modo più rapido di accorgersi di aver sbagliato un fattore $2\pi$.</p>`},
+  {t:'reveal', title:'Lo scritto del 16/11/2023, e la domanda finale che vale tutta la tappa 05', tag:'esame', steps:[
+   {label:'Il testo', body:R`
+   <p>«Si calcoli la trasformata di Fourier di $f(x)=xe^{-x}\theta(x)+e^{x}\theta(-x)$. Ottenuta $\hat f(k)$, si calcoli l&rsquo;antitrasformata $\hat{\hat f}(x)$ e si mostri che per $x\ne0$ vale $f(x)$. Per $x=0$ l&rsquo;integrale è più complicato: senza svolgere il conto, in analogia con quanto succede per la serie di Fourier, quanto ci aspettiamo valga $\hat{\hat f}(0)$?»</p>
+   <p><b>La funzione è definita a pezzi</b>, e il primo passo è sempre lo stesso: si spezza l&rsquo;integrale dove cambia la definizione, non si cerca una formula unica.</p>`},
+   {label:'I due integrali', body:R`
+   <p>$$\hat f(k)=\int_0^{\infty}dx\,xe^{-x}e^{-ikx}+\int_{-\infty}^{0}dx\,e^{x}e^{-ikx}.$$
+   Il primo è $\int_0^\infty x e^{-(1+ik)x}dx=\dfrac{1}{(1+ik)^2}$ (è $\Gamma(2)$ riscalata, oppure una derivata rispetto al parametro). Il secondo è $\int_{-\infty}^0 e^{(1-ik)x}dx=\dfrac{1}{1-ik}$. Quindi
+   $$\hat f(k)=\frac{1}{(1+ik)^2}+\frac{1}{1-ik}.$$
+   <b>Il controllo che costa cinque secondi:</b> $\hat f(0)$ deve valere $\int f(x)dx$, cioè $1+1=2$. E infatti $\hat f(0)=1+1=2$. Se non torna, l&rsquo;errore è nei segni degli esponenti.</p>`},
+   {label:'La domanda finale, ed e quella vera', body:R`
+   <p>In $x=0$ la funzione ha un <b>salto</b>: da sinistra $e^{x}\to1$, da destra $xe^{-x}\to0$. L&rsquo;antitrasformata non può scegliere un lato, e per lo stesso meccanismo del nucleo di Dirichlet — che è <b>pari</b> e pesa i due lati allo stesso modo — restituisce la <b>semisomma</b>:
+   $$\hat{\hat f}(0)=\frac{f(0^-)+f(0^+)}{2}=\frac{1+0}{2}=\frac12.$$
+   <b>Il testo lo dice esplicitamente</b> («in analogia con quanto succede per la serie di Fourier»): la domanda non chiede un conto, chiede se hai capito che serie e trasformata condividono lo <i>stesso</i> teorema di convergenza puntuale. Chi ha studiato la tappa 05 risponde in una riga; chi sa solo calcolare integrali si mette a calcolare un integrale difficile e non finisce.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché $\widehat{f'}=ik\hat f$ implica che una funzione liscia ha trasformata che decade in fretta?`,
+    a:R`Perché se $f$ ha $m$ derivate sommabili, allora $k^m\hat f(k)$ è ancora limitata (e tende a zero per Riemann-Lebesgue): quindi $\hat f$ decade almeno come $|k|^{-m}$. <b>Regolarità nello spazio ↔ decadimento nelle frequenze</b>, ed è la stessa affermazione letta da due lati. Il caso estremo è la gaussiana, liscia ovunque, la cui trasformata è ancora una gaussiana; il caso opposto è la $\delta$, che è «tutta spigolo» e ha trasformata costante — non decade affatto.`},
+   {q:R`Nel calcolo sopra, come si trova $\int_0^\infty xe^{-(1+ik)x}dx$ senza integrare per parti?`,
+    a:R`Derivando rispetto al parametro: $\int_0^\infty e^{-sx}dx=\frac1s$, quindi $\int_0^\infty xe^{-sx}dx=-\frac{d}{ds}\frac1s=\frac1{s^2}$, con $s=1+ik$. <b>La derivazione sotto il segno è il trucco che negli scritti fa risparmiare più tempo</b>, e vale ogni volta che compare una potenza di $x$ moltiplicata per un esponenziale.`}
+  ]}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'coseni per una funzione pari · Parseval al quarto ordine · riconoscere il regime di convergenza',
   blocchi:[
   {t:'esercizio', title:'$f(x)=x^2$: soli coseni, e $\\sum1/n^4=\\pi^4/90$',
    src:'esercizio guidato — provaci prima di rivelare',
@@ -536,7 +670,7 @@ MOVIMENTO*/
 ]},
 
 /* ---------------- 06 · SENSO E ROTTE ---------------- */
-{ num:'06', title:'Il senso e le rotte fisiche', meta:'perché «la base giusta» è una strategia fisica, non un tecnicismo',
+{ num:'08', title:'Il senso e le rotte fisiche', meta:'perché «la base giusta» è una strategia fisica, non un tecnicismo',
   blocchi:[
   {t:'prosa', title:'Cosa hai davvero imparato', tag:'sintesi', html:R`
   <p><b>A monte.</b> Il nucleo 08 dava distanza e completezza; qui una struttura in più — il prodotto scalare — trasforma quello spazio in una <b>geometria</b>: angoli, perpendicolarità, proiezioni, Pitagora. La convergenza uniforme del nucleo 07 diventa uno dei tre regimi possibili, non più l&rsquo;unico modo di dire &laquo;si avvicina&raquo;.</p>
