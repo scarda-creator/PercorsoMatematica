@@ -217,7 +217,8 @@ function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html
    =================================================================== */
 var CORSO = 'elettromagnetismo';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
 var STRUM = {};
-
+STRUM["teorema-di-stokes"] = {"nome":"Teorema di Stokes","riga":"La circuitazione di un campo lungo una curva chiusa è il flusso del suo rotore attraverso una qualunque superficie che quella curva borda: $\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r=\\int_S(\\nabla\\times\\mathbf F)\\cdot\\hat n\\,dS$.","serve":"Dice che la circuitazione dipende solo dal bordo e non dalla superficie scelta — ed è la licenza a deformare la superficie a piacere, che in fisica si usa continuamente. Letto nell'altro verso dà il significato del rotore: la circuitazione per unità di area, nel limite di un cappio piccolo. Il verso della normale e quello di percorrenza del bordo vanno legati dalla regola della mano destra, altrimenti il segno è casuale.","esempio":"Per il vortice $\\mathbf F=(-y,x,0)$ il rotore ha solo componente $z$, che vale $\\partial_x(x)-\\partial_y(-y)=2$. Sul disco di raggio $R$ nel piano $xy$ il flusso del rotore è quindi $2$ per l'area, $2\\pi R^{2}$; la circuitazione diretta sul cerchio, dove $\\mathbf F\\cdot d\\mathbf r$ vale $R^{2}\\,dt$, dà $\\int_0^{2\\pi}R^{2}\\,dt=2\\pi R^{2}$.","pieno":{"file":"05-teoremi-integrali.html","tappa":"03","come":"l'enunciato, l'orientazione coerente bordo-normale e l'indipendenza dalla superficie, nel nucleo dei teoremi integrali"},"qui":{"elettromagnetismo":{"serve":"È il ponte fra la forma integrale e la forma locale delle due leggi di circuitazione: Ampère, $\\oint\\mathbf B\\cdot d\\mathbf r=\\mu_0 I$, diventa $\\nabla\\times\\mathbf B=\\mu_0\\mathbf J$; Faraday, $\\oint\\mathbf E\\cdot d\\mathbf r=-\\dfrac{d\\Phi_B}{dt}$, diventa $\\nabla\\times\\mathbf E=-\\partial_t\\mathbf B$. E regge l'affermazione più usata dell'elettrostatica: se il rotore di $\\mathbf E$ è nullo su un dominio senza buchi, ogni circuitazione è nulla e il campo è conservativo.","esempio":"Per il filo rettilineo infinito percorso da una corrente il campo ha modulo $\\dfrac{\\mu_0 I}{2\\pi r}$ ed è tangente ai cerchi concentrici, quindi la circuitazione su un cerchio di raggio $r$ è $\\dfrac{\\mu_0 I}{2\\pi r}\\cdot 2\\pi r=\\mu_0 I$: il raggio scompare. Stokes dice che lo stesso valore si ottiene su qualunque cappio che allacci il filo, anche storto — è il bordo a contare, non la forma."}},"controllo":[{"tipo":"uguale","sinistra":"diff(x,x)-diff(-y,y)","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"integrale","espr":"R**2","var":"t","da":"0","a":"2*pi","vale":"2*pi*R**2","dove":"esempio","appare":"2\\pi R^{2}"},{"tipo":"uguale","sinistra":"mu0*Ic/(2*pi*r)*2*pi*r","vale":"mu0*Ic","dove":"qui.elettromagnetismo.esempio","appare":"\\mu_0 I"}]};
+STRUM["rotore"] = {"nome":"Rotore","riga":"Il campo $\\nabla\\times\\mathbf F$, la cui componente lungo $\\hat n$ misura la circuitazione di $\\mathbf F$ per unità di area attorno a $\\hat n$.","serve":"È la girandola locale: dove il rotore è nullo, una paletta infinitesima immersa nel campo non gira. Da qui il criterio più usato — un campo con rotore nullo su un dominio semplicemente connesso è conservativo — e la doppia ipotesi non è pedanteria: su un dominio bucato il criterio salta, e il controesempio (il vortice attorno a un filo escluso) è proprio il caso che si incontra in fisica.","esempio":"Il vortice $\\mathbf F=(-y,x)$ ha rotore $\\partial_x(x)-\\partial_y(-y)=2$: gira davvero, ed è costante su tutto il piano. Il campo radiale $\\mathbf F=(x,y)$ ha invece rotore $\\partial_x(y)-\\partial_y(x)=0$: si allontana dall'origine senza ruotare, e infatti è il gradiente di $\\tfrac12(x^{2}+y^{2})$.","pieno":{"file":"04-campi-vettoriali.html","tappa":"03","come":"divergenza e rotore insieme, con le loro letture geometriche e il calcolo in componenti, nel nucleo sui campi vettoriali"},"qui":{"elettromagnetismo":{"serve":"Le due equazioni di Maxwell col rotore sono quelle che accoppiano i campi: $\\nabla\\times\\mathbf E=-\\partial_t\\mathbf B$ e $\\nabla\\times\\mathbf B=\\mu_0\\mathbf J+\\mu_0\\varepsilon_0\\partial_t\\mathbf E$. Il rotore nullo di $\\mathbf E$ in statica è ciò che autorizza a scrivere il potenziale; appena $\\mathbf B$ varia nel tempo quel rotore non è più nullo, e il potenziale scalare da solo smette di bastare. Il rotore è quindi il posto esatto in cui l'elettrostatica finisce.","esempio":"Che non possa esistere un potenziale scalare quando $\\mathbf B$ varia si vede dall'identità $\\nabla\\times(\\nabla V)$, che è nulla per ogni $V$: se $\\mathbf E$ fosse $-\\nabla V$ il suo rotore sarebbe zero, mentre Faraday lo vuole uguale a $-\\partial_t\\mathbf B$. Sul campione $V=xy$ il gradiente è $(y,x)$ e il conto è $\\partial_x(x)-\\partial_y(y)=0$, come per qualunque altro $V$."}},"controllo":[{"tipo":"uguale","sinistra":"diff(x,x)-diff(-y,y)","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"uguale","sinistra":"diff(y,x)-diff(x,y)","vale":"0","dove":"esempio","appare":"=0"},{"tipo":"uguale","sinistra":"diff(diff(x*y,y),x)-diff(diff(x*y,x),y)","vale":"0","dove":"qui.elettromagnetismo.esempio","appare":"=0"}]};
 
 function schedaHTML(s){
   var q = (s.qui && s.qui[CORSO]) || s;
@@ -268,12 +269,11 @@ var TAPPE = [
 
 /*MOVIMENTO
 id:        em-08 — il campo magnetico
-identita:  le correnti come sorgenti, e la circuitazione al posto del flusso
-copre:     C.1 — Campo magnetico, legge di Biot-Savart, legge di Ampère
+identita:  Biot-Savart e Ampère, e perché non esistono monopoli
+copre:     B.5 — Fenomeni magnetici stazionari nel vuoto
 serve:     em-07 (em-07-la-corrente.html)
 apre:      em-09 (em-09-materiali-magnetici.html), em-10 (em-10-induzione.html)
-strumenti: campo-vettoriale · teorema-della-divergenza
-fonti:     Focardi cap. 5-6; programma di Bini voce C.1; 75 prove d'esame 2008-2021
+strumenti: rotore · teorema-di-stokes
 generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
@@ -324,7 +324,10 @@ MOVIMENTO*/
   "perche":"e' l'enunciato della non esistenza dei monopoli magnetici: una legge sperimentale, non un risultato calcolato"},
 
  {"tipo":"simbolico","dove":"02","appare":"\\frac{\\mu_0}{4\\pi}\\frac{I\\,d\\vec\\ell\\times\\hat r}{r^{2}}",
-  "perche":"e' l'enunciato della legge di Biot-Savart in forma elementare: la legge di partenza della tappa"}
+  "perche":"e' l'enunciato della legge di Biot-Savart in forma elementare: la legge di partenza della tappa"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\nabla\\times\\vec B=\\mu_0\\vec J",
+  "perche":"e' la forma LOCALE della legge di Ampere: si ottiene dalla forma integrale applicando Stokes alla circuitazione e l'argomento di arbitrarieta' della superficie, lo stesso usato in em-02 per Gauss. E' un'equivalenza fra due enunciati, non un valore calcolato"}
 ]
 CONTROLLO*/
 
@@ -412,7 +415,10 @@ CONTROLLO*/
    <li>si sceglie un cammino $\gamma$ su cui $\vec B$ sia <b>costante in modulo e parallelo</b> a $d\vec\ell$, così che la circuitazione sia $B\times(\text{lunghezza})$;</li>
    <li>si conta la corrente concatenata e si risolve.</li>
   </ol>
-  <p><b>La legge vale sempre, ma serve a calcolare solo quando c&rsquo;è simmetria</b> — identico a Gauss. Senza simmetria resta vera e inutile, e si torna a Biot-Savart.</p>`},
+  <p><b>La legge vale sempre, ma serve a calcolare solo quando c&rsquo;è simmetria</b> — identico a Gauss. Senza simmetria resta vera e inutile, e si torna a Biot-Savart.</p>
+  <p><b>La forma locale, in due righe.</b> Il <span class="str" data-str="teorema-di-stokes">teorema di Stokes</span> trasforma la circuitazione in un flusso di rotore, $\oint_{\partial S}\vec B\cdot d\vec\ell=\int_S(\nabla\times\vec B)\cdot\hat n\,dS$, mentre la corrente concatenata è il flusso della densità, $I_{\text{conc}}=\int_S\vec J\cdot\hat n\,dS$. Chiedendo l&rsquo;uguaglianza per <i>ogni</i> superficie $S$ — lo stesso argomento di arbitrarietà con cui em-02 ha prodotto la forma locale di Gauss — i due integrandi coincidono:
+  $$\boxed{\;\nabla\times\vec B=\mu_0\vec J\;}$$
+  Il <span class="str" data-str="rotore">rotore</span> di $\vec B$ è la densità di corrente: è <b>la sorgente puntuale del campo magnetico</b>, come $\rho/\varepsilon_0$ lo era per la divergenza di $\vec E$. Questa è la quarta equazione di Maxwell nella sua versione <b>stazionaria</b>, e in em-11 si vedrà che così com&rsquo;è <i>non può</i> essere completa: prendendone la divergenza si ottiene $\nabla\cdot\vec J=0$, che è falso ogni volta che un condensatore si carica. È da quella crepa che nasce la corrente di spostamento.</p>`},
   {t:'reveal', title:'I quattro casi che coprono gli esami', tag:'esame', steps:[
    {label:'Filo indefinito', body:R`
    <p>Simmetria cilindrica: $\vec B$ è tangente alle circonferenze attorno al filo e dipende solo da $r$. Con $\gamma$ una circonferenza: $B\cdot2\pi r=\mu_0I$, quindi
