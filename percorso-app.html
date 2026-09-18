@@ -98,7 +98,12 @@
 "use strict";
 var KEY='pm-progresso-v1', GIORNO=86400000;
 var IDX = window.PM_INDICE || {nuclei:[],movimenti:{}};
-var COLM = {1:'var(--m1)',2:'var(--m2)',3:'var(--m3)',4:'var(--m4)',5:'#ff9b6b'};
+// Un colore per sezione. Le 6-9 sono state aggiunte il 18-09 quando si e' scoperto che
+// l'app ne disegnava solo cinque: i nuclei delle altre esistevano, erano nell'indice, e
+// non comparivano da nessuna parte. Il fallback finale evita che una sezione nuova nasca
+// senza colore e con la barra invisibile.
+var COLM = {1:'var(--m1)',2:'var(--m2)',3:'var(--m3)',4:'var(--m4)',5:'#ff9b6b',
+            6:'#ff6b6b',7:'#8bd450',8:'#4c8dff',9:'#5eead4'};
 
 function vuoto(){ return {v:1,nuclei:{},voci:{},opts:{perGiorno:10},storico:{}}; }
 function leggi(){ try{ var d=JSON.parse(localStorage.getItem(KEY)||'null'); return d&&d.v?d:vuoto(); }catch(e){ return vuoto(); } }
@@ -222,7 +227,11 @@ function vistaPercorso(){
     '<div><div class="k">'+Object.keys(D.storico).length+'</div><div class="v">giorni attivi</div></div>'+
     '</div>'));
 
-  [1,2,3,4,5].forEach(function(m){
+  // TUTTE le sezioni dichiarate nell'indice, non una lista fissa (riparato il 18-09).
+  // Con `[1,2,3,4,5]` scritto a mano, aprire una sezione nuova nell'indice non bastava:
+  // i nuclei restavano invisibili, ed e' successo per mesi alle sezioni 6 e 7 senza che
+  // nessuno se ne accorgesse. Ora l'app segue l'indice invece di avere una sua idea.
+  Object.keys(IDX.movimenti).map(Number).sort(function(a,b){return a-b;}).forEach(function(m){
     var lista=IDX.nuclei.filter(function(n){ return n.mov===m; });
     if(!lista.length) return;
     root.appendChild(el('<div class="mov">Movimento '+m+' — '+(IDX.movimenti[m]||'')+'</div>'));
