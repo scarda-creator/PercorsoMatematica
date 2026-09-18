@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-01 — Le varietà topologiche: «localmente come R^n», e tutto quello che se ne ricava gratis</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-01 — Le varietà topologiche: che cosa si guadagna a chiedere solo «localmente come R^n»</b> · Diverio, lezioni 27/09 e 01/10</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-01: Le varietà topologiche <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-01 — le varietà topologiche
+identita:  che cosa si guadagna a chiedere solo «localmente come R^n», e quali proprietà si ottengono gratis
+copre:     G.1, G.2, G.4
+serve:     — (è la radice del corso)
+apre:      gd-02 (gd-02-strutture-lisce.html)
+registro:  Introduzione e lezione del 27/09/2019, più l'inizio del 01/10
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"(2*u/(1+u**2))**2+((u**2-1)/(1+u**2))**2","vale":"1",
+  "ipotesi":{"u":"real"},
+  "dove":"02","appare":"sta davvero sulla circonferenza"},
+
+ {"tipo":"uguale","sinistra":"(2*u/(1+u**2))/(1-(u**2-1)/(1+u**2))","vale":"u",
+  "ipotesi":{"u":"real"},
+  "dove":"02","appare":"\\varphi_N^{-1}"},
+
+ {"tipo":"uguale","sinistra":"(2*u/(1+u**2))/(1+(u**2-1)/(1+u**2))","vale":"1/u",
+  "ipotesi":{"u":"positive"},
+  "dove":"02","appare":"\\frac1u"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\left(\\frac{2u}{1+u^{2}},\\ \\frac{u^{2}-1}{1+u^{2}}\\right)",
+  "perche":"e' la coppia che definisce l'inversa della carta: la sua correttezza e' asserita dalle due uguaglianze accanto (sta su S^1, e composta con la carta da' l'identita')"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\varphi:U\\to\\varphi(U)\\subseteq\\mathbb{R}^{n}",
+  "perche":"e' la definizione di carta coordinata: si stabilisce una notazione, non si calcola nulla"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\pi_1(M)",
+  "perche":"e' la notazione del gruppo fondamentale, oggetto della topologia algebrica qui richiamato per enunciarne la numerabilita'"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.1, G.2, G.4 · la radice del corso di Diverio',
+  blocchi:[
+  {t:'prosa', title:'Il problema che una varieta risolve', tag:'architettura', html:R`
+  <p>In Analisi Vettoriale le superfici erano <b>dentro</b> $\mathbb{R}^3$: una sfera era l&rsquo;insieme dei punti a distanza fissa dall&rsquo;origine, e tutto ciò che si faceva su di essa passava dalle coordinate dello spazio ambiente. Funziona, ma nasconde una domanda: <b>quelle proprietà sono della superficie o del modo in cui l&rsquo;abbiamo messa nello spazio?</b></p>
+  <p>La geometria differenziale rovescia il punto di vista. <b>Una varietà è uno spazio che non sta dentro niente</b>: è definito da come è fatto <i>localmente</i>, e l&rsquo;unica richiesta è che ogni suo punto abbia un intorno indistinguibile da un pezzo di $\mathbb{R}^n$. Non c&rsquo;è ambiente, non ci sono coordinate privilegiate, e ogni affermazione che si fa deve avere senso <b>senza</b> di essi.</p>
+  <p>La ragione per cui è la scelta giusta si vede in fisica: lo spazio-tempo della relatività generale <b>non sta dentro</b> nessuno spazio più grande, e lo spazio delle configurazioni di un pendolo doppio è un toro che non è naturale immaginare immerso da nessuna parte. <b>Se la teoria richiedesse un ambiente, non si potrebbe nemmeno formulare.</b></p>
+  <div class="note"><b>Come è organizzato questo corso, e conviene saperlo subito.</b> Diverio non segue un libro: le sue lezioni costruiscono in ordine varietà topologiche → strutture lisce → mappe → tangente → campi → flussi. Il testo più vicino è <b>Abate-Tovena, capitoli 1-3</b>; gli appunti di <b>Manetti</b> seguono quasi lo stesso ordine e sono corti. Ciò che nel corso <b>non c&rsquo;è</b>, e sarebbe facile studiare per sbaglio: metriche riemanniane, connessioni, curvatura, geodetiche. Il corso finisce dentro le equazioni differenziali su varietà.</div>`}
+]},
+
+/* ---------------- 01 · LA DEFINIZIONE ---------------- */
+{ num:'01', title:'La definizione, e le tre richieste', meta:'localmente euclideo · Hausdorff · base numerabile · e perche servono le ultime due',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Uno spazio topologico $M$ è una <b>varietà topologica</b> di dimensione $n$ se:</p>
+  <ol>
+   <li>è <b>localmente euclideo</b>: ogni punto ha un intorno aperto $U$ omeomorfo a un aperto di $\mathbb{R}^n$. L&rsquo;omeomorfismo $\varphi:U\to\varphi(U)\subseteq\mathbb{R}^{n}$ si chiama <b>carta coordinata</b>, e la coppia $(U,\varphi)$ dà a ogni punto di $U$ le sue $n$ coordinate;</li>
+   <li>è di <b>Hausdorff</b>: due punti distinti hanno intorni disgiunti;</li>
+   <li>ha una <b>base numerabile</b> di aperti.</li>
+  </ol>
+  <p><b>La prima è l&rsquo;idea; le altre due sono ipotesi tecniche che si aggiungono perché senza di esse succedono cose sgradevoli</b>, e conviene sapere quali.</p>`},
+  {t:'prosa', title:'Perche Hausdorff e base numerabile non sono gratis', tag:'first principles', html:R`
+  <p><b>Senza Hausdorff</b> esiste il controesempio classico: la <i>retta con due origini</i>, cioè due copie di $\mathbb{R}$ incollate lungo $\mathbb{R}\setminus\{0\}$. È localmente euclidea — ogni punto ha un intorno che è un intervallo — ma le due origini non si separano, e <b>le successioni possono avere due limiti</b>. Tutto il calcolo differenziale, che vive di limiti, diventa ambiguo.</p>
+  <p><b>Senza base numerabile</b> si perdono le <b>partizioni dell&rsquo;unità</b> (movimento gd-05), e con esse la possibilità di incollare costruzioni locali in una globale. È la proprietà su cui si regge metà del corso: senza, non si può costruire una metrica, non si può integrare, non si può estendere una funzione da un chiuso. Il controesempio è la <i>retta lunga</i>, localmente euclidea e di Hausdorff, su cui quelle costruzioni falliscono.</p>
+  <div class="note"><b>La domanda giusta da farsi davanti a un&rsquo;ipotesi tecnica</b> — e vale per tutto il corso — non è «perché è richiesta» ma <b>«che cosa si rompe senza»</b>. Diverio introduce entrambe queste condizioni nelle prime due lezioni e poi ne deduce una lista di conseguenze: è quella lista, non la definizione, il contenuto del movimento.</div>`}
+]},
+
+/* ---------------- 02 · LE CARTE, IN CONCRETO ---------------- */
+{ num:'02', title:'Le carte in concreto: la sfera, e perche una sola non basta', meta:'proiezione stereografica · perche servono almeno due carte · il grafico di una funzione',
+  blocchi:[
+  {t:'reveal', title:'La sfera con due carte', tag:'costruzione', steps:[
+   {label:'Perche una non basta', body:R`
+   <p>$S^n$ è compatta; un aperto di $\mathbb{R}^n$ omeomorfo a tutta $S^n$ dovrebbe essere compatto, e gli unici sottoinsiemi di $\mathbb{R}^n$ compatti e aperti sono l&rsquo;insieme vuoto. <b>Quindi una carta sola non può coprire la sfera</b>: servono almeno due, e questo è il primo esempio di una varietà che <i>non</i> è un aperto di $\mathbb{R}^n$.</p>`},
+   {label:'La proiezione stereografica', body:R`
+   <p>Si toglie il polo nord $N$ e si proietta ogni punto sulla retta (o sul piano) equatoriale, dalla parte del polo. Per $S^1\subset\mathbb{R}^2$:
+   $$\varphi_N(x,y)=\frac{x}{1-y},\qquad \varphi_N^{-1}(u)=\left(\frac{2u}{1+u^{2}},\ \frac{u^{2}-1}{1+u^{2}}\right).$$
+   Due controlli che vanno sempre fatti e che qui tornano: l&rsquo;immagine dell&rsquo;inversa <b>sta davvero sulla circonferenza</b> (la somma dei quadrati fa $1$), e componendo carta e inversa si ritrova l&rsquo;identità. La stessa costruzione dal polo sud dà $\varphi_S$, e insieme coprono tutto.</p>`},
+   {label:'La transizione, che e il cuore di tutto il seguito', body:R`
+   <p>Sulla sovrapposizione delle due carte — la sfera meno i due poli — si può passare dall&rsquo;una all&rsquo;altra, e il conto dà
+   $$\varphi_S\circ\varphi_N^{-1}(u)=\frac1u.$$
+   <b>Questa funzione è liscia dove è definita</b> ($u\ne0$), e questo fatto — non la definizione di carta — è ciò che rende la sfera una varietà <i>differenziabile</i>. È il contenuto del prossimo movimento: le carte da sole danno solo la topologia, sono le <b>funzioni di transizione</b> a portare la struttura liscia.</p>`}
+  ]},
+  {t:'prosa', title:'Gli altri esempi che Diverio usa subito', tag:'regola operativa', html:R`
+  <ul>
+   <li><b>Un aperto di $\mathbb{R}^n$</b>: carta unica, l&rsquo;identità. Il caso banale, ma serve perché dice che tutto ciò che si sa dell&rsquo;analisi resta un caso particolare;</li>
+   <li><b>il grafico di una funzione continua</b> $f:\mathbb{R}^n\to\mathbb{R}^m$: la proiezione sulle prime $n$ coordinate è una carta globale. <b>Un grafico è sempre una varietà</b>, ed è il motivo per cui in gd-08 il criterio della funzione implicita sarà così potente: dice quando un insieme è <i>localmente</i> un grafico;</li>
+   <li><b>prodotti</b>: se $M$ e $N$ sono varietà, $M\times N$ lo è, di dimensione la somma. Da qui il <b>toro</b> $S^1\times S^1$, che è lo spazio delle configurazioni del pendolo doppio;</li>
+   <li><b>aperti di varietà</b>: un aperto di una varietà è una varietà della stessa dimensione. Sembra ovvio e serve continuamente, perché quasi tutte le costruzioni sono locali.</li>
+  </ul>`}
+]},
+
+/* ---------------- 03 · LE PROPRIETÀ GRATIS ---------------- */
+{ num:'03', title:'Quello che si ottiene gratis: le proprieta topologiche', meta:'palle coordinate numerabili · locale compattezza · esaustione in compatti · paracompattezza · e il gruppo fondamentale',
+  blocchi:[
+  {t:'prosa', title:'La lista, e perche e la parte utile del movimento', tag:'sintesi', html:R`
+  <p>Diverio dedica la lezione del 27/09 a dedurre dalle tre richieste una <b>lista di proprietà</b>. Non sono curiosità: sono gli ingredienti tecnici di tutte le dimostrazioni del corso, e conviene sapere a che cosa serve ciascuna.</p>
+  <ul>
+   <li><b>base numerabile di palle coordinate</b>: si può scegliere la base fatta di aperti che stanno dentro una carta e corrispondono a palle. <b>Serve ovunque</b>: permette di ridurre un problema globale a numerabili problemi locali in $\mathbb{R}^n$;</li>
+   <li><b>locale compattezza</b>: ogni punto ha un intorno con chiusura compatta. Viene dal fatto che in $\mathbb{R}^n$ le palle chiuse sono compatte, e passa alla varietà tramite le carte;</li>
+   <li><b>esaustione in compatti</b>: esiste una successione di compatti $K_1\subset K_2\subset\cdots$ con $M=\bigcup K_i$ e ciascuno contenuto nell&rsquo;interno del successivo. <b>È il modo di trattare varietà non compatte come limiti di pezzi compatti</b>, e si usa in gd-09 (Whitney) e gd-15 (campi completi);</li>
+   <li><b>paracompattezza</b>: ogni ricoprimento aperto ammette un raffinamento localmente finito. <b>È la chiave che apre le partizioni dell&rsquo;unità</b> (gd-05) — cioè metà del corso;</li>
+   <li><b>le componenti connesse sono aperte, connesse per archi, e in numero numerabile</b>: su una varietà connessione e connessione per archi <b>coincidono</b>, e non è vero in uno spazio topologico qualunque. Il motivo è locale: gli aperti euclidei sono connessi per archi.</li>
+  </ul>
+  <p><b>E una proprietà meno ovvia, che Diverio dimostra il 01/10</b>: il <b>gruppo fondamentale</b> $\pi_1(M)$ di una varietà topologica è <b>numerabile</b>. Serve la base numerabile: con un ricoprimento numerabile di palle si costruisce un insieme numerabile di generatori. È il primo punto in cui la topologia algebrica entra nel corso, e riappare in gd-11 con la fibrazione di Hopf.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la connessione implica la connessione per archi su una varietà, e non in generale?`,
+    a:R`Perché la proprietà è <b>locale</b>: ogni punto ha un intorno omeomorfo a una palla, che è connessa per archi. Fissato un punto, l&rsquo;insieme dei punti raggiungibili con un cammino è quindi <b>aperto</b>, e per lo stesso motivo lo è il suo complementare; se $M$ è connessa, uno dei due è vuoto. <b>L&rsquo;argomento «aperto e chiuso in un connesso»</b> è lo schema che tornerà molte volte nel corso, ed è la prima volta che compare.`},
+   {q:R`La retta con due origini è localmente euclidea. Che cosa va storto di preciso?`,
+    a:R`La successione $x_k=1/k$ converge <b>a entrambe</b> le origini: il limite non è unico. Quindi non ha senso parlare del limite di una curva, né della velocità in un punto, né dell&rsquo;unicità della soluzione di un&rsquo;equazione differenziale — <b>e il corso arriva proprio lì</b> (gd-13). Hausdorff non è un capriccio: è ciò che rende ben definite tutte le nozioni di convergenza su cui si costruisce il resto.`}
+  ]}
+]},
+
+/* ---------------- 04 · IL SENSO ---------------- */
+{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e dove la nozione di varieta riappare',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Una varietà topologica è <b>solo</b> uno spazio che localmente somiglia a $\mathbb{R}^n$: su di essa si può parlare di continuità, connessione, compattezza — e basta. <b>Non si può ancora derivare</b>, perché non c&rsquo;è nessun modo di dire che una funzione è liscia: dipenderebbe dalla carta.</p>
+  <p><b>A valle.</b> gd-02 aggiunge l&rsquo;unica cosa che manca, e lo fa chiedendo che le <b>funzioni di transizione</b> siano lisce. Da lì in poi ogni nozione del corso segue lo stesso schema: si definisce in carta, e si verifica che non dipenda dalla carta scelta.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>La varietà</b>: uno spazio con coordinate locali e nessun ambiente.`,
+   rotte:[
+    {dove:'Relativita<br>generale', txt:R`Lo spazio-tempo <b>è</b> una varietà quadridimensionale, e il principio di relatività generale è letteralmente la richiesta che le leggi non dipendano dalla carta scelta. <b>La covarianza di em-14 diventa qui un requisito di struttura.</b>`},
+    {dove:'Meccanica<br>analitica', txt:R`Lo spazio delle configurazioni di un sistema vincolato è una varietà: il pendolo doppio vive su un <b>toro</b> $S^1\times S^1$, il corpo rigido su $SO(3)$. Le coordinate lagrangiane <i>sono</i> carte, e il fatto che se ne possano scegliere diverse senza cambiare la fisica e' esattamente questo movimento.`},
+    {dove:'Meccanica<br>statistica', txt:R`Lo spazio delle fasi è una varietà (simplettica, gd-oltre il corso), e il teorema di Liouville è un&rsquo;affermazione su una forma di volume definita senza coordinate privilegiate.`},
+    {dove:'Teoria<br>dei campi', txt:R`I campi di gauge vivono su <b>fibrati</b> sopra lo spazio-tempo, e le funzioni di transizione di gd-02 diventano le trasformazioni di gauge. La struttura che qui serve a incollare carte, là <b>è</b> il contenuto fisico.`}
+   ],
+   domanda:R`Chiedere «localmente come $\mathbb{R}^n$» sembra una richiesta minima, e in effetti lo è: non fissa nessuna distanza, nessun angolo, nessuna curvatura. Eppure basta a dedurre paracompattezza, esaustioni, e la numerabilità del gruppo fondamentale. <b>Domanda da portare avanti per tutto il corso:</b> quanta geometria è già contenuta nella sola topologia, e da che punto in poi servono strutture aggiuntive? La risposta segna la differenza fra i teoremi che valgono su <i>ogni</i> varietà — Sard, Whitney, i flussi — e quelli che richiedono una metrica, che in questo corso non si incontrano affatto.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-01-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-01 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-01-varieta-topologiche.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

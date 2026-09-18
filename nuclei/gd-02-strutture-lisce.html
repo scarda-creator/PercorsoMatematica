@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-02 — Le strutture lisce: atlanti, compatibilità, e la struttura che le carte non danno</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-02 — Le strutture lisce: sono le funzioni di transizione a portare la derivabilità</b> · Diverio, lezioni 01/10 e 04/10</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-02: Le strutture lisce <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-02 — le strutture lisce
+identita:  sono le funzioni di transizione, non le carte, a portare la struttura differenziabile
+copre:     G.3, G.5, G.6
+serve:     gd-01 (gd-01-varieta-topologiche.html)
+apre:      gd-03 (gd-03-sottovarieta-grassmanniane.html)
+registro:  Lezioni del 01/10 e 04/10/2019, con la digressione sulle strutture esotiche
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"(2*u/(1+u**2))/(1+(u**2-1)/(1+u**2))","vale":"1/u",
+  "ipotesi":{"u":"positive"},
+  "dove":"01","appare":"\\frac1u"},
+
+ {"tipo":"uguale","sinistra":"diff(1/u,u)","vale":"-1/u**2",
+  "ipotesi":{"u":"positive"},
+  "dove":"01","appare":"-\\frac{1}{u^{2}}"},
+
+ {"tipo":"uguale","sinistra":"(x**3)**Rational(1,3)","vale":"x",
+  "ipotesi":{"x":"positive"},
+  "dove":"03","appare":"t\\mapsto t^{1/3}"},
+
+ {"tipo":"limite","espr":"diff(x**Rational(1,3),x)","var":"x","a":"0","vale":"oo",
+  "ipotesi":{"x":"positive"},
+  "dove":"03","appare":"<b>derivata esplode</b>"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\{x^{2}+y^{2}=z^{2}\\}",
+  "perche":"e' l'equazione che definisce il cono, cioe' il dato dell'esempio: non un risultato calcolato"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\varphi_\\beta\\circ\\varphi_\\alpha^{-1}",
+  "perche":"e' la notazione della funzione di transizione fra due carte: una definizione, non un valore"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\mathbb{RP}^{n}",
+  "perche":"e' la notazione dello spazio proiettivo reale, definito nella riga stessa: un nome, non un conto"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.3, G.5, G.6 · il movimento che rende possibile derivare',
+  blocchi:[
+  {t:'prosa', title:'Il problema, e la mossa', tag:'architettura', html:R`
+  <p>Su una varietà topologica (gd-01) <b>non si può derivare</b>, e la ragione è precisa. Per dire che una funzione $f:M\to\mathbb{R}$ è derivabile in un punto, si sarebbe tentati di leggerla in una carta e chiedere che $f\circ\varphi^{-1}$ sia derivabile. Ma <b>la risposta dipenderebbe dalla carta</b>: un&rsquo;altra carta potrebbe darne una diversa, e la nozione non sarebbe una proprietà di $f$.</p>
+  <p><b>La mossa è chiedere che le carte siano compatibili fra loro.</b> Se il passaggio da una carta all&rsquo;altra è liscio, allora leggere $f$ in una carta o nell&rsquo;altra dà lo stesso verdetto, per la regola della catena. <b>La struttura differenziabile non sta nelle carte: sta nelle funzioni di transizione</b>, ed è tutto il contenuto di questo movimento.</p>`}
+]},
+
+/* ---------------- 01 · ATLANTI E COMPATIBILITÀ ---------------- */
+{ num:'01', title:'Atlanti, compatibilita e atlante massimale', meta:'la condizione di compatibilita · perche e simmetrica · latlante massimale e perche si prende',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e come si verifica in pratica', tag:'grammatica', html:R`
+  <p>Due carte $(U_\alpha,\varphi_\alpha)$ e $(U_\beta,\varphi_\beta)$ si dicono <b>compatibili</b> se la <b>funzione di transizione</b>
+  $$\varphi_\beta\circ\varphi_\alpha^{-1}:\varphi_\alpha(U_\alpha\cap U_\beta)\to\varphi_\beta(U_\alpha\cap U_\beta)$$
+  è liscia ($C^\infty$). <b>È una funzione fra aperti di $\mathbb{R}^n$</b>: qui «liscia» ha il significato ordinario dell&rsquo;analisi, e questo è il punto in cui tutto il calcolo che già si conosce entra nella teoria.</p>
+  <p>La condizione è automaticamente <b>simmetrica</b>: l&rsquo;inversa della transizione è la transizione nell&rsquo;altro verso, ed è liscia perché un diffeomorfismo lo è in entrambi i versi. Se le carte non si sovrappongono, sono compatibili a vuoto.</p>
+  <p>Un <b>atlante</b> è una famiglia di carte che copre $M$ e a due a due compatibili. Una <b>varietà differenziabile</b> è una varietà topologica con un atlante — e da quel momento si può dire che cosa è liscio.</p>`},
+  {t:'reveal', title:'La sfera, verificata per intero', tag:'costruzione', steps:[
+   {label:'Le due carte e la transizione', body:R`
+   <p>Su $S^1$, le due proiezioni stereografiche dai poli. Sulla sovrapposizione (la circonferenza meno i due poli) la transizione è
+   $$\varphi_S\circ\varphi_N^{-1}(u)=\frac1u,$$
+   definita per $u\ne0$ e <b>liscia lì</b>: la sua derivata è $-\frac{1}{u^{2}}$, e tutte le successive esistono. <b>Le due carte sono compatibili, quindi $S^1$ è una varietà differenziabile.</b></p>
+   <p>Lo stesso conto in dimensione $n$ dà $\vec u\mapsto\vec u/|\vec u|^{2}$, l&rsquo;inversione rispetto alla sfera unitaria: liscia ovunque tranne l&rsquo;origine, che è proprio il punto escluso. <b>Il fatto che la singolarità cada esattamente dove la carta non è definita non è una fortuna</b>: è la traduzione del fatto che il polo mancante a una carta è coperto dall&rsquo;altra.</p>`},
+   {label:'Perche questo conto e il modello di tutti gli altri', body:R`
+   <p>Ogni volta che in questo corso si costruisce una varietà, i passi sono <b>sempre</b> questi tre: si esibiscono le carte, si calcola la transizione sulle sovrapposizioni, si verifica che sia liscia. Lo si farà per lo spazio proiettivo, per la grassmanniana (gd-03), per il fibrato tangente (gd-07). <b>Chi ha fatto una volta il conto sulla sfera, li ha fatti tutti</b> — cambia solo l&rsquo;algebra della transizione.</p>`}
+  ]},
+  {t:'prosa', title:'Latlante massimale, e perche si prende quello', tag:'idea', html:R`
+  <p>Due atlanti diversi possono dare la <b>stessa</b> nozione di funzione liscia — basta che l&rsquo;unione sia ancora un atlante. Per non dover scegliere un rappresentante, si prende l&rsquo;<b>atlante massimale</b>: l&rsquo;insieme di <i>tutte</i> le carte compatibili con quelle date. Ogni atlante ne determina uno solo, e <b>la struttura liscia è per definizione quello</b>.</p>
+  <p><b>La ragione è la stessa di ogni «massimale» in matematica</b>: si vuole che l&rsquo;oggetto non dipenda da una scelta arbitraria. In pratica non si lavora mai con l&rsquo;atlante massimale — si esibiscono due o tre carte — ma sapere che è lui la struttura evita di credere che la sfera con le carte stereografiche sia diversa dalla sfera con le carte per proiezione sui piani coordinati. <b>Sono la stessa varietà</b>, e la prova è che le loro carte sono compatibili fra loro.</p>`}
+]},
+
+/* ---------------- 02 · GLI ESEMPI ---------------- */
+{ num:'02', title:'Gli esempi che Diverio costruisce, e uno che non funziona', meta:'spazi vettoriali e matrici · sfere · spazi proiettivi · gruppi di Lie · il cono quadratico',
+  blocchi:[
+  {t:'prosa', title:'La famiglia di esempi', tag:'regola operativa', html:R`
+  <ul>
+   <li><b>spazi vettoriali reali di dimensione finita</b>, e tutto ciò che ne discende: le matrici $M_{n}(\mathbb{R})\cong\mathbb{R}^{n^2}$, le applicazioni lineari, e — aperto dentro le matrici — il <b>gruppo lineare generale</b> $GL(n,\mathbb{R})$, che è un aperto perché il determinante è continuo e $GL$ è la controimmagine di $\mathbb{R}\setminus\{0\}$. <b>Una varietà di dimensione $n^2$ che è anche un gruppo</b>: il primo esempio di gruppo di Lie (gd-14);</li>
+   <li><b>grafici di funzioni lisce</b>: carta globale, struttura ovvia;</li>
+   <li><b>sfere</b>: le stereografiche, come sopra;</li>
+   <li><b>spazi proiettivi</b> $\mathbb{RP}^{n}$: le rette per l&rsquo;origine di $\mathbb{R}^{n+1}$. Le carte sono gli $n+1$ aperti $U_i=\{x_i\ne0\}$ con le coordinate affini $x_j/x_i$, e le transizioni sono <b>funzioni razionali</b> con denominatore non nullo dove servono: lisce. <b>$\mathbb{RP}^1$ è omeomorfo a $S^1$; $\mathbb{RP}^2$ non è immergibile in $\mathbb{R}^3$</b>, ed è il primo esempio di varietà che si costruisce senza poterla disegnare — cioè la ragione per cui l&rsquo;approccio astratto serve.</li>
+  </ul>`},
+  {t:'prosa', title:'Il cono quadratico: quando non e nemmeno una varieta topologica', tag:'first principles', html:R`
+  <p>L&rsquo;insieme $\{x^{2}+y^{2}=z^{2}\}$ — il doppio cono — <b>non è una varietà topologica</b>, e il punto singolare è il vertice. L&rsquo;argomento non è «si vede che ha una punta»: si toglie il vertice e si guarda cosa resta. Un intorno del vertice privato del vertice ha <b>due</b> componenti connesse (le due falde), mentre un intorno di un punto di $\mathbb{R}^2$ privato del punto è connesso. <b>Un omeomorfismo conserva il numero di componenti connesse</b>, quindi non può esistere.</p>
+  <div class="note"><b>È il primo esempio di come si dimostra che qualcosa NON è una varietà</b>, ed è una tecnica che vale la pena conservare: si cerca un <i>invariante topologico locale</i> che distingue il punto sospetto da un punto di $\mathbb{R}^n$. La connessione dell&rsquo;intorno bucato è il più semplice; in casi più difficili si usano i gruppi di omologia locale. <b>Chiedere «è liscio?» prima di aver verificato «è una varietà topologica?» è l&rsquo;errore da non fare.</b></div>`}
+]},
+
+/* ---------------- 03 · STRUTTURE ESOTICHE ---------------- */
+{ num:'03', title:'Strutture diverse sullo stesso spazio, e le esotiche', meta:'la struttura cubica su R · perche non e una struttura DIVERSA · e il caso di R^4',
+  blocchi:[
+  {t:'reveal', title:'Lesempio che sembra un controesempio e non lo e', tag:'idea', steps:[
+   {label:'La struttura cubica', body:R`
+   <p>Su $\mathbb{R}$ si prenda come unica carta $\varphi(t)=t^{3}$, invece dell&rsquo;identità. È un omeomorfismo, quindi un atlante legittimo, e definisce una struttura liscia — chiamiamola <b>struttura cubica</b>.</p>
+   <p><b>È diversa da quella standard</b>, nel senso preciso che i due atlanti <i>non</i> sono compatibili: la transizione fra la carta $\varphi(t)=t^{3}$ e l&rsquo;identità è $t\mapsto t^{1/3}$, la cui <b>derivata esplode</b> in $0$. Quindi l&rsquo;identità di $\mathbb{R}$, vista come mappa fra le due strutture, <b>non è liscia</b>.</p>`},
+   {label:'Ma sono diffeomorfe, e questo cambia tutto', body:R`
+   <p>Eppure le due varietà <b>sono diffeomorfe</b>: basta usare la mappa $t\mapsto t^{1/3}$ invece dell&rsquo;identità, e quella è liscia <i>come mappa fra le due strutture</i> — perché letta nelle rispettive carte diventa l&rsquo;identità. <b>La domanda giusta non è «l&rsquo;identità è liscia?» ma «esiste un diffeomorfismo?»</b>, e qui la risposta è sì.</p>
+   <p>La morale vale per tutto il corso: <b>due strutture lisce diverse sullo stesso spazio topologico possono dare varietà indistinguibili</b>. Contare le strutture ha senso solo <i>a meno di diffeomorfismo</i>.</p>`},
+   {label:'Le esotiche, dove la risposta e no', body:R`
+   <p>La domanda diventa seria quando la risposta è negativa: esistono strutture lisce su uno stesso spazio topologico <b>non</b> diffeomorfe fra loro? Sì, e sono le <b>strutture esotiche</b>. Milnor (1956) ne trovò sette su $S^{7}$; su $S^{n}$ per $n\le6$ la struttura è unica.</p>
+   <p><b>Il caso più sorprendente è $\mathbb{R}^{4}$</b>: su $\mathbb{R}^{n}$ la struttura liscia è unica per ogni $n\ne4$, mentre su $\mathbb{R}^{4}$ ce ne sono <b>infinite non equivalenti</b>. <i>Esattamente</i> nella dimensione dello spazio-tempo, e nessuno sa se questo significhi qualcosa. Diverio la cita come digressione e non la dimostra — la dimostrazione usa la teoria di gauge, cioè fisica applicata alla matematica.</p>`}
+  ]}
+]},
+
+/* ---------------- 04 · IL SENSO ---------------- */
+{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e il metodo che si ripetera per tutto il corso',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto, ed è il metodo di tutto il corso.</b> Ogni nozione differenziale su una varietà si definisce <b>in carta</b> e si dimostra <b>indipendente dalla carta</b>. Il secondo passo usa sempre la regola della catena applicata alla funzione di transizione. <b>Quando in una dimostrazione compare uno jacobiano di transizione, quello è il passo che sta facendo esattamente questo.</b></p>
+  <p><b>A valle.</b> gd-03 costruisce esempi difficili con questo metodo (sottovarietà, grassmanniane); gd-04 definisce le mappe lisce fra varietà; gd-06 il differenziale. Il cociclo jacobiano di gd-07, che regge il fibrato tangente, è la funzione di transizione derivata.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento',
+   oggetto:R`<b>La compatibilità delle carte</b>: la struttura sta nel modo in cui i pezzi si incollano, non nei pezzi.`,
+   rotte:[
+    {dove:'Teoria<br>dei campi', txt:R`Un <b>fibrato</b> è definito dai suoi dati di incollamento — le funzioni di transizione a valori in un gruppo — e in fisica quelle <i>sono</i> le trasformazioni di gauge. La struttura di gd-02 diventa il contenuto della teoria.`},
+    {dove:'Relativita<br>generale', txt:R`I cambi di carta sono i <b>cambi di coordinate</b>, e la richiesta che la fisica non dipenda dalla carta è il principio di covarianza generale. Ogni tensore è definito da come si trasforma sotto transizione.`},
+    {dove:'Meccanica<br>analitica', txt:R`Le trasformazioni canoniche sono cambi di carta che preservano una struttura in più (la forma simplettica): lo stesso schema, con una condizione aggiuntiva sulle transizioni.`},
+    {dove:'Topologia<br>differenziale', txt:R`Le strutture esotiche sono l&rsquo;oggetto di studio di un intero settore, e il caso di $\mathbb{R}^4$ e' stato risolto con strumenti nati in fisica — le equazioni di Yang-Mills e di Seiberg-Witten.`}
+   ],
+   domanda:R`La struttura liscia si ottiene chiedendo che le transizioni siano $C^\infty$. Ma si potrebbe chiedere di meno ($C^k$) o di più (analitiche, o olomorfe se le carte sono complesse). <b>Domanda da portare avanti:</b> che cosa cambia? La risposta è sorprendente: fra $C^1$ e $C^\infty$ <b>non cambia niente di sostanziale</b> (ogni struttura $C^1$ contiene una $C^\infty$ compatibile, ed è essenzialmente unica), mentre il salto a <b>olomorfo</b> cambia tutto — le varietà complesse sono molto più rigide, e su una superficie compatta esistono famiglie continue di strutture complesse non equivalenti. È il campo in cui lavora Diverio.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-02-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-02 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-02-strutture-lisce.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

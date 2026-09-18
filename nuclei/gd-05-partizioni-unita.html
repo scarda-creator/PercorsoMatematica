@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-05 — Le partizioni dell'unità: da locale a globale, e la funzione che rompe l'analiticità</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-05 — Le partizioni dell'unità: lo strumento che incolla il locale nel globale</b> · Diverio, lezioni 15/10 e 18/10</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-05: Le partizioni dell'unità <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-05 — le partizioni dell'unità
+identita:  lo strumento che trasforma costruzioni locali in costruzioni globali
+copre:     G.11, G.12
+serve:     gd-04 (gd-04-applicazioni-lisce.html)
+apre:      gd-06 (gd-06-spazio-tangente.html)
+registro:  Lezioni del 15/10 e 18/10/2019 — cutoff, bump, e le tre applicazioni
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"limite","espr":"diff(exp(-1/t),t)","var":"t","a":"0","vale":"0",
+  "ipotesi":{"t":"positive"},
+  "dove":"01","appare":"tutte le derivate tendono a zero"},
+
+ {"tipo":"limite","espr":"diff(exp(-1/t),t,2)","var":"t","a":"0","vale":"0",
+  "ipotesi":{"t":"positive"},
+  "dove":"01","appare":"anche la seconda"},
+
+ {"tipo":"limite","espr":"diff(exp(-1/t),t,3)","var":"t","a":"0","vale":"0",
+  "ipotesi":{"t":"positive"},
+  "dove":"01","appare":"e la terza"},
+
+ {"tipo":"uguale","sinistra":"(exp(-1/t)/(exp(-1/t)+exp(-1/(1-t)))).subs(t,Rational(1,2))",
+  "vale":"Rational(1,2)",
+  "ipotesi":{"t":"positive"},
+  "dove":"01","appare":"<b>vale $\\tfrac12$ a metà strada</b>"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\sum_\\alpha\\rho_\\alpha\\equiv1",
+  "perche":"e' la condizione che definisce una partizione dell'unita': una definizione, non un conto"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\operatorname{supp}f",
+  "perche":"e' la notazione del supporto, definito nella riga stessa"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.11, G.12 · lo strumento su cui poggia meta del corso',
+  blocchi:[
+  {t:'prosa', title:'Il problema che risolve', tag:'architettura', html:R`
+  <p>Su una varietà quasi tutto si sa fare <b>in carta</b>, cioè localmente. Ma quasi tutto ciò che interessa è <b>globale</b>: una metrica su tutta la varietà, un campo vettoriale definito ovunque, l&rsquo;integrale su tutta $M$, l&rsquo;estensione di una funzione definita su un chiuso.</p>
+  <p>Il problema di incollare i pezzi locali non è banale, perché due carte si sovrappongono e le costruzioni non coincidono sulla sovrapposizione. <b>La partizione dell&rsquo;unità è il modo di fare una media pesata</b>: si assegna a ogni carta un peso liscio, i pesi sommano a $1$ ovunque, e la somma pesata delle costruzioni locali è una costruzione globale.</p>
+  <p><b>Il prezzo è che funziona solo in categoria liscia.</b> Serve una funzione $C^\infty$ che sia identicamente $1$ in una regione e identicamente $0$ fuori da un&rsquo;altra, e questo <b>nessuna funzione analitica può farlo</b>: una funzione analitica nulla su un aperto è nulla ovunque (principio di identità — lo stesso di Metodi, me-01b). Il movimento comincia costruendo quella funzione.</p>`}
+]},
+
+/* ---------------- 01 · LA FUNZIONE CHE ROMPE L'ANALITICITÀ ---------------- */
+{ num:'01', title:'La funzione che rompe lanaliticita: cutoff e bump', meta:'e^{-1/t} · perche tutte le derivate si annullano · il bump a supporto compatto',
+  blocchi:[
+  {t:'reveal', title:'La costruzione, in tre passi', tag:'costruzione', steps:[
+   {label:'Il mattone', body:R`
+   <p>$$f(t)=\begin{cases}e^{-1/t}&t>0\\ 0&t\le0\end{cases}$$
+   è <b>$C^\infty$ su tutto $\mathbb{R}$</b>. In $t=0$ va verificato: la derivata $k$-esima per $t>0$ è $e^{-1/t}$ moltiplicato per un polinomio in $1/t$, e <b>tutte le derivate tendono a zero</b> per $t\to0^+$ — la prima, <b>anche la seconda</b>, <b>e la terza</b>, e per induzione tutte, perché l&rsquo;esponenziale schiaccia qualunque potenza.</p>
+   <p><b>Ma la serie di Taylor in $0$ è identicamente nulla</b>, mentre la funzione non lo è per $t>0$: $f$ è liscia e <b>non analitica</b>. È il controesempio classico, ed è esattamente ciò che serve.</p>`},
+   {label:'La funzione di transizione fra 0 e 1', body:R`
+   <p>Con due copie di $f$ si costruisce
+   $$g(t)=\frac{f(t)}{f(t)+f(1-t)},$$
+   che è liscia, vale <b>$0$ per $t\le0$</b>, <b>$1$ per $t\ge1$</b>, e sale monotona in mezzo — <b>vale $\tfrac12$ a metà strada</b>. Il denominatore non si annulla mai, perché per ogni $t$ almeno uno dei due addendi è positivo.</p>`},
+   {label:'Il bump', body:R`
+   <p>Componendo $g$ con una funzione della distanza si ottiene una <b>bump function</b>: liscia, identicamente $1$ su una palla $B_r$, identicamente $0$ fuori da $B_R$ con $R>r$, e compresa fra $0$ e $1$ in mezzo. Il suo <b>supporto</b> — la chiusura dell&rsquo;insieme dove non si annulla, $\operatorname{supp}f$ — è compatto e contenuto in $B_R$.</p>
+   <p><b>Questa è la funzione che fa tutto</b>: su una varietà si trasporta in carta, e dà una funzione liscia globale che vive dentro un singolo aperto coordinato. Da qui in poi si può lavorare in una carta e poi «spegnere» la costruzione prima del bordo.</p>`}
+  ]},
+  {t:'plot', title:'Il mattone e il bump',
+   intro:R`A sinistra $f(t)=e^{-1/t}$ per $t>0$ (zero altrove): piattissima in $0$, eppure positiva subito dopo. A destra la bump costruita con due copie di $f$.`,
+   plots:[
+    {kind:'func2d', xr:[-1,2], yr:[-0.05,1.05], height:300,
+     title:'e^{-1/t}: tutte le derivate nulle in 0, e la serie di Taylor non la vede',
+     xlabel:'t', ylabel:'f(t)',
+     curves:[{f:'x>0 ? exp(-1/x) : 0', col:'#5eead4', width:2.6, label:'f(t)'},
+             {f:'0', col:'#4d5a6b', width:1.4, dash:true, label:'la sua serie di Taylor in 0'}],
+     segs:[{x1:0, y1:-0.05, x2:0, y2:1.05, col:'#ff6b6b', dash:true, width:1.3}]},
+    {kind:'func2d', xr:[-2.5,2.5], yr:[-0.05,1.15], height:300,
+     title:'la bump: identicamente 1 al centro, identicamente 0 fuori, liscia ovunque',
+     xlabel:'x', ylabel:'bump(x)',
+     curves:[{f:'(function(u){ if(u<=0) return 1; if(u>=1) return 0; var a=exp(-1/u), b=exp(-1/(1-u)); return b/(a+b); })((abs(x)-0.8)/0.9)', col:'#d8a13a', width:2.6, label:'bump'}],
+     segs:[{x1:-0.8, y1:0, x2:0.8, y2:0, col:'#5eead4', width:3, label:'qui vale 1', lx:-0.45, ly:0.08},
+           {x1:1.7, y1:0, x2:2.5, y2:0, col:'#b98cff', width:3, label:'qui vale 0', lx:1.75, ly:0.08},
+           {x1:-2.5, y1:0, x2:-1.7, y2:0, col:'#b98cff', width:3}]}
+   ],
+   leggi:R`<b>A sinistra sta tutto il punto del movimento.</b> La curva verde e quella grigia — la sua serie di Taylor in $0$, che è identicamente nulla — coincidono per $t\le0$ e si separano subito dopo. Una funzione analitica non può comportarsi così: se coincide con zero su un intervallo, è zero ovunque. <b>La classe $C^\infty$ è strettamente più grande di quella analitica, e tutta la geometria differenziale vive in quello scarto.</b><br><br>
+   <b>A destra</b> il risultato: una funzione perfettamente liscia che vale <i>esattamente</i> 1 in una regione e <i>esattamente</i> 0 in un&rsquo;altra, con un raccordo morbido. Non è un&rsquo;approssimazione — il tratto piatto è piatto davvero. In geometria riemanniana e olomorfa questa costruzione <b>non è disponibile</b>, ed è la ragione tecnica per cui quelle teorie sono molto più rigide.`}
+]},
+
+/* ---------------- 02 · LA PARTIZIONE ---------------- */
+{ num:'02', title:'La partizione dellunita, e il teorema di esistenza', meta:'la definizione · subordinata a un ricoprimento · dove entra la paracompattezza',
+  blocchi:[
+  {t:'prosa', title:'Definizione e teorema', tag:'grammatica', html:R`
+  <p>Dato un ricoprimento aperto $\{U_\alpha\}$ di $M$, una <b>partizione dell&rsquo;unità subordinata</b> è una famiglia di funzioni lisce $\rho_\alpha:M\to[0,1]$ tali che:</p>
+  <ul>
+   <li>$\operatorname{supp}\rho_\alpha\subseteq U_\alpha$ — ciascuna vive dentro un solo aperto del ricoprimento;</li>
+   <li>la famiglia dei supporti è <b>localmente finita</b>: ogni punto ha un intorno che incontra solo un numero finito di supporti (così la somma è ben definita);</li>
+   <li>$\sum_\alpha\rho_\alpha\equiv1$ su tutta $M$.</li>
+  </ul>
+  <p><b>Teorema (e vale per ogni varietà liscia):</b> per ogni ricoprimento aperto esiste una partizione dell&rsquo;unità subordinata. <b>La dimostrazione usa esattamente le proprietà elencate in gd-01</b>: la base numerabile di palle coordinate per costruire un raffinamento numerabile, la locale compattezza e l&rsquo;esaustione in compatti per renderlo localmente finito, e le bump della tappa precedente per fabbricare le funzioni. Poi si normalizza dividendo per la somma — che è finita in ogni punto e positiva.</p>
+  <div class="note"><b>Ecco perché gd-01 dedicava una tappa intera a proprietà che sembravano di servizio.</b> Paracompattezza ed esaustione in compatti non erano curiosità topologiche: sono gli ingredienti di questo teorema, e questo teorema è ciò che rende costruibile quasi tutto il resto. <b>Quando in un corso una definizione chiede più di quanto sembri necessario, di solito c&rsquo;è un teorema di esistenza a valle che la consuma tutta.</b></div>`}
+]},
+
+/* ---------------- 03 · LE TRE APPLICAZIONI ---------------- */
+{ num:'03', title:'Le tre applicazioni che Diverio usa subito', meta:'funzioni test · estensione da un chiuso · funzione di esaustione',
+  blocchi:[
+  {t:'prosa', title:'A che cosa servono, in concreto', tag:'regola operativa', html:R`
+  <ol>
+   <li><b>Funzioni test su misura.</b> Dati un chiuso $C$ e un aperto $U\supseteq C$, esiste $\psi$ liscia che vale <b>$1$ su $C$</b> e ha supporto dentro $U$. È la versione globale della bump, e serve ogni volta che si vuole «localizzare» un problema senza rovinarlo ai bordi.</li>
+   <li><b>Estensione da un chiuso.</b> Una funzione liscia definita su un chiuso $C$ (cioè restrizione di una liscia su un intorno) si estende a una funzione liscia su <b>tutta</b> $M$. Si copre $C$ con carte, si estende in ciascuna, e si incollano le estensioni con la partizione. <b>È il teorema che permette di costruire oggetti globali partendo da dati parziali</b>, e in gd-09 servirà per gli intorni tubolari.</li>
+   <li><b>Funzione di esaustione liscia e positiva.</b> Esiste $h:M\to\mathbb{R}$ liscia, positiva, <b>propria</b> — cioè con $h^{-1}([0,c])$ compatto per ogni $c$. Serve a trattare varietà non compatte «un pezzo alla volta», ed è l&rsquo;ingrediente tecnico con cui in gd-15 si dimostra che i campi a supporto compatto sono completi.</li>
+  </ol>
+  <p><b>E l&rsquo;applicazione che questo corso non fa ma che è la più citata altrove</b>: ogni varietà liscia ammette una <b>metrica riemanniana</b>. Si prende in ogni carta il prodotto scalare euclideo e si incollano con la partizione; la somma di prodotti scalari con pesi positivi è ancora un prodotto scalare. <b>La positività è ciò che rende lecita l&rsquo;operazione</b>, e infatti non funziona per una metrica lorentziana: non tutte le varietà ne ammettono una, ed è una condizione topologica non banale — con conseguenze in relatività generale.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché non si può costruire una partizione dell'unità con funzioni analitiche?`,
+    a:R`Perché una funzione analitica nulla su un aperto è nulla su tutta la componente connessa (principio di identità). Le $\rho_\alpha$ devono annullarsi fuori dal loro aperto e non essere identicamente nulle: <b>impossibile in categoria analitica</b>. È lo stesso principio che in Metodi (me-01b) rendeva unica la continuazione analitica: <b>la stessa rigidità che là è una risorsa, qui è un ostacolo</b>, ed è il motivo per cui la geometria analitica complessa usa tecniche completamente diverse (fasci, coomologia).`},
+   {q:R`Dove si usa esattamente la base numerabile nella dimostrazione del teorema?`,
+    a:R`Per estrarre dal ricoprimento dato un raffinamento <b>numerabile</b> fatto di palle coordinate, che poi si rende localmente finito usando l&rsquo;esaustione in compatti. Senza numerabilità la somma $\sum\rho_\alpha$ potrebbe non avere senso. <b>È il punto in cui un&rsquo;ipotesi apparentemente astratta diventa un passaggio concreto di una dimostrazione</b> — e all&rsquo;orale è una domanda tipica.`}
+  ]}
+]},
+
+/* ---------------- 04 · IL SENSO ---------------- */
+{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e perche la liscezza e diversa dallanaliticita',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> La geometria differenziale è <b>flessibile</b>: si possono modificare oggetti su una regione senza toccarli altrove. Questa libertà non è gratuita — viene dall&rsquo;esistenza di funzioni lisce non analitiche — ed è ciò che distingue questo corso dalla geometria complessa e da quella algebrica, dove le funzioni sono rigide e i teoremi hanno un sapore opposto.</p>
+  <p><b>A valle.</b> gd-06 definisce lo spazio tangente usando le funzioni lisce costruite qui (le derivazioni hanno bisogno di germi, e i germi hanno bisogno di bump per essere manipolati); gd-07 incolla i campi vettoriali; gd-09 costruisce gli intorni tubolari.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento',
+   oggetto:R`<b>La partizione dell&rsquo;unità</b>: pesi lisci che sommano a uno, e trasformano il locale in globale.`,
+   rotte:[
+    {dove:'Fisica<br>matematica', txt:R`Le <b>funzioni test</b> a supporto compatto sono lo spazio su cui si definiscono le distribuzioni (Metodi, me-09): la delta di Dirac è un funzionale su funzioni costruite esattamente come quelle di questa tappa. <b>Senza $e^{-1/t}$ non ci sarebbe la teoria delle distribuzioni.</b>`},
+    {dove:'Relativita<br>generale', txt:R`Ogni varietà ammette una metrica riemanniana grazie a questa costruzione, ma <b>non ogni varietà ammette una metrica lorentziana</b>: serve un campo vettoriale mai nullo, e la palla pelosa (gd-07) dice che su $S^2$ non ne esistono. <b>La topologia vincola quali spazi-tempo sono possibili.</b>`},
+    {dove:'Analisi<br>numerica', txt:R`I metodi a <b>elementi finiti</b> e le <b>partizioni dell&rsquo;unità</b> numeriche usano letteralmente questa idea: funzioni di forma locali, pesate, che sommano a uno. La geometria astratta e il calcolo pratico condividono la stessa struttura.`},
+    {dove:'Teoria<br>dei fasci', txt:R`L'esistenza delle partizioni dell'unita' equivale al fatto che i fasci di funzioni lisce siano <b>aciclici</b>: e' la ragione per cui in geometria differenziale la coomologia si calcola con de Rham e non serve tutto l'apparato che occorre nel caso olomorfo.`}
+   ],
+   domanda:R`La funzione $e^{-1/t}$ è liscia ma la sua serie di Taylor non la rappresenta: fra la funzione e tutte le sue derivate in un punto c&rsquo;è uno scarto invisibile al calcolo differenziale. <b>Domanda che porti avanti:</b> quanto è grande quello scarto? La risposta è sorprendente — per il teorema di Borel, <b>ogni</b> successione di numeri può essere la successione dei coefficienti di Taylor di una funzione liscia. Cioè: conoscere <i>tutte</i> le derivate in un punto non dice <b>niente</b> sulla funzione altrove. In fisica questo è il motivo per cui le serie perturbative possono divergere pur descrivendo bene una teoria, e perché esistono effetti «non perturbativi» — come il tunneling — <b>invisibili a ogni ordine dello sviluppo</b>.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-05-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-05 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-05-partizioni-unita.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

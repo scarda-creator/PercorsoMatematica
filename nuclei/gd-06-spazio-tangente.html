@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-06 — Lo spazio tangente e il differenziale: tre definizioni, un solo oggetto</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-06 — Lo spazio tangente: velocità, derivazioni, e il differenziale come jacobiana</b> · Diverio, lezioni 18/10 e 22/10</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-06: Lo spazio tangente e il differenziale <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-06 — lo spazio tangente e il differenziale
+identita:  che cos'è un vettore quando non c'è uno spazio ambiente in cui disegnarlo
+copre:     G.13, R.5
+serve:     gd-05 (gd-05-partizioni-unita.html)
+apre:      gd-07 (gd-07-fibrato-tangente.html), gd-08 (gd-08-valori-regolari.html)
+registro:  Lezioni del 18/10 e 22/10/2019 — tangente come velocità di curve, poi come derivazioni
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"Matrix([r*cos(th),r*sin(th)]).jacobian([r,th]).det()","vale":"r",
+  "ipotesi":{"r":"positive","th":"real"},
+  "dove":"03","appare":"vale r"},
+
+ {"tipo":"uguale","sinistra":"Matrix([r*cos(th),r*sin(th)]).jacobian([r,th])[0,1]","vale":"-r*sin(th)",
+  "ipotesi":{"r":"positive","th":"real"},
+  "dove":"03","appare":"-r\\sin\\theta"},
+
+ {"tipo":"uguale","sinistra":"diff(sin(2*t),t)**2+diff(sin(t),t)**2","vale":"4*cos(2*t)**2+cos(t)**2",
+  "ipotesi":{"t":"real"},
+  "dove":"04","appare":"(2\\cos 2t,\\ \\cos t)"},
+
+ {"tipo":"simbolico","dove":"01","appare":"v(f)=v(\\psi)f(p)+\\psi(p)v(f)=0",
+  "perche":"e' l'applicazione della regola di Leibniz a una funzione nulla vicino a p: un passaggio simbolico su funzioni non specificate, non un valore numerico"},
+
+ {"tipo":"simbolico","dove":"01","appare":"v(fg)=v(f)\\,g(p)+f(p)\\,v(g)",
+  "perche":"e' la regola di Leibniz che DEFINISCE una derivazione: un assioma, non un conto"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\left.\\frac{\\partial}{\\partial x^{i}}\\right|_p",
+  "perche":"e' la notazione dei vettori della base coordinata dello spazio tangente: una definizione"},
+
+ {"tipo":"simbolico","dove":"03","appare":"dF_p",
+  "perche":"e' la notazione del differenziale in un punto, definito nella tappa stessa"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.13, R.5 · il cuore del corso',
+  blocchi:[
+  {t:'prosa', title:'Il problema, detto bene', tag:'architettura', html:R`
+  <p>Su una superficie dentro $\mathbb{R}^3$ un vettore tangente è una freccia: sta nello spazio ambiente ed è tangente alla superficie. <b>Su una varietà astratta quella descrizione non è disponibile</b>: non c&rsquo;è ambiente, e una freccia «che esce» non ha dove andare.</p>
+  <p>Eppure il vettore tangente serve: è la velocità di una curva, è la direzione lungo cui derivare, è il dato iniziale di un&rsquo;equazione differenziale. <b>Bisogna definirlo usando solo ciò che c&rsquo;è sulla varietà</b> — cioè le funzioni lisce e le curve.</p>
+  <p>Diverio dà due definizioni e mostra che coincidono. <b>Non è pedanteria</b>: la prima è quella che si usa per <i>capire</i>, la seconda quella che si usa per <i>dimostrare</i>, e la terza (in coordinate) quella che si usa per <i>calcolare</i>. Saper passare dall&rsquo;una all&rsquo;altra è il mestiere di questo corso.</p>`}
+]},
+
+/* ---------------- 01 · LE DUE DEFINIZIONI ---------------- */
+{ num:'01', title:'Velocita di curve, e derivazioni', meta:'la classe di equivalenza di curve · la regola di Leibniz · e perche coincidono',
+  blocchi:[
+  {t:'reveal', title:'Le due strade', tag:'costruzione', steps:[
+   {label:'Prima: le velocita delle curve', body:R`
+   <p>Si considerano le curve lisce $\gamma:(-\epsilon,\epsilon)\to M$ con $\gamma(0)=p$, e si dicono <b>equivalenti</b> due curve che, lette in una carta, hanno la stessa derivata in $0$. <b>Un vettore tangente è una classe di equivalenza</b>, e $T_pM$ è l&rsquo;insieme delle classi.</p>
+   <p>La condizione non dipende dalla carta: cambiando carta si compone con una transizione, e la regola della catena moltiplica entrambe le derivate per la stessa jacobiana. <b>È il solito schema di gd-04, e qui è il passaggio che rende la definizione lecita.</b></p>
+   <p><b>Il vantaggio</b>: è intuitiva, dice che un vettore è «una direzione con una velocità». <b>Lo svantaggio</b>: che $T_pM$ sia uno spazio <i>vettoriale</i> non si vede — sommare due classi di curve non ha senso ovvio.</p>`},
+   {label:'Seconda: le derivazioni', body:R`
+   <p>Una <b>derivazione</b> in $p$ è un&rsquo;applicazione lineare $v$ dalle funzioni lisce ai numeri che soddisfa la regola di Leibniz:
+   $$v(fg)=v(f)\,g(p)+f(p)\,v(g).$$
+   <b>È la caratterizzazione algebrica di «derivata direzionale»</b>: lineare e con la regola del prodotto. Si definisce $T_pM$ come lo spazio delle derivazioni.</p>
+   <p><b>Il vantaggio è immediato</b>: le derivazioni si sommano e si moltiplicano per scalari, quindi $T_pM$ <b>è</b> uno spazio vettoriale senza bisogno di dimostrarlo. <b>Lo svantaggio</b>: sembra non avere niente a che fare con le frecce.</p>`},
+   {label:'Perche sono la stessa cosa', body:R`
+   <p>A una curva $\gamma$ si associa la derivazione $f\mapsto\frac{d}{dt}\big|_0 f(\gamma(t))$: derivare $f$ lungo la curva. <b>La corrispondenza è biiettiva</b>, e la dimostrazione non banale è la suriettività: ogni derivazione viene da una curva. Si fa in carta, mostrando che una derivazione è determinata dai suoi valori sulle funzioni coordinate.</p>
+   <p><b>Un dettaglio tecnico che vale la pena notare</b>: la dimostrazione usa che una funzione liscia si scrive $f(x)=f(p)+\sum(x^i-p^i)g_i(x)$ con $g_i$ lisce (lemma di Hadamard), e per applicarla globalmente servono le <b>bump function di gd-05</b>. È il primo posto in cui la tappa precedente viene consumata davvero.</p>`}
+  ]},
+  {t:'prosa', title:'Perche i germi', tag:'idea', html:R`
+  <p>Diverio lavora con i <b>germi</b>: due funzioni lisce definiscono lo stesso germe in $p$ se coincidono su un intorno di $p$. La ragione è che una derivazione è un oggetto <b>locale</b> — dipende solo dal comportamento di $f$ vicino a $p$ — e i germi sono il modo di dirlo senza giri di parole.</p>
+  <p><b>Che sia davvero locale va dimostrato</b>, e la prova è graziosa: se $f\equiv0$ su un intorno $U$ di $p$, si prende una bump $\psi$ che vale $1$ fuori da $U$ e $0$ vicino a $p$; allora $f=\psi f$ ovunque, e per Leibniz $v(f)=v(\psi)f(p)+\psi(p)v(f)=0$. <b>Le bump servono anche qui</b>, e questo è il motivo per cui gd-05 viene prima.</p>`}
+]},
+
+/* ---------------- 02 · LA BASE COORDINATA ---------------- */
+{ num:'02', title:'La base coordinata, e la dimensione', meta:'i vettori d/dx^i · dim T_pM = dim M · e come cambiano le componenti',
+  blocchi:[
+  {t:'prosa', title:'La base, e il cambio di base', tag:'grammatica', html:R`
+  <p>In una carta $(U,\varphi)$ con coordinate $x^1,\dots,x^n$ si definiscono le derivazioni
+  $$\left.\frac{\partial}{\partial x^{i}}\right|_p:\ f\ \longmapsto\ \frac{\partial(f\circ\varphi^{-1})}{\partial x^{i}}(\varphi(p)),$$
+  cioè «derivo rispetto alla $i$-esima coordinata, leggendo $f$ in carta». <b>Sono $n$ derivazioni indipendenti e generano tutto</b>: quindi $\dim T_pM=\dim M$, e ogni vettore si scrive $v=\sum v^{i}\frac{\partial}{\partial x^{i}}$.</p>
+  <p><b>Cambiando carta la base cambia</b>, e le componenti si trasformano con la <b>jacobiana della transizione</b>:
+  $$\tilde v^{j}=\sum_i\frac{\partial\tilde x^{j}}{\partial x^{i}}\,v^{i}.$$
+  <b>Questa formula è la definizione fisica di «vettore controvariante»</b>: in relatività e in meccanica analitica si <i>definisce</i> un vettore come un oggetto che si trasforma così. Qui non è una definizione: è un <b>teorema</b>, e l&rsquo;oggetto è stato costruito prima, senza coordinate.</p>
+  <div class="note"><b>Il punto di vista che questo corso insegna e che vale la pena portare via</b>: in fisica si dice «un vettore è ciò che si trasforma come un vettore», e sembra una circolarità. Qui si vede che non lo è: il vettore esiste come derivazione, indipendentemente da ogni carta, e la legge di trasformazione è <i>conseguenza</i> del cambio di base. <b>Le due frasi dicono la stessa cosa, ma solo una delle due spiega perché.</b></div>`}
+]},
+
+/* ---------------- 03 · IL DIFFERENZIALE ---------------- */
+{ num:'03', title:'Il differenziale: la jacobiana senza coordinate', meta:'la definizione · in carta e la matrice jacobiana · la regola della catena · lesempio delle polari',
+  blocchi:[
+  {t:'prosa', title:'La definizione e il calcolo', tag:'costruzione', html:R`
+  <p>Data $F:M\to N$ liscia e $p\in M$, il <b>differenziale</b> $dF_p:T_pM\to T_{F(p)}N$ si definisce su una derivazione $v$ così:
+  $$dF_p(v)(f)=v(f\circ F).$$
+  In parole: <b>per derivare $f$ lungo l&rsquo;immagine, si deriva $f\circ F$ lungo l&rsquo;originale</b>. Sulle curve l&rsquo;interpretazione è ancora più semplice: la velocità della curva immagine.</p>
+  <p><b>In coordinate, $dF_p$ è la matrice jacobiana</b> di $\psi\circ F\circ\varphi^{-1}$ nel punto. Quindi tutta l&rsquo;algebra lineare che si conosce si applica: rango, nucleo, immagine, invertibilità. E la <b>regola della catena</b> diventa $d(G\circ F)_p=dG_{F(p)}\circ dF_p$: la composizione di mappe corrisponde al prodotto di matrici. <b>È l&rsquo;enunciato più pulito della regola della catena che si possa dare</b>, e non contiene indici.</p>
+  <p><b>L&rsquo;esempio da avere in mano</b>: il passaggio a coordinate polari $F(r,\theta)=(r\cos\theta,\ r\sin\theta)$ ha jacobiana
+  $$dF=\begin{pmatrix}\cos\theta&-r\sin\theta\\ \sin\theta&r\cos\theta\end{pmatrix},$$
+  con l&rsquo;entrata in alto a destra che è $-r\sin\theta$ e determinante che <b>vale $r$</b>. Il determinante si annulla in $r=0$: lì le polari non sono una carta, ed è la ragione per cui l&rsquo;origine va sempre esclusa. <b>Lo stesso $r$ è il fattore che compare nell&rsquo;integrale doppio in polari</b> — il determinante jacobiano di Analisi Vettoriale è questo differenziale.</p>`}
+]},
+
+/* ---------------- 04 · IMMERSIONI, SUBMERSIONI, RANGO ---------------- */
+{ num:'04', title:'Immersioni, submersioni e rango costante', meta:'le definizioni · i due teoremi di forma normale · e la figura otto',
+  blocchi:[
+  {t:'prosa', title:'Le definizioni, e cosa dicono davvero', tag:'grammatica', html:R`
+  <p>Si classifica $F$ in base al <b>rango</b> di $dF_p$:</p>
+  <ul>
+   <li><b>immersione</b>: $dF_p$ è <b>iniettivo</b> per ogni $p$. Localmente $F$ «infila» $M$ dentro $N$ senza schiacciarla;</li>
+   <li><b>submersione</b>: $dF_p$ è <b>suriettivo</b> per ogni $p$. Localmente $F$ proietta $M$ su $N$;</li>
+   <li><b>rango costante</b>: $\operatorname{rk}dF_p$ non dipende da $p$ (le prime due sono casi particolari).</li>
+  </ul>
+  <p><b>Il teorema del rango costante</b> dice che in quei casi esistono carte in cui $F$ si scrive nella <b>forma più semplice possibile</b>:
+  $$(x^1,\dots,x^n)\ \longmapsto\ (x^1,\dots,x^k,0,\dots,0).$$
+  <b>Cioè: a meno di cambi di coordinate, una mappa di rango costante è una proiezione seguita da un&rsquo;inclusione.</b> È il teorema più potente della tappa: riduce lo studio locale di qualunque mappa di rango costante a un&rsquo;unica forma normale.</p>
+  <p>Due corollari che si usano continuamente: se $dF_p$ è <b>invertibile</b>, $F$ è un diffeomorfismo locale (<b>teorema di invertibilità locale</b> — e si vede subito perché $t\mapsto t^3$ di gd-04 fallisce in $0$); se $F$ è una submersione, le sue <b>fibre</b> sono sottovarietà, ed è il ponte con gd-08.</p>`},
+  {t:'prosa', title:'La figura otto: immersione si, sottovarieta no', tag:'idea', html:R`
+  <p>La curva $\gamma(t)=(\sin2t,\ \sin t)$ su $(-\pi,\pi)$ disegna una <b>figura a otto</b>. La sua velocità è $(2\cos 2t,\ \cos t)$, che <b>non si annulla mai</b> — le due componenti non hanno zeri comuni — quindi $\gamma$ è un&rsquo;<b>immersione iniettiva</b>.</p>
+  <p><b>Eppure l&rsquo;immagine non è una sottovarietà</b>: nel punto di incrocio ogni intorno ha quattro rami, e non è omeomorfo a un intervallo. L&rsquo;errore sta nel credere che «immersione iniettiva» implichi «l&rsquo;immagine è una sottovarietà»: <b>manca una condizione topologica</b>, e la curva la viola perché i due estremi del dominio si avvicinano allo stesso punto dell&rsquo;immagine.</p>
+  <p>La condizione che manca è la <b>propriezza</b>, ed è il contenuto di gd-09. <b>Questo esempio è il motivo per cui quel movimento esiste</b>: senza, si crederebbe che immergere basti.</p>`},
+  {t:'plot', title:'La figura otto: velocita mai nulla, e un punto che rovina tutto',
+   intro:R`La curva $(\sin 2t,\ \sin t)$ per $t\in(-\pi,\pi)$: iniettiva, con velocità mai nulla, e con un&rsquo;immagine che non è una sottovarietà.`,
+   plots:[
+    {kind:'curve', x:'sin(2*t)', y:'sin(t)', tr:[-3.1416,3.1416], xr:[-1.4,1.4], yr:[-1.3,1.3],
+     height:340, title:'nellorigine passano due rami: nessun intorno e un intervallo',
+     marks:[{x:0, y:0, label:'qui lintorno ha quattro rami', col:'#ff6b6b'},
+            {x:1, y:0.7071, label:'t = pi/4', col:'#5eead4'}]}
+   ],
+   leggi:R`<b>La curva è liscia, iniettiva, e la sua velocità non si annulla mai</b>: tutte le condizioni «differenziali» sono soddisfatte. Il problema è <i>topologico</i> e sta tutto nell&rsquo;origine: la curva ci passa una volta sola come punto del dominio, ma i valori $t\to\pm\pi$ si avvicinano a quello stesso punto dell&rsquo;immagine. Quindi <b>la mappa non è un omeomorfismo sull&rsquo;immagine</b>, e l&rsquo;immagine non eredita la struttura.<br><br>
+   <b>La lezione da portare avanti</b>: le condizioni sul differenziale controllano il comportamento <i>locale</i> nel dominio, e non dicono nulla su come l&rsquo;immagine si richiude su se stessa. Ogni volta che in questo corso si vuole concludere qualcosa <b>sull&rsquo;immagine</b>, serve un&rsquo;ipotesi topologica in più — ed è sempre la stessa: la propriezza.`}
+]},
+
+/* ---------------- 05 · IL SENSO ---------------- */
+{ num:'05', title:'Il senso, e le rotte', meta:'cosa apre, e dove il tangente riappare',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Un vettore non è una freccia: è un <b>operatore di derivazione</b>. Questa sostituzione — da oggetto geometrico a oggetto algebrico — è ciò che rende possibile fare geometria senza ambiente, e si ripete a ogni livello: i campi vettoriali saranno derivazioni delle funzioni (gd-07), le parentesi di Lie saranno commutatori di derivazioni (gd-12), i flussi saranno esponenziali di derivazioni (gd-15).</p>
+  <p><b>A valle.</b> gd-07 mette insieme tutti i $T_pM$ e ne fa una varietà; gd-08 usa il rango per riconoscere sottovarietà; gd-12 studia cosa succede quando due derivazioni non commutano.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento',
+   oggetto:R`<b>Il vettore tangente come derivazione</b>, e il differenziale come approssimazione lineare senza coordinate.`,
+   rotte:[
+    {dove:'Meccanica<br>analitica', txt:R`Le <b>velocità generalizzate</b> $\dot q$ sono vettori tangenti allo spazio delle configurazioni, e la lagrangiana è una funzione sul <b>fibrato tangente</b> (gd-07). Il passaggio a $p=\partial L/\partial\dot q$ porta al fibrato <i>co</i>tangente, ed è la ragione geometrica per cui hamiltoniana e lagrangiana vivono su spazi diversi.`},
+    {dove:'Relativita<br>generale', txt:R`La <b>quadrivelocità</b> è un vettore tangente allo spazio-tempo, e il fatto che i vettori vivano in spazi tangenti <i>diversi</i> in punti diversi è la ragione per cui confrontarli richiede una connessione — e da lì la curvatura.`},
+    {dove:'Sistemi<br>dinamici', txt:R`Un sistema dinamico è un campo vettoriale: a ogni stato si assegna la <b>velocità con cui evolve</b>. La linearizzazione attorno a un equilibrio è il differenziale, e i suoi autovalori decidono la stabilità.`},
+    {dove:'Ottimizzazione', txt:R`Il <b>gradiente</b> su una varietà ha senso solo con una metrica, ma il <b>differenziale</b> no: e' definito sempre. La distinzione fra i due — covariante e controvariante — nasce esattamente qui, e in ottimizzazione decide se un algoritmo e' indipendente dalla parametrizzazione.`}
+   ],
+   domanda:R`Lo spazio tangente in punti diversi è uno spazio vettoriale diverso: <b>non c&rsquo;è nessun modo canonico di confrontare un vettore in $p$ con uno in $q$</b>. In $\mathbb{R}^n$ sembra si possa (si traslano le frecce), ma quella è una struttura in più dello spazio euclideo, non della varietà. <b>Domanda che porti avanti:</b> che cosa serve per trasportare un vettore da un punto a un altro? La risposta è una <b>connessione</b>, la sua ambiguità lungo cammini diversi è la <b>curvatura</b>, e in fisica quell&rsquo;ambiguità è la fase di Berry e il campo di gauge. <b>Nel corso di Diverio non ci sono</b>: questo è precisamente il punto in cui il programma si ferma, e da cui parte la geometria riemanniana.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-06-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-06 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-06-spazio-tangente.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

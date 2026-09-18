@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-09 — Immersioni proprie, intorni tubolari e il teorema di Whitney</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-09 — Immersioni proprie e Whitney: ogni varietà sta dentro uno spazio euclideo</b> · Diverio, lezioni 12/11, 15/11, 19/11</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-09: Immersioni proprie, intorni tubolari e Whitney <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-09 — immersioni proprie, intorni tubolari e Whitney
+identita:  quando l'immagine di un'immersione è davvero una sottovarietà, e perché ogni varietà si immerge
+copre:     G.18, G.19, G.20
+serve:     gd-08 (gd-08-valori-regolari.html)
+apre:      gd-10 (gd-10-teorema-sard.html)
+registro:  Lezioni del 12/11, 15/11 e 19/11/2019 — la discussione sull'ottimalità della dimensione è del docente
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"2*1+1","vale":"3",
+  "dove":"03","appare":"2n+1"},
+
+ {"tipo":"uguale","sinistra":"2*2","vale":"4",
+  "dove":"03","appare":"2n"},
+
+ {"tipo":"uguale","sinistra":"diff(sin(2*t),t)**2+diff(sin(t),t)**2","vale":"4*cos(2*t)**2+cos(t)**2",
+  "ipotesi":{"t":"real"},
+  "dove":"01","appare":"(2\\cos 2t,\\ \\cos t)"},
+
+ {"tipo":"simbolico","dove":"01","appare":"F^{-1}(K)",
+  "perche":"e' la notazione della controimmagine di un compatto, con cui si definisce la propriezza"},
+
+ {"tipo":"simbolico","dove":"02","appare":"NM",
+  "perche":"e' la notazione del fibrato normale, introdotto nella riga stessa"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.18-G.20 · il problema dellimmagine, e il teorema che chiude il cerchio',
+  blocchi:[
+  {t:'prosa', title:'La domanda lasciata aperta', tag:'architettura', html:R`
+  <p>gd-06 ha mostrato la <b>figura a otto</b>: un&rsquo;immersione iniettiva la cui immagine <i>non</i> è una sottovarietà. Il differenziale era perfetto — iniettivo ovunque — e il problema era topologico: la curva si richiudeva su se stessa.</p>
+  <p>Questo movimento risolve quel problema identificando <b>la condizione che mancava</b> (la propriezza), e poi usa la stessa nozione per il teorema che chiude il primo blocco del corso: <b>Whitney</b> — ogni varietà astratta si può immergere in uno spazio euclideo. Cioè: l&rsquo;approccio senza ambiente di gd-01 non era più generale, era solo <b>più onesto</b>. Un ambiente esiste sempre; sceglierlo è arbitrario.</p>`}
+]},
+
+/* ---------------- 01 · PROPRIEZZA ---------------- */
+{ num:'01', title:'Applicazioni proprie: la condizione che mancava', meta:'la definizione · le esaustive sono proprie · e il criterio per limmagine',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e il teorema', tag:'grammatica', html:R`
+  <p>$F:M\to N$ è <b>propria</b> se la controimmagine $F^{-1}(K)$ di ogni compatto è compatta. In parole: <b>non si può «scappare all&rsquo;infinito» restando in una regione limitata dell&rsquo;arrivo</b>.</p>
+  <p><b>Teorema.</b> Se $F$ è un&rsquo;immersione <b>iniettiva e propria</b>, allora $F(M)$ è una sottovarietà <b>chiusa</b> di $N$ e $F$ è un diffeomorfismo sull&rsquo;immagine. E vale anche il viceversa: le sottovarietà chiuse sono esattamente le immagini di immersioni proprie.</p>
+  <p><b>Perché la figura a otto fallisce</b>: la curva è definita su $(-\pi,\pi)$, aperto, e prendendo un piccolo disco compatto attorno all&rsquo;origine la sua controimmagine contiene sia $t$ vicino a $0$ sia $t$ vicino a $\pm\pi$ — <b>non è compatta</b>, perché gli estremi non ci sono. La velocità della curva è $(2\cos 2t,\ \cos t)$, <b>mai nulla</b>: il difetto non è mai stato nel differenziale.</p>
+  <p><b>Il criterio pratico</b>, ed è quello che si usa: se $M$ è <b>compatta</b>, ogni mappa continua è propria (la controimmagine è chiusa in un compatto). Quindi <b>ogni immersione iniettiva di una varietà compatta ha per immagine una sottovarietà</b>. Tutti i controesempi vivono nel non compatto.</p>
+  <div class="note"><b>Le funzioni esaustive di gd-05 sono proprie</b>, per costruzione: $h^{-1}([0,c])$ è compatto. È il ponte fra le due tappe, e il motivo per cui l&rsquo;esaustione serviva: permette di trattare una varietà non compatta come unione crescente di compatti, e di trasferirle i teoremi che valgono nel compatto.</div>`}
+]},
+
+/* ---------------- 02 · INTORNI TUBOLARI ---------------- */
+{ num:'02', title:'Intorni tubolari: una sottovarieta ha un intorno che le somiglia', meta:'il fibrato normale · lenunciato · a cosa serve davvero',
+  blocchi:[
+  {t:'prosa', title:'Lenunciato, e la costruzione', tag:'costruzione', html:R`
+  <p>Data una sottovarietà chiusa $M\subseteq\mathbb{R}^N$, si considera il <b>fibrato normale</b> $NM$: in ogni punto, i vettori ortogonali a $T_pM$. È un fibrato di rango $N-\dim M$.</p>
+  <p><b>Teorema dell&rsquo;intorno tubolare.</b> Esiste un intorno aperto $U$ di $M$ in $\mathbb{R}^N$ diffeomorfo a un intorno della sezione nulla in $NM$, in modo che il diffeomorfismo sia l&rsquo;identità su $M$. <b>In parole: un intorno di $M$ è fatto come una famiglia di dischetti ortogonali a $M$</b>, e c&rsquo;è una <b>retrazione</b> liscia $r:U\to M$ che a ogni punto vicino associa il punto più vicino di $M$.</p>
+  <p><b>A che cosa serve, ed è il motivo per cui il teorema esiste:</b></p>
+  <ul>
+   <li>a <b>estendere</b> oggetti definiti su $M$ a un intorno (si estende in modo costante lungo i dischetti), e viceversa a <b>restringere</b> con la retrazione;</li>
+   <li>a <b>deformare</b>: due mappe vicine in $U$ si possono spingere su $M$, ed è la tecnica base per dimostrare che certe costruzioni non dipendono da scelte;</li>
+   <li>a <b>trasversalizzare</b> (gd-17): perturbare una mappa per renderla trasversa si fa dentro l&rsquo;intorno tubolare.</li>
+  </ul>
+  <p><b>La costruzione usa le partizioni dell&rsquo;unità</b> (gd-05) per incollare i dischetti locali e per rendere il raggio una funzione liscia che si assottiglia dove serve — perché su una varietà non compatta il raggio uniforme non esiste. È il terzo posto in cui gd-05 viene consumata.</p>`}
+]},
+
+/* ---------------- 03 · WHITNEY ---------------- */
+{ num:'03', title:'Il teorema di Whitney, e la discussione sullottimalita', meta:'la versione debole 2n+1 · la forte 2n · perche non si puo fare meglio · e il caso compatto',
+  blocchi:[
+  {t:'reveal', title:'I due enunciati e lidea', tag:'idea', steps:[
+   {label:'Gli enunciati', body:R`
+   <p><b>Whitney debole</b>: ogni varietà liscia di dimensione $n$ ammette un&rsquo;immersione regolare propria in $\mathbb{R}^{2n+1}$. Per $n=1$ dà <b>$2n+1=3$</b>: ogni curva astratta sta in $\mathbb{R}^3$.</p>
+   <p><b>Whitney forte</b>: basta $\mathbb{R}^{2n}$. Per $n=2$ dà <b>$2n=4$</b>: ogni superficie astratta sta in $\mathbb{R}^4$ — e infatti $\mathbb{RP}^2$, che in $\mathbb{R}^3$ non entra, in $\mathbb{R}^4$ sì.</p>`},
+   {label:'Lidea della dimostrazione, nel caso compatto', body:R`
+   <p>Si copre $M$ con un numero <b>finito</b> di carte e si prendono le bump di gd-05. La mappa che manda $p$ nella lista delle coordinate pesate più i pesi stessi è un&rsquo;immersione iniettiva in uno spazio euclideo di dimensione grande. <b>Poi si abbassa la dimensione proiettando</b>: si mostra che «quasi tutte» le direzioni di proiezione mantengono l&rsquo;immersione e l&rsquo;iniettività, finché non si scende a $2n+1$.</p>
+   <p><b>Il «quasi tutte» è la misura nulla di gd-08</b>: le direzioni cattive formano l&rsquo;immagine di una mappa da una varietà di dimensione troppo bassa, quindi hanno misura nulla — e in gd-10 sarà Sard a garantirlo in generale. <b>Ecco perché questi tre movimenti stanno insieme</b>: il conteggio dimensionale che rende «generica» una proiezione è lo stesso in tutti e tre.</p>`},
+   {label:'Perche 2n e ottimale, e cosa significa', body:R`
+   <p>La dimensione non si può abbassare in generale: <b>$\mathbb{RP}^2$ non si immerge in $\mathbb{R}^3$</b> (è non orientabile e compatta, e una superficie chiusa in $\mathbb{R}^3$ deve essere orientabile), e ci sono esempi in ogni dimensione che saturano il $2n$.</p>
+   <p><b>Ma per varietà particolari si può fare molto meglio</b>: $S^n$ sta in $\mathbb{R}^{n+1}$, il toro in $\mathbb{R}^3$. Whitney dà una garanzia <i>universale</i>, non la dimensione ottimale caso per caso — e trovare quella per una data varietà è un problema aperto in molti casi.</p>
+   <div class="note"><b>La conseguenza concettuale, che è il vero motivo per cui il teorema si studia.</b> Whitney dice che l&rsquo;approccio astratto di gd-01 non ha creato oggetti nuovi: ogni varietà astratta <i>è</i> una sottovarietà di qualche $\mathbb{R}^N$. Allora perché non partire da lì? <b>Perché l&rsquo;immersione non è canonica</b>: ce ne sono infinite, nessuna privilegiata, e usarne una significa portarsi dietro una struttura che non appartiene alla varietà. <b>La stessa ragione per cui in fisica si preferiscono formulazioni senza coordinate</b> pur sapendo che le coordinate esistono sempre.</div>`}
+  ]}
+]},
+
+/* ---------------- 04 · IL SENSO ---------------- */
+{ num:'04', title:'Il senso, e le rotte', meta:'cosa chiude il primo blocco del corso, e cosa apre',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> La <b>propriezza</b> è la condizione che manca ogni volta che si vuole dedurre qualcosa sull&rsquo;<i>immagine</i> di una mappa da ipotesi sul <i>differenziale</i>. Le condizioni sul differenziale sono locali nel dominio; l&rsquo;immagine è un fatto globale, e serve un&rsquo;ipotesi globale.</p>
+  <p><b>A valle.</b> gd-10 dimostra Sard, che è il teorema di genericità usato qui in modo informale; da gd-11 in poi il corso cambia direzione e passa ai campi vettoriali, ai flussi e alle equazioni differenziali.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento',
+   oggetto:R`<b>La propriezza</b> e l&rsquo;<b>intorno tubolare</b>: quando il locale determina il globale, e quando serve altro.`,
+   rotte:[
+    {dove:'Topologia<br>differenziale', txt:R`L'intorno tubolare e' lo strumento con cui si definiscono il <b>grado</b> di una mappa, l'indice di intersezione e la teoria del cobordismo: tutta la macchina che estrae numeri interi dalla geometria.`},
+    {dove:'Teoria<br>dei campi', txt:R`I <b>difetti topologici</b> (vortici, stringhe, monopoli) sono sottovarieta' dove il parametro d'ordine degenera, e il loro intorno tubolare e' cio' che permette di classificarli guardando il comportamento su una piccola sfera attorno.`},
+    {dove:'Analisi<br>globale', txt:R`La propriezza e' la condizione che rende compatti gli spazi di soluzioni di equazioni differenziali (compattezza di Gromov, moduli di curve): senza, le successioni di soluzioni «scappano» e la teoria non chiude.`},
+    {dove:'Robotica<br>e controllo', txt:R`Lo spazio delle configurazioni di un meccanismo e' una varieta' astratta; <b>Whitney garantisce che si possa parametrizzare con un numero finito di coordinate globali</b>, ed e' cio' che rende possibile calcolarci sopra.`}
+   ],
+   domanda:R`Whitney dice che ogni varietà entra in $\mathbb{R}^{2n}$, ma l&rsquo;immersione è arbitraria. <b>Domanda che porti avanti:</b> quante immersioni essenzialmente diverse esistono, e quando due si possono deformare l&rsquo;una nell&rsquo;altra? Per le curve chiuse in $\mathbb{R}^3$ la risposta è la <b>teoria dei nodi</b> — un cerchio immerso può essere annodato in infiniti modi non equivalenti, benché la varietà astratta sia sempre $S^1$. <b>Tutta l&rsquo;informazione sta nell&rsquo;immersione, non nella varietà</b>, ed è il punto in cui la geometria intrinseca e quella estrinseca si separano davvero.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-09-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-09 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-09-immersioni-whitney.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
