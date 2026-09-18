@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento me-12 — Funzioni di Green: la risposta a una sorgente puntiforme, e perché da lì si ricostruisce tutto</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Metodi e Modelli · Movimento <b>me-12 — Funzioni di Green: la formula maestra al bordo, le prescrizioni e i propagatori</b> · Set 4 es. 9-11 · More problems es. 20-21 · cinque appelli, sempre l'esercizio 4</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'metodi-e-modelli';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["delta-di-dirac"] = {"nome":"Delta di Dirac","riga":"Non è una funzione ma un funzionale, definito da $\\int f(x)\\,\\delta(x-a)\\,dx=f(a)$, che composto con una funzione si spezza sui suoi zeri come $\\delta(g(x))=\\sum_i \\delta(x-x_i)/|g'(x_i)|$.","serve":"Serve come macchina per cambiare variabile senza invertire nulla. La densità di $y=f(x)$ si scrive $p_Y(y)=\\int p_X(x)\\,\\delta(y-f(x))\\,dx$, e la delta produce da sola il fattore $1/|f'|$ che altrimenti andrebbe messo a mano: i rami molteplici si contano da soli invece di doverli ricordare. È la ragione pratica per cui il formalismo con la delta compare in ogni soluzione d'esame che tocchi una distribuzione, mentre il cambio di variabile esplicito compare quasi mai.","esempio":"$\\delta(x^2-a^2)$ con $a$ positivo. Gli zeri sono $x=\\pm a$; la derivata dell'argomento è $2x$, che in modulo vale $2a$ su entrambi. Quindi $\\delta(x^2-a^2)=\\dfrac{1}{2a}\\big[\\delta(x-a)+\\delta(x+a)\\big]$. Il caso si ripete identico in fisica statistica con $\\varepsilon=p^2/2m$ in una dimensione, dove i due rami $p=\\pm\\sqrt{2m\\varepsilon}$ contribuiscono entrambi — e dimenticarne uno dimezza la risposta.","pieno":{"file":"15-distribuzioni.html","tappa":"01","come":"le distribuzioni come funzionali, la delta e le sue proprietà, nel nucleo di Metodi"},"qui":{"meccanica-statistica":{"serve":"È lo strumento con cui si calcola la densità degli stati, cioè l'oggetto su cui poggia tutto il secondo tempo del corso: $g(\\varepsilon)=\\int d^dp\\,d^dq\\;\\delta(\\varepsilon-H)/h^d$. L'identità che si usa davvero non è la definizione ma questa: $\\delta(\\varepsilon-H)=\\partial_\\varepsilon\\,\\theta(\\varepsilon-H)$. Si scambia l'integrale con la derivata e ci si ritrova a calcolare il volume della regione dove l'hamiltoniana sta sotto $\\varepsilon$ — un integrale elementare — invece di un integrale con una delta dentro. La $g$ così ottenuta è pura geometria dello spazio delle fasi: non sa nulla della temperatura, e per questo resta identica quando si passa da Boltzmann a Fermi o a Bose.","esempio":"Particella libera in due dimensioni. Il volume della regione $p^2/2m$ sotto $\\varepsilon$ è il disco di area $2\\pi m\\varepsilon$; derivando rispetto a $\\varepsilon$ si ottiene $2\\pi m$, cioè una densità degli stati costante. Non è una curiosità: è la ragione per cui in due dimensioni una particella libera non condensa, e per cui le prove che chiedono la condensazione in $d=2$ mettono sempre un potenziale confinante, che porta la $g$ da costante a crescente."}},"controllo":[{"tipo":"derivata","espr":"x**2-a**2","rispetto":["x"],"vale":"2*x","ipotesi":{"x":"positive","a":"positive"},"dove":"esempio","appare":"2x"},{"tipo":"uguale","sinistra":"1/Abs(2*a)","vale":"1/(2*a)","ipotesi":{"a":"positive"},"dove":"esempio","appare":"\\dfrac{1}{2a}"},{"tipo":"derivata","espr":"2*pi*m*e","rispetto":["e"],"vale":"2*pi*m","ipotesi":{"m":"positive","e":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"2\\pi m"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo me-12: funzioni di Green <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        me-12 — funzioni di Green
+identita:  la risposta a una sorgente puntiforme, e perché da lì si ricostruisce tutto
+copre:     F.4 — Metodi di risoluzione di equazioni differenziali: classificazione, ODE del primo e secondo ordine, PDE del secondo ordine con condizioni iniziali e al bordo, funzioni di Green
+serve:     me-09 (15-distribuzioni.html), me-10b (me-10b-trasformata-di-laplace.html), me-11 (17-edp.html)
+apre:      — (chiude la voce F.4)
+fonti:     Set 4 «Differential equations» es. 9-11 (Esposito) · More problems es. 18-21 (Esposito) · cinque scritti d'appello 2023-2025 · scaletta note §15 (corpo ASSENTE dal PDF: vedi tappa 00)
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"(x-1/x)*diff(x-4/x,x)-diff(x-1/x,x)*(x-4/x)","vale":"6/x",
+  "ipotesi":{"x":"positive"},
+  "dove":"04","appare":"W(x)=\\dfrac{6}{x}"},
+
+ {"tipo":"uguale",
+  "sinistra":"(x-4/x)/6*(x**3/3-x+Rational(2,3))+(x-1/x)/6*(-Rational(16,3)-x**3/3+4*x)",
+  "vale":"(3*x**3-7*x**2+4)/(9*x)","ipotesi":{"x":"positive"},
+  "dove":"04","appare":"\\dfrac{3x^{3}-7x^{2}+4}{9x}"},
+
+ {"tipo":"uguale",
+  "sinistra":"x**2*diff((3*x**3-7*x**2+4)/(9*x),x,2)+x*diff((3*x**3-7*x**2+4)/(9*x),x)-(3*x**3-7*x**2+4)/(9*x)",
+  "vale":"x**2","ipotesi":{"x":"positive"},
+  "dove":"04","appare":"rimette in piedi $x^{2}$"},
+
+ {"tipo":"limite","espr":"(3*x**3-7*x**2+4)/(9*x)","var":"x","a":"1","vale":"0",
+  "ipotesi":{"x":"positive"},
+  "dove":"04","appare":"f(1)=0"},
+
+ {"tipo":"limite","espr":"(3*x**3-7*x**2+4)/(9*x)","var":"x","a":"2","vale":"0",
+  "ipotesi":{"x":"positive"},
+  "dove":"04","appare":"f(2)=0"},
+
+ {"tipo":"limite","espr":"(a*x+b/x)+3*(a-b/x**2)","var":"x","a":"1","vale":"4*a-2*b",
+  "ipotesi":{"x":"positive"},
+  "dove":"05","appare":"4a-2b=0"},
+
+ {"tipo":"limite","espr":"(a*x+b/x)-6*(a-b/x**2)","var":"x","a":"2","vale":"-4*a+2*b",
+  "ipotesi":{"x":"positive"},
+  "dove":"05","appare":"-4a+2b=0"},
+
+ {"tipo":"uguale","sinistra":"(x+2/x)*diff(x+2/x,x)-diff(x+2/x,x)*(x+2/x)","vale":"0",
+  "ipotesi":{"x":"positive"},
+  "dove":"05","appare":"W\\equiv0"},
+
+ {"tipo":"uguale","sinistra":"x*diff(x-2,x)-diff(x,x)*(x-2)","vale":"2",
+  "dove":"06","appare":"W=2"},
+
+ {"tipo":"limite","espr":"(x/2-1)-(-3*x/2)","var":"x","a":"1","vale":"1",
+  "dove":"06","appare":"salta di esattamente $1$"},
+
+ {"tipo":"uguale",
+  "sinistra":"(exp(x)-exp(2*x))*diff(exp(x)-exp(2*(x-1)),x)-diff(exp(x)-exp(2*x),x)*(exp(x)-exp(2*(x-1)))",
+  "vale":"(exp(2)-1)*exp(3*x-2)",
+  "dove":"06","appare":"(e^{2}-1)e^{3x-2}"},
+
+ {"tipo":"uguale","sinistra":"x**l*diff(x**(-l-1),x)-diff(x**l,x)*x**(-l-1)","vale":"-(2*l+1)/x**2",
+  "ipotesi":{"x":"positive","l":"positive"},
+  "dove":"06","appare":"-\\dfrac{2\\ell+1}{x^{2}}"},
+
+ {"tipo":"uguale","sinistra":"log(x)*diff(Integer(1),x)-diff(log(x),x)*Integer(1)","vale":"-1/x",
+  "ipotesi":{"x":"positive"},
+  "dove":"06","appare":"W(x)=-\\dfrac{1}{x}"},
+
+ {"tipo":"integrale","espr":"log(x)/x**2","var":"x","da":"1","a":"2","vale":"(1-log(2))/2",
+  "ipotesi":{"x":"positive"},
+  "dove":"06","appare":"\\dfrac{1-\\log 2}{2}"},
+
+ {"tipo":"uguale",
+  "sinistra":"x**2*diff(1-1/x,x,2)+x*diff(1-1/x,x)+1/x","vale":"0",
+  "ipotesi":{"x":"positive"},
+  "dove":"06","appare":"f(x)=1-\\dfrac{1}{x}"},
+
+ {"tipo":"integrale","espr":"exp(-s*t)*sin(w*t)/w","var":"t","da":"0","a":"oo",
+  "vale":"1/(s**2+w**2)","ipotesi":{"s":"positive","w":"positive","t":"positive"},
+  "dove":"07","appare":"\\dfrac{1}{s^{2}+\\omega_0^{2}}"},
+
+ {"tipo":"uguale","sinistra":"diff(sin(w*t)/w,t,2)+w**2*(sin(w*t)/w)","vale":"0",
+  "ipotesi":{"w":"positive","t":"positive"},
+  "dove":"09","appare":"risolve l'omogenea per $t>0$"},
+
+ {"tipo":"limite","espr":"sin(w*t)/w","var":"t","a":"0","vale":"0",
+  "ipotesi":{"w":"positive","t":"positive"},
+  "dove":"09","appare":"parte da fermo"},
+
+ {"tipo":"limite","espr":"cos(w*t)","var":"t","a":"0","vale":"1",
+  "ipotesi":{"w":"positive","t":"positive"},
+  "dove":"09","appare":"riceve un calcio di velocità $1$"},
+
+ {"tipo":"uguale","sinistra":"1/(2*w)*(1/(u+w)-1/(u-w))","vale":"-1/(u**2-w**2)",
+  "ipotesi":{"w":"positive"},
+  "dove":"09","appare":"\\dfrac{1}{\\omega+\\omega_0}-\\dfrac{1}{\\omega-\\omega_0}"},
+
+ {"tipo":"uguale","sinistra":"diff(I*exp(-I*w*t)/(2*w),t,2)+w**2*(I*exp(-I*w*t)/(2*w))","vale":"0",
+  "ipotesi":{"w":"positive","t":"positive"},
+  "dove":"09","appare":"anche $G_F$ risolve l'omogenea lontano dall'origine"},
+
+ {"tipo":"integrale","espr":"exp(-k*q**2*t)*cos(q*x)/(2*pi)","var":"q","da":"-oo","a":"oo",
+  "vale":"exp(-x**2/(4*k*t))/sqrt(4*pi*k*t)",
+  "ipotesi":{"k":"positive","t":"positive","x":"positive","q":"real"},
+  "dove":"08","appare":"\\sqrt{4\\pi\\kappa t}"},
+
+ {"tipo":"uguale",
+  "sinistra":"diff(exp(-x**2/(4*k*t))/sqrt(4*pi*k*t),t)-k*diff(exp(-x**2/(4*k*t))/sqrt(4*pi*k*t),x,2)",
+  "vale":"0","ipotesi":{"k":"positive","t":"positive","x":"positive"},
+  "dove":"08","appare":"soddisfa l'equazione del calore"},
+
+ {"tipo":"integrale","espr":"sin(u*t)/u","var":"u","da":"-oo","a":"oo","vale":"pi",
+  "ipotesi":{"t":"positive","u":"real"},
+  "dove":"08","appare":"\\pi\\,\\mathrm{sgn}(t)"},
+
+ {"tipo":"uguale","sinistra":"diff(sin(w*t)/w,t)","vale":"cos(w*t)",
+  "ipotesi":{"w":"positive","t":"positive"},
+  "dove":"03","appare":"\\cos(\\omega_0 t)"},
+
+ {"tipo":"uguale","sinistra":"(x-1/x)*diff(x-4/x,x)-diff(x-1/x,x)*(x-4/x)",
+  "vale":"(2*(x-1/x))*diff((x-4/x)/2,x)-diff(2*(x-1/x),x)*((x-4/x)/2)",
+  "ipotesi":{"x":"positive"},
+  "dove":"03","appare":"non cambia"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Metodi · voce F.4 · l’esercizio 4 di ogni appello, da 7 o 8 punti · e la fonte che manca',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>Un operatore differenziale lineare $D$ manda funzioni in funzioni, e un'equazione $D f = j$ chiede di <b>invertirlo</b>: data la sorgente $j$, trovare $f$. Se $D$ fosse una matrice scriveremmo $f = D^{-1}j$ e avremmo finito. La <b>funzione di Green</b> è esattamente quell'inversa, scritta in un modo che ha senso per un operatore differenziale: si risolve <b>una volta sola</b> il problema con la sorgente più semplice che esista — una $\delta$ concentrata in un punto —
+  $$D\,G(x,y)=\delta(x-y),$$
+  e poi <b>ogni</b> altra sorgente si ottiene per sovrapposizione, perché ogni $j$ è una somma continua di $\delta$.</p>
+  <p>In una frase: <i>la funzione di Green è la risposta a una sorgente puntiforme, e da lì si ricostruisce tutto</i> — perché $D$ è lineare, e la linearità dice che chi sa rispondere a un punto sa rispondere a qualunque cosa.</p>
+  <p><b>Perché proprio questo, e con che peso.</b> La voce F.4 del programma chiude l'elenco con «… funzioni di Green», ed è l'ultimo movimento di Metodi. Sui diciannove scritti in banca dati, il metodo delle funzioni di Green compare in <b>cinque appelli</b> — 20/06/2023, 04/07/2023, 16/11/2023, 06/11/2024, 12/02/2025 — e in tutti e cinque è <b>l'esercizio 4, da 7 o 8 punti</b>, l'ultimo del compito. Non è un argomento fra i tanti: è il modo in cui il corso decide di chiudere lo scritto, e vale circa un quinto del voto.</p>`},
+  {t:'prosa', title:'Un avviso sulla fonte, prima di cominciare', tag:'limite dichiarato', html:R`
+  <div class="note warn"><b>Le note del docente, su questo argomento, non ci sono.</b> Il PDF <i>Caprini-Esposito, Metodi Matematici — note</i> si interrompe a pagina interna <b>80</b>, in mezzo a un esempio del §12.1 sulla trasformata di Laplace. Il suo indice, però, promette ancora tre paragrafi: §13 <i>Equazioni differenziali ordinarie</i> (pp. 81-88), §14 <i>Equazioni alle derivate parziali</i> (pp. 89-93) e §15 <b><i>Funzioni di Green</i></b> (pp. 94-103). Sono ventitré pagine che <b>nel file non esistono</b> — non è un difetto di estrazione: il PDF ha 93 pagine fisiche e sono state lette tutte.<br><br>
+  Anche la seconda fonte che il programma cita per questo argomento, <b>Petrini-Pradisi-Zaffaroni vol. 2, cap. 6</b>, non è in banca dati: quello che c'è è il <b>volume 1</b>, il cui capitolo 6 parla di spazi di funzioni.<br><br>
+  <b>Cosa c'è, invece, ed è di prima mano:</b> la scaletta del §15 (leggibile dall'indice), il foglio <b>Set 4 — Differential equations</b> di Esposito con gli esercizi 9, 10 e 11 risolti per esteso, il foglio <b>More problems</b> con gli esercizi 20 e 21 sulle prescrizioni, e i cinque compiti d'appello con le soluzioni dei docenti. Questo movimento è costruito su quelli, e segue l'ordine della scaletta del §15. Dove ha dovuto ricostruire un passaggio che stava solo nelle pagine mancanti, lo dice.</div>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li><b>Costruire</b> la formula maestra della funzione di Green al bordo invece di ricordarla, partendo da continuità e salto della derivata, e sapere da dove viene ogni pezzo — incluso il <b>Wronskiano</b> al denominatore.</li>
+  <li>Risolvere l'esercizio 4 tipo in tutte e cinque le varianti cadute: equazione di <b>Eulero</b>, coefficienti costanti, sorgente <b>distribuzionale</b> $\delta'$, dominio illimitato, e <b>condizioni al bordo inomogenee</b>.</li>
+  <li>Riconoscere <b>quando la funzione di Green non esiste</b> — $W\equiv0$ — e dire perché, invece di calcolare a vuoto. È il discriminante che un appello ha messo apposta.</li>
+  <li>Passare al caso invariante per traslazioni e vedere il <b>ponte con la trasformata di Laplace</b> (me-10b): $G=\mathcal L^{-1}[1/D(s)]$.</li>
+  <li>Costruire le funzioni di Green delle <b>PDE</b> col metodo di Fourier: nucleo del calore e <b>propagatore</b> di Schrödinger.</li>
+  <li>Capire la <b>non-unicità</b> e le tre <b>prescrizioni</b> $i\epsilon$ — <b>green ritardata</b>, <b>green avanzata</b>, di <b>Feynman</b> — sull'<b>oscillatore armonico forzato</b>, e perché la scelta è fisica e non matematica.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · INVERTIRE UN OPERATORE ---------------- */
+{ num:'01', title:'L’idea: invertire un operatore lineare', meta:'la $\\delta$ come base continua · sovrapposizione · $G$ come nucleo integrale',
+  blocchi:[
+  {t:'reveal', title:'Da «risolvo un’equazione» a «inverto un operatore»', tag:'costruzione', steps:[
+   {label:'Il problema, e la mossa', body:R`<p>Vogliamo risolvere $D f = j$, con $D$ lineare — per esempio $D=a_2(x)\frac{d^2}{dx^2}+a_1(x)\frac{d}{dx}+a_0(x)$. La mossa è scomporre la sorgente. Per la proprietà fondamentale della <span class="str" data-str="delta-di-dirac">delta di Dirac</span> (me-09),
+   $$j(x)=\int dy\;j(y)\,\delta(x-y),$$
+   cioè <b>ogni sorgente è una sovrapposizione continua di sorgenti puntiformi</b>, ciascuna di «peso» $j(y)$ e collocata in $y$.</p>`},
+   {label:'Risolvi una volta sola, per il punto', body:R`<p>Chiamiamo $G(x,y)$ la risposta alla singola <b>sorgente puntiforme</b> posta in $y$:
+   $$D_x\,G(x,y)=\delta(x-y),$$
+   dove il pedice ricorda che $D$ agisce sulla variabile $x$, mentre $y$ sta a guardare come un parametro. Un solo problema, risolto una volta.</p>`},
+   {label:'Sovrapponi, e hai finito', body:R`<p>Poni $f(x)=\displaystyle\int dy\;G(x,y)\,j(y)$ e applica $D$. Poiché $D$ agisce su $x$ e l'integrale è in $y$, i due si scambiano:
+   $$D f(x)=\int dy\;\big[D_xG(x,y)\big]\,j(y)=\int dy\;\delta(x-y)\,j(y)=j(x).\qquad\blacksquare$$
+   <b>Questo è tutto il metodo.</b> Il resto del movimento è: come si costruisce $G$ in concreto, e cosa fissa l'ambiguità che resta.</p>`}
+  ]},
+  {t:'prosa', title:'Tre osservazioni che decidono tutto il seguito', tag:'struttura', html:R`
+  <ul>
+  <li><b>$G$ non dipende dalla sorgente.</b> Dipende solo dall'operatore $D$ <b>e dalle condizioni al bordo</b>. È l'investimento che si ammortizza: costruita una volta, risolve l'equazione per ogni $j$. Un appello che chiede due sorgenti diverse sullo stesso operatore chiede una sola funzione di Green.</li>
+  <li><b>Le condizioni al bordo entrano in $G$, non dopo.</b> Se pretendiamo che $f$ soddisfi certe condizioni omogenee al bordo, e $f$ è una sovrapposizione di $G(\cdot,y)$ con pesi qualunque, allora <b>ogni</b> $G(\cdot,y)$ deve soddisfarle. È il punto che rende la costruzione della tappa 02 obbligata invece che arbitraria.</li>
+  <li><b>L'ambiguità è inevitabile.</b> Se $G$ risolve $DG=\delta$ e $h$ risolve $Dh=0$, allora anche $G+h$ risolve $DG=\delta$. La funzione di Green <b>non è unica</b>: è definita a meno di una soluzione dell'omogenea. Al bordo, le condizioni la fissano; sull'asse dei tempi, no — e nasce la tappa 09.</li>
+  </ul>`},
+  {t:'prosa', title:'Il vocabolario, perché cambia da contesto a contesto', tag:'grammatica', html:R`
+  <p>Lo stesso oggetto ha tre nomi a seconda di chi lo usa, e conviene saperlo perché gli esercizi li mescolano.</p>
+  <ul>
+  <li><b>Funzione di Green</b> — il nome matematico, quando la variabile è spaziale e ci sono condizioni al bordo (tappe 02-06).</li>
+  <li><b>Propagatore</b> — lo stesso oggetto quando la variabile è il tempo e $G(t,x)$ dice «quanta ampiezza arriva in $x$ al tempo $t$ da un impulso nell'origine». È il linguaggio della meccanica quantistica e della teoria dei campi (tappe 08-09).</li>
+  <li><b>Risposta all'impulso</b> — lo stesso oggetto in teoria dei segnali, dove $j$ è l'ingresso e $f$ l'uscita, e la sovrapposizione $f=\int G\,j$ si chiama convoluzione.</li>
+  </ul>`}
+]},
+
+/* ---------------- 02 · LA FORMULA MAESTRA ---------------- */
+{ num:'02', title:'La formula maestra, costruita e non ricordata', meta:'due soluzioni omogenee · continuità · salto della derivata · il Wronskiano al denominatore',
+  blocchi:[
+  {t:'prosa', title:'Il problema esatto che stiamo per risolvere', tag:'impostazione', html:R`
+  <p>Sia $D=a_2(x)\partial_x^2+a_1(x)\partial_x+a_0(x)$ su un intervallo $[a,b]$, con $a_2(x)\ne0$ all'interno, e chiediamo a $f$ due condizioni al bordo <b>omogenee</b>, una per estremo: $B_a[f]=0$ e $B_b[f]=0$ (tipicamente $f(a)=0$ e $f(b)=0$, ma anche $f'(a)=0$, o combinazioni $\alpha f(a)+\beta f'(a)=0$). Cerchiamo $G(x,y)$ con
+  $$a_2(x)\,\partial_x^2G+a_1(x)\,\partial_xG+a_0(x)\,G=\delta(x-y),\qquad B_a[G]=B_b[G]=0.$$
+  Tutto il lavoro sta in una sola idea: <b>per $x\ne y$ la $\delta$ è zero, quindi $G$ risolve l'omogenea</b>; la $\delta$ agisce solo in $x=y$, e ci dice cosa succede al raccordo fra i due pezzi.</p>`},
+  {t:'reveal', title:'Quattro mosse, e la formula esce da sola', tag:'derivazione', steps:[
+   {label:'1 · Due pezzi, due soluzioni dell’omogenea', body:R`<p>Sia $f_1$ la soluzione dell'omogenea $Df=0$ che soddisfa la condizione a <b>sinistra</b>, $B_a[f_1]=0$; sia $f_2$ quella che soddisfa la condizione a <b>destra</b>, $B_b[f_2]=0$. (Ciascuna esiste: è un'equazione del secondo ordine, lo spazio delle soluzioni ha dimensione 2, e una condizione lineare ne seleziona una direzione.)</p>
+   <p>Per $x<y$, $G$ risolve l'omogenea e deve soddisfare la condizione a sinistra: allora $G\propto f_1(x)$. Per $x>y$, stessa cosa a destra: $G\propto f_2(x)$. I coefficienti possono dipendere da $y$, che qui è un parametro:
+   $$G(x,y)=A(y)\,f_1(x)\,\theta(y-x)+B(y)\,f_2(x)\,\theta(x-y).$$
+   Le due $\theta$ di Heaviside sono solo il modo compatto di dire «questo pezzo a sinistra, quello a destra».</p>`},
+   {label:'2 · Continuità in $x=y$', body:R`<p>Perché $\partial_x^2G$ produca una $\delta$ e non una $\delta'$, $G$ deve essere <b>continua</b> in $x=y$ e avere la derivata prima con un salto. (Se $G$ saltasse, $\partial_xG$ conterrebbe una $\delta$ e $\partial_x^2G$ una $\delta'$: di grado troppo alto.) Imponendo che il valore da sinistra e da destra coincidano:
+   $$A(y)\,f_1(y)=B(y)\,f_2(y).$$
+   La soluzione generale di questa condizione è $A(y)=C(y)\,f_2(y)$ e $B(y)=C(y)\,f_1(y)$, con $C$ ancora da determinare: è la parametrizzazione che <b>rende simmetrica</b> la formula, ed è la mossa che fa comparire il Wronskiano fra un attimo.</p>`},
+   {label:'3 · Il salto della derivata, che è dove vive la $\\delta$', body:R`<p>Integriamo l'equazione fra $y-\epsilon$ e $y+\epsilon$ e mandiamo $\epsilon\to0$. I termini con $a_1\partial_xG$ e $a_0G$ danno contributo nullo ($G$ è continua, e l'intervallo si annulla); a destra, $\int\delta(x-y)dx=1$. Resta il solo termine di ordine due:
+   $$a_2(y)\Big[\partial_xG(y^+,y)-\partial_xG(y^-,y)\Big]=1\qquad\Longrightarrow\qquad \partial_xG\big|_{y^-}^{y^+}=\frac{1}{a_2(y)}.$$
+   Sostituendo $\partial_xG=B(y)f_2'(x)$ a destra e $A(y)f_1'(x)$ a sinistra:
+   $$C(y)\Big[f_1(y)f_2'(y)-f_1'(y)f_2(y)\Big]=\frac{1}{a_2(y)}.$$</p>`},
+   {label:'4 · Il Wronskiano, e la formula', body:R`<p>La parentesi quadra è il <b>Wronskiano</b> delle due soluzioni,
+   $$W(y)\equiv f_1(y)f_2'(y)-f_1'(y)f_2(y),$$
+   quindi $C(y)=\dfrac{1}{a_2(y)W(y)}$ e la costruzione è finita:
+   $$G(x,y)=\frac{1}{a_2(y)\,W(y)}\Big[f_1(x)f_2(y)\,\theta(y-x)+f_1(y)f_2(x)\,\theta(x-y)\Big].$$
+   E la soluzione del problema di partenza è
+   $$f(x)=\int_a^b dy\;G(x,y)\,j(y)=f_2(x)\!\int_a^x\!\frac{f_1(y)j(y)}{a_2(y)W(y)}dy+f_1(x)\!\int_x^b\!\frac{f_2(y)j(y)}{a_2(y)W(y)}dy.\qquad\blacksquare$$
+   <b>È la formula che le soluzioni dei cinque appelli usano parola per parola</b>, e che le note chiamano «la formula trovata in classe».</p>`}
+  ]},
+  {t:'prosa', title:'Come si legge la formula, e come non sbagliarla', tag:'regola operativa', html:R`
+  <ul>
+  <li><b>Quale $f$ va con quale $\theta$.</b> $f_1$ è quella del bordo <b>sinistro</b> e compare moltiplicata per $\theta(y-x)$, cioè <b>nella regione $x<y$</b>. È l'unico modo di ricordarlo che non si confonde: <i>ogni $f$ vive dalla parte del bordo che le ha dato la sua condizione</i>. Scambiarle dà una $G$ che viola le condizioni al bordo.</li>
+  <li><b>$G$ è simmetrica:</b> $G(x,y)=G(y,x)$. Si vede scambiando $x\leftrightarrow y$ nella formula: i due addendi si scambiano fra loro. È la <b>reciprocità</b>, e vale ogni volta che l'operatore è autoaggiunto nella forma di Sturm-Liouville; è anche un controllo gratuito sul risultato.</li>
+  <li><b>Il prodotto $a_2(y)W(y)$ va tenuto insieme.</b> L'errore più comune è dimenticare $a_2$ quando l'equazione è scritta in forma $x^2f''+\dots$: lì $a_2(y)=y^2$, e sparisce se si copia la formula del caso $f''+\dots$ senza guardare.</li>
+  </ul>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché si impone la <b>continuità</b> di $G$ e il <b>salto</b> di $G'$, e non il contrario?`,
+    a:R`Perché la derivata di un salto è una $\delta$, e la derivata di una $\delta$ è una $\delta'$. Se $G$ avesse un salto in $x=y$, $\partial_xG$ conterrebbe $\delta(x-y)$ e $\partial_x^2G$ conterrebbe $\delta'(x-y)$: l'equazione $a_2\partial_x^2G+\dots=\delta$ avrebbe a sinistra un oggetto più singolare che a destra, e nessuna scelta dei coefficienti potrebbe pareggiarli. <b>Il grado di singolarità della sorgente fissa il grado di irregolarità della soluzione:</b> sorgente $\delta$ in un'equazione del second'ordine $\Rightarrow$ $G$ continua con derivata discontinua. Per una sorgente $\delta'$ (tappa 06) è la soluzione stessa a saltare.`},
+   {q:R`Dove si è usata l'ipotesi $a_2(x)\ne0$?`,
+    a:R`In due punti. Nel <b>salto</b>: la condizione è $a_2(y)[\partial_xG]=1$, e se $a_2(y)=0$ non esiste alcun salto finito che produca la $\delta$. E nella <b>formula finale</b>, dove $a_2(y)$ sta al denominatore. Un punto in cui $a_2$ si annulla è un <b>punto singolare</b> dell'equazione, e lì la teoria va rifatta: è il motivo per cui l'appello del 04/07/2023 su $x^2f''=\delta'(x-1)$ specifica il dominio $[0,2]$ ma mette la sorgente in $x=1$, lontano dall'origine.`}
+  ]}
+]},
+
+/* ---------------- 03 · LE DUE LIBERTÀ CHE NON CONTANO ---------------- */
+{ num:'03', title:'Due libertà apparenti, e perché non cambiano nulla', meta:'riscalare $f_1,f_2$ · il Wronskiano non è costante se $a_1\\ne0$',
+  blocchi:[
+  {t:'prosa', title:'Riscalare le soluzioni omogenee non cambia $G$', tag:'controllo di coerenza', html:R`
+  <p>$f_1$ e $f_2$ sono definite a meno di una costante: se $f_1$ soddisfa la condizione a sinistra, anche $\alpha f_1$ la soddisfa. Sembra un'ambiguità nella formula, e invece <b>non cambia</b> niente. Sostituendo $f_1\to\alpha f_1$ e $f_2\to\beta f_2$, il numeratore acquista un fattore $\alpha\beta$ (ogni addendo contiene una $f_1$ e una $f_2$), e il Wronskiano pure:
+  $$W\to\alpha\beta\,W.$$
+  I due fattori si elidono e $G$ <b>non cambia</b>. È il motivo per cui nelle soluzioni d'appello si trovano Wronskiani diversi per lo stesso problema — $W=6/x$ oppure $W=\tfrac{3}{2x}$, a seconda di come sono state normalizzate le $f$ — e la funzione di Green finale è la stessa. <b>Se il tuo $W$ non coincide con quello della soluzione ufficiale, non è ancora un errore:</b> confronta la $G$.</p>`},
+  {t:'prosa', title:'Il Wronskiano dipende da $x$, e va lasciato dipendere', tag:'trabocchetto dichiarato', html:R`
+  <div class="note warn">Nel caso a <b>coefficienti costanti</b> molti testi ricordano il Wronskiano come una costante. In generale <b>non lo è</b>: per l'identità di Abel, $W(x)=W(x_0)\exp\!\big[-\!\int_{x_0}^x\frac{a_1}{a_2}\big]$, quindi $W$ è costante solo se $a_1\equiv0$. Nelle equazioni di Eulero — che sono il tipo più frequente in questi appelli — $W$ dipende da $x$ eccome: nell'esercizio del 20/06/2023 vale <b>$W(x)=\dfrac{6}{x}$</b>, in quello del 12/02/2025 vale <b>$W(x)=-\dfrac{1}{x}$</b>. Sostituire un valore numerico al posto di $W(y)$ dentro l'integrale è l'errore che fa sbagliare il conto restando con la formula giusta.</div>`},
+  {t:'prosa', title:'E una derivata che serve dopo', tag:'grammatica', html:R`
+  <p>Un conto minuscolo che tornerà nella tappa 09, e che conviene avere sotto mano: se $G_R(t)=\dfrac{\sin(\omega_0t)}{\omega_0}$, allora
+  $$G_R'(t)=\cos(\omega_0 t),$$
+  cioè la derivata vale $1$ nell'origine qualunque sia $\omega_0$. È la traduzione, nel linguaggio dei valori iniziali, del salto unitario della derivata: la sorgente puntiforme dà all'oscillatore un impulso di velocità, non di posizione.</p>`}
+]},
+
+/* ---------------- 04 · IL PRIMO APPELLO, PER INTERO ---------------- */
+{ num:'04', title:'L’esercizio 4 del 20/06/2023, svolto per intero', meta:'equazione di Eulero · $W(x)=6/x$ · la soluzione e le tre verifiche',
+  blocchi:[
+  {t:'esercizio', title:'Eulero con condizioni di Dirichlet',
+   src:'appello 20/06/2023, esercizio 4 [7 pt.] — Caprini ed Esposito',
+   testo:R`Si utilizzi il metodo delle funzioni di Green per risolvere $x^2f''(x)+xf'(x)-f(x)=x^2$ sul dominio $x\in[1,2]$, con condizioni al bordo $f(1)=f(2)=0$.`,
+   steps:[
+    {label:'Le soluzioni dell’omogenea: è un’equazione di Eulero', body:R`<p>L'omogenea $x^2f''+xf'-f=0$ ha coefficienti $a_k(x)\propto x^k$: è un'<b>equazione di Eulero</b>, e si risolve col tentativo $f=x^\alpha$. Sostituendo, $\alpha(\alpha-1)+\alpha-1=\alpha^2-1=0$, quindi $\alpha=\pm1$ e le due soluzioni indipendenti sono
+    $$f(x)=x\qquad\text{e}\qquad f(x)=\frac1x.$$</p>`},
+    {label:'Le due combinazioni che rispettano un bordo ciascuna', body:R`<p>Cerco $f_1=ax+b/x$ con $f_1(1)=0$: $a+b=0$, quindi (scegliendo $a=1$)
+    $$f_1(x)=x-\frac1x.$$
+    E $f_2$ con $f_2(2)=0$: $2a+b/2=0$, cioè $b=-4a$, quindi
+    $$f_2(x)=x-\frac4x.$$</p>`},
+    {label:'Il Wronskiano', body:R`<p>Con $f_1'=1+x^{-2}$ e $f_2'=1+4x^{-2}$:
+    $$W=f_1f_2'-f_1'f_2=\Big(x-\tfrac1x\Big)\Big(1+\tfrac{4}{x^2}\Big)-\Big(1+\tfrac{1}{x^2}\Big)\Big(x-\tfrac4x\Big).$$
+    Sviluppando, i termini in $x$ e in $x^{-3}$ si cancellano e restano i due in $x^{-1}$: <b>$W(x)=\dfrac{6}{x}$</b>. Non è costante — qui $a_1=x\ne0$ — ed è diverso da zero su tutto $[1,2]$, quindi la funzione di Green esiste.</p>`},
+    {label:'La funzione di Green', body:R`<p>Qui $a_2(y)=y^2$, quindi il prefattore è $\dfrac{1}{a_2(y)W(y)}=\dfrac{1}{y^2\cdot 6/y}=\dfrac{1}{6y}$, e
+    $$G(x,y)=\frac{1}{6y}\Big[\Big(x-\tfrac1x\Big)\Big(y-\tfrac4y\Big)\theta(y-x)+\Big(y-\tfrac1y\Big)\Big(x-\tfrac4x\Big)\theta(x-y)\Big].$$</p>`},
+    {label:'L’integrale, con $j(y)=y^2$', body:R`<p>$$f(x)=\frac{f_2(x)}{6}\int_1^x\! \frac{f_1(y)\,y^2}{y}dy+\frac{f_1(x)}{6}\int_x^2\! \frac{f_2(y)\,y^2}{y}dy=\frac{f_2(x)}{6}\int_1^x\!(y^2-1)\,dy+\frac{f_1(x)}{6}\int_x^2\!(y^2-4)\,dy.$$
+    I due integrali valgono $\frac{x^3}{3}-x+\frac23$ e $-\frac{16}{3}-\frac{x^3}{3}+4x$. Sostituendo e semplificando:
+    $$f(x)=\dfrac{3x^{3}-7x^{2}+4}{9x}.\qquad\blacksquare$$</p>`},
+    {label:'Le tre verifiche che valgono trenta secondi', body:R`<p><b>(a) I bordi:</b> in $x=1$ il numeratore è $3-7+4=0$, quindi <b>$f(1)=0$</b>; in $x=2$ è $24-28+4=0$, quindi <b>$f(2)=0$</b>. <b>(b) L'equazione:</b> derivando due volte e ricomponendo, $x^2f''+xf'-f$ <b>rimette in piedi $x^{2}$</b>, la sorgente di partenza. <b>(c) Il segno:</b> la sorgente è positiva e le condizioni sono nulle ai due estremi, quindi $f$ deve avere segno definito all'interno — e infatti $3x^3-7x^2+4=(x-1)(3x^2-4x-4)$ è negativo in $(1,2)$.</p>
+    <div class="note">Queste tre verifiche sono la differenza fra un esercizio consegnato e un esercizio consegnato <b>giusto</b>, e costano molto meno che rifare il conto.</div>`}
+   ],
+   nota:R`Struttura da memorizzare, perché è identica in tutti e cinque gli appelli: <b>(1)</b> risolvi l'omogenea; <b>(2)</b> imponi <i>un</i> bordo a ciascuna soluzione; <b>(3)</b> calcola $W$ e controlla che non sia nullo; <b>(4)</b> scrivi $G$ col prefattore $1/(a_2W)$; <b>(5)</b> integra contro $j$ spezzando in $\int_a^x$ e $\int_x^b$; <b>(6)</b> verifica i bordi. Il punto in cui si perde tempo è sempre il (5); il punto in cui si perdono punti è sempre il (3).`}
+]},
+
+/* ---------------- 05 · QUANDO LA GREEN NON ESISTE ---------------- */
+{ num:'05', title:'Quando la funzione di Green non esiste', meta:'$W\\equiv0$ · la seconda parte dello stesso appello · l’alternativa di Fredholm',
+  blocchi:[
+  {t:'prosa', title:'Il discriminante, messo apposta', tag:'il nodo', html:R`
+  <p>Lo stesso appello del 20/06/2023, dopo aver fatto risolvere l'esercizio, aggiunge una riga: <i>«Si discuta poi il caso in cui le condizioni al bordo sono $f(1)+3f'(1)=f(2)-6f'(2)=0$»</i>. Non è un secondo conto: è una <b>verifica che si è capito da dove viene il metodo</b>, e la risposta è che qui il metodo <b>non si applica</b>.</p>`},
+  {t:'reveal', title:'Il conto, in tre righe', tag:'derivazione', steps:[
+   {label:'Imponi la condizione a sinistra', body:R`<p>Con $f=ax+b/x$ e $f'=a-b/x^2$, la condizione in $x=1$ è
+   $$f(1)+3f'(1)=(a+b)+3(a-b)=4a-2b=0\ \Longrightarrow\ b=2a.$$
+   Quindi $f_1(x)=x+\dfrac2x$.</p>`},
+   {label:'Imponi la condizione a destra', body:R`<p>In $x=2$:
+   $$f(2)-6f'(2)=\Big(2a+\tfrac b2\Big)-6\Big(a-\tfrac b4\Big)=-4a+2b=0\ \Longrightarrow\ b=2a.$$
+   <b>La stessa identica relazione.</b> Quindi $f_2(x)=x+\dfrac2x=f_1(x)$.</p>`},
+   {label:'Il Wronskiano si annulla', body:R`<p>Due funzioni proporzionali hanno Wronskiano nullo: $W\equiv0$ su tutto l'intervallo. Il prefattore $\dfrac{1}{a_2(y)W(y)}$ è infinito, <b>la funzione di Green non esiste</b>, e l'equazione non si può risolvere con questo metodo. $\blacksquare$</p>`}
+  ]},
+  {t:'prosa', title:'Che cosa significa davvero, al di là del conto', tag:'first principles', html:R`
+  <p>Non è un incidente tecnico: è la versione continua di un fatto di algebra lineare che si conosce già. $W\equiv0$ vuol dire che esiste una soluzione <b>non banale</b> dell'omogenea che soddisfa <b>entrambe</b> le condizioni al bordo — cioè l'operatore $D$, ristretto alle funzioni che rispettano i bordi, ha un <b>nucleo non banale</b>: ha l'autovalore zero.</p>
+  <p>Un operatore con nucleo non banale non è invertibile, esattamente come una matrice singolare; e $G$ era proprio l'inversa. Il parallelo è completo (<b>alternativa di Fredholm</b>):</p>
+  <ul>
+  <li>se $W\ne0$: $D$ è invertibile sul dominio con quei bordi, $G$ esiste ed è unica, e la soluzione esiste ed è unica <b>per ogni</b> sorgente $j$;</li>
+  <li>se $W\equiv0$: $D$ non è invertibile. La soluzione o <b>non esiste</b>, oppure esiste ma <b>non è unica</b> (vi si può sommare l'elemento del nucleo) — e la distinzione dipende da $j$: serve che $j$ sia ortogonale al nucleo dell'aggiunto.</li>
+  </ul>
+  <p>È lo stesso enunciato di $Ax=b$ con $A$ singolare, ed è il ponte con la teoria spettrale di me-07 e me-09b: <b>la funzione di Green è il risolvente $\left(D-\lambda\right)^{-1}$ calcolato in $\lambda=0$</b>, e non esiste quando $0$ è nello spettro.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In un esercizio trovi $f_1$ e $f_2$ e ti accorgi che $W$ si annulla <b>in un punto solo</b> interno all'intervallo, non ovunque. È lo stesso caso?`,
+    a:R`No, ed è la domanda giusta. Per l'<b>identità di Abel</b>, $W(x)=W(x_0)\exp\big[-\int_{x_0}^x a_1/a_2\big]$: un esponenziale non si annulla mai, quindi $W$ o è <b>identicamente nullo</b> o non si annulla <b>mai</b> (dove $a_1/a_2$ è integrabile). Se il tuo conto dà uno zero isolato, hai sbagliato il conto — oppure quel punto è una singolarità dell'equazione, cioè uno zero di $a_2$, e allora l'intervallo va spezzato. Non esiste il caso «$W$ si annulla qua e là».`}
+  ]}
+]},
+
+/* ---------------- 06 · LE ALTRE QUATTRO VARIANTI ---------------- */
+{ num:'06', title:'Le altre quattro varianti cadute', meta:'sorgente $\\delta\'$ · coefficienti costanti · dominio illimitato · bordi inomogenei',
+  blocchi:[
+  {t:'prosa', title:'Che cosa cambia, e che cosa no', tag:'mappa del terreno', html:R`
+  <p>La struttura delle sei mosse non cambia mai. Cambia <b>un</b> ingrediente per volta, ed è utile vederli isolati perché all'esame arrivano mescolati.</p>`},
+  {t:'esercizio', title:'(a) Sorgente distribuzionale: $\\delta\'$',
+   src:'appello 04/07/2023, esercizio 4 [7 pt.]',
+   testo:R`Si usi il metodo della funzione di Green per risolvere $x^2f''(x)=\delta'(x-1)$ su $x\in[0,2]$, con $f(0)=f(2)=0$.`,
+   steps:[
+    {label:'La Green, che è facile', body:R`<p>L'omogenea $x^2f''=0$ dà $f''=0$ per $x\ne0$, quindi le soluzioni sono $1$ e $x$. Con $f_1(0)=0$: $f_1=x$. Con $f_2(2)=0$: $f_2=x-2$. Il Wronskiano è
+    $$W=x\cdot 1-1\cdot(x-2)=2,$$
+    dunque <b>$W=2$</b>, costante (qui $a_1=0$, come vuole Abel). Con $a_2(y)=y^2$:
+    $$G(x,y)=\frac{1}{2y^2}\Big[x(y-2)\,\theta(y-x)+y(x-2)\,\theta(x-y)\Big].$$</p>`},
+    {label:'Integrare contro $\\delta\'$: il segno è tutto', body:R`<p>Per definizione di derivata distribuzionale (me-09), $\int dy\,\varphi(y)\,\delta'(y-1)=-\varphi'(1)$. Quindi
+    $$f(x)=\int_0^2 dy\;G(x,y)\,\delta'(y-1)=-\,\partial_y G(x,y)\Big|_{y=1}.$$
+    <b>Il meno è la parte che si dimentica</b>, e cambia il segno di tutta la risposta.</p>`},
+    {label:'Le due regioni, separatamente', body:R`<p>Per $x<1$ siamo nel ramo $y>x$, dove $G=\dfrac{x(y-2)}{2y^2}$; derivando in $y$ e valutando in $y=1$ si ottiene $\dfrac{3x}{2}$, quindi $f(x)=-\dfrac{3x}{2}$.</p>
+    <p>Per $x>1$ siamo nel ramo $y<x$, dove $G=\dfrac{y(x-2)}{2y^2}=\dfrac{x-2}{2y}$; derivando, $-\dfrac{x-2}{2y^2}$, e in $y=1$ dà $-\dfrac{x-2}{2}$, quindi $f(x)=\dfrac{x}{2}-1$.</p>
+    $$f(x)=\begin{cases}-\dfrac{3x}{2}, & 0\le x<1,\\[6pt] \dfrac{x}{2}-1, & 1<x\le 2.\end{cases}$$`},
+    {label:'Perché la soluzione salta, e perché va bene', body:R`<p>Controlliamo i bordi: $f(0)=0$ e $f(2)=1-1=0$. Ma in $x=1$ la soluzione <b>salta di esattamente $1$</b>: da $-3/2$ a $-1/2$. Non è un errore. Una sorgente $\delta'$ è un <b>dipolo</b>, e alza di uno il grado di singolarità della risposta: con sorgente $\delta$ la soluzione è continua e salta la derivata (tappa 02), con sorgente $\delta'$ <b>salta la soluzione stessa</b>. $\blacksquare$</p>`}
+   ],
+   nota:R`Regola generale: se la sorgente è $\delta^{(n)}(y-y_0)$, la soluzione è $(-1)^n\partial_y^n G(x,y)|_{y=y_0}$. Tutto il lavoro resta nel costruire $G$ una volta sola; la sorgente esotica è solo un modo diverso di consumarla.`},
+  {t:'esercizio', title:'(b) Coefficienti costanti',
+   src:'appello 16/11/2023, esercizio 4 [8 pt.]',
+   testo:R`Si utilizzi il metodo della funzione di Green per $f''(x)-3f'(x)+2f(x)=\delta'(x-1)$ su $x\in[0,2]$, con $f(0)=f(2)=0$.`,
+   steps:[
+    {label:'Omogenea: polinomio caratteristico', body:R`<p>$\lambda^2-3\lambda+2=0$ dà $\lambda=1,2$: soluzioni $e^x$ ed $e^{2x}$. Con $f_1(0)=0$: $f_1=e^x-e^{2x}$. Con $f_2(2)=0$: $f_2=e^x-e^{2(x-1)}$ (infatti $f_2(2)=e^2-e^2=0$).</p>`},
+    {label:'Il Wronskiano', body:R`<p>Un conto diretto dà
+    $$W(x)=f_1f_2'-f_1'f_2=(e^{2}-1)e^{3x-2}.$$
+    Nota che <b>non è costante</b> pur essendo l'equazione a coefficienti costanti: qui $a_1=-3\ne0$, e Abel prevede proprio $W\propto e^{3x}$. È l'errore della tappa 03 in agguato.</p>`},
+    {label:'Il resto è identico', body:R`<p>$a_2\equiv1$, quindi $G(x,y)=\dfrac{1}{(e^2-1)e^{3y-2}}[f_1(x)f_2(y)\theta(y-x)+f_1(y)f_2(x)\theta(x-y)]$, e la sorgente $\delta'$ si consuma come nell'esercizio (a): $f(x)=-\partial_yG(x,y)|_{y=1}$. $\blacksquare$</p>`}
+   ],
+   nota:R`Questo appello e il precedente differiscono solo per l'omogenea: stessa sorgente, stessi bordi, stesso dominio. È la prova che il metodo è una <b>macchina</b>, e che l'unica parte «creativa» è risolvere $Df=0$.`},
+  {t:'esercizio', title:'(c) Dominio illimitato, e (d) bordi inomogenei',
+   src:'appelli 06/11/2024 [8 pt.] e 12/02/2025 [8 pt.]',
+   testo:R`(c) Operatore con termine $\ell(\ell+1)$, condizioni in $x\to0$ e $x\to\infty$. (d) $x^2f''(x)+xf'(x)=-\dfrac1x$ su $x\in[1,\infty)$, con $f(1)=0$ e $\lim_{x\to\infty}f(x)=1$.`,
+   steps:[
+    {label:'(c) Le condizioni al bordo all’infinito', body:R`<p>Quando il dominio è illimitato, «condizione al bordo» diventa una <b>condizione di regolarità</b>: $f_1$ è la soluzione che non esplode in $0$, $f_2$ quella che non esplode a $\infty$. Nell'appello del 06/11/2024 l'omogenea è di tipo Eulero con $\alpha^2+\alpha-\ell(\ell+1)=0$, cioè $\alpha=\ell$ oppure $\alpha=-\ell-1$, da cui
+    $$f_1(x)=x^{\ell}\ \ (\to0 \text{ per } x\to0),\qquad f_2(x)=x^{-\ell-1}\ \ (\to0 \text{ per } x\to\infty).$$
+    Il Wronskiano è
+    $$W(x)=-\dfrac{2\ell+1}{x^{2}},$$
+    che è la formula che compare in ogni libro di elettrostatica accanto allo sviluppo in multipoli: <b>questo esercizio è il calcolo del potenziale di una carica puntiforme in coordinate sferiche</b>, scritto in astratto.</p>`},
+    {label:'(d) Le soluzioni omogenee', body:R`<p>$x^2f''+xf'=0$ si riscrive $(xf')'=0$, quindi $f'=c/x$ e le soluzioni sono $1$ e $\log x$. Con $f_1(1)=0$: $f_1=\log x$. A destra si prende la soluzione che resta limitata, $f_2=1$. Allora
+    $$W(x)=-\dfrac{1}{x},$$
+    e con $a_2(y)=y^2$ il prefattore è $\dfrac{1}{y^2(-1/y)}=-\dfrac1y$:
+    $$G(x,y)=-\frac1y\Big[\log x\,\theta(y-x)+\log y\,\theta(x-y)\Big],$$
+    che è esattamente la $G$ stampata nella soluzione ufficiale.</p>`},
+    {label:'(d) L’integrale, con il suggerimento del testo', body:R`<p>Con $j(y)=-1/y$:
+    $$f(x)=\int_1^x\frac{\log y}{y^2}\,dy+\log x\int_x^{\infty}\frac{dy}{y^2}.$$
+    Il testo d'esame regala la primitiva $\int\frac{\log x}{x^2}dx=-\frac{1+\log x}{x}$ — con cui, per esempio, $\int_1^2\frac{\log y}{y^2}dy=\dfrac{1-\log 2}{2}$. Il primo integrale vale $1-\frac{1+\log x}{x}$, il secondo $\frac{\log x}{x}$, e la somma si semplifica in
+    $$f(x)=1-\dfrac{1}{x}.$$</p>`},
+    {label:'(d) Il punto dell’esercizio: i bordi erano inomogenei', body:R`<p>Le condizioni richieste erano $f(1)=0$ e $\lim_{x\to\infty}f=1$: la seconda <b>non è omogenea</b>, e la costruzione della tappa 02 vale solo per bordi omogenei. La via generale è scrivere $f=f_{\text{part}}+f_{\text{om}}$, costruire $G$ con i bordi <b>omogeneizzati</b> (cioè $f\to0$ a entrambi gli estremi), e poi aggiungere la combinazione di soluzioni omogenee che riporta i valori giusti.</p>
+    <p>Qui il regalo è che la particolare trovata soddisfa già tutto: $f(1)=0$ e $\lim_{x\to\infty}(1-1/x)=1$, quindi la costante da aggiungere è nulla. <b>Ma il controllo va fatto, non dato per scontato</b>: è l'unico punto in cui questo esercizio differisce dagli altri quattro. $\blacksquare$</p>`}
+   ],
+   nota:R`Bordi inomogenei: <b>omogeneizza, costruisci $G$, poi ripara con l'omogenea</b>. Non esiste una funzione di Green «per bordi inomogenei» — la $G$ è sempre quella del problema omogeneo, e i valori al bordo si ripristinano dopo.`}
+]},
+
+/* ---------------- 07 · TRASLAZIONI E IL PONTE CON LAPLACE ---------------- */
+{ num:'07', title:'Invarianza per traslazioni, e il ponte con Laplace', meta:'$G(x,y)=G(x-y)$ · convoluzione · $G=\\mathcal{L}^{-1}[1/D(s)]$',
+  blocchi:[
+  {t:'reveal', title:'Quando l’operatore ha coefficienti costanti', tag:'costruzione', steps:[
+   {label:'La funzione di Green dipende solo dalla differenza', body:R`<p>Se $D$ ha coefficienti costanti, traslare la sorgente trasla la risposta: $G(x,y)=G(x-y)$. L'equazione si riduce allora a un solo problema,
+   $$D\,G(x)=\delta(x),$$
+   e la sovrapposizione diventa una <b>convoluzione</b>:
+   $$f(x)=\int dy\;G(x-y)\,j(y)=(G*j)(x).$$
+   Il vantaggio è enorme: la convoluzione è ciò che le trasformate integrali diagonalizzano.</p>`},
+   {label:'Laplace trasforma la convoluzione in un prodotto', body:R`<p>Dal movimento me-10b, $\mathcal L[G*j]=\mathcal L[G]\cdot\mathcal L[j]$ e $\mathcal L[f^{(n)}]$ è un polinomio in $s$ per $F(s)$ (più i valori iniziali). Applicando $\mathcal L$ a $Df=j$ con condizioni iniziali nulle si ottiene $D(s)F(s)=J(s)$, dove $D(s)$ è il <b>polinomio caratteristico</b> dell'operatore. Quindi $F(s)=J(s)/D(s)$, e confrontando con $\mathcal L[G]\cdot J$:
+   $$\boxed{\;\mathcal L[G](s)=\frac{1}{D(s)}\qquad\Longleftrightarrow\qquad G=\mathcal L^{-1}\!\left[\frac{1}{D(s)}\right].\;}$$
+   <b>La funzione di Green è l'antitrasformata dell'inverso del polinomio caratteristico.</b> È la definizione operativa più rapida che esista, ed è il motivo per cui me-10b è prerequisito di questo movimento.</p>`},
+   {label:'Il caso che serve nella tappa 09', body:R`<p>Per l'oscillatore $D=\partial_t^2+\omega_0^2$ il polinomio è $D(s)=s^2+\omega_0^2$, e dal repertorio di me-10b
+   $$\mathcal L\!\left[\frac{\sin(\omega_0t)}{\omega_0}\right](s)=\dfrac{1}{s^{2}+\omega_0^{2}},$$
+   quindi $G(t)=\dfrac{\sin(\omega_0t)}{\omega_0}$ per $t>0$. Teniamolo da parte: nella tappa 09 lo ritroveremo per un'altra strada, e la coincidenza <b>non</b> sarà una coincidenza.</p>`}
+  ]},
+  {t:'prosa', title:'Perché Laplace dà una sola risposta e Fourier tre', tag:'il nodo, anticipato', html:R`
+  <p>Vale la pena notare subito una cosa che sembra un dettaglio e invece è il cuore della tappa 09. La trasformata di Laplace vive su $t\ge0$ e porta dentro di sé le condizioni iniziali: <b>l'antitrasformata è unica</b>, e la funzione di Green che produce è automaticamente quella che vale zero per $t<0$. Fourier, invece, vive su tutto $\mathbb{R}$, non sa nulla di «prima» e «dopo», e quando il polinomio $D(-i\omega)$ ha <b>zeri sull'asse reale</b> l'inversa $1/D$ non è nemmeno definita come funzione. Lì nasce l'ambiguità, e con essa le tre prescrizioni.</p>`}
+]},
+
+/* ---------------- 08 · LE PDE COL METODO DI FOURIER ---------------- */
+{ num:'08', title:'Le PDE col metodo di Fourier: calore e Schrödinger', meta:'$\\hat G=1/D(i\\omega,iq)$ · nucleo del calore · il propagatore libero · un refuso nelle dispense',
+  blocchi:[
+  {t:'prosa', title:'La ricetta, in due righe', tag:'regola operativa', html:R`
+  <p>Per un operatore a coefficienti costanti in più variabili si trasforma tutto. Con la convenzione delle dispense,
+  $$G(t,x)=\int\frac{d\omega\,dq}{(2\pi)^2}\,e^{i\omega t+iqx}\,\hat G(\omega,q),\qquad \delta(t)\delta(x)=\int\frac{d\omega\,dq}{(2\pi)^2}e^{i\omega t+iqx},$$
+  l'equazione $D\,G=\delta(t)\delta(x)$ diventa <b>algebrica</b>: $D(i\omega,iq)\,\hat G=1$, cioè $\hat G=1/D(i\omega,iq)$. Tutto il mestiere sta poi nel rifare l'integrale — e nel decidere cosa fare se il denominatore si annulla.</p>`},
+  {t:'esercizio', title:'Il nucleo del calore, e perché ammette solo la ritardata',
+   src:'Set 4, esercizio 11.1 (Esposito)',
+   testo:R`Si determini la funzione di Green dell'operatore $D=\partial_t-\kappa\partial_x^2$, mostrando che l'unica condizione al contorno possibile è quella ritardata, $G_R(t<0,x)=0$.`,
+   steps:[
+    {label:'In spazio di Fourier', body:R`<p>$(i\omega+\kappa q^2)\hat G=1$, quindi $\hat G=\dfrac{1}{i\omega+\kappa q^2}=-\dfrac{i}{\omega-i\kappa q^2}$. Il polo è in $\omega=i\kappa q^2$: sta <b>sull'asse immaginario, non su quello reale</b> (per $q\ne0$). È il punto decisivo: non c'è nessuna ambiguità da risolvere, $\hat G$ è una vera funzione e non una distribuzione, e la funzione di Green è <b>unica</b>.</p>`},
+    {label:'L’integrale in $\\omega$, coi residui', body:R`<p>Per $t>0$ si chiude nel semipiano superiore e si raccoglie il polo; per $t<0$ si chiude in quello inferiore, dove <b>non ci sono poli</b>, e il risultato è zero. Da qui la $\theta(t)$: la condizione ritardata non è stata <i>imposta</i>, è <b>uscita dal conto</b>. Fisicamente: il calore non può arrivare prima di essere stato acceso, e l'equazione del calore lo sa da sola.</p>`},
+    {label:'L’integrale gaussiano in $q$', body:R`<p>Resta $\displaystyle\int\frac{dq}{2\pi}e^{-\kappa q^2t+iqx}$, un integrale gaussiano con un termine lineare immaginario. Completando il quadrato,
+    $$\int\frac{dq}{2\pi}e^{-\kappa q^2t+iqx}=\frac{e^{-x^2/(4\kappa t)}}{\sqrt{4\pi\kappa t}},$$
+    e quindi
+    $$G_R(t,x)=\frac{e^{-\frac{x^{2}}{4\kappa t}}}{\sqrt{4\pi\kappa t}}\,\theta(t).$$
+    È il <b>nucleo del calore</b>: una gaussiana che parte infinitamente stretta in $t=0^+$ e si allarga come $\sqrt{t}$. Verifica diretta: <b>soddisfa l'equazione del calore</b> per ogni $t>0$.</p>`}
+   ],
+   nota:R`<div class="note warn"><b>Refuso nelle dispense.</b> Il Set 4, eq. (95), stampa il risultato come $\dfrac{e^{-x^2/4\kappa t}}{\sqrt{4\pi\kappa}}\theta(t)$: al denominatore <b>manca la $t$</b> sotto radice (l'esponente invece è giusto). Verificato sulla pagina resa del PDF, quindi è un refuso vero e non una perdita dell'estrazione. Che il $\sqrt{t}$ ci debba stare si vede in tre modi: rifacendo l'integrale gaussiano; controllando che $\int dx\,G=\theta(t)$, cioè che il calore totale si conservi; e notando che senza $\sqrt t$ la funzione non risolve l'equazione del calore. <b>La formula corretta è quella scritta qui sopra.</b></div>`},
+  {t:'esercizio', title:'Il propagatore libero di Schrödinger, dove l’ambiguità compare',
+   src:'Set 4, esercizio 11.2 (Esposito)',
+   testo:R`Si determini la funzione di Green di $D=i\partial_t+\tfrac12\partial_x^2$, con $G(t<0,x)=0$.`,
+   steps:[
+    {label:'Il denominatore si annulla sull’asse reale', body:R`<p>In Fourier: $\big(-\omega-\tfrac{q^2}{2}\big)\hat G=1$. Ora il polo è in $\omega=-q^2/2$, che per ogni $q$ è un <b>punto dell'asse reale</b>: il cammino d'integrazione ci passa sopra. La divisione per zero va regolarizzata, e la scelta non è unica — il modo generale di scriverla è parte principale più delta:
+    $$\hat G(\omega,q)=-\mathcal P\!\left(\frac{1}{\omega+\frac{q^2}{2}}\right)+2\pi\,c\;\delta\!\left(\omega+\frac{q^2}{2}\right),$$
+    con $c$ <b>arbitraria</b>: il termine con la $\delta$ è la trasformata di una soluzione dell'omogenea, ed è esattamente l'ambiguità annunciata nella tappa 01.</p>`},
+    {label:'Antitrasformare la parte principale', body:R`<p>Il conto passa per l'integrale
+    $$\int_{-\infty}^{\infty}du\,\frac{\sin(ut)}{u}=\pi\,\mathrm{sgn}(t),$$
+    (per $t>0$ vale $\pi$; è l'integrale di Dirichlet, che le dispense lasciano per esercizio). Ne segue $G=\big(c-\tfrac i2\mathrm{sgn}(t)\big)\int\frac{dq}{2\pi}e^{iqx-i\frac{q^2}{2}t}$.</p>`},
+    {label:'L’integrale gaussiano immaginario, e la scelta di $c$', body:R`<p>L'ultimo integrale è gaussiano con esponente immaginario puro: va regolarizzato con $e^{-\epsilon q^2}$ e poi si manda $\epsilon\to0$, ottenendo $\dfrac{e^{-x^2/(2it)}}{\sqrt{2\pi i t}}$. Quindi
+    $$G(t,x)=\Big(c-\frac i2\mathrm{sgn}(t)\Big)\frac{e^{-\frac{x^{2}}{2it}}}{\sqrt{2\pi i t}}.$$
+    La condizione $G(t<0,x)=0$ chiede che il prefattore si annulli per $t<0$, dove $\mathrm{sgn}=-1$: serve $c=-\tfrac i2$, e allora
+    $$G_R(t,x)=-i\,\theta(t)\,\frac{e^{-\frac{x^{2}}{2it}}}{\sqrt{2\pi i t}}.\qquad\blacksquare$$
+    È il <b>propagatore</b> libero della meccanica quantistica: la stessa gaussiana del calore con $\kappa\to i/2$, e la sostituzione $t\to it$ che manda l'una nell'altra è la <b>rotazione di Wick</b>.</p>`}
+   ],
+   nota:R`Il confronto fra i due esercizi è il vero contenuto della tappa: <b>calore</b>, polo fuori dall'asse reale, funzione di Green unica, causalità automatica. <b>Schrödinger</b>, polo sull'asse reale, una costante arbitraria, causalità da imporre a mano. La differenza non è tecnica: è che la prima equazione distingue il passato dal futuro e la seconda no.`}
+]},
+
+/* ---------------- 09 · LE TRE PRESCRIZIONI ---------------- */
+{ num:'09', title:'Non-unicità e le tre prescrizioni: ritardata, avanzata, Feynman', meta:'oscillatore armonico forzato · poli sull’asse reale · $i\\epsilon$ · il propagatore bosonico',
+  blocchi:[
+  {t:'prosa', title:'Il problema, nella sua forma più nuda', tag:'impostazione', html:R`
+  <p>Prendiamo l'<b>oscillatore armonico forzato</b>, $\ddot x(t)+\omega_0^2x(t)=j(t)$, che è il §15.2 della scaletta del docente e l'esempio su cui si costruisce tutto il resto. La funzione di Green soddisfa
+  $$\big(\partial_t^2+\omega_0^2\big)G(t)=\delta(t),$$
+  e in Fourier, con $G(t)=\int\frac{d\omega}{2\pi}e^{-i\omega t}\hat G(\omega)$,
+  $$\big(-\omega^2+\omega_0^2\big)\hat G(\omega)=1\qquad\Longrightarrow\qquad \hat G(\omega)=-\frac{1}{\omega^2-\omega_0^2}.$$
+  I poli sono in $\omega=\pm\omega_0$: <b>due punti dell'asse reale</b>, in mezzo al cammino d'integrazione. L'integrale, così com'è, <b>non ha senso</b>. E la ragione fisica è trasparente: l'equazione è invariante per $t\to-t$, quindi non può sapere da sola in quale verso il tempo scorre.</p>`},
+  {t:'prosa', title:'Che cosa significa scegliere una prescrizione', tag:'first principles', html:R`
+  <p>Regolarizzare vuol dire spostare i poli di un infinitesimo $i\epsilon$ fuori dall'asse reale, integrare, e poi mandare $\epsilon\to0$. Ogni modo di spostarli dà un risultato diverso, e i risultati differiscono per una <b>soluzione dell'omogenea</b> — che è esattamente l'ambiguità della tappa 01, ora resa esplicita. Tornerà utile la decomposizione in fratti semplici
+  $$-\frac{1}{\omega^{2}-\omega_0^{2}}=\frac{1}{2\omega_0}\left[\dfrac{1}{\omega+\omega_0}-\dfrac{1}{\omega-\omega_0}\right],$$
+  che mostra i due poli isolati e i loro residui.</p>
+  <p>La <b>scelta non è matematica, è fisica</b>: si decide che cosa si vuole che la funzione di Green descriva. Tre scelte hanno un nome perché tre domande fisiche ricorrono.</p>`},
+  {t:'gram', title:'Le tre prescrizioni', rows:[
+   [R`<b>green ritardata</b> $G_R$`, R`$\omega\to\omega+i\epsilon$: <b>entrambi</b> i poli scendono sotto l'asse reale. Per $t<0$ si chiude nel semipiano superiore, dove non c'è nulla, e si ottiene <b>zero</b>. È la <b>causale</b>: la risposta viene dopo la causa. $$G_R(t)=\theta(t)\,\frac{\sin(\omega_0t)}{\omega_0}.$$ È quella che si usa in meccanica classica, in elettrodinamica (potenziali ritardati) e ogni volta che si risolve un problema ai valori iniziali.`],
+   [R`<b>green avanzata</b> $G_A$`, R`$\omega\to\omega-i\epsilon$: entrambi i poli salgono. Si annulla per $t>0$ e vive nel passato: $$G_A(t)=-\theta(-t)\,\frac{\sin(\omega_0t)}{\omega_0}.$$ Non è «sbagliata»: è la risposta alla domanda inversa — quale sorgente nel passato produce <i>questo</i> stato adesso. È lo strumento dei problemi al valore finale e della formulazione dell'assorbitore.`],
+   [R`<b>Feynman</b> $G_F$`, R`$\omega^2\to\omega^2+i\epsilon$: il polo in $+\omega_0$ scende, quello in $-\omega_0$ sale. Non si annulla né nel passato né nel futuro: $$G_F(t)=\frac{i}{2\omega_0}\,e^{-i\omega_0|t|}.$$ Propaga le frequenze <b>positive in avanti</b> nel tempo e quelle <b>negative all'indietro</b> — che in teoria dei campi è l'enunciato «le antiparticelle sono particelle che vanno indietro nel tempo». È il propagatore dei diagrammi di Feynman.`]
+  ]},
+  {t:'reveal', title:'Il conto della ritardata, e la verifica che chiude il cerchio', tag:'derivazione', steps:[
+   {label:'I residui', body:R`<p>Con $\omega\to\omega+i\epsilon$ i poli sono in $\pm\omega_0-i\epsilon$. Per $t>0$, $e^{-i\omega t}$ decade nel semipiano <b>inferiore</b>, quindi si chiude in basso — raccogliendo entrambi i poli, in verso orario (fattore $-2\pi i$). I residui di $-\frac{e^{-i\omega t}}{(\omega-\omega_0)(\omega+\omega_0)}$ valgono $-\frac{e^{-i\omega_0t}}{2\omega_0}$ e $+\frac{e^{i\omega_0t}}{2\omega_0}$, la cui somma è $\frac{i\sin(\omega_0t)}{\omega_0}$. Moltiplicando per $\frac{1}{2\pi}(-2\pi i)=-i$:
+   $$G_R(t)=\frac{\sin(\omega_0t)}{\omega_0}\qquad (t>0),$$
+   e zero per $t<0$, perché in alto non ci sono poli. $\blacksquare$</p>`},
+   {label:'Le tre verifiche', body:R`<p><b>(a)</b> Per $t>0$ la funzione <b>risolve l'omogenea per $t>0$</b>: $\ddot G+\omega_0^2G=0$, come deve essere lontano dalla sorgente. <b>(b)</b> Nell'origine <b>parte da fermo</b>, $G_R(0)=0$, e <b>riceve un calcio di velocità $1$</b>, $\dot G_R(0^+)=1$ — che è il salto unitario della derivata della tappa 02, ora letto come condizione iniziale. <b>(c)</b> Rimettendo le $\theta$: $\ddot G_R+\omega_0^2G_R=\delta(t)$, perché derivando due volte $\theta(t)\sin(\omega_0t)/\omega_0$ si genera esattamente una $\delta$ dal salto della derivata.</p>`},
+   {label:'La coincidenza che non è una coincidenza', body:R`<p>$G_R(t)=\theta(t)\frac{\sin(\omega_0t)}{\omega_0}$ è <b>identica</b> a quella trovata nella tappa 07 con $\mathcal L^{-1}[1/(s^2+\omega_0^2)]$. Non è un caso: la trasformata di Laplace integra su $t\ge0$, cioè <b>contiene già la scelta ritardata</b>. Il semipiano di convergenza di me-10b e il semipiano in cui si spostano i poli qui sono lo stesso semipiano. <b>Laplace non risolve l'ambiguità: la nasconde, avendola già scelta.</b></p>`}
+  ]},
+  {t:'prosa', title:'La non-unicità, detta in una riga', tag:'il nodo', html:R`
+  <p>La differenza fra due prescrizioni qualsiasi risolve l'omogenea. Il caso più pulito:
+  $$G_R(t)-G_A(t)=\theta(t)\frac{\sin(\omega_0t)}{\omega_0}+\theta(-t)\frac{\sin(\omega_0t)}{\omega_0}=\frac{\sin(\omega_0t)}{\omega_0},$$
+  perché $\theta(t)+\theta(-t)=1$. E $\frac{\sin(\omega_0t)}{\omega_0}$ è una soluzione dell'oscillatore libero. <b>Questa è la non-unicità, per intero:</b> le funzioni di Green di uno stesso operatore formano uno spazio affine sulle soluzioni dell'omogenea, e una prescrizione non è altro che il modo di scegliere un punto in quello spazio. La verifica che <b>anche $G_F$ risolve l'omogenea lontano dall'origine</b> conferma che vive nello stesso spazio.</p>`},
+  {t:'esercizio', title:'Il propagatore bosonico, dove le tre prescrizioni si scrivono insieme',
+   src:'More problems, esercizio 21 (Esposito)',
+   testo:R`Si calcoli la funzione di Green per $D=\partial_t^2-\partial_x^2+m^2$ (il «propagatore bosonico minkowskiano»), e se ne determinino le forme ritardata, avanzata e di Feynman introducendo una prescrizione $i\epsilon$ appropriata.`,
+   steps:[
+    {label:'In Fourier', body:R`<p>$\big(-\omega^2+q^2+m^2\big)\hat G=1$: i poli sono in $\omega=\pm\sqrt{q^2+m^2}$, di nuovo <b>sull'asse reale</b>, e di nuovo servono le prescrizioni. È lo stesso oscillatore di prima, con $\omega_0\to\sqrt{q^2+m^2}$ — <b>un oscillatore per ogni modo $q$</b>, che è l'intera idea della quantizzazione di un campo libero.</p>`},
+    {label:'Le tre scritture', body:R`<p>$$G_R=\int\frac{d\omega\,dq}{(2\pi)^2}\frac{e^{-i\omega t+iqx}}{(\omega+i\epsilon)^2-q^2-m^2},\qquad G_A=\int\frac{d\omega\,dq}{(2\pi)^2}\frac{e^{-i\omega t+iqx}}{(\omega-i\epsilon)^2-q^2-m^2},$$
+    $$G_F=\int\frac{d\omega\,dq}{(2\pi)^2}\frac{e^{-i\omega t+iqx}}{\omega^2-q^2-m^2+i\epsilon}.$$
+    Nelle prime due l'$i\epsilon$ accompagna $\omega$ e sposta <b>entrambi</b> i poli dalla stessa parte; nella terza accompagna la <b>massa</b> e li sposta in versi opposti. È tutta qui la differenza fra causalità e Feynman, ed è la ragione per cui in teoria dei campi la si scrive come $m^2\to m^2-i\epsilon$.</p>`}
+   ],
+   nota:R`Se questa tappa sembra sproporzionata rispetto a quanto cade allo scritto — e lo è: nei diciannove compiti in banca dati le parole «ritardata», «avanzata», «Feynman» e «propagatore» compaiono <b>zero volte</b> — è perché è nel programma (voce F.4), è nella scaletta delle note (§15.4) e in due esercizi assegnati, ed è il punto in cui Metodi diventa il linguaggio di Meccanica Quantistica. Il costo è mezz'ora; il ritorno è non dover imparare da capo il propagatore fra tre mesi.`}
+]},
+
+/* ---------------- 10 · ESERCIZI ---------------- */
+{ num:'10', title:'Esercizi — tocca a te', meta:'quattro esercizi con soluzione, dal tipo d’appello al propagatore',
+  blocchi:[
+  {t:'esercizio', title:'(1) Il tipo d’appello, senza rete',
+   src:'palestra — costruita sul modello dei cinque appelli',
+   testo:R`Risolvere $f''(x)-f(x)=e^{x}$ su $x\in[0,1]$ con $f(0)=f(1)=0$, col metodo delle funzioni di Green.`,
+   steps:[
+    {label:'Omogenea e bordi', body:R`<p>$\lambda^2=1$, soluzioni $e^{x}$ ed $e^{-x}$; conviene usare $\sinh$. Con $f_1(0)=0$: $f_1=\sinh x$. Con $f_2(1)=0$: $f_2=\sinh(x-1)$.</p>`},
+    {label:'Wronskiano', body:R`<p>$W=\sinh x\cosh(x-1)-\cosh x\sinh(x-1)=\sinh\big(x-(x-1)\big)=\sinh 1$, per la formula di sottrazione. È <b>costante</b>, come Abel prevede essendo $a_1=0$, e non nullo: la $G$ esiste.</p>`},
+    {label:'La funzione di Green e la soluzione', body:R`<p>$a_2\equiv1$, quindi
+    $$G(x,y)=\frac{1}{\sinh 1}\big[\sinh x\,\sinh(y-1)\,\theta(y-x)+\sinh y\,\sinh(x-1)\,\theta(x-y)\big],$$
+    e $f(x)=\int_0^1G(x,y)e^{y}dy$, da spezzare in $\int_0^x$ e $\int_x^1$. <b>Controllo obbligatorio prima di consegnare:</b> $f(0)=0$ e $f(1)=0$ devono venire da soli — se non vengono, l'errore è quasi sempre nell'aver scambiato $f_1$ e $f_2$ fra le due $\theta$.</p>`}
+   ],
+   nota:R`Il $\sinh$ invece degli esponenziali non è estetica: rende il Wronskiano un numero invece di una combinazione, e fa cadere i bordi per ispezione.`},
+  {t:'esercizio', title:'(2) Riconoscere che non esiste, senza fare il conto',
+   src:'palestra — sul modello della seconda parte del 20/06/2023',
+   testo:R`Per quali valori di $L>0$ il problema $f''(x)+f(x)=j(x)$ su $[0,L]$ con $f(0)=f(L)=0$ <b>non</b> ammette funzione di Green?`,
+   steps:[
+    {label:'Cerca l’elemento del nucleo', body:R`<p>La $G$ non esiste quando l'omogenea ha una soluzione non banale che rispetta <b>entrambi</b> i bordi. Qui l'omogenea è $f''+f=0$, con soluzioni $\sin x$ e $\cos x$. La condizione $f(0)=0$ seleziona $f=\sin x$; la condizione $f(L)=0$ chiede $\sin L=0$.</p>`},
+    {label:'La risposta', body:R`<p>$$L=n\pi,\qquad n=1,2,3,\dots$$
+    Per questi $L$, $f_1=f_2=\sin x$, $W\equiv0$, e la funzione di Green non esiste. $\blacksquare$</p>
+    <div class="note">Il significato è spettrale: $L=n\pi$ sono esattamente le lunghezze per cui <b>zero è autovalore</b> di $-\frac{d^2}{dx^2}-1$ con quei bordi — cioè le lunghezze a cui la corda ha un modo normale di frequenza nulla. È la <b>risonanza</b>: forzare un sistema a una frequenza di risonanza non ha risposta stazionaria, e la matematica lo dice rifiutando di invertire l'operatore.</div>`}
+   ],
+   nota:R`Domanda da trenta secondi che vale quanto un esercizio intero. Prima di lanciarsi nel conto di $W$, chiediti sempre: <i>esiste una soluzione dell'omogenea che azzera tutti e due i bordi?</i>`},
+  {t:'esercizio', title:'(3) Sorgente $\\delta$ semplice, e la reciprocità',
+   src:'palestra',
+   testo:R`Risolvere $f''(x)=\delta(x-\tfrac12)$ su $[0,1]$ con $f(0)=f(1)=0$, e verificare che $G(x,y)=G(y,x)$.`,
+   steps:[
+    {label:'La Green del laplaciano 1D', body:R`<p>Omogenea $f''=0$: soluzioni $1$ e $x$. Con i bordi, $f_1=x$ e $f_2=x-1$; $W=x\cdot1-1\cdot(x-1)=1$; $a_2\equiv1$. Quindi
+    $$G(x,y)=x(y-1)\theta(y-x)+y(x-1)\theta(x-y).$$</p>`},
+    {label:'La soluzione e la sua forma', body:R`<p>Con sorgente $\delta(y-\frac12)$ la soluzione è semplicemente $f(x)=G(x,\tfrac12)$:
+    $$f(x)=\begin{cases}-\dfrac{x}{2}, & x<\tfrac12,\\[6pt] \dfrac{x-1}{2}, & x>\tfrac12.\end{cases}$$
+    È una spezzata: due segmenti che si incontrano in $x=\frac12$ con un angolo. <b>Continua</b> (vale $-\frac14$ da entrambe le parti) con derivata che <b>salta di $1$</b>, da $-\frac12$ a $+\frac12$: la tappa 02, resa visibile.</p>`},
+    {label:'La reciprocità', body:R`<p>Scambiando $x\leftrightarrow y$ nella formula, il primo addendo diventa $y(x-1)\theta(x-y)$ e il secondo $x(y-1)\theta(y-x)$: sono gli stessi due addendi, scambiati d'ordine. Quindi <b>$G(x,y)=G(y,x)$</b>. Fisicamente: la risposta misurata in $x$ a una sorgente in $y$ è uguale alla risposta in $y$ a una sorgente in $x$. È il teorema di reciprocità, ed è gratis ogni volta che l'operatore è autoaggiunto.</p>`}
+   ],
+   nota:R`Questa $G$ — la corda tesa tirata in un punto — è il modello mentale da tenere per tutte le altre: <b>continua, con un angolo dove sta la sorgente, e nulla ai bordi</b>.`},
+  {t:'esercizio', title:'(4) Dalla ritardata alla risposta forzata',
+   src:'palestra — sul modello del Set 4, esercizio 10',
+   testo:R`Usando $G_R(t)=\theta(t)\frac{\sin(\omega_0t)}{\omega_0}$, si trovi la risposta dell'oscillatore inizialmente fermo nell'origine a una forzante costante $j(t)=F\,\theta(t)$.`,
+   steps:[
+    {label:'Convoluzione', body:R`<p>$$x(t)=\int_{-\infty}^{\infty}dt'\,G_R(t-t')\,j(t')=F\!\int_0^t dt'\,\frac{\sin\big(\omega_0(t-t')\big)}{\omega_0},$$
+    dove le due $\theta$ hanno fatto tutto il lavoro sugli estremi: $\theta(t-t')$ impone $t'<t$ e $\theta(t')$ impone $t'>0$.</p>`},
+    {label:'L’integrale e la lettura fisica', body:R`<p>Sostituendo $u=t-t'$: $\ x(t)=\frac{F}{\omega_0}\int_0^t\sin(\omega_0u)\,du=\frac{F}{\omega_0^2}\big[1-\cos(\omega_0t)\big]$.</p>
+    <p>La risposta oscilla fra $0$ e $\frac{2F}{\omega_0^2}$ attorno alla nuova posizione d'equilibrio $\frac{F}{\omega_0^2}$: <b>il doppio</b> dello spostamento statico. È il fatto per cui un carico applicato di colpo sollecita una struttura il doppio dello stesso carico appoggiato piano, e qui esce da un integrale di tre righe. <b>Controlli:</b> $x(0)=0$ e $\dot x(0)=\frac{F}{\omega_0}\sin(0)=0$, come richiesto. $\blacksquare$</p>`}
+   ],
+   nota:R`Questo è il modo in cui la funzione di Green si usa davvero in fisica: costruita <b>una volta</b> per l'oscillatore, risolve qualunque forzante per convoluzione — gradino, impulso, sinusoide, rumore — senza mai più toccare l'equazione differenziale.`}
+]},
+
+/* ---------------- 11 · IL SENSO ---------------- */
+{ num:'11', title:'Il senso: perché questo è l’ultimo movimento di Metodi', meta:'dove convergono i dieci movimenti precedenti · causalità e analiticità · verso la quantistica',
+  blocchi:[
+  {t:'prosa', title:'Tutto il corso converge qui', tag:'sintesi', html:R`
+  <p>Vale la pena guardare che cosa è servito, in questo solo movimento:</p>
+  <ul>
+  <li>la <b>$\delta$ di Dirac</b> e le distribuzioni (me-09), senza cui $DG=\delta$ non ha significato, e senza cui la sorgente $\delta'$ dei due appelli è illeggibile;</li>
+  <li>il <b>teorema dei residui</b> (me-04), che è come si fanno tutti gli integrali di questo movimento;</li>
+  <li>la <b>trasformata di Fourier</b> (me-10) per passare allo spazio dei momenti, e la <b>trasformata di Laplace</b> (me-10b) per il ponte $G=\mathcal L^{-1}[1/D]$;</li>
+  <li>le <b>ODE e le EDP</b> (me-11): Eulero, coefficienti costanti, Wronskiano, Abel;</li>
+  <li>la <b>teoria spettrale</b> (me-07, me-09b) per capire che $W\equiv0$ significa «zero è autovalore», e che $G$ è il risolvente in $\lambda=0$;</li>
+  <li>la <b>parte principale</b> e i poli sull'asse reale (me-04), che sono le prescrizioni.</li>
+  </ul>
+  <p>Non è un caso ed è il motivo per cui sta alla fine: <b>la funzione di Green è il posto in cui tutti gli strumenti del corso vengono usati insieme su un solo problema.</b> Un appello che la chiede come esercizio 4 sta, in un colpo solo, verificando tutto il resto.</p>`},
+  {t:'prosa', title:'Causalità e analiticità, di nuovo', tag:'cucitura', html:R`
+  <p>La voce A.2 del programma nomina «la relazione fra causalità e analiticità» dentro la teoria delle funzioni analitiche, e me-10b l'ha dimostrata nella sua forma di base: <i>una risposta nulla per $t<0$ equivale a una trasformata olomorfa in un semipiano</i>. Qui quella frase diventa operativa e reversibile.</p>
+  <p>Scegliere la <b>prescrizione ritardata</b> vuol dire spingere tutti i poli di $\hat G$ nello stesso semipiano; e spingere i poli in un semipiano vuol dire rendere $\hat G$ olomorfa nell'altro; e rendere $\hat G$ olomorfa in un semipiano vuol dire, per il lemma di Jordan, che l'antitrasformata si annulla per $t<0$. <b>Causalità, posizione dei poli e olomorfia sono tre nomi della stessa cosa</b>, e la funzione di Green è dove la si tocca con mano. Da qui nascono le relazioni di dispersione di Kramers-Kronig, che sono la stessa identità scritta come integrale.</p>`},
+  {t:'prosa', title:'Che cosa apre', tag:'ROI', html:R`
+  <p>Il propagatore di Schrödinger della tappa 08 è <b>l'oggetto</b> della meccanica quantistica: $\psi(t,x)=\int dy\,G(t,x-y)\psi(0,y)$ è l'evoluzione temporale, e il passaggio all'integrale sui cammini consiste nel comporre infiniti propagatori infinitesimi. Il propagatore di Feynman della tappa 09 è la linea interna di ogni diagramma. E l'osservazione che $\partial_t^2-\partial_x^2+m^2$ è «un oscillatore per ogni modo $q$» è la quantizzazione del campo libero, in una riga.</p>
+  <p>Detto senza enfasi: <b>ciò che qui è l'ultimo esercizio di uno scritto, fra tre mesi sarà il primo capitolo di un altro corso.</b> Conviene che sia solido adesso.</p>`},
+  {t:'collaudo', title:'Controllo finale', items:[
+   {q:R`In una frase, perché la funzione di Green al bordo è <b>unica</b> mentre quella dell'oscillatore nel tempo <b>non lo è</b>?`,
+    a:R`Perché le due condizioni al bordo omogenee fissano completamente le due costanti arbitrarie dell'omogenea — a meno del caso degenere $W\equiv0$ — mentre sull'asse dei tempi non c'è nessun «bordo»: l'equazione $\ddot G+\omega_0^2G=\delta$ su tutto $\mathbb{R}$ lascia libera l'aggiunta di qualunque $A\cos\omega_0t+B\sin\omega_0t$, e servono <b>altre</b> informazioni — causalità, o anticausalità, o il criterio di Feynman — per sceglierne una. In entrambi i casi il numero di condizioni deve pareggiare la dimensione dello spazio delle soluzioni omogenee: al bordo pareggia, nel tempo no finché non si dice come si comporta la soluzione a $t\to\pm\infty$.`},
+   {q:R`Un esercizio d'appello chiede la funzione di Green e tu trovi $W=0$. Che cosa scrivi?`,
+    a:R`Che le due soluzioni omogenee selezionate dai due bordi sono <b>proporzionali</b>, dunque esiste una soluzione non banale dell'omogenea che rispetta entrambe le condizioni; che quindi l'operatore ristretto a quel dominio ha <b>nucleo non banale</b> (zero è autovalore) e <b>non è invertibile</b>; e che perciò <b>la funzione di Green non esiste</b> e il problema non si risolve con questo metodo. Aggiungendo, se c'è tempo, che per l'<b>alternativa di Fredholm</b> la soluzione esiste solo se la sorgente è ortogonale al nucleo, e in quel caso non è unica. Non si cerca di forzare il conto: la risposta richiesta è la diagnosi.`}
+  ]}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleome-12-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo me-12 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: me-12-funzioni-di-green.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

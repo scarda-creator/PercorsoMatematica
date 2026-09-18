@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento me-10b — La trasformata di Laplace: la cugina di Fourier che sa gestire ciò che cresce</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Metodi e Modelli · Movimento <b>me-10b — La trasformata di Laplace: dal semipiano di convergenza alla linea di Bromwich, e il problema di Cauchy che diventa algebra</b> · Caprini ed Esposito, note §12 · Set 3 es. 8 · Set 4 es. 10</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'metodi-e-modelli';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["serie-di-potenze"] = {"nome":"Serie di potenze","riga":"Una somma $\\sum_{n\\ge0}a_n(x-x_0)^{n}$, che converge dentro un intervallo (in campo complesso: un disco) di raggio $R$ centrato in $x_0$ e diverge fuori.","serve":"È la classe di serie di funzioni che si comporta meglio di tutte: dentro il raggio converge uniformemente sui compatti, quindi si deriva e si integra termine a termine infinite volte, e i coefficienti sono quelli di Taylor. Il raggio si calcola col rapporto $|a_{n+1}/a_n|$ o con Cauchy–Hadamard, e sul bordo non si sa niente a priori: va studiato a parte.","esempio":"Per $\\sum_{n\\ge0}\\dfrac{x^{n}}{n!}$ il rapporto fra coefficienti consecutivi tende a $0$: il raggio è infinito e la somma è $e^{x}$ su tutto $\\mathbb{R}$. Per $\\sum_{n\\ge1}n\\,x^{n}$ tende invece a $1$, quindi $R=1$, e in $x=\\tfrac12$ la somma vale $2$.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio, la derivazione termine a termine e l'identità con Taylor, nel nucleo sulle serie di funzioni"},"qui":{"metodi-e-modelli":{"serve":"In campo complesso la serie di potenze non è una classe fra altre: è la definizione stessa di analitica, e il teorema che olomorfa $=$ analitica dice che ogni funzione derivabile in senso complesso è già una serie di potenze. Il raggio smette anche di essere un conto sui coefficienti e diventa geometria: è la distanza dal centro alla singolarità più vicina — ed è il primo dei due raggi della corona di Laurent.","esempio":"La regola geometrica spiega i raggi reali che sembravano arbitrari: $\\dfrac{1}{1+x^{2}}$ è liscia su tutto $\\mathbb{R}$, ma il suo sviluppo in $0$ ha raggio $1$, perché in $\\pm i$ la funzione esplode e $|i|=1$. Dentro quel raggio il conto chiude: in $z=\\tfrac12$ la serie $1-z^{2}+z^{4}-\\cdots$ vale $\\tfrac45$."}},"controllo":[{"tipo":"limite","espr":"1/(n+1)","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $0$"},{"tipo":"limite","espr":"(n+1)/n","var":"n","a":"oo","vale":"1","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $1$"},{"tipo":"somma","espr":"n*(1/2)**n","var":"n","da":"1","a":"oo","vale":"2","dove":"esempio","appare":"vale $2$"},{"tipo":"uguale","sinistra":"Abs(I)","vale":"1","dove":"qui.metodi-e-modelli.esempio","appare":"|i|=1"},{"tipo":"somma","espr":"(-1)**n*(1/2)**(2*n)","var":"n","da":"0","a":"oo","vale":"4/5","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac45"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo me-10b: trasformata di Laplace <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        me-10b — trasformata di Laplace
+identita:  la cugina della trasformata di Fourier che sa gestire ciò che cresce, e che trasforma un problema con condizioni iniziali in un'equazione algebrica
+copre:     F.3 — Analisi di Fourier: serie di Fourier, trasformata di Fourier, trasformata di Laplace
+serve:     me-10 (09-hilbert-fourier.html), me-02 (12-cauchy.html)
+apre:      me-12 (da costruire)
+fonti:     note Esposito §12 (pp. 77-80); programma: Zanghì 17.1-17.3 e 17.8, Petrini cap. 2
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/* ---------------- 00 · IL FILO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Metodi · note §12 (pp. 77-80) · la trasformata che il programma nomina accanto a Fourier, e che gli esercizi usano per risolvere Cauchy',
+  blocchi:[
+  {t:'prosa', title:'Una frase, e il programma del movimento', tag:'first principles', html:R`
+  <p>La trasformata di Fourier (me-10) prende una funzione su tutto $\mathbb{R}$ e la scompone in onde $e^{-ikx}$ di ampiezza costante. Ha due punti ciechi, e sono esattamente i due casi che in fisica capitano sempre:</p>
+  <ul>
+  <li>una funzione che <b>cresce</b> all'infinito non ha trasformata di Fourier: l'integrale $\int dx\,f(x)e^{-ikx}$ non converge, perché $|e^{-ikx}|=1$ non smorza niente;</li>
+  <li>un <b>problema con condizioni iniziali</b> — l'oscillatore che parte fermo da una posizione data — vive su $t\ge0$ e non su tutto l'asse, e Fourier non ha modo di far entrare $x(0)$ e $\dot x(0)$ nel conto.</li>
+  </ul>
+  <p>La trasformata di Laplace ripara entrambi con una sola mossa: <i>sostituire all'onda pura $e^{-ikt}$ l'onda smorzata $e^{-st}$ con $s$ complesso, e integrare solo sulla semiretta $t\ge0$.</i></p>
+  <p style="text-align:center">$$\mathcal L[f](s)\equiv F(s)=\int_0^{\infty}dt\,f(t)\,e^{-st},\qquad s\in\mathbb{C}.$$</p>
+  <p>Il fattore $|e^{-st}|=e^{-\mathrm{Re}\,s\,t}$ decade, e decade tanto più in fretta quanto più $\mathrm{Re}\,s$ è grande: qualunque crescita esponenziale di $f$ viene domata, purché $\mathrm{Re}\,s$ sia grande abbastanza. Da qui discendono le tre cose che questo movimento costruisce, e nient'altro:</p>
+  <ul>
+  <li><b>L'esistenza non è ovunque, ma in un semipiano</b> $\mathrm{Re}\,s\gt\alpha_{\min}$ — ed è lì che $F(s)$ è anche <b>olomorfa</b>. La trasformata di Laplace è un oggetto di analisi complessa, non di analisi reale: tutto me-01 e me-04 rientra in gioco.</li>
+  <li><b>L'inversione è un integrale di contorno</b> lungo una retta verticale (la <i>linea di Bromwich</i>), e si calcola <b>chiudendo il cammino e sommando i residui</b>. È l'esercizio di me-04 in un altro costume — e la chiusura a destra, dove non ci sono poli, produce da sola $f(t)=0$ per $t\lt0$.</li>
+  <li><b>La derivata diventa moltiplicazione <i>più</i> i dati iniziali</b>: $\mathcal L[f'](s)=sF(s)-f(0)$. È il termine $-f(0)$ che Fourier non ha, ed è tutta la ragione per cui un problema di Cauchy si risolve con Laplace: le condizioni iniziali entrano nell'equazione algebrica invece di essere imposte alla fine.</li>
+  </ul>`},
+  {t:'prosa', title:'Quanto in profondità, e perché così', tag:'misura', html:R`
+  <p>Il conto è stato rifatto stanotte, e va detto per intero perché contraddice il numero che circolava. Su <b>24 prove leggibili</b> di Metodi in banca dati, questo movimento è toccato da <b>2</b>: i due fogli di esercizi di Esposito (<i>Set 3 — analisi di Fourier</i>, esercizio 8, e <i>Set 4 — equazioni differenziali</i>, esercizio 10). Negli <b>scritti d'esame dal 2023 al 2026 la parola «Laplace» non compare mai</b>.</p>
+  <p>Non è una ragione per saltarlo, ed ecco perché:</p>
+  <ul>
+  <li>è <b>nel programma</b>, alla voce F.3, nominato accanto alla serie e alla trasformata di Fourier: «<i>Analisi di Fourier: serie di Fourier, trasformata di Fourier, trasformata di Laplace</i>»;</li>
+  <li>il docente gli dedica un paragrafo intero delle note (§12) e <b>due esercizi con soluzione</b>, che è il segnale più forte che esista su cosa consideri esigibile;</li>
+  <li>rientra dalla finestra negli scritti che non lo nominano: ogni ODE a coefficienti costanti con condizioni iniziali si può fare con Laplace, ed è la strada più corta; e la <b>funzione di Green</b> di me-12, che compare in 10 prove, è l'antitrasformata di $1/D(s)$.</li>
+  </ul>
+  <p>Quindi: si copre <b>tutto</b> ciò che il docente ha scritto, conti compresi e rifatti, senza la dilatazione che si è data a me-08 (7 prove, il movimento più esaminato del corso). E si insiste sulla tappa 06 — Laplace come <i>solutore</i> — perché è lì che questo movimento paga anche negli scritti che parlano d'altro.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Calcolare la trasformata di Laplace di una funzione assegnata e <b>dichiararne il semipiano di esistenza e olomorfia</b> — che è la seconda metà della domanda in ogni esercizio del Set 3, e vale metà dei punti.</li>
+  <li>Ricavare le trasformate elementari invece di ricordarle: $1/s$, $n!/s^{n+1}$, $1/(s-a)$, $\omega/(s^2+\omega^2)$, $e^{-as}$, e sapere da dove viene ciascuna ascissa di convergenza.</li>
+  <li>Usare le quattro proprietà: derivata, moltiplicazione per $t$, traslazione, convoluzione — e <b>riconoscere una convoluzione mascherata</b> dentro un integrale, che è il trucco dell'esercizio 8.4.</li>
+  <li>Scrivere l'integrale di Bromwich, <b>chiuderlo dalla parte giusta</b> a seconda del segno di $t$, e calcolarlo con i residui, poli multipli inclusi.</li>
+  <li>Risolvere un problema di Cauchy lineare a coefficienti costanti dall'inizio alla fine: trasformare, imporre i dati iniziali, risolvere l'equazione algebrica, antitrasformare.</li>
+  <li>Dire in una frase perché la trasformata è olomorfa dentro il suo semipiano, e perché fuori non è «indefinita» ma <i>continuabile</i> (me-01b).</li>
+  </ul>
+  <p>Questo movimento poggia su <b>me-10</b> (trasformata di Fourier: l'inversione di Laplace <i>è</i> l'inversione di Fourier travestita) e su <b>me-02</b>/<b>me-04</b> (integrazione nel complesso e residui: senza, Bromwich è una formula da copiare). Regge <b>me-12</b>, le funzioni di Green.</p>`}
+]},
+
+/* ---------------- 01 · IL SEMIPIANO ---------------- */
+{ num:'01', title:'Dove la trasformata esiste, e perché proprio lì è olomorfa', meta:'note §12, eqq. (12.1)-(12.4) · crescita al più esponenziale · $\\alpha_{\\min}$ · derivazione sotto il segno',
+  blocchi:[
+  {t:'prosa', title:'La condizione di esistenza, e da dove esce', tag:'first principles', html:R`
+  <p>Sia $f:[0,\infty)\to\mathbb{C}$ <b>localmente integrabile</b> (cioè integrabile su ogni intervallo limitato: niente esplosioni a distanza finita). Perché l'integrale $\int_0^{\infty}dt\,f(t)e^{-st}$ converga serve una sola cosa in più, e riguarda l'infinito: che $f$ <b>non cresca più in fretta di un esponenziale</b>,</p>
+  $$|f(t)|\lt C\,e^{\alpha t}\qquad\forall\,t\gt t_0,$$
+  <p>per qualche $\alpha\in\mathbb{R}$ e qualche $t_0$. Sia $\alpha_{\min}$ il <b>più piccolo</b> $\alpha$ per cui questo vale: è <span class="str" data-str="serie-di-potenze">un estremo inferiore</span>, non un valore speciale della funzione, e si chiama <b>ascissa di convergenza</b>. Allora la stima si spezza in due pezzi, e ciascuno è finito per una ragione diversa:</p>
+  $$|F(s)|\le\int_0^{\infty}dt\,|f(t)|\,e^{-\mathrm{Re}\,s\,t}\le\underbrace{\int_0^{t_0}dt\,|f(t)|\,e^{-\mathrm{Re}\,s\,t}}_{\text{finito: }f\text{ localmente integrabile}}+\underbrace{\int_{t_0}^{\infty}dt\,C\,e^{(\alpha_{\min}-\mathrm{Re}\,s)t}}_{\text{finito se }\mathrm{Re}\,s\gt\alpha_{\min}}\lt\infty.$$
+  <p>Il primo pezzo è un integrale su un intervallo limitato e non chiede niente. Il secondo converge <b>se e solo se</b> l'esponente è negativo, cioè $\mathrm{Re}\,s\gt\alpha_{\min}$. Da qui il fatto centrale:</p>
+  <p style="text-align:center"><i>il dominio di esistenza della trasformata di Laplace è un <b>semipiano destro</b> del piano complesso $s$, e il suo bordo verticale sta in $\mathrm{Re}\,s=\alpha_{\min}$.</i></p>
+  <p>Due letture da tenere insieme. La prima è <b>operativa</b>: $\alpha_{\min}$ si legge dalla crescita di $f$ — per $f$ limitata è $0$, per $f=t\,e^{2t}\cos t$ è $2$ (il fattore $t$ non basta a spostarlo, perché $t\lt e^{\epsilon t}$ da un certo punto in poi, e $\epsilon$ è piccolo a piacere). La seconda è <b>strutturale</b>: il bordo non è un accidente dell'integrale, è il luogo delle <b>singolarità</b> di $F$. Nell'esercizio 8.1 la trasformata è $\tfrac{2}{s^2+16}-\tfrac{1}{s^2+4}$, i poli stanno in $s=\pm4i$ e $s=\pm2i$, cioè sull'asse immaginario — e infatti $\alpha_{\min}=0$.</p>`},
+  {t:'reveal', title:'Perché $F(s)$ è olomorfa nel semipiano, e non solo definita', tag:'il punto che le prove chiedono', steps:[
+   {label:'La domanda', body:R`<p>«Dominio di esistenza <b>e olomorfia</b>» è la formula che ricorre in ogni soluzione di Esposito. Che siano lo stesso insieme non è ovvio: esistere vuol dire che un integrale converge, essere olomorfa vuol dire essere derivabile in senso complesso in un intorno di ogni punto (me-01).</p>`},
+   {label:'Il candidato derivata', body:R`<p>Si deriva sotto il segno di integrale, sperando che si possa:
+   $$F'(s)=-\int_0^{\infty}dt\;t\,f(t)\,e^{-st}.$$
+   Il fattore in più è $t$, che è una crescita <i>polinomiale</i>.</p>`},
+   {label:'Perché si può', body:R`<p>Perché $t\,e^{-\mathrm{Re}\,s\,t}$ si stima come $e^{-(\mathrm{Re}\,s-\epsilon)t}$ per ogni $\epsilon\gt0$: il polinomio si mangia dentro l'esponenziale. Quindi l'integrale di $F'$ converge <b>con la stessa stima di prima</b>, e la convergenza è <i>localmente uniforme</i> in ogni semipiano $\mathrm{Re}\,s\ge\alpha_{\min}+\delta$. È esattamente la condizione che autorizza lo scambio fra derivata e integrale.</p>`},
+   {label:'La conclusione, e cosa porta con sé', body:R`<p>$F(s)$ è derivabile in senso complesso in ogni punto del semipiano aperto: <b>è olomorfa lì dentro</b>. E allora tutto l'apparato di me-01/me-04 le si applica — sviluppo in serie, teorema di Cauchy, residui — e in particolare:</p>
+   <ul>
+   <li>si può <b>continuare analiticamente</b> $F$ fuori dal semipiano (me-01b). L'esempio più corto: $\mathcal L[e^{at}](s)=1/(s-a)$ nasce definita per $\mathrm{Re}\,s\gt a$, ma $1/(s-a)$ ha senso su tutto $\mathbb{C}\setminus\{a\}$. La formula finale <i>vive</i> più a lungo dell'integrale che l'ha prodotta — e per questo la si può manipolare, sommare, invertire senza pensare ogni volta al semipiano.</li>
+   <li>$F$ non può essere una funzione qualunque: è olomorfa e, per il pezzo di stima visto sopra, $F(s)\to0$ quando $\mathrm{Re}\,s\to+\infty$. Una «trasformata» che non tende a zero all'infinito non è la trasformata di nessuno.</li>
+   </ul>`}
+  ]},
+  {t:'gram', title:'Fourier e Laplace, affiancate', rows:[
+   [R`<b>dominio</b>`, R`Fourier: tutta la retta, $\int_{-\infty}^{\infty}$. Laplace: la semiretta $[0,\infty)$, cioè si assume $f(t\lt0)=0$. La semiretta non è una limitazione tecnica: è la <b>causalità</b>. Un segnale che comincia a un istante, una risposta che non precede la sua causa.`],
+   [R`<b>nucleo</b>`, R`Fourier: $e^{-ikx}$, modulo $1$, non smorza. Laplace: $e^{-st}$ con $\mathrm{Re}\,s\gt0$, modulo $e^{-\mathrm{Re}\,s\,t}$, smorza esponenzialmente. È l'unica differenza, e tutte le altre ne discendono.`],
+   [R`<b>esistenza</b>`, R`Fourier: chiede $f\in L^1$ (o $L^2$ nel senso di me-10), cioè decrescita. Laplace: basta che $f$ non superi un esponenziale, quindi <b>accetta funzioni che divergono</b> — $e^{2t}$, $t^{100}$, $t\,e^{2t}\cos t$.`],
+   [R`<b>dove vive il risultato</b>`, R`Fourier: $\hat f(k)$ su $k$ reale. Laplace: $F(s)$ su un <b>semipiano complesso</b>, ed è olomorfa. La variabile è complessa fin dall'inizio, non per estensione.`],
+   [R`<b>inversione</b>`, R`Fourier: $\int dk/2\pi$ sull'asse reale. Laplace: $\int ds/2\pi i$ su una <b>retta verticale</b> dentro il semipiano, e si calcola con i residui.`],
+   [R`<b>derivata</b>`, R`Fourier: $\widehat{f'}=ik\hat f$, pulito. Laplace: $\mathcal L[f']=sF(s)-f(0)$, con il <b>dato iniziale</b>. È lo «sporco» che rende Laplace utile: i dati del problema entrano nella trasformata.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$f(t)=e^{t^2}$ ha trasformata di Laplace?`,
+    a:R`<b>No, per nessun $s$.</b> La condizione è $|f|\lt Ce^{\alpha t}$ per un $\alpha$ <i>fisso</i>, e $e^{t^2}$ batte ogni esponenziale: $e^{t^2-\alpha t}\to\infty$ comunque si scelga $\alpha$. Il semipiano di convergenza è vuoto, cioè $\alpha_{\min}=+\infty$. Attenzione al caso opposto, che è quello dell'esercizio 8.3: $e^{-t^2/2}$ decade più di ogni esponenziale, quindi la condizione vale per <b>ogni</b> $\alpha$ reale, $\alpha_{\min}=-\infty$, e la trasformata esiste su tutto il piano.`},
+   {q:R`Perché non si dice mai «la trasformata di Laplace di $f$ vale $F(s)$ per ogni $s$», e invece per Fourier non ci si pone il problema?`,
+    a:R`Perché per Fourier l'esistenza è una proprietà di $f$ sola (sta o non sta in $L^1$), mentre per Laplace il peso $e^{-\mathrm{Re}\,s\,t}$ dipende da $s$: la stessa funzione è trasformabile per certi $s$ e non per altri. Dichiarare il semipiano fa parte della risposta, non è un'aggiunta pedante — ed è la metà della domanda in ogni esercizio del Set 3.`}
+  ]}
+]},
+
+/* ---------------- 02 · IL REPERTORIO ---------------- */
+{ num:'02', title:'Le trasformate elementari, costruite invece che ricordate', meta:'note §12, esempio 12.1 · una sola trasformata di partenza, e tutto il resto per derivazione · l\'ascissa di ciascuna',
+  blocchi:[
+  {t:'reveal', title:'L\'unica trasformata da sapere: l\'esponenziale', tag:'esempio motore', steps:[
+   {label:'Il conto', body:R`<p>Per $a\in\mathbb{R}$ e $f(t)=e^{at}\theta(t)$:
+   $$F(s)=\int_0^{\infty}dt\,e^{(a-s)t}=\left[\frac{e^{(a-s)t}}{a-s}\right]_0^{\infty}=\frac{1}{s-a},$$
+   dove il termine a $t=\infty$ si annulla <b>solo</b> se $\mathrm{Re}\,(a-s)\lt0$. Quindi
+   $$\mathcal L[e^{at}](s)=\frac{1}{s-a},\qquad \mathrm{Re}\,s\gt a.$$</p>`},
+   {label:'Che cosa si vede già qui', body:R`<p>Tre cose che si ritroveranno ovunque. <b>Uno:</b> l'ascissa di convergenza è $\alpha_{\min}=a$, ed è anche la posizione del <b>polo</b> di $F$. <b>Due:</b> la formula $1/(s-a)$ è definita ben oltre il semipiano: è la continuazione analitica di cui alla tappa 01. <b>Tre:</b> $a$ può essere <b>complesso</b> — il conto non cambia, e la condizione diventa $\mathrm{Re}\,s\gt\mathrm{Re}\,a$. Da questa sola osservazione escono seno e coseno.`},
+   {label:'Seno e coseno, in due righe', body:R`<p>Con Eulero, $\sin(\omega t)=\frac{1}{2i}(e^{i\omega t}-e^{-i\omega t})$, e per linearità
+   $$\mathcal L[\sin\omega t](s)=\frac{1}{2i}\left(\frac{1}{s-i\omega}-\frac{1}{s+i\omega}\right)=\frac{\omega}{s^2+\omega^2},\qquad
+   \mathcal L[\cos\omega t](s)=\frac{s}{s^2+\omega^2},$$
+   entrambe per $\mathrm{Re}\,s\gt0$: le due esponenziali hanno $\mathrm{Re}\,(\pm i\omega)=0$, e l'ascissa della somma è <b>la più grande</b> delle due.</p>`},
+   {label:'Le potenze, derivando rispetto a $s$', body:R`<p>Dalla $\mathcal L[1]=1/s$ si scende per derivazione: poiché $\partial_s e^{-st}=-t\,e^{-st}$,
+   $$\mathcal L[t](s)=-\frac{d}{ds}\int_0^{\infty}dt\,e^{-st}=-\frac{d}{ds}\frac1s=\frac{1}{s^2},
+   \qquad\text{e iterando}\qquad \mathcal L[t^n](s)=\frac{n!}{s^{n+1}},$$
+   sempre per $\mathrm{Re}\,s\gt0$. <b>Questo è il trucco più redditizio del movimento</b>: derivare rispetto a un parametro è lecito per lo stesso argomento che rende $F$ olomorfa, e trasforma un integrale difficile in una derivata facile. Nell'esercizio 8.2 si userà con un parametro messo lì apposta.</p>`}
+  ]},
+  {t:'gram', title:'Il repertorio, con l\'ascissa di ciascuna', rows:[
+   [R`$\mathcal L[1]=\dfrac1s$`, R`$\alpha_{\min}=0$. È il caso $a=0$ dell'esponenziale. Attenzione: «$1$» qui significa $\theta(t)$, la funzione che vale $1$ per $t\gt0$ e $0$ prima — su $[0,\infty)$ sono la stessa cosa, e questa è la convenzione che rende la traslazione sensata.`],
+   [R`$\mathcal L[t^n]=\dfrac{n!}{s^{n+1}}$`, R`$\alpha_{\min}=0$. Un polinomio non sposta l'ascissa: cresce meno di ogni esponenziale.`],
+   [R`$\mathcal L[e^{at}]=\dfrac{1}{s-a}$`, R`$\alpha_{\min}=\mathrm{Re}\,a$. Il polo <b>è</b> l'ascissa.`],
+   [R`$\mathcal L[\sin\omega t]=\dfrac{\omega}{s^2+\omega^2}$, $\mathcal L[\cos\omega t]=\dfrac{s}{s^2+\omega^2}$`, R`$\alpha_{\min}=0$ per $\omega$ reale. I poli stanno in $\pm i\omega$, sull'asse immaginario: oscillare senza crescere né decadere è il caso di bordo.`],
+   [R`$\mathcal L[\delta(t-a)]=e^{-as}$`, R`per $a\gt0$; definita su tutto il piano. È la trasformata che non decade all'infinito reale — coerente col fatto che la delta non è una funzione ma una distribuzione (me-09).`],
+   [R`$\mathcal L\bigl[e^{-t^2/2}\bigr]=\sqrt{\tfrac{\pi}{2}}\,e^{s^2/2}\bigl[1-\mathrm{erf}(s/\sqrt2)\bigr]$`, R`$\alpha_{\min}=-\infty$: esiste ovunque. Non è elementare, ed è l'esercizio 8.3: la si costruisce per intero nella tappa 05.`]
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Due funzioni diverse possono avere la stessa trasformata di Laplace?`,
+    a:R`Sì, ma solo se differiscono su un insieme di <b>misura nulla</b> — cioè se sono lo stesso elemento di $L^2$, nel senso di me-08. L'inversione di Bromwich ricostruisce $f$ quasi ovunque, non punto per punto, per lo stesso motivo per cui lo fa l'inversione di Fourier. Nei punti di salto restituisce la semisomma dei limiti destro e sinistro.`},
+   {q:R`$\mathcal L[\cos\omega t]=s/(s^2+\omega^2)$ non tende a zero come $1/s^2$ ma come $1/s$. È un problema?`,
+    a:R`No: la richiesta è solo $F(s)\to0$ per $\mathrm{Re}\,s\to+\infty$, e $1/s$ ci va. Il <b>tasso</b> di decadimento dice piuttosto quanto è regolare $f$ in $t=0^+$: $\mathcal L[\delta]=e^{-as}$ non decade affatto (oggetto singolarissimo), $\mathcal L[\cos]\sim1/s$ (funzione che parte da un valore non nullo), $\mathcal L[\sin]\sim\omega/s^2$ (parte da zero). È la stessa corrispondenza regolarità-decadimento di me-10, letta al contrario.`}
+  ]}
+]},
+
+/* ---------------- 03 · LE PROPRIETÀ ---------------- */
+{ num:'03', title:'Le quattro proprietà, e quella che decide tutto', meta:'note §12.1, eqq. (12.10)-(12.15) · derivata $\\to$ moltiplicazione $+$ dati iniziali · convoluzione $\\to$ prodotto',
+  blocchi:[
+  {t:'prosa', title:'Derivata e dato iniziale: il termine che Fourier non ha', tag:'il cuore del movimento', html:R`
+  <p>Si integra per parti, e si guarda che cosa resta al bordo:</p>
+  $$\mathcal L[f'](s)=\int_0^{\infty}dt\,f'(t)e^{-st}=\Bigl[f(t)e^{-st}\Bigr]_0^{\infty}+s\int_0^{\infty}dt\,f(t)e^{-st}=s\,F(s)-f(0).$$
+  <p>Il termine a $t=\infty$ si annulla proprio grazie alla condizione di esistenza $\mathrm{Re}\,s\gt\alpha_{\min}$ — non è una svista, è il posto dove la condizione di convergenza <i>lavora</i>. Resta il valore in zero, col segno meno. Iterando:</p>
+  $$\mathcal L\!\left[\frac{d^nf}{dt^n}\right](s)=s^nF(s)-s^{n-1}f(0)-s^{n-2}f'(0)-\cdots-f^{(n-1)}(0),$$
+  <p>e in particolare, quello che serve per ogni ODE del secondo ordine:</p>
+  $$\mathcal L[\ddot x](s)=s^2X(s)-s\,x(0)-\dot x(0).$$
+  <p>Esposito lo commenta con una frase da prendere alla lettera: <i>qui compaiono i valori iniziali di $f$ e delle sue derivate, una proprietà che rende la trasformata di Laplace particolarmente adatta alla risoluzione di equazioni differenziali con condizioni iniziali</i>. Si noti bene la differenza di metodo, non solo di formula: con Fourier si trova la soluzione generale e <b>poi</b> si impongono le condizioni; con Laplace le condizioni sono già dentro l'equazione algebrica, e l'antitrasformata restituisce <b>la</b> soluzione, quella e non un'altra.</p>`},
+  {t:'gram', title:'Le altre tre, e a cosa serve ciascuna', rows:[
+   [R`<b>linearità</b> · $\mathcal L[\alpha f+\beta g]=\alpha F+\beta G$`, R`manifesta dalla definizione. Serve più di quanto sembri: è ciò che autorizza a spezzare $\sin$ e $\cos$ in esponenziali (tappa 02) e a scomporre $F(s)$ in <b>frazioni parziali</b> prima di antitrasformare (tappa 06). L'ascissa della somma è la più grande delle due.`],
+   [R`<b>moltiplicazione per $t$</b> · $\mathcal L[t\,f](s)=-F'(s)$`, R`è la formula $F'(s)=-\int t f e^{-st}$ della tappa 01 letta al contrario. Serve ogni volta che compare un fattore $t$ davanti a qualcosa di noto: $\mathcal L[t\,e^{at}]=-\frac{d}{ds}\frac{1}{s-a}=\frac{1}{(s-a)^2}$, e un fattore $t$ nel tempo è un <b>polo doppio</b> in $s$. Da tenere: la corrispondenza polo di ordine $n$ $\leftrightarrow$ crescita $t^{n-1}$ è il modo di leggere una soluzione senza calcolarla.`],
+   [R`<b>traslazione</b> · $\mathcal L[\theta(t-a)f(t-a)](s)=e^{-as}F(s)$`, R`un ritardo nel tempo è un fattore di fase-decadimento in $s$. <b>Non è nelle note §12</b>: viene dal formulario di Giuseppe (cap. 15) e dai testi del programma, ed è qui perché senza di essa non si trattano le sorgenti che si accendono a un certo istante — il gradino, l'impulso ritardato. Il $\theta(t-a)$ davanti non è decorativo: senza, la formula è falsa.`],
+   [R`<b>smorzamento</b> · $\mathcal L[e^{at}f(t)](s)=F(s-a)$`, R`la simmetrica della precedente: moltiplicare per un esponenziale nel tempo <b>trasla</b> la trasformata in $s$, e con essa il semipiano ($\alpha_{\min}\to\alpha_{\min}+\mathrm{Re}\,a$). Con questa e la precedente, ogni $e^{at}\times$(cosa nota) si fa a mente.`]
+  ]},
+  {t:'reveal', title:'Convoluzione $\\to$ prodotto, e perché qui l\'integrale si ferma a $t$', tag:'derivazione', steps:[
+   {label:'La definizione, con la causalità dentro', body:R`<p>Si definisce la convoluzione assumendo $f(t\lt0)=g(t\lt0)=0$:
+   $$(f*g)(t)=\int_{-\infty}^{\infty}dt'\,f(t')g(t-t')=\int_0^{t}dt'\,f(t')g(t-t').$$
+   Gli estremi si accorciano da soli: $f(t')$ uccide $t'\lt0$, e $g(t-t')$ uccide $t'\gt t$. <b>Questo è il motivo per cui la convoluzione di Laplace ha estremi $0$ e $t$</b> mentre quella di Fourier va su tutta la retta — ed è anche il motivo per cui la si riconosce a colpo d'occhio: un integrale $\int_0^t$ in cui l'integrando dipende da $t$ solo attraverso $t-t'$.</p>`},
+   {label:'Il conto', body:R`<p>$$\mathcal L[f*g](s)=\int_0^{\infty}dt\,e^{-st}\int_0^{t}dt'\,f(t')g(t-t')
+   =\int_0^{\infty}dt'\int_0^{\infty}d\tau\,e^{-s(\tau+t')}f(t')g(\tau),$$
+   dove si è posto $\tau=t-t'$. Il dominio triangolare $\{0\le t'\le t\lt\infty\}$ diventa il quadrante $\{t'\ge0,\ \tau\ge0\}$, e questo è il passo su cui vale la pena fermarsi: <b>è il cambio di variabile che scioglie l'accoppiamento fra i due estremi</b>. L'esponenziale si fattorizza, e i due integrali si separano:</p>
+   $$\boxed{\ \mathcal L[f*g](s)=F(s)\,G(s)\ }$$`},
+   {label:'Che cosa se ne fa', body:R`<p>Due usi opposti, e servono tutti e due. <b>In avanti</b> (esercizio 8.4): un integrale che sembra difficile è una convoluzione, quindi la sua trasformata è un prodotto di due trasformate facili. <b>All'indietro</b> (me-12): un prodotto $F(s)G(s)$ in $s$ significa che nel tempo la soluzione è $\int_0^t$ della sorgente contro qualcos'altro — e quel «qualcos'altro» è la <b>funzione di Green</b>. La formula $x(t)=\int_0^t dt'\,G(t-t')\,j(t')$ che comparirà lì è questa riga letta al contrario.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`$\mathcal L[f']=sF(s)-f(0)$: e se $f$ ha un salto in $t=0$, quale $f(0)$?`,
+    a:R`Il limite <b>destro</b>, $f(0^+)$: l'integrale parte da $t=0$ e vede solo ciò che succede dopo. È la ragione per cui in fisica si scrive sempre $x(0^+)$ nei problemi con un impulso in zero — e il fatto che $\mathcal L$ ignori tutto ciò che sta a sinistra dell'origine è la stessa causalità della tappa 01.`},
+   {q:R`Perché $\mathcal L[t\,f]=-F'$ e non $+F'$?`,
+    a:R`Per il segno dentro l'esponenziale: $\partial_s e^{-st}=-t\,e^{-st}$. Il modo di non sbagliarlo mai è ricostruirlo invece di ricordarlo — derivare la definizione richiede una riga. È lo stesso segno che in Fourier dà $\widehat{xf}=i\,\partial_k\hat f$.`}
+  ]}
+]},
+
+/* ---------------- 04 · BROMWICH ---------------- */
+{ num:'04', title:'Tornare indietro: la linea di Bromwich e i residui', meta:'note §12, eqq. (12.5)-(12.9) · Laplace è Fourier di $f(t)e^{-\\xi t}$ · chiudere a sinistra o a destra · $\\theta(t)$ che esce da sola',
+  blocchi:[
+  {t:'reveal', title:'La formula di inversione, ricavata da Fourier in quattro passi', tag:'derivazione', steps:[
+   {label:'1 · La trasformata di Laplace È una trasformata di Fourier', body:R`<p>Si scrive $s=\xi+i\eta$ con $\xi,\eta$ reali, e si estende $f$ a tutta la retta ponendo $f(t\lt0)=0$:
+   $$F(\xi+i\eta)=\int_0^{\infty}dt\,f(t)e^{-\xi t}e^{-i\eta t}=\int_{-\infty}^{\infty}dt\,\bigl[f(t)e^{-\xi t}\bigr]e^{-i\eta t}=\widehat{\bigl(f\,e^{-\xi\cdot}\bigr)}(\eta).$$
+   Cioè: <b>fissato $\xi$, la trasformata di Laplace è la trasformata di Fourier (nella variabile $\eta$) della funzione smorzata $f(t)e^{-\xi t}\theta(t)$.</b> Tutta l'inversione discende da qui, e non c'è nessuna teoria nuova da imparare.</p>`},
+   {label:'2 · Si antitrasforma in $\\eta$', body:R`<p>Con l'inversione di Fourier di me-10:
+   $$f(t)\,e^{-\xi t}=\int_{-\infty}^{\infty}\frac{d\eta}{2\pi}\,F(\xi+i\eta)\,e^{i\eta t}.$$</p>`},
+   {label:'3 · Si toglie lo smorzamento e si cambia variabile', body:R`<p>Si moltiplica per $e^{\xi t}$ e si porta dentro: $e^{\xi t}e^{i\eta t}=e^{(\xi+i\eta)t}=e^{st}$. Con $s=\xi+i\eta$ si ha $ds=i\,d\eta$, cioè $d\eta/2\pi=ds/2\pi i$, e gli estremi $\eta=\pm\infty$ diventano $s=\xi\pm i\infty$:
+   $$\boxed{\ f(t)=\int_{\xi-i\infty}^{\xi+i\infty}\frac{ds}{2\pi i}\,F(s)\,e^{st}\ }$$
+   con $\xi\gt\alpha_{\min}$ <b>qualsiasi</b>. Gli estremi $\xi\pm i\infty$ sono una notazione per la retta verticale $\mathrm{Re}\,s=\xi$: è la <b>linea di Bromwich</b>.</p>`},
+   {label:'4 · Perché $\\xi$ non conta', body:R`<p>Perché $F$ è olomorfa in tutto il semipiano (tappa 01): due rette verticali entrambe dentro il semipiano si chiudono in un rettangolo che non contiene singolarità, e per il teorema di Cauchy (me-02) l'integrale è lo stesso. La libertà su $\xi$ non è un dettaglio: è ciò che permette di <b>scegliere</b> la retta più comoda, purché stia a destra di tutte le singolarità di $F$.</p>`}
+  ]},
+  {t:'prosa', title:'Il conto vero si fa chiudendo il contorno, e il segno di $t$ decide da che parte', tag:'metodo', html:R`
+  <p>Un integrale su una retta infinita non si calcola come sta: lo si chiude con un semicerchio e si applicano i residui (me-04). Quale semicerchio lo decide il fattore $e^{st}$, e si guarda solo il suo modulo, $|e^{st}|=e^{t\,\mathrm{Re}\,s}$:</p>
+  <ul>
+  <li><b>$t\gt0$</b>: $e^{st}$ decade dove $\mathrm{Re}\,s\to-\infty$, quindi si chiude a <b>sinistra</b>, e si raccolgono <i>tutti</i> i poli di $F$ (che stanno a sinistra della linea di Bromwich per costruzione);</li>
+  <li><b>$t\lt0$</b>: $e^{st}$ decade dove $\mathrm{Re}\,s\to+\infty$, quindi si chiude a <b>destra</b>, dove per costruzione <b>non c'è nessun polo</b> — e l'integrale vale zero.</li>
+  </ul>
+  <p>La seconda riga è più importante di quanto sembri: dice che l'inversione di Laplace restituisce automaticamente una funzione <b>nulla per $t\lt0$</b>. Non si impone la causalità, la si ottiene. E la si ottiene dalla posizione della linea di Bromwich, cioè da una scelta di contorno — che è esattamente il meccanismo con cui in me-12 si sceglie fra funzione di Green <i>ritardata</i> e <i>avanzata</i>.</p>
+  <p>Esposito lo verifica sul caso noto, $F(s)=1/(s-a)$ con $\xi\gt a$: per $t\gt0$ si chiude a sinistra e si prende il polo semplice in $s=a$,
+  $$\int_{\xi-i\infty}^{\xi+i\infty}\frac{ds}{2\pi i}\frac{e^{st}}{s-a}=\mathrm{Res}\left[\frac{e^{st}}{s-a};s=a\right]=e^{at};$$
+  per $t\lt0$ si chiude a destra, non si racchiude niente, e l'integrale vale $0$. Il risultato è $f(t)=e^{at}\theta(t)$: <b>proprio la funzione di partenza, $\theta$ compreso</b>.</p>
+  <p><b>Nella pratica</b>, però, Bromwich non si calcola quasi mai a mano: si scompone $F(s)$ in frazioni parziali e si legge la tabella della tappa 02 all'indietro. Le due strade sono la stessa cosa — la scomposizione in frazioni parziali <i>è</i> la somma dei residui, scritta in un altro ordine — e conviene saperle entrambe: la tabella è più veloce, Bromwich è ciò che si usa quando i poli sono multipli, quando $F$ non è razionale (tagli, punti di diramazione: me-01b), o quando la domanda è sul <i>comportamento</i> della soluzione e non sulla sua formula.</p>`},
+  {t:'prolessi', title:'Il polo più a destra decide il destino della soluzione', html:R`
+  <p>Senza calcolare niente, la posizione dei poli di $F(s)$ dice come si comporta $f(t)$ per tempi lunghi, perché ogni polo in $s_0$ contribuisce un termine $\propto e^{s_0t}$:</p>
+  <ul>
+  <li>poli a sinistra dell'asse immaginario ($\mathrm{Re}\,s_0\lt0$) $\Rightarrow$ <b>decadimento</b>, con tempo di rilassamento $1/|\mathrm{Re}\,s_0|$;</li>
+  <li>poli <i>sull'</i>asse ($\mathrm{Re}\,s_0=0$) $\Rightarrow$ <b>oscillazione persistente</b>, o un termine costante se $s_0=0$;</li>
+  <li>poli a destra $\Rightarrow$ <b>instabilità</b>, crescita esponenziale.</li>
+  </ul>
+  <p>È il criterio di stabilità lineare, e lo si incontrerà di nuovo in tre posti: nella teoria del controllo, nelle risonanze della meccanica quantistica (un polo con parte immaginaria è uno stato con vita media finita), e nella risposta lineare della meccanica statistica, dove i poli della funzione di risposta sono i <b>modi di rilassamento</b> del sistema.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la linea di Bromwich deve stare a destra di <i>tutte</i> le singolarità e non basta che stia nel semipiano di convergenza?`,
+    a:R`Sono la stessa richiesta: il semipiano di convergenza è per definizione privo di singolarità di $F$, e il suo bordo $\mathrm{Re}\,s=\alpha_{\min}$ è dove la singolarità più a destra si trova. Dirlo nei due modi serve però a cose diverse: «dentro il semipiano» è ciò che si controlla quando si parte da $f$; «a destra di tutti i poli» è ciò che si controlla quando si parte da una $F(s)$ scritta da qualcun altro — per esempio dall'equazione algebrica di un problema di Cauchy, dove $f$ non la si conosce ancora.`},
+   {q:R`Nel conto di inversione, che fine ha fatto il contributo del semicerchio grande?`,
+    a:R`Si annulla, ed è il lemma di Jordan di me-04: se $F(s)\to0$ uniformemente sul semicerchio, l'integrale su di esso tende a zero grazie al fattore $e^{st}$ che decade esponenzialmente dalla parte scelta. Per una $F$ razionale con denominatore di grado maggiore del numeratore la condizione è automatica — ed è un altro modo di dire che le trasformate di Laplace tendono a zero all'infinito.`}
+  ]}
+]},
+
+/* ---------------- 05 · IL MESTIERE ---------------- */
+{ num:'05', title:'Quattro modi di calcolare una trasformata — e due refusi nelle dispense', meta:'Set 3, esercizio 8 · Eulero · derivazione sotto il segno (Feynman) · contorno e error function · convoluzione riconosciuta',
+  blocchi:[
+  {t:'prosa', title:'Che cosa chiede l\'esercizio, e perché sono quattro tecniche e non quattro conti', tag:'inquadramento', html:R`
+  <p>L'esercizio 8 del Set 3 chiede la trasformata di quattro funzioni definite con $f(t\lt0)=0$, e in più — <i>si discuta anche il dominio di esistenza e olomorfia</i>. Le quattro non sono varianti: sono <b>i quattro modi</b> in cui un integrale di Laplace si aggredisce. Vale la pena vederli come un elenco chiuso, perché coprono tutto ciò che può essere chiesto:</p>
+  <ol>
+  <li>spezzare in esponenziali con <b>Eulero</b>, e usare l'unica trasformata nota;</li>
+  <li><b>derivare rispetto a un parametro</b> — introdotto apposta, se non c'è;</li>
+  <li><b>completare il quadrato</b> e spostare il cammino nel piano complesso, quando l'integrando è gaussiano;</li>
+  <li><b>riconoscere una convoluzione</b>, e moltiplicare due trasformate facili invece di farne una difficile.</li>
+  </ol>
+  <p>In tutti e quattro, la parte sul semipiano si risponde con la stessa domanda: <i>a quale condizione su $\mathrm{Re}\,s$ il contributo a $t=\infty$ si annulla?</i></p>`},
+  {t:'reveal', title:'1 · $f_1(t)=\\sin t\\,\\cos(3t)$ — Eulero, e il refuso nel testo', tag:'tecnica 1', steps:[
+   {label:'Il conto', body:R`<p>Si spezza tutto in esponenziali: $\sin t\cos3t=\frac{1}{4i}\bigl(e^{4it}+e^{-2it}-e^{2it}-e^{-4it}\bigr)$, e ogni pezzo è l'esponenziale della tappa 02:
+   $$F_1(s)=\frac{1}{4i}\left(\frac{1}{s-4i}+\frac{1}{s+2i}-\frac{1}{s-2i}-\frac{1}{s+4i}\right)=\frac{2}{s^2+16}-\frac{1}{s^2+4}.$$</p>`},
+   {label:'Il semipiano', body:R`<p>Ogni pezzo richiede che il contributo a $t=\infty$ sia nullo, cioè $\mathrm{Re}\,s\gt0$ (gli esponenti sono immaginari puri). Coerente con la funzione: $|f_1(t)|\le1$ è limitata, quindi $|f_1|\lt Ce^{\alpha t}$ con $\alpha_{\min}=0$. E coerente col risultato: i poli di $F_1$ sono in $s=\pm4i$ e $s=\pm2i$, <b>tutti sull'asse immaginario</b>, e il semipiano di olomorfia è quello alla loro destra.</p>`},
+   {label:'Il refuso, e perché va detto', body:R`<p>Nel <b>testo</b> dell'esercizio 8 la prima funzione è $f_1(t)=\sin(t)\cos(2t)$; nella <b>soluzione</b> Esposito svolge $\sin(t)\cos(3t)$. Il risultato scritto, $\tfrac{2}{s^2+16}-\tfrac{1}{s^2+4}$, è quello di $\cos(3t)$ — verificato. Con la funzione del testo, $\cos(2t)$, si avrebbe invece
+   $$\mathcal L[\sin t\cos2t](s)=\frac12\left(\frac{3}{s^2+9}-\frac{1}{s^2+1}\right)=\frac{s^2-3}{(s^2+1)(s^2+9)},$$
+   con poli in $\pm i$ e $\pm3i$ e lo stesso $\alpha_{\min}=0$. Saperlo serve a due cose: a non perdere dieci minuti all'esame cercando l'errore <i>proprio</i> quando il risultato non torna con quello stampato, e a ricordare la regola generale — $\sin A\cos B=\frac12[\sin(A+B)+\sin(A-B)]$, da cui i due poli a $\pm i(A+B)$ e $\pm i(A-B)$.</p>`}
+  ]},
+  {t:'reveal', title:'2 · $f_2(t)=t\\,e^{2t}\\cos t$ — il trucco di Feynman', tag:'tecnica 2', steps:[
+   {label:'L\'idea', body:R`<p>Il fattore $t$ davanti è una derivata rispetto a un parametro che non c'è ancora: lo si crea. Si scrive $e^{2t}\to e^{\lambda t}$, si osserva che $t\,e^{\lambda t}=\partial_\lambda e^{\lambda t}$, e alla fine si manda $\lambda\to2$. È la stessa mossa che nella tappa 02 ha prodotto $\mathcal L[t^n]$, con il parametro al posto di $s$.</p>`},
+   {label:'Il conto', body:R`<p>$$F_2(s)=\lim_{\lambda\to2}\frac{d}{d\lambda}\int_0^{\infty}dt\,e^{\lambda t}\cos t\,e^{-st}
+   =\lim_{\lambda\to2}\frac{d}{d\lambda}\frac12\left(\frac{1}{s-\lambda-i}+\frac{1}{s-\lambda+i}\right)$$
+   $$=\lim_{\lambda\to2}\frac{d}{d\lambda}\frac{s-\lambda}{(s-\lambda)^2+1}
+   =\lim_{\lambda\to2}\frac{(s-\lambda)^2-1}{\bigl[(s-\lambda)^2+1\bigr]^2}
+   =\frac{(s-2)^2-1}{\bigl[(s-2)^2+1\bigr]^2}.$$</p>`},
+   {label:'Il semipiano, e la sottigliezza del fattore $t$', body:R`<p>Serve $\mathrm{Re}\,s\gt\lambda\to2$, quindi $\alpha_{\min}=2$. La verifica diretta sulla funzione è istruttiva: $|f_2(t)|=t\,e^{2t}|\cos t|\le t\,e^{2t}\lt e^{(2+\epsilon)t}$ per ogni $\epsilon\gt0$, perché $t\lt e^{\epsilon t}$ per $t$ grande. <b>Il fattore $t$ non sposta l'ascissa</b>, ma la rende un estremo inferiore non raggiunto — e nella trasformata si vede come un polo <b>doppio</b> in $s=2\pm i$ invece che semplice. La corrispondenza è quella annunciata nella tappa 03: un fattore $t$ nel tempo, un ordine in più nel polo.</p>`},
+   {label:'La stessa cosa, senza Feynman', body:R`<p>Con le proprietà: $\mathcal L[\cos t]=\frac{s}{s^2+1}$; lo smorzamento dà $\mathcal L[e^{2t}\cos t]=\frac{s-2}{(s-2)^2+1}$; e la moltiplicazione per $t$ dà $-\frac{d}{ds}$ di quello, cioè lo stesso risultato. <b>Due strade, una riga ciascuna</b>: conviene conoscerle entrambe, perché Feynman funziona anche quando il parametro non è una traslazione.</p>`}
+  ]},
+  {t:'reveal', title:'3 · $f_3(t)=e^{-t^2/2}$ — completare il quadrato, e la error function', tag:'tecnica 3', steps:[
+   {label:'Completare il quadrato', body:R`<p>$$F_3(s)=\int_0^{\infty}dt\,e^{-t^2/2-st}=e^{s^2/2}\int_0^{\infty}dt\,e^{-\frac12(t+s)^2},$$
+   perché $-\frac{t^2}{2}-st=-\frac12(t+s)^2+\frac{s^2}{2}$. Il problema è che l'integrale residuo ha un <b>cammino traslato di $s$ nel piano complesso</b>, e $s$ è complesso: non è più un integrale reale.</p>`},
+   {label:'Il contorno', body:R`<p>Si usa il fatto che $e^{-z^2/2}$ è <b>intera</b> (olomorfa ovunque, me-01): l'integrale su un cammino chiuso è nullo, quindi si può deformare il cammino. Si chiude il rettangolo formato da: il semiasse reale positivo; il tratto verticale all'infinito $\gamma_R$ (contributo nullo, soppressione esponenziale); il cammino $\gamma_1$ che va da $\infty$ a $0$ traslato di $-s$; e un cammino qualsiasi $\gamma_2$ da $-s$ a $0$ — «qualsiasi» proprio perché la funzione è intera.</p>`},
+   {label:'I due pezzi', body:R`<p>Su $\gamma_1$ si ritrova l'integrale gaussiano reale: $\int_{\infty}^{0}dt\,e^{-t^2/2}=-\sqrt{\pi/2}$. Su $\gamma_2$, col cambio $z'=(z+s)/\sqrt2$, compare per definizione la <b>error function</b>
+   $$\mathrm{erf}(z)\equiv\frac{2}{\sqrt\pi}\int_0^{z}dz'\,e^{-z'^2}:\qquad \int_{\gamma_2}dz\,e^{-\frac12(z+s)^2}=\sqrt{\frac{\pi}{2}}\,\mathrm{erf}\!\left(\frac{s}{\sqrt2}\right).$$</p>`},
+   {label:'Il risultato, e il semipiano', body:R`<p>$$F_3(s)=\sqrt{\frac{\pi}{2}}\,e^{s^2/2}\left[1-\mathrm{erf}\!\left(\frac{s}{\sqrt2}\right)\right].$$
+   La error function è definita su <b>tutto</b> il piano complesso, e questo è coerente con la funzione di partenza: $e^{-t^2/2}$ decade più in fretta di ogni esponenziale, quindi $|f_3(t)|\lt Ce^{\alpha t}$ vale per <i>ogni</i> $\alpha\in\mathbb{R}$, cioè $\alpha_{\min}=-\infty$ e la trasformata esiste ovunque. <b>Il punto da portare via non è la formula</b> — è che quando il semipiano di convergenza è tutto il piano, la trasformata non ha poli, e quindi non è una funzione razionale: è la spia che il risultato conterrà una funzione speciale.</p>`}
+  ]},
+  {t:'reveal', title:'4 · $f_4$, una convoluzione mascherata — e il secondo refuso', tag:'tecnica 4', steps:[
+   {label:'Riconoscerla', body:R`<p>La quarta funzione è definita da un integrale:
+   $$f_4(t)=\int_0^{t}dt'\,t'^2\,e^{t-t'}.$$
+   L'integrando dipende da $t$ soltanto attraverso $e^{t-t'}$, e gli estremi sono $0$ e $t$: per la tappa 03 è <b>esattamente</b> la forma di una convoluzione. Precisamente $f_4=g*h$ con $g(t)=t^2$ e $h(t)=e^{t}$. Quindi la trasformata è il prodotto, e i due fattori sono in tabella.</p>`},
+   {label:'Il conto', body:R`<p>$$\mathcal L[t^2](s)=\frac{2}{s^3}\ \ (\mathrm{Re}\,s\gt0),\qquad \mathcal L[e^{t}](s)=\frac{1}{s-1}\ \ (\mathrm{Re}\,s\gt1),$$
+   $$F_4(s)=\frac{2}{s^3(s-1)},\qquad \mathrm{Re}\,s\gt1.$$
+   Il semipiano è <b>l'intersezione</b> dei due, cioè quello definito dall'ascissa più grande: $\alpha_{\min}=\max(0,1)=1$. Si legge anche dai poli del risultato: $s=0$ (triplo) e $s=1$, e la retta di Bromwich deve stare a destra di entrambi.</p>`},
+   {label:'Il refuso, e la verifica', body:R`<p>La soluzione stampata scrive $\mathcal L[t](s)=1/s^2$ e conclude $F_4(s)=\dfrac{1}{s^2(s-1)}$: ha trattato $t'^2$ come $t'$. Con la funzione del testo, che ha $t'^2$, il primo fattore è $\mathcal L[t^2]=2/s^3$ e il risultato corretto è
+   $$F_4(s)=\frac{2}{s^3(s-1)}.$$
+   Verificato in due modi indipendenti: calcolando la trasformata dell'integrale di convoluzione svolto, e moltiplicando le due trasformate elementari. <b>Il metodo della soluzione è giusto e il conto no</b> — ed è il tipo di errore che in sede d'esame costa poco se si controlla il caso limite, e moltissimo se si prende il risultato come tabella. Controllo da fare sempre: il grado del denominatore deve pareggiare il comportamento a $s$ grande, e $\mathcal L[t^n]\sim n!/s^{n+1}$ dice subito che con $t'^2$ il denominatore parte da $s^3$.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Come si riconosce una convoluzione dentro un integrale che non è scritto come tale?`,
+    a:R`Tre segnali insieme: gli estremi sono $0$ e $t$; la variabile esterna $t$ compare <b>solo</b> nella combinazione $t-t'$ (oltre che nell'estremo); e l'altro fattore dipende solo da $t'$. Se uno dei tre manca non è una convoluzione — per esempio $\int_0^t dt'\,t\,f(t')$ non lo è, perché il $t$ fuori non è nella forma $t-t'$: lì si porta $t$ fuori dall'integrale e si usa la moltiplicazione per $t$.`},
+   {q:R`L'ascissa di convergenza di un prodotto di trasformate è la somma delle due? La più grande? La più piccola?`,
+    a:R`<b>La più grande.</b> L'integrale che definisce la trasformata della convoluzione si fattorizza nei due integrali separati, e converge quando convergono entrambi: l'intersezione di due semipiani destri è il semipiano destro con l'ascissa maggiore. Nell'esercizio 8.4: $\max(0,1)=1$.`}
+  ]}
+]},
+
+/* ---------------- 06 · IL SOLUTORE ---------------- */
+{ num:'06', title:'Il problema di Cauchy che diventa algebra', meta:'Set 4, esercizio 10 · trasformare, imporre, risolvere, antitrasformare · e il ponte verso me-12',
+  blocchi:[
+  {t:'prosa', title:'L\'algoritmo, in tre passi e mezzo', tag:'metodo', html:R`
+  <p>Data un'ODE lineare a coefficienti costanti con sorgente e condizioni iniziali in $t=0$:</p>
+  <ol>
+  <li><b>Si applica $\mathcal L$ a entrambi i membri</b>, usando $\mathcal L[\dot x]=sX-x(0)$ e $\mathcal L[\ddot x]=s^2X-sx(0)-\dot x(0)$: le condizioni iniziali <b>entrano qui</b>, non alla fine.</li>
+  <li><b>Si risolve algebricamente per $X(s)$</b>. L'equazione differenziale è diventata un'equazione di primo grado nell'incognita $X$: questo è tutto il guadagno del metodo, e la struttura che ne esce è sempre
+  $$X(s)=\frac{J(s)+(\text{polinomio nei dati iniziali})}{D(s)},\qquad D(s)=\text{polinomio caratteristico}.$$</li>
+  <li><b>Si antitrasforma</b>: frazioni parziali più tabella, oppure Bromwich e residui quando i poli sono multipli.</li>
+  </ol>
+  <p>Il mezzo passo è il <b>controllo</b>, e non va saltato: si verifica che la $x(t)$ trovata soddisfi le condizioni iniziali, il che costa due sostituzioni e intercetta quasi tutti gli errori di segno.</p>`},
+  {t:'reveal', title:'Primo problema · $\\ddot x+x=t$, con $x(0)=\\dot x(0)=0$', tag:'Set 4, es. 10.1', steps:[
+   {label:'Trasformare', body:R`<p>Con i dati iniziali entrambi nulli, $\mathcal L[\ddot x]=s^2X(s)$. A destra, $\mathcal L[t]=1/s^2$ per $\mathrm{Re}\,s\gt0$ (si ottiene come $-\frac{d}{ds}\frac1s$, tappa 02). Quindi
+   $$s^2X(s)+X(s)=\frac{1}{s^2}\qquad\Longrightarrow\qquad X(s)=\frac{1}{s^2(s^2+1)}.$$</p>`},
+   {label:'Leggere i poli prima di calcolare', body:R`<p>$X$ ha un polo <b>doppio</b> in $s=0$ e due poli semplici in $s=\pm i$. Traduzione immediata, senza fare il conto: ci sarà un termine che cresce come $t$ (polo doppio in zero) e un'oscillazione di frequenza $1$ (poli in $\pm i$). La linea di Bromwich va presa con $\xi\gt0$.</p>`},
+   {label:'Antitrasformare con i residui', body:R`<p>Per $t\gt0$ si chiude a sinistra e si raccolgono tutti e tre i poli:
+   $$x(t)=\mathrm{Res}\left[\frac{e^{st}}{s^2(s^2+1)};0\right]+\mathrm{Res}\left[\cdots;i\right]+\mathrm{Res}\left[\cdots;-i\right]
+   =\frac{d}{ds}\left[\frac{e^{st}}{s^2+1}\right]_{s=0}-\frac{e^{it}}{2i}+\frac{e^{-it}}{2i}.$$
+   Il primo è un polo doppio, quindi si deriva (me-04): $\frac{d}{ds}\frac{e^{st}}{s^2+1}\big|_{s=0}=t$. Gli altri due si ricombinano in $-\sin t$. Dunque
+   $$x(t)=t-\sin t.$$</p>`},
+   {label:'Il controllo, e la lettura fisica', body:R`<p>$x(0)=0$ ✓; $\dot x=1-\cos t$, quindi $\dot x(0)=0$ ✓; e $\ddot x+x=\sin t+t-\sin t=t$ ✓.</p>
+   <p>Fisicamente: un oscillatore armonico di frequenza $1$, fermo all'origine, spinto da una forza che cresce linearmente nel tempo. La soluzione <b>insegue la rampa</b> ($t$) oscillandole attorno con ampiezza costante ($-\sin t$). L'oscillazione non cresce perché la sorgente non è in risonanza: se la forzante fosse $\sin t$ invece di $t$, il polo in $s=i$ diventerebbe doppio e comparirebbe un $t\sin t$ — la risonanza, letta come <b>coincidenza fra polo della sorgente e polo del sistema</b>. È la cosa più elegante che questo metodo faccia vedere.</p>`}
+  ]},
+  {t:'reveal', title:'Secondo problema · $\\ddot x+2\\dot x=e^{-t}$, con $x(0)=0$ e $\\dot x(0)=v_0$', tag:'Set 4, es. 10.2', steps:[
+   {label:'Trasformare, con un dato iniziale non nullo', body:R`<p>$$\underbrace{s^2X-s\,x(0)-\dot x(0)}_{\mathcal L[\ddot x]}+\underbrace{2\bigl(sX-x(0)\bigr)}_{\mathcal L[2\dot x]}=\mathcal L[e^{-t}]=\frac{1}{s+1}.$$
+   Con $x(0)=0$ e $\dot x(0)=v_0$ resta $(s^2+2s)X(s)=v_0+\frac{1}{s+1}$, cioè
+   $$X(s)=\frac{v_0}{s(s+2)}+\frac{1}{s(s+1)(s+2)}.$$
+   Si noti dove è finita la velocità iniziale: <b>dentro il numeratore</b>, come una sorgente. Nel formalismo di Laplace un dato iniziale e una forza impulsiva sono la stessa cosa — ed è vero anche fisicamente: dare una velocità iniziale $v_0$ equivale a un impulso $\delta(t)$ di area $v_0$.</p>`},
+   {label:'Il semipiano', body:R`<p>I poli sono in $s=0,-1,-2$: il più a destra è $s=0$, quindi il dominio di esistenza e olomorfia è $\mathrm{Re}\,s\gt0$, e la retta di Bromwich si prende con $\xi\gt0$. Il polo in zero annuncia che la soluzione tende a una <b>costante</b> e non a zero — cosa vera: l'equazione non ha termine di richiamo (nessun $x$ senza derivate), quindi la posizione finale non è vincolata.</p>`},
+   {label:'Antitrasformare', body:R`<p>Tre poli semplici, tre residui:
+   $$x(t)=\frac{v_0}{2}+\frac12-e^{-t}-\frac{v_0}{2}e^{-2t}+\frac12e^{-2t}
+   =\frac{v_0}{2}\bigl(1-e^{-2t}\bigr)+\frac12\bigl(1+e^{-2t}\bigr)-e^{-t}.$$</p>`},
+   {label:'Il controllo', body:R`<p>In $t=0$: $\frac{v_0}{2}(1-1)+\frac12(1+1)-1=0$ ✓. La derivata è $v_0e^{-2t}-e^{-2t}+e^{-t}$, che in zero vale $v_0-1+1=v_0$ ✓. Per $t\to\infty$ la soluzione tende a $\frac{v_0}{2}+\frac12$: il sistema si ferma, e dove si ferma dipende dalla spinta iniziale — il termine $\frac{v_0}{2}$ — e dalla sorgente. Tutto questo si era già letto dai poli.</p>`}
+  ]},
+  {t:'prolessi', title:'Perché questa tappa è il ponte verso me-12 (funzioni di Green)', html:R`
+  <p>Si guardi di nuovo la struttura che esce sempre dal passo 2:
+  $$X(s)=\frac{J(s)}{D(s)}+\frac{\text{dati iniziali}}{D(s)}.$$
+  Il primo termine è un <b>prodotto</b>: $J(s)\cdot\frac{1}{D(s)}$. Per la tappa 03, un prodotto in $s$ è una convoluzione in $t$:
+  $$x(t)=\int_0^{t}dt'\,G(t-t')\,j(t'),\qquad G(t)\equiv\mathcal L^{-1}\!\left[\frac{1}{D(s)}\right].$$
+  Questa $G$ è la <b>funzione di Green</b>, e questa riga è la sua definizione operativa: la risposta del sistema a una sorgente impulsiva: poiché $\mathcal L[\delta]=1$, con sorgente $j=\delta$ si ha $X=1/D$, cioè la soluzione è $G$ stessa. Che sia <i>ritardata</i> — cioè $G(t)=0$ per $t\lt0$ — non è una scelta fatta a posteriori: viene dalla chiusura del contorno di Bromwich a destra, dove non ci sono poli (tappa 04).</p>
+  <p>Detto altrimenti: <b>me-12 non introdurrà un oggetto nuovo</b>, gli darà un nome. Chi ha capito questa tappa ha già la funzione di Green per ogni operatore a coefficienti costanti; quello che me-12 aggiunge è il caso a coefficienti non costanti (dove Laplace non basta e serve il Wronskiano) e le condizioni al bordo invece che iniziali.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Quando conviene Laplace e quando conviene la funzione di Green «classica» con il Wronskiano?`,
+    a:R`Laplace quando i <b>coefficienti sono costanti</b> e le condizioni sono <b>iniziali</b> (in $t=0$): trasforma tutto in algebra. Il Wronskiano quando i coefficienti dipendono da $x$ — un'equazione di Eulero, per esempio — o quando le condizioni sono <b>al bordo</b> (in due punti diversi), perché lì $\mathcal L$ non sa dove mettere i dati. Metà degli esercizi del Set 4 sono del secondo tipo: è il motivo per cui Laplace non li copre tutti.`},
+   {q:R`Nell'equazione trasformata, che differenza fa che il polinomio caratteristico $D(s)$ sia lo stesso che si trova col metodo dell'equazione caratteristica?`,
+    a:R`Nessuna: <b>è lo stesso polinomio</b>. Cercare soluzioni $e^{rt}$ dell'omogenea dà $D(r)=0$, e i poli di $X(s)$ sono le radici di $D$: le esponenziali dell'omogenea sono i residui. Laplace non è un metodo alternativo, è lo stesso metodo con la contabilità dei dati iniziali già fatta — e con la soluzione particolare che esce gratis dal termine $J(s)/D(s)$ invece che dalla variazione delle costanti.`}
+  ]}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'nella forma dei due fogli di Esposito · ogni risultato verificato con sympy',
+  blocchi:[
+  {t:'esercizio', title:'1 · Una trasformata con tutte e tre le proprietà', html:R`
+  <p>Calcola $\mathcal L\bigl[t\,e^{-3t}\sin t\bigr](s)$ e dichiara il semipiano di esistenza e olomorfia. Fallo <b>senza</b> integrare.</p>`,
+   sol:R`<p>Si parte dalla tabella e si applicano due proprietà in fila. $\mathcal L[\sin t]=\frac{1}{s^2+1}$, con $\alpha_{\min}=0$. Lo <b>smorzamento</b> ($e^{at}f\to F(s-a)$, qui $a=-3$) dà $\mathcal L[e^{-3t}\sin t]=\frac{1}{(s+3)^2+1}$, e sposta l'ascissa a $\alpha_{\min}=-3$. La <b>moltiplicazione per $t$</b> ($-d/ds$) dà infine
+  $$\mathcal L[t\,e^{-3t}\sin t](s)=-\frac{d}{ds}\frac{1}{(s+3)^2+1}=\frac{2(s+3)}{\bigl[(s+3)^2+1\bigr]^2},\qquad \mathrm{Re}\,s\gt-3.$$
+  Controllo strutturale: i poli sono in $s=-3\pm i$, <b>doppi</b> per via del fattore $t$, e stanno sul bordo $\mathrm{Re}\,s=-3$ del semipiano. Tutto coerente.</p>`},
+  {t:'esercizio', title:'2 · Bromwich contro frazioni parziali', html:R`
+  <p>Antitrasforma $F(s)=\dfrac{1}{s^2(s+1)}$ in due modi: (a) scomponendo in frazioni parziali e leggendo la tabella; (b) con l'integrale di Bromwich e i residui. Verifica che coincidano.</p>`,
+   sol:R`<p><b>(a)</b> $\dfrac{1}{s^2(s+1)}=\dfrac{1}{s^2}-\dfrac{1}{s}+\dfrac{1}{s+1}$ (si trova imponendo l'identità, o con i residui stessi). Leggendo la tabella: $t-1+e^{-t}$.</p>
+  <p><b>(b)</b> Poli in $s=0$ (doppio) e $s=-1$ (semplice), entrambi a sinistra della retta $\xi\gt0$. Per $t\gt0$ si chiude a sinistra:
+  $$\mathrm{Res}\left[\frac{e^{st}}{s^2(s+1)};0\right]=\frac{d}{ds}\left[\frac{e^{st}}{s+1}\right]_{s=0}=\frac{t(s+1)-1}{(s+1)^2}e^{st}\Big|_{s=0}=t-1,\qquad
+  \mathrm{Res}\left[\cdots;-1\right]=\frac{e^{-t}}{1}=e^{-t}.$$
+  Somma: $x(t)=t-1+e^{-t}$, la stessa di prima. <b>Morale</b>: la scomposizione in frazioni parziali <i>è</i> il calcolo dei residui, fatto una volta per tutte sui denominatori invece che caso per caso. Controllo: in $t=0$ vale $0-1+1=0$, ed è giusto, perché $F\sim1/s^2$ a grandi $s$ implica $f(0)=0$.</p>`},
+  {t:'esercizio', title:'3 · Un Cauchy con radice doppia', html:R`
+  <p>Risolvi $\ddot x+3\dot x+2x=e^{-t}$ con $x(0)=\dot x(0)=0$, e spiega <b>prima</b> di calcolare perché comparirà un termine $t\,e^{-t}$.</p>`,
+   sol:R`<p>Trasformando: $(s^2+3s+2)X(s)=\frac{1}{s+1}$, e $s^2+3s+2=(s+1)(s+2)$, quindi
+  $$X(s)=\frac{1}{(s+1)^2(s+2)}.$$
+  <b>La previsione</b>: la sorgente ha un polo in $s=-1$ e il sistema pure (è una radice caratteristica). I due poli coincidono, il polo risultante è <b>doppio</b>, e un polo doppio dà un fattore $t$ moltiplicato per l'esponenziale. È la <b>risonanza in regime smorzato</b>: forzare un sistema esattamente al suo modo di decadimento.</p>
+  <p>I residui: in $s=-2$ (semplice) vale $\frac{e^{-2t}}{(-2+1)^2}=e^{-2t}$; in $s=-1$ (doppio) vale $\frac{d}{ds}\left[\frac{e^{st}}{s+2}\right]_{s=-1}=\frac{t(s+2)-1}{(s+2)^2}e^{st}\Big|_{s=-1}=(t-1)e^{-t}$. Quindi
+  $$x(t)=(t-1)e^{-t}+e^{-2t}.$$
+  Controllo: $x(0)=-1+1=0$ ✓; $\dot x=(2-t)e^{-t}-2e^{-2t}$, e $\dot x(0)=2-2=0$ ✓. Per tempi lunghi domina $t\,e^{-t}$: cresce prima di decadere, che è la firma della risonanza smorzata.</p>`},
+  {t:'esercizio', title:'4 · Una convoluzione, in avanti e all\'indietro', html:R`
+  <p>Calcola $h(t)=\displaystyle\int_0^{t}dt'\,\sin(t-t')\,e^{-t'}$ in due modi: direttamente, e passando per le trasformate.</p>`,
+   sol:R`<p><b>Via Laplace.</b> È la convoluzione $\sin*e^{-\cdot}$, quindi $H(s)=\frac{1}{s^2+1}\cdot\frac{1}{s+1}$, con $\alpha_{\min}=\max(0,-1)=0$. Poli semplici in $s=\pm i$ e $s=-1$; antitrasformando (frazioni parziali o residui):
+  $$h(t)=\frac{1}{2}\bigl(\sin t-\cos t+e^{-t}\bigr).$$
+  <b>Direttamente</b> si integra per parti due volte, e si ritrova lo stesso. <b>Perché la prima via è meglio</b>: non richiede nessuna ingegnosità, e soprattutto <i>si legge</i> — il termine $e^{-t}$ è il transiente che ricorda la sorgente iniziale, e $\frac12(\sin t-\cos t)$ è la risposta permanente alla frequenza propria. Controllo: $h(0)=\frac12(0-1+1)=0$ ✓, e deve essere zero perché l'integrale su un intervallo di ampiezza nulla è nullo.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', items:[
+   {q:R`Perché un polo doppio di $X(s)$ dà un termine $t\,e^{s_0t}$ e non $e^{s_0t}$ due volte?`,
+    a:R`Perché il residuo in un polo di ordine $2$ si calcola derivando rispetto a $s$ (me-04), e la derivata di $e^{st}$ rispetto a $s$ è $t\,e^{st}$: il fattore $t$ viene <b>dall'operazione di residuo</b>, non dalla funzione. È la stessa corrispondenza della tappa 03 vista dall'altro lato: $\mathcal L[t\,e^{at}]=1/(s-a)^2$.`},
+   {q:R`Data $F(s)$, come si trova $f(0^+)$ senza antitrasformare?`,
+    a:R`$f(0^+)=\lim_{s\to\infty}sF(s)$, sul reale. Viene da $\mathcal L[f']=sF-f(0)$: per $s\to\infty$ il membro sinistro tende a zero (è la trasformata di qualcosa), quindi $sF(s)\to f(0)$. È il <b>teorema del valore iniziale</b>, e il suo gemello è quello del valore finale, $\lim_{t\to\infty}f(t)=\lim_{s\to0}sF(s)$, valido solo se tutti i poli stanno a sinistra dell'asse (altrimenti il limite nel tempo non esiste). Sull'esercizio 10.2: $sX(s)\to\frac{v_0}{2}+\frac12$ per $s\to0$, che è proprio la posizione finale trovata.`}
+  ]}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa consegna · causalità e analiticità (programma A.2) · dove si ritrova in Quantistica e in Statistica',
+  blocchi:[
+  {t:'prosa', title:'Cosa consegna questo movimento', tag:'sintesi', html:R`
+  <p>Uno <b>strumento</b> e un'<b>idea</b>, e la seconda vale più del primo.</p>
+  <p>Lo strumento: un problema di Cauchy lineare a coefficienti costanti si risolve in quattro righe meccaniche, con i dati iniziali già dentro e la soluzione particolare gratis. Vale per ogni circuito, ogni oscillatore forzato, ogni equazione di rilassamento, ed è la strada più corta ogni volta che le condizioni sono <i>iniziali</i> e non al bordo.</p>
+  <p>L'idea: <b>le singolarità della trasformata sono il comportamento della funzione</b>. La posizione dei poli dà i tempi di decadimento e le frequenze; il loro ordine dà le potenze di $t$; la loro coincidenza dà la risonanza. Si impara a leggere una soluzione <i>prima</i> di calcolarla, e poi a non calcolarla affatto quando la domanda è qualitativa. È lo stesso spostamento di sguardo di me-03 — dove le singolarità classificano le funzioni — applicato alla dinamica.</p>`},
+  {t:'prosa', title:'Causalità e analiticità: la voce A.2 del programma, che è qui', tag:'cucitura', html:R`
+  <p>Il programma di Caprini ed Esposito nomina, dentro la teoria delle funzioni analitiche, la <i>relazione fra causalità e analiticità</i>. Il posto dove quella relazione si vede per intero è questo movimento, e vale la pena dirla in una riga perché all'orale è una domanda da due minuti che distingue chi ha capito:</p>
+  <p style="text-align:center"><i>una risposta <b>causale</b> — $G(t)=0$ per $t\lt0$ — ha trasformata <b>olomorfa in un semipiano</b>, e viceversa.</i></p>
+  <p>Il verso facile è la tappa 01: se $f$ vive solo su $t\ge0$, l'integrale converge per $\mathrm{Re}\,s$ grande e $F$ è olomorfa lì. Il verso interessante è quello di ritorno, ed è la tappa 04: se $F$ è olomorfa a destra di una retta, si chiude il contorno di Bromwich a destra per $t\lt0$ senza incontrare poli, e si ottiene $f(t)=0$. <b>Le due proprietà sono la stessa proprietà scritta in due variabili diverse.</b></p>
+  <p>Da qui discendono, con un passo ciascuno, due cose che compariranno altrove: le <b>relazioni di Kramers-Kronig</b> (parte reale e parte immaginaria di una risposta causale non sono indipendenti: ciascuna determina l'altra, perché entrambe sono determinate dall'olomorfia), e il fatto che in teoria dei campi la <b>prescrizione $i\epsilon$</b> — lo spostamento infinitesimo dei poli del propagatore — sia una scelta di <i>condizione al contorno temporale</i> e non un artificio di calcolo. Il movimento me-12 fa vedere la stessa scelta nella forma «Green ritardata contro avanzata contro Feynman».</p>`},
+  {t:'prolessi', title:'Le rotte fuori dal corso', html:R`
+  <p><b>Verso la Quantistica.</b> L'operatore risolvente $(H-z)^{-1}$ — che in me-09b compare come strumento per definire lo spettro — è la trasformata di Laplace dell'operatore di evoluzione $e^{-iHt}$, a meno di una rotazione della variabile. Lo spettro di $H$ è l'insieme delle singolarità del risolvente, cioè, in questo linguaggio, <b>i poli della trasformata della dinamica</b>. Gli stati legati sono poli sull'asse reale; le risonanze sono poli spostati sotto, e la parte immaginaria è l'inverso della vita media: esattamente la lettura «polo $\to$ tempo di decadimento» della tappa 04.</p>
+  <p><b>Verso la Statistica.</b> In teoria della risposta lineare la grandezza centrale è la suscettività $\chi(\omega)$, che è la trasformata della funzione di risposta causale: i suoi poli sono i <b>modi di rilassamento</b> del sistema, e la loro distanza dall'asse reale è l'inverso dei tempi di rilassamento. Quando uno di quei poli si avvicina all'asse, il tempo diverge: è il <b>rallentamento critico</b> vicino a una transizione di fase, ed è uno dei fenomeni che la tesi di cui Giuseppe parla — decoerenza, termalizzazione, ETH — guarda da vicino. Anche la funzione di partizione di un sistema è, nel formalismo, una trasformata di Laplace: $Z(\beta)=\int dE\,\Omega(E)e^{-\beta E}$, con $\beta$ al posto di $s$ e la densità degli stati al posto di $f$. L'insieme microcanonico e quello canonico sono <b>una coppia trasformata-antitrasformata</b>, e il punto di sella che li lega (me-05) è il modo in cui si calcola l'antitrasformata quando i poli non bastano.</p>`}
+]}
+
+/*CONTROLLO
+[
+ {"tipo":"integrale","espr":"exp((a-s)*t)","var":"t","da":"0","a":"oo","vale":"1/(s-a)",
+  "ipotesi":{"t":"positive","s":"positive","a":"negative"},
+  "nota":"l'esempio 12.1: la verifica si fa sul semipiano REALE (s>0>a, che e' un pezzo del semipiano Re s>a), e l'identita' si estende al semipiano complesso per continuazione analitica, come dice la tappa 01. Sympy non sa portare un vincolo del tipo Re s > Re a.",
+  "dove":"02","appare":"\\frac{1}{s-a}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(sin(w*t),t,s,noconds=True)","vale":"w/(s**2+w**2)",
+  "ipotesi":{"t":"positive","s":"positive","w":"positive"},
+  "dove":"02","appare":"\\frac{\\omega}{s^2+\\omega^2}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(cos(w*t),t,s,noconds=True)","vale":"s/(s**2+w**2)",
+  "ipotesi":{"t":"positive","s":"positive","w":"positive"},
+  "dove":"02","appare":"\\mathcal L[\\cos\\omega t]=\\dfrac{s}{s^2+\\omega^2}"},
+
+ {"tipo":"uguale","sinistra":"-diff(1/s,s)","vale":"1/s**2",
+  "ipotesi":{"s":"positive"},
+  "nota":"il passo 'derivare rispetto a s' che produce L[t] dalla L[1]",
+  "dove":"02","appare":"\\frac{1}{s^2}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t**3,t,s,noconds=True)","vale":"factorial(3)/s**4",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la formula n!/s^(n+1) verificata su n=3",
+  "dove":"02","appare":"\\frac{n!}{s^{n+1}}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(DiracDelta(t-a),t,s,noconds=True)","vale":"exp(-a*s)",
+  "ipotesi":{"t":"positive","s":"positive","a":"positive"},
+  "dove":"02","appare":"\\mathcal L[\\delta(t-a)]=e^{-as}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(-t**2/2),t,s,noconds=True)",
+  "vale":"sqrt(pi/2)*exp(s**2/2)*erfc(s/sqrt(2))",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"erfc(z)=1-erf(z): sympy restituisce la forma con erfc, la prosa scrive [1-erf], e sono la stessa cosa per definizione",
+  "dove":"02","appare":"1-\\mathrm{erf}"},
+
+ {"tipo":"derivata","espr":"exp(-s*t)","rispetto":["s"],"vale":"-t*exp(-s*t)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la derivata del nucleo rispetto a s: e' il motore di tutta la tappa, e da' anche il segno meno di L[t f]=-F'",
+  "dove":"02","appare":"-t\\,e^{-st}"},
+
+ {"tipo":"derivata","espr":"exp(-s*t)","rispetto":["s"],"vale":"-t*exp(-s*t)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la stessa derivata, qui a sostenere il collaudo sul segno di L[t f]=-F'",
+  "dove":"03","appare":"-t\\,e^{-st}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(diff(sin(t),t),t,s,noconds=True)",
+  "vale":"s/(s**2+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la regola L[f']=sF(s)-f(0) su f=sin t: F=1/(s^2+1) e f(0)=0, quindi s*F-0=s/(s^2+1), che e' proprio L[cos t]",
+  "dove":"03","appare":"s\\,F(s)-f(0)"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(diff(cos(t),t,2),t,s,noconds=True)",
+  "vale":"s**2*(s/(s**2+1))-s*1-0",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la formula iterata su n=2 e f=cos t: F=s/(s^2+1), f(0)=1, f'(0)=0. Il membro destro e' scritto nella forma s^2 F - s f(0) - f'(0), non semplificato, perche' e' la formula che si rivendica",
+  "dove":"03","appare":"s^nF(s)-s^{n-1}f(0)"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(2*sin(t)+3*cos(t),t,s,noconds=True)",
+  "vale":"2/(s**2+1)+3*s/(s**2+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la linearita' su alpha=2, beta=3, f=sin, g=cos",
+  "dove":"03","appare":"\\alpha F+\\beta G"},
+
+ {"tipo":"uguale",
+  "sinistra":"laplace_transform(integrate(sin(t-u)*exp(-u),(u,0,t)),t,s,noconds=True)",
+  "vale":"(1/(s**2+1))*(1/(s+1))",
+  "ipotesi":{"t":"positive","s":"positive","u":"positive"},
+  "nota":"il teorema di convoluzione verificato su un caso: si svolge l'integrale di convoluzione, se ne prende la trasformata, e viene il PRODOTTO delle due trasformate",
+  "dove":"03","appare":"F(s)\\,G(s)"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(Heaviside(t-a)*exp(-(t-a)),t,s,noconds=True)",
+  "vale":"exp(-a*s)/(s+1)",
+  "ipotesi":{"t":"positive","s":"positive","a":"positive"},
+  "nota":"la traslazione L[theta(t-a)f(t-a)]=e^{-as}F(s) verificata su f=e^{-t}, la cui F e' 1/(s+1)",
+  "dove":"03","appare":"e^{-as}F(s)"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(2*t)*cos(t),t,s,noconds=True)",
+  "vale":"(s-2)/((s-2)**2+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"lo smorzamento L[e^{at}f]=F(s-a) su f=cos t, a=2: il caso che serve nella tappa 05",
+  "dove":"03","appare":"F(s-a)"},
+
+ {"tipo":"uguale","sinistra":"-diff(1/(s-2),s)","vale":"1/(s-2)**2",
+  "ipotesi":{"s":"positive"},
+  "nota":"la moltiplicazione per t su e^{2t}: un fattore t nel tempo, un polo doppio in s",
+  "dove":"03","appare":"\\frac{1}{(s-a)^2}"},
+
+ {"tipo":"integrale","espr":"exp(-s*t)*t","var":"t","da":"0","a":"oo","vale":"1/s**2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il conto esplicito dietro L[t]=-d/ds L[1], rifatto per intero invece che dedotto",
+  "dove":"03","appare":"-F'(s)"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(sin(t)*cos(3*t),t,s,noconds=True)",
+  "vale":"2/(s**2+16)-1/(s**2+4)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il risultato STAMPATO nella soluzione 8.1: e' giusto per cos(3t), non per il cos(2t) del testo dell'esercizio. E' l'asserzione che documenta il primo refuso",
+  "dove":"05","appare":"\\frac{2}{s^2+16}-\\frac{1}{s^2+4}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(sin(t)*cos(2*t),t,s,noconds=True)",
+  "vale":"(s**2-3)/((s**2+1)*(s**2+9))",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"e questo e' il risultato per la funzione che il TESTO dell'esercizio assegna",
+  "dove":"05","appare":"\\frac{s^2-3}{(s^2+1)(s^2+9)}"},
+
+ {"tipo":"uguale","sinistra":"(3/(s**2+9)-1/(s**2+1))/2","vale":"(s**2-3)/((s**2+1)*(s**2+9))",
+  "ipotesi":{"s":"positive"},
+  "nota":"la forma intermedia con sinA cosB = [sin(A+B)+sin(A-B)]/2 coincide con quella ridotta",
+  "dove":"05","appare":"\\frac{3}{s^2+9}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t*exp(2*t)*cos(t),t,s,noconds=True)",
+  "vale":"((s-2)**2-1)/((s-2)**2+1)**2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il risultato dell'esercizio 8.2, ottenuto dal docente col trucco di Feynman e qui verificato",
+  "dove":"05","appare":"\\frac{(s-2)^2-1}{\\bigl[(s-2)^2+1\\bigr]^2}"},
+
+ {"tipo":"derivata","espr":"(s-l)/((s-l)**2+1)","rispetto":["l"],
+  "vale":"((s-l)**2-1)/((s-l)**2+1)**2",
+  "ipotesi":{"s":"positive","l":"positive"},
+  "nota":"il passo centrale di Feynman: la derivata rispetto al parametro lambda (qui `l`), prima del limite lambda->2",
+  "dove":"05","appare":"\\frac{d}{d\\lambda}\\frac{s-\\lambda}{(s-\\lambda)^2+1}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(-t**2/2),t,s,noconds=True)",
+  "vale":"sqrt(pi/2)*exp(s**2/2)*erfc(s/sqrt(2))",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"l'esercizio 8.3. Asserito con erfc e non con (1-erf) perche' sympy non riduce la differenza delle due forme a zero da solo: erfc(z)=1-erf(z) e' una definizione, e chiedere alla macchina di riconoscerla fa fallire un'asserzione vera. La prosa scrive [1-erf(...)] come le note",
+  "dove":"05","appare":"1-\\mathrm{erf}"},
+
+ {"tipo":"uguale","sinistra":"integrate(exp(-t**2/2-s*t),(t,0,oo))",
+  "vale":"exp(s**2/2)*integrate(exp(-(t+s)**2/2),(t,0,oo))",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il passo di completamento del quadrato verificato COME UGUAGLIANZA FRA I DUE INTEGRALI, non solo sull'esponente: e' il punto in cui il cammino si sposta nel complesso",
+  "dove":"05","appare":"e^{s^2/2}\\int_0^{\\infty}dt\\,e^{-\\frac12(t+s)^2}"},
+
+ {"tipo":"uguale","sinistra":"-t**2/2-s*t","vale":"-(t+s)**2/2+s**2/2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"l'identita' algebrica del completamento del quadrato, isolata",
+  "dove":"05","appare":"-\\frac12(t+s)^2+\\frac{s^2}{2}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(2*t)*cos(t),t,s,noconds=True)",
+  "vale":"(s-2)/((s-2)**2+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la seconda strada dell'esercizio 8.2, quella senza Feynman: smorzamento applicato a L[cos t]",
+  "dove":"05","appare":"\\frac{s-2}{(s-2)^2+1}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(t),t,s,noconds=True)","vale":"1/(s-1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il secondo fattore dell'esercizio 8.4; il vincolo vero e' Re s>1, e sympy lo porta come positivita' del solo s (il conto e' lo stesso per continuazione analitica)",
+  "dove":"05","appare":"\\frac{1}{s-1}"},
+
+ {"tipo":"integrale","espr":"exp(-x**2/2)","var":"x","da":"0","a":"oo","vale":"sqrt(pi/2)",
+  "ipotesi":{"x":"real"},
+  "nota":"il pezzo gaussiano reale che esce dal cammino gamma_1, col segno cambiato perche' li' il verso e' da infinito a zero",
+  "dove":"05","appare":"-\\sqrt{\\pi/2}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t**2,t,s,noconds=True)","vale":"2/s**3",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il fattore che la soluzione stampata sbaglia: usa L[t]=1/s^2 dove la funzione ha t'^2",
+  "dove":"05","appare":"\\mathcal L[t^2](s)=\\frac{2}{s^3}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t**2,t,s,noconds=True)","vale":"2/s**3",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"lo stesso fattore nella forma inline in cui la prosa lo scrive dentro il paragrafo del refuso",
+  "dove":"05","appare":"\\mathcal L[t^2]=2/s^3"},
+
+ {"tipo":"uguale",
+  "sinistra":"laplace_transform(integrate(u**2*exp(t-u),(u,0,t)),t,s,noconds=True)",
+  "vale":"2/(s**3*(s-1))",
+  "ipotesi":{"t":"positive","s":"positive","u":"positive"},
+  "nota":"il secondo refuso, chiuso da un conto INDIPENDENTE: si svolge la convoluzione e poi se ne prende la trasformata, senza usare il teorema di convoluzione. Viene 2/(s^3(s-1)) e non 1/(s^2(s-1)) come stampato",
+  "dove":"05","appare":"\\frac{2}{s^3(s-1)}"},
+
+ {"tipo":"uguale","sinistra":"(2/s**3)*(1/(s-1))","vale":"2/(s**3*(s-1))",
+  "ipotesi":{"s":"positive"},
+  "nota":"e lo stesso risultato per la via del teorema di convoluzione: i due modi coincidono",
+  "dove":"05","appare":"F_4(s)=\\frac{2}{s^3(s-1)}"},
+
+ {"tipo":"uguale","sinistra":"inverse_laplace_transform(1/(s**2*(s**2+1)),s,t)","vale":"t-sin(t)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la soluzione del primo problema di Cauchy, verificata sull'antitrasformata invece che sui residui",
+  "dove":"06","appare":"x(t)=t-\\sin t"},
+
+ {"tipo":"derivata","espr":"exp(s*t)/(s**2+1)","rispetto":["s"],
+  "vale":"(t*(s**2+1)-2*s)*exp(s*t)/(s**2+1)**2",
+  "ipotesi":{"s":"real","t":"positive"},
+  "nota":"il residuo nel polo doppio in s=0 si calcola derivando: valutata in s=0 questa derivata da' t, che e' il termine lineare della soluzione",
+  "dove":"06","appare":"\\frac{e^{st}}{s^2+1}\\big|_{s=0}=t"},
+
+ {"tipo":"uguale","sinistra":"diff(exp(s*t)/(s**2+1),s).subs(s,0)","vale":"t",
+  "ipotesi":{"t":"positive","s":"real"},
+  "dove":"06","appare":"=t"},
+
+ {"tipo":"uguale","sinistra":"diff(t-sin(t),t,2)+(t-sin(t))","vale":"t",
+  "ipotesi":{"t":"positive"},
+  "nota":"il controllo dichiarato nella prosa: la soluzione trovata risolve davvero l'equazione",
+  "dove":"06","appare":"\\ddot x+x=\\sin t+t-\\sin t=t"},
+
+ {"tipo":"uguale",
+  "sinistra":"inverse_laplace_transform(v/(s*(s+2))+1/(s*(s+1)*(s+2)),s,t)",
+  "vale":"v*(1-exp(-2*t))/2+(1+exp(-2*t))/2-exp(-t)",
+  "ipotesi":{"t":"positive","s":"positive","v":"positive"},
+  "nota":"la soluzione del secondo problema; `v` e' il v_0 della prosa",
+  "dove":"06","appare":"\\frac{v_0}{2}\\bigl(1-e^{-2t}\\bigr)+\\frac12\\bigl(1+e^{-2t}\\bigr)-e^{-t}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t,t,s,noconds=True)","vale":"1/s**2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la sorgente del primo problema di Cauchy",
+  "dove":"06","appare":"\\frac{1}{s^2}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(-t),t,s,noconds=True)","vale":"1/(s+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la sorgente del secondo problema di Cauchy",
+  "dove":"06","appare":"\\frac{1}{s+1}"},
+
+ {"tipo":"uguale","sinistra":"v+1/(s+1)","vale":"(v*(s+1)+1)/(s+1)",
+  "ipotesi":{"s":"positive","v":"positive"},
+  "nota":"il membro destro dell'equazione trasformata del secondo problema, dopo aver imposto x(0)=0 e xdot(0)=v_0: il dato iniziale entra come una sorgente",
+  "dove":"06","appare":"v_0+\\frac{1}{s+1}"},
+
+ {"tipo":"uguale","sinistra":"v-1+1","vale":"v",
+  "ipotesi":{"v":"positive"},
+  "nota":"il controllo sulla derivata in t=0: deve restituire la velocita' iniziale v_0",
+  "dove":"06","appare":"v_0-1+1=v_0"},
+
+ {"tipo":"uguale","sinistra":"v/2*(1-1)+(1+1)/2-1","vale":"0",
+  "ipotesi":{"v":"positive"},
+  "nota":"il controllo in t=0 della soluzione del secondo problema, che deve dare x(0)=0",
+  "dove":"06","appare":"\\frac{v_0}{2}(1-1)+\\frac12(1+1)-1=0"},
+
+ {"tipo":"uguale","sinistra":"factor(s**2+2*s)","vale":"s*(s+2)",
+  "ipotesi":{"s":"positive"},
+  "nota":"i poli del secondo problema: 0 e -2, piu' il -1 della sorgente. Il piu' a destra e' 0, da cui Re s>0",
+  "dove":"06","appare":"s=0,-1,-2"},
+
+ {"tipo":"limite","espr":"s*(v/(s*(s+2))+1/(s*(s+1)*(s+2)))","var":"s","a":"0",
+  "vale":"v/2+1/2","ipotesi":{"s":"positive","v":"positive"},
+  "nota":"il teorema del valore finale applicato al secondo problema: la posizione asintotica e' v_0/2+1/2, la stessa che si legge dalla soluzione esplicita",
+  "dove":"07","appare":"\\frac{v_0}{2}+\\frac12"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t*exp(-3*t)*sin(t),t,s,noconds=True)",
+  "vale":"2*(s+3)/((s+3)**2+1)**2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "dove":"07","appare":"\\frac{2(s+3)}{\\bigl[(s+3)^2+1\\bigr]^2}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(-3*t)*sin(t),t,s,noconds=True)",
+  "vale":"1/((s+3)**2+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il passo intermedio dell'esercizio 1: lo smorzamento applicato a L[sin t]",
+  "dove":"07","appare":"\\frac{1}{(s+3)^2+1}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(exp(-t),t,s,noconds=True)","vale":"1/(s+1)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"il secondo fattore della convoluzione dell'esercizio 4",
+  "dove":"07","appare":"\\frac{1}{s+1}"},
+
+ {"tipo":"uguale","sinistra":"laplace_transform(t*exp(2*t),t,s,noconds=True)","vale":"1/(s-2)**2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"la corrispondenza fattore t <-> polo doppio, richiamata nel collaudo: qui su a=2",
+  "dove":"07","appare":"\\mathcal L[t\\,e^{at}]=1/(s-a)^2"},
+
+ {"tipo":"uguale","sinistra":"exp(-2*t)/(-2+1)**2","vale":"exp(-2*t)",
+  "ipotesi":{"t":"positive"},
+  "nota":"il residuo semplice in s=-2 dell'esercizio 3",
+  "dove":"07","appare":"\\frac{e^{-2t}}{(-2+1)^2}=e^{-2t}"},
+
+ {"tipo":"uguale","sinistra":"(0-1+1)/2","vale":"0",
+  "nota":"il controllo h(0)=0 dell'esercizio 4",
+  "dove":"07","appare":"\\frac12(0-1+1)=0"},
+
+ {"tipo":"uguale","sinistra":"1/s**2-1/s+1/(s+1)","vale":"1/(s**2*(s+1))",
+  "ipotesi":{"s":"positive"},
+  "nota":"la scomposizione in frazioni parziali dell'esercizio 2 e' un'identita', non un'approssimazione",
+  "dove":"07","appare":"\\dfrac{1}{s^2}-\\dfrac{1}{s}+\\dfrac{1}{s+1}"},
+
+ {"tipo":"uguale","sinistra":"inverse_laplace_transform(1/(s**2*(s+1)),s,t)","vale":"t-1+exp(-t)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "dove":"07","appare":"t-1+e^{-t}"},
+
+ {"tipo":"uguale","sinistra":"diff(exp(s*t)/(s+1),s).subs(s,0)","vale":"t-1",
+  "ipotesi":{"t":"positive","s":"real"},
+  "nota":"il residuo nel polo doppio dell'esercizio 2, calcolato come derivata",
+  "dove":"07","appare":"=t-1"},
+
+ {"tipo":"uguale","sinistra":"factor(s**2+3*s+2)","vale":"(s+1)*(s+2)",
+  "ipotesi":{"s":"positive"},
+  "dove":"07","appare":"s^2+3s+2=(s+1)(s+2)"},
+
+ {"tipo":"uguale","sinistra":"inverse_laplace_transform(1/((s+1)**2*(s+2)),s,t)",
+  "vale":"(t-1)*exp(-t)+exp(-2*t)",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"l'esercizio 3: il polo doppio in s=-1 produce il fattore t annunciato prima del conto",
+  "dove":"07","appare":"x(t)=(t-1)e^{-t}+e^{-2t}"},
+
+ {"tipo":"uguale","sinistra":"diff((t-1)*exp(-t)+exp(-2*t),t,2)+3*diff((t-1)*exp(-t)+exp(-2*t),t)+2*((t-1)*exp(-t)+exp(-2*t))",
+  "vale":"exp(-t)","ipotesi":{"t":"positive"},
+  "nota":"e la verifica che quella funzione risolve davvero l'equazione dell'esercizio 3",
+  "dove":"07","appare":"\\ddot x+3\\dot x+2x=e^{-t}"},
+
+ {"tipo":"uguale",
+  "sinistra":"integrate(sin(t-u)*exp(-u),(u,0,t))","vale":"(sin(t)-cos(t)+exp(-t))/2",
+  "ipotesi":{"t":"positive","u":"positive"},
+  "nota":"l'esercizio 4 calcolato DIRETTAMENTE, cioe' senza passare dalle trasformate",
+  "dove":"07","appare":"\\frac{1}{2}\\bigl(\\sin t-\\cos t+e^{-t}\\bigr)"},
+
+ {"tipo":"uguale",
+  "sinistra":"inverse_laplace_transform(1/((s**2+1)*(s+1)),s,t)",
+  "vale":"(sin(t)-cos(t)+exp(-t))/2",
+  "ipotesi":{"t":"positive","s":"positive"},
+  "nota":"e lo stesso per la via delle trasformate: i due modi dell'esercizio 4 coincidono",
+  "dove":"07","appare":"h(t)=\\frac{1}{2}\\bigl(\\sin t-\\cos t+e^{-t}\\bigr)"}
+]
+CONTROLLO*/
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleome-10b-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo me-10b · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: me-10b-trasformata-di-laplace.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
