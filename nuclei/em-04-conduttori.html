@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento em-04 — I conduttori: equilibrio, schermo, capacità, e il metodo a strati che risolve mezzo compito</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Elettromagnetismo · Movimento <b>em-04 — I conduttori: cosa succede quando le cariche sono libere di muoversi</b> · 80 prove su 100 · densità 7.0, la seconda del corso</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'elettromagnetismo';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo em-04: I conduttori <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        em-04 — i conduttori
+identita:  cosa succede quando le cariche sono libere di muoversi: equilibrio, schermo, capacità
+copre:     B.2 — Conduttori in equilibrio elettrostatico, capacità, condensatori
+serve:     em-02 (em-02-flusso-e-gauss.html), em-03 (em-03-il-potenziale.html)
+apre:      em-05 (em-05-dielettrici.html), em-06 (em-06-energia-del-campo.html)
+strumenti: campo-vettoriale
+fonti:     Focardi cap. 2; programma di Bini voce B.2; 80 prove d'esame 2008-2021
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"q/(q/(4*pi*e0)*(1/R1-1/R2))","vale":"4*pi*e0*R1*R2/(R2-R1)",
+  "ipotesi":{"q":"positive","e0":"positive","R1":"positive","R2":"positive"},
+  "dove":"04","appare":"\\dfrac{4\\pi\\varepsilon_0R_1R_2}{R_2-R_1}"},
+
+ {"tipo":"limite","espr":"4*pi*e0*R1*R2/(R2-R1)","var":"R2","a":"oo","vale":"4*pi*e0*R1",
+  "ipotesi":{"e0":"positive","R1":"positive","R2":"positive"},
+  "dove":"04","appare":"C=4\\pi\\varepsilon_0R"},
+
+ {"tipo":"uguale","sinistra":"q/(q/(2*pi*e0*L)*log(R2/R1))","vale":"2*pi*e0*L/log(R2/R1)",
+  "ipotesi":{"q":"positive","e0":"positive","L":"positive","R1":"positive","R2":"positive"},
+  "dove":"04","appare":"\\dfrac{2\\pi\\varepsilon_0L}{\\ln(R_2/R_1)}"},
+
+ {"tipo":"integrale","espr":"(-q*d/(2*pi*(r**2+d**2)**Rational(3,2)))*2*pi*r",
+  "var":"r","da":"0","a":"oo","vale":"-q",
+  "ipotesi":{"q":"positive","d":"positive","r":"positive"},
+  "dove":"06","appare":"-q"},
+
+ {"tipo":"uguale","sinistra":"q**2/(4*pi*e0*(2*d)**2)","vale":"q**2/(16*pi*e0*d**2)",
+  "ipotesi":{"q":"positive","e0":"positive","d":"positive"},
+  "dove":"06","appare":"\\dfrac{q^{2}}{16\\pi\\varepsilon_0d^{2}}"},
+
+ {"tipo":"uguale","sinistra":"Rational(1,2)*(e0*A/d)*(E*d)**2","vale":"e0*E**2/2*A*d",
+  "ipotesi":{"e0":"positive","A":"positive","d":"positive","E":"positive"},
+  "dove":"04","appare":"\\dfrac{\\varepsilon_0E^{2}}{2}\\,(Ad)"},
+
+ {"tipo":"uguale","sinistra":"1/(1/C1+1/C2)","vale":"C1*C2/(C1+C2)",
+  "ipotesi":{"C1":"positive","C2":"positive"},
+  "dove":"04","appare":"\\dfrac{C_1C_2}{C_1+C_2}"},
+
+ {"tipo":"uguale","sinistra":"(sigma/e0)**2*e0/2","vale":"sigma**2/(2*e0)",
+  "ipotesi":{"sigma":"positive","e0":"positive"},
+  "dove":"02","appare":"\\frac{\\varepsilon_0E^{2}}{2}"},
+
+ {"tipo":"uguale","sinistra":"(Q/(4*pi*R**2))/e0","vale":"Q/(4*pi*e0*R**2)",
+  "ipotesi":{"Q":"positive","R":"positive","e0":"positive"},
+  "dove":"02","appare":"\\frac{Q}{4\\pi\\varepsilon_0R^2}"},
+
+ {"tipo":"uguale","sinistra":"(Q/A)/e0","vale":"Q/(e0*A)",
+  "ipotesi":{"Q":"positive","A":"positive","e0":"positive"},
+  "dove":"04","appare":"Q/(\\varepsilon_0A)"},
+
+ {"tipo":"uguale","sinistra":"Q/(Q*d/(e0*A))","vale":"e0*A/d",
+  "ipotesi":{"Q":"positive","A":"positive","d":"positive","e0":"positive"},
+  "dove":"04","appare":"\\frac{\\varepsilon_0A}{d}"},
+
+ {"tipo":"uguale","sinistra":"1/C1+1/C2","vale":"(C1+C2)/(C1*C2)",
+  "ipotesi":{"C1":"positive","C2":"positive"},
+  "dove":"04","appare":"\\frac1{C_1}+\\frac1{C_2}"},
+
+ {"tipo":"uguale","sinistra":"Q**2/(2*C)","vale":"Rational(1,2)*Q*(Q/C)",
+  "ipotesi":{"Q":"positive","C":"positive"},
+  "dove":"04","appare":"\\frac12Q\\,\\Delta V"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\nabla\\cdot\\vec E=\\rho/\\varepsilon_0",
+  "perche":"e' la forma locale di Gauss, dimostrata in em-02 e qui richiamata per applicarla a un campo nullo: un teorema citato, non un conto di questa tappa"},
+
+ {"tipo":"simbolico","dove":"03","appare":"Q/(4\\pi\\varepsilon_0)=1",
+  "perche":"e' la scelta delle unita' con cui sono disegnate le due figure, cioe' una convenzione dichiarata: non un risultato"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\vec E=0",
+  "perche":"e' la condizione che DEFINISCE l'equilibrio elettrostatico in un conduttore, cioe' l'ipotesi da cui parte tutta la tappa: non un risultato calcolato"},
+
+ {"tipo":"simbolico","dove":"02","appare":"E=\\dfrac{\\sigma}{\\varepsilon_0}",
+  "perche":"e' l'enunciato del teorema di Coulomb, dimostrato nella tappa stessa col cilindretto di Gauss: la formula e' il bersaglio della dimostrazione, non un conto a parte"},
+
+ {"tipo":"simbolico","dove":"03","appare":"Q_{\\text{int}}=0",
+  "perche":"e' la condizione di induzione completa imposta dall'equilibrio, cioe' il passaggio logico del metodo: da E=0 dentro il metallo segue che la superficie gaussiana non racchiude carica netta"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Elettromagnetismo · voce B.2 · 80 prove su 100 lo toccano, densita 7.0: e il secondo argomento del corso',
+  blocchi:[
+  {t:'prosa', title:'Una sola ipotesi, e tutto il resto viene da li', tag:'architettura', html:R`
+  <p>Fin qui le cariche stavano dove qualcuno le aveva messe. In un <b>conduttore</b> non è così: le cariche sono <b>libere di muoversi</b>, e si muovono finché possono. L&rsquo;unica ipotesi di questo movimento è che abbiano <b>finito</b> di muoversi — si chiama <b>equilibrio elettrostatico</b> — e si scrive in due caratteri:
+  $$\vec E=0\quad\text{dentro il metallo}.$$
+  Se non fosse zero, una carica libera sentirebbe una forza e si sposterebbe, e non saremmo all&rsquo;equilibrio. <b>Tutto questo movimento è la lista delle conseguenze di quella riga</b>, e ogni esercizio d&rsquo;esame sui conduttori si risolve ripercorrendo quella lista.</p>
+  <p>La misura dice perché conviene farlo bene: <b>80 prove su 100 fra il 2008 e il 2021</b> toccano questo movimento, con densità 7.0 — è il secondo argomento del corso dopo la corrente, e «condensatore» compare <b>232 volte</b> nella banca dati degli scritti. Non è un capitolo di teoria: è metà del compito.</p>`},
+  {t:'prosa', title:'Cosa serve gia avere in mano', tag:'dipendenze', html:R`
+  <p>Da <b>em-02</b> il metodo a strati: si sceglie la gaussiana con la simmetria del problema, si conta la carica dentro, si legge il campo. Qui quel metodo fa il suo <b>terzo tempo</b> e diventa quasi automatico, perché i conduttori aggiungono condizioni che chiudono i conti al posto tuo.</p>
+  <p>Da <b>em-03</b> il potenziale e la sua relazione col campo, $V(b)-V(a)=-\int_a^b\vec E\cdot d\vec\ell$. Serve perché la <b>capacità</b> è un rapporto fra carica e differenza di potenziale, e perché «messo a terra» significa «potenziale fissato a zero», che è la condizione al contorno più frequente degli scritti.</p>`}
+]},
+
+/* ---------------- 01 · L'EQUILIBRIO ---------------- */
+{ num:'01', title:'Lequilibrio elettrostatico: le quattro conseguenze, e sono tutte la stessa', meta:'E=0 dentro · niente carica di volume · superficie equipotenziale · campo perpendicolare alla superficie',
+  blocchi:[
+  {t:'prosa', title:'Le quattro conseguenze', tag:'first principles', html:R`
+  <p>Da $\vec E=0$ nel volume del conduttore seguono quattro fatti, e conviene vederli come <b>uno solo detto in quattro modi</b>, perché all&rsquo;esame si usano indifferentemente.</p>
+  <ol>
+   <li><b>Nessuna carica netta nel volume.</b> Per la forma locale di Gauss (em-02), $\nabla\cdot\vec E=\rho/\varepsilon_0$: se $\vec E$ è identicamente nullo in una regione, la sua divergenza è nulla, quindi $\rho=0$ lì dentro. <b>Tutta la carica in eccesso sta sulla superficie</b>, in uno strato di spessore atomico che noi trattiamo come una $\sigma$.</li>
+   <li><b>Il conduttore è un volume equipotenziale.</b> Fra due punti qualsiasi del metallo $V(b)-V(a)=-\int\vec E\cdot d\vec\ell=0$. Non solo la superficie: <b>tutto il corpo</b> è allo stesso potenziale, cavità comprese se non contengono cariche.</li>
+   <li><b>Il campo esterno è perpendicolare alla superficie.</b> Se avesse una componente tangente, le cariche superficiali scorrerebbero lungo la superficie — e non sarebbe equilibrio. Quindi la superficie di un conduttore è una <b>superficie equipotenziale</b>, e le linee di campo ci arrivano ad angolo retto.</li>
+   <li><b>Una cavità vuota è schermata.</b> Dentro una cavità priva di cariche il campo è <b>nullo</b>, qualunque cosa succeda fuori. È la gabbia di Faraday, e la dimostrazione sta nella tappa 05.</li>
+  </ol>
+  <div class="note"><b>L&rsquo;errore che costa punti, e si vede in ogni correzione:</b> «$\vec E=0$ dentro» vale nel <b>metallo</b>, non nelle cavità e non nei vuoti fra un guscio e l&rsquo;altro. In un sistema a strati il campo è nullo <i>solo</i> negli spessori conduttori, e vivo dappertutto altrove. Chi annulla il campo anche nella cavità perché «è dentro» sbaglia ogni sistema a gusci concentrici — cioè, statisticamente, l&rsquo;esercizio più frequente del corso.</div>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una carica $+q$ è appesa al centro di una cavità sferica scavata dentro un conduttore neutro. Quanto vale il campo dentro la cavità?`,
+    a:R`<b>Non è nullo</b>: vale $\frac{q}{4\pi\varepsilon_0r^2}$ come se il conduttore non ci fosse. La conseguenza (4) richiede una cavità <b>vuota</b>; qui la carica c&rsquo;è. Ciò che il conduttore fa è comparire una carica $-q$ sulla parete interna (perché una gaussiana dentro il metallo deve racchiudere carica netta nulla) e una $+q$ sulla superficie esterna, distribuita con la simmetria della <i>superficie esterna</i> e non con quella della cavità — <b>lo schermo funziona in un verso solo</b>.`},
+   {q:R`Perché la carica in eccesso si dispone tutta sulla superficie, e non «un po' anche dentro»?`,
+    a:R`Perché $\rho=\varepsilon_0\nabla\cdot\vec E$ e $\vec E\equiv0$ implica $\rho\equiv0$ <b>punto per punto</b>, non «in media». Non è una questione di repulsione fra cariche che le spinge il più lontano possibile — quella è l&rsquo;intuizione, non l&rsquo;argomento — è che un campo identicamente nullo ha divergenza identicamente nulla.`}
+  ]}
+]},
+
+/* ---------------- 02 · IL TEOREMA DI COULOMB ---------------- */
+{ num:'02', title:'Il teorema di Coulomb: il campo appena fuori, e perche vale sigma/epsilon0 e non meta', meta:'il cilindretto di Gauss a cavallo della superficie · il confronto col piano infinito · la pressione elettrostatica',
+  blocchi:[
+  {t:'reveal', title:'La dimostrazione, e il confronto che spiazza', tag:'costruzione', steps:[
+   {label:'Il cilindretto', body:R`
+   <p>Si prende una superficie gaussiana a forma di pillola, piccolissima, a cavallo della superficie del conduttore: una base dentro il metallo, una appena fuori, e il mantello di altezza trascurabile.</p>
+   <ul>
+    <li>base interna: $\vec E=0$, flusso <b>nullo</b>;</li>
+    <li>mantello: altezza $\to0$, flusso <b>trascurabile</b>;</li>
+    <li>base esterna, area $dA$: il campo è perpendicolare alla superficie (conseguenza 3), quindi il flusso è $E\,dA$.</li>
+   </ul>
+   <p>La carica racchiusa è $\sigma\,dA$, e Gauss dà $E\,dA=\sigma dA/\varepsilon_0$:
+   $$E=\frac{\sigma}{\varepsilon_0}.$$</p>`},
+   {label:'Perche NON e sigma su due epsilon', body:R`
+   <p>Il piano indefinito carico di em-02 dava $E=\dfrac{\sigma}{2\varepsilon_0}$, e qui viene il doppio. <b>Non è un errore di fattore: sono due situazioni diverse.</b></p>
+   <p>Nel piano isolato il campo esce da <b>entrambi</b> i lati, e la carica $\sigma dA$ si divide fra due flussi. Su un conduttore il campo da una parte è <b>zero</b>: tutta la carica alimenta un flusso solo, che quindi è doppio. Detto altrimenti: il campo appena fuori è la somma di quello prodotto dallo <i>strato locale</i> di carica ($\sigma/2\varepsilon_0$) e di quello prodotto da <b>tutto il resto del sistema</b> ($\sigma/2\varepsilon_0$ anch&rsquo;esso, perché dentro deve cancellare il primo). Fuori i due si sommano e fanno $\sigma/\varepsilon_0$; dentro si sottraggono e fanno zero.</p>`},
+   {label:'La pressione elettrostatica, che nasce dalla stessa scomposizione', body:R`
+   <p>Quella scomposizione risponde anche a una domanda insidiosa: <b>con quale campo si calcola la forza sulla carica superficiale?</b> Non con $\sigma/\varepsilon_0$ — quel campo include il contributo della carica stessa, che non può spingere se stessa. Con l&rsquo;<b>altro</b> pezzo, $\sigma/2\varepsilon_0$. Quindi la forza per unità di area è
+   $$\frac{F}{A}=\sigma\cdot\frac{\sigma}{2\varepsilon_0}=\frac{\sigma^{2}}{2\varepsilon_0}=\frac{\varepsilon_0E^{2}}{2},$$
+   ed è <b>sempre verso l&rsquo;esterno</b>: un conduttore carico tende a dilatarsi, qualunque sia il segno della carica. Quel $\varepsilon_0E^2/2$ è già la <b>densità di energia del campo</b>, che incontrerai in em-06 come oggetto autonomo — qui esce come pressione, e il fatto che i due numeri coincidano non è una coincidenza.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Su una sfera conduttrice isolata di raggio $R$ con carica $Q$: quanto vale $\sigma$, e quanto il campo appena fuori?`,
+    a:R`$\sigma=\frac{Q}{4\pi R^2}$ per simmetria, e il campo appena fuori è $\frac{\sigma}{\varepsilon_0}=\frac{Q}{4\pi\varepsilon_0R^2}$ — che è <b>esattamente</b> il campo di una carica puntiforme $Q$ posta al centro, valutato in $r=R$. I due conti coincidono, come devono: è il teorema di Coulomb e Gauss che raccontano lo stesso fatto.`},
+   {q:R`Su un conduttore non sferico, dove si accumula più carica?`,
+    a:R`Dove la superficie è più <b>curva</b>: sulle punte. L&rsquo;argomento in una riga: la superficie è equipotenziale, e per due sferette collegate di raggi $R_1,R_2$ lo stesso potenziale $\frac{Q}{4\pi\varepsilon_0R}$ impone $\sigma R=\text{cost}$, cioè $\sigma\propto1/R$. Sulle punte $\sigma$ esplode, e con essa $E=\sigma/\varepsilon_0$ — da lì il <b>potere dispersivo delle punte</b> e il parafulmine.`}
+  ]}
+]},
+
+/* ---------------- 03 · IL METODO A STRATI, TERZO TEMPO ---------------- */
+{ num:'03', title:'Sistemi a gusci: il metodo che risolve lesercizio piu frequente del corso', meta:'induzione completa · messa a terra · la ricetta in cinque passi · il campo e il potenziale a tratti',
+  blocchi:[
+  {t:'prosa', title:'La ricetta, e non cambia mai', tag:'regola operativa', html:R`
+  <p>La forma tipica dello scritto: una carica $Q_1$ su un conduttore sferico (o un filo, o un cilindro) di raggio $R_1$, circondato da un guscio conduttore fra $R_2$ e $R_3$, eventualmente <b>messo a terra</b>; si chiede il campo ovunque, le cariche su ogni superficie, il potenziale, la capacità. <b>Cinque passi, sempre gli stessi:</b></p>
+  <ol>
+   <li><b>Elenca le superfici</b>, dall&rsquo;interno verso l&rsquo;esterno, e dai un nome alla carica su ciascuna.</li>
+   <li><b>Metti a zero il campo dentro ogni spessore metallico.</b> Una gaussiana che cammina dentro il metallo deve racchiudere carica netta nulla, $Q_{\text{int}}=0$: questo fissa la carica sulla faccia interna di ogni guscio, e vale l&rsquo;<b>induzione completa</b> — sulla faccia interna compare esattamente l&rsquo;opposto di ciò che sta più dentro.</li>
+   <li><b>Conserva la carica di ogni conduttore isolato</b> (la somma delle sue due facce è la carica che gli hai dato). Se invece è <b>messo a terra</b>, questa condizione salta e la sostituisci con $V=0$: la terra fornisce o assorbe la carica che serve, e quasi sempre il risultato è che la <b>faccia esterna resta scarica</b>.</li>
+   <li><b>Gauss regione per regione</b>: il campo in ogni zona dipende solo dalla carica totale racchiusa.</li>
+   <li><b>Integra il campo</b> per il potenziale, partendo da dove lo conosci (l&rsquo;infinito, o la terra).</li>
+  </ol>
+  <div class="note"><b>Il controllo che smaschera gli errori</b>: il campo può <b>saltare</b> solo attraversando una superficie carica, e il salto vale $\sigma/\varepsilon_0$. Il potenziale invece è <b>continuo ovunque</b>, sempre, anche dove il campo salta — è l&rsquo;integrale di una funzione limitata. Se il tuo $V(r)$ ha un gradino, hai sbagliato un segno o un estremo.</div>`},
+  {t:'plot', title:'Campo e potenziale attraverso un sistema a tre superfici',
+   intro:R`Sfera conduttrice di raggio $R_1=1$ con carica $Q$, dentro un guscio conduttore neutro fra $R_2=2$ e $R_3=3$. In unità $Q/(4\pi\varepsilon_0)=1$.`,
+   plots:[
+    {kind:'func2d', xr:[0,5], yr:[-0.15,1.25], height:330,
+     title:'E(r): nullo nel metallo, 1/r^2 nel vuoto — e i due salti',
+     xlabel:'r', ylabel:'E(r)',
+     curves:[{f:'x<1 ? 0 : (x<2 ? 1/(x*x) : (x<3 ? 0 : 1/(x*x)))', col:'#5eead4', width:2.6, label:'E(r)'}],
+     segs:[{x1:1, y1:0, x2:1, y2:1.15, col:'#ff6b6b', dash:true, width:1.4, label:'R1', lx:1.02, ly:1.18},
+           {x1:2, y1:0, x2:2, y2:1.15, col:'#4c8dff', dash:true, width:1.4, label:'R2', lx:2.02, ly:1.18},
+           {x1:3, y1:0, x2:3, y2:1.15, col:'#4c8dff', dash:true, width:1.4, label:'R3', lx:3.02, ly:1.18},
+           {x1:0, y1:0, x2:5, y2:0, col:'#4d5a6b', width:1}],
+     marks:[{x:0.5, y:0, label:'dentro il conduttore: E=0', col:'#b98cff', up:true},
+            {x:2.5, y:0, label:'dentro il guscio: E=0', col:'#b98cff', up:true}]},
+    {kind:'func2d', xr:[0,5], yr:[0,1.35], height:330,
+     title:'V(r): continuo ovunque, e piatto dentro ogni metallo',
+     xlabel:'r', ylabel:'V(r)',
+     curves:[{f:'x<1 ? (1/1-1/2+1/3) : (x<2 ? (1/x-1/2+1/3) : (x<3 ? 1/3 : 1/x))', col:'#d8a13a', width:2.6, label:'V(r)'}],
+     segs:[{x1:1, y1:0, x2:1, y2:1.3, col:'#ff6b6b', dash:true, width:1.2},
+           {x1:2, y1:0, x2:2, y2:1.3, col:'#4c8dff', dash:true, width:1.2},
+           {x1:3, y1:0, x2:3, y2:1.3, col:'#4c8dff', dash:true, width:1.2}],
+     marks:[{x:0.5, y:0.8333, label:'equipotenziale', col:'#b98cff', up:true},
+            {x:2.5, y:0.3333, label:'equipotenziale', col:'#b98cff', up:true}]}
+   ],
+   leggi:R`<b>Le due figure insieme sono il controllo dell&rsquo;esercizio.</b> Il campo (sopra) è nullo in due intervalli — <i>dentro il metallo</i>, non dentro la cavità — e fra $R_1$ e $R_2$ vive tranquillo come se il guscio non ci fosse: quello è il punto che chi sbaglia annulla. I salti stanno solo dove c&rsquo;è carica superficiale: in $R_1$ sale, in $R_2$ crolla a zero (lì è comparsa la carica indotta $-Q$), in $R_3$ risale (lì è comparsa $+Q$, perché il guscio era neutro).<br><br>
+   Il potenziale (sotto) <b>non salta mai</b>, ed è piatto esattamente dove il campo è nullo — un plateau per ogni conduttore, che è il significato grafico di «equipotenziale». Fuori da $R_3$ il potenziale è $1/r$ come se ci fosse solo $Q$ al centro: <b>visto da fuori, il guscio neutro non esiste</b>. Se avessi messo il guscio a terra, l&rsquo;ultimo tratto sarebbe schiacciato a zero e la faccia esterna resterebbe scarica: <i>quello</i> è ciò che «messo a terra» cambia nel disegno.`}
+]},
+
+/* ---------------- 04 · LA CAPACITÀ ---------------- */
+{ num:'04', title:'La capacita e i condensatori: tre geometrie, e sono lo stesso conto', meta:'definizione · piano, cilindrico, sferico · serie e parallelo · lenergia immagazzinata',
+  blocchi:[
+  {t:'prosa', title:'Che cosa misura la capacita', tag:'grammatica', html:R`
+  <p>Per un conduttore isolato, carica e potenziale sono <b>proporzionali</b> — raddoppia la carica e raddoppia il campo, quindi il potenziale. Il rapporto dipende solo dalla geometria e si chiama <b>capacità</b>:
+  $$C=\frac{Q}{V}.$$
+  Per una sfera isolata, $V=\frac{Q}{4\pi\varepsilon_0R}$ dà $C=4\pi\varepsilon_0R$: <b>la capacità è una lunghezza</b>, a meno di costanti. Più un conduttore è grande, più carica accetta a parità di potenziale.</p>
+  <p>Un <b>condensatore</b> è una coppia di conduttori con cariche $+Q$ e $-Q$, e $C=Q/\Delta V$. La ricetta per calcolarlo è una sola, in tre passi: <b>si mette $Q$, si calcola il campo con Gauss, si integra per avere $\Delta V$, si divide</b>. Le tre geometrie classiche differiscono solo nel secondo passo.</p>`},
+  {t:'reveal', title:'Le tre geometrie, calcolate e non ricordate', tag:'costruzione', steps:[
+   {label:'Piano', body:R`
+   <p>Due armature di area $A$ a distanza $d$, campo uniforme $E=\sigma/\varepsilon_0=Q/(\varepsilon_0A)$ (teorema di Coulomb, tappa 02), quindi $\Delta V=Ed=\frac{Qd}{\varepsilon_0A}$ e
+   $$C=\frac{\varepsilon_0A}{d}.$$
+   Il campo è uniforme solo se $d\ll\sqrt A$: gli <b>effetti di bordo</b> si trascurano, ed è l&rsquo;unica approssimazione di tutta la tappa.</p>`},
+   {label:'Cilindrico', body:R`
+   <p>Due cilindri coassiali di raggi $R_1<R_2$ e lunghezza $L\gg R_2$. Gauss con una superficie cilindrica dà $E(r)=\frac{Q}{2\pi\varepsilon_0Lr}$, e integrando da $R_1$ a $R_2$:
+   $$\Delta V=\frac{Q}{2\pi\varepsilon_0L}\ln\frac{R_2}{R_1}\quad\Longrightarrow\quad C=\frac{2\pi\varepsilon_0L}{\ln(R_2/R_1)}.$$
+   <b>Il logaritmo è la firma della simmetria cilindrica</b> e torna in ogni esercizio con fili e cavi coassiali.</p>`},
+   {label:'Sferico, e i due limiti che valgono un controllo', body:R`
+   <p>Due sfere concentriche: $E(r)=\frac{Q}{4\pi\varepsilon_0r^2}$ fra le armature, $\Delta V=\frac{Q}{4\pi\varepsilon_0}\left(\frac{1}{R_1}-\frac{1}{R_2}\right)$, quindi
+   $$C=\frac{4\pi\varepsilon_0R_1R_2}{R_2-R_1}.$$
+   <b>Due controlli che valgono più della formula.</b> Se $R_2\to\infty$ si ritrova la sfera isolata, $C=4\pi\varepsilon_0R_1$: una sfera sola è un condensatore la cui seconda armatura è l&rsquo;infinito. Se invece $R_2=R_1+d$ con $d$ piccolo, $C\to\frac{4\pi\varepsilon_0R_1^2}{d}=\frac{\varepsilon_0A}{d}$ con $A=4\pi R_1^2$: <b>si ritrova il condensatore piano</b>, come dev&rsquo;essere, perché da vicino ogni superficie è piatta.</p>`}
+  ]},
+  {t:'prosa', title:'Serie e parallelo, e perche si sommano al contrario', tag:'regola operativa', html:R`
+  <p><b>Parallelo</b> (stessa $\Delta V$, le cariche si sommano): $C=C_1+C_2$. <b>Serie</b> (stessa $Q$ per induzione completa, le tensioni si sommano):
+  $$\frac1C=\frac1{C_1}+\frac1{C_2}\quad\Longrightarrow\quad C=\frac{C_1C_2}{C_1+C_2}.$$
+  <b>Il modo di non confondersi</b> non è ricordare le formule ma chiedersi <i>che cosa è in comune</i>: in parallelo è la tensione, in serie è la carica. E un controllo di buon senso che funziona sempre: due condensatori in serie hanno capacità <b>minore</b> del più piccolo dei due (è come allontanare le armature), in parallelo <b>maggiore</b> del più grande (è come allargarle).</p>
+  <p><b>L&rsquo;energia immagazzinata</b> si ottiene caricando poco per volta, $dU=V\,dq=\frac{q}{C}dq$, e integrando:
+  $$U=\frac{Q^{2}}{2C}=\frac12C\,\Delta V^{2}=\frac12Q\,\Delta V.$$
+  Nel condensatore piano questa diventa $U=\frac{\varepsilon_0E^{2}}{2}\,(Ad)$: <b>energia per unità di volume $\times$ volume fra le armature</b>. È lo stesso $\varepsilon_0E^2/2$ della pressione elettrostatica, ed è il ponte con em-06 — dove si prenderà sul serio l&rsquo;idea che <i>l&rsquo;energia sta nel campo</i>, non nelle cariche.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un condensatore piano è carico e <b>isolato</b>. Allontani le armature: come cambiano $Q$, $E$, $\Delta V$, $U$?`,
+    a:R`$Q$ resta (è isolato). $E=\sigma/\varepsilon_0$ resta, perché dipende solo dalla densità di carica e non dalla distanza. $\Delta V=Ed$ <b>cresce</b>. $C=Q/\Delta V$ <b>cala</b>. $U=\frac{Q^2}{2C}$ <b>cresce</b> — e l&rsquo;energia in più l&rsquo;hai messa tu, tirando contro l&rsquo;attrazione fra le armature. <b>Se invece il condensatore resta collegato al generatore</b> cambia tutto: è $\Delta V$ a restare fisso, $Q$ cala, e $U=\frac12C\Delta V^2$ <b>diminuisce</b>. La domanda «isolato o collegato?» va fatta prima di ogni conto: è lì che casca metà degli scritti.`},
+   {q:R`Perché la capacità di una sfera isolata non contiene nessuna «seconda armatura»?`,
+    a:R`Ce l&rsquo;ha: è l&rsquo;<b>infinito</b>, dove si è scelto $V=0$. Il limite $R_2\to\infty$ della formula sferica lo mostra esplicitamente. Ogni capacità è sempre <i>fra due cose</i>; quando se ne nomina una sola, l&rsquo;altra è il riferimento di potenziale — e infatti per un conduttore «messo a terra» la seconda armatura è letteralmente la terra.`}
+  ]}
+]},
+
+/* ---------------- 05 · LO SCHERMO ---------------- */
+{ num:'05', title:'Schermo elettrostatico e gabbia di Faraday: perche funziona in un verso solo', meta:'la dimostrazione col potenziale · cosa schermi e cosa no · la messa a terra',
+  blocchi:[
+  {t:'prosa', title:'La dimostrazione, che non usa Gauss', tag:'costruzione', html:R`
+  <p><b>Tesi</b>: in una cavità vuota dentro un conduttore in equilibrio il campo è nullo, qualunque sia la distribuzione di cariche <i>fuori</i>.</p>
+  <p>Gauss da solo non basta: dice che il flusso attraverso una superficie nella cavità è nullo, non che il campo lo sia — potrebbe entrare da una parte e uscire dall&rsquo;altra. L&rsquo;argomento giusto usa il <b>potenziale</b>. La parete della cavità è tutta allo stesso potenziale $V_0$ (il conduttore è equipotenziale). Dentro la cavità non ci sono cariche, quindi $V$ soddisfa $\nabla^2V=0$: è <b>armonica</b>. Una funzione armonica non ha massimi né minimi interni — li ha solo sul bordo — e qui il bordo è tutto a $V_0$. Quindi $V\equiv V_0$ in tutta la cavità, e $\vec E=-\nabla V=0$. <b>Il risultato viene dal principio del massimo</b>, lo stesso che nel percorso di Metodi governa l&rsquo;equazione di Laplace: non è un&rsquo;analogia, è letteralmente lo stesso teorema.</p>`},
+  {t:'prosa', title:'Il verso che non funziona, e la messa a terra', tag:'regola operativa', html:R`
+  <p><b>Dall&rsquo;esterno verso l&rsquo;interno lo schermo è perfetto</b>: dentro la cavità non arriva niente. <b>Dall&rsquo;interno verso l&rsquo;esterno no</b>: una carica $q$ nella cavità induce $-q$ sulla parete interna e $+q$ sulla superficie esterna, e quel $+q$ produce campo fuori. Chi sta fuori si accorge della carica — non di <i>dove</i> sia, perché la distribuzione esterna segue la forma della superficie esterna e ha dimenticato la posizione della sorgente.</p>
+  <p><b>La messa a terra chiude anche quel verso.</b> Collegando il conduttore a terra, la carica $+q$ sulla faccia esterna se ne va e il potenziale è fissato a zero: fuori il campo è <b>nullo</b>. È il motivo per cui gli schermi dei cavi e le gabbie vere si collegano a massa, e all&rsquo;esame è la differenza fra «guscio isolato» (la faccia esterna porta carica) e «guscio a terra» (la faccia esterna è scarica).</p>
+  <div class="note">La gabbia di Faraday reale ha buchi e funziona lo stesso, purché le maglie siano piccole rispetto alla lunghezza d&rsquo;onda del campo da schermare — che in elettrostatica è infinita, e per questo una rete va bene quanto una lastra. Il telefono dentro l&rsquo;ascensore perde il segnale per la stessa ragione, ma lì la lunghezza d&rsquo;onda è finita ed è il motivo per cui a volte il segnale passa.</div>`}
+]},
+
+/* ---------------- 06 · LA CARICA IMMAGINE ---------------- */
+{ num:'06', title:'La carica immagine: il piano conduttore, e il trucco che sostituisce un problema con un altro', meta:'unicita della soluzione · la densita indotta · la carica totale · la forza attrattiva',
+  blocchi:[
+  {t:'prosa', title:'Perche e lecito, ed e la parte che non si racconta mai', tag:'first principles', html:R`
+  <p>Problema: una carica $q$ a distanza $d$ da un piano conduttore indefinito messo a terra. Il campo nella regione $z>0$ è quello di $q$ <b>più</b> quello delle cariche indotte sul piano, che non conosciamo. Sembra un problema circolare.</p>
+  <p>Il <b>metodo delle immagini</b> lo spezza così: si <i>indovina</i> una configurazione fittizia — la carica $q$ più una carica $-q$ in posizione simmetrica, con il piano rimosso — e si verifica che produca $V=0$ su tutto il piano $z=0$, com&rsquo;è richiesto. <b>Perché questo basta:</b> nella regione $z>0$ le due configurazioni hanno la <i>stessa</i> carica vera e le <i>stesse</i> condizioni al contorno, e il <b>teorema di unicità</b> per l&rsquo;equazione di Laplace dice che la soluzione con quei dati è una sola. Quindi coincidono.</p>
+  <p><b>Il metodo non è un trucco: è un teorema di unicità usato al contrario</b> — invece di risolvere, si esibisce una soluzione e si dimostra che è <i>la</i> soluzione. Ed è valido <b>solo</b> nella regione fisica: nella zona $z<0$ il campo vero è nullo (siamo dentro il metallo), mentre la configurazione fittizia lì darebbe qualcosa. Chi usa l&rsquo;immagine per calcolare il campo dalla parte sbagliata prende zero.</p>`},
+  {t:'reveal', title:'Quello che lesame chiede: sigma, carica totale, forza', tag:'esame', steps:[
+   {label:'La densita indotta', body:R`
+   <p>Sul piano il campo è perpendicolare e vale, sommando i due contributi a distanza $r$ dal piede della perpendicolare,
+   $$E_z(r)=-\frac{2}{4\pi\varepsilon_0}\frac{qd}{(r^{2}+d^{2})^{3/2}},$$
+   e per il teorema di Coulomb $\sigma=\varepsilon_0E_z$:
+   $$\sigma(r)=-\frac{qd}{2\pi(r^{2}+d^{2})^{3/2}}.$$
+   <b>Negativa ovunque</b> (se $q>0$), massima in modulo sotto la carica, e decadente come $r^{-3}$.</p>`},
+   {label:'La carica totale indotta, e il controllo che chiude', body:R`
+   <p>Si integra su tutto il piano in coordinate polari, $dA=2\pi r\,dr$:
+   $$\int_0^{\infty}\sigma(r)\,2\pi r\,dr=-q.$$
+   <b>Esattamente $-q$</b>, e non è un caso: il piano a terra è in <b>induzione completa</b> con la carica, cioè tutte le linee di campo che partono da $q$ finiscono sul piano. Questo integrale è il controllo che gli scritti chiedono esplicitamente («si calcoli la carica elettrica totale indotta sul piano conduttore»), e se non viene $-q$ c&rsquo;è un errore in $\sigma$.</p>`},
+   {label:'La forza', body:R`
+   <p>La forza su $q$ è quella esercitata dall&rsquo;immagine, a distanza $2d$:
+   $$F=\frac{q^{2}}{4\pi\varepsilon_0(2d)^{2}}=\frac{q^{2}}{16\pi\varepsilon_0d^{2}},$$
+   <b>attrattiva</b>. Nota che è il <i>quarto</i> della forza fra due cariche $q$ e $-q$ a distanza $d$ — l&rsquo;errore tipico è dimenticare che la separazione è $2d$ e non $d$.</p>
+   <div class="note"><b>Il conto dell&rsquo;energia è la trappola gemella.</b> L&rsquo;energia di questo sistema <i>non</i> è $-\frac{q^2}{4\pi\varepsilon_0(2d)}$, cioè quella della coppia carica-immagine: è la <b>metà</b>, perché nel sistema vero il campo esiste solo in mezzo spazio, e l&rsquo;energia è l&rsquo;integrale di $\varepsilon_0E^2/2$ su quel mezzo spazio. La forza invece è la stessa. È il caso in cui «sostituire il problema» vale per una grandezza e non per l&rsquo;altra, e conviene ricordarlo così: <b>l&rsquo;immagine riproduce il campo, non l&rsquo;energia</b>.</div>`}
+  ]},
+  {t:'plot', title:'La carica indotta sul piano: dove si concentra, e quanto vale in tutto',
+   intro:R`$\sigma(r)$ in unità di $q/d^2$, con $d=1$. In tratteggio il contributo cumulato $\int_0^r\sigma\,2\pi r'dr'$, cioè quanta carica è già stata raccolta entro il raggio $r$.`,
+   plots:[
+    {kind:'func2d', xr:[0,6], yr:[-1.05,0.12], height:350,
+     title:'sigma(r) e la carica cumulata: meta della carica indotta sta entro r = 1.7 d',
+     xlabel:'r / d', ylabel:'in unita di q',
+     curves:[
+      {f:'-1/(2*PI*pow(1+x*x,1.5))*6.2832', col:'#5eead4', width:2.4, label:'sigma(r) (scalata)'},
+      {f:'-(1-1/sqrt(1+x*x))', col:'#d8a13a', width:2.2, dash:true, label:'carica raccolta entro r'}
+     ],
+     segs:[{x1:0, y1:-1, x2:6, y2:-1, col:'#ff6b6b', dash:true, width:1.4, label:'-q: il totale', lx:4.2, ly:-0.94},
+           {x1:0, y1:0, x2:6, y2:0, col:'#4d5a6b', width:1},
+           {x1:1.732, y1:-0.5, x2:1.732, y2:0, col:'#b98cff', dash:true, width:1.3, label:'meta della carica', lx:1.8, ly:-0.28}],
+     marks:[{x:0, y:-1, label:'sigma massima sotto la carica', col:'#5eead4', up:true},
+            {x:1.732, y:-0.5, label:'r = 1.73 d', col:'#b98cff'}]}
+   ],
+   leggi:R`La curva piena mostra che la carica indotta è <b>concentrata sotto la carica</b> e decade come $r^{-3}$: a tre $d$ di distanza è già quasi nulla. La tratteggiata è il conto cumulato, e vale $-q\left(1-\frac{1}{\sqrt{1+(r/d)^2}}\right)$: parte da zero, e <b>tende a $-q$</b> — la linea rossa. Questo è il controllo dell&rsquo;esercizio <i>visto</i>: la carica totale indotta è esattamente l&rsquo;opposto di quella che la induce, e ci arriva lentamente, con una coda che si estende molto più in là di dove $\sigma$ sembra ormai trascurabile.<br><br>
+   <b>La lettura che vale un esercizio intero</b>: metà della carica indotta sta entro $r\simeq1{,}73\,d$, cioè entro meno di due volte la distanza della carica. Quando un compito chiede «la carica indotta entro un raggio $R$», la risposta è quella formula, e il suo limite per $R\to\infty$ è il controllo che dice se hai sbagliato un fattore.`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'tre forme che cadono davvero: gusci concentrici, condensatore che cambia, piano con immagine',
+  blocchi:[
+  {t:'esercizio', title:'Gusci concentrici con messa a terra',
+   src:'forma ricorrente negli scritti 2008-2021 (cfr. 180705)',
+   testo:R`Una sfera conduttrice di raggio $R_1$ porta carica $Q$. È circondata da un guscio conduttore fra $R_2$ e $R_3$, <b>messo a terra</b>. Determinare: le cariche su tutte le superfici, il campo in ogni regione, il potenziale della sfera interna, e la capacità del sistema.`,
+   steps:[
+    {label:'Le cariche', body:R`<p>Faccia interna del guscio ($R_2$): per induzione completa, $-Q$. Faccia esterna ($R_3$): il guscio è <b>a terra</b>, quindi non deve conservare la carica — e poiché per $r>R_3$ il campo deve essere nullo (altrimenti il potenziale non potrebbe valere zero sia su $R_3$ sia all&rsquo;infinito), la carica racchiusa totale è nulla: sulla faccia esterna resta <b>zero</b>.</p>`},
+    {label:'Il campo', body:R`<p>$E=0$ per $r<R_1$ (dentro il metallo); $E=\frac{Q}{4\pi\varepsilon_0r^2}$ per $R_1<r<R_2$; $E=0$ nel guscio e <b>anche per $r>R_3$</b>. Il sistema, visto da fuori, è invisibile: è la messa a terra che lo rende tale.</p>`},
+    {label:'Potenziale e capacita', body:R`<p>Partendo da $V(R_2)=0$: $V(R_1)=\frac{Q}{4\pi\varepsilon_0}\left(\frac1{R_1}-\frac1{R_2}\right)$. Quindi $C=Q/V(R_1)=\frac{4\pi\varepsilon_0R_1R_2}{R_2-R_1}$: <b>è il condensatore sferico</b>, e $R_3$ non compare. Il guscio esterno a terra ha reso il sistema un condensatore fra $R_1$ e $R_2$, punto.</p>`}
+   ]},
+  {t:'esercizio', title:'Il condensatore che cambia: isolato o collegato',
+   src:'la domanda a due rami, frequentissima',
+   testo:R`Un condensatore piano di armature $A$ e distanza $d$ è caricato a tensione $V_0$ e poi <b>scollegato</b>. Si allontanano le armature fino a $2d$. Calcolare la variazione di energia, e il lavoro fatto dall'operatore. Rifare il conto nel caso in cui il condensatore fosse rimasto <b>collegato</b> al generatore.`,
+   steps:[
+    {label:'Isolato', body:R`<p>$Q=C_0V_0$ resta costante, $C$ dimezza, quindi $U=\frac{Q^2}{2C}$ <b>raddoppia</b>: $\Delta U=+\frac12C_0V_0^2$. Tutto questo lavoro l&rsquo;ha fatto l&rsquo;operatore tirando contro l&rsquo;attrazione fra le armature, e infatti $F=\frac{\varepsilon_0E^2}{2}A$ è costante mentre $E$ non cambia — $L=Fd$ dà lo stesso numero.</p>`},
+    {label:'Collegato', body:R`<p>$V_0$ resta costante, $C$ dimezza, quindi $U=\frac12CV_0^2$ <b>dimezza</b>: $\Delta U=-\frac14C_0V_0^2$. Ma il generatore ha <b>riassorbito</b> carica $\Delta Q=-\frac12C_0V_0$, e il bilancio completo richiede di contare anche il lavoro fatto sul generatore. <b>Morale operativa</b>: la domanda «isolato o collegato» va posta <i>prima</i> di scrivere qualunque formula, perché decide quale grandezza tenere fissa — ed è l&rsquo;unica cosa che distingue i due conti.</p>`}
+   ]},
+  {t:'esercizio', title:'Piano conduttore e carica: la densita e la sua coda',
+   src:'cfr. 180621 — «determinare sigma e la carica totale indotta»',
+   testo:R`Una carica $q$ è posta a distanza $d$ da un piano conduttore indefinito messo a terra. Determinare $\sigma(r)$, la carica totale indotta, e la frazione di carica indotta che si trova entro un raggio $R$ dal piede della perpendicolare.`,
+   steps:[
+    {label:'La strada', body:R`<p>Immagine $-q$ in $z=-d$; campo sul piano; $\sigma=\varepsilon_0E_z$; integrazione in polari. La frazione entro $R$ è $$\frac{Q_{\text{ind}}(R)}{-q}=1-\frac{1}{\sqrt{1+(R/d)^{2}}},$$ che per $R\to\infty$ tende a $1$ — il controllo. <b>La figura della tappa 06 è esattamente questa funzione</b>, ed è il motivo per cui conviene guardarla prima di rifare il conto.</p>`}
+   ]}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa chiude, cosa apre, e dove questo movimento riappare in fisica',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Gauss (em-02) e il potenziale (em-03) erano strumenti generali; qui incontrano la prima <b>condizione al contorno</b> vera — $\vec E=0$ nel metallo, $V$ fissato sulla terra — e da strumenti diventano un metodo che chiude gli esercizi.</p>
+  <p><b>Il punto.</b> Un conduttore non è un materiale con proprietà da ricordare: è <b>un vincolo</b>. Tutto ciò che sappiamo sui conduttori è la lista delle conseguenze di quel vincolo, e per questo si può ricostruire in tre righe invece di impararlo.</p>
+  <p><b>A valle.</b> em-05 mette un dielettrico dove qui c&rsquo;è il vuoto, e la capacità si moltiplica per $\varepsilon_r$; em-06 prende sul serio $\varepsilon_0E^2/2$, che qui è comparso due volte per strade diverse — pressione e densità di energia; em-07 mette in moto le cariche che qui erano ferme, e l&rsquo;equilibrio diventa corrente stazionaria.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il conduttore come condizione al contorno</b>: una superficie su cui il potenziale è costante e il campo è perpendicolare.`,
+   rotte:[
+    {dove:'Metodi<br>matematici', txt:R`Il problema «trovare $V$ dato il potenziale sul bordo» è il <b>problema di Dirichlet</b> per l&rsquo;equazione di Laplace, e il metodo delle immagini è il modo elementare di costruirne la <b>funzione di Green</b>. La stessa struttura, in me-12: risolvere per una sorgente puntiforme e poi sovrapporre.`},
+    {dove:'Meccanica<br>quantistica', txt:R`La «particella in una scatola» è lo stesso problema al bordo con un&rsquo;altra equazione: condizioni su una superficie chiusa, spettro discreto di soluzioni. E l&rsquo;effetto Casimir nasce proprio da due piastre conduttrici che impongono condizioni al contorno al campo quantizzato.`},
+    {dove:'Fisica dei<br>materiali', txt:R`La distinzione conduttore/isolante che qui è un&rsquo;ipotesi diventa un <b>risultato</b> della teoria a bande: gli elettroni sono liberi se la banda è parzialmente riempita. La schermatura acquista una <b>lunghezza</b> finita (Debye, Thomas-Fermi) invece di essere perfetta e istantanea.`},
+    {dove:'Elettronica', txt:R`Ogni coppia di conduttori vicini è un condensatore <b>parassita</b>, e la capacità che qui è un esercizio diventa il limite di velocità dei circuiti reali: caricare quelle capacità costa tempo, ed è il motivo per cui i processori hanno una frequenza massima.`}
+   ],
+   domanda:R`Lo schermo elettrostatico che hai appena dimostrato è <b>perfetto e istantaneo</b>: nella cavità il campo è esattamente nullo, sempre. Ma nessun conduttore reale lo è — gli elettroni hanno massa, la ridistribuzione richiede tempo, e la schermatura ha una lunghezza caratteristica. <b>Domanda da portare avanti:</b> qual è il tempo che serve a un conduttore per «rispondere», e quale campo esterno è abbastanza veloce da entrare nella cavità prima che le cariche si siano riorganizzate? La risposta introduce la <b>frequenza di plasma</b>, spiega perché i metalli sono lucidi, e perché una gabbia di Faraday che ferma le onde radio si lascia attraversare dai raggi X.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoem-04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo em-04 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: em-04-conduttori.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
