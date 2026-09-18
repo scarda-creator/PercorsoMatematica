@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento em-11 — Le equazioni di Maxwell: la corrente di spostamento, le quattro leggi, e il numero che era la luce</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Elettromagnetismo · Movimento <b>em-11 — Le equazioni di Maxwell: un termine mancante, e la luce che ne esce</b> · il centro del corso</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'elettromagnetismo';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo em-11: Le equazioni di Maxwell <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        em-11 — le equazioni di Maxwell
+identita:  il termine che mancava, e la teoria che si chiude su se stessa
+copre:     C.4 — Equazioni di Maxwell, corrente di spostamento
+serve:     em-09 (em-09-materiali-magnetici.html), em-10 (em-10-induzione.html)
+apre:      em-12 (em-12-onde.html)
+strumenti: teorema-della-divergenza · campo-vettoriale
+fonti:     Focardi cap. 10; programma di Bini voce C.4; 27 prove d'esame 2008-2021
+generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"e0*diff(q/(e0*A),t)*A","vale":"diff(q,t)",
+  "ipotesi":{"e0":"positive","A":"positive","t":"positive"},
+  "dove":"02","appare":"\\varepsilon_0\\frac{d\\Phi_E}{dt}=\\frac{dq}{dt}=i"},
+
+ {"tipo":"uguale","sinistra":"1/sqrt(e0*mu0)","vale":"sqrt(1/(e0*mu0))",
+  "ipotesi":{"e0":"positive","mu0":"positive"},
+  "dove":"04","appare":"\\frac{1}{\\sqrt{\\varepsilon_0\\mu_0}}"},
+
+ {"tipo":"uguale",
+  "sinistra":"(diff(sin(k*x-c*k*t),x,2)-diff(sin(k*x-c*k*t),t,2)/c**2)",
+  "vale":"0",
+  "ipotesi":{"k":"positive","c":"positive","x":"real","t":"real"},
+  "dove":"04","appare":"\\nabla^{2}\\vec E=\\mu_0\\varepsilon_0\\frac{\\partial^{2}\\vec E}{\\partial t^{2}}"},
+
+ {"tipo":"uguale",
+  "sinistra":"floor(N(1/sqrt(Rational(88541878128,10**22)*4*pi*10**(-7)))/10**5)",
+  "vale":"2997",
+  "dove":"04","appare":"2{,}998\\times10^{8}"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\oint_\\gamma\\vec B\\cdot d\\vec\\ell=\\mu_0I_{\\text{conc}}",
+  "perche":"e' la legge di Ampere nella forma di em-08, richiamata qui per mostrarne l'incoerenza: enunciato citato"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\oint\\vec B\\cdot d\\vec\\ell=\\mu_0i",
+  "perche":"e' l'applicazione della legge citata al disco che taglia il filo: un passaggio dell'argomento per assurdo, non un conto"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\nabla\\times\\vec B=\\mu_0\\vec J",
+  "perche":"e' la forma locale della legge di Ampere incompleta, richiamata per mostrare che implica div J = 0: enunciato citato"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\nabla\\times\\vec E=-\\frac{\\partial\\vec B}{\\partial t}",
+  "perche":"e' la terza equazione di Maxwell, gia' ricavata in em-10: enunciato del quadro riassuntivo"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\nabla\\cdot\\vec D=\\rho_{\\text{lib}}",
+  "perche":"e' la prima equazione riscritta con D, gia' ricavata in em-05: enunciato"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\nabla\\times\\vec H=\\vec J_{\\text{lib}}+\\frac{\\partial\\vec D}{\\partial t}",
+  "perche":"e' la quarta equazione riscritta con H, che unisce em-09 e la corrente di spostamento: enunciato"},
+
+ {"tipo":"simbolico","dove":"04","appare":"-\\mu_0\\varepsilon_0\\frac{\\partial^{2}\\vec E}{\\partial t^{2}}",
+  "perche":"e' un passaggio simbolico della derivazione su campi non specificati: la sostituzione della quarta equazione dentro la terza"},
+
+ {"tipo":"simbolico","dove":"04","appare":"\\nabla(\\nabla\\cdot\\vec E)-\\nabla^{2}\\vec E",
+  "perche":"e' l'identita' del doppio rotore, un risultato di calcolo vettoriale generale gia' noto da Analisi Vettoriale"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\nabla\\cdot\\vec J=-\\frac{\\partial\\rho}{\\partial t}",
+  "perche":"e' l'equazione di continuita' di em-07, usata come vincolo che il termine nuovo deve rispettare: enunciato citato"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\nabla\\cdot\\vec E=\\frac{\\rho}{\\varepsilon_0}",
+  "perche":"e' la prima equazione di Maxwell, cioe' Gauss in forma locale gia' ricavata in em-02: enunciato"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\nabla\\times\\vec B=\\mu_0\\vec J+\\mu_0\\varepsilon_0\\frac{\\partial\\vec E}{\\partial t}",
+  "perche":"e' la quarta equazione di Maxwell, il risultato della tappa 02 scritto in forma locale: enunciato"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Elettromagnetismo · voce C.4 · il punto in cui il corso si chiude e ne comincia un altro',
+  blocchi:[
+  {t:'prosa', title:'Dove siamo arrivati, e cosa non torna', tag:'architettura', html:R`
+  <p>Abbiamo quattro leggi. Tre sono definitive: Gauss per $\vec E$ (em-02), Gauss per $\vec B$ (em-08), Faraday (em-10). La quarta — Ampère — <b>è sbagliata</b>, e questo movimento la ripara.</p>
+  <p>Il difetto non è un dettaglio tecnico: è una <b>contraddizione logica</b> con la conservazione della carica, e si vede in un esperimento elementare che abbiamo già incontrato — un condensatore in carica. Il termine che manca lo aggiunge Maxwell nel 1865, per pura coerenza, senza nessun esperimento che lo richiedesse.</p>
+  <p><b>E da quel termine esce la luce.</b> Le equazioni corrette ammettono soluzioni ondulatorie che viaggiano a $1/\sqrt{\varepsilon_0\mu_0}$ — un numero costruito con due costanti misurate con bilance e magneti, che risulta uguale alla velocità della luce misurata dagli astronomi. <b>È il più grande momento di unificazione della fisica classica</b>, e succede in questo movimento.</p>`}
+]},
+
+/* ---------------- 01 · IL DIFETTO DI AMPÈRE ---------------- */
+{ num:'01', title:'Il difetto di Ampere: due superfici, due risposte', meta:'il condensatore in carica · lambiguita della superficie · e perche non e un caso patologico',
+  blocchi:[
+  {t:'prosa', title:'Lesperimento mentale che rompe la legge', tag:'first principles', html:R`
+  <p>La legge di Ampère dice
+  $$\oint_\gamma\vec B\cdot d\vec\ell=\mu_0I_{\text{conc}},$$
+  dove $I_{\text{conc}}$ è la corrente che attraversa <b>una qualunque</b> superficie con bordo $\gamma$. Quel «qualunque» è essenziale: se il risultato dipendesse dalla superficie scelta, la legge non definirebbe niente.</p>
+  <p><b>Ora si prenda un circuito che sta caricando un condensatore</b>, e come $\gamma$ una circonferenza attorno al filo:</p>
+  <ul>
+   <li>scegliendo come superficie un <b>disco</b> che taglia il filo: la corrente $i$ lo attraversa, e $\oint\vec B\cdot d\vec\ell=\mu_0i$;</li>
+   <li>scegliendo una superficie a <b>sacchetto</b> che passa <i>fra le armature</i> del condensatore: <b>nessuna carica la attraversa</b>, e il conto dà zero.</li>
+  </ul>
+  <p>Due superfici con lo stesso bordo, due risultati diversi. <b>La legge di Ampère, così com&rsquo;è, è auto-contraddittoria</b> ogni volta che la corrente non è stazionaria.</p>
+  <div class="note"><b>Non è un caso patologico costruito ad arte</b>, ed è importante capirlo. In em-07 lo avevamo già visto arrivare: $\nabla\cdot\vec J=0$ vale <i>solo</i> in regime stazionario, e la legge di Ampère nella forma di em-08 presuppone proprio quello — perché la divergenza di un rotore è identicamente nulla, quindi $\nabla\times\vec B=\mu_0\vec J$ implica $\nabla\cdot\vec J=0$ <b>sempre</b>. La legge non è approssimata: è incompatibile con la conservazione della carica appena qualcosa cambia nel tempo.</div>`}
+]},
+
+/* ---------------- 02 · LA CORRENTE DI SPOSTAMENTO ---------------- */
+{ num:'02', title:'La corrente di spostamento: il termine dedotto, non misurato', meta:'la richiesta di coerenza · il conto sul condensatore · le due correnti che si passano il testimone',
+  blocchi:[
+  {t:'reveal', title:'Come si trova il termine mancante', tag:'costruzione', steps:[
+   {label:'La richiesta', body:R`
+   <p>Serve un termine $\vec J_d$ da aggiungere a $\vec J$ tale che $\nabla\cdot(\vec J+\vec J_d)=0$ <b>sempre</b>, anche fuori dallo stazionario. Dall&rsquo;equazione di continuità $\nabla\cdot\vec J=-\dfrac{\partial\rho}{\partial t}$, e da Gauss $\rho=\varepsilon_0\nabla\cdot\vec E$:
+   $$\nabla\cdot\vec J=-\varepsilon_0\frac{\partial}{\partial t}(\nabla\cdot\vec E)=-\nabla\cdot\left(\varepsilon_0\frac{\partial\vec E}{\partial t}\right).$$
+   Quindi il termine cercato è
+   $$\vec J_d=\varepsilon_0\frac{\partial\vec E}{\partial t},$$
+   la <b>corrente di spostamento</b>. <b>Non è stata misurata: è stata dedotta</b> dall&rsquo;obbligo che due leggi già note non si contraddicano.</p>`},
+   {label:'La verifica sul condensatore', body:R`
+   <p>Fra le armature il campo è $E=\dfrac{q}{\varepsilon_0A}$, quindi il flusso è $\Phi_E=\dfrac{q}{\varepsilon_0}$ e
+   $$\varepsilon_0\frac{d\Phi_E}{dt}=\frac{dq}{dt}=i.$$
+   <b>La corrente di spostamento fra le armature è esattamente uguale alla corrente di conduzione nel filo.</b> L&rsquo;ambiguità della tappa 01 sparisce: qualunque superficie si scelga, la somma «conduzione + spostamento» che la attraversa è la stessa. Il disco intercetta $i$ di conduzione; il sacchetto intercetta $i$ di spostamento.</p>`},
+   {label:'Che cosa e davvero, e che cosa non e', body:R`
+   <p><b>Non è una corrente</b>: non ci sono cariche che si muovono fra le armature (nel vuoto non c&rsquo;è nulla da muovere). È un <b>campo elettrico che varia</b>, e il contenuto fisico dell&rsquo;equazione è:
+   $$\text{un campo elettrico variabile genera campo magnetico,}$$
+   esattamente come un campo magnetico variabile genera campo elettrico (em-10). <b>Il nome «corrente» è storico</b> e viene dal modello meccanico dell&rsquo;etere che Maxwell usava; è rimasto anche dopo che il modello è caduto.</p>
+   <p><b>Con questo termine la teoria si chiude su se stessa</b>: $\vec E$ che varia fa $\vec B$, $\vec B$ che varia fa $\vec E$. Non serve più nessuna carica per sostenere i campi, e questa è la porta da cui entrano le onde.</p>`}
+  ]},
+  {t:'plot', title:'Le due correnti durante la carica: il testimone che passa',
+   intro:R`Carica di un condensatore attraverso una resistenza: corrente di conduzione nel filo e corrente di spostamento fra le armature, in unità $V_0/R$ e $\tau=1$.`,
+   plots:[
+    {kind:'func2d', xr:[0,4], yr:[0,1.15], height:330,
+     title:'sono la stessa curva: dove finisce la conduzione comincia lo spostamento',
+     xlabel:'t / tau', ylabel:'corrente',
+     curves:[
+      {f:'exp(-x)', col:'#5eead4', width:3.0, label:'conduzione nel filo'},
+      {f:'exp(-x)', col:'#d8a13a', width:1.4, dash:true, label:'spostamento fra le armature'}
+     ],
+     segs:[{x1:0, y1:0, x2:4, y2:0, col:'#4d5a6b', width:1}],
+     marks:[{x:1, y:0.3679, label:'coincidono a ogni istante', col:'#b98cff'}]}
+   ],
+   leggi:R`<b>Le due curve sono sovrapposte, e questo è tutto il punto</b>: la corrente di spostamento fra le armature vale istante per istante quanto quella di conduzione nel filo. Non è un&rsquo;approssimazione né una media su un periodo — è un&rsquo;identità, e discende direttamente dalla conservazione della carica.<br><br>
+   <b>Il modo di guardarla che conviene portare all&rsquo;esame</b>: la corrente non si interrompe mai. Nel filo è fatta di elettroni che si spostano; fra le armature è fatta di un campo elettrico che cresce. <b>Il circuito è sempre chiuso</b>, anche quando fisicamente è interrotto da un condensatore — e questa è la ragione per cui in alternata «la corrente passa» attraverso un condensatore (em-10b) senza che nessuna carica lo attraversi davvero.`}
+]},
+
+/* ---------------- 03 · LE QUATTRO EQUAZIONI ---------------- */
+{ num:'03', title:'Le quattro equazioni, in forma locale e integrale', meta:'il quadro completo · cosa dice ciascuna in una frase · la simmetria e dove si rompe',
+  blocchi:[
+  {t:'prosa', title:'Il quadro', tag:'sintesi', html:R`
+  <p><b>Nel vuoto, in forma locale:</b></p>
+  $$\nabla\cdot\vec E=\frac{\rho}{\varepsilon_0}\qquad\text{(1) le cariche sono sorgenti di }\vec E$$
+  $$\nabla\cdot\vec B=0\qquad\text{(2) non ci sono cariche magnetiche}$$
+  $$\nabla\times\vec E=-\frac{\partial\vec B}{\partial t}\qquad\text{(3) un }\vec B\text{ che varia genera }\vec E$$
+  $$\nabla\times\vec B=\mu_0\vec J+\mu_0\varepsilon_0\frac{\partial\vec E}{\partial t}\qquad\text{(4) le correnti e un }\vec E\text{ che varia generano }\vec B$$
+  <p>A queste va aggiunta la forza di Lorentz $\vec F=q(\vec E+\vec v\times\vec B)$, che è ciò che collega i campi al moto della materia: <b>le equazioni dicono come i campi nascono, Lorentz dice cosa fanno</b>. Insieme sono l&rsquo;intero elettromagnetismo classico — e stanno in cinque righe.</p>
+  <p><b>La simmetria fra i due campi è quasi perfetta, e dove si rompe è interessante</b>: se esistessero cariche magnetiche, le equazioni (2) e (3) avrebbero i loro termini di sorgente e la simmetria sarebbe completa. Dirac mostrò nel 1931 che l&rsquo;esistenza di <i>un solo</i> monopolo magnetico nell&rsquo;universo spiegherebbe perché la carica elettrica è <b>quantizzata</b>. Non ne è mai stato trovato uno.</p>`},
+  {t:'prosa', title:'Nei materiali, e perche si usano D e H', tag:'regola operativa', html:R`
+  <p>Con la materia, le due equazioni con le sorgenti si riscrivono usando i campi «contabili» di em-05 ed em-09:
+  $$\nabla\cdot\vec D=\rho_{\text{lib}},\qquad \nabla\times\vec H=\vec J_{\text{lib}}+\frac{\partial\vec D}{\partial t},$$
+  mentre le altre due restano identiche — perché non contengono sorgenti. <b>È la forma che si usa in pratica</b>, ed è tutta la ragione per cui $\vec D$ e $\vec H$ sono stati introdotti: nelle equazioni compaiono solo le cariche e le correnti che controlliamo.</p>`}
+]},
+
+/* ---------------- 04 · LA LUCE ---------------- */
+{ num:'04', title:'Il numero che era la luce', meta:'come si ricava lequazione delle onde · il calcolo di c da due costanti da laboratorio · cosa vuol dire',
+  blocchi:[
+  {t:'reveal', title:'Da quattro equazioni a unonda', tag:'costruzione', steps:[
+   {label:'Il passaggio', body:R`
+   <p>Nel vuoto ($\rho=0$, $\vec J=0$) si prende il rotore della (3) e si usa la (4):
+   $$\nabla\times(\nabla\times\vec E)=-\frac{\partial}{\partial t}(\nabla\times\vec B)=-\mu_0\varepsilon_0\frac{\partial^{2}\vec E}{\partial t^{2}}.$$
+   Con l&rsquo;identità $\nabla\times(\nabla\times\vec E)=\nabla(\nabla\cdot\vec E)-\nabla^{2}\vec E$ e la (1) con $\rho=0$, resta
+   $$\nabla^{2}\vec E=\mu_0\varepsilon_0\frac{\partial^{2}\vec E}{\partial t^{2}}.$$
+   <b>È l&rsquo;equazione di d&rsquo;Alembert</b> — la stessa delle onde su una corda, incontrata in Metodi (me-11) — con velocità di propagazione $v=1/\sqrt{\varepsilon_0\mu_0}$. Lo stesso conto fatto con $\vec B$ dà la stessa equazione.</p>`},
+   {label:'Il numero', body:R`
+   <p>$\varepsilon_0$ si misura con condensatori, $\mu_0$ con fili percorsi da corrente: <b>due esperimenti da tavolo, nessuno dei quali ha a che fare con la luce</b>. Mettendo i numeri:
+   $$\frac{1}{\sqrt{\varepsilon_0\mu_0}}=2{,}998\times10^{8}\ \text{m/s},$$
+   che è la velocità della luce misurata dagli astronomi con le lune di Giove e in laboratorio con le ruote dentate.</p>
+   <p><b>La conclusione di Maxwell è una delle frasi più audaci della storia della fisica</b>: «difficilmente possiamo evitare la conclusione che la luce consista di ondulazioni trasversali dello stesso mezzo che è causa dei fenomeni elettrici e magnetici». <b>L&rsquo;ottica smette di essere una disciplina separata</b> e diventa un capitolo dell&rsquo;elettromagnetismo — ed è quello che studierai in em-13.</p>`},
+   {label:'E la crepa che ne segue', body:R`
+   <p>C&rsquo;è un dettaglio che all&rsquo;epoca sembrò un problema tecnico e non lo era: quelle equazioni dicono che la luce va a $c$, <b>ma rispetto a che cosa?</b> In meccanica newtoniana le velocità si sommano, quindi $c$ dovrebbe dipendere dal riferimento — e le equazioni di Maxwell, cambiate di riferimento con Galileo, <b>cambiano forma</b>.</p>
+   <p>Per cinquant&rsquo;anni si cercò il mezzo di riferimento (l&rsquo;etere), senza trovarlo. La soluzione fu abbandonare le trasformazioni di Galileo, non le equazioni di Maxwell: <b>è la relatività ristretta</b>, ed è il contenuto di em-14. Queste quattro equazioni sono già relativistiche: lo erano vent&rsquo;anni prima che qualcuno se ne accorgesse.</p>`}
+  ]}
+]},
+
+/* ---------------- 05 · IL SENSO ---------------- */
+{ num:'05', title:'Il senso, e le rotte', meta:'cosa chiude, cosa apre, e il metodo di Maxwell come lezione',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>A monte.</b> Tutti i movimenti precedenti sono <b>casi particolari</b> di queste quattro equazioni: l&rsquo;elettrostatica è ciò che resta quando si annullano le derivate temporali, la magnetostatica quando le correnti sono stazionarie. Non c&rsquo;è niente da tenere a mente separatamente.</p>
+  <p><b>Il punto, che è anche una lezione di metodo.</b> Maxwell non ha aggiunto quel termine perché un esperimento lo chiedesse: l&rsquo;ha aggiunto perché <b>due leggi che credeva vere si contraddicevano</b>. La coerenza matematica ha prodotto una previsione fisica — le onde — verificata vent&rsquo;anni dopo da Hertz. <b>È il modello di come funziona la fisica teorica</b>, ed è la ragione per cui vale la pena prendere sul serio un&rsquo;incoerenza anche quando «in pratica non dà fastidio».</p>
+  <p><b>A valle.</b> em-12 risolve queste equazioni nel vuoto e studia le onde; em-13 ne deduce l&rsquo;ottica; em-14 mostra che erano relativistiche dall&rsquo;inizio.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Le equazioni di Maxwell</b>: una teoria di campo chiusa, che si sostiene senza sorgenti.`,
+   rotte:[
+    {dove:'Relativita', txt:R`Scritte con il tensore $F^{\mu\nu}$ diventano <b>due</b> equazioni invece di quattro: $\partial_\mu F^{\mu\nu}=\mu_0J^\nu$ e l&rsquo;identità di Bianchi. La forma covariante rende manifesto ciò che em-14 dimostra: elettrico e magnetico sono componenti di un solo oggetto.`},
+    {dove:'Teoria<br>dei campi', txt:R`Maxwell è la <b>teoria di gauge</b> più semplice: l&rsquo;invarianza $U(1)$ del potenziale determina la forma delle equazioni. Da lì, generalizzando il gruppo, nascono le interazioni deboli e forti — <b>tutto il Modello Standard è costruito su questo schema</b>.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Quantizzando il campo si ottengono i <b>fotoni</b>; l&rsquo;elettrodinamica quantistica che ne segue è la teoria fisica più accuratamente verificata che esista (momento magnetico dell&rsquo;elettrone, dodici cifre).`},
+    {dove:'Numerica', txt:R`Risolvere queste quattro equazioni su un reticolo (metodo FDTD) è il pane della progettazione di antenne, fibre, circuiti ad alta frequenza e dispositivi fotonici: sono equazioni <b>che si integrano al calcolatore</b> ogni giorno, in ingegneria.`}
+   ],
+   domanda:R`Maxwell ha aggiunto un termine per coerenza, e ne è uscita la luce. <b>Domanda che porti avanti, ed è metodologica prima che fisica:</b> quante volte si può ripetere questa mossa? Dirac lo rifece nel 1928 — cercando un&rsquo;equazione quantistica compatibile con la relatività trovò l&rsquo;<b>antimateria</b>, che nessuno aveva chiesto; Pauli inventò il neutrino per salvare la conservazione dell&rsquo;energia. <b>Quando la coerenza formale di una teoria predice oggetti nuovi, sotto quali condizioni le si può credere?</b> Non c&rsquo;è una risposta generale, e la storia contiene sia successi clamorosi sia vicoli ciechi eleganti — ma sapere che la domanda esiste cambia il modo in cui si guarda una derivazione.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoem-11-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo em-11 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: em-11-maxwell.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
