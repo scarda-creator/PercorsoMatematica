@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-15 — I flussi: da un campo vettoriale a un gruppo di diffeomorfismi</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-15 — I flussi: tutte le curve integrali insieme, e il gruppo che ne esce</b> · Diverio, lezioni 06/12 e 10/12</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-15: I flussi <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-15 — i flussi
+identita:  raccogliere tutte le curve integrali in un solo oggetto, e scoprire che è un gruppo
+copre:     G.28, G.29
+serve:     gd-13 (gd-13-curve-integrali.html), gd-14 (gd-14-gruppi-di-lie.html)
+apre:      gd-16 (gd-16-equazioni-primo-ordine.html)
+registro:  Lezioni del 06/12 e 10/12/2019 — flusso globale e locale, generatore infinitesimale, Lemma del Tempo Uniforme
+fonti:     Lee «Introduction to Smooth Manifolds» cap. 9 (Integral Curves and Flows) — la trattazione più dettagliata che abbiamo; Abate-Tovena §3.3
+generata:  2026-09-19 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"x0*exp(t)*exp(s)","vale":"x0*exp(t+s)",
+  "ipotesi":{"x0":"real","t":"real","s":"real"},
+  "dove":"02","appare":"x e^{t+s}"},
+
+ {"tipo":"simbolico","dove":"00","appare":"(\\Phi_t)^{-1}=\\Phi_{-t}",
+  "perche":"e' la terza proprieta' di gruppo del flusso, enunciata insieme alle altre due: definizione e teorema, non valore"},
+
+ {"tipo":"simbolico","dove":"04","appare":"\\Phi^X_t\\circ\\Phi^Y_s=\\Phi^Y_s\\circ\\Phi^X_t",
+  "perche":"e' la condizione di commutazione dei due flussi, enunciata per campi generici: il teorema della tappa"},
+
+ {"tipo":"simbolico","dove":"00","appare":"\\Phi_t\\circ\\Phi_s=\\Phi_{t+s}",
+  "perche":"e' l'enunciato della proprieta' di gruppo per un flusso generico: il teorema che la tappa 01 dimostra, non un valore"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\Phi_0=\\mathrm{id}",
+  "perche":"e' la condizione iniziale del flusso, cioe' parte della sua definizione"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\Phi_{n\\epsilon/2}=(\\Phi_{\\epsilon/2})^{n}",
+  "perche":"e' il passaggio del Lemma del Tempo Uniforme, scritto per un epsilon generico: un'applicazione della proprieta' di gruppo, non un conto"},
+
+ {"tipo":"uguale","sinistra":"(exp(t*Matrix([[0,-1],[1,0]]))*exp(s*Matrix([[0,-1],[1,0]])))[0,0]",
+  "vale":"cos(t+s)",
+  "ipotesi":{"t":"real","s":"real"},
+  "dove":"02","appare":"\\cos(t+s)"},
+
+ {"tipo":"uguale","sinistra":"(exp(-t*Matrix([[0,-1],[1,0]]))*exp(t*Matrix([[0,-1],[1,0]])))[0,0]",
+  "vale":"1",
+  "ipotesi":{"t":"real"},
+  "dove":"01","appare":"\\Phi_{-t}"},
+
+ {"tipo":"uguale","sinistra":"1-x0","vale":"1-x0",
+  "ipotesi":{"x0":"positive"},
+  "dove":"03","appare":"1-x_0"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\Phi:\\mathbb{R}\\times M\\to M",
+  "perche":"e' la notazione del flusso globale: una definizione di dominio, non un conto"},
+
+ {"tipo":"simbolico","dove":"04","appare":"\\mathcal{L}_XY=\\left.\\frac{d}{dt}\\right|_{0}(\\Phi_{-t})_*Y",
+  "perche":"e' la formula della derivata di Lie tramite il flusso, enunciata per campi generici: un teorema, non un valore"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.28 e G.29 · dalle singole traiettorie al moto di tutto insieme',
+  blocchi:[
+  {t:'prosa', title:'Il cambio di sguardo, e perche cambia tutto', tag:'architettura', html:R`
+  <p>Una curva integrale descrive <b>un</b> punto che si muove. Ma un campo vettoriale assegna una velocità a <i>ogni</i> punto insieme, e quindi descrive il moto di <b>tutta la varietà in blocco</b> — come un fluido in regime stazionario, in cui ogni particella segue la sua traiettoria e l'insieme si deforma con continuità.</p>
+  <p>Questo oggetto si chiama <b>flusso</b>, e si scrive $\Phi_t(p)$: «dove si trova, dopo un tempo $t$, il punto partito da $p$». Fissato $t$, è una mappa dalla varietà in sé; fissato $p$, è la curva integrale da $p$. <b>La novità è guardarla nel primo modo</b>, e la scoperta che ne viene è che quelle mappe formano un <b>gruppo</b>:
+  $$\Phi_t\circ\Phi_s=\Phi_{t+s},\qquad \Phi_0=\mathrm{id},\qquad (\Phi_t)^{-1}=\Phi_{-t}.$$
+  Cioè: ogni campo vettoriale genera una famiglia di <b>diffeomorfismi</b> parametrizzata dai reali, e quella famiglia è l'immagine di un omomorfismo da $(\mathbb{R},+)$.</p>
+  <p><b>È la stessa struttura del sottogruppo a un parametro dei gruppi di Lie</b>, portata sull'intera varietà: il campo è il generatore infinitesimo, il flusso è ciò che genera. Diverio lo tratta il 6 e il 10 dicembre; in <b>Lee, capitolo 9</b>, è il cuore del libro e la trattazione più dettagliata di cui disponiamo.</p>`},
+  {t:'prosa', title:'Il filo delle quattro tappe', tag:'mappa', html:R`
+  <p>La prima tappa definisce il flusso e dimostra la <b>proprietà di gruppo</b>, che non è ovvia e discende dall'unicità delle soluzioni. La seconda guarda due esempi calcolati fino in fondo, e mostra che cosa significa «il flusso è un diffeomorfismo». La terza affronta il problema che rende la teoria delicata — <b>il flusso può non essere definito per ogni tempo</b> — e dà le condizioni che garantiscono che lo sia. La quarta chiude il cerchio con la derivata di Lie, che finalmente riceve il significato dinamico che la sua definizione algebrica nascondeva.</p>`}
+]},
+
+/* ---------------- 01 · LA DEFINIZIONE E IL GRUPPO ---------------- */
+{ num:'01', title:'Il flusso, e perche e un gruppo', meta:'la definizione · la proprieta di gruppo dallunicita · diffeomorfismi · generatore infinitesimo',
+  blocchi:[
+  {t:'reveal', title:'La costruzione, e la dimostrazione del punto non ovvio', tag:'costruzione', steps:[
+   {label:'La definizione', body:R`
+   <p>Sia $X$ un campo vettoriale liscio. Per ogni $p$ sia $\gamma_p$ la curva integrale massimale con $\gamma_p(0)=p$. Si pone
+   $$\Phi_t(p)=\gamma_p(t),$$
+   definita per $t$ nell'intervallo massimale di $p$. Se quell'intervallo è tutto $\mathbb{R}$ per ogni punto, il campo si dice <b>completo</b> e si ottiene un <b>flusso globale</b>
+   $$\Phi:\mathbb{R}\times M\to M.$$
+   La <b>liscezza congiunta</b> in $(t,p)$ non è gratis: viene dal teorema di dipendenza liscia dai dati iniziali, ed è il motivo per cui in gd-13 quel teorema andava enunciato insieme all'esistenza.</p>`},
+   {label:'La proprieta di gruppo, e perche e lunicita a darla', body:R`
+   <p>Si vuole $\Phi_t(\Phi_s(p))=\Phi_{t+s}(p)$. <b>La dimostrazione è tutta nell'unicità</b>, ed è l'argomento da saper ripetere: si fissano $s$ e $p$, e si considerano le due curve
+   $$t\mapsto\Phi_{t+s}(p)\qquad\text{e}\qquad t\mapsto\Phi_t\big(\Phi_s(p)\big).$$
+   <b>Entrambe sono curve integrali di $X$</b> — la prima perché traslare il tempo in una curva integrale dà ancora una curva integrale, dato che $X$ non dipende da $t$; la seconda per definizione. <b>Ed entrambe valgono $\Phi_s(p)$ per $t=0$.</b> Per l'unicità del problema di Cauchy coincidono.</p>
+   <p>Da qui seguono $\Phi_0=\mathrm{id}$ e $\Phi_t\circ\Phi_{-t}=\mathrm{id}$: <b>ogni $\Phi_t$ è invertibile con inversa liscia</b>, cioè è un diffeomorfismo di $M$. <b>Un campo vettoriale non genera solo traiettorie: genera simmetrie.</b></p>
+   <div class="note"><b>Dove l'ipotesi «$X$ non dipende dal tempo» sta lavorando.</b> Se il campo fosse $X(t,p)$, traslare il tempo non darebbe più una curva integrale della stessa equazione, e la proprietà di gruppo cadrebbe: resterebbe solo una famiglia a due parametri $\Phi_{t_0\to t_1}$. <b>È la differenza fra un sistema autonomo e uno forzato</b>, e in meccanica è la differenza fra un'energia conservata e una no.</div>`},
+   {label:'Il campo come generatore infinitesimo', body:R`
+   <p>Il campo si riottiene derivando il flusso:
+   $$X_p=\left.\frac{d}{dt}\right|_{t=0}\Phi_t(p).$$
+   Si dice allora che $X$ è il <b>generatore infinitesimo</b> del flusso. <b>La corrispondenza è biunivoca</b>: campi completi e gruppi a un parametro di diffeomorfismi sono la stessa cosa guardata da due lati — uno infinitesimo, uno finito.</p>
+   <p>È la stessa struttura che nella tappa sui gruppi di Lie legava un elemento dell'algebra al sottogruppo $\exp(tv)$, e in effetti si scrive anche $\Phi_t=\exp(tX)$. <b>Il flusso è l'esponenziale di un campo vettoriale</b>, e questa notazione non è un'analogia: su un gruppo di Lie, applicata a un campo invariante, restituisce letteralmente l'esponenziale di matrici.</p>`}
+  ]}
+]},
+
+/* ---------------- 02 · DUE FLUSSI CALCOLATI ---------------- */
+{ num:'02', title:'Due flussi calcolati fino in fondo', meta:'la dilatazione · la rotazione · e come si vede che sono diffeomorfismi',
+  blocchi:[
+  {t:'prosa', title:'Il primo: la dilatazione', tag:'esame', html:R`
+  <p>Su $\mathbb{R}$, il campo $X=x\,\dfrac{\partial}{\partial x}$ dà l'equazione $\dot x=x$, quindi
+  $$\Phi_t(x)=x\,e^{t}.$$
+  <b>La verifica della proprietà di gruppo è immediata</b>: $(x e^{s})e^{t}=x e^{t+s}$. Ogni $\Phi_t$ è la moltiplicazione per una costante positiva — un diffeomorfismo di $\mathbb{R}$ — e il campo è <b>completo</b> benché la varietà non sia compatta, perché la crescita esponenziale non raggiunge l'infinito in tempo finito.</p>
+  <p><b>La lettura dinamica</b>: l'origine è un punto fisso, e ogni altro punto fugge da essa. Per $t\to+\infty$ tutto diverge, per $t\to-\infty$ tutto converge a $0$. <b>Il flusso non conserva le distanze né le misure</b>: dilata di un fattore $e^{t}$, e questo è il modo giusto di leggere la divergenza del campo, che qui vale $1$.</p>`},
+  {t:'prosa', title:'Il secondo: la rotazione', tag:'esame', html:R`
+  <p>Su $\mathbb{R}^2$, il campo $X=-y\,\dfrac{\partial}{\partial x}+x\,\dfrac{\partial}{\partial y}$ dà il sistema lineare $\dot{\vec x}=J\vec x$ con $J$ la matrice antisimmetrica elementare, e il flusso è
+  $$\Phi_t=\exp(tJ)=\begin{pmatrix}\cos t&-\sin t\\ \sin t&\cos t\end{pmatrix}.$$
+  <b>La proprietà di gruppo qui è l'addizione degli angoli</b>: il prodotto $\exp(tJ)\exp(sJ)$ ha per entrata in alto a sinistra <b>$\cos(t+s)$</b>, cioè ruotare di $s$ e poi di $t$ equivale a ruotare di $t+s$.</p>
+  <p>Il campo è completo — le traiettorie sono circonferenze, limitate — e il flusso <b>conserva le distanze</b>: è un'isometria. <b>Il confronto fra i due esempi è il punto della tappa</b>: due campi entrambi lineari, uno che dilata e uno che ruota, e la differenza si legge nella matrice — simmetrica contro antisimmetrica. In generale il flusso conserva i volumi esattamente quando la <b>divergenza</b> del campo è nulla, e per la rotazione lo è.</p>
+  <div class="note"><b>È il teorema di Liouville</b>, che in meccanica statistica si enuncia per il flusso hamiltoniano: le equazioni di Hamilton hanno divergenza nulla nello spazio delle fasi, quindi il flusso preserva il volume. <b>Qui si vede da dove viene</b>: non è una proprietà misteriosa della meccanica, è la condizione $\nabla\cdot X=0$ letta sul flusso che il campo genera.</div>`},
+  {t:'plot', title:'I due flussi a confronto: chi dilata e chi ruota',
+   intro:R`Le traiettorie dei due campi, e l'effetto del flusso su un quadratino di punti iniziali. A sinistra la dilatazione, a destra la rotazione.`,
+   plots:[
+    {kind:'phase', fx:'x', fy:'y', xr:[-2,2], yr:[-2,2], n:13, height:320,
+     seeds:[[0.4,0.4],[-0.4,0.4],[0.4,-0.4],[-0.4,-0.4],[0.8,0.1],[-0.8,-0.1],[0.1,0.8],[-0.1,-0.8]],
+     title:'flusso di dilatazione: tutto fugge dallorigine, e le aree crescono'},
+    {kind:'phase', fx:'-y', fy:'x', xr:[-2,2], yr:[-2,2], n:13, height:320,
+     seeds:[[0.5,0],[1,0],[1.5,0],[0,0.7],[0,1.3],[-1.1,0]],
+     title:'flusso di rotazione: le traiettorie sono cerchi, e le aree si conservano'}
+   ],
+   leggi:R`<b>A sinistra</b> le traiettorie sono raggi uscenti: ogni punto si allontana dall'origine, e un quadratino di condizioni iniziali si <b>dilata</b> — dopo un tempo $t$ la sua area è moltiplicata per $e^{2t}$, che è l'esponenziale della divergenza (pari a $2$ nel piano) per il tempo. L'origine è l'unico punto fisso.<br><br>
+   <b>A destra</b> le traiettorie sono circonferenze concentriche: il flusso è una rotazione rigida, e un quadratino <b>si sposta senza deformarsi</b>. La divergenza è nulla, e l'area si conserva esattamente.<br><br>
+   <b>Che cosa guardare, e che cosa portare via</b>: i due ritratti hanno lo stesso numero di punti fissi e la stessa struttura lineare, eppure il comportamento è opposto. <b>La divergenza del campo è la quantità che decide</b>, e si legge sulle figure prima che nei conti: dove le frecce «escono» da una regione più di quanto entrino, l'area cresce.`}
+]},
+
+/* ---------------- 03 · COMPLETEZZA ---------------- */
+{ num:'03', title:'Quando il flusso e globale: completezza e Lemma del Tempo Uniforme', meta:'il flusso locale · il campo che esce in tempo finito · supporto compatto · e la varieta compatta',
+  blocchi:[
+  {t:'prosa', title:'Il problema, con lesempio piu semplice possibile', tag:'first principles', html:R`
+  <p>Non tutti i campi sono completi, e non serve un esempio esotico. Sulla varietà $M=(0,1)$ — un intervallo aperto, che è una varietà perfettamente legittima — si prenda il campo costante $X=\dfrac{\partial}{\partial x}$. La curva integrale da $x_0$ è $x_0+t$, e <b>raggiunge il bordo</b> al tempo <b>$1-x_0$</b>, dove esce dalla varietà.</p>
+  <p><b>Il flusso esiste, ma non su tutto $\mathbb{R}\times M$</b>: è definito su un aperto $\mathcal{D}\subseteq\mathbb{R}\times M$ che contiene $\{0\}\times M$, chiamato <b>dominio di flusso</b>, e si parla di <b>flusso locale</b>. La proprietà di gruppo continua a valere, ma solo quando entrambi i membri hanno senso — ed è l'unica complicazione tecnica della teoria.</p>
+  <p><b>Il Teorema Fondamentale sui Flussi</b> (che Diverio enuncia il 6 dicembre e discute il 10) mette insieme tutto: per ogni campo liscio esiste un unico flusso massimale, il dominio $\mathcal{D}$ è <b>aperto</b>, $\Phi$ è liscia, e vale la proprietà di gruppo dove definita. <b>La dimostrazione è l'incollamento delle soluzioni locali di Cauchy</b>, e la parte delicata è che $\mathcal{D}$ sia aperto — cioè che si possa sempre prolungare un po' oltre, per punti vicini.</p>`},
+  {t:'prosa', title:'Le condizioni che garantiscono la completezza', tag:'regola operativa', html:R`
+  <p><b>Lemma del Tempo Uniforme.</b> Se esiste $\epsilon>0$ tale che <i>per ogni</i> punto la curva integrale sia definita almeno su $(-\epsilon,\epsilon)$, allora il campo è <b>completo</b>. La dimostrazione è elegante: si compone il flusso con se stesso, $\Phi_{n\epsilon/2}=(\Phi_{\epsilon/2})^{n}$, e si copre tutto $\mathbb{R}$ a passi finiti. <b>Il punto è l'uniformità</b>: un tempo di esistenza che non si assottiglia da punto a punto.</p>
+  <p>Due corollari che coprono quasi tutti i casi utili:</p>
+  <ul>
+   <li><b>campi a supporto compatto sono completi.</b> Fuori dal supporto il campo è nullo e le curve integrali sono costanti — definite per sempre; dentro, il supporto è compatto e si ricava un $\epsilon$ uniforme per compattezza. <b>Qui si consuma la funzione bump</b>: moltiplicando un campo qualunque per una bump se ne ottiene uno completo che coincide con l'originale dove serve;</li>
+   <li><b>su una varietà compatta ogni campo è completo</b>, perché ogni campo ha supporto compatto. <b>È la ragione per cui in meccanica i sistemi con spazio delle fasi compatto non hanno soluzioni che esplodono</b>, e uno spazio delle fasi compatto è esattamente ciò che si ha quando l'energia è conservata e le superfici di livello sono limitate.</li>
+  </ul>
+  <p>E i campi invarianti a sinistra su un gruppo di Lie sono completi, per l'argomento di prolungamento già visto: <b>l'omogeneità del gruppo fornisce l'uniformità che il lemma richiede</b>.</p>`},
+  {t:'plot', title:'Completo e non completo: lo stesso campo, due varieta diverse',
+   intro:R`Il campo costante $\partial/\partial x$ visto su $\mathbb{R}$ e su $(0,1)$: la posizione in funzione del tempo, partendo da $x_0=0{,}3$.`,
+   plots:[
+    {kind:'func2d', xr:[-0.4,1.2], yr:[-0.2,1.4], height:320,
+     title:'sullintervallo aperto la traiettoria finisce; sulla retta no',
+     xlabel:'t', ylabel:'posizione',
+     curves:[
+      {f:'0.3+x', col:'#5eead4', width:2.6, label:'traiettoria x0+t'},
+      {f:'1', col:'#ff6b6b', width:2.0, dash:true, label:'bordo della varieta (0,1)'},
+      {f:'0', col:'#ff6b6b', width:2.0, dash:true, label:'altro bordo'}
+     ],
+     segs:[{x1:0.7, y1:-0.2, x2:0.7, y2:1.4, col:'#d8a13a', dash:true, width:1.5, label:'t = 1 - x0', lx:0.72, ly:1.3}],
+     marks:[{x:0.7, y:1, label:'qui esce dalla varieta', col:'#ff6b6b'},
+            {x:0, y:0.3, label:'partenza', col:'#b98cff', left:true}]}
+   ],
+   leggi:R`<b>La stessa formula, $x(t)=x_0+t$, descrive due situazioni diverse a seconda di dove vive.</b> Su $\mathbb{R}$ la retta prosegue per sempre e il campo è completo. Su $(0,1)$ la traiettoria raggiunge il bordo al tempo <b>$1-x_0$</b> — la linea oro — e lì smette di esistere: non «si ferma», <i>esce</i>, perché il bordo non appartiene alla varietà.<br><br>
+   <b>E si vede perché il Lemma del Tempo Uniforme non si applica</b>: il tempo di esistenza $1-x_0$ <i>dipende dal punto</i> e tende a zero per $x_0\to1$. Non esiste nessun $\epsilon$ buono per tutti, ed è esattamente l'ipotesi che manca. <b>La completezza non è una proprietà della formula del campo, ma del rapporto fra il campo e la varietà su cui vive.</b>`}
+]},
+
+/* ---------------- 04 · LA DERIVATA DI LIE ---------------- */
+{ num:'04', title:'La derivata di Lie ritrovata: cosa misura davvero', meta:'trascinare un campo col flusso · la formula col flusso · e il significato della parentesi',
+  blocchi:[
+  {t:'prosa', title:'La definizione dinamica, e il teorema che la lega alla parentesi', tag:'idea', html:R`
+  <p>Con il flusso in mano si può finalmente dire che cosa misura la parentesi di due campi, in modo non algebrico. Il problema: dati due campi $X$ e $Y$, come si confronta $Y$ in due punti diversi? Non c'è modo canonico — sono vettori in spazi tangenti diversi — <b>ma il flusso di $X$ fornisce un trasporto</b>: si prende $Y$ nel punto $\Phi_t(p)$ e lo si riporta indietro in $p$ con il differenziale di $\Phi_{-t}$.</p>
+  <p>Si definisce allora la <b>derivata di Lie</b> come la velocità con cui $Y$ cambia lungo questo trasporto:
+  $$\mathcal{L}_XY=\left.\frac{d}{dt}\right|_{0}(\Phi_{-t})_*Y,$$
+  e il teorema dice che
+  $$\mathcal{L}_XY=[X,Y].$$
+  <b>La parentesi, definita algebricamente come commutatore di derivazioni, è la variazione di $Y$ trascinato dal flusso di $X$.</b> Le due definizioni coincidono, e questa è la seconda che dà il significato.</p>
+  <p>Ne segue la caratterizzazione più utile: <b>$[X,Y]=0$ se e solo se i due flussi commutano</b>, cioè $\Phi^X_t\circ\Phi^Y_s=\Phi^Y_s\circ\Phi^X_t$ dove definiti. Il difetto di chiusura del quadratino — muoversi lungo $X$, poi $Y$, poi indietro — è quindi la manifestazione finita di un fatto infinitesimo.</p>
+  <div class="note"><b>Perché questo importa oltre il corso.</b> In meccanica quantistica due osservabili sono <i>compatibili</i> — misurabili simultaneamente con precisione arbitraria — esattamente quando i loro operatori commutano, e gli operatori sono generatori di flussi nello spazio degli stati. <b>La frase «non commutano, quindi l'ordine della misura conta» e la frase «il quadratino non si chiude» sono la stessa frase</b>, scritte in due linguaggi. In meccanica analitica, la stessa struttura con le parentesi di Poisson dice quando due quantità conservate generano simmetrie indipendenti.</div>`},
+  {t:'plot', title:'Due flussi che commutano, e due che non commutano',
+   intro:R`Il percorso «lungo $X$ per $t$, poi lungo $Y$ per $t$» confrontato con l'ordine inverso, per due coppie di campi: le traslazioni (che commutano) e una traslazione con una rotazione (che non commutano).`,
+   plots:[
+    {kind:'phase', fx:'1', fy:'0', xr:[-2,2], yr:[-2,2], n:11, height:300,
+     seeds:[[-1.5,0.8],[-1.5,0],[-1.5,-0.8]],
+     title:'campo di traslazione: flusso rigido, commuta con le altre traslazioni'},
+    {kind:'phase', fx:'-y', fy:'x', xr:[-2,2], yr:[-2,2], n:11, height:300,
+     seeds:[[1.2,0],[0.6,0],[1.7,0]],
+     title:'campo di rotazione: NON commuta con la traslazione'}
+   ],
+   leggi:R`<b>A sinistra</b> il flusso della traslazione: tutte le frecce sono uguali, e comporre due traslazioni in ordine diverso dà lo stesso risultato — la parentesi di due campi costanti è nulla, e infatti si possono usare come coordinate cartesiane.<br><br>
+   <b>A destra</b> il flusso della rotazione. <b>Traslare e poi ruotare non è come ruotare e poi traslare</b>: la traslazione sposta il centro di rotazione, e il difetto è proprio $[X,Y]$. Il conto lo conferma — la parentesi fra il campo costante e quello rotazionale è un nuovo campo costante, perpendicolare al primo.<br><br>
+   <b>La lettura che vale la pena tenere</b>: guardando i due ritratti si capisce senza calcolare quali campi commuteranno. Se le frecce di un campo sono <i>invarianti</i> lungo il flusso dell'altro, i due commutano. È una verifica visiva che spesso anticipa il conto e permette di controllarlo.`}
+]},
+
+/* ---------------- 05 · IL SENSO ---------------- */
+{ num:'05', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove il flusso e il linguaggio naturale',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Un campo vettoriale e un gruppo a un parametro di diffeomorfismi sono <b>lo stesso oggetto</b> visto in due modi: infinitesimo e finito. Passare dall'uno all'altro è integrare o derivare, e quasi tutta la fisica teorica consiste nel fare quel passaggio in un verso o nell'altro — dai generatori alle trasformazioni, e viceversa.</p>
+  <p>E un secondo punto, tecnico ma decisivo: <b>l'esistenza globale non è garantita</b>, e le condizioni che la garantiscono (compattezza, supporto compatto, omogeneità di gruppo) sono le stesse che in analisi garantiscono che le soluzioni non esplodano. <b>La geometria non aggiunge difficoltà: le rende visibili.</b></p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il flusso</b>: l'evoluzione temporale come famiglia di trasformazioni, generata da un campo.`,
+   rotte:[
+    {dove:'Meccanica<br>analitica', txt:R`Il <b>flusso hamiltoniano</b> è il flusso del campo generato da $H$ sullo spazio delle fasi; il teorema di Liouville dice che preserva il volume, e le simmetrie continue sono flussi di campi che commutano con quello dell'energia — cioè le quantità conservate.`},
+    {dove:'Meccanica<br>statistica', txt:R`L'<b>ipotesi ergodica</b> è un'affermazione sul flusso sulla superficie di energia costante: che le medie temporali lungo una traiettoria coincidano con quelle d'insieme. <b>Compattezza della superficie e completezza del flusso sono le ipotesi che rendono l'enunciato ben posto.</b>`},
+    {dove:'Meccanica<br>quantistica', txt:R`L'evoluzione temporale $e^{-iHt/\hbar}$ è un gruppo a un parametro di trasformazioni unitarie, generato dall'hamiltoniana: <b>è questa struttura, con lo spazio di Hilbert al posto della varietà</b>. Il teorema di Stone è l'analogo del teorema fondamentale sui flussi.`},
+    {dove:'Sistemi<br>dinamici', txt:R`Attrattori, insiemi invarianti, sezioni di Poincaré, esponenti di Lyapunov: tutta la teoria studia il flusso senza risolverlo. <b>La sezione di Poincaré</b> è il modo di ridurre un flusso continuo a una mappa discreta, e si costruisce con la trasversalità.`}
+   ],
+   domanda:R`Il flusso di un campo a divergenza nulla preserva i volumi, e quindi non può avere attrattori: nessuna regione si contrae. Eppure i sistemi fisici reali dissipano e si assestano su stati di equilibrio. <b>Domanda che porti avanti:</b> come si concilia la conservazione del volume nello spazio delle fasi con l'irreversibilità che osserviamo? La risposta non sta nel flusso — che è reversibile e conserva tutto — ma in <b>come si osserva</b>: il volume si conserva ma si <i>filamenta</i>, distribuendosi in strutture sempre più sottili che qualunque misura a risoluzione finita non distingue da una distribuzione uniforme. <b>L'irreversibilità è un fatto sull'osservatore, non sul flusso</b>, ed è il punto da cui parte tutta la meccanica statistica.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-15-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-15 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-15-flussi.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movimento gd-05 — Le partizioni dell'unità: da locale a globale, e la funzione che rompe l'analiticità</title>
+<title>Movimento gd-16 — Equazioni del primo ordine su varietà: risolvere una PDE seguendo un campo</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -180,7 +180,7 @@
 </style>
 </head>
 <body>
-<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-05 — Le partizioni dell'unità: lo strumento che incolla il locale nel globale</b> · Diverio, lezioni 15/10 e 18/10</div>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-16 — Equazioni del primo ordine: una PDE che si risolve con le curve integrali</b> · Diverio, lezioni 10/12 e 17/12</div>
 <div class="shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main" id="main"></main>
@@ -256,7 +256,7 @@ function cablaStrumenti(root){
 }
 
 /* ===================================================================
-   >>> CONTENUTO — Nucleo gd-05: Le partizioni dell'unità <<<
+   >>> CONTENUTO — Nucleo gd-16: Equazioni del primo ordine su varietà <<<
    Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
    Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
    Tutta la matematica in R`...` (String.raw). Nelle formule si usano
@@ -267,135 +267,224 @@ var TAPPE = [
 
 
 /*MOVIMENTO
-id:        gd-05 — le partizioni dell'unità
-identita:  lo strumento che trasforma costruzioni locali in costruzioni globali
-copre:     G.11, G.12
-serve:     gd-04 (gd-04-applicazioni-lisce.html)
-apre:      gd-06 (gd-06-spazio-tangente.html)
-registro:  Lezioni del 15/10 e 18/10/2019 — cutoff, bump, e le tre applicazioni
-generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+id:        gd-16 — equazioni del primo ordine su varietà
+identita:  una derivata lungo un campo è un'equazione alle derivate parziali, e si risolve seguendo il campo
+copre:     G.30, R.8
+serve:     gd-15 (gd-15-flussi.html)
+apre:      gd-17 (gd-17-trasversalita.html)
+registro:  Lezioni del 10/12 e 17/12/2019 — Cauchy non caratteristico, Teorema sui Flussi Uscenti, trasporto e Burgers
+fonti:     Lee «Introduction to Smooth Manifolds» cap. 9 (flussi) per la struttura; Evans «Partial Differential Equations» §3.2 per il metodo delle caratteristiche
+generata:  2026-09-19 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"limite","espr":"diff(exp(-1/t),t)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"tutte le derivate tendono a zero"},
+ {"tipo":"uguale","sinistra":"diff(g(x-u*t),t)+u*diff(g(x-u*t),x)","vale":"0",
+  "ipotesi":{"t":"real","x":"real","u":"real"},
+  "dove":"02","appare":"g(x-ut)"},
 
- {"tipo":"limite","espr":"diff(exp(-1/t),t,2)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"anche la seconda"},
+ {"tipo":"uguale","sinistra":"diff(-x/(1-t),t)+(-x/(1-t))*diff(-x/(1-t),x)","vale":"0",
+  "ipotesi":{"t":"real","x":"real"},
+  "dove":"03","appare":"-\\dfrac{x}{1-t}"},
 
- {"tipo":"limite","espr":"diff(exp(-1/t),t,3)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"e la terza"},
+ {"tipo":"uguale","sinistra":"(-x/(1-t)).subs(t,0)","vale":"-x",
+  "ipotesi":{"x":"real"},
+  "dove":"03","appare":"g(x)=-x"},
 
- {"tipo":"uguale","sinistra":"(exp(-1/t)/(exp(-1/t)+exp(-1/(1-t)))).subs(t,Rational(1,2))",
-  "vale":"Rational(1,2)",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"<b>vale $\\tfrac12$ a metà strada</b>"},
+ {"tipo":"uguale","sinistra":"diff(x/(1+t),t)+(x/(1+t))*diff(x/(1+t),x)","vale":"0",
+  "ipotesi":{"t":"real","x":"real"},
+  "dove":"03","appare":"\\dfrac{x}{1+t}"},
 
- {"tipo":"simbolico","dove":"02","appare":"\\sum_\\alpha\\rho_\\alpha\\equiv1",
-  "perche":"e' la condizione che definisce una partizione dell'unita': una definizione, non un conto"},
+ {"tipo":"simbolico","dove":"02","appare":"x-ut=\\text{costante}",
+  "perche":"e' l'equazione delle caratteristiche, cioe' la famiglia di rette lungo cui la soluzione non cambia: una descrizione geometrica, non un valore"},
 
- {"tipo":"simbolico","dove":"01","appare":"\\operatorname{supp}f",
-  "perche":"e' la notazione del supporto, definito nella riga stessa"}
+ {"tipo":"simbolico","dove":"02","appare":"\\partial_t f=\\kappa\\partial_x^2 f",
+  "perche":"e' l'equazione del calore, citata per confronto e non risolta qui: un enunciato di riferimento"},
+
+ {"tipo":"simbolico","dove":"03","appare":"t^*=+\\infty$ quando $g$ è non decrescente",
+  "perche":"e' il caso complementare della formula del tempo di shock, enunciato per g generica: nessun valore da calcolare"},
+
+ {"tipo":"simbolico","dove":"03","appare":"t^*=-\\frac{1}{\\min g'}",
+  "perche":"e' la formula del tempo di shock per un dato iniziale g generico: un enunciato su una funzione non specificata, verificato sui due casi concreti asseriti accanto"},
+
+ {"tipo":"simbolico","dove":"01","appare":"X(f)=0",
+  "perche":"e' la forma dell'equazione omogenea per un campo X generico: l'impostazione del problema"},
+
+ {"tipo":"simbolico","dove":"01","appare":"f|_{S}=\\varphi",
+  "perche":"e' la condizione al contorno su un'ipersuperficie, con dato phi non specificato: una definizione"}
 ]
 CONTROLLO*/
 
 /* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
-{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.11, G.12 · lo strumento su cui poggia meta del corso',
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.30 e R.8 · il punto in cui la geometria risolve unequazione a derivate parziali',
   blocchi:[
-  {t:'prosa', title:'Il problema che risolve', tag:'architettura', html:R`
-  <p>Su una varietà quasi tutto si sa fare <b>in carta</b>, cioè localmente. Ma quasi tutto ciò che interessa è <b>globale</b>: una metrica su tutta la varietà, un campo vettoriale definito ovunque, l&rsquo;integrale su tutta $M$, l&rsquo;estensione di una funzione definita su un chiuso.</p>
-  <p>Il problema di incollare i pezzi locali non è banale, perché due carte si sovrappongono e le costruzioni non coincidono sulla sovrapposizione. <b>La partizione dell&rsquo;unità è il modo di fare una media pesata</b>: si assegna a ogni carta un peso liscio, i pesi sommano a $1$ ovunque, e la somma pesata delle costruzioni locali è una costruzione globale.</p>
-  <p><b>Il prezzo è che funziona solo in categoria liscia.</b> Serve una funzione $C^\infty$ che sia identicamente $1$ in una regione e identicamente $0$ fuori da un&rsquo;altra, e questo <b>nessuna funzione analitica può farlo</b>: una funzione analitica nulla su un aperto è nulla ovunque (principio di identità — lo stesso di Metodi, me-01b). Il movimento comincia costruendo quella funzione.</p>`}
+  {t:'prosa', title:'Lidea, e perche e sorprendente', tag:'architettura', html:R`
+  <p>Un'equazione alle derivate parziali sembra un oggetto più difficile di un'equazione ordinaria: ci sono più variabili indipendenti, e non c'è una «direzione del tempo» privilegiata. <b>Per le equazioni del primo ordine questa impressione è falsa</b>, e questo movimento spiega perché.</p>
+  <p>Il motivo sta in una riscrittura. Un'equazione del tipo
+  $$a^1(x)\frac{\partial f}{\partial x^1}+\cdots+a^n(x)\frac{\partial f}{\partial x^n}=0$$
+  non è altro che la derivata di $f$ lungo il campo vettoriale $X=\sum a^i\partial/\partial x^i$. Cioè si scrive
+  $$X(f)=0,$$
+  e in questa forma dice una cosa sola e geometrica: <b>$f$ è costante lungo le curve integrali di $X$</b>. Quelle curve si chiamano <b>caratteristiche</b>, e conoscerle riduce la PDE a un problema che è già stato risolto — trovare le curve integrali di un campo.</p>
+  <p><b>La conseguenza operativa è forte</b>: risolvere un'equazione alle derivate parziali del primo ordine non richiede nessuna tecnica nuova. Richiede di integrare un campo, cioè un sistema di equazioni ordinarie, e poi di propagare il dato iniziale lungo le soluzioni. Diverio lo tratta il 10 e il 17 dicembre, e chiude il corso con questo; in <b>Lee</b> la struttura sta nel capitolo 9, mentre il metodo per il caso quasi-lineare è svolto in dettaglio in <b>Evans §3.2</b>.</p>`},
+  {t:'prosa', title:'Il filo delle quattro tappe', tag:'mappa', html:R`
+  <p>La prima tappa riscrive l'equazione in forma geometrica e chiarisce <b>dove si può mettere il dato</b>: non su una superficie qualunque, ma su una che le caratteristiche <i>attraversano</i> — è la condizione di non caratteristicità. La seconda risolve il caso lineare, con l'equazione del trasporto come modello. La terza passa al caso <b>quasi-lineare</b>, in cui il campo dipende dalla soluzione stessa, e lì compare il fenomeno che il caso lineare non ha: la soluzione liscia <b>cessa di esistere</b> in tempo finito. La quarta è il teorema generale che mette tutto insieme.</p>`}
 ]},
 
-/* ---------------- 01 · LA FUNZIONE CHE ROMPE L'ANALITICITÀ ---------------- */
-{ num:'01', title:'La funzione che rompe lanaliticita: cutoff e bump', meta:'e^{-1/t} · perche tutte le derivate si annullano · il bump a supporto compatto',
+/* ---------------- 01 · LA RISCRITTURA E IL DATO ---------------- */
+{ num:'01', title:'La riscrittura geometrica, e dove si puo mettere il dato', meta:'X(f)=0 · le caratteristiche · ipersuperficie non caratteristica · perche la condizione serve',
   blocchi:[
-  {t:'reveal', title:'La costruzione, in tre passi', tag:'costruzione', steps:[
-   {label:'Il mattone', body:R`
-   <p>$$f(t)=\begin{cases}e^{-1/t}&t>0\\ 0&t\le0\end{cases}$$
-   è <b>$C^\infty$ su tutto $\mathbb{R}$</b>. In $t=0$ va verificato: la derivata $k$-esima per $t>0$ è $e^{-1/t}$ moltiplicato per un polinomio in $1/t$, e <b>tutte le derivate tendono a zero</b> per $t\to0^+$ — la prima, <b>anche la seconda</b>, <b>e la terza</b>, e per induzione tutte, perché l&rsquo;esponenziale schiaccia qualunque potenza.</p>
-   <p><b>Ma la serie di Taylor in $0$ è identicamente nulla</b>, mentre la funzione non lo è per $t>0$: $f$ è liscia e <b>non analitica</b>. È il controesempio classico, ed è esattamente ciò che serve.</p>`},
-   {label:'La funzione di transizione fra 0 e 1', body:R`
-   <p>Con due copie di $f$ si costruisce
-   $$g(t)=\frac{f(t)}{f(t)+f(1-t)},$$
-   che è liscia, vale <b>$0$ per $t\le0$</b>, <b>$1$ per $t\ge1$</b>, e sale monotona in mezzo — <b>vale $\tfrac12$ a metà strada</b>. Il denominatore non si annulla mai, perché per ogni $t$ almeno uno dei due addendi è positivo.</p>`},
-   {label:'Il bump', body:R`
-   <p>Componendo $g$ con una funzione della distanza si ottiene una <b>bump function</b>: liscia, identicamente $1$ su una palla $B_r$, identicamente $0$ fuori da $B_R$ con $R>r$, e compresa fra $0$ e $1$ in mezzo. Il suo <b>supporto</b> — la chiusura dell&rsquo;insieme dove non si annulla, $\operatorname{supp}f$ — è compatto e contenuto in $B_R$.</p>
-   <p><b>Questa è la funzione che fa tutto</b>: su una varietà si trasporta in carta, e dà una funzione liscia globale che vive dentro un singolo aperto coordinato. Da qui in poi si può lavorare in una carta e poi «spegnere» la costruzione prima del bordo.</p>`}
-  ]},
-  {t:'plot', title:'Il mattone e il bump',
-   intro:R`A sinistra $f(t)=e^{-1/t}$ per $t>0$ (zero altrove): piattissima in $0$, eppure positiva subito dopo. A destra la bump costruita con due copie di $f$.`,
-   plots:[
-    {kind:'func2d', xr:[-1,2], yr:[-0.05,1.05], height:300,
-     title:'e^{-1/t}: tutte le derivate nulle in 0, e la serie di Taylor non la vede',
-     xlabel:'t', ylabel:'f(t)',
-     curves:[{f:'x>0 ? exp(-1/x) : 0', col:'#5eead4', width:2.6, label:'f(t)'},
-             {f:'0', col:'#4d5a6b', width:1.4, dash:true, label:'la sua serie di Taylor in 0'}],
-     segs:[{x1:0, y1:-0.05, x2:0, y2:1.05, col:'#ff6b6b', dash:true, width:1.3}]},
-    {kind:'func2d', xr:[-2.5,2.5], yr:[-0.05,1.15], height:300,
-     title:'la bump: identicamente 1 al centro, identicamente 0 fuori, liscia ovunque',
-     xlabel:'x', ylabel:'bump(x)',
-     curves:[{f:'(function(u){ if(u<=0) return 1; if(u>=1) return 0; var a=exp(-1/u), b=exp(-1/(1-u)); return b/(a+b); })((abs(x)-0.8)/0.9)', col:'#d8a13a', width:2.6, label:'bump'}],
-     segs:[{x1:-0.8, y1:0, x2:0.8, y2:0, col:'#5eead4', width:3, label:'qui vale 1', lx:-0.45, ly:0.08},
-           {x1:1.7, y1:0, x2:2.5, y2:0, col:'#b98cff', width:3, label:'qui vale 0', lx:1.75, ly:0.08},
-           {x1:-2.5, y1:0, x2:-1.7, y2:0, col:'#b98cff', width:3}]}
-   ],
-   leggi:R`<b>A sinistra sta tutto il punto del movimento.</b> La curva verde e quella grigia — la sua serie di Taylor in $0$, che è identicamente nulla — coincidono per $t\le0$ e si separano subito dopo. Una funzione analitica non può comportarsi così: se coincide con zero su un intervallo, è zero ovunque. <b>La classe $C^\infty$ è strettamente più grande di quella analitica, e tutta la geometria differenziale vive in quello scarto.</b><br><br>
-   <b>A destra</b> il risultato: una funzione perfettamente liscia che vale <i>esattamente</i> 1 in una regione e <i>esattamente</i> 0 in un&rsquo;altra, con un raccordo morbido. Non è un&rsquo;approssimazione — il tratto piatto è piatto davvero. In geometria riemanniana e olomorfa questa costruzione <b>non è disponibile</b>, ed è la ragione tecnica per cui quelle teorie sono molto più rigide.`}
-]},
-
-/* ---------------- 02 · LA PARTIZIONE ---------------- */
-{ num:'02', title:'La partizione dellunita, e il teorema di esistenza', meta:'la definizione · subordinata a un ricoprimento · dove entra la paracompattezza',
-  blocchi:[
-  {t:'prosa', title:'Definizione e teorema', tag:'grammatica', html:R`
-  <p>Dato un ricoprimento aperto $\{U_\alpha\}$ di $M$, una <b>partizione dell&rsquo;unità subordinata</b> è una famiglia di funzioni lisce $\rho_\alpha:M\to[0,1]$ tali che:</p>
+  {t:'prosa', title:'Le due letture della stessa equazione', tag:'costruzione', html:R`
+  <p>L'equazione $X(f)=0$ si legge in due modi, ed entrambi servono:</p>
   <ul>
-   <li>$\operatorname{supp}\rho_\alpha\subseteq U_\alpha$ — ciascuna vive dentro un solo aperto del ricoprimento;</li>
-   <li>la famiglia dei supporti è <b>localmente finita</b>: ogni punto ha un intorno che incontra solo un numero finito di supporti (così la somma è ben definita);</li>
-   <li>$\sum_\alpha\rho_\alpha\equiv1$ su tutta $M$.</li>
+   <li><b>analitico</b>: una relazione lineare fra le derivate parziali di $f$, con coefficienti dati;</li>
+   <li><b>geometrico</b>: $f$ ha derivata nulla lungo $X$, quindi <b>è costante su ogni curva integrale</b>. Le superfici di livello di $f$ contengono le caratteristiche, e $f$ è determinata da quale valore assegna a ciascuna.</li>
   </ul>
-  <p><b>Teorema (e vale per ogni varietà liscia):</b> per ogni ricoprimento aperto esiste una partizione dell&rsquo;unità subordinata. <b>La dimostrazione usa esattamente le proprietà elencate in gd-01</b>: la base numerabile di palle coordinate per costruire un raffinamento numerabile, la locale compattezza e l&rsquo;esaustione in compatti per renderlo localmente finito, e le bump della tappa precedente per fabbricare le funzioni. Poi si normalizza dividendo per la somma — che è finita in ogni punto e positiva.</p>
-  <div class="note"><b>Ecco perché gd-01 dedicava una tappa intera a proprietà che sembravano di servizio.</b> Paracompattezza ed esaustione in compatti non erano curiosità topologiche: sono gli ingredienti di questo teorema, e questo teorema è ciò che rende costruibile quasi tutto il resto. <b>Quando in un corso una definizione chiede più di quanto sembri necessario, di solito c&rsquo;è un teorema di esistenza a valle che la consuma tutta.</b></div>`}
+  <p>La seconda lettura suggerisce immediatamente come costruire le soluzioni: <b>si sceglie un valore per ogni curva integrale</b>. Il modo di farlo è dare $f$ su una ipersuperficie $S$ che ogni curva attraversi una volta sola, e poi <b>propagare</b> quel valore lungo il flusso.</p>
+  <p>Il problema di <b>Cauchy</b> è quindi: trovare $f$ con $X(f)=0$ e $f|_{S}=\varphi$, dove $\varphi$ è il dato su $S$.</p>`},
+  {t:'prosa', title:'La condizione di non caratteristicita, e cosa succede senza', tag:'first principles', html:R`
+  <p><b>La condizione.</b> L'ipersuperficie $S$ si dice <b>non caratteristica</b> in $p\in S$ se
+  $$X(p)\notin T_pS,$$
+  cioè se il campo <b>attraversa</b> $S$ invece di essere tangente. <b>Teorema:</b> se $S$ è non caratteristica in ogni punto, il problema di Cauchy ha una e una sola soluzione liscia in un intorno di $S$.</p>
+  <p><b>Perché la condizione non è tecnica ma necessaria</b>, e si vede con due casi limite:</p>
+  <ul>
+   <li>se $X$ è <b>tangente</b> a $S$ in un punto, allora lungo $S$ la soluzione dovrebbe essere costante (perché $f$ è costante lungo le caratteristiche, e lì la caratteristica corre <i>dentro</i> $S$). Ma il dato $\varphi$ è arbitrario e in generale non è costante: <b>il problema non ha soluzione</b>;</li>
+   <li>se il dato $\varphi$ <i>fosse</i> costante lungo quella direzione, la condizione diventa compatibile — ma allora la soluzione <b>non è unica</b>, perché nulla determina $f$ fuori da $S$ nella direzione mancante.</li>
+  </ul>
+  <p><b>Esistenza o unicità: senza la condizione si perde l'una o l'altra</b>, mai entrambe conservate. È esattamente la stessa alternativa che in algebra lineare distingue un sistema incompatibile da uno indeterminato, e non è un caso: il problema di Cauchy è lineare.</p>`},
+  {t:'plot', title:'Caratteristiche e dato: quando il campo attraversa, e quando no',
+   intro:R`Le curve integrali di un campo e due possibili ipersuperfici su cui dare il dato: una attraversata (buona) e una tangente (cattiva).`,
+   plots:[
+    {kind:'phase', fx:'1', fy:'0.35', xr:[-2,2], yr:[-1.6,1.6], n:12, height:320,
+     seeds:[[-1.9,-1.2],[-1.9,-0.6],[-1.9,0],[-1.9,0.6],[-1.9,1.2]],
+     title:'le caratteristiche: le curve lungo cui la soluzione e costante',
+     segs:[{x1:0, y1:-1.6, x2:0, y2:1.6, col:'#5eead4', width:3, label:'S buona: il campo la attraversa', lx:0.06, ly:1.35},
+           {x1:-2, y1:-0.7, x2:2, y2:0.7, col:'#ff6b6b', width:3, label:'S cattiva: il campo le e tangente', lx:-1.9, ly:-1.0}]}
+   ],
+   leggi:R`<b>Le frecce sono le caratteristiche</b>: lungo ognuna la soluzione non cambia. La retta verticale verde è una buona superficie su cui dare il dato — ogni caratteristica la attraversa una volta sola, quindi assegnare $\varphi$ lì significa assegnare un valore a ciascuna curva, e la soluzione esiste ed è unica.<br><br>
+   <b>La retta rossa è tangente al campo</b>: giace <i>lungo</i> una caratteristica. Dare un dato su di essa è chiedere che $f$ assuma valori diversi su punti della stessa curva integrale, dove però $f$ deve essere costante: <b>il problema è sovradeterminato e in generale non ha soluzione</b>. E se per caso il dato fosse costante, resterebbe indeterminato in tutte le direzioni trasverse.<br><br>
+   <b>Da portare via</b>: la condizione di non caratteristicità non è una richiesta di regolarità, è la richiesta che il dato sia <i>indipendente</i> — e si verifica a occhio guardando se il campo buca la superficie.`}
 ]},
 
-/* ---------------- 03 · LE TRE APPLICAZIONI ---------------- */
-{ num:'03', title:'Le tre applicazioni che Diverio usa subito', meta:'funzioni test · estensione da un chiuso · funzione di esaustione',
+/* ---------------- 02 · IL CASO LINEARE ---------------- */
+{ num:'02', title:'Il caso lineare: lequazione del trasporto', meta:'la soluzione per propagazione · g(x-ut) · e perche il profilo si sposta senza deformarsi',
   blocchi:[
-  {t:'prosa', title:'A che cosa servono, in concreto', tag:'regola operativa', html:R`
-  <ol>
-   <li><b>Funzioni test su misura.</b> Dati un chiuso $C$ e un aperto $U\supseteq C$, esiste $\psi$ liscia che vale <b>$1$ su $C$</b> e ha supporto dentro $U$. È la versione globale della bump, e serve ogni volta che si vuole «localizzare» un problema senza rovinarlo ai bordi.</li>
-   <li><b>Estensione da un chiuso.</b> Una funzione liscia definita su un chiuso $C$ (cioè restrizione di una liscia su un intorno) si estende a una funzione liscia su <b>tutta</b> $M$. Si copre $C$ con carte, si estende in ciascuna, e si incollano le estensioni con la partizione. <b>È il teorema che permette di costruire oggetti globali partendo da dati parziali</b>, e in gd-09 servirà per gli intorni tubolari.</li>
-   <li><b>Funzione di esaustione liscia e positiva.</b> Esiste $h:M\to\mathbb{R}$ liscia, positiva, <b>propria</b> — cioè con $h^{-1}([0,c])$ compatto per ogni $c$. Serve a trattare varietà non compatte «un pezzo alla volta»: una proprietà che vale su ogni compatto e passa al limite crescente, vale su tutta la varietà. <b>La prima applicazione, immediata:</b> un campo vettoriale a supporto compatto ha traiettorie definite per ogni tempo — fuori dal supporto è nullo e le curve sono costanti, dentro il supporto è compatto e fornisce un tempo minimo di esistenza uguale per tutti i punti, che si itera. Senza esaustione quel «tempo minimo uniforme» non esisterebbe.</li>
-  </ol>
-  <p><b>E l&rsquo;applicazione che questo corso non fa ma che è la più citata altrove</b>: ogni varietà liscia ammette una <b>metrica riemanniana</b>. Si prende in ogni carta il prodotto scalare euclideo e si incollano con la partizione; la somma di prodotti scalari con pesi positivi è ancora un prodotto scalare. <b>La positività è ciò che rende lecita l&rsquo;operazione</b>, e infatti non funziona per una metrica lorentziana: non tutte le varietà ne ammettono una, ed è una condizione topologica non banale — con conseguenze in relatività generale.</p>`},
-  {t:'collaudo', title:'Controllo lampo', items:[
-   {q:R`Perché non si può costruire una partizione dell'unità con funzioni analitiche?`,
-    a:R`Perché una funzione analitica nulla su un aperto è nulla su tutta la componente connessa (principio di identità). Le $\rho_\alpha$ devono annullarsi fuori dal loro aperto e non essere identicamente nulle: <b>impossibile in categoria analitica</b>. È lo stesso principio che in Metodi (me-01b) rendeva unica la continuazione analitica: <b>la stessa rigidità che là è una risorsa, qui è un ostacolo</b>, ed è il motivo per cui la geometria analitica complessa usa tecniche completamente diverse (fasci, coomologia).`},
-   {q:R`Dove si usa esattamente la base numerabile nella dimostrazione del teorema?`,
-    a:R`Per estrarre dal ricoprimento dato un raffinamento <b>numerabile</b> fatto di palle coordinate, che poi si rende localmente finito usando l&rsquo;esaustione in compatti. Senza numerabilità la somma $\sum\rho_\alpha$ potrebbe non avere senso. <b>È il punto in cui un&rsquo;ipotesi apparentemente astratta diventa un passaggio concreto di una dimostrazione</b> — e all&rsquo;orale è una domanda tipica.`}
-  ]}
+  {t:'reveal', title:'Lequazione modello, risolta per intero', tag:'esame', steps:[
+   {label:'Il problema', body:R`
+   <p>$$\frac{\partial f}{\partial t}+u\frac{\partial f}{\partial x}=0,\qquad f(0,x)=g(x),$$
+   con $u$ costante. In forma geometrica è $X(f)=0$ con $X=\partial_t+u\,\partial_x$ sul piano $(t,x)$, e il dato è assegnato sulla retta $t=0$ — <b>non caratteristica</b>, perché $X$ ha componente $1$ nella direzione $t$ e quindi la attraversa.</p>`},
+   {label:'Le caratteristiche e la soluzione', body:R`
+   <p>Le curve integrali di $X$ risolvono $\dot t=1$, $\dot x=u$: sono le rette
+   $$x-ut=\text{costante}.$$
+   La soluzione è costante su ciascuna, e sulla retta $t=0$ vale $g$; quindi il valore in $(t,x)$ è il valore del dato nel punto da cui quella caratteristica proviene:
+   $$f(t,x)=g(x-ut),$$
+   e la verifica diretta conferma che <b>$g(x-ut)$</b> annulla l'equazione per qualunque $g$ derivabile.</p>`},
+   {label:'Che cosa dice fisicamente', body:R`
+   <p><b>Il profilo iniziale trasla rigidamente con velocità $u$, senza cambiare forma.</b> Non si allarga, non si attenua, non si deforma: l'equazione del trasporto descrive il puro trascinamento.</p>
+   <p>Conviene confrontarla con ciò che <i>non</i> fa. Un termine di diffusione ($\partial_t f=\kappa\partial_x^2 f$) allargherebbe il profilo smussandolo; un termine del secondo ordine nel tempo darebbe due onde che viaggiano in versi opposti. <b>Qui c'è una sola direzione di propagazione</b>, ed è la firma delle equazioni del primo ordine: <i>l'informazione viaggia lungo le caratteristiche, in un verso solo</i>.</p>`}
+  ]},
+  {t:'plot', title:'Il profilo che trasla senza deformarsi',
+   intro:R`La soluzione $f(t,x)=g(x-ut)$ con $g$ una gaussiana e $u=1$, a quattro istanti successivi.`,
+   plots:[
+    {kind:'func2d', xr:[-3,7], yr:[-0.1,1.15], height:320,
+     title:'quattro istantanee: la forma resta identica, cambia solo la posizione',
+     xlabel:'x', ylabel:'f(t,x)',
+     curves:[
+      {f:'exp(-4*x*x)', col:'#5eead4', width:2.2, label:'t=0'},
+      {f:'exp(-4*(x-1.5)*(x-1.5))', col:'#d8a13a', width:2.2, label:'t=1.5'},
+      {f:'exp(-4*(x-3)*(x-3))', col:'#b98cff', width:2.2, label:'t=3'},
+      {f:'exp(-4*(x-4.5)*(x-4.5))', col:'#4c8dff', width:2.2, label:'t=4.5'}
+     ],
+     segs:[{x1:-3, y1:0, x2:7, y2:0, col:'#4d5a6b', width:1}]}
+   ],
+   leggi:R`<b>Le quattro curve sono la stessa curva</b>, spostata: altezza identica, larghezza identica, nessuna coda che si allunga. È il contenuto di $f(t,x)=g(x-ut)$ letto su un grafico — e il contrasto con la diffusione, dove le curve si abbassano e si allargano, è il modo più rapido di ricordare la differenza fra un'equazione del primo ordine e una del secondo.<br><br>
+   <b>Il dettaglio che conta all'esame</b>: la velocità di traslazione è $u$, cioè il <i>coefficiente</i> dell'equazione, e non dipende né dal profilo né dal tempo. Nella tappa seguente quel coefficiente diventerà $f$ stessa, e proprio allora la forma comincerà a cambiare.`}
 ]},
 
-/* ---------------- 04 · IL SENSO ---------------- */
-{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e perche la liscezza e diversa dallanaliticita',
+/* ---------------- 03 · IL CASO QUASI-LINEARE ---------------- */
+{ num:'03', title:'Il caso quasi-lineare e lequazione di Burgers: quando la soluzione si rompe', meta:'il campo che dipende dalla soluzione · le caratteristiche che si incontrano · il tempo di shock',
+  blocchi:[
+  {t:'prosa', title:'La differenza, e perche cambia tutto', tag:'costruzione', html:R`
+  <p>Nel caso <b>quasi-lineare</b> i coefficienti dipendono anche dal valore incognito:
+  $$\frac{\partial f}{\partial t}+f\,\frac{\partial f}{\partial x}=0$$
+  è l'<b>equazione di Burgers inviscida</b>, il modello più semplice. La velocità di trasporto non è più una costante $u$: <b>è la soluzione stessa</b>. Dove $f$ è grande il profilo avanza più in fretta, dove è piccola più piano.</p>
+  <p>Il metodo geometrico funziona ancora, con un aggiustamento: le caratteristiche vanno cercate nello spazio <b>esteso</b> che comprende anche la variabile dipendente, e il campo diventa $\partial_t+f\partial_x$ con $f$ costante lungo la curva. Il risultato è che le caratteristiche sono ancora <b>rette</b>, ma con pendenze diverse:
+  $$x=x_0+g(x_0)\,t,$$
+  e la soluzione è data in forma <b>implicita</b> da $f=g(x-ft)$.</p>
+  <p><b>Qui nasce il fenomeno nuovo.</b> Se $g$ è decrescente, le caratteristiche che partono da punti diversi <b>convergono</b> e prima o poi si incontrano. Nel punto di incontro la soluzione dovrebbe assumere due valori diversi: <b>la soluzione liscia cessa di esistere</b>, e si forma uno <b>shock</b>.</p>`},
+  {t:'reveal', title:'I due conti che mostrano le due sorti', tag:'esame', steps:[
+   {label:'Dato crescente: nessun problema', body:R`
+   <p>Con $g(x)=x$ la soluzione è
+   $$f(t,x)=\frac{x}{1+t},$$
+   e la verifica diretta conferma che annulla l'equazione. Le caratteristiche <b>divergono</b> — quelle che partono più a destra vanno più veloci — e il profilo si <b>allarga</b> indefinitamente. La soluzione è liscia per ogni $t>0$: <b>nessuno shock</b>, mai.</p>`},
+   {label:'Dato decrescente: shock a tempo finito', body:R`
+   <p>Con <b>$g(x)=-x$</b> la soluzione è
+   $$f(t,x)=-\frac{x}{1-t},$$
+   e anche questa verifica l'equazione. Ma il denominatore si annulla a $t=1$: <b>la soluzione esplode</b>. Le caratteristiche convergono tutte verso l'origine e si incontrano lì, tutte insieme, al tempo $1$.</p>
+   <p><b>Il tempo di shock in generale</b> è
+   $$t^*=-\frac{1}{\min g'},$$
+   quando $g$ ha qualche tratto decrescente, e $t^*=+\infty$ quando $g$ è non decrescente. <b>La derivata del dato iniziale decide il destino della soluzione</b>, e lo decide subito: non serve integrare per saperlo.</p>`},
+   {label:'Che cosa succede dopo lo shock', body:R`
+   <p>La teoria di questo corso finisce qui — <b>oltre $t^*$ non esiste soluzione liscia</b>, e il problema di Cauchy così posto non ha risposta. La strada che si prende in analisi è ammettere <b>soluzioni deboli</b>, che soddisfano l'equazione in senso integrale e possono avere discontinuità; ma allora l'unicità si perde, e occorre una <i>condizione di entropia</i> per selezionare quella fisica.</p>
+   <p><b>Vale la pena sapere che il muro è lì e perché</b>: non è un limite del metodo delle caratteristiche, è un fatto sull'equazione. Le caratteristiche si incontrano davvero, e nessuna tecnica può far assumere due valori a una funzione.</p>`}
+  ]},
+  {t:'plot', title:'Le caratteristiche che divergono e quelle che si incontrano',
+   intro:R`Le rette caratteristiche $x=x_0+g(x_0)t$ nel piano $(t,x)$, per dato crescente e per dato decrescente.`,
+   plots:[
+    {kind:'func2d', xr:[0,2], yr:[-2.5,2.5], height:310,
+     title:'dato crescente g(x)=x: le caratteristiche divergono, nessuno shock',
+     xlabel:'t', ylabel:'x',
+     curves:[
+      {f:'-2-2*x', col:'#5eead4', width:1.8, label:'da x0=-2'},
+      {f:'-1-1*x', col:'#5eead4', width:1.8},
+      {f:'0', col:'#4d5a6b', width:1.6},
+      {f:'1+1*x', col:'#d8a13a', width:1.8},
+      {f:'2+2*x', col:'#d8a13a', width:1.8, label:'da x0=2'}
+     ]},
+    {kind:'func2d', xr:[0,2], yr:[-2.5,2.5], height:310,
+     title:'dato decrescente g(x)=-x: si incontrano tutte a t=1',
+     xlabel:'t', ylabel:'x',
+     curves:[
+      {f:'-2+2*x', col:'#b98cff', width:1.8, label:'da x0=-2'},
+      {f:'-1+1*x', col:'#b98cff', width:1.8},
+      {f:'0', col:'#4d5a6b', width:1.6},
+      {f:'1-1*x', col:'#ff6b6b', width:1.8},
+      {f:'2-2*x', col:'#ff6b6b', width:1.8, label:'da x0=2'}
+     ],
+     segs:[{x1:1, y1:-2.5, x2:1, y2:2.5, col:'#ff9b6b', dash:true, width:1.6, label:'t*=1: shock', lx:1.04, ly:2.1}],
+     marks:[{x:1, y:0, label:'qui si incontrano tutte', col:'#ff6b6b'}]}
+   ],
+   leggi:R`<b>A sinistra le rette si allontanano</b>: partendo da punti diversi con velocità crescenti, non si incontrano mai. Ogni punto del piano $(t,x)$ è raggiunto da <i>una sola</i> caratteristica, quindi la soluzione è definita ovunque e resta liscia.<br><br>
+   <b>A destra convergono</b>, e a $t=1$ passano tutte per lo stesso punto. Oltre quella linea, un punto del piano è raggiunto da <b>più caratteristiche con valori diversi</b>: la funzione dovrebbe valere due cose insieme, e la soluzione liscia non esiste più.<br><br>
+   <b>Il criterio si legge sulla figura prima che nei conti</b>: si guarda se le rette divergono o convergono, e la risposta è nel segno di $g'$. È anche il motivo per cui l'equazione di Burgers è il modello standard della formazione delle onde d'urto: <b>la parte alta di un'onda viaggia più veloce di quella bassa, la raggiunge, e il fronte diventa verticale.</b>`}
+]},
+
+/* ---------------- 04 · IL TEOREMA GENERALE ---------------- */
+{ num:'04', title:'Il Teorema sui Flussi Uscenti, e cosa garantisce', meta:'lenunciato · la costruzione con il flusso · lintorno in cui vale · e il limite locale',
+  blocchi:[
+  {t:'prosa', title:'Lenunciato e la costruzione', tag:'sintesi', html:R`
+  <p><b>Teorema (flussi uscenti).</b> Sia $S\subseteq M$ un'ipersuperficie e $X$ un campo <b>non tangente</b> a $S$ in nessun punto. Allora la mappa
+  $$(t,s)\ \longmapsto\ \Phi_t(s),\qquad s\in S,$$
+  è un <b>diffeomorfismo</b> da un intorno di $\{0\}\times S$ su un intorno di $S$ in $M$.</p>
+  <p><b>In parole: il flusso fornisce un sistema di coordinate</b> in cui una è il tempo lungo le caratteristiche e le altre parametrizzano $S$. La dimostrazione è il teorema di invertibilità locale: il differenziale della mappa nell'origine manda la direzione $t$ in $X$ e le direzioni di $S$ in se stesse, ed è invertibile <b>esattamente</b> perché $X$ non è tangente — cioè per la condizione di non caratteristicità.</p>
+  <p>Con queste coordinate la PDE diventa banale: $X$ è $\partial/\partial t$, l'equazione $X(f)=0$ diventa $\partial f/\partial t=0$, e la soluzione è «$f$ non dipende da $t$», cioè <b>$f$ è il dato propagato</b>. <b>Tutto il contenuto del metodo delle caratteristiche è questo cambio di coordinate.</b></p>
+  <div class="note"><b>Il limite, dichiarato:</b> il teorema è <b>locale</b>. Garantisce la soluzione in un intorno di $S$, non ovunque, e il caso di Burgers mostra che non potrebbe essere altrimenti — lì le coordinate costruite dal flusso smettono di essere un diffeomorfismo proprio al tempo di shock, quando due caratteristiche si incontrano e la mappa perde l'iniettività. <b>La geometria non nasconde il problema: lo localizza</b>, e dice esattamente dove e perché il metodo finisce.</div>`}
+]},
+
+/* ---------------- 05 · IL SENSO ---------------- */
+{ num:'05', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove le caratteristiche governano la fisica',
   blocchi:[
   {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
-  <p><b>Il punto.</b> La geometria differenziale è <b>flessibile</b>: si possono modificare oggetti su una regione senza toccarli altrove. Questa libertà non è gratuita — viene dall&rsquo;esistenza di funzioni lisce non analitiche — ed è ciò che distingue questo corso dalla geometria complessa e da quella algebrica, dove le funzioni sono rigide e i teoremi hanno un sapore opposto.</p>
-  <p><b>A valle.</b> gd-06 definisce lo spazio tangente usando le funzioni lisce costruite qui (le derivazioni hanno bisogno di germi, e i germi hanno bisogno di bump per essere manipolati); gd-07 incolla i campi vettoriali; gd-09 costruisce gli intorni tubolari.</p>`},
-  {t:'prolessi', title:'Dove riappare questo movimento',
-   oggetto:R`<b>La partizione dell&rsquo;unità</b>: pesi lisci che sommano a uno, e trasformano il locale in globale.`,
+  <p><b>Il punto.</b> Un'equazione alle derivate parziali del primo ordine <b>non è un'equazione alle derivate parziali</b>: è una famiglia di equazioni ordinarie lungo le caratteristiche, e la geometria serve a vederlo. L'unica cosa che si aggiunge rispetto al caso ordinario è la condizione sul dato — che sia assegnato trasversalmente al campo.</p>
+  <p><b>E il punto che resta aperto</b>: nel caso quasi-lineare la soluzione può cessare di esistere in tempo finito, e la geometria dice precisamente quando e perché. <b>Non è una patologia matematica</b>: le onde d'urto esistono, e questo è il loro modello più semplice.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Le caratteristiche</b>: le curve lungo cui l'informazione viaggia, e su cui una PDE diventa una ODE.`,
    rotte:[
-    {dove:'Fisica<br>matematica', txt:R`Le <b>funzioni test</b> a supporto compatto sono lo spazio su cui si definiscono le distribuzioni (Metodi, me-09): la delta di Dirac è un funzionale su funzioni costruite esattamente come quelle di questa tappa. <b>Senza $e^{-1/t}$ non ci sarebbe la teoria delle distribuzioni.</b>`},
-    {dove:'Relativita<br>generale', txt:R`Ogni varietà ammette una metrica riemanniana grazie a questa costruzione, ma <b>non ogni varietà ammette una metrica lorentziana</b>: serve un campo vettoriale mai nullo, e la palla pelosa (gd-07) dice che su $S^2$ non ne esistono. <b>La topologia vincola quali spazi-tempo sono possibili.</b>`},
-    {dove:'Analisi<br>numerica', txt:R`I metodi a <b>elementi finiti</b> e le <b>partizioni dell&rsquo;unità</b> numeriche usano letteralmente questa idea: funzioni di forma locali, pesate, che sommano a uno. La geometria astratta e il calcolo pratico condividono la stessa struttura.`},
-    {dove:'Teoria<br>dei fasci', txt:R`L'esistenza delle partizioni dell'unita' equivale al fatto che i fasci di funzioni lisce siano <b>aciclici</b>: e' la ragione per cui in geometria differenziale la coomologia si calcola con de Rham e non serve tutto l'apparato che occorre nel caso olomorfo.`}
+    {dove:'Fluidodinamica', txt:R`L'equazione di Burgers è il modello delle <b>onde d'urto</b>: in un gas compressibile la velocità del suono dipende dalla densità, le perturbazioni forti raggiungono quelle deboli, e il fronte si irripidisce fino a diventare una discontinuità. <b>Il boom sonico è questo conto.</b>`},
+    {dove:'Relativita', txt:R`Le caratteristiche dell'equazione delle onde formano il <b>cono di luce</b>: sono le curve lungo cui l'informazione si propaga, e la loro struttura definisce la causalità. <b>«Non si può superare la velocità della luce» è un'affermazione sulle caratteristiche di una PDE.</b>`},
+    {dove:'Meccanica<br>analitica', txt:R`L'equazione di <b>Hamilton-Jacobi</b> è del primo ordine, e le sue caratteristiche sono le traiettorie del sistema nello spazio delle fasi: risolverla equivale a integrare il moto. È il ponte fra l'ottica geometrica e la meccanica, e da lì all'equazione di Schrödinger.`},
+    {dove:'Traffico<br>e reti', txt:R`Il modello di Lighthill-Whitham per il traffico e' un'equazione di questo tipo, e lo shock e' letteralmente <b>l'ingorgo</b>: l'onda di frenata che risale la colonna di auto e' una caratteristica che viaggia all'indietro.`}
    ],
-   domanda:R`La funzione $e^{-1/t}$ è liscia ma la sua serie di Taylor non la rappresenta: fra la funzione e tutte le sue derivate in un punto c&rsquo;è uno scarto invisibile al calcolo differenziale. <b>Domanda che porti avanti:</b> quanto è grande quello scarto? La risposta è sorprendente — per il teorema di Borel, <b>ogni</b> successione di numeri può essere la successione dei coefficienti di Taylor di una funzione liscia. Cioè: conoscere <i>tutte</i> le derivate in un punto non dice <b>niente</b> sulla funzione altrove. In fisica questo è il motivo per cui le serie perturbative possono divergere pur descrivendo bene una teoria, e perché esistono effetti «non perturbativi» — come il tunneling — <b>invisibili a ogni ordine dello sviluppo</b>.`}
+   domanda:R`Il metodo delle caratteristiche funziona per il primo ordine e si ferma lì: per il secondo ordine si possono ancora definire le caratteristiche, ma non risolvono l'equazione — la classificano. <b>Domanda che porti avanti:</b> perché la distinzione fra ellittico, parabolico e iperbolico coincide con «quante caratteristiche reali ci sono»? La risposta è che le caratteristiche sono le direzioni lungo cui <i>non</i> si può propagare il dato, e quindi la loro esistenza decide se un problema è ben posto con dati iniziali (iperbolico: onde), con dati al bordo (ellittico: equilibrio), o con una combinazione (parabolico: diffusione). <b>La stessa geometria che qui risolve, là classifica</b> — e dice quale problema ha senso porre.`}
 ]}
 
 ];
@@ -404,7 +493,7 @@ CONTROLLO*/
 /* =================================================================== */
 var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
 
-var VKEY='pm-nucleogd-05-visited';
+var VKEY='pm-nucleogd-16-visited';
 function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
 function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
 var SEEN = loadSeen();
@@ -412,7 +501,7 @@ var SEEN = loadSeen();
 function renderNav(active){
   var nav=document.getElementById('sidebar');
   nav.innerHTML='';
-  var h=document.createElement('h2'); h.textContent='Nucleo gd-05 · le tappe'; nav.appendChild(h);
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-16 · le tappe'; nav.appendChild(h);
   TAPPE.forEach(function(s){
     var b=document.createElement('button');
     b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
@@ -561,7 +650,7 @@ function showTappa(num){
   window.scrollTo(0,0);
 }
 
-/* deep-link: gd-05-partizioni-unita.html#03 apre direttamente la tappa 03 */
+/* deep-link: gd-16-equazioni-primo-ordine.html#03 apre direttamente la tappa 03 */
 window.addEventListener('DOMContentLoaded', function(){
   var h=(location.hash||'').replace('#','');
   showTappa(byId[h]?h:'00');

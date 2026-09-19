@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movimento gd-05 — Le partizioni dell'unità: da locale a globale, e la funzione che rompe l'analiticità</title>
+<title>Movimento gd-13 — Curve integrali e problema di Cauchy su varietà: esistenza, unicità, e la fuga in tempo finito</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -180,7 +180,7 @@
 </style>
 </head>
 <body>
-<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-05 — Le partizioni dell'unità: lo strumento che incolla il locale nel globale</b> · Diverio, lezioni 15/10 e 18/10</div>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-13 — Curve integrali: un campo vettoriale è un'equazione differenziale, e la varietà è dove vive</b> · Diverio, lezione 29/11</div>
 <div class="shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main" id="main"></main>
@@ -217,7 +217,7 @@ function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html
    =================================================================== */
 var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
 var STRUM = {};
-
+STRUM["campo-vettoriale"] = {"nome":"Campo vettoriale","riga":"Una funzione che a ogni punto dello spazio associa un vettore, scritta $\\mathbf{F}(x,y,z)=F_x\\,\\hat{\\imath}+F_y\\,\\hat{\\jmath}+F_z\\,\\hat{k}$ con le tre componenti funzioni del punto.","serve":"È il modo di dire «c'è qualcosa in ogni punto dello spazio, e ha una direzione». Serve perché permette di smettere di ragionare su coppie di oggetti che si attraggono a distanza e di ragionare su una proprietà dello spazio: la sorgente prepara il campo, e chi arriva dopo sente solo ciò che trova dove si trova.","esempio":"Il campo di una carica puntiforme $q$ nell'origine è $\\mathbf{E}=\\dfrac{q}{4\\pi\\varepsilon_0 r^{2}}\\hat{r}$: la direzione è radiale, il modulo dipende solo dalla distanza. Con $q=1$ e $4\\pi\\varepsilon_0=1$, nel punto $(3,4,0)$ si ha $r=5$, quindi il modulo vale $\\tfrac{1}{25}$ e il versore è $\\left(\\tfrac35,\\tfrac45,0\\right)$: la componente lungo $x$ è $\\tfrac{3}{125}$.","pieno":{"file":"04-campi-vettoriali.html","tappa":"00","come":"la trattazione completa, nel nucleo sui campi vettoriali di Analisi Vettoriale"},"qui":{"elettromagnetismo":{"serve":"È l'oggetto che l'intero corso studia: $\\mathbf{E}$ e $\\mathbf{B}$ sono campi vettoriali, e le quattro equazioni di Maxwell sono affermazioni su come le loro derivate spaziali si legano alle sorgenti. Tutto ciò che si impara dopo — flusso, circuitazione, divergenza, rotore — è un modo di interrogare un campo vettoriale.","esempio":"Per la carica puntiforme in $(3,4,0)$ con $q=1$ e $4\\pi\\varepsilon_0=1$: $r=5$, modulo $\\tfrac{1}{25}$, e la componente lungo $x$ vale $\\tfrac{3}{125}$. Le tre componenti non sono tre campi separati: ruotando gli assi si mescolano fra loro, ed è quello che rende $\\mathbf{E}$ un vettore e non una terna di numeri."}},"controllo":[{"tipo":"uguale","sinistra":"sqrt(3**2+4**2)","vale":"5","dove":"esempio","appare":"r=5"},{"tipo":"uguale","sinistra":"1/sqrt(3**2+4**2)**2","vale":"1/25","dove":"esempio","appare":"\\tfrac{1}{25}"},{"tipo":"uguale","sinistra":"(1/5**2)*(3/5)","vale":"3/125","dove":"esempio","appare":"\\tfrac{3}{125}"},{"tipo":"uguale","sinistra":"sqrt(3**2+4**2)","vale":"5","dove":"qui.elettromagnetismo.esempio","appare":"r=5"},{"tipo":"uguale","sinistra":"(1/5**2)*(3/5)","vale":"3/125","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac{3}{125}"}]};
 
 function schedaHTML(s){
   var q = (s.qui && s.qui[CORSO]) || s;
@@ -256,7 +256,7 @@ function cablaStrumenti(root){
 }
 
 /* ===================================================================
-   >>> CONTENUTO — Nucleo gd-05: Le partizioni dell'unità <<<
+   >>> CONTENUTO — Nucleo gd-13: Curve integrali e il problema di Cauchy su varietà <<<
    Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
    Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
    Tutta la matematica in R`...` (String.raw). Nelle formule si usano
@@ -267,135 +267,123 @@ var TAPPE = [
 
 
 /*MOVIMENTO
-id:        gd-05 — le partizioni dell'unità
-identita:  lo strumento che trasforma costruzioni locali in costruzioni globali
-copre:     G.11, G.12
-serve:     gd-04 (gd-04-applicazioni-lisce.html)
-apre:      gd-06 (gd-06-spazio-tangente.html)
-registro:  Lezioni del 15/10 e 18/10/2019 — cutoff, bump, e le tre applicazioni
+id:        gd-13 — curve integrali e il problema di Cauchy su varietà
+identita:  un campo vettoriale è un'equazione differenziale, e la varietà è il posto dove ha senso
+copre:     G.25, R.7
+serve:     gd-12 (gd-12-parentesi-lie.html)
+apre:      gd-15 (gd-15-flussi.html)
+registro:  Lezione del 29/11/2019 — curve integrali, descrizione locale in carta, Cauchy
 generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"limite","espr":"diff(exp(-1/t),t)","var":"t","a":"0","vale":"0",
+ {"tipo":"uguale","sinistra":"diff(-1/(t-1/x0),t)","vale":"(-1/(t-1/x0))**2",
+  "ipotesi":{"t":"positive","x0":"positive"},
+  "dove":"02","appare":"x(t)=\\dfrac{x_0}{1-x_0t}"},
+
+ {"tipo":"uguale","sinistra":"(-1/(t-1/x0)).subs(t,0)","vale":"x0",
+  "ipotesi":{"x0":"positive"},
+  "dove":"02","appare":"vale x_0 al tempo zero"},
+
+ {"tipo":"uguale","sinistra":"diff((t/3)**3,t)-((t/3)**3)**Rational(2,3)","vale":"0",
   "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"tutte le derivate tendono a zero"},
+  "dove":"03","appare":"\\left(\\frac{t}{3}\\right)^{3}"},
 
- {"tipo":"limite","espr":"diff(exp(-1/t),t,2)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"anche la seconda"},
+ {"tipo":"simbolico","dove":"00","appare":"\\dot\\gamma(t)=X(\\gamma(t))",
+  "perche":"e' la definizione di curva integrale: l'equazione che si vuole risolvere, non il suo risultato"},
 
- {"tipo":"limite","espr":"diff(exp(-1/t),t,3)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"e la terza"},
-
- {"tipo":"uguale","sinistra":"(exp(-1/t)/(exp(-1/t)+exp(-1/(1-t)))).subs(t,Rational(1,2))",
-  "vale":"Rational(1,2)",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"<b>vale $\\tfrac12$ a metà strada</b>"},
-
- {"tipo":"simbolico","dove":"02","appare":"\\sum_\\alpha\\rho_\\alpha\\equiv1",
-  "perche":"e' la condizione che definisce una partizione dell'unita': una definizione, non un conto"},
-
- {"tipo":"simbolico","dove":"01","appare":"\\operatorname{supp}f",
-  "perche":"e' la notazione del supporto, definito nella riga stessa"}
+ {"tipo":"simbolico","dove":"01","appare":"\\dot x^{i}=X^{i}(x^1,\\dots,x^n)",
+  "perche":"e' la lettura in carta della stessa equazione, con campo generico: un sistema di ODE non specificato"}
 ]
 CONTROLLO*/
 
 /* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
-{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.11, G.12 · lo strumento su cui poggia meta del corso',
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.25, R.7 · il campo diventa un moto',
   blocchi:[
-  {t:'prosa', title:'Il problema che risolve', tag:'architettura', html:R`
-  <p>Su una varietà quasi tutto si sa fare <b>in carta</b>, cioè localmente. Ma quasi tutto ciò che interessa è <b>globale</b>: una metrica su tutta la varietà, un campo vettoriale definito ovunque, l&rsquo;integrale su tutta $M$, l&rsquo;estensione di una funzione definita su un chiuso.</p>
-  <p>Il problema di incollare i pezzi locali non è banale, perché due carte si sovrappongono e le costruzioni non coincidono sulla sovrapposizione. <b>La partizione dell&rsquo;unità è il modo di fare una media pesata</b>: si assegna a ogni carta un peso liscio, i pesi sommano a $1$ ovunque, e la somma pesata delle costruzioni locali è una costruzione globale.</p>
-  <p><b>Il prezzo è che funziona solo in categoria liscia.</b> Serve una funzione $C^\infty$ che sia identicamente $1$ in una regione e identicamente $0$ fuori da un&rsquo;altra, e questo <b>nessuna funzione analitica può farlo</b>: una funzione analitica nulla su un aperto è nulla ovunque (principio di identità — lo stesso di Metodi, me-01b). Il movimento comincia costruendo quella funzione.</p>`}
+  {t:'prosa', title:'Il cambio di sguardo', tag:'architettura', html:R`
+  <p>Fin qui un <span class="str" data-str="campo-vettoriale">campo vettoriale</span> era un oggetto <b>statico</b>: una freccia per ogni punto. Ora diventa una <b>legge di moto</b>: «da qui, muoviti in questa direzione con questa velocità». Una <b>curva integrale</b> è una curva che obbedisce a quella legge,
+  $$\dot\gamma(t)=X(\gamma(t)),$$
+  cioè <b>una soluzione di un&rsquo;equazione differenziale ordinaria sulla varietà</b>.</p>
+  <p>La domanda «esiste? è unica?» ha una risposta che si conosce già dall&rsquo;analisi (Cauchy-Lipschitz), e questo movimento fa due cose: mostra che la risposta si <b>trasporta</b> sulla varietà senza modifiche, e chiarisce che cosa resta di specifico — <b>la fuga in tempo finito</b>, che su una varietà ha un significato geometrico e non solo analitico.</p>`}
 ]},
 
-/* ---------------- 01 · LA FUNZIONE CHE ROMPE L'ANALITICITÀ ---------------- */
-{ num:'01', title:'La funzione che rompe lanaliticita: cutoff e bump', meta:'e^{-1/t} · perche tutte le derivate si annullano · il bump a supporto compatto',
+/* ---------------- 01 · IN CARTA ---------------- */
+{ num:'01', title:'In carta e un sistema di ODE, e questo basta', meta:'la lettura locale · il teorema di Cauchy-Lipschitz · e perche lunicita e globale',
   blocchi:[
-  {t:'reveal', title:'La costruzione, in tre passi', tag:'costruzione', steps:[
-   {label:'Il mattone', body:R`
-   <p>$$f(t)=\begin{cases}e^{-1/t}&t>0\\ 0&t\le0\end{cases}$$
-   è <b>$C^\infty$ su tutto $\mathbb{R}$</b>. In $t=0$ va verificato: la derivata $k$-esima per $t>0$ è $e^{-1/t}$ moltiplicato per un polinomio in $1/t$, e <b>tutte le derivate tendono a zero</b> per $t\to0^+$ — la prima, <b>anche la seconda</b>, <b>e la terza</b>, e per induzione tutte, perché l&rsquo;esponenziale schiaccia qualunque potenza.</p>
-   <p><b>Ma la serie di Taylor in $0$ è identicamente nulla</b>, mentre la funzione non lo è per $t>0$: $f$ è liscia e <b>non analitica</b>. È il controesempio classico, ed è esattamente ciò che serve.</p>`},
-   {label:'La funzione di transizione fra 0 e 1', body:R`
-   <p>Con due copie di $f$ si costruisce
-   $$g(t)=\frac{f(t)}{f(t)+f(1-t)},$$
-   che è liscia, vale <b>$0$ per $t\le0$</b>, <b>$1$ per $t\ge1$</b>, e sale monotona in mezzo — <b>vale $\tfrac12$ a metà strada</b>. Il denominatore non si annulla mai, perché per ogni $t$ almeno uno dei due addendi è positivo.</p>`},
-   {label:'Il bump', body:R`
-   <p>Componendo $g$ con una funzione della distanza si ottiene una <b>bump function</b>: liscia, identicamente $1$ su una palla $B_r$, identicamente $0$ fuori da $B_R$ con $R>r$, e compresa fra $0$ e $1$ in mezzo. Il suo <b>supporto</b> — la chiusura dell&rsquo;insieme dove non si annulla, $\operatorname{supp}f$ — è compatto e contenuto in $B_R$.</p>
-   <p><b>Questa è la funzione che fa tutto</b>: su una varietà si trasporta in carta, e dà una funzione liscia globale che vive dentro un singolo aperto coordinato. Da qui in poi si può lavorare in una carta e poi «spegnere» la costruzione prima del bordo.</p>`}
-  ]},
-  {t:'plot', title:'Il mattone e il bump',
-   intro:R`A sinistra $f(t)=e^{-1/t}$ per $t>0$ (zero altrove): piattissima in $0$, eppure positiva subito dopo. A destra la bump costruita con due copie di $f$.`,
-   plots:[
-    {kind:'func2d', xr:[-1,2], yr:[-0.05,1.05], height:300,
-     title:'e^{-1/t}: tutte le derivate nulle in 0, e la serie di Taylor non la vede',
-     xlabel:'t', ylabel:'f(t)',
-     curves:[{f:'x>0 ? exp(-1/x) : 0', col:'#5eead4', width:2.6, label:'f(t)'},
-             {f:'0', col:'#4d5a6b', width:1.4, dash:true, label:'la sua serie di Taylor in 0'}],
-     segs:[{x1:0, y1:-0.05, x2:0, y2:1.05, col:'#ff6b6b', dash:true, width:1.3}]},
-    {kind:'func2d', xr:[-2.5,2.5], yr:[-0.05,1.15], height:300,
-     title:'la bump: identicamente 1 al centro, identicamente 0 fuori, liscia ovunque',
-     xlabel:'x', ylabel:'bump(x)',
-     curves:[{f:'(function(u){ if(u<=0) return 1; if(u>=1) return 0; var a=exp(-1/u), b=exp(-1/(1-u)); return b/(a+b); })((abs(x)-0.8)/0.9)', col:'#d8a13a', width:2.6, label:'bump'}],
-     segs:[{x1:-0.8, y1:0, x2:0.8, y2:0, col:'#5eead4', width:3, label:'qui vale 1', lx:-0.45, ly:0.08},
-           {x1:1.7, y1:0, x2:2.5, y2:0, col:'#b98cff', width:3, label:'qui vale 0', lx:1.75, ly:0.08},
-           {x1:-2.5, y1:0, x2:-1.7, y2:0, col:'#b98cff', width:3}]}
-   ],
-   leggi:R`<b>A sinistra sta tutto il punto del movimento.</b> La curva verde e quella grigia — la sua serie di Taylor in $0$, che è identicamente nulla — coincidono per $t\le0$ e si separano subito dopo. Una funzione analitica non può comportarsi così: se coincide con zero su un intervallo, è zero ovunque. <b>La classe $C^\infty$ è strettamente più grande di quella analitica, e tutta la geometria differenziale vive in quello scarto.</b><br><br>
-   <b>A destra</b> il risultato: una funzione perfettamente liscia che vale <i>esattamente</i> 1 in una regione e <i>esattamente</i> 0 in un&rsquo;altra, con un raccordo morbido. Non è un&rsquo;approssimazione — il tratto piatto è piatto davvero. In geometria riemanniana e olomorfa questa costruzione <b>non è disponibile</b>, ed è la ragione tecnica per cui quelle teorie sono molto più rigide.`}
-]},
-
-/* ---------------- 02 · LA PARTIZIONE ---------------- */
-{ num:'02', title:'La partizione dellunita, e il teorema di esistenza', meta:'la definizione · subordinata a un ricoprimento · dove entra la paracompattezza',
-  blocchi:[
-  {t:'prosa', title:'Definizione e teorema', tag:'grammatica', html:R`
-  <p>Dato un ricoprimento aperto $\{U_\alpha\}$ di $M$, una <b>partizione dell&rsquo;unità subordinata</b> è una famiglia di funzioni lisce $\rho_\alpha:M\to[0,1]$ tali che:</p>
+  {t:'prosa', title:'La riduzione, e il teorema', tag:'costruzione', html:R`
+  <p>Si prende una <b>carta locale</b> attorno al punto iniziale: la curva diventa $t\mapsto(x^1(t),\dots,x^n(t))$ e l&rsquo;equazione diventa il <b>sistema di equazioni ordinarie</b>
+  $$\dot x^{i}=X^{i}(x^1,\dots,x^n),$$
+  <b>del primo ordine, autonomo, con coefficienti lisci</b>. Il <b>problema di Cauchy</b> è quel sistema più il dato $x(0)=x_0$, ed è la forma in cui l'analisi sa già rispondere. <b>Tutto il trasporto della teoria sulla varietà consiste in questo passaggio</b>: la carta locale trasforma un problema geometrico in uno che si conosce. Il teorema di Cauchy-Lipschitz dà quindi, per ogni dato iniziale, <b>esistenza e unicità locali</b>, più la <b>dipendenza liscia dal dato iniziale</b>.</p>
+  <p><b>Quest'ultima merita di essere enunciata bene, perché è la parte che si dimentica e serve più di tutte.</b> Non dice solo che la soluzione dipende con continuità dal punto di partenza: dice che la mappa
+  $$(t,x_0)\ \longmapsto\ x(t;x_0)$$
+  è <b>liscia in entrambe le variabili insieme</b>, su un intorno di $(0,x_0)$. Senza questo si avrebbe una famiglia di curve una per punto, senza nessun legame regolare fra loro; con questo si ha un oggetto solo, liscio, che muove tutti i punti contemporaneamente. <b>È la differenza fra avere infinite soluzioni e avere una deformazione della varietà</b>, ed è ciò che permette di derivare rispetto al dato iniziale — operazione che in meccanica corrisponde a studiare la stabilità di un'orbita rispetto a una perturbazione.</p>
+  <p><b>Due punti che non sono automatici e vanno visti:</b></p>
   <ul>
-   <li>$\operatorname{supp}\rho_\alpha\subseteq U_\alpha$ — ciascuna vive dentro un solo aperto del ricoprimento;</li>
-   <li>la famiglia dei supporti è <b>localmente finita</b>: ogni punto ha un intorno che incontra solo un numero finito di supporti (così la somma è ben definita);</li>
-   <li>$\sum_\alpha\rho_\alpha\equiv1$ su tutta $M$.</li>
+   <li><b>l&rsquo;indipendenza dalla carta</b>: un cambio di carta trasforma il sistema in un altro sistema liscio, e le soluzioni si corrispondono. Quindi «essere curva integrale» è una proprietà geometrica;</li>
+   <li><b>l&rsquo;unicità è globale</b>, non solo locale. Due soluzioni con lo stesso dato iniziale coincidono su tutto l&rsquo;intervallo comune: l&rsquo;insieme dove coincidono è <b>aperto</b> (per unicità locale) e <b>chiuso</b> (per continuità, e qui serve <b>Hausdorff</b>), quindi è tutto. <b>È lo stesso argomento «aperto e chiuso in un connesso» di gd-01</b>, ed è il punto in cui l&rsquo;ipotesi di Hausdorff lavora davvero: sulla retta con due origini l&rsquo;unicità fallirebbe.</li>
   </ul>
-  <p><b>Teorema (e vale per ogni varietà liscia):</b> per ogni ricoprimento aperto esiste una partizione dell&rsquo;unità subordinata. <b>La dimostrazione usa esattamente le proprietà elencate in gd-01</b>: la base numerabile di palle coordinate per costruire un raffinamento numerabile, la locale compattezza e l&rsquo;esaustione in compatti per renderlo localmente finito, e le bump della tappa precedente per fabbricare le funzioni. Poi si normalizza dividendo per la somma — che è finita in ogni punto e positiva.</p>
-  <div class="note"><b>Ecco perché gd-01 dedicava una tappa intera a proprietà che sembravano di servizio.</b> Paracompattezza ed esaustione in compatti non erano curiosità topologiche: sono gli ingredienti di questo teorema, e questo teorema è ciò che rende costruibile quasi tutto il resto. <b>Quando in un corso una definizione chiede più di quanto sembri necessario, di solito c&rsquo;è un teorema di esistenza a valle che la consuma tutta.</b></div>`}
+  <p>Ne segue che ogni punto ha una <b>curva integrale massimale</b>, definita su un intervallo aperto massimale $(a,b)\ni0$, unica.</p>`}
 ]},
 
-/* ---------------- 03 · LE TRE APPLICAZIONI ---------------- */
-{ num:'03', title:'Le tre applicazioni che Diverio usa subito', meta:'funzioni test · estensione da un chiuso · funzione di esaustione',
+/* ---------------- 02 · LA FUGA IN TEMPO FINITO ---------------- */
+{ num:'02', title:'La fuga in tempo finito, e cosa significa su una varieta', meta:'lesempio x = x^2 · perche lintervallo non e tutto R · e il caso compatto',
   blocchi:[
-  {t:'prosa', title:'A che cosa servono, in concreto', tag:'regola operativa', html:R`
-  <ol>
-   <li><b>Funzioni test su misura.</b> Dati un chiuso $C$ e un aperto $U\supseteq C$, esiste $\psi$ liscia che vale <b>$1$ su $C$</b> e ha supporto dentro $U$. È la versione globale della bump, e serve ogni volta che si vuole «localizzare» un problema senza rovinarlo ai bordi.</li>
-   <li><b>Estensione da un chiuso.</b> Una funzione liscia definita su un chiuso $C$ (cioè restrizione di una liscia su un intorno) si estende a una funzione liscia su <b>tutta</b> $M$. Si copre $C$ con carte, si estende in ciascuna, e si incollano le estensioni con la partizione. <b>È il teorema che permette di costruire oggetti globali partendo da dati parziali</b>, e in gd-09 servirà per gli intorni tubolari.</li>
-   <li><b>Funzione di esaustione liscia e positiva.</b> Esiste $h:M\to\mathbb{R}$ liscia, positiva, <b>propria</b> — cioè con $h^{-1}([0,c])$ compatto per ogni $c$. Serve a trattare varietà non compatte «un pezzo alla volta»: una proprietà che vale su ogni compatto e passa al limite crescente, vale su tutta la varietà. <b>La prima applicazione, immediata:</b> un campo vettoriale a supporto compatto ha traiettorie definite per ogni tempo — fuori dal supporto è nullo e le curve sono costanti, dentro il supporto è compatto e fornisce un tempo minimo di esistenza uguale per tutti i punti, che si itera. Senza esaustione quel «tempo minimo uniforme» non esisterebbe.</li>
-  </ol>
-  <p><b>E l&rsquo;applicazione che questo corso non fa ma che è la più citata altrove</b>: ogni varietà liscia ammette una <b>metrica riemanniana</b>. Si prende in ogni carta il prodotto scalare euclideo e si incollano con la partizione; la somma di prodotti scalari con pesi positivi è ancora un prodotto scalare. <b>La positività è ciò che rende lecita l&rsquo;operazione</b>, e infatti non funziona per una metrica lorentziana: non tutte le varietà ne ammettono una, ed è una condizione topologica non banale — con conseguenze in relatività generale.</p>`},
-  {t:'collaudo', title:'Controllo lampo', items:[
-   {q:R`Perché non si può costruire una partizione dell'unità con funzioni analitiche?`,
-    a:R`Perché una funzione analitica nulla su un aperto è nulla su tutta la componente connessa (principio di identità). Le $\rho_\alpha$ devono annullarsi fuori dal loro aperto e non essere identicamente nulle: <b>impossibile in categoria analitica</b>. È lo stesso principio che in Metodi (me-01b) rendeva unica la continuazione analitica: <b>la stessa rigidità che là è una risorsa, qui è un ostacolo</b>, ed è il motivo per cui la geometria analitica complessa usa tecniche completamente diverse (fasci, coomologia).`},
-   {q:R`Dove si usa esattamente la base numerabile nella dimostrazione del teorema?`,
-    a:R`Per estrarre dal ricoprimento dato un raffinamento <b>numerabile</b> fatto di palle coordinate, che poi si rende localmente finito usando l&rsquo;esaustione in compatti. Senza numerabilità la somma $\sum\rho_\alpha$ potrebbe non avere senso. <b>È il punto in cui un&rsquo;ipotesi apparentemente astratta diventa un passaggio concreto di una dimostrazione</b> — e all&rsquo;orale è una domanda tipica.`}
-  ]}
+  {t:'reveal', title:'Lesempio, e la lettura', tag:'idea', steps:[
+   {label:'Il conto', body:R`
+   <p>Su $M=\mathbb{R}$ si prenda $X=x^{2}\dfrac{\partial}{\partial x}$, cioè $\dot x=x^{2}$. Con dato iniziale $x_0>0$ la soluzione è
+   $$x(t)=\frac{x_0}{1-x_0t},$$
+   che <b>vale $x_0$ al tempo zero</b> e <b>esplode</b> per $t\to1/x_0$: la curva integrale massimale è definita solo su $(-\infty,\ 1/x_0)$.</p>`},
+   {label:'Che cosa significa geometricamente', body:R`
+   <p><b>La soluzione non «finisce»: esce dalla varietà.</b> In tempo finito raggiunge l&rsquo;infinito, che non è un punto di $\mathbb{R}$. Su una varietà generica il fenomeno si chiama <b>fuga da ogni compatto</b>: la curva, avvicinandosi all&rsquo;estremo dell&rsquo;intervallo, lascia definitivamente ogni sottoinsieme compatto.</p>
+   <p><b>Il teorema di fuga</b>: se l&rsquo;intervallo massimale ha estremo finito $b$, allora per ogni compatto $K$ esiste $t<b$ oltre cui la curva è fuori da $K$. <b>Cioè: l&rsquo;unico modo di smettere di esistere è scappare.</b> Non ci sono altre patologie.</p>`},
+   {label:'Il corollario che si usa sempre', body:R`
+   <p><b>Se $M$ è compatta, ogni curva integrale è definita su tutto $\mathbb{R}$</b> — non c&rsquo;è dove scappare. Il campo si dice allora <b>completo</b>, e in gd-15 questo darà un flusso globale, cioè un gruppo a un parametro di diffeomorfismi.</p>
+   <p>Lo stesso vale, senza compattezza, per i campi a <b>supporto compatto</b> e — più in generale — quando la crescita è controllata. <b>La lezione operativa</b>: la completezza non è una proprietà del campo in sé ma del rapporto fra il campo e la geometria in cui vive, e la compattezza è il modo più semplice di garantirla.</p>`}
+  ]},
+  {t:'plot', title:'Esplodere in tempo finito, e non esplodere',
+   intro:R`Le soluzioni di $\dot x=x^{2}$ e $\dot x=x$ con lo stesso dato iniziale $x_0=1$: la prima ha un asintoto verticale, la seconda cresce per sempre restando definita.`,
+   plots:[
+    {kind:'func2d', xr:[0,2], yr:[0,8], height:330,
+     title:'x^2 esplode a t=1; x cresce ma non esce mai dalla varieta',
+     xlabel:'t', ylabel:'x(t)',
+     curves:[
+      {f:'x<0.98 ? 1/(1-x) : 0/0', col:'#ff6b6b', width:2.6, label:'ẋ = x^2: esplode'},
+      {f:'exp(x)', col:'#5eead4', width:2.4, label:'ẋ = x: definita sempre'}
+     ],
+     segs:[{x1:1, y1:0, x2:1, y2:8, col:'#ff6b6b', dash:true, width:1.5, label:'t=1/x_0', lx:1.03, ly:7.2}],
+     marks:[{x:0, y:1, label:'stesso dato iniziale', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<b>Le due curve partono dallo stesso punto</b> e si separano subito: quella rossa ha un asintoto verticale a $t=1$, quella verde cresce esponenzialmente ma è definita per ogni $t$. <b>La differenza non è «quanto cresce» ma se la crescita è abbastanza rapida da percorrere una distanza infinita in tempo finito</b> — e la soglia è esattamente fra crescita lineare nel campo ($\dot x=x$, lipschitziano) e quadratica ($\dot x=x^2$, non lipschitziano globalmente).<br><br>
+   <b>La lettura geometrica</b>: la curva rossa non «si ferma» a $t=1$, <i>esce</i> da $\mathbb{R}$. Se la varietà fosse stata compatta — per esempio $S^1$ invece di $\mathbb{R}$ — non ci sarebbe stato dove andare, e la soluzione sarebbe esistita per sempre.`}
+]},
+
+/* ---------------- 03 · L'IPOTESI CHE SERVE ---------------- */
+{ num:'03', title:'Perche serve la lipschitzianita, e il controesempio', meta:'x = x^(2/3) · due soluzioni con lo stesso dato · e perche la liscezza basta',
+  blocchi:[
+  {t:'prosa', title:'Il controesempio classico', tag:'first principles', html:R`
+  <p>L&rsquo;unicità richiede più della continuità. Per $\dot x=x^{2/3}$ con $x(0)=0$ ci sono <b>almeno due</b> soluzioni: quella identicamente nulla, e
+  $$x(t)=\left(\frac{t}{3}\right)^{3},$$
+  che verifica l&rsquo;equazione — si controlla derivando. <b>Il campo è continuo ma non lipschitziano in $0$</b> (la derivata di $x^{2/3}$ esplode lì), e l&rsquo;unicità cade.</p>
+  <p><b>In questo corso il problema non si pone</b>, perché i campi sono <i>lisci</i> e quindi localmente lipschitziani. Ma vale la pena sapere qual è l&rsquo;ipotesi che sta lavorando: <b>non la liscezza in sé, ma la lipschitzianità locale</b>, che è molto meno. Il teorema vale per campi $C^1$, e in molte applicazioni fisiche è tutto ciò che si ha.</p>
+  <div class="note"><b>Dove il problema si pone davvero.</b> In meccanica ci sono sistemi con forze non lipschitziane — urti, attrito secco, vincoli unilateri — e lì la non unicità <i>è</i> un fenomeno fisico, non un difetto del modello: significa che lo stato iniziale non determina il futuro, e serve informazione in più. <b>Il determinismo classico è un teorema, non un assioma</b>, e questo è il punto in cui si vede da quali ipotesi dipende.</div>`}
 ]},
 
 /* ---------------- 04 · IL SENSO ---------------- */
-{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e perche la liscezza e diversa dallanaliticita',
+{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e dove le equazioni su varieta sono la regola',
   blocchi:[
   {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
-  <p><b>Il punto.</b> La geometria differenziale è <b>flessibile</b>: si possono modificare oggetti su una regione senza toccarli altrove. Questa libertà non è gratuita — viene dall&rsquo;esistenza di funzioni lisce non analitiche — ed è ciò che distingue questo corso dalla geometria complessa e da quella algebrica, dove le funzioni sono rigide e i teoremi hanno un sapore opposto.</p>
-  <p><b>A valle.</b> gd-06 definisce lo spazio tangente usando le funzioni lisce costruite qui (le derivazioni hanno bisogno di germi, e i germi hanno bisogno di bump per essere manipolati); gd-07 incolla i campi vettoriali; gd-09 costruisce gli intorni tubolari.</p>`},
+  <p><b>Il punto.</b> Un campo vettoriale <b>è</b> un&rsquo;equazione differenziale, e una varietà è il posto giusto in cui scriverla: le coordinate sono locali e arbitrarie, la soluzione no. <b>Tutta la teoria qualitativa dei sistemi dinamici vive in questo quadro</b>, e il vantaggio pratico è che lo spazio delle fasi di un sistema vincolato è una varietà, non uno spazio euclideo.</p>
+  <p><b>A valle.</b> gd-15 raccoglie tutte le curve integrali in un unico oggetto — il flusso — e studia quando è globale; gd-16 e gd-17 passano alle equazioni alle derivate parziali del primo ordine, che si risolvono <i>proprio</i> con le curve integrali di un campo.</p>`},
   {t:'prolessi', title:'Dove riappare questo movimento',
-   oggetto:R`<b>La partizione dell&rsquo;unità</b>: pesi lisci che sommano a uno, e trasformano il locale in globale.`,
+   oggetto:R`<b>La curva integrale</b>: la soluzione di un&rsquo;equazione differenziale su uno spazio curvo.`,
    rotte:[
-    {dove:'Fisica<br>matematica', txt:R`Le <b>funzioni test</b> a supporto compatto sono lo spazio su cui si definiscono le distribuzioni (Metodi, me-09): la delta di Dirac è un funzionale su funzioni costruite esattamente come quelle di questa tappa. <b>Senza $e^{-1/t}$ non ci sarebbe la teoria delle distribuzioni.</b>`},
-    {dove:'Relativita<br>generale', txt:R`Ogni varietà ammette una metrica riemanniana grazie a questa costruzione, ma <b>non ogni varietà ammette una metrica lorentziana</b>: serve un campo vettoriale mai nullo, e la palla pelosa (gd-07) dice che su $S^2$ non ne esistono. <b>La topologia vincola quali spazi-tempo sono possibili.</b>`},
-    {dove:'Analisi<br>numerica', txt:R`I metodi a <b>elementi finiti</b> e le <b>partizioni dell&rsquo;unità</b> numeriche usano letteralmente questa idea: funzioni di forma locali, pesate, che sommano a uno. La geometria astratta e il calcolo pratico condividono la stessa struttura.`},
-    {dove:'Teoria<br>dei fasci', txt:R`L'esistenza delle partizioni dell'unita' equivale al fatto che i fasci di funzioni lisce siano <b>aciclici</b>: e' la ragione per cui in geometria differenziale la coomologia si calcola con de Rham e non serve tutto l'apparato che occorre nel caso olomorfo.`}
+    {dove:'Meccanica<br>analitica', txt:R`Le equazioni di Hamilton sono le curve integrali del <b>campo hamiltoniano</b> sullo spazio delle fasi, che è una varietà. Il teorema di Liouville dice che quel flusso preserva il volume — un&rsquo;affermazione che ha senso solo in questo linguaggio.`},
+    {dove:'Meccanica<br>statistica', txt:R`L&rsquo;<b>ipotesi ergodica</b> è un&rsquo;affermazione sulle curve integrali sulla superficie di energia costante: che una singola traiettoria visiti densamente la varietà. <b>Il quadro geometrico è questo</b>, e senza di esso l&rsquo;enunciato non si formula.`},
+    {dove:'Relativita<br>generale', txt:R`Le <b>geodetiche</b> sono curve integrali di un campo sul fibrato tangente, e la questione della loro completezza — se esistono per ogni tempo proprio — <b>è</b> la definizione di singolarità dello spazio-tempo. I teoremi di Penrose-Hawking dicono che l&rsquo;incompletezza è inevitabile.`},
+    {dove:'Sistemi<br>dinamici', txt:R`Punti fissi, orbite periodiche, attrattori, stabilita': tutta la teoria qualitativa e' lo studio delle curve integrali senza risolverle. <b>La linearizzazione attorno a un equilibrio</b> e' il differenziale di gd-06 applicato al campo.`}
    ],
-   domanda:R`La funzione $e^{-1/t}$ è liscia ma la sua serie di Taylor non la rappresenta: fra la funzione e tutte le sue derivate in un punto c&rsquo;è uno scarto invisibile al calcolo differenziale. <b>Domanda che porti avanti:</b> quanto è grande quello scarto? La risposta è sorprendente — per il teorema di Borel, <b>ogni</b> successione di numeri può essere la successione dei coefficienti di Taylor di una funzione liscia. Cioè: conoscere <i>tutte</i> le derivate in un punto non dice <b>niente</b> sulla funzione altrove. In fisica questo è il motivo per cui le serie perturbative possono divergere pur descrivendo bene una teoria, e perché esistono effetti «non perturbativi» — come il tunneling — <b>invisibili a ogni ordine dello sviluppo</b>.`}
+   domanda:R`La soluzione di $\dot x=x^2$ esiste fino a $t=1/x_0$ e poi «esce dalla varietà». Ma in relatività generale le geodetiche incomplete non escono da nessuna parte: <b>lo spazio-tempo semplicemente finisce</b>. <b>Domanda che porti avanti:</b> che differenza c&rsquo;è fra una soluzione che scappa all&rsquo;infinito e una varietà che ha un buco? Formalmente nessuna — in entrambi i casi l&rsquo;intervallo massimale è limitato — e questo è esattamente il motivo per cui la definizione moderna di singolarità gravitazionale è <b>l&rsquo;incompletezza geodetica</b> e non «la curvatura diverge»: l&rsquo;unica cosa che si può affermare senza uscire dalla varietà è che il moto smette di essere definito.`}
 ]}
 
 ];
@@ -404,7 +392,7 @@ CONTROLLO*/
 /* =================================================================== */
 var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
 
-var VKEY='pm-nucleogd-05-visited';
+var VKEY='pm-nucleogd-13-visited';
 function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
 function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
 var SEEN = loadSeen();
@@ -412,7 +400,7 @@ var SEEN = loadSeen();
 function renderNav(active){
   var nav=document.getElementById('sidebar');
   nav.innerHTML='';
-  var h=document.createElement('h2'); h.textContent='Nucleo gd-05 · le tappe'; nav.appendChild(h);
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-13 · le tappe'; nav.appendChild(h);
   TAPPE.forEach(function(s){
     var b=document.createElement('button');
     b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
@@ -561,7 +549,7 @@ function showTappa(num){
   window.scrollTo(0,0);
 }
 
-/* deep-link: gd-05-partizioni-unita.html#03 apre direttamente la tappa 03 */
+/* deep-link: gd-13-curve-integrali.html#03 apre direttamente la tappa 03 */
 window.addEventListener('DOMContentLoaded', function(){
   var h=(location.hash||'').replace('#','');
   showTappa(byId[h]?h:'00');

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movimento gd-05 — Le partizioni dell'unità: da locale a globale, e la funzione che rompe l'analiticità</title>
+<title>Movimento gd-12 — Parentesi di Lie e derivata di Lie: quando due campi non commutano</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -180,7 +180,7 @@
 </style>
 </head>
 <body>
-<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-05 — Le partizioni dell'unità: lo strumento che incolla il locale nel globale</b> · Diverio, lezioni 15/10 e 18/10</div>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-12 — La parentesi di Lie: il secondo ordine che si cancella, e cosa resta</b> · Diverio, lezioni 26/11, 29/11, 03/12</div>
 <div class="shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main" id="main"></main>
@@ -217,7 +217,7 @@ function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html
    =================================================================== */
 var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
 var STRUM = {};
-
+STRUM["campo-vettoriale"] = {"nome":"Campo vettoriale","riga":"Una funzione che a ogni punto dello spazio associa un vettore, scritta $\\mathbf{F}(x,y,z)=F_x\\,\\hat{\\imath}+F_y\\,\\hat{\\jmath}+F_z\\,\\hat{k}$ con le tre componenti funzioni del punto.","serve":"È il modo di dire «c'è qualcosa in ogni punto dello spazio, e ha una direzione». Serve perché permette di smettere di ragionare su coppie di oggetti che si attraggono a distanza e di ragionare su una proprietà dello spazio: la sorgente prepara il campo, e chi arriva dopo sente solo ciò che trova dove si trova.","esempio":"Il campo di una carica puntiforme $q$ nell'origine è $\\mathbf{E}=\\dfrac{q}{4\\pi\\varepsilon_0 r^{2}}\\hat{r}$: la direzione è radiale, il modulo dipende solo dalla distanza. Con $q=1$ e $4\\pi\\varepsilon_0=1$, nel punto $(3,4,0)$ si ha $r=5$, quindi il modulo vale $\\tfrac{1}{25}$ e il versore è $\\left(\\tfrac35,\\tfrac45,0\\right)$: la componente lungo $x$ è $\\tfrac{3}{125}$.","pieno":{"file":"04-campi-vettoriali.html","tappa":"00","come":"la trattazione completa, nel nucleo sui campi vettoriali di Analisi Vettoriale"},"qui":{"elettromagnetismo":{"serve":"È l'oggetto che l'intero corso studia: $\\mathbf{E}$ e $\\mathbf{B}$ sono campi vettoriali, e le quattro equazioni di Maxwell sono affermazioni su come le loro derivate spaziali si legano alle sorgenti. Tutto ciò che si impara dopo — flusso, circuitazione, divergenza, rotore — è un modo di interrogare un campo vettoriale.","esempio":"Per la carica puntiforme in $(3,4,0)$ con $q=1$ e $4\\pi\\varepsilon_0=1$: $r=5$, modulo $\\tfrac{1}{25}$, e la componente lungo $x$ vale $\\tfrac{3}{125}$. Le tre componenti non sono tre campi separati: ruotando gli assi si mescolano fra loro, ed è quello che rende $\\mathbf{E}$ un vettore e non una terna di numeri."}},"controllo":[{"tipo":"uguale","sinistra":"sqrt(3**2+4**2)","vale":"5","dove":"esempio","appare":"r=5"},{"tipo":"uguale","sinistra":"1/sqrt(3**2+4**2)**2","vale":"1/25","dove":"esempio","appare":"\\tfrac{1}{25}"},{"tipo":"uguale","sinistra":"(1/5**2)*(3/5)","vale":"3/125","dove":"esempio","appare":"\\tfrac{3}{125}"},{"tipo":"uguale","sinistra":"sqrt(3**2+4**2)","vale":"5","dove":"qui.elettromagnetismo.esempio","appare":"r=5"},{"tipo":"uguale","sinistra":"(1/5**2)*(3/5)","vale":"3/125","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac{3}{125}"}]};
 
 function schedaHTML(s){
   var q = (s.qui && s.qui[CORSO]) || s;
@@ -256,7 +256,7 @@ function cablaStrumenti(root){
 }
 
 /* ===================================================================
-   >>> CONTENUTO — Nucleo gd-05: Le partizioni dell'unità <<<
+   >>> CONTENUTO — Nucleo gd-12: Parentesi di Lie e derivata di Lie <<<
    Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
    Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
    Tutta la matematica in R`...` (String.raw). Nelle formule si usano
@@ -267,135 +267,120 @@ var TAPPE = [
 
 
 /*MOVIMENTO
-id:        gd-05 — le partizioni dell'unità
-identita:  lo strumento che trasforma costruzioni locali in costruzioni globali
-copre:     G.11, G.12
-serve:     gd-04 (gd-04-applicazioni-lisce.html)
-apre:      gd-06 (gd-06-spazio-tangente.html)
-registro:  Lezioni del 15/10 e 18/10/2019 — cutoff, bump, e le tre applicazioni
+id:        gd-12 — parentesi di Lie e derivata di Lie
+identita:  misurare di quanto due campi non commutano, e scoprire che è ancora un campo
+copre:     G.23, G.24
+serve:     gd-07 (gd-07-fibrato-tangente.html)
+apre:      gd-13 (gd-13-curve-integrali.html), gd-14 (gd-14-gruppi-di-lie.html)
+registro:  Lezioni del 26/11, 29/11 e 03/12/2019 — parentesi in coordinate, campi F-associati, sottovarietà immerse
 generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"limite","espr":"diff(exp(-1/t),t)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"tutte le derivate tendono a zero"},
+ {"tipo":"uguale","sinistra":"diff(x*diff(f,y),x)-x*diff(diff(f,x),y)","vale":"diff(f,y)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"\\frac{\\partial}{\\partial y}"},
 
- {"tipo":"limite","espr":"diff(exp(-1/t),t,2)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"anche la seconda"},
+ {"tipo":"uguale","sinistra":"y*diff(x*diff(f,y),x)-x*diff(y*diff(f,x),y)",
+  "vale":"y*diff(f,y)-x*diff(f,x)",
+  "ipotesi":{"x":"real","y":"real"},
+  "dove":"02","appare":"y\\frac{\\partial}{\\partial y}-x\\frac{\\partial}{\\partial x}"},
 
- {"tipo":"limite","espr":"diff(exp(-1/t),t,3)","var":"t","a":"0","vale":"0",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"e la terza"},
+ {"tipo":"simbolico","dove":"01","appare":"[X,Y]=XY-YX",
+  "perche":"e' la definizione della parentesi come commutatore di derivazioni: una definizione"},
 
- {"tipo":"uguale","sinistra":"(exp(-1/t)/(exp(-1/t)+exp(-1/(1-t)))).subs(t,Rational(1,2))",
-  "vale":"Rational(1,2)",
-  "ipotesi":{"t":"positive"},
-  "dove":"01","appare":"<b>vale $\\tfrac12$ a metà strada</b>"},
-
- {"tipo":"simbolico","dove":"02","appare":"\\sum_\\alpha\\rho_\\alpha\\equiv1",
-  "perche":"e' la condizione che definisce una partizione dell'unita': una definizione, non un conto"},
-
- {"tipo":"simbolico","dove":"01","appare":"\\operatorname{supp}f",
-  "perche":"e' la notazione del supporto, definito nella riga stessa"}
+ {"tipo":"simbolico","dove":"03","appare":"[X,[Y,Z]]+[Y,[Z,X]]+[Z,[X,Y]]=0",
+  "perche":"e' l'identita' di Jacobi enunciata per campi generici: un teorema, verificabile ma non un valore"}
 ]
 CONTROLLO*/
 
 /* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
-{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.11, G.12 · lo strumento su cui poggia meta del corso',
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.23, G.24 · il corso cambia direzione',
   blocchi:[
-  {t:'prosa', title:'Il problema che risolve', tag:'architettura', html:R`
-  <p>Su una varietà quasi tutto si sa fare <b>in carta</b>, cioè localmente. Ma quasi tutto ciò che interessa è <b>globale</b>: una metrica su tutta la varietà, un campo vettoriale definito ovunque, l&rsquo;integrale su tutta $M$, l&rsquo;estensione di una funzione definita su un chiuso.</p>
-  <p>Il problema di incollare i pezzi locali non è banale, perché due carte si sovrappongono e le costruzioni non coincidono sulla sovrapposizione. <b>La partizione dell&rsquo;unità è il modo di fare una media pesata</b>: si assegna a ogni carta un peso liscio, i pesi sommano a $1$ ovunque, e la somma pesata delle costruzioni locali è una costruzione globale.</p>
-  <p><b>Il prezzo è che funziona solo in categoria liscia.</b> Serve una funzione $C^\infty$ che sia identicamente $1$ in una regione e identicamente $0$ fuori da un&rsquo;altra, e questo <b>nessuna funzione analitica può farlo</b>: una funzione analitica nulla su un aperto è nulla ovunque (principio di identità — lo stesso di Metodi, me-01b). Il movimento comincia costruendo quella funzione.</p>`}
+  {t:'prosa', title:'La domanda', tag:'architettura', html:R`
+  <p>Un <span class="str" data-str="campo-vettoriale">campo vettoriale</span> è una derivazione (gd-07): agisce sulle funzioni. Due campi $X$ e $Y$ si possono quindi <b>comporre</b>, e la domanda naturale è se l&rsquo;ordine conti.</p>
+  <p><b>Conta.</b> «Muoversi lungo $X$ e poi lungo $Y$» non è la stessa cosa che l&rsquo;opposto, e la differenza è il contenuto di questo movimento. La sorpresa è che la differenza — che a priori sarebbe un operatore del <b>secondo</b> ordine — risulta essere ancora un <b>campo vettoriale</b>, cioè del primo ordine: i termini secondi si cancellano.</p>
+  <p><b>È il movimento in cui il corso cambia direzione</b>: da qui in avanti si studiano i campi come <i>dinamica</i> — flussi, equazioni differenziali, gruppi di trasformazioni — e la parentesi è l&rsquo;oggetto algebrico che governa tutto.</p>`}
 ]},
 
-/* ---------------- 01 · LA FUNZIONE CHE ROMPE L'ANALITICITÀ ---------------- */
-{ num:'01', title:'La funzione che rompe lanaliticita: cutoff e bump', meta:'e^{-1/t} · perche tutte le derivate si annullano · il bump a supporto compatto',
+/* ---------------- 01 · LA DEFINIZIONE ---------------- */
+{ num:'01', title:'La parentesi: il commutatore, e perche resta del primo ordine', meta:'la definizione · il conto in coordinate · la cancellazione dei termini secondi',
   blocchi:[
-  {t:'reveal', title:'La costruzione, in tre passi', tag:'costruzione', steps:[
-   {label:'Il mattone', body:R`
-   <p>$$f(t)=\begin{cases}e^{-1/t}&t>0\\ 0&t\le0\end{cases}$$
-   è <b>$C^\infty$ su tutto $\mathbb{R}$</b>. In $t=0$ va verificato: la derivata $k$-esima per $t>0$ è $e^{-1/t}$ moltiplicato per un polinomio in $1/t$, e <b>tutte le derivate tendono a zero</b> per $t\to0^+$ — la prima, <b>anche la seconda</b>, <b>e la terza</b>, e per induzione tutte, perché l&rsquo;esponenziale schiaccia qualunque potenza.</p>
-   <p><b>Ma la serie di Taylor in $0$ è identicamente nulla</b>, mentre la funzione non lo è per $t>0$: $f$ è liscia e <b>non analitica</b>. È il controesempio classico, ed è esattamente ciò che serve.</p>`},
-   {label:'La funzione di transizione fra 0 e 1', body:R`
-   <p>Con due copie di $f$ si costruisce
-   $$g(t)=\frac{f(t)}{f(t)+f(1-t)},$$
-   che è liscia, vale <b>$0$ per $t\le0$</b>, <b>$1$ per $t\ge1$</b>, e sale monotona in mezzo — <b>vale $\tfrac12$ a metà strada</b>. Il denominatore non si annulla mai, perché per ogni $t$ almeno uno dei due addendi è positivo.</p>`},
-   {label:'Il bump', body:R`
-   <p>Componendo $g$ con una funzione della distanza si ottiene una <b>bump function</b>: liscia, identicamente $1$ su una palla $B_r$, identicamente $0$ fuori da $B_R$ con $R>r$, e compresa fra $0$ e $1$ in mezzo. Il suo <b>supporto</b> — la chiusura dell&rsquo;insieme dove non si annulla, $\operatorname{supp}f$ — è compatto e contenuto in $B_R$.</p>
-   <p><b>Questa è la funzione che fa tutto</b>: su una varietà si trasporta in carta, e dà una funzione liscia globale che vive dentro un singolo aperto coordinato. Da qui in poi si può lavorare in una carta e poi «spegnere» la costruzione prima del bordo.</p>`}
+  {t:'prosa', title:'La definizione e il conto', tag:'costruzione', html:R`
+  <p>Si definisce
+  $$[X,Y]=XY-YX,$$
+  dove il prodotto è la <b>composizione</b> come operatori sulle funzioni: $XY(f)=X(Y(f))$.</p>
+  <p><b>Presi separatamente, $XY$ e $YX$ sono del secondo ordine</b>: applicano due derivate. Ma nella differenza i termini con le derivate seconde di $f$ compaiono due volte con segno opposto e <b>si cancellano</b>, perché le derivate parziali commutano (teorema di Schwarz). Resta
+  $$[X,Y]^{k}=\sum_i\left(X^{i}\frac{\partial Y^{k}}{\partial x^{i}}-Y^{i}\frac{\partial X^{k}}{\partial x^{i}}\right),$$
+  che è del primo ordine: <b>$[X,Y]$ è un campo vettoriale</b>.</p>
+  <p><b>La cancellazione non è un caso fortunato</b>: è il fatto che il commutatore di due derivazioni è ancora una derivazione, cioè soddisfa Leibniz. Si verifica in due righe, ed è la ragione strutturale — <b>vale in qualunque algebra</b>, non solo per le funzioni lisce, ed è il motivo per cui le algebre di Lie compaiono ovunque.</p>`}
+]},
+
+/* ---------------- 02 · I CONTI ---------------- */
+{ num:'02', title:'Due conti da avere in mano', meta:'il primo esempio · il caso che genera una rotazione · e il significato geometrico',
+  blocchi:[
+  {t:'reveal', title:'Gli esempi che Diverio fa in coordinate', tag:'esame', steps:[
+   {label:'Il primo, elementare', body:R`
+   <p>$X=\dfrac{\partial}{\partial x}$ e $Y=x\dfrac{\partial}{\partial y}$. Allora
+   $$[X,Y]=\frac{\partial}{\partial y}.$$
+   <b>Il risultato non è nullo</b>, e si legge così: muoversi in $x$ modifica <i>quanto</i> $Y$ spinge in $y$, e quel cambiamento è la parentesi. <b>Il conto va fatto una volta a mano</b>, applicando entrambi i membri a una funzione generica $f$ e vedendo i termini secondi elidersi.</p>`},
+   {label:'Il secondo, che produce una rotazione', body:R`
+   <p>$X=y\dfrac{\partial}{\partial x}$ e $Y=x\dfrac{\partial}{\partial y}$. Il conto dà
+   $$[X,Y]=y\frac{\partial}{\partial y}-x\frac{\partial}{\partial x}.$$
+   <b>I due campi «di taglio» generano, commutando, un campo di dilatazione anisotropa.</b> È il fenomeno generale: parentesi di campi semplici producono campi nuovi, e l&rsquo;insieme dei campi generati è l&rsquo;<b>algebra di Lie</b> che quei campi generano — l&rsquo;oggetto che in gd-14 diventa protagonista.</p>`},
+   {label:'Che cosa misura, geometricamente', body:R`
+   <p><b>Il significato</b>: si parte da $p$, si scorre lungo $X$ per un tempo $t$, poi lungo $Y$ per $t$, poi indietro lungo $X$, poi indietro lungo $Y$. <b>Non si torna al punto di partenza</b>: il difetto di chiusura è
+   $$t^{2}\,[X,Y](p)+O(t^{3}).$$
+   <b>La parentesi è il difetto di chiusura del quadratino</b>, al secondo ordine. Se $[X,Y]=0$ i due flussi commutano e il quadratino si chiude — ed è esattamente la condizione per poter usare i due campi come <b>coordinate</b>.</p>
+   <div class="note"><b>È il fatto che in meccanica quantistica diventa il principio di indeterminazione.</b> Posizione e impulso sono generatori di traslazioni (nello spazio e nel momento), non commutano, e $[\hat x,\hat p]=i\hbar$ è la stessa struttura: <i>misurare in un ordine o nell&rsquo;altro non dà lo stesso risultato, e la differenza è il commutatore</i>. La geometria di questa tappa e l&rsquo;algebra di quel principio sono lo stesso oggetto.</div>`}
   ]},
-  {t:'plot', title:'Il mattone e il bump',
-   intro:R`A sinistra $f(t)=e^{-1/t}$ per $t>0$ (zero altrove): piattissima in $0$, eppure positiva subito dopo. A destra la bump costruita con due copie di $f$.`,
+  {t:'plot', title:'Il quadratino che non si chiude',
+   intro:R`Il difetto di chiusura dopo il percorso $X$, $Y$, $-X$, $-Y$ per un tempo $t$, in funzione di $t$: cresce come $t^{2}$ quando la parentesi non è nulla, ed è esattamente nullo quando lo è.`,
    plots:[
-    {kind:'func2d', xr:[-1,2], yr:[-0.05,1.05], height:300,
-     title:'e^{-1/t}: tutte le derivate nulle in 0, e la serie di Taylor non la vede',
-     xlabel:'t', ylabel:'f(t)',
-     curves:[{f:'x>0 ? exp(-1/x) : 0', col:'#5eead4', width:2.6, label:'f(t)'},
-             {f:'0', col:'#4d5a6b', width:1.4, dash:true, label:'la sua serie di Taylor in 0'}],
-     segs:[{x1:0, y1:-0.05, x2:0, y2:1.05, col:'#ff6b6b', dash:true, width:1.3}]},
-    {kind:'func2d', xr:[-2.5,2.5], yr:[-0.05,1.15], height:300,
-     title:'la bump: identicamente 1 al centro, identicamente 0 fuori, liscia ovunque',
-     xlabel:'x', ylabel:'bump(x)',
-     curves:[{f:'(function(u){ if(u<=0) return 1; if(u>=1) return 0; var a=exp(-1/u), b=exp(-1/(1-u)); return b/(a+b); })((abs(x)-0.8)/0.9)', col:'#d8a13a', width:2.6, label:'bump'}],
-     segs:[{x1:-0.8, y1:0, x2:0.8, y2:0, col:'#5eead4', width:3, label:'qui vale 1', lx:-0.45, ly:0.08},
-           {x1:1.7, y1:0, x2:2.5, y2:0, col:'#b98cff', width:3, label:'qui vale 0', lx:1.75, ly:0.08},
-           {x1:-2.5, y1:0, x2:-1.7, y2:0, col:'#b98cff', width:3}]}
+    {kind:'func2d', xr:[0,1], yr:[0,1.1], height:320,
+     title:'difetto di chiusura: quadratico se [X,Y] non e nullo, zero se lo e',
+     xlabel:'t', ylabel:'distanza dal punto di partenza',
+     curves:[
+      {f:'x*x', col:'#5eead4', width:2.6, label:'[X,Y] diverso da zero: cresce come t^2'},
+      {f:'0', col:'#b98cff', width:2.2, dash:true, label:'[X,Y]=0: il quadratino si chiude'}
+     ],
+     marks:[{x:1, y:1, label:'il coefficiente e |[X,Y]|', col:'#d8a13a', left:true}]}
    ],
-   leggi:R`<b>A sinistra sta tutto il punto del movimento.</b> La curva verde e quella grigia — la sua serie di Taylor in $0$, che è identicamente nulla — coincidono per $t\le0$ e si separano subito dopo. Una funzione analitica non può comportarsi così: se coincide con zero su un intervallo, è zero ovunque. <b>La classe $C^\infty$ è strettamente più grande di quella analitica, e tutta la geometria differenziale vive in quello scarto.</b><br><br>
-   <b>A destra</b> il risultato: una funzione perfettamente liscia che vale <i>esattamente</i> 1 in una regione e <i>esattamente</i> 0 in un&rsquo;altra, con un raccordo morbido. Non è un&rsquo;approssimazione — il tratto piatto è piatto davvero. In geometria riemanniana e olomorfa questa costruzione <b>non è disponibile</b>, ed è la ragione tecnica per cui quelle teorie sono molto più rigide.`}
+   leggi:R`<b>La curva verde è quadratica, non lineare</b>, e questo è il punto: al primo ordine i due percorsi coincidono sempre — la non commutatività è un effetto del <i>secondo</i> ordine. È il motivo per cui su scale piccole ogni varietà sembra piatta e ogni coppia di campi sembra commutare, e occorre guardare il termine successivo per vedere la struttura.<br><br>
+   <b>La retta viola è il caso $[X,Y]=0$</b>: il quadratino si chiude esattamente, per ogni $t$, non solo al secondo ordine. Quando questo succede i due flussi si possono usare come sistema di coordinate — «vado $a$ lungo $X$ e $b$ lungo $Y$» è ben definito indipendentemente dall&rsquo;ordine — e il teorema di Frobenius dice che è proprio quella la condizione.`}
 ]},
 
-/* ---------------- 02 · LA PARTIZIONE ---------------- */
-{ num:'02', title:'La partizione dellunita, e il teorema di esistenza', meta:'la definizione · subordinata a un ricoprimento · dove entra la paracompattezza',
+/* ---------------- 03 · LE PROPRIETÀ ---------------- */
+{ num:'03', title:'Le proprieta: algebra di Lie, F-associati, sottovarieta', meta:'antisimmetria e Jacobi · la derivata di Lie · campi F-associati · e il teorema sulle sottovarieta',
   blocchi:[
-  {t:'prosa', title:'Definizione e teorema', tag:'grammatica', html:R`
-  <p>Dato un ricoprimento aperto $\{U_\alpha\}$ di $M$, una <b>partizione dell&rsquo;unità subordinata</b> è una famiglia di funzioni lisce $\rho_\alpha:M\to[0,1]$ tali che:</p>
-  <ul>
-   <li>$\operatorname{supp}\rho_\alpha\subseteq U_\alpha$ — ciascuna vive dentro un solo aperto del ricoprimento;</li>
-   <li>la famiglia dei supporti è <b>localmente finita</b>: ogni punto ha un intorno che incontra solo un numero finito di supporti (così la somma è ben definita);</li>
-   <li>$\sum_\alpha\rho_\alpha\equiv1$ su tutta $M$.</li>
-  </ul>
-  <p><b>Teorema (e vale per ogni varietà liscia):</b> per ogni ricoprimento aperto esiste una partizione dell&rsquo;unità subordinata. <b>La dimostrazione usa esattamente le proprietà elencate in gd-01</b>: la base numerabile di palle coordinate per costruire un raffinamento numerabile, la locale compattezza e l&rsquo;esaustione in compatti per renderlo localmente finito, e le bump della tappa precedente per fabbricare le funzioni. Poi si normalizza dividendo per la somma — che è finita in ogni punto e positiva.</p>
-  <div class="note"><b>Ecco perché gd-01 dedicava una tappa intera a proprietà che sembravano di servizio.</b> Paracompattezza ed esaustione in compatti non erano curiosità topologiche: sono gli ingredienti di questo teorema, e questo teorema è ciò che rende costruibile quasi tutto il resto. <b>Quando in un corso una definizione chiede più di quanto sembri necessario, di solito c&rsquo;è un teorema di esistenza a valle che la consuma tutta.</b></div>`}
-]},
-
-/* ---------------- 03 · LE TRE APPLICAZIONI ---------------- */
-{ num:'03', title:'Le tre applicazioni che Diverio usa subito', meta:'funzioni test · estensione da un chiuso · funzione di esaustione',
-  blocchi:[
-  {t:'prosa', title:'A che cosa servono, in concreto', tag:'regola operativa', html:R`
-  <ol>
-   <li><b>Funzioni test su misura.</b> Dati un chiuso $C$ e un aperto $U\supseteq C$, esiste $\psi$ liscia che vale <b>$1$ su $C$</b> e ha supporto dentro $U$. È la versione globale della bump, e serve ogni volta che si vuole «localizzare» un problema senza rovinarlo ai bordi.</li>
-   <li><b>Estensione da un chiuso.</b> Una funzione liscia definita su un chiuso $C$ (cioè restrizione di una liscia su un intorno) si estende a una funzione liscia su <b>tutta</b> $M$. Si copre $C$ con carte, si estende in ciascuna, e si incollano le estensioni con la partizione. <b>È il teorema che permette di costruire oggetti globali partendo da dati parziali</b>, e in gd-09 servirà per gli intorni tubolari.</li>
-   <li><b>Funzione di esaustione liscia e positiva.</b> Esiste $h:M\to\mathbb{R}$ liscia, positiva, <b>propria</b> — cioè con $h^{-1}([0,c])$ compatto per ogni $c$. Serve a trattare varietà non compatte «un pezzo alla volta»: una proprietà che vale su ogni compatto e passa al limite crescente, vale su tutta la varietà. <b>La prima applicazione, immediata:</b> un campo vettoriale a supporto compatto ha traiettorie definite per ogni tempo — fuori dal supporto è nullo e le curve sono costanti, dentro il supporto è compatto e fornisce un tempo minimo di esistenza uguale per tutti i punti, che si itera. Senza esaustione quel «tempo minimo uniforme» non esisterebbe.</li>
-  </ol>
-  <p><b>E l&rsquo;applicazione che questo corso non fa ma che è la più citata altrove</b>: ogni varietà liscia ammette una <b>metrica riemanniana</b>. Si prende in ogni carta il prodotto scalare euclideo e si incollano con la partizione; la somma di prodotti scalari con pesi positivi è ancora un prodotto scalare. <b>La positività è ciò che rende lecita l&rsquo;operazione</b>, e infatti non funziona per una metrica lorentziana: non tutte le varietà ne ammettono una, ed è una condizione topologica non banale — con conseguenze in relatività generale.</p>`},
-  {t:'collaudo', title:'Controllo lampo', items:[
-   {q:R`Perché non si può costruire una partizione dell'unità con funzioni analitiche?`,
-    a:R`Perché una funzione analitica nulla su un aperto è nulla su tutta la componente connessa (principio di identità). Le $\rho_\alpha$ devono annullarsi fuori dal loro aperto e non essere identicamente nulle: <b>impossibile in categoria analitica</b>. È lo stesso principio che in Metodi (me-01b) rendeva unica la continuazione analitica: <b>la stessa rigidità che là è una risorsa, qui è un ostacolo</b>, ed è il motivo per cui la geometria analitica complessa usa tecniche completamente diverse (fasci, coomologia).`},
-   {q:R`Dove si usa esattamente la base numerabile nella dimostrazione del teorema?`,
-    a:R`Per estrarre dal ricoprimento dato un raffinamento <b>numerabile</b> fatto di palle coordinate, che poi si rende localmente finito usando l&rsquo;esaustione in compatti. Senza numerabilità la somma $\sum\rho_\alpha$ potrebbe non avere senso. <b>È il punto in cui un&rsquo;ipotesi apparentemente astratta diventa un passaggio concreto di una dimostrazione</b> — e all&rsquo;orale è una domanda tipica.`}
-  ]}
+  {t:'prosa', title:'La struttura algebrica', tag:'grammatica', html:R`
+  <p>La parentesi è <b>bilineare</b>, <b>antisimmetrica</b> ($[X,Y]=-[Y,X]$) e soddisfa l&rsquo;<b>identità di Jacobi</b>
+  $$[X,[Y,Z]]+[Y,[Z,X]]+[Z,[X,Y]]=0.$$
+  Uno spazio vettoriale con un&rsquo;operazione così si chiama <b>algebra di Lie</b>: i campi vettoriali su $M$ ne formano una (di dimensione infinita), e in gd-14 se ne troverà una di dimensione finita dentro ogni gruppo di Lie.</p>
+  <p><b>Jacobi non è associatività</b> — la parentesi <i>non</i> è associativa — ed è la sostituta giusta: dice che $[X,\cdot]$ è una derivazione della parentesi stessa. <b>In meccanica analitica la stessa identità vale per le parentesi di Poisson</b>, e non è una coincidenza: entrambe nascono da commutatori.</p>
+  <p>Si scrive anche $\mathcal{L}_XY=[X,Y]$ e si chiama <b>derivata di Lie</b> di $Y$ lungo $X$: misura quanto $Y$ cambia mentre lo si trascina col flusso di $X$ (gd-15 ne darà la formula col flusso). <b>Due nomi per lo stesso oggetto</b>, e la scelta dipende da cosa si vuole enfatizzare: struttura algebrica, o variazione lungo un moto.</p>`},
+  {t:'prosa', title:'F-associati, e il teorema sulle sottovarieta', tag:'regola operativa', html:R`
+  <p>Due campi $X$ su $M$ e $\tilde X$ su $N$ si dicono <b>$F$-associati</b> se $dF(X_p)=\tilde X_{F(p)}$: $F$ trasporta l&rsquo;uno nell&rsquo;altro. <b>Teorema</b>: se $X\sim\tilde X$ e $Y\sim\tilde Y$, allora $[X,Y]\sim[\tilde X,\tilde Y]$. <b>La parentesi è naturale</b>, cioè compatibile con le mappe lisce — ed è ciò che la rende un oggetto geometrico e non un artificio di coordinate.</p>
+  <p><b>Il corollario che Diverio usa il 03/12</b>: se $X$ e $Y$ sono <b>tangenti</b> a una sottovarietà immersa $S$, allora anche $[X,Y]$ lo è. La dimostrazione è immediata con l&rsquo;associazione: i campi ristretti a $S$ sono associati a quelli su $M$ via l&rsquo;inclusione.</p>
+  <p><b>La conseguenza è il teorema di Frobenius</b> (fuori dal corso ma vicino): una distribuzione di piani tangenti è integrabile — cioè esistono sottovarietà tangenti a quei piani — <b>se e solo se</b> è chiusa rispetto alla parentesi. <b>La parentesi decide se un sistema di direzioni si può integrare</b>, ed è il ponte fra questo movimento e tutte le equazioni differenziali che seguono.</p>`}
 ]},
 
 /* ---------------- 04 · IL SENSO ---------------- */
-{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e perche la liscezza e diversa dallanaliticita',
+{ num:'04', title:'Il senso, e le rotte', meta:'cosa apre, e perche i commutatori sono ovunque in fisica',
   blocchi:[
   {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
-  <p><b>Il punto.</b> La geometria differenziale è <b>flessibile</b>: si possono modificare oggetti su una regione senza toccarli altrove. Questa libertà non è gratuita — viene dall&rsquo;esistenza di funzioni lisce non analitiche — ed è ciò che distingue questo corso dalla geometria complessa e da quella algebrica, dove le funzioni sono rigide e i teoremi hanno un sapore opposto.</p>
-  <p><b>A valle.</b> gd-06 definisce lo spazio tangente usando le funzioni lisce costruite qui (le derivazioni hanno bisogno di germi, e i germi hanno bisogno di bump per essere manipolati); gd-07 incolla i campi vettoriali; gd-09 costruisce gli intorni tubolari.</p>`},
+  <p><b>Il punto.</b> La non commutatività è misurabile, e la misura è ancora un oggetto dello stesso tipo. <b>Questa chiusura</b> — il commutatore di due campi è un campo — è ciò che rende possibile una teoria algebrica delle simmetrie infinitesime, e da lì arriva metà della fisica teorica.</p>
+  <p><b>A valle.</b> gd-13 integra un campo e trova le curve integrali; gd-14 studia i campi invarianti su un gruppo e trova l&rsquo;algebra di Lie; gd-15 collega parentesi e flussi.</p>`},
   {t:'prolessi', title:'Dove riappare questo movimento',
-   oggetto:R`<b>La partizione dell&rsquo;unità</b>: pesi lisci che sommano a uno, e trasformano il locale in globale.`,
+   oggetto:R`<b>Il commutatore</b>: quanto due operazioni infinitesime non commutano, e il fatto che la risposta sia dello stesso tipo.`,
    rotte:[
-    {dove:'Fisica<br>matematica', txt:R`Le <b>funzioni test</b> a supporto compatto sono lo spazio su cui si definiscono le distribuzioni (Metodi, me-09): la delta di Dirac è un funzionale su funzioni costruite esattamente come quelle di questa tappa. <b>Senza $e^{-1/t}$ non ci sarebbe la teoria delle distribuzioni.</b>`},
-    {dove:'Relativita<br>generale', txt:R`Ogni varietà ammette una metrica riemanniana grazie a questa costruzione, ma <b>non ogni varietà ammette una metrica lorentziana</b>: serve un campo vettoriale mai nullo, e la palla pelosa (gd-07) dice che su $S^2$ non ne esistono. <b>La topologia vincola quali spazi-tempo sono possibili.</b>`},
-    {dove:'Analisi<br>numerica', txt:R`I metodi a <b>elementi finiti</b> e le <b>partizioni dell&rsquo;unità</b> numeriche usano letteralmente questa idea: funzioni di forma locali, pesate, che sommano a uno. La geometria astratta e il calcolo pratico condividono la stessa struttura.`},
-    {dove:'Teoria<br>dei fasci', txt:R`L'esistenza delle partizioni dell'unita' equivale al fatto che i fasci di funzioni lisce siano <b>aciclici</b>: e' la ragione per cui in geometria differenziale la coomologia si calcola con de Rham e non serve tutto l'apparato che occorre nel caso olomorfo.`}
+    {dove:'Meccanica<br>quantistica', txt:R`$[\hat x,\hat p]=i\hbar$ è questa struttura: gli operatori sono generatori di trasformazioni, e il commutatore misura il difetto di chiusura. <b>Le regole di commutazione del momento angolare sono l&rsquo;algebra di Lie di $SO(3)$</b>, e lo spettro si ricava da esse per pura algebra.`},
+    {dove:'Meccanica<br>analitica', txt:R`Le <b>parentesi di Poisson</b> hanno le stesse proprietà (bilineari, antisimmetriche, Jacobi), e il teorema di Noether è l&rsquo;affermazione che le quantità conservate formano un&rsquo;algebra di Lie. <b>Il passaggio classico-quantistico sostituisce $\{\cdot,\cdot\}$ con $\frac{1}{i\hbar}[\cdot,\cdot]$.</b>`},
+    {dove:'Teoria<br>dei campi', txt:R`L&rsquo;algebra di Lie del gruppo di gauge determina la forma dell&rsquo;interazione; il termine $[A_\mu,A_\nu]$ nel tensore di Yang-Mills è letteralmente una parentesi, ed è la ragione per cui le teorie non abeliane hanno interazioni fra i bosoni di gauge mentre l&rsquo;elettromagnetismo no.`},
+    {dove:'Controllo<br>e robotica', txt:R`Un sistema si puo' portare in direzioni che <b>non</b> sono generate direttamente dai comandi, usando i commutatori: e' il motivo per cui un'auto puo' parcheggiare lateralmente pur non potendo muoversi lateralmente. Il teorema di Chow-Rashevskii lo dice con questa algebra.`}
    ],
-   domanda:R`La funzione $e^{-1/t}$ è liscia ma la sua serie di Taylor non la rappresenta: fra la funzione e tutte le sue derivate in un punto c&rsquo;è uno scarto invisibile al calcolo differenziale. <b>Domanda che porti avanti:</b> quanto è grande quello scarto? La risposta è sorprendente — per il teorema di Borel, <b>ogni</b> successione di numeri può essere la successione dei coefficienti di Taylor di una funzione liscia. Cioè: conoscere <i>tutte</i> le derivate in un punto non dice <b>niente</b> sulla funzione altrove. In fisica questo è il motivo per cui le serie perturbative possono divergere pur descrivendo bene una teoria, e perché esistono effetti «non perturbativi» — come il tunneling — <b>invisibili a ogni ordine dello sviluppo</b>.`}
+   domanda:R`Se $[X,Y]=0$ i flussi commutano e i due campi si possono usare come coordinate. <b>Domanda che porti avanti:</b> data una famiglia di direzioni in ogni punto — una <i>distribuzione</i> — quando esiste una famiglia di sottovarietà tangenti a quelle direzioni? La risposta è il <b>teorema di Frobenius</b>: se e solo se la distribuzione è chiusa per parentesi. In termodinamica è la condizione di integrabilità che distingue una forma differenziale esatta da una che non lo è, e <b>il calore non è una funzione di stato esattamente per questo</b>: la forma $\delta Q$ non è integrabile, e serve un fattore integrante — che è la temperatura, e produce l&rsquo;entropia.`}
 ]}
 
 ];
@@ -404,7 +389,7 @@ CONTROLLO*/
 /* =================================================================== */
 var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
 
-var VKEY='pm-nucleogd-05-visited';
+var VKEY='pm-nucleogd-12-visited';
 function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
 function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
 var SEEN = loadSeen();
@@ -412,7 +397,7 @@ var SEEN = loadSeen();
 function renderNav(active){
   var nav=document.getElementById('sidebar');
   nav.innerHTML='';
-  var h=document.createElement('h2'); h.textContent='Nucleo gd-05 · le tappe'; nav.appendChild(h);
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-12 · le tappe'; nav.appendChild(h);
   TAPPE.forEach(function(s){
     var b=document.createElement('button');
     b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
@@ -561,7 +546,7 @@ function showTappa(num){
   window.scrollTo(0,0);
 }
 
-/* deep-link: gd-05-partizioni-unita.html#03 apre direttamente la tappa 03 */
+/* deep-link: gd-12-parentesi-lie.html#03 apre direttamente la tappa 03 */
 window.addEventListener('DOMContentLoaded', function(){
   var h=(location.hash||'').replace('#','');
   showTappa(byId[h]?h:'00');

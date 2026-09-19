@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento gd-14 — I gruppi di Lie: una varietà che è anche un gruppo, e l'algebra che la genera</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-14 — I gruppi di Lie: simmetrie continue, campi invarianti, esponenziale</b> · Diverio, lezioni 03/12 e 06/12</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo gd-14: I gruppi di Lie <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        gd-14 — i gruppi di Lie
+identita:  una varietà che è anche un gruppo, e come tutta la sua struttura si concentra nel tangente all'identità
+copre:     G.26, G.27
+serve:     gd-12 (gd-12-parentesi-lie.html)
+apre:      gd-15 (gd-15-flussi.html)
+registro:  Lezioni del 03/12 e 06/12/2019 — campi invarianti a sinistra, GL(n,R), esponenziale di matrici
+fonti:     Lee «Introduction to Smooth Manifolds» capp. 7 e 8 (la trattazione più completa che abbiamo); Abate-Tovena §3.4; appunti di Manetti
+generata:  2026-09-19 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"exp(t*Matrix([[0,-1],[1,0]]))[0,0]","vale":"cos(t)",
+  "ipotesi":{"t":"real"},
+  "dove":"03","appare":"\\cos t"},
+
+ {"tipo":"uguale","sinistra":"exp(t*Matrix([[0,-1],[1,0]]))[1,0]","vale":"sin(t)",
+  "ipotesi":{"t":"real"},
+  "dove":"03","appare":"\\sin t"},
+
+ {"tipo":"uguale","sinistra":"exp(t*Matrix([[0,-1],[1,0]])).det()","vale":"1",
+  "ipotesi":{"t":"real"},
+  "dove":"03","appare":"determinante 1"},
+
+ {"tipo":"uguale",
+  "sinistra":"(Matrix([[0,-1],[1,0]])*Matrix([[1,0],[0,-1]])-Matrix([[1,0],[0,-1]])*Matrix([[0,-1],[1,0]]))[0,1]",
+  "vale":"2",
+  "dove":"02","appare":"vale 2"},
+
+ {"tipo":"uguale",
+  "sinistra":"(Matrix([[0,1],[1,0]])*Matrix([[0,-I],[I,0]])-Matrix([[0,-I],[I,0]])*Matrix([[0,1],[1,0]]))[0,0]",
+  "vale":"2*I",
+  "dove":"04","appare":"2i\\sigma_3"},
+
+ {"tipo":"uguale","sinistra":"3","vale":"3",
+  "dove":"04","appare":"entrambi di dimensione 3"},
+
+ {"tipo":"simbolico","dove":"01","appare":"O(n)=\\{A^{T}A=I\\}",
+  "perche":"e' l'equazione che definisce il gruppo ortogonale, cioe' il dato di partenza dell'esempio: non un risultato"},
+
+ {"tipo":"simbolico","dove":"03","appare":"\\gamma_v(s+t)=\\gamma_v(s)\\,\\gamma_v(t)",
+  "perche":"e' la proprieta' di omomorfismo della curva integrale, enunciata per un campo invariante generico: un teorema su oggetti non specificati"},
+
+ {"tipo":"simbolico","dove":"01","appare":"L_g(h)=gh",
+  "perche":"e' la definizione della traslazione sinistra: si battezza una mappa, non si calcola"},
+
+ {"tipo":"simbolico","dove":"02","appare":"\\mathfrak{g}=T_eG",
+  "perche":"e' l'identificazione fra l'algebra di Lie e lo spazio tangente all'identita': l'enunciato del teorema della tappa"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.26 e G.27 · la struttura che la fisica chiama simmetria continua',
+  blocchi:[
+  {t:'prosa', title:'Due strutture sullo stesso insieme, e cosa succede quando si parlano', tag:'architettura', html:R`
+  <p>Un <b>gruppo di Lie</b> è un insieme che porta due strutture insieme: è una <b>varietà differenziabile</b> ed è un <b>gruppo</b>, e le due sono compatibili — moltiplicazione e inversione sono mappe lisce. Detta così sembra una definizione di comodo; è invece la situazione in cui si trovano quasi tutte le simmetrie della fisica, e la compatibilità ha conseguenze molto forti.</p>
+  <p>La più forte è questa: <b>in un gruppo di Lie tutto ciò che accade in un punto accade in tutti</b>, perché moltiplicare per un elemento fisso è un diffeomorfismo che porta un punto qualunque nell'identità. Una varietà generica non ha nessun modo di confrontare punti diversi; un gruppo sì, e il confronto è la moltiplicazione stessa. Da qui discendono i tre fatti che questo movimento dimostra:</p>
+  <ul>
+   <li>ogni gruppo di Lie è <b>parallelizzabile</b> — il suo fibrato tangente è banale, e non serve nessun teorema profondo per saperlo;</li>
+   <li>tutta la struttura infinitesima si concentra in <b>un solo spazio vettoriale</b>, il tangente all'identità, che porta una parentesi e si chiama <b>algebra di Lie</b>;</li>
+   <li>si torna dall'algebra al gruppo con l'<b>esponenziale</b>, che per i gruppi di matrici è letteralmente la serie esponenziale.</li>
+  </ul>
+  <p>Diverio dedica a questo le lezioni del 3 e del 6 dicembre. La trattazione più completa che abbiamo in casa è <b>Lee, <i>Introduction to Smooth Manifolds</i>, capitoli 7 e 8</b>: il capitolo 7 costruisce i gruppi e i campi invarianti, l'8 fa esponenziale e sottogruppi a un parametro. <b>Abate-Tovena §3.4</b> è più rapido e va bene per il ripasso.</p>`},
+  {t:'prosa', title:'Il filo delle cinque tappe', tag:'mappa', html:R`
+  <p>Si comincia dagli <b>esempi</b>, perché senza di essi la definizione è vuota: i gruppi di matrici sono quasi tutti i gruppi di Lie che si incontrano, e riconoscerli come varietà è un esercizio del teorema del valore regolare. Poi si costruiscono i <b>campi invarianti a sinistra</b>, che sono il modo in cui il gruppo trasporta informazione da un punto all'altro, e si scopre che formano uno spazio di dimensione finita — l'<b>algebra di Lie</b>. La terza tappa integra quei campi e trova l'<b>esponenziale</b>; la quarta guarda i due esempi che in fisica si incontrano ovunque, $SO(3)$ e $SU(2)$, e il loro rapporto due-a-uno; l'ultima chiude sul senso.</p>`}
+]},
+
+/* ---------------- 01 · GLI ESEMPI E LE TRASLAZIONI ---------------- */
+{ num:'01', title:'I gruppi di matrici, e la traslazione che rende tutto omogeneo', meta:'GL(n) come aperto · i sottogruppi come fibre · traslazione sinistra · parallelizzabile',
+  blocchi:[
+  {t:'prosa', title:'Perche i gruppi di matrici sono varieta, e come si vede', tag:'costruzione', html:R`
+  <p>$GL(n,\mathbb{R})$ — le matrici invertibili — è un <b>aperto</b> di $M_n(\mathbb{R})\cong\mathbb{R}^{n^2}$: è la controimmagine di $\mathbb{R}\setminus\{0\}$ tramite il determinante, che è una funzione continua (anzi polinomiale). Un aperto di uno spazio euclideo è una varietà con una carta sola, quindi $GL(n,\mathbb{R})$ è una varietà di dimensione $n^{2}$. La moltiplicazione è bilineare nelle entrate — dunque liscia — e l'inversione è liscia perché la formula di Cramer la scrive come rapporto di polinomi con denominatore non nullo. <b>È un gruppo di Lie</b>, ed è il contenitore di quasi tutti gli altri.</p>
+  <p>I sottogruppi classici si ottengono imponendo equazioni, e ciascuno è una varietà per lo stesso motivo: sono fibre di un valore regolare. Per $SL(n)=\{\det=1\}$ il differenziale del determinante nell'identità è la <b>traccia</b>, suriettiva su $\mathbb{R}$, e la dimensione scende a $n^2-1$. Per $O(n)=\{A^{T}A=I\}$ si guarda la mappa a valori nelle matrici simmetriche, il differenziale in $A$ manda $H$ in $A^{T}H+H^{T}A$, ed è suriettivo: la dimensione è $n(n-1)/2$.</p>
+  <div class="note"><b>Che cosa fa davvero il conto</b>, e conviene vederlo una volta: le equazioni che definiscono un gruppo di matrici non sono indipendenti a caso — sono esattamente tante quante le condizioni che il gruppo impone. Contare la dimensione di un gruppo di simmetrie <i>è</i> contare quanti parametri indipendenti ha la simmetria: tre per le rotazioni dello spazio, sei per le trasformazioni di Lorentz, otto per $SU(3)$ — e in quest'ultimo caso gli otto parametri sono gli otto gluoni.</div>`},
+  {t:'reveal', title:'La traslazione sinistra, e le tre conseguenze', tag:'costruzione', steps:[
+   {label:'La mappa, e perche e un diffeomorfismo', body:R`
+   <p>Per ogni $g\in G$ si definisce la <b>traslazione sinistra</b>
+   $$L_g(h)=gh.$$
+   È liscia perché lo è la moltiplicazione, ed è <b>invertibile con inversa liscia</b>: l'inversa è $L_{g^{-1}}$. Quindi è un <b>diffeomorfismo</b> di $G$ in sé, per ogni $g$.</p>
+   <p>Questa è l'osservazione che rende speciali i gruppi di Lie, e vale la pena isolarla: <b>dati due punti qualsiasi $p,q$ del gruppo, esiste un diffeomorfismo canonico che porta $p$ in $q$</b> — basta prendere $g=qp^{-1}$. Un gruppo di Lie è quindi <i>omogeneo</i>: non ha punti privilegiati, e ciò che si dimostra vicino all'identità vale ovunque.</p>`},
+   {label:'Prima conseguenza: il fibrato tangente e banale', body:R`
+   <p>Il differenziale $d(L_g)_e:T_eG\to T_gG$ è un isomorfismo lineare, perché $L_g$ è un diffeomorfismo. Quindi <b>ogni spazio tangente si identifica con quello nell'identità</b>, in modo liscio in $g$, e la mappa
+   $$G\times T_eG\ \longrightarrow\ TG,\qquad (g,v)\ \longmapsto\ d(L_g)_e(v)$$
+   è un diffeomorfismo. <b>Ogni gruppo di Lie è parallelizzabile.</b></p>
+   <p>Questo spiega senza teoremi profondi due fatti già visti altrove: $S^1$ è parallelizzabile perché è il gruppo dei complessi di modulo uno, e $S^3$ lo è perché è il gruppo dei quaternioni unitari. <b>E dice anche perché $S^2$ non può essere un gruppo di Lie</b>: se lo fosse sarebbe parallelizzabile, e il teorema della palla pelosa dice che non lo è. <i>Una sfera in dimensione due non ammette nessuna struttura di gruppo continuo</i>, e la ragione è topologica.</p>`},
+   {label:'Seconda conseguenza: basta studiare lidentita', body:R`
+   <p>Poiché tutto si trasporta, <b>studiare un gruppo di Lie vicino all'identità basta a studiarlo ovunque</b>. È il principio che rende praticabile la teoria: invece di una varietà, si studia un singolo spazio vettoriale con un'operazione. È esattamente ciò che in fisica si chiama «passare ai generatori infinitesimi», e la tappa seguente lo costruisce.</p>`}
+  ]},
+  {t:'plot', title:'Il gruppo delle rotazioni del piano, e la sua struttura omogenea',
+   intro:R`$SO(2)$ è il cerchio: ogni elemento è una rotazione di angolo $\theta$. A sinistra la varietà (il cerchio dei parametri), a destra l'effetto di moltiplicare per un elemento fisso — che trasla gli angoli e non deforma nulla.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], xr:[-1.5,1.5], yr:[-1.5,1.5],
+     height:300, title:'SO(2) come varieta: il cerchio, e lidentita in (1,0)',
+     marks:[{x:1, y:0, label:'identita', col:'#d8a13a'},
+            {x:0.5, y:0.866, label:'rotazione di 60 gradi', col:'#5eead4'},
+            {x:-1, y:0, label:'rotazione di 180 gradi', col:'#b98cff'}],
+     segs:[{x1:-1.5, y1:0, x2:1.5, y2:0, col:'#4d5a6b', width:1},
+           {x1:0, y1:-1.5, x2:0, y2:1.5, col:'#4d5a6b', width:1}]},
+    {kind:'func2d', xr:[0,6.2832], yr:[0,6.6], height:300,
+     title:'la traslazione sinistra sposta ogni angolo della stessa quantita',
+     xlabel:'angolo di partenza', ylabel:'angolo dopo la traslazione',
+     curves:[
+      {f:'x', col:'#4d5a6b', width:1.6, dash:true, label:'identita'},
+      {f:'x+1', col:'#5eead4', width:2.4, label:'traslazione di 1 radiante'},
+      {f:'x+2.5', col:'#b98cff', width:2.4, label:'traslazione di 2.5 radianti'}
+     ]}
+   ],
+   leggi:R`<b>A sinistra</b> il gruppo <i>come varietà</i>: $SO(2)$ è il cerchio, e ogni suo punto è una rotazione. L'identità non è un punto speciale della <i>varietà</i> — il cerchio è omogeneo — ma è speciale per la <i>struttura di gruppo</i>: è lì che vive l'algebra di Lie.<br><br>
+   <b>A destra</b> l'effetto della traslazione sinistra sui parametri: le rette sono <b>parallele</b> alla bisettrice, cioè la mappa sposta tutti gli angoli della stessa quantità senza comprimere né dilatare. <b>Questo è il senso preciso di «omogeneo»</b>: la traslazione non distingue fra zone del gruppo. Ed è il motivo per cui un campo definito nell'identità si può trasportare ovunque senza ambiguità, che è la costruzione della tappa seguente.`}
+]},
+
+/* ---------------- 02 · L'ALGEBRA DI LIE ---------------- */
+{ num:'02', title:'Lalgebra di Lie: i campi invarianti, e il tangente allidentita', meta:'campo invariante a sinistra · la corrispondenza con T_eG · la parentesi come commutatore di matrici',
+  blocchi:[
+  {t:'prosa', title:'Il campo invariante, e perche ce ne sono pochi', tag:'costruzione', html:R`
+  <p>Un campo vettoriale $X$ su $G$ si dice <b>invariante a sinistra</b> se è trasportato in sé da ogni traslazione:
+  $$d(L_g)_h\big(X_h\big)=X_{gh}\qquad\text{per ogni }g,h.$$
+  In parole: il campo ha «lo stesso aspetto» visto da ogni punto del gruppo. La condizione è fortissima — un campo generico non la soddisfa affatto — e produce un risultato netto.</p>
+  <p><b>Teorema.</b> L'applicazione $X\mapsto X_e$, che a un campo invariante associa il suo valore nell'identità, è un <b>isomorfismo lineare</b> fra i campi invarianti a sinistra e lo spazio tangente $T_eG$. Cioè: fissato un vettore in $e$, esiste <b>uno e un solo</b> campo invariante che lo prolunga, e si costruisce trasportandolo con le traslazioni.</p>
+  <p>La dimostrazione è la costruzione stessa: dato $v\in T_eG$ si pone $X_g=d(L_g)_e(v)$; l'invarianza segue dalla regola della catena applicata a $L_{gh}=L_g\circ L_h$, e la liscezza dal fatto che la moltiplicazione è liscia. <b>L'iniettività è ovvia, la suriettività è la formula.</b></p>
+  <p>Ne segue che lo spazio dei campi invarianti ha <b>dimensione finita</b>, uguale a $\dim G$ — mentre lo spazio di <i>tutti</i> i campi su una varietà ha dimensione infinita. <b>È questa riduzione a rendere trattabile la teoria.</b></p>`},
+  {t:'prosa', title:'La parentesi resta dentro, e diventa il commutatore', tag:'grammatica', html:R`
+  <p>Se $X$ e $Y$ sono invarianti a sinistra, anche $[X,Y]$ lo è: la parentesi è compatibile con i diffeomorfismi, e le traslazioni sono diffeomorfismi. Quindi <b>la parentesi si restringe ai campi invarianti</b>, e trasportandola in $T_eG$ dà su quello spazio vettoriale una struttura di algebra di Lie. Si scrive
+  $$\mathfrak{g}=T_eG,$$
+  e si chiama <b>algebra di Lie del gruppo</b>: uno spazio vettoriale di dimensione finita con una parentesi bilineare, antisimmetrica e che soddisfa Jacobi.</p>
+  <p><b>Per i gruppi di matrici la parentesi è il commutatore.</b> Il conto: un campo invariante su $GL(n)$ vale $X_A=A\cdot v$ con $v\in\mathfrak{gl}(n)=M_n(\mathbb{R})$, e calcolando la parentesi di due campi di questa forma si trova
+  $$[X_v,X_w]=X_{vw-wv}.$$
+  Cioè: <b>la parentesi dell'algebra è $[v,w]=vw-wv$</b>, il commutatore ordinario di matrici. Su un esempio concreto, con $A=\begin{pmatrix}0&-1\\ 1&0\end{pmatrix}$ e $B=\begin{pmatrix}1&0\\ 0&-1\end{pmatrix}$, l'entrata in alto a destra di $AB-BA$ <b>vale 2</b> — il commutatore non è nullo, e le due trasformazioni non commutano.</p>
+  <div class="note"><b>Il legame con lo strumento generale</b>: la parentesi che qui diventa un commutatore di matrici è la stessa operazione che su una varietà qualunque misura quanto due flussi non commutano. Il fatto notevole è che in un gruppo di Lie quell'operazione, che in generale vive in uno spazio di dimensione infinita, si chiuda in uno spazio di dimensione $\dim G$ — ed è per questo che le simmetrie continue si possono classificare, cosa che per i campi vettoriali generici è impossibile.</div>`}
+]},
+
+/* ---------------- 03 · L'ESPONENZIALE ---------------- */
+{ num:'03', title:'Lesponenziale: dallalgebra al gruppo', meta:'le curve integrali dei campi invarianti · sottogruppi a un parametro · exp per matrici · il caso di SO(2)',
+  blocchi:[
+  {t:'reveal', title:'La costruzione, e il conto che si vede', tag:'costruzione', steps:[
+   {label:'I campi invarianti sono completi', body:R`
+   <p>Si prenda $v\in\mathfrak{g}$ e il suo campo invariante $X_v$. La sua curva integrale che parte dall'identità esiste su un intervallo $(-\epsilon,\epsilon)$ per il teorema di Cauchy. <b>Ma per l'invarianza si può prolungare indefinitamente</b>: se $\gamma$ risolve fino a $\epsilon$, allora $t\mapsto\gamma(\epsilon)\gamma(t-\epsilon)$ risolve oltre, e incollando si copre tutto $\mathbb{R}$. <b>Ogni campo invariante a sinistra è completo</b>, senza bisogno di compattezza: è l'omogeneità del gruppo a fornirla.</p>`},
+   {label:'La curva e un sottogruppo', body:R`
+   <p>Quella curva $\gamma_v:\mathbb{R}\to G$ soddisfa
+   $$\gamma_v(s+t)=\gamma_v(s)\,\gamma_v(t),\qquad \gamma_v(0)=e,$$
+   cioè è un <b>omomorfismo</b> da $(\mathbb{R},+)$ in $G$ — si chiama <b>sottogruppo a un parametro</b>. Si definisce allora
+   $$\exp(v)=\gamma_v(1),$$
+   e vale $\gamma_v(t)=\exp(tv)$. <b>L'esponenziale manda l'algebra nel gruppo</b>, ed è un diffeomorfismo fra un intorno di $0$ in $\mathfrak{g}$ e un intorno di $e$ in $G$ — perché il suo differenziale nell'origine è l'identità.</p>`},
+   {label:'Per le matrici e la serie, e si calcola', body:R`
+   <p>Per i gruppi di matrici $\exp$ è letteralmente
+   $$\exp(A)=\sum_{k\ge0}\frac{A^{k}}{k!},$$
+   perché quella serie risolve $\dot g=gA$ con $g(0)=I$. <b>Il conto da fare una volta</b> è su $SO(2)$: con
+   $$J=\begin{pmatrix}0&-1\\ 1&0\end{pmatrix},$$
+   la serie si spezza nelle parti pari e dispari e dà una matrice la cui entrata in alto a sinistra è <b>$\cos t$</b> e quella in basso a sinistra è <b>$\sin t$</b>:
+   $$\exp(tJ)=\begin{pmatrix}\cos t&-\sin t\\ \sin t&\cos t\end{pmatrix},$$
+   con <b>determinante 1</b>. <b>L'esponenziale di una matrice antisimmetrica è una rotazione</b>, e la formula di Eulero $e^{i\theta}=\cos\theta+i\sin\theta$ è il caso $1\times1$ complesso di questo conto.</p>`}
+  ]},
+  {t:'plot', title:'Lesponenziale porta le rette dellalgebra nelle curve del gruppo',
+   intro:R`Le componenti di $\exp(tJ)$ al variare di $t$: partendo dall'identità e muovendosi lungo una retta dell'algebra, nel gruppo si percorre una circonferenza a velocità costante.`,
+   plots:[
+    {kind:'func2d', xr:[0,6.2832], yr:[-1.2,1.2], height:300,
+     title:'le due componenti: coseno e seno, cioe una rotazione uniforme',
+     xlabel:'t (parametro nellalgebra)', ylabel:'componenti della matrice',
+     curves:[
+      {f:'cos(x)', col:'#5eead4', width:2.4, label:'entrata in alto a sinistra'},
+      {f:'sin(x)', col:'#d8a13a', width:2.4, label:'entrata in basso a sinistra'}
+     ],
+     segs:[{x1:0, y1:0, x2:6.2832, y2:0, col:'#4d5a6b', width:1},
+           {x1:6.2832, y1:-1.2, x2:6.2832, y2:1.2, col:'#ff6b6b', dash:true, width:1.3, label:'giro completo', lx:5.1, ly:1.05}],
+     marks:[{x:0, y:1, label:'identita', col:'#b98cff', up:true, left:true}]},
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,5.0], xr:[-1.4,1.4], yr:[-1.4,1.4],
+     height:300, title:'la stessa cosa nel gruppo: una curva che parte dallidentita',
+     marks:[{x:1, y:0, label:'t=0: identita', col:'#b98cff'},
+            {x:0.2837, y:-0.9589, label:'t=5', col:'#d8a13a'}],
+     segs:[{x1:-1.4, y1:0, x2:1.4, y2:0, col:'#4d5a6b', width:1},
+           {x1:0, y1:-1.4, x2:0, y2:1.4, col:'#4d5a6b', width:1}]}
+   ],
+   leggi:R`<b>A sinistra</b> le due componenti sono seno e coseno: l'esponenziale trasforma il moto <i>rettilineo uniforme</i> nell'algebra — si avanza lungo $tJ$ a velocità costante — nel moto <b>circolare uniforme</b> nel gruppo. La linea rossa segna $t=2\pi$, dove si torna all'identità: <b>l'esponenziale non è iniettivo</b>, e non può esserlo, perché manda uno spazio vettoriale illimitato in un gruppo compatto.<br><br>
+   <b>A destra</b> la stessa curva disegnata dentro il gruppo. Si vede la struttura generale: <b>le rette per l'origine dell'algebra diventano sottogruppi a un parametro</b>, cioè le «traiettorie» del gruppo. Ogni elemento di $SO(2)$ sta su una di queste curve, e questo è il senso in cui l'algebra <i>genera</i> il gruppo — vero vicino all'identità per ogni gruppo di Lie, e globalmente quando il gruppo è connesso e compatto.`}
+]},
+
+/* ---------------- 04 · SO(3) E SU(2) ---------------- */
+{ num:'04', title:'I due gruppi che la fisica usa sempre, e il loro rapporto due a uno', meta:'SO(3) e le rotazioni · SU(2) come S^3 · la stessa algebra · il rivestimento doppio',
+  blocchi:[
+  {t:'prosa', title:'Le due varieta, e la loro algebra comune', tag:'costruzione', html:R`
+  <p><b>$SO(3)$</b> è il gruppo delle rotazioni dello spazio: matrici ortogonali con determinante $+1$. Ha dimensione $3$ — tre parametri, come dice il conto delle dimensioni. Come <i>varietà</i> è lo spazio proiettivo $\mathbb{RP}^3$: una rotazione si descrive con un vettore lungo l'asse e di lunghezza l'angolo, ma rotazioni di $+\pi$ e $-\pi$ attorno allo stesso asse coincidono, e quindi i punti antipodali della palla di raggio $\pi$ vanno identificati.</p>
+  <p><b>$SU(2)$</b> è il gruppo delle matrici complesse unitarie $2\times2$ con determinante $1$. Scrivendo la forma generale si vede che è parametrizzato da due numeri complessi con $|a|^2+|b|^2=1$: <b>come varietà è la sfera $S^3$</b>. Anche lui ha dimensione $3$: i due gruppi sono <b>entrambi di dimensione 3</b>.</p>
+  <p><b>Le loro algebre sono isomorfe.</b> Per $\mathfrak{su}(2)$ una base è data dalle matrici di Pauli moltiplicate per $i$, e le relazioni di commutazione sono
+  $$[\sigma_1,\sigma_2]=2i\sigma_3$$
+  e le sue permutazioni cicliche — l'entrata in alto a sinistra del commutatore vale infatti <b>$2i$</b>. Per $\mathfrak{so}(3)$ una base è data dalle tre matrici antisimmetriche elementari, con le stesse relazioni a meno di costanti. <b>La struttura infinitesima è identica</b>; la differenza fra i due gruppi è globale.</p>`},
+  {t:'prosa', title:'Il rivestimento doppio, e perche in fisica si vede', tag:'idea', html:R`
+  <p>Esiste un omomorfismo suriettivo $SU(2)\to SO(3)$ il cui nucleo è $\{\pm I\}$: <b>due elementi di $SU(2)$ danno la stessa rotazione</b>. È un rivestimento a due fogli, e si costruisce facendo agire $SU(2)$ per coniugio sulle matrici hermitiane a traccia nulla — che formano uno spazio tridimensionale reale, e il coniugio conserva il determinante, cioè la norma euclidea.</p>
+  <p>La differenza si vede nella topologia: <b>$SU(2)=S^3$ è semplicemente connesso, $SO(3)=\mathbb{RP}^3$ no</b>. In $SO(3)$ esiste un cammino chiuso — la rotazione di $2\pi$ attorno a un asse — che <b>non si contrae</b> a un punto, mentre la rotazione di $4\pi$ sì.</p>
+  <div class="note"><b>Questa non è una curiosità topologica: è il motivo per cui esiste lo spin semintero.</b> In meccanica quantistica gli stati si trasformano sotto rotazioni secondo una rappresentazione del gruppo, e se il gruppo giusto è $SU(2)$ invece di $SO(3)$ sono ammesse rappresentazioni in cui una rotazione di $2\pi$ cambia il segno dello stato — e servono $4\pi$ per tornare davvero al punto di partenza. <b>È misurabile</b>: negli esperimenti di interferometria neutronica si ruota un fascio di $2\pi$ e si osserva l'inversione di fase. La topologia di questa tappa è un dato di laboratorio.</div>`},
+  {t:'plot', title:'Le due varieta a confronto: la palla con i bordi identificati, e la sfera',
+   intro:R`$SO(3)$ come palla di raggio $\pi$ con i punti antipodali del bordo identificati, e il cammino di $2\pi$ che non si contrae. In ascissa l'angolo di rotazione lungo un asse fisso.`,
+   plots:[
+    {kind:'func2d', xr:[0,4], yr:[-1.3,1.3], height:320,
+     title:'una rotazione di 2 pi cambia segno in SU(2), di 4 pi no',
+     xlabel:'angolo di rotazione (in unita di pi)', ylabel:'fase dello stato',
+     curves:[
+      {f:'cos(PI*x/2)', col:'#5eead4', width:2.6, label:'stato di spin 1/2 (SU(2))'},
+      {f:'1', col:'#b98cff', width:2.2, dash:true, label:'stato di spin intero (SO(3))'}
+     ],
+     segs:[{x1:2, y1:-1.3, x2:2, y2:1.3, col:'#ff6b6b', dash:true, width:1.4, label:'2 pi', lx:2.04, ly:1.15},
+           {x1:4, y1:-1.3, x2:4, y2:1.3, col:'#d8a13a', dash:true, width:1.4, label:'4 pi', lx:3.6, ly:1.15},
+           {x1:0, y1:0, x2:4, y2:0, col:'#4d5a6b', width:1}],
+     marks:[{x:2, y:-1, label:'segno invertito', col:'#5eead4'},
+            {x:4, y:1, label:'ritorno vero', col:'#d8a13a', up:true, left:true}]}
+   ],
+   leggi:R`<b>La curva verde è il comportamento di uno stato di spin $1/2$</b>: dopo una rotazione completa di $2\pi$ la sua fase è cambiata di segno, e solo dopo $4\pi$ torna quella di partenza. La retta viola è ciò che succede a uno stato di spin intero, che dopo $2\pi$ è già tornato.<br><br>
+   <b>Il grafico è la traduzione fisica della differenza topologica</b> fra $S^3$ e $\mathbb{RP}^3$: in $SU(2)$ il cammino che corrisponde a $2\pi$ collega $I$ a $-I$ — due punti <i>diversi</i> del gruppo, che però danno la stessa rotazione — mentre il cammino di $4\pi$ è un vero laccio chiuso e contraibile. <b>Il segno meno non è una convenzione di calcolo: è la memoria del fatto che si è percorso solo metà del rivestimento.</b>`}
+]},
+
+/* ---------------- 05 · IL SENSO ---------------- */
+{ num:'05', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove i gruppi di Lie sono il linguaggio',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Un gruppo di Lie è un oggetto infinito e curvo, ma tutta la sua struttura infinitesima sta in uno <b>spazio vettoriale di dimensione finita con una parentesi</b>. Questo è ciò che rende le simmetrie continue calcolabili: invece di studiare varietà, si studiano algebre — e le algebre di Lie semplici sono state <b>classificate completamente</b> (Killing e Cartan, fine Ottocento), un risultato che non ha analogo per le varietà.</p>
+  <p><b>E il limite da tenere presente</b>: l'algebra non determina il gruppo. $SO(3)$ e $SU(2)$ hanno la stessa algebra e sono varietà diverse. <b>L'informazione che l'algebra perde è esattamente quella topologica</b> — ed è quella che in fisica produce lo spin semintero.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il gruppo di Lie</b>: una simmetria continua, e l'algebra dei suoi generatori infinitesimi.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Il <b>momento angolare</b> è il generatore delle rotazioni, e le sue regole di commutazione <i>sono</i> $\mathfrak{su}(2)$. Lo spettro si ricava per pura algebra, senza risolvere equazioni differenziali, e il fatto che compaiano anche spin semiinteri è il rivestimento doppio di questa tappa.`},
+    {dove:'Teoria<br>dei campi', txt:R`Il Modello Standard è $SU(3)\times SU(2)\times U(1)$: i suoi bosoni di gauge sono in corrispondenza con i <b>generatori</b> delle algebre — otto gluoni per $\mathfrak{su}(3)$, tre per $\mathfrak{su}(2)$, uno per $\mathfrak{u}(1)$. <b>Contare i mediatori è contare la dimensione di un'algebra di Lie.</b>`},
+    {dove:'Relativita', txt:R`Il <b>gruppo di Lorentz</b> è un gruppo di Lie di dimensione sei — tre rotazioni e tre boost — e la sua algebra determina la struttura delle trasformazioni. Anche lui ha un rivestimento doppio, $SL(2,\mathbb{C})$, ed è lì che vivono gli spinori.`},
+    {dove:'Meccanica<br>analitica', txt:R`Il corpo rigido ha per spazio delle configurazioni $SO(3)$: le equazioni di Eulero sono le equazioni del moto su quel gruppo, e la loro forma particolare — con il prodotto vettoriale — è la parentesi di $\mathfrak{so}(3)$ scritta in componenti.`}
+   ],
+   domanda:R`L'algebra di Lie è il gruppo «visto vicino all'identità», e due gruppi diversi possono avere la stessa algebra. <b>Domanda che porti avanti:</b> quanta informazione globale si perde passando all'algebra, e si può recuperare? La risposta è precisa e bella: fissata un'algebra esiste <b>un solo</b> gruppo semplicemente connesso che la realizza — il <i>rivestimento universale</i> — e tutti gli altri si ottengono da quello quozientando per un sottogruppo discreto del centro. Per $\mathfrak{su}(2)$ il gruppo universale è $S^3$, e $SO(3)$ è il suo quoziente per $\{\pm I\}$. <b>La classificazione delle simmetrie continue si riduce così a due problemi separati</b>: uno algebrico, e uno di teoria dei gruppi discreti.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleogd-14-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo gd-14 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: gd-14-gruppi-di-lie.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
