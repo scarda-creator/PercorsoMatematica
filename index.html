@@ -1,104 +1,304 @@
 <!DOCTYPE html>
 <!-- SORGENTE. Questo file vive nella navicella e viene pubblicato da
      00-capitano/scripts/pubblica-quiz.py nel repo PercorsoMatematica.
-     Fino al 28-08-2026 esisteva SOLO dentro il clone del repo: la casa non
-     aveva una sorgente, e i suoi numeri erano scritti a mano (diceva 370
-     domande di Analisi Vettoriale quando sul disco ce n'erano 516).
-     I conteggi qui dentro NON si scrivono a mano: li riempie
-     00-capitano/scripts/home-percorso.py leggendo i quiz veri. -->
+
+     LO SCAFFALE (Dedalo, 2026-09-19, su progetto di Giuseppe): «l'immagine e' una
+     selezione tra coste di libri diversi, uno per campo. clicco sul libro e ci sta la
+     scelta tra teoria e esercizi e lavagne (intanto metti placeholder con un marker
+     quando non e' stato richiesto). cliccando la teoria si apre la lista di tutti i
+     nuclei. se serve smistare l'importante e' che ci sia una precisa divisione per
+     campo.»
+
+     Sostituisce la home a quattro schede del 28-08, che era ferma a quattro corsi
+     mentre i campi sono sette: Elettromagnetismo e Geometria Differenziale avevano
+     i nuclei online e nessuna porta per arrivarci.
+
+     TRE LIVELLI, UNA PAGINA: scaffale -> libro -> lista dei nuclei. Lo stato sta
+     nell'URL e nella history, cosi' le frecce del browser e i gesti del telefono
+     funzionano davvero invece di far uscire dal sito.
+
+     NIENTE DA RIALLINEARE A MANO: la lista dei nuclei viene da `nuclei-indice.js`,
+     che `nuclei/indice-nuclei.js` rigenera a ogni pubblicazione; i conteggi delle
+     domande li riempie `00-capitano/scripts/home-percorso.py` contando i quiz veri.
+     Qui sta solo la tabella che dice quale sezione dell'indice appartiene a quale
+     libro - e quella si tocca solo quando si apre un corso nuovo. -->
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0e1117">
-<title>Percorso-matematica — tutto lo studio in un posto</title>
+<title>Tengri — lo scaffale</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icona.png">
 <style>
-:root{--bg:#0e1117;--card:#161b22;--line:#2b333d;--fg:#eef3f8;--muted:#b9c4d1;--accent:#5eead4;--blu:#4c8dff;--viola:#b98cff;--ambra:#f0a95a;--verde:#7ddba3}
+:root{--bg:#0e1117;--card:#161b22;--line:#2b333d;--fg:#eef3f8;--muted:#b9c4d1;--accent:#5eead4}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--fg);
-  min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:36px 24px}
-.wrap{max-width:900px;width:100%}
-h1{font-size:1.85rem;margin:0 0 6px}
-.sub{color:var(--muted);margin:0 0 30px;font-size:1rem;line-height:1.55}
-h3.sez{font-size:.72rem;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);
-  font-weight:700;margin:30px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-h3.sez:first-of-type{margin-top:0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-a.card{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--card);
-  border:1px solid var(--line);border-radius:16px;padding:22px;transition:border-color .15s,transform .15s}
-a.card:hover{border-color:var(--accent);transform:translateY(-3px)}
-a.card.app{border-color:var(--blu)} a.card.app:hover{border-color:var(--blu)}
-.ic{font-size:1.7rem;line-height:1}
-.card h2{margin:0;font-size:1.15rem}
-.card p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.5}
-.cta{margin-top:4px;font-weight:600;color:var(--accent);font-size:.9rem}
-.card.app .cta{color:#8fb0ff}
-.badge{font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:#8fb0ff;font-weight:700}
-.note{margin-top:28px;font-size:.82rem;color:var(--muted);line-height:1.6;
-  border-top:1px solid var(--line);padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 20px 70px}
+h1{margin:.1em 0 .15em;font-size:1.8rem;letter-spacing:-.01em}
+.sotto{color:var(--muted);margin:0 0 26px;font-size:.98rem}
+
+/* ---------- lo scaffale ---------- */
+.ripiano{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:30px 16px 0;
+  border-radius:16px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.035))}
+.ripiano::after{content:"";display:block;width:100%;height:14px;margin-top:20px;border-radius:5px;
+  background:linear-gradient(180deg,#2a3340,#151b24);box-shadow:0 10px 26px rgba(0,0,0,.55)}
+.costa{position:relative;width:76px;border-radius:6px 6px 2px 2px;cursor:pointer;overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 30px rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;transition:transform .18s}
+.costa:hover{transform:translateY(-12px) rotate(-1deg)}
+.costa .titolo{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:700;
+  font-size:.95rem;letter-spacing:.02em;padding:18px 0 26px;white-space:nowrap;
+  text-shadow:0 1px 3px rgba(0,0,0,.65)}
+.costa .fascia{position:absolute;top:0;left:0;right:0;height:5px}
+.costa .conta{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-size:.68rem;
+  opacity:.8;font-variant-numeric:tabular-nums}
+.costa.vuota{opacity:.5;filter:grayscale(.45)}
+
+/* ---------- il libro aperto ---------- */
+#vista-libro,#vista-lista{display:none}
+#vista-libro.on,#vista-lista.on{display:block}
+.testata{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.testata h2{margin:0;font-size:1.5rem}
+.tag{font-size:.74rem;border:1px solid var(--line);border-radius:999px;padding:2px 11px;color:var(--muted)}
+.scelte{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-top:22px}
+.scelta{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:19px;
+  cursor:pointer;transition:.16s;position:relative}
+.scelta:hover{border-color:var(--accent);transform:translateY(-3px)}
+.scelta h3{margin:0 0 7px;font-size:1.12rem}
+.scelta p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.5}
+.scelta.ph{cursor:default;opacity:.6}
+.scelta.ph:hover{transform:none;border-color:var(--line)}
+.marker{position:absolute;top:13px;right:13px;font-size:.66rem;letter-spacing:.07em;
+  text-transform:uppercase;padding:3px 9px;border-radius:999px;
+  background:#33290f;color:#f0a95a;border:1px solid #6b4a17}
+.altro{margin-top:22px;font-size:.87rem;color:var(--muted)}
+.altro a{color:var(--accent);border-bottom:1px solid rgba(94,234,212,.3)}
+
+/* ---------- la lista dei nuclei ---------- */
+.gruppo{margin-top:24px}
+.gruppo h3{margin:0 0 8px;font-size:.98rem;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--line);padding-bottom:6px}
+.nuc{display:flex;align-items:baseline;gap:11px;padding:9px 12px;border-radius:10px;
+  border:1px solid transparent;transition:.13s}
+.nuc:hover{background:var(--card);border-color:var(--line)}
+.nuc .id{font-variant-numeric:tabular-nums;font-size:.78rem;color:var(--muted);min-width:54px}
+.nuc .t{flex:1}
+.nuc .n{font-size:.76rem;color:var(--muted);white-space:nowrap}
+.piede{margin-top:34px;border-top:1px solid var(--line);padding-top:15px;
+  font-size:.82rem;color:var(--muted);line-height:1.6}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>Percorso-matematica</h1>
-<p class="sub">Una sola casa: i <b data-conta="nuclei">63</b> nuclei che cuciono <b>Analisi Vettoriale</b> e <b>Metodi Matematici della Fisica</b> in un organismo solo, e accanto tutti gli allenamenti &mdash; <b data-conta="totale">1657</b> domande su quattro corsi, aggiornate ogni notte.</p>
 
-<h3 class="sez">Il percorso</h3>
-<div class="grid">
-<a class="card app" href="percorso-app.html">
-<div class="ic">&#9673;</div><span class="badge">allenamento</span>
-<h2>L&rsquo;app</h2>
-<p>Avanzamento, autovalutazione e ripasso spaziato: poche carte al giorno, quelle scadute. Installabile e utilizzabile offline. I progressi restano sul tuo dispositivo.</p>
-<span class="cta">Apri l&rsquo;allenamento &rarr;</span>
-</a>
-<a class="card" href="mappa-percorso.html">
-<div class="ic">&#9671;</div>
-<h2>La mappa</h2>
-<p>Il disegno totale: quattro movimenti, i nuclei uno per uno, i tre ponti fra Analisi Vettoriale e Metodi. Ogni nodo &egrave; cliccabile.</p>
-<span class="cta">Vedi il percorso intero &rarr;</span>
-</a>
-<a class="card" href="carta-delle-rotte.html">
-<div class="ic">&#10022;</div>
-<h2>Le rotte verso la fisica</h2>
-<p>Dove ogni pezzo di matematica riappare in fisica, e con che nome: 78 archi, e per ogni nucleo una domanda ancora aperta.</p>
-<span class="cta">Segui le rotte &rarr;</span>
-</a>
+  <div id="vista-scaffale">
+    <h1>Tengri</h1>
+    <p class="sotto">Un libro per campo: <b data-conta="nuclei">63</b> movimenti di teoria e
+      <b data-conta="totale">1657</b> domande d&rsquo;allenamento. Si apre la costa e dentro
+      ci sono teoria, esercizi e lavagne.</p>
+    <div class="ripiano" id="ripiano"></div>
+    <p class="piede">Materiale scritto per esami reali, non un manuale: privilegia il <i>perch&eacute;</i>
+      e i trabocchetti d&rsquo;esame alla completezza.<br>
+      Per installarlo sul telefono: apri il <a href="percorso-app.html" style="color:var(--accent)">percorso</a>
+      e scegli <b>Aggiungi a schermata Home</b> (iOS) o <b>Installa app</b> (Android).<br>
+      <span style="opacity:.7">Stato dei lavori notturni: <a href="stato.html" style="color:var(--muted)">stato.html</a>
+      &middot; ultimo aggiornamento <b data-conta="data">19/09/2026</b></span></p>
+  </div>
+
+  <div id="vista-libro">
+    <div class="testata"><h2 id="l-tit"></h2><span class="tag" id="l-tag"></span></div>
+    <p class="sotto" id="l-sotto"></p>
+    <div class="scelte" id="scelte"></div>
+    <div class="altro" id="l-altro"></div>
+  </div>
+
+  <div id="vista-lista">
+    <div class="testata"><h2 id="n-tit"></h2><span class="tag" id="n-tag"></span></div>
+    <div id="n-corpo"></div>
+  </div>
+
 </div>
 
-<h3 class="sez">Gli allenamenti</h3>
-<div class="grid">
-<a class="card" href="analisi-vettoriale/Quiz_AnalisiVettoriale_v1.html">
-<div class="ic">&#8747;</div><span class="badge" style="color:#5eead4">scritto del 4 settembre</span>
-<h2>Analisi Vettoriale</h2>
-<p><b data-conta="av">558</b> domande su <b data-pool="av">10</b> pool: EDO qualitative, curve e integrali di linea, superfici e area, Gauss e Stokes, Dini, ottimizzazione vincolata, campi conservativi.</p>
-<span class="cta" style="color:#5eead4">Vai al quiz &rarr;</span>
-</a>
-<a class="card" href="metodi/Quiz_MetodiModelli_v1.html">
-<div class="ic">&#8734;</div><span class="badge" style="color:#b98cff">scritto del 9 settembre</span>
-<h2>Metodi e Modelli</h2>
-<p><b data-conta="metodi">353</b> domande su <b data-pool="metodi">9</b> pool, aperto dalle equazioni alle derivate parziali &mdash; l&rsquo;esercizio 4 degli ultimi sei appelli. Poi Green, polidrome, residui, Fourier, teorema spettrale.</p>
-<span class="cta" style="color:#b98cff">Vai al quiz &rarr;</span>
-</a>
-<a class="card" href="meccanica/Quiz_Meccanica_Orale_v1.html">
-<div class="ic">&#9874;</div><span class="badge" style="color:#f0a95a">orale di settembre</span>
-<h2>Meccanica</h2>
-<p><b data-conta="meccanica">457</b> domande e le dimostrazioni da fare alla lavagna, sul programma ufficiale. Autovalutazione e ripasso spaziato in comune con l&rsquo;app.</p>
-<span class="cta" style="color:#f0a95a">Vai al quiz &rarr;</span>
-</a>
-<a class="card" href="geometria/">
-<div class="ic">&#9651;</div><span class="badge" style="color:#7ddba3">superato il 14 luglio</span>
-<h2>Geometria</h2>
-<p><b data-conta="geometria">289</b> domande su <b data-pool="geometria">12</b> pool, pi&ugrave; la dispensa completa, il formulario e il percorso saper-fare. Resta qui: algebra lineare e teorema spettrale tornano dentro Metodi.</p>
-<span class="cta" style="color:#7ddba3">Entra in Geometria &rarr;</span>
-</a>
-</div>
+<script src="nav-tengri.js"></script>
+<script src="nuclei-indice.js"></script>
+<script>
+/* I LIBRI. `sez` sono le sezioni dell'indice che appartengono al campo: e' l'unico
+   punto in cui vive la corrispondenza campo <-> nuclei.
+   `esercizi` e `lavagne` sono i file veri; null = non ancora costruito, e allora la
+   scheda diventa un placeholder con il marker, come chiesto. */
+var LIBRI = [
+  { id:"analisi-vettoriale", nome:"Analisi Vettoriale", col:"#2f7d5b", acc:"#7ddba3",
+    sez:[1,2], stato:"scritto superato con 21, resta l’orale",
+    esercizi:{href:"analisi-vettoriale/Quiz_AnalisiVettoriale_v1.html",
+      desc:"<b data-conta=\"av\">558</b> domande su <b data-pool=\"av\">10</b> pool: EDO qualitative, curve e integrali di linea, superfici, Gauss e Stokes, Dini, vincoli, campi conservativi."},
+    lavagne:{href:"analisi-vettoriale/Teoria_AnalisiVettoriale.html",
+      desc:"Enunciare e dimostrare: 9 blocchi e 110 unità sul programma dell’orale. Non si risolve, si espone."},
+    altro:[["analisi-vettoriale/formulario.html","formulario"],
+           ["analisi-vettoriale/percorso-interattivo.html","percorso saper-fare"],
+           ["analisi-vettoriale/","casa del corso"]] },
 
-<p class="note">Materiale di studio scritto per un esame reale, non un manuale: privilegia il <i>perch&eacute;</i> e i trabocchetti d&rsquo;esame alla completezza. La matematica &egrave; da intendersi &laquo;da verificare&raquo;.<br>
-Formulari, dispense e percorsi interattivi: <a href="analisi-vettoriale/" style="color:#5eead4">Analisi Vettoriale</a> &middot; <a href="geometria/" style="color:#7ddba3">Geometria</a>.<br>
-Per installarlo sul telefono: apri l&rsquo;app e scegli <b>Aggiungi a schermata Home</b> (iOS) o <b>Installa app</b> (Android). I quiz si aggiornano da soli anche se l&rsquo;app &egrave; gi&agrave; installata.<br>
-<span style="opacity:.65">Stato dei lavori notturni: <a href="stato.html" style="color:var(--muted)">stato.html</a> &middot; ultimo aggiornamento <b data-conta="data">19/09/2026</b></span></p>
-</div>
+  { id:"metodi", nome:"Metodi e Modelli", col:"#5b3f8a", acc:"#b98cff",
+    sez:[3,4], stato:"teoria completa · esame da dare al prossimo appello",
+    esercizi:{href:"metodi/Quiz_MetodiModelli_v1.html",
+      desc:"<b data-conta=\"metodi\">353</b> domande su <b data-pool=\"metodi\">9</b> pool: EDP, funzioni di Green, polidrome, residui, Fourier, teorema spettrale."},
+    lavagne:null,
+    altro:[["metodi/","casa del corso"]] },
+
+  { id:"elettromagnetismo", nome:"Elettromagnetismo", col:"#1f4f8f", acc:"#4c8dff",
+    sez:[8], stato:"recupero del secondo anno · terzo canale",
+    esercizi:null, lavagne:null,
+    altro:[["elettromagnetismo/","casa del corso"]] },
+
+  { id:"geometria-differenziale", nome:"Geometria Differenziale", col:"#146b63", acc:"#5eead4",
+    sez:[10], stato:"esame a scelta · corso che non seguirà",
+    esercizi:null, lavagne:null,
+    altro:[["geometria-differenziale/","casa del corso"]] },
+
+  { id:"meccanica-statistica", nome:"Meccanica Statistica", col:"#7a4a1c", acc:"#f0a95a",
+    sez:[9,6], stato:"di curriculum · in costruzione",
+    esercizi:null, lavagne:null,
+    altro:[["meccanica-statistica/","casa del corso"]] },
+
+  { id:"meccanica", nome:"Meccanica", col:"#8a2f3b", acc:"#ff8f9c",
+    sez:[5], stato:"orale da ridare",
+    esercizi:{href:"meccanica/Quiz_Meccanica_Orale_v1.html",
+      desc:"<b data-conta=\"meccanica\">457</b> domande sul programma ufficiale, con autovalutazione e ripasso spaziato in comune con il percorso."},
+    lavagne:{href:"meccanica/Quiz_Meccanica_Orale_v1.html?modo=lavagna",
+      desc:"Le dimostrazioni da fare alla lavagna, senza timer: si scrive, poi si confronta con la soluzione modello."},
+    altro:[] },
+
+  { id:"geometria", nome:"Geometria", col:"#3d5a2f", acc:"#8bd450",
+    sez:[7], stato:"superata il 14 luglio, e ancora serve",
+    esercizi:{href:"geometria/Quiz_Geometria_v1.html",
+      desc:"<b data-conta=\"geometria\">289</b> domande su <b data-pool=\"geometria\">12</b> pool. Algebra lineare e teorema spettrale tornano dentro Metodi."},
+    lavagne:null,
+    altro:[["geometria/dispensa-completa.html","dispensa completa"],
+           ["geometria/formulario.html","formulario"],
+           ["geometria/percorso-interattivo.html","percorso saper-fare"],
+           ["geometria/","casa del corso"]] }
+];
+
+var IDX = window.PM_INDICE || {nuclei:[], movimenti:{}};
+function el(h){ var d=document.createElement("div"); d.innerHTML=h.trim(); return d.firstChild; }
+function libroDi(id){ for(var i=0;i<LIBRI.length;i++){ if(LIBRI[i].id===id) return LIBRI[i]; } return null; }
+function nucleiDi(L){
+  return IDX.nuclei.filter(function(n){
+    return L.sez.indexOf(n.mov)>=0 && (n.file||"").indexOf("nuclei/")===0;
+  });
+}
+
+function disegnaScaffale(){
+  var r=document.getElementById("ripiano"); r.innerHTML="";
+  LIBRI.forEach(function(L){
+    var n=nucleiDi(L).length;
+    /* L'altezza della costa e' il numero di movimenti: lo scaffale dice a colpo
+       d'occhio dove il lavoro e' arrivato, senza che nessuno scriva un numero.
+       Ma un libro non e' vuoto per non avere teoria: Meccanica e Geometria hanno
+       zero movimenti e centinaia di domande, e sbiadirli direbbe il falso. */
+    var pieno = n || L.esercizi || L.lavagne;
+    var h=Math.max(168, Math.min(300, 152+n*8));
+    var c=el('<div class="costa'+(pieno?"":" vuota")+'" style="height:'+h+'px;'+
+      "background:linear-gradient(95deg,"+L.col+" 0%,"+L.col+"dd 62%,rgba(0,0,0,.34) 100%)\">"+
+      '<span class="fascia" style="background:'+L.acc+'"></span>'+
+      '<span class="titolo">'+L.nome+"</span>"+
+      '<span class="conta">'+(n? n+" mov." : (L.esercizi? "quiz" : "—"))+"</span></div>");
+    c.onclick=function(){ vai({libro:L.id}); };
+    r.appendChild(c);
+  });
+}
+
+function scheda(titolo, desc, href, acc, marker){
+  if(href){
+    var s=el('<div class="scelta" style="border-left:4px solid '+acc+'">'+
+      "<h3>"+titolo+"</h3><p>"+desc+"</p></div>");
+    s.onclick=function(){ location.href=href; };
+    return s;
+  }
+  return el('<div class="scelta ph"><span class="marker">'+marker+"</span>"+
+    "<h3>"+titolo+"</h3><p>"+desc+"</p></div>");
+}
+
+function disegnaLibro(L){
+  document.getElementById("l-tit").textContent=L.nome;
+  document.getElementById("l-tag").textContent=L.stato;
+  var ns=nucleiDi(L), n=ns.length;
+  document.getElementById("l-sotto").textContent = n
+    ? n+" movimenti di teoria, con derivazioni, figure e controlli verificati a macchina."
+    : "Teoria non ancora costruita per questo campo.";
+
+  var s=document.getElementById("scelte"); s.innerHTML="";
+  s.appendChild(scheda("Teoria",
+    n ? n+" movimenti, dal primo all’ultimo, nell’ordine in cui si studiano."
+      : "Nessun movimento ancora scritto.",
+    n ? "#teoria" : null, L.acc, "da costruire"));
+  if(n) s.lastChild.onclick=function(){ vai({libro:L.id, sez:"teoria"}); };
+
+  s.appendChild(scheda("Esercizi",
+    L.esercizi ? L.esercizi.desc
+      : "Gli allenamenti sugli esercizi d’esame veri. Per questo campo non sono ancora stati chiesti.",
+    L.esercizi && L.esercizi.href, L.acc, "non richiesto"));
+
+  s.appendChild(scheda("Lavagne",
+    L.lavagne ? L.lavagne.desc
+      : "Le dimostrazioni da esporre all’orale, enunciato per enunciato. Per questo campo non sono ancora state chieste.",
+    L.lavagne && L.lavagne.href, L.acc, "non richiesto"));
+
+  var a=document.getElementById("l-altro");
+  a.innerHTML = L.altro && L.altro.length
+    ? "Altro materiale: " + L.altro.map(function(x){
+        return '<a href="'+x[0]+'">'+x[1]+"</a>"; }).join(" &middot; ")
+    : "";
+}
+
+function disegnaLista(L){
+  document.getElementById("n-tit").textContent=L.nome+" · teoria";
+  var ns=nucleiDi(L);
+  document.getElementById("n-tag").textContent=ns.length+" movimenti";
+  var c=document.getElementById("n-corpo"); c.innerHTML="";
+  L.sez.forEach(function(m){
+    var g=ns.filter(function(n){ return n.mov===m; });
+    if(!g.length) return;
+    var box=el('<div class="gruppo"><h3>'+(IDX.movimenti[m]||("Sezione "+m))+"</h3></div>");
+    g.forEach(function(n){
+      /* La sigla sta gia' nella colonna di sinistra: ripeterla nel titolo
+         («em-04   em-04 — I conduttori…») e' rumore, e si toglie qui invece che
+         nel dato - nel banner della pagina la sigla serve eccome. */
+      var t=String(n.titolo||"").replace(/^\s*[\w.-]+\s+—\s+/, "");
+      box.appendChild(el('<a class="nuc" href="'+n.file+'">'+
+        '<span class="id">'+n.nn+"</span>"+
+        '<span class="t">'+t+"</span>"+
+        '<span class="n">'+n.tappe.length+" tappe</span></a>"));
+    });
+    c.appendChild(box);
+  });
+}
+
+/* ---------- i tre livelli, sulla history vera del browser ---------- */
+function mostra(st, spingi){
+  var L=st.libro? libroDi(st.libro) : null;
+  document.getElementById("vista-scaffale").style.display = L? "none":"block";
+  document.getElementById("vista-libro").className = (L && !st.sez)? "on":"";
+  document.getElementById("vista-lista").className = (L && st.sez==="teoria")? "on":"";
+  if(L && !st.sez) disegnaLibro(L);
+  if(L && st.sez==="teoria") disegnaLista(L);
+  document.title = L? ("Tengri — "+L.nome) : "Tengri — lo scaffale";
+  if(spingi){
+    history.pushState(st, "", L? ("?libro="+L.id+(st.sez? "&sez="+st.sez : "")) : location.pathname);
+  }
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function vai(st){ mostra(st, true); }
+function leggiURL(){
+  var q=new URLSearchParams(location.search);
+  return {libro:q.get("libro"), sez:q.get("sez")};
+}
+window.onpopstate=function(e){ mostra(e.state || leggiURL(), false); };
+
+disegnaScaffale();
+mostra(leggiURL(), false);
+</script>
 </body>
 </html>
