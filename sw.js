@@ -1,10 +1,13 @@
-/* sw.js — service worker del percorso-matematica (Dedalo, 2026-07-21).
+/* sw.js — service worker di Tengri (Dedalo, 2026-07-21).
  * Scopo: rendere l'app installabile e usabile OFFLINE (treno, aula, metro).
  * Strategia: cache-first sui file del percorso, network-first solo per l'indice
  * (così un nucleo nuovo appare senza dover svuotare la cache).
  * I progressi NON passano di qui: vivono in localStorage, non nella cache.
  */
-var VER = 'pm-v6';
+/* VER alzato a 'tengri-v7' il 2026-09-20 col battesimo della casa: le pagine di
+   primo livello sono cache-first, e senza questo salto chi ha gia' l'app installata
+   avrebbe continuato a leggere il nome vecchio dalla copia in cache. */
+var VER = 'tengri-v7';
 var BASE = [
   './',
   'index.html',

@@ -46,6 +46,12 @@
     "  font-weight:500;transition:.14s;display:inline-flex;align-items:center;gap:5px}",
     ".tgn a:hover,.tgn button:hover{border-color:#5eead4;color:#fff}",
     ".tgn b{border-color:#5eead4;color:#5eead4;cursor:default}",
+    /* Il marchio: non e' un bottone, e' il nome della casa. Nessun bordo, nessun
+       riquadro - e sparisce sotto i 420px, dove ogni pixel serve alle voci. */
+    ".tgn .marchio{background:none;border:0;padding:0 10px 0 4px;color:#5eead4;",
+    "  font:600 .95rem/1 Georgia,'Times New Roman',serif;letter-spacing:.14em;",
+    "  text-transform:uppercase;cursor:default;user-select:none}",
+    "@media(max-width:420px){.tgn .marchio{display:none}}",
     ".tgn .sp{flex:1;min-width:8px}",
     ".tgn .vicini{display:flex;gap:6px;flex-wrap:wrap}",
     ".tgn .vicini a{max-width:min(42vw,300px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
@@ -57,6 +63,7 @@
   bar.className = "tgn";
   var qui = p.split("/").pop() || "index.html";
   bar.innerHTML =
+    '<span class="marchio" title="Tengri — la casa dello studio">Tengri</span>' +
     '<button data-tgn="back" title="Indietro">&#8592;</button>' +
     '<button data-tgn="fwd" title="Avanti">&#8594;</button>' +
     VOCI.map(function (v) {

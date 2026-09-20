@@ -1,4 +1,4 @@
-/* progresso.js — memoria dei progressi del percorso-matematica (Dedalo, 2026-07-21).
+/* progresso.js — memoria dei progressi di Tengri (Dedalo, 2026-07-21).
  *
  * Si include in ogni nucleo con <script defer src="progresso.js"></script> nel <head>.
  * NON tocca il contenuto dei nuclei: si aggancia da fuori a ciò che già esiste

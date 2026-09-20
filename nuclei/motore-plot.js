@@ -1,4 +1,4 @@
-/* motore-plot.js — visualizzazioni del percorso-matematica (Dedalo, 2026-07-20).
+/* motore-plot.js — visualizzazioni di Tengri (Dedalo, 2026-07-20).
  * Canvas puro, zero librerie esterne, self-contained. Il blocco {t:'plot',...} del
  * motore dei nuclei chiama PM_Plot.render(container, spec).
  * kind:
