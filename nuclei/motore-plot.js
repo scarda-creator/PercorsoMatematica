@@ -367,11 +367,21 @@
   function draw3dcurve(host, spec) {
     var h = spec.height || 380, w = spec.w || Math.min(560, host.clientWidth || 560);
     var cv = mkCanvas(host, w, h), g = cv.g;
-    var X = fnt(spec.x), Y = fnt(spec.y), Z = fnt(spec.z || '0'), tr = spec.tr || [0, 2 * Math.PI], N = spec.n || 400;
-    var P = [], i, bb = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9, z0: 1e9, z1: -1e9 };
-    for (i = 0; i <= N; i++) { var t = tr[0] + (tr[1] - tr[0]) * i / N, p = { x: X(t), y: Y(t), z: Z(t) };
-      P.push(p); bb.x0 = Math.min(bb.x0, p.x); bb.x1 = Math.max(bb.x1, p.x);
-      bb.y0 = Math.min(bb.y0, p.y); bb.y1 = Math.max(bb.y1, p.y); bb.z0 = Math.min(bb.z0, p.z); bb.z1 = Math.max(bb.z1, p.z); }
+    // spec.curves=[{x,y,z,tr?,col?,label?}] disegna piu' curve NELLO STESSO riquadro,
+    // che e' l'unico modo di mostrare una relazione fra curve (allacciamento, intreccio):
+    // due pannelli affiancati mostrano due curve e nessuna relazione. Senza `curves` si
+    // resta al caso singolo di prima, invariato.
+    var fam = spec.curves || [{ x: spec.x, y: spec.y, z: spec.z, col: spec.col }];
+    var N = spec.n || 400;
+    var PS = [], i, bb = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9, z0: 1e9, z1: -1e9 };
+    fam.forEach(function (C) {
+      var X = fnt(C.x), Y = fnt(C.y), Z = fnt(C.z || '0'), tr = C.tr || spec.tr || [0, 2 * Math.PI];
+      var P = [];
+      for (var i = 0; i <= N; i++) { var t = tr[0] + (tr[1] - tr[0]) * i / N, p = { x: X(t), y: Y(t), z: Z(t) };
+        P.push(p); bb.x0 = Math.min(bb.x0, p.x); bb.x1 = Math.max(bb.x1, p.x);
+        bb.y0 = Math.min(bb.y0, p.y); bb.y1 = Math.max(bb.y1, p.y); bb.z0 = Math.min(bb.z0, p.z); bb.z1 = Math.max(bb.z1, p.z); }
+      PS.push(P);
+    });
     var cx = (bb.x0 + bb.x1) / 2, cyy = (bb.y0 + bb.y1) / 2, czz = (bb.z0 + bb.z1) / 2;
     var sc = Math.max(bb.x1 - bb.x0, bb.y1 - bb.y0, bb.z1 - bb.z0) / 2 || 1;
     var state = { yaw: spec.yaw !== undefined ? spec.yaw : 0.7, pitch: spec.pitch !== undefined ? spec.pitch : 0.5 };
@@ -392,9 +402,15 @@
         var e = { x: cx, y: cyy, z: bb.z0 }; e[ax[0]] = ax[1];
         var Pe = proj(e, cyaw, syaw, cp, sp); g.beginPath(); g.moveTo(O.px, O.py); g.lineTo(Pe.px, Pe.py); g.stroke();
       });
-      g.strokeStyle = spec.col || COL.c3; g.lineWidth = 2.4; g.beginPath();
-      for (var k = 0; k <= N; k++) { var q = proj(P[k], cyaw, syaw, cp, sp); k ? g.lineTo(q.px, q.py) : g.moveTo(q.px, q.py); }
-      g.stroke();
+      var leg3 = [];
+      PS.forEach(function (P, ci) {
+        var col = fam[ci].col || [COL.c3, COL.c2, COL.c1, COL.c4, COL.warn][ci % 5];
+        g.strokeStyle = col; g.lineWidth = 2.4; g.beginPath();
+        for (var k = 0; k <= N; k++) { var q = proj(P[k], cyaw, syaw, cp, sp); k ? g.lineTo(q.px, q.py) : g.moveTo(q.px, q.py); }
+        g.stroke();
+        if (fam[ci].label) leg3.push({ t: fam[ci].label, c: col });
+      });
+      if (leg3.length) legend(g, leg3, 34, w);
       if (spec.mark3d) { var mp = proj(spec.mark3d, cyaw, syaw, cp, sp);
         g.fillStyle = '#fff'; g.strokeStyle = COL.bg; g.lineWidth = 1.5; g.beginPath(); g.arc(mp.px, mp.py, 4, 0, 7); g.fill(); g.stroke(); }
       g.fillStyle = COL.axis; g.font = '11px Georgia'; g.fillText('↻ trascina per ruotare', 12, h - 12);
