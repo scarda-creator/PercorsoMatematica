@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento ms-09 — Il gas perfetto classico e il confine della sua validità: dove Maxwell-Boltzmann smette di valere</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Meccanica Statistica · Movimento <b>ms-09 — Il gas perfetto classico e il confine della sua validità: dove Maxwell-Boltzmann smette di valere</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'meccanica-statistica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["integrale-gaussiano"] = {"nome":"Integrale gaussiano","riga":"$\\displaystyle\\int_{-\\infty}^{+\\infty} e^{-ax^{2}}\\,dx=\\sqrt{\\pi/a}$ per $a>0$, e $\\displaystyle\\int_{-\\infty}^{+\\infty} x^{2}e^{-ax^{2}}\\,dx=\\tfrac12\\sqrt{\\pi/a^{3}}$.","serve":"E' l'unico integrale che serve davvero sapere a memoria in meccanica statistica, perche' l'energia cinetica e' quadratica nell'impulso e quindi ogni integrazione sugli impulsi e' una gaussiana. Il trucco della dimostrazione — elevare al quadrato e passare in coordinate polari — vale la pena di vederlo una volta: e' il motivo per cui compare un $\\pi$ in una formula che di cerchi non parla.","esempio":"Da $I^{2}=\\iint e^{-a(x^{2}+y^{2})}dx\\,dy=2\\pi\\int_{0}^{\\infty}re^{-ar^{2}}dr=\\pi/a$ segue $I=\\sqrt{\\pi/a}$. I momenti superiori si ottengono derivando rispetto ad $a$ sotto il segno: $-\\partial_a I=\\int x^{2}e^{-ax^{2}}dx=\\tfrac12\\sqrt{\\pi}\\,a^{-3/2}$. Derivare rispetto a un parametro e' piu' rapido che integrare per parti, e funziona per tutti i momenti pari.","pieno":null,"qui":{"meccanica-statistica":{"serve":"La funzione di partizione di una particella libera e' un prodotto di tre gaussiane negli impulsi, e da li' esce la lunghezza d'onda termica $\\lambda=h/\\sqrt{2\\pi m k T}$ — che e' la grandezza con cui si misura quando un gas smette di essere classico.","esempio":"$\\int e^{-\\beta p^{2}/2m}dp=\\sqrt{2\\pi m/\\beta}$, quindi $Z_{1}=\\dfrac{V}{h^{3}}(2\\pi mkT)^{3/2}=V/\\lambda^{3}$. Lo stesso integrale col peso $p^{2}$ da' $\\langle p^{2}/2m\\rangle=\\tfrac12 kT$ per grado di liberta': l'equipartizione non e' un principio a parte, e' questo integrale."}}};
+STRUM["stirling"] = {"nome":"Approssimazione di Stirling","riga":"Per $N$ grande, $\\ln N! = N\\ln N - N + \\tfrac12\\ln(2\\pi N) + O(1/N)$; quasi sempre bastano i primi due termini.","serve":"Il fattoriale nasce ogni volta che si contano configurazioni, e $N!$ con $N\\sim 10^{23}$ non e' un numero che si maneggia. Stirling lo trasforma in una funzione liscia e derivabile di $N$ — ed e' proprio la derivabilita', non la comodita', il punto: senza di essa non si potrebbe massimizzare un'entropia rispetto a un numero di occupazione.","esempio":"Con $N=10$: $\\ln 10! = 15{,}104$, mentre $N\\ln N - N = 13{,}026$ e il termine $\\tfrac12\\ln(2\\pi N)=2{,}070$ porta a $15{,}096$ — tre cifre esatte gia' a dieci. Il terzo termine e' trascurabile in termodinamica perche' cresce come $\\ln N$ contro $N$: su $N=10^{23}$ pesa $10^{-22}$ in relativo. Per questo in meccanica statistica si scrive $\\ln N!\\simeq N\\ln N-N$ e non si guarda indietro.","pieno":null,"qui":{"meccanica-statistica":{"serve":"E' lo strumento senza il quale il conteggio microcanonico non diventa termodinamica. $S=k\\ln\\Omega$ con $\\Omega$ pieno di fattoriali resta un'espressione; applicato Stirling, $S$ diventa una funzione estensiva di $N$, $V$, $E$ che si puo' derivare per ottenere temperatura e pressione.","esempio":"Nel gas ideale il conteggio corretto di Boltzmann divide per $N!$, e il suo logaritmo $-\\ln N!\\simeq -N\\ln N+N$ e' esattamente il termine che rende l'entropia estensiva e scioglie il paradosso di Gibbs. Togliere Stirling di li' significa non vedere piu' da dove viene il $-N\\ln N$ della Sackur-Tetrode."}}};
+STRUM["trasformata-di-legendre"] = {"nome":"Trasformata di Legendre","riga":"Scambia una variabile con la sua derivata coniugata: da $f(x)$ si passa a $g(p)=f(x)-px$ con $p=df/dx$, e $dg=-x\\,dp$.","serve":"Serve quando la variabile naturale di una funzione non e' quella che si controlla in laboratorio. La trasformata non perde informazione — da $g$ si torna a $f$ — e cambia solo quale variabile e' indipendente. E' l'operazione che genera tutti i potenziali termodinamici l'uno dall'altro, e la stessa che porta dalla lagrangiana all'hamiltoniana.","esempio":"Con $f(x)=x^{2}$: $p=2x$, $x=p/2$, $g=x^{2}-px=p^{2}/4-p^{2}/2=-p^{2}/4$. Il segno negativo non e' un errore: per $f$ convessa la trasformata e' concava, e applicandola due volte si torna a $f$.","pieno":null,"qui":{"meccanica-statistica":{"serve":"E' il ponte fra gli ensemble. Il passaggio da microcanonico a canonico non e' solo un cambio di racconto — energia fissata contro temperatura fissata — e' una trasformata di Legendre dell'entropia, e questo spiega perche' i due ensemble danno gli stessi risultati all'equilibrio: la trasformata e' invertibile.","esempio":"Da $S(E)$ con $1/T=\\partial S/\\partial E$ si passa all'energia libera $F=E-TS$, funzione di $T$ invece che di $E$, con $dF=-S\\,dT-p\\,dV$. Lo stesso schema porta da $F$ al gran potenziale $\\Omega=F-\\mu N$ scambiando $N$ con $\\mu$: e' sempre la stessa operazione, applicata a una coppia coniugata diversa."}}};
+STRUM["delta-di-dirac"] = {"nome":"Delta di Dirac","riga":"Non è una funzione ma un funzionale, definito da $\\int f(x)\\,\\delta(x-a)\\,dx=f(a)$, che composto con una funzione si spezza sui suoi zeri come $\\delta(g(x))=\\sum_i \\delta(x-x_i)/|g'(x_i)|$.","serve":"Serve come macchina per cambiare variabile senza invertire nulla. La densità di $y=f(x)$ si scrive $p_Y(y)=\\int p_X(x)\\,\\delta(y-f(x))\\,dx$, e la delta produce da sola il fattore $1/|f'|$ che altrimenti andrebbe messo a mano: i rami molteplici si contano da soli invece di doverli ricordare. È la ragione pratica per cui il formalismo con la delta compare in ogni soluzione d'esame che tocchi una distribuzione, mentre il cambio di variabile esplicito compare quasi mai.","esempio":"$\\delta(x^2-a^2)$ con $a$ positivo. Gli zeri sono $x=\\pm a$; la derivata dell'argomento è $2x$, che in modulo vale $2a$ su entrambi. Quindi $\\delta(x^2-a^2)=\\dfrac{1}{2a}\\big[\\delta(x-a)+\\delta(x+a)\\big]$. Il caso si ripete identico in fisica statistica con $\\varepsilon=p^2/2m$ in una dimensione, dove i due rami $p=\\pm\\sqrt{2m\\varepsilon}$ contribuiscono entrambi — e dimenticarne uno dimezza la risposta.","pieno":{"file":"15-distribuzioni.html","tappa":"01","come":"le distribuzioni come funzionali, la delta e le sue proprietà, nel nucleo di Metodi"},"qui":{"meccanica-statistica":{"serve":"È lo strumento con cui si calcola la densità degli stati, cioè l'oggetto su cui poggia tutto il secondo tempo del corso: $g(\\varepsilon)=\\int d^dp\\,d^dq\\;\\delta(\\varepsilon-H)/h^d$. L'identità che si usa davvero non è la definizione ma questa: $\\delta(\\varepsilon-H)=\\partial_\\varepsilon\\,\\theta(\\varepsilon-H)$. Si scambia l'integrale con la derivata e ci si ritrova a calcolare il volume della regione dove l'hamiltoniana sta sotto $\\varepsilon$ — un integrale elementare — invece di un integrale con una delta dentro. La $g$ così ottenuta è pura geometria dello spazio delle fasi: non sa nulla della temperatura, e per questo resta identica quando si passa da Boltzmann a Fermi o a Bose.","esempio":"Particella libera in due dimensioni. Il volume della regione $p^2/2m$ sotto $\\varepsilon$ è il disco di area $2\\pi m\\varepsilon$; derivando rispetto a $\\varepsilon$ si ottiene $2\\pi m$, cioè una densità degli stati costante. Non è una curiosità: è la ragione per cui in due dimensioni una particella libera non condensa, e per cui le prove che chiedono la condensazione in $d=2$ mettono sempre un potenziale confinante, che porta la $g$ da costante a crescente."}},"controllo":[{"tipo":"derivata","espr":"x**2-a**2","rispetto":["x"],"vale":"2*x","ipotesi":{"x":"positive","a":"positive"},"dove":"esempio","appare":"2x"},{"tipo":"uguale","sinistra":"1/Abs(2*a)","vale":"1/(2*a)","ipotesi":{"a":"positive"},"dove":"esempio","appare":"\\dfrac{1}{2a}"},{"tipo":"derivata","espr":"2*pi*m*e","rispetto":["e"],"vale":"2*pi*m","ipotesi":{"m":"positive","e":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"2\\pi m"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["serie-geometrica"] = {"nome":"Serie geometrica","riga":"La somma $\\sum_{n\\ge 0} q^{n}$ vale $\\dfrac{1}{1-q}$ se $|q|\\lt 1$, e non esiste se $|q|\\ge 1$.","serve":"È l'unica serie di cui si conosce la somma in forma chiusa senza fatica, e per questo diventa il metro di tutte le altre: una serie si studia maggiorandola con una geometrica (criterio del rapporto, criterio della radice) o riconoscendola come geometrica travestita.","esempio":"Con $q=\\tfrac12$: $1+\\tfrac12+\\tfrac14+\\cdots=\\dfrac{1}{1-\\tfrac12}=2$. Con $q=-\\tfrac13$: $\\dfrac{1}{1+\\tfrac13}=\\tfrac34$. Con $q=1$ le somme parziali sono $N+1$ e se ne vanno: la formula $1/(1-q)$ non è una scorciatoia da usare fuori dal suo raggio.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio $R=1$, il grafico delle somme parziali e la cassetta dei trucchi che parte da qui, nella tappa sulle serie di potenze"},"qui":{"metodi-e-modelli":{"serve":"È il motore della serie di Laurent: lo sviluppo di $\\dfrac{1}{z-a}$ in potenze di $z$ o di $1/z$ è una geometrica, e quale delle due si sceglie decide in quale corona si sta sviluppando. Tutta la parte principale di Laurent nasce da qui.","esempio":"Per $\\dfrac{1}{z-2}$ con $|z|\\lt 2$ si scrive $-\\tfrac12\\cdot\\dfrac{1}{1-z/2}=-\\sum_{n\\ge0}\\dfrac{z^{n}}{2^{n+1}}$; in $z=1$ entrambi i membri valgono $-1$. Per $|z|\\gt 2$ si raccoglie invece $z$ e viene $\\sum_{n\\ge0}\\dfrac{2^{n}}{z^{n+1}}$, cioè solo potenze negative; in $z=4$ entrambi i membri valgono $\\tfrac12$."},"elettromagnetismo":{"serve":"Compare ogni volta che una configurazione si ripete con un fattore costante — catene di cariche immagine fra due piani conduttori, riflessioni multiple in una cavità — e la somma chiusa è ciò che rende il conto finito invece che infinito.","esempio":"Una carica fra due piani paralleli genera immagini a distanze crescenti, e il contributo al potenziale è una somma del tipo $\\sum_{n\\ge0} r^{n}$ con $r\\lt 1$ fissato dalla geometria. Con una riflettività $r=\\tfrac14$ la serie vale $\\tfrac43$: la catena è infinita, il potenziale no."}},"controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"0","a":"oo","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"somma","espr":"(-1/3)**n","var":"n","da":"0","a":"oo","vale":"3/4","dove":"esempio","appare":"\\tfrac34"},{"tipo":"somma","espr":"-1**n/2**(n+1)","var":"n","da":"0","a":"oo","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"somma","espr":"2**n/4**(n+1)","var":"n","da":"0","a":"oo","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"},{"tipo":"somma","espr":"(1/4)**n","var":"n","da":"0","a":"oo","vale":"4/3","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac43"},{"tipo":"uguale","sinistra":"1/(1-2)","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"uguale","sinistra":"1/(4-2)","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"}]};
+STRUM["funzione-gamma"] = {"nome":"Funzione Gamma","riga":"$\\Gamma(z)=\\displaystyle\\int_0^{\\infty}t^{z-1}e^{-t}\\,dt$, e da questa $\\displaystyle\\int_0^{\\infty}t^{k}e^{-at}\\,dt=\\dfrac{\\Gamma(k+1)}{a^{k+1}}$ per $a>0$.","serve":"E' il fattoriale esteso ai numeri non interi — $\\Gamma(n+1)=n!$ — e soprattutto e' la forma chiusa di TUTTI gli integrali del tipo «potenza per esponenziale». Sapere questa sola formula sostituisce una decina di integrazioni per parti, e permette di leggere a vista il risultato di un integrale appena si riconosce l'esponente della potenza.","esempio":"Da $\\Gamma(z+1)=z\\,\\Gamma(z)$, che si ottiene integrando per parti una volta, discende $\\Gamma(n+1)=n!$ per $n$ intero: $\\Gamma(1)=1$, $\\Gamma(2)=1$, $\\Gamma(3)=2$, $\\Gamma(4)=6$. Sui semi-interi il capostipite e' $\\Gamma(\\tfrac12)=\\sqrt\\pi$ — che e' l'integrale gaussiano travestito — e da li' $\\Gamma(\\tfrac32)=\\tfrac12\\sqrt\\pi$, $\\Gamma(\\tfrac52)=\\tfrac34\\sqrt\\pi$. Un integrale come $\\int_0^\\infty t^{2}e^{-at}dt$ vale dunque $\\Gamma(3)/a^{3}=2/a^{3}$, senza fare nessun conto.","pieno":null,"qui":{"meccanica-statistica":{"serve":"E' l'inventario degli integrali del canonico ridotto a una riga. Ogni funzione di partizione di singola particella e' un integrale di potenza per esponenziale — cambia solo l'esponente, e con esso la fisica: $t^{1/2}$ per il gas classico, $t^{2}$ per l'ultrarelativistico, $t^{3/n}$ per un potenziale $\\alpha r^{n}$. Riconoscere quale $\\Gamma$ si sta calcolando e' cio' che distingue chi risolve lo scritto in dieci minuti da chi lo risolve in un'ora.","esempio":"Per una particella relativistica con $\\varepsilon=cp$ la partizione porta $\\int_0^\\infty p^{2}e^{-\\beta cp}dp=\\Gamma(3)/(\\beta c)^{3}=2/(\\beta c)^{3}$, da cui $\\langle\\varepsilon\\rangle=3T$ invece dei $\\tfrac32T$ del caso non relativistico. Il fattore 3 contro $3/2$ viene per intero dall'esponente della potenza, cioe' dall'argomento della Gamma: la dipendenza dell'energia dalla quantita' di moto decide da sola quanto calore serve a scaldare il gas."}}};
+STRUM["cambio-di-variabile"] = {"nome":"Cambio di variabile in una densità","riga":"Una densità non si trasforma sostituendo ma porta il jacobiano: se $y=f(x)$ allora $p_Y(y)=\\sum_i p_X(x_i)\\,/\\,|f'(x_i)|$, sommato su tutti i rami $x_i$ con $f(x_i)=y$.","serve":"È l'unico punto in cui una densità si comporta diversamente da una funzione, ed è l'errore che si ripete. Ciò che è invariante è la probabilità dell'evento, $p_Y(y)|dy|=p_X(x)|dx|$: la densità no, perché è una probabilità per unità di qualcosa, e passando da $x$ a $y$ quell'unità si dilata o si comprime. Scrivere $p_Y(y)=p_X(x(y))$ e basta è attraente e sbagliato. Si scova senza rifare il conto con due prove da cinque secondi: la normalizzazione non torna, e le dimensioni restano quelle della variabile di partenza.","esempio":"Una particella uniforme su un disco di raggio $R$: $p(x,y)=1/(\\pi R^2)$. Passando alla sola distanza dal centro, il jacobiano è l'elemento d'area radiale $2\\pi r$, e resta $p(r)=2r/R^2$ su $[0,R]$, che infatti si normalizza a $1$. Il valor medio è $\\langle r\\rangle=2R/3$ — non $R/2$, che è la risposta di chi tratta $r$ come uniforme. La differenza fra i due numeri è esattamente il fattore $r$, cioè il fatto che lontano dal centro c'è più area.","pieno":{"file":"ms-03-probabilita.html","tappa":"01","come":"la regola dedotta dall'invarianza della probabilità, i rami molteplici e il caso radiale, nel movimento ms-03 di Meccanica Statistica"},"qui":{"meccanica-statistica":{"serve":"È metà della domanda più frequente dello scritto: «calcolare la densità di probabilità dell'energia di singola particella», «la densità di particelle $\\rho(r)$». L'altra metà è la marginalizzazione. Le scritture $d^2r=2\\pi r\\,dr$ e $d^3r=4\\pi r^2dr$ non sono formule da ricordare: sono questo cambio di variabile con gli angoli già integrati, e saperlo deducere è ciò che salva quando la simmetria è cilindrica invece che sferica. Attenzione al doppio jacobiano: $p(r)$ è una densità rispetto a $r$, $\\rho(r)$ è una densità per unità di volume, e fra le due ce n'è un altro.","esempio":"L'energia cinetica in due dimensioni. La misura radiale nel piano degli impulsi è la derivata dell'area del disco, $2\\pi p$; la sostituzione $\\varepsilon=p^2/2m$ ha $d\\varepsilon/dp=p/m$, e il jacobiano cancella esattamente il fattore $p$. Per questo in $d=2$ la densità dell'energia è l'esponenziale pura $\\beta e^{-\\beta\\varepsilon}$, senza prefattore, mentre in $d=3$ resta un $\\sqrt{\\varepsilon}$. Da quel solo fattore dipendono tutte le differenze qualitative fra i gas quantistici in dimensioni diverse."}},"controllo":[{"tipo":"integrale","espr":"2*r/R**2","var":"r","da":"0","a":"R","vale":"1","ipotesi":{"r":"positive","R":"positive"},"dove":"esempio","appare":"p(r)=2r/R^2"},{"tipo":"integrale","espr":"r*2*r/R**2","var":"r","da":"0","a":"R","vale":"2*R/3","ipotesi":{"r":"positive","R":"positive"},"dove":"esempio","appare":"2R/3"},{"tipo":"derivata","espr":"pi*p**2","rispetto":["p"],"vale":"2*pi*p","ipotesi":{"p":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"2\\pi p"},{"tipo":"derivata","espr":"p**2/(2*m)","rispetto":["p"],"vale":"p/m","ipotesi":{"p":"positive","m":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"p/m"},{"tipo":"integrale","espr":"b*exp(-b*e)","var":"e","da":"0","a":"oo","vale":"1","ipotesi":{"b":"positive","e":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"\\beta e^{-\\beta\\varepsilon}"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo ms-09: Il gas perfetto classico e il confine della sua validità: dove Maxwell-Boltzmann smette di valere <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        ms-09 — il gas perfetto classico e il confine della sua validita
+identita:  Maxwell-Boltzmann, e la domanda che il corso pone davvero: quando la statistica classica
+           smette di valere, e come si verifica sui numeri del problema
+copre:     A.9 (Gas perfetto; statistica di Maxwell-Boltzmann; condizioni di validita)
+serve:     ms-07 (il mestiere del canonico)
+apre:      ms-10 (l'insieme gran canonico)
+strumenti: integrale-gaussiano, stirling, cambio-di-variabile, funzione-gamma,
+           trasformata-di-legendre, delta-di-dirac, ordini-di-grandezza, serie-geometrica
+fonti:     Crisanti, Introduzione alla Meccanica Statistica (note del corso 2019) — l'equazione di
+           Sackur-Tetrode senza e con la correzione di Gibbs e il paradosso del mescolamento
+           (pag. stampate 174-175, marcatori PDF 175-176); il gas di oscillatori 1D con E=NT e C_V=N
+           e il gas relativistico con E=3NT e PV=NT (pag. 179-183, PDF 180-184); la lunghezza d'onda
+           termica ripresa da Huang §8.1 con la tabella delle temperature di degenerazione di idrogeno,
+           elio liquido ed elettroni in un metallo (pag. 229-230, PDF 230-231, e pag. 255, PDF 256);
+           il teorema di equipartizione dimostrato nel canonico per parti, <p_i dH/dp_j> = delta_ij T
+           (pag. 204, PDF 205); la densita degli stati G(eps) e la distribuzione dell'energia nel
+           canonico (pag. 208-210, PDF 209-211); il gas con H = a|p|^b che da E = 3NT/b e PV=NT per
+           ogni b (pag. 211, PDF 212); il gas in campo gravitazionale con E = (5/2)NT (pag. 205-207,
+           PDF 206-208); la giustificazione semiclassica del fattore h^{3N}, cioe c=1, dal conto di
+           DeltaGamma per la buca 1D e per l'oscillatore (pag. 227-229, PDF 228-230); la sostituzione
+           somma->integrale e il termine singolare p=0 che essa perde (pag. 253-254, PDF 254-255); il
+           limite classico dei gas quantistici, z<<1 equivalente a v/lambda^3>>1, e le correzioni
+           quantistiche all'equazione di stato (pag. 265-267, PDF 266-268).
+           Gravina, Statistical Mechanics (note Grilli-Giardina 2018) — il paradosso di Gibbs e
+           Sackur-Tetrode con la giustificazione quantistica del N! (pag. 42-43, PDF 42-43); il
+           capitolo 8 intero sulla statistica di Maxwell-Boltzmann: la n(x,p) come media canonica di
+           una somma di delta, n_MB = N e^{-beta H}/Z_1 = e^{beta(mu-H)}, i LIMITI DI APPLICABILITA
+           ricavati da <n_p> << 1 cioe e^{beta mu} << 1 cioe lambda^3/v << 1, la marginalizzazione che
+           da la distribuzione degli impulsi (2 pi m T)^{-3/2} e quella delle coordinate e^{-beta V(x)}
+           (pag. 53-58, PDF 53-58); la densita degli stati G(eps) calcolata con la delta in d=3,2,1
+           (pag. 62-64, PDF 62-64); la lunghezza d'onda termica come parametro d'ordine della
+           transizione classico-quantistico (pag. 86, PDF 86); PV = (2/3)E come risultato esatto e il
+           limite classico che ne ricava PV=NT (pag. 89, PDF 89); la prima correzione quantistica
+           PV = NT(1 -/+ N lambda^3/(2^{5/2} g_s V)) con i fermioni che premono piu dei bosoni
+           (pag. 93-95, PDF 93-95).
+           Falcioni-Vulpiani, Meccanica Statistica Elementare — l'entropia di Sackur-Tetrode con k_B
+           esplicito e la giustificazione di h^{3N} e di N! come conteggio corretto degli stati
+           (pag. stampate 29-30, marcatori PDF 38-39); la derivazione MICROCANONICA ESATTA della
+           distribuzione di Maxwell-Boltzmann, rho(x,p) = omega(E-p^2/2m,V,N-1)/omega(E,V,N), la forma
+           esatta (1 - p^2/2mE)^{3N/2-5/2} e il limite (1+b/z)^z -> e^b che la rende gaussiana
+           (pag. 38-42, PDF 47-51); la verifica sperimentale della maxwelliana con i fasci molecolari
+           e l'allargamento Doppler delle righe (pag. 70-72, PDF 79-81); la legge di Richardson nelle
+           due versioni, quantistica e classica, e la condizione k_B T >> eps_F sotto cui vale la
+           seconda (pag. 72-73, PDF 81-82); l'equipartizione come ipotesi ardita di Einstein nel moto
+           browniano (pag. 77-80, PDF 86-89). DISACCORDO DI CONVENZIONE DICHIARATO NEL TESTO: Crisanti
+           e Gravina pongono k=1, cosi che beta=1/T e l'entropia e un numero puro; Falcioni-Vulpiani
+           tengono k_B esplicito (beta=1/k_B T) e scrivono S = N k_B [...]. Nelle tappe 08 e 10, dove
+           si fanno i NUMERI, k_B torna esplicito per forza: un criterio si verifica in unita SI.
+registro:  Note Crisanti 2019 (docente del terzo canale) per l'impianto microcanonico, Sackur-Tetrode,
+           equipartizione, densita degli stati e la giustificazione di h; note Grilli-Giardina per il
+           capitolo dedicato a Maxwell-Boltzmann e per i LIMITI DI APPLICABILITA, che sono il cuore
+           della voce A.9; Falcioni-Vulpiani per la derivazione microcanonica esatta della maxwelliana
+           e per le verifiche sperimentali. 19 prove su 47 nominano il gas ideale, 16 il limite
+           classico, e quasi sempre come ULTIMA domanda di un esercizio quantistico: «si verifichi che
+           nel limite di alta temperatura si ritrova il risultato classico». Movimento cerniera.
+generata:  2026-09-24 da fonti aperte e lette in dossier — mescolanza Crisanti (impianto, Sackur-Tetrode,
+           equipartizione, densita degli stati, h) + Grilli-Giardina (Maxwell-Boltzmann, criterio di
+           applicabilita, correzioni quantistiche) + Falcioni-Vulpiani (derivazione microcanonica
+           esatta, k_B esplicito, esperimenti)
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"00","appare":"F=-T\\log Z",
+  "perche":"e' la definizione dell'energia libera di Helmholtz a partire dalla funzione di partizione canonica: la relazione ponte fra meccanica statistica e termodinamica, enunciata sul posto perche' regge ogni derivazione del movimento. Non e' un conto"},
+ {"tipo":"simbolico","dove":"00","appare":"n\\lambda^3\\ll1",
+  "perche":"e' il criterio di validita' della statistica classica, enunciato qui come bussola e DEDOTTO nella tappa 07 dalla condizione sui numeri di occupazione: e' una disuguaglianza da verificare sui numeri, non un valore calcolato"},
+ {"tipo":"simbolico","dove":"00","appare":"\\lambda=\\dfrac{h}{\\sqrt{2\\pi mT}}",
+  "perche":"e' la definizione della lunghezza d'onda termica di de Broglie nella convenzione usata da tutte e tre le fonti; l'origine dei fattori numerici e' discussa nella tappa 07. E' una definizione"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\frac{z_1^N}{N!}",
+  "perche":"e' la fattorizzazione della partizione per particelle non interagenti con il conteggio di Boltzmann: una riscrittura strutturale dell'integrale su 6N variabili, non un valore calcolato"},
+ {"tipo":"integrale","espr":"exp(-b*p**2/(2*m))","var":"p","da":"-oo","a":"oo",
+  "vale":"sqrt(2*pi*m/b)","ipotesi":{"b":"positive","m":"positive"},
+  "dove":"01","appare":"\\sqrt{\\frac{2\\pi m}{\\beta}}"},
+ {"tipo":"uguale","sinistra":"(h/sqrt(2*pi*m*T))**3","vale":"h**3/(2*pi*m*T)**Rational(3,2)",
+  "ipotesi":{"h":"positive","m":"positive","T":"positive"},
+  "dove":"01","appare":"\\frac{h^3}{(2\\pi mT)^{3/2}}"},
+ {"tipo":"numero","espr":"log(factorial(100))","vale":"363.7","dove":"01","appare":"363{,}7"},
+ {"tipo":"numero","espr":"log(factorial(100))-(100*log(100)-100)","vale":"3.222","dove":"01","appare":"3{,}222"},
+ {"tipo":"uguale","sinistra":"N*log(N)-N","vale":"N*log(N/exp(1))","ipotesi":{"N":"positive"},
+  "dove":"01","appare":"N\\log(N/e)"},
+ {"tipo":"simbolico","dove":"01","appare":"-NT\\log\\left(\\frac{V}{N\\lambda^3}\\,e\\right)",
+  "perche":"e' $-T\\log Z_N$ con dentro gia' sostituite $Z_N=z_1^N/N!$, $z_1=V/\\lambda^3$ e l'approssimazione di Stirling: una catena di sostituzioni di definizioni, non un conto nuovo. I conti che ne discendono (pressione, energia, calore specifico) sono asseriti qui sotto"},
+ {"tipo":"derivata","espr":"-(-N*T*log(V))","rispetto":["V"],"vale":"N*T/V",
+  "ipotesi":{"N":"positive","T":"positive","V":"positive"},
+  "dove":"01","appare":"\\frac{NT}{V}"},
+ {"tipo":"simbolico","dove":"01","appare":"PV=NT",
+  "perche":"e' l'equazione di stato ottenuta moltiplicando per $V$ il risultato $P=NT/V$, che e' asserito qui accanto come derivata: una riscrittura, non un conto nuovo"},
+ {"tipo":"derivata","espr":"-3*N/2*log(beta)","rispetto":["beta"],"vale":"-3*N/(2*beta)",
+  "ipotesi":{"N":"positive","beta":"positive"},
+  "dove":"01","appare":"-\\frac{3N}{2\\beta}"},
+ {"tipo":"uguale","sinistra":"3*N/(2*(1/T))","vale":"3*N*T/2","ipotesi":{"N":"positive","T":"positive"},
+  "dove":"01","appare":"\\frac32NT"},
+ {"tipo":"derivata","espr":"3*N*T/2","rispetto":["T"],"vale":"3*N/2",
+  "ipotesi":{"N":"positive","T":"positive"},
+  "dove":"01","appare":"\\frac32N"},
+
+ {"tipo":"uguale","sinistra":"2*N*log(2*V*u)-2*N*log(V*u)","vale":"2*N*log(2)",
+  "ipotesi":{"N":"positive","V":"positive","u":"positive"},
+  "dove":"02","appare":"2N\\log 2"},
+ {"tipo":"uguale","sinistra":"N/2*log(2)+N/2*log(2)","vale":"N*log(2)","ipotesi":{"N":"positive"},
+  "dove":"02","appare":"N\\log 2"},
+ {"tipo":"derivata","espr":"N*T*(log(A)+3*log(T)/2+1)","rispetto":["T"],
+  "vale":"N*log(A)+3*N*log(T)/2+5*N/2",
+  "ipotesi":{"N":"positive","T":"positive","A":"positive"},
+  "dove":"02","appare":"N\\log A+\\tfrac32N\\log T+\\tfrac52N"},
+ {"tipo":"uguale","sinistra":"V/N*(2*pi*m/h**2)**Rational(3,2)*T**Rational(3,2)",
+  "vale":"V/(N*(h/sqrt(2*pi*m*T))**3)",
+  "ipotesi":{"V":"positive","N":"positive","m":"positive","h":"positive","T":"positive"},
+  "dove":"02","appare":"\\dfrac{V}{N\\lambda^3}"},
+ {"tipo":"simbolico","dove":"02","appare":"\\log\\frac{V}{N\\lambda^3}+\\frac52",
+  "perche":"e' l'entropia PER PARTICELLA, cioe' la Sackur-Tetrode gia' asserita qui sopra divisa per $N$: una riscrittura della stessa formula, non un conto nuovo"},
+ {"tipo":"uguale","sinistra":"sqrt(2*m*E)/m","vale":"sqrt(2*E/m)",
+  "ipotesi":{"m":"positive","E":"positive"},
+  "dove":"02","appare":"\\sqrt{2mE}/m"},
+ {"tipo":"uguale","sinistra":"2*m/sqrt(2*m*E)","vale":"sqrt(2*m/E)",
+  "ipotesi":{"m":"positive","E":"positive"},
+  "dove":"02","appare":"\\sqrt{\\frac{2m}{E}}"},
+ {"tipo":"integrale","espr":"sqrt(2*m/E)","var":"E","da":"a","a":"b",
+  "vale":"2*sqrt(2*m)*(sqrt(b)-sqrt(a))",
+  "ipotesi":{"m":"positive","a":"positive","b":"positive","E":"positive"},
+  "dove":"02","appare":"2L\\sqrt{2m}\\left(\\sqrt{E_{n+1}}-\\sqrt{E_n}\\right)"},
+ {"tipo":"uguale","sinistra":"sqrt(hbar**2*pi**2*n**2/(2*m*L**2))","vale":"pi*hbar*n/(L*sqrt(2*m))",
+  "ipotesi":{"hbar":"positive","n":"positive","m":"positive","L":"positive"},
+  "dove":"02","appare":"\\dfrac{\\pi\\hbar\\,n}{L\\sqrt{2m}}"},
+ {"tipo":"uguale",
+  "sinistra":"sqrt(hbar**2*pi**2*(n+1)**2/(2*m*L**2))-sqrt(hbar**2*pi**2*n**2/(2*m*L**2))",
+  "vale":"pi*hbar/(L*sqrt(2*m))",
+  "ipotesi":{"hbar":"positive","n":"positive","m":"positive","L":"positive"},
+  "dove":"02","appare":"\\frac{\\pi\\hbar}{L\\sqrt{2m}}"},
+ {"tipo":"simbolico","dove":"02","appare":"\\Delta\\Gamma=2\\pi\\hbar=h",
+  "perche":"e' il risultato del conto precedente riscritto con la definizione $h=2\\pi\\hbar$: un cambio di simbolo per la stessa quantita', non un conto"},
+ {"tipo":"limite","espr":"log(T**Rational(3,2))","var":"T","a":"0","vale":"-oo",
+  "ipotesi":{"T":"positive"},"dove":"02","appare":"-\\infty"},
+ {"tipo":"numero","espr":"exp(-Rational(5,2))","vale":"0.082","dove":"02","appare":"0{,}082"},
+ {"tipo":"simbolico","dove":"02","appare":"N/V",
+  "perche":"e' l'uguaglianza delle densita' fra le due parti e il tutto, cioe' l'IPOTESI del problema (gas identici alla stessa densita'), non il risultato di un conto"},
+
+ {"tipo":"simbolico","dove":"03","appare":"N\\,\\frac{e^{-\\beta H(\\mathbf x,\\mathbf p)}}{z_1}",
+  "perche":"e' la definizione della statistica di Maxwell-Boltzmann come numero medio di occupazione di uno stato di singola particella (Grilli-Giardina pag. 54), ottenuta semplificando gli N-1 integrali identici sopra e sotto: una definizione, non un valore calcolato"},
+ {"tipo":"uguale","sinistra":"1/sqrt(2*pi*m*T)**3","vale":"(2*pi*m*T)**Rational(-3,2)",
+  "ipotesi":{"m":"positive","T":"positive"},
+  "dove":"03","appare":"(2\\pi mT)^{-3/2}\\,e^{-\\beta p^2/2m}"},
+ {"tipo":"limite","espr":"(1-a/N)**(3*N/2)","var":"N","a":"oo","vale":"exp(-3*a/2)",
+  "ipotesi":{"N":"positive","a":"positive"},"dove":"03","appare":"e^{-3a/2}"},
+ {"tipo":"derivata","espr":"3*N/2*log(E)","rispetto":["E"],"vale":"3*N/(2*E)",
+  "ipotesi":{"N":"positive","E":"positive"},
+  "dove":"03","appare":"\\frac{3N}{2E}"},
+ {"tipo":"uguale","sinistra":"3/(2*(1/T))","vale":"3*T/2","ipotesi":{"T":"positive"},
+  "dove":"03","appare":"\\frac32T"},
+ {"tipo":"uguale","sinistra":"3*(p**2/(2*m*(3*T/2)))/2","vale":"p**2/(2*m*T)",
+  "ipotesi":{"p":"positive","m":"positive","T":"positive"},
+  "dove":"03","appare":"\\frac{p^2}{2mT}"},
+
+ {"tipo":"derivata","espr":"v**2*exp(-m*v**2/(2*T))","rispetto":["v"],
+  "vale":"(2*v - m*v**3/T)*exp(-m*v**2/(2*T))",
+  "ipotesi":{"m":"positive","T":"positive","v":"positive"},
+  "dove":"04","appare":"\\Big(2v-\\frac{mv^3}{T}\\Big)e^{-mv^2/2T}"},
+ {"tipo":"integrale","espr":"v**3*exp(-m*v**2/(2*T))","var":"v","da":"0","a":"oo",
+  "vale":"2*T**2/m**2","ipotesi":{"m":"positive","T":"positive","v":"positive"},
+  "dove":"04","appare":"\\frac{2T^2}{m^2}"},
+ {"tipo":"uguale","sinistra":"4*pi*(m/(2*pi*T))**Rational(3,2)*2*T**2/m**2","vale":"sqrt(8*T/(pi*m))",
+  "ipotesi":{"m":"positive","T":"positive"},
+  "dove":"04","appare":"\\sqrt{\\frac{8T}{\\pi m}}"},
+ {"tipo":"integrale","espr":"v**4*exp(-m*v**2/(2*T))","var":"v","da":"0","a":"oo",
+  "vale":"3*sqrt(pi/2)*(T/m)**Rational(5,2)",
+  "ipotesi":{"m":"positive","T":"positive","v":"positive"},
+  "dove":"04","appare":"3\\sqrt{\\frac{\\pi}{2}}\\left(\\frac Tm\\right)^{5/2}"},
+ {"tipo":"uguale","sinistra":"4*pi*(m/(2*pi*T))**Rational(3,2)*3*sqrt(pi/2)*(T/m)**Rational(5,2)",
+  "vale":"3*T/m","ipotesi":{"m":"positive","T":"positive"},
+  "dove":"04","appare":"\\frac{3T}{m}"},
+ {"tipo":"uguale","sinistra":"4*pi*(m/(2*pi*T))**Rational(3,2)*3*sqrt(pi/2)*(T/m)**Rational(5,2)",
+  "vale":"3*T/m","ipotesi":{"m":"positive","T":"positive"},
+  "dove":"04","appare":"3T/m"},
+ {"tipo":"simbolico","dove":"04","appare":"\\tfrac32T",
+  "perche":"e' l'equipartizione per tre gradi di liberta' quadratici, enunciata qui come lettura del risultato $\\langle v^2\\rangle=3T/m$ asserito accanto: la sua dimostrazione e' nella tappa 05, qui e' un enunciato"},
+ {"tipo":"numero","espr":"sqrt(2)","vale":"1.414","dove":"04","appare":"1{,}414"},
+ {"tipo":"numero","espr":"sqrt(8/pi)","vale":"1.596","dove":"04","appare":"1{,}596"},
+ {"tipo":"numero","espr":"sqrt(3)","vale":"1.732","dove":"04","appare":"1{,}732"},
+
+ {"tipo":"simbolico","dove":"05","appare":"\\delta_{ij}T",
+  "perche":"e' l'enunciato del teorema di equipartizione nella forma generale di Crisanti (pag. 204): un teorema, il cui unico conto e' l'integrazione per parti svolta qui accanto e asserita come derivata del peso di Boltzmann"},
+ {"tipo":"derivata","espr":"exp(-b*H(p))","rispetto":["p"],
+  "vale":"-b*Derivative(H(p),p)*exp(-b*H(p))",
+  "ipotesi":{"b":"positive","H":"funzione"},
+  "dove":"05","appare":"-\\beta\\frac{\\partial H}{\\partial p_j}e^{-\\beta H}"},
+ {"tipo":"simbolico","dove":"05","appare":"\\frac Ts",
+  "perche":"e' l'equipartizione generalizzata a un termine di potenza s, cioe' l'inversione dell'uguaglianza $s\\langle H_s\\rangle=T$: un enunciato, non un conto"},
+ {"tipo":"uguale","sinistra":"sqrt(2*pi*m/b)*sqrt(2*pi/(b*m*w**2))/(2*pi*hbar)","vale":"1/(b*hbar*w)",
+  "ipotesi":{"m":"positive","b":"positive","w":"positive","hbar":"positive"},
+  "dove":"05","appare":"\\frac{1}{\\beta\\hbar\\omega}"},
+ {"tipo":"derivata","espr":"-log(beta)","rispetto":["beta"],"vale":"-1/beta",
+  "ipotesi":{"beta":"positive"},"dove":"05","appare":"-\\frac1\\beta"},
+ {"tipo":"uguale","sinistra":"N/(1/T)","vale":"N*T","ipotesi":{"N":"positive","T":"positive"},
+  "dove":"05","appare":"NT"},
+ {"tipo":"derivata","espr":"N*T","rispetto":["T"],"vale":"N",
+  "ipotesi":{"N":"positive","T":"positive"},"dove":"05","appare":"N"},
+ {"tipo":"limite","espr":"x**2*exp(x)/(exp(x)-1)**2","var":"x","a":"0","vale":"1",
+  "dove":"05","appare":"\\to 1"},
+ {"tipo":"limite","espr":"x**2*exp(x)/(exp(x)-1)**2","var":"x","a":"oo","vale":"0",
+  "dove":"05","appare":"\\to 0"},
+
+ {"tipo":"simbolico","dove":"06","appare":"\\frac{e^{-\\beta\\varepsilon}}{z_1}\\,G(\\varepsilon)",
+  "perche":"e' la densita' di probabilita' dell'energia: la delta impone $H=\\varepsilon$, il peso di Boltzmann esce dall'integrale e cio' che resta si CHIAMA $G(\\varepsilon)$. E' una definizione, non un valore calcolato"},
+ {"tipo":"derivata","espr":"V*4*pi/3*(2*m*e)**Rational(3,2)/h**3","rispetto":["e"],
+  "vale":"4*pi*V*m*sqrt(2*m*e)/h**3",
+  "ipotesi":{"V":"positive","m":"positive","e":"positive","h":"positive"},
+  "dove":"06","appare":"\\frac{4\\pi Vm}{h^3}\\sqrt{2m\\varepsilon}"},
+ {"tipo":"derivata","espr":"A*pi*2*m*e/h**2","rispetto":["e"],"vale":"2*pi*A*m/h**2",
+  "ipotesi":{"A":"positive","m":"positive","e":"positive","h":"positive"},
+  "dove":"06","appare":"\\frac{2\\pi Am}{h^2}"},
+ {"tipo":"derivata","espr":"2*L*sqrt(2*m*e)/h","rispetto":["e"],"vale":"L*sqrt(2*m/e)/h",
+  "ipotesi":{"L":"positive","m":"positive","e":"positive","h":"positive"},
+  "dove":"06","appare":"\\frac{L}{h}\\sqrt{\\frac{2m}{\\varepsilon}}"},
+ {"tipo":"derivata","espr":"sqrt(e)*exp(-b*e)","rispetto":["e"],
+  "vale":"(1/(2*sqrt(e)) - b*sqrt(e))*exp(-b*e)",
+  "ipotesi":{"e":"positive","b":"positive"},
+  "dove":"06","appare":"\\Big(\\frac{1}{2\\sqrt\\varepsilon}-\\beta\\sqrt\\varepsilon\\Big)e^{-\\beta\\varepsilon}"},
+ {"tipo":"uguale","sinistra":"1/(2*(1/T))","vale":"T/2","ipotesi":{"T":"positive"},
+  "dove":"06","appare":"\\frac T2"},
+ {"tipo":"numero","espr":"5.04e-11/1e-2/1e-9","vale":"5.04","dove":"06","appare":"5{,}04"},
+
+ {"tipo":"uguale","sinistra":"sqrt(2*m*(3*T/2))","vale":"sqrt(3*m*T)",
+  "ipotesi":{"m":"positive","T":"positive"},"dove":"07","appare":"\\sqrt{3mT}"},
+ {"tipo":"uguale","sinistra":"2*pi*hbar/sqrt(2*pi*m*T)","vale":"sqrt(2*pi*hbar**2/(m*T))",
+  "ipotesi":{"hbar":"positive","m":"positive","T":"positive"},
+  "dove":"07","appare":"\\sqrt{\\frac{2\\pi\\hbar^2}{mT}}"},
+ {"tipo":"numero","espr":"sqrt(2*pi/3)","vale":"1.447","dove":"07",
+  "appare":"\\sqrt{\\frac{2\\pi}{3}}\\approx1{,}447"},
+ {"tipo":"derivata","espr":"-N*T*log(z)+N*T*log(N)-N*T","rispetto":["N"],
+  "vale":"-T*log(z)+T*log(N)",
+  "ipotesi":{"N":"positive","T":"positive","z":"positive"},
+  "dove":"07","appare":"-T\\log z_1+T\\log N"},
+ {"tipo":"simbolico","dove":"07","appare":"n\\lambda^3",
+  "perche":"e' $N/z_1$ riscritto con $z_1=V/\\lambda^3$ e $n=N/V$: una sostituzione di notazione che da' alla fugacita' il suo nome fisico, non un conto"},
+
+ {"tipo":"numero","espr":"1.013e5/(1.381e-23*300)/1e25","vale":"2.445","dove":"08","appare":"2{,}45"},
+ {"tipo":"numero","espr":"6.626e-34/sqrt(2*pi*6.642e-27*1.381e-23*300)/1e-11","vale":"5.039",
+  "dove":"08","appare":"5{,}04"},
+ {"tipo":"numero","espr":"(1.013e5/(1.381e-23*300))**(-Rational(1,3))/1e-9","vale":"3.445",
+  "dove":"08","appare":"3{,}45"},
+ {"tipo":"numero",
+  "espr":"(1.013e5/(1.381e-23*300))*(6.626e-34/sqrt(2*pi*6.642e-27*1.381e-23*300))**3/1e-6",
+  "vale":"3.129","dove":"08","appare":"3{,}13\\times10^{-6}"},
+ {"tipo":"numero",
+  "espr":"(6.626e-34/sqrt(2*pi*6.642e-27*1.381e-23*300))*(1.013e5/(1.381e-23*300))**Rational(1,3)",
+  "vale":"0.0146","dove":"08","appare":"0{,}0146"},
+ {"tipo":"numero",
+  "espr":"(2*pi*(1.0546e-34)**2/6.642e-27)*(1.013e5/(1.381e-23*300))**Rational(2,3)/1.381e-23",
+  "vale":"0.064","dove":"08","appare":"0{,}064"},
+ {"tipo":"numero","espr":"6.626e-34/sqrt(2*pi*9.109e-31*1.381e-23*300)/1e-9","vale":"4.30",
+  "dove":"08","appare":"4{,}30"},
+ {"tipo":"numero","espr":"(8.5e28)**(-Rational(1,3))/1e-10","vale":"2.274","dove":"08",
+  "appare":"2{,}27"},
+ {"tipo":"numero","espr":"8.5e28*(6.626e-34/sqrt(2*pi*9.109e-31*1.381e-23*300))**3/1e3",
+  "vale":"6.772","dove":"08","appare":"6{,}77\\times10^{3}"},
+ {"tipo":"numero",
+  "espr":"(6.626e-34/sqrt(2*pi*9.109e-31*1.381e-23*300))*(8.5e28)**Rational(1,3)",
+  "vale":"18.92","dove":"08","appare":"18{,}9"},
+ {"tipo":"numero",
+  "espr":"(2*pi*(1.0546e-34)**2/9.109e-31)*(8.5e28)**Rational(2,3)/1.381e-23/1e5",
+  "vale":"1.074","dove":"08","appare":"1{,}07"},
+ {"tipo":"numero",
+  "espr":"(2*pi*(1.0546e-34)**2/9.109e-31)*(1e28)**Rational(2,3)/1.381e-23/1e4",
+  "vale":"2.578","dove":"08","appare":"2{,}58"},
+ {"tipo":"numero","espr":"6.626e-34/sqrt(2*pi*1.4446e-25*1.381e-23*5e-7)/1e-7","vale":"2.647",
+  "dove":"08","appare":"2{,}65"},
+ {"tipo":"numero","espr":"(1e20)**(-Rational(1,3))/1e-7","vale":"2.154","dove":"08",
+  "appare":"2{,}15"},
+ {"tipo":"numero","espr":"1e20*(6.626e-34/sqrt(2*pi*1.4446e-25*1.381e-23*5e-7))**3","vale":"1.854",
+  "dove":"08","appare":"1{,}85"},
+ {"tipo":"numero","espr":"zeta(Rational(3,2))","vale":"2.612","dove":"08","appare":"2{,}612"},
+
+ {"tipo":"simbolico","dove":"09","appare":"z\\,e^{-\\beta\\varepsilon}",
+  "perche":"e' $e^{-\\beta(\\varepsilon-\\mu)}$ riscritto con la definizione di fugacita' $z=e^{\\beta\\mu}$: un cambio di notazione, non un conto"},
+ {"tipo":"integrale","espr":"y**Rational(3,2)*exp(-y)","var":"y","da":"0","a":"oo",
+  "vale":"3*sqrt(pi)/4","ipotesi":{"y":"positive"},
+  "dove":"09","appare":"\\frac{3\\sqrt\\pi}{4}"},
+ {"tipo":"integrale","espr":"y**Rational(3,2)*exp(-2*y)","var":"y","da":"0","a":"oo",
+  "vale":"3*sqrt(pi)/(4*2**Rational(5,2))","ipotesi":{"y":"positive"},
+  "dove":"09","appare":"\\frac{1}{2^{5/2}}\\cdot\\frac{3\\sqrt\\pi}{4}"},
+ {"tipo":"numero","espr":"1/2**Rational(5,2)","vale":"0.177","dove":"09","appare":"0{,}177"},
+ {"tipo":"uguale","sinistra":"2*(3*N*T/2)/3","vale":"N*T","ipotesi":{"N":"positive","T":"positive"},
+  "dove":"09","appare":"NT"},
+ {"tipo":"simbolico","dove":"09","appare":"\\frac{\\rho h^3}{2(2\\pi mk_BT)^{3/2}}",
+  "perche":"e' la fugacita' classica nella convenzione con k_B esplicito e con il fattore 2 della degenerazione di spin (Falcioni-Vulpiani eq. 5.14), cioe' $n\\lambda^3/g_s$ scritto nell'altra grammatica: una traduzione di notazione, non un conto"},
+
+ {"tipo":"simbolico","dove":"10","appare":"\\Gamma\\!\\left(\\frac3b\\right)",
+  "perche":"e' la definizione integrale della funzione Gamma di Eulero, riconosciuta dopo il cambio di variabile: una definizione citata, non un conto"},
+ {"tipo":"integrale","espr":"y**2*exp(-y)","var":"y","da":"0","a":"oo","vale":"2",
+  "ipotesi":{"y":"positive"},"dove":"10","appare":"\\Gamma(3)=2"},
+ {"tipo":"derivata","espr":"-3/b*log(beta)","rispetto":["beta"],"vale":"-3/(b*beta)",
+  "ipotesi":{"b":"positive","beta":"positive"},
+  "dove":"10","appare":"-\\frac{3}{b\\beta}"},
+ {"tipo":"uguale","sinistra":"3*N/(b*(1/T))","vale":"3*N*T/b",
+  "ipotesi":{"N":"positive","T":"positive","b":"positive"},
+  "dove":"10","appare":"\\frac{3NT}{b}"},
+ {"tipo":"derivata","espr":"-(-N*T*log(V))","rispetto":["V"],"vale":"N*T/V",
+  "ipotesi":{"N":"positive","T":"positive","V":"positive"},
+  "dove":"10","appare":"\\frac{NT}{V}"},
+ {"tipo":"integrale","espr":"exp(-b*m*g*z)","var":"z","da":"0","a":"oo","vale":"1/(b*m*g)",
+  "ipotesi":{"b":"positive","m":"positive","g":"positive","z":"positive"},
+  "dove":"10","appare":"\\frac{1}{\\beta mg}"},
+ {"tipo":"derivata","espr":"-5/2*log(beta)","rispetto":["beta"],"vale":"-5/(2*beta)",
+  "ipotesi":{"beta":"positive"},"dove":"10","appare":"-\\frac{5}{2\\beta}"},
+ {"tipo":"uguale","sinistra":"5*N/(2*(1/T))","vale":"5*N*T/2",
+  "ipotesi":{"N":"positive","T":"positive"},
+  "dove":"10","appare":"\\tfrac52NT"},
+ {"tipo":"derivata","espr":"5*N*T/2","rispetto":["T"],"vale":"5*N/2",
+  "ipotesi":{"N":"positive","T":"positive"},"dove":"10","appare":"\\tfrac52N"},
+ {"tipo":"uguale","sinistra":"3*(T/2)+T","vale":"5*T/2","ipotesi":{"T":"positive"},
+  "dove":"10","appare":"\\tfrac52T"},
+ {"tipo":"uguale","sinistra":"2*(3*N*T/2)/3","vale":"N*T","ipotesi":{"N":"positive","T":"positive"},
+  "dove":"10","appare":"NT"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Meccanica Statistica · voce A.9 · il gas perfetto, e il confine oltre il quale la statistica classica non vale piu',
+  blocchi:[
+  {t:'prosa', title:'Tre formule che valgono quasi sempre, e il quasi e il contenuto', tag:'architettura', html:R`
+  <p>Il gas perfetto classico è il primo sistema che la meccanica statistica risolve <i>per intero</i>, ed è anche l&rsquo;ultimo di cui si possa dire che vale sempre. Ogni esercizio che cominci con «$N$ particelle non interagenti in un volume $V$ a temperatura $T$» finisce, per una strada o per l&rsquo;altra, su tre formule: l&rsquo;equazione di stato $pV=NT$, l&rsquo;energia $E=\tfrac32NT$, l&rsquo;entropia di Sackur-Tetrode. Sono formule che si imparano in mezz&rsquo;ora e si usano per tre anni.</p>
+  <p>Il punto di questo movimento è che <b>non valgono sempre</b>, e che il corso chiede di saperlo dire con un numero. Gli elettroni di conduzione di un rame a temperatura ambiente sono un gas di particelle quasi libere, con la stessa hamiltoniana $H=\sum_i p_i^2/2m$ del gas perfetto: eppure il loro calore specifico non è $\tfrac32Nk_B$, non lo è nemmeno per ordine di grandezza, e nessuna correzione di interazione può salvare il conto. Il motivo non è l&rsquo;interazione: è che quel gas <b>non è classico</b>. La quantità che lo decide è una sola, e si scrive</p>
+  <p style="text-align:center"><b>$n\lambda^3\ll1$, dove $\lambda=\dfrac{h}{\sqrt{2\pi mT}}$ è la lunghezza termica di de Broglie e $n=N/V$ la densità.</b></p>
+  <p>Non è uno slogan: è una <b>disuguaglianza da verificare sui numeri del problema</b>. Per l&rsquo;elio a temperatura ambiente vale circa $3\times10^{-6}$, e il gas è classico con sei ordini di margine; per gli elettroni del rame vale circa $7\times10^{3}$, e la statistica classica è sbagliata di quattro ordini; per un gas di rubidio nelle trappole ottiche vale circa uno, ed è esattamente lì che si accende il condensato di Bose-Einstein. I tre casi li facciamo per esteso, con le costanti dentro.</p>
+  <div class="note"><b>Due convenzioni, dichiarate subito, perché le tre fonti non concordano.</b> Seguendo le note di Crisanti (docente del terzo canale) e quelle di Grilli-Giardina poniamo $k_B=1$: allora $\beta=1/T$, la temperatura è un&rsquo;energia, l&rsquo;entropia è un numero puro e la relazione ponte con la termodinamica è $F=-T\log Z$. Falcioni-Vulpiani tengono invece $k_B$ esplicito ($\beta=1/k_BT$) e scrivono, per esempio, $S=Nk_B[\cdots]$: dove riporto una loro formula lo dichiaro. Nelle due tappe in cui si fanno i <b>numeri</b> — il criterio di validità e gli esercizi — $k_B$ torna esplicito per forza, perché un criterio si verifica in unità SI e non in unità naturali.</div>`},
+  {t:'prosa', title:'Come e fatto il movimento', tag:'architettura', html:R`
+  <p><b>La rotta, e perché è questa.</b> Si comincia costruendo il gas perfetto nel canonico fino in fondo: la partizione di <i>una</i> particella, quella di $N$, l&rsquo;energia libera, e da lì $pV=NT$ <i>ricavata</i> e non citata. Subito dopo arriva la prima anomalia: nel conteggio degli stati compaiono due oggetti che nessuno ha chiesto — un fattore $1/N!$ e un fattore $1/h^{3N}$ — e senza di loro l&rsquo;entropia non è estensiva (paradosso di Gibbs) e non è nemmeno adimensionale. È il primo segnale che <b>la meccanica classica non si chiude da sola</b>.</p>
+  <p>Poi la distribuzione di Maxwell-Boltzmann, ricavata due volte: per marginalizzazione dalla densità canonica, che è la strada corta, e per marginalizzazione <i>esatta</i> dal microcanonico, che è la strada di Falcioni-Vulpiani e mostra la gaussiana come un <b>limite</b> $N\to\infty$ e non come un postulato. Da lì le tre velocità e il conto che le distingue, l&rsquo;equipartizione con la sua dimostrazione e i tre modi in cui fallisce, la densità degli stati come macchina che traduce somme in integrali — con la condizione sotto cui la traduzione è lecita, che è il punto in cui nasce la condensazione di Bose.</p>
+  <p>Le ultime tre tappe sono il cuore d&rsquo;esame: da dove viene $\lambda$ e perché proprio quella combinazione di $h$, $m$ e $T$; il criterio $n\lambda^3\ll1$ con i tre casi numerici; e infine le tre statistiche — Maxwell-Boltzmann, Fermi-Dirac, Bose-Einstein — viste collassare sulla stessa curva quando la temperatura sale, che è la figura che l&rsquo;ultima domanda di ogni esercizio quantistico chiede di saper disegnare a parole.</p>`}
+]},
+
+/* ---------------- 01 · IL GAS PERFETTO NEL CANONICO ---------------- */
+{ num:'01', title:'Il gas perfetto nel canonico: da una particella a N, e da N alla equazione di stato', meta:'partizione di singola particella · integrale gaussiano · energia libera · pressione ed energia ricavate',
+  blocchi:[
+  {t:'reveal', title:'Dalla partizione di una particella a quella di N', tag:'costruzione', steps:[
+   {label:'La fattorizzazione, e cosa la rende possibile', body:R`
+   <p>Un gas perfetto è definito da un&rsquo;unica proprietà: le particelle <b>non interagiscono</b>, cioè l&rsquo;hamiltoniana è una somma di termini di singola particella, $H=\sum_{i=1}^N H_i$ con $H_i=p_i^2/2m$. Non serve altro — né che le particelle siano puntiformi, né che il gas sia rarefatto in senso geometrico: serve che nell&rsquo;esponenziale di Boltzmann non compaiano termini incrociati. Quando questo è vero, $e^{-\beta H}=\prod_i e^{-\beta H_i}$ e l&rsquo;integrale su $6N$ variabili si spezza nel prodotto di $N$ integrali identici su $6$:</p>
+   $$Z_N=\int\frac{d^{3N}q\,d^{3N}p}{h^{3N}N!}\,e^{-\beta H}=\frac{z_1^N}{N!}$$
+   <p>dove $z_1$ è la <b>funzione di partizione di singola particella</b>. I due fattori al denominatore — l&rsquo;$h^{3N}$ e l&rsquo;$N!$ — li abbiamo scritti senza giustificarli, ed è di proposito: sono gli ospiti non invitati della tappa seguente. Per ora basta osservare che nessuno dei due dipende da $T$ o da $V$, quindi nessuno dei due può cambiare l&rsquo;equazione di stato. Grilli-Giardina (pag. 56) arriva a questa stessa $Z=z_1^N/N!$ discutendo esplicitamente che la divisione per $N!$ è il modo classico, e approssimato, di tenere conto della indistinguibilità.</p>`},
+   {label:'Tre integrali gaussiani, e una lunghezza che compare da sola', body:R`
+   <p>Calcoliamo $z_1$. L&rsquo;integrale sulle posizioni dà semplicemente il volume, perché l&rsquo;hamiltoniana non dipende da $\mathbf q$; quello sugli impulsi si spezza in tre copie dello stesso integrale unidimensionale:</p>
+   $$z_1=\int\frac{d^3q\,d^3p}{h^3}\,e^{-\beta p^2/2m}$$
+   <p>e ciascuna delle tre copie è un <span class="str" data-str="integrale-gaussiano">integrale gaussiano</span> di varianza pari a $m/\beta$, cioè $mT$:</p>
+   $$\int_{-\infty}^{+\infty}dp_x\,e^{-\beta p_x^2/2m}=\sqrt{\frac{2\pi m}{\beta}}$$
+   <p>Mettendo insieme volume e impulsi,</p>
+   $$z_1=\frac{V}{h^3}\left(\frac{2\pi m}{\beta}\right)^{3/2}$$
+   <p>Ora si guardi la struttura di questo risultato, perché è il seme di tutto il movimento. La quantità $h/\sqrt{2\pi mT}$ ha le dimensioni di una <b>lunghezza</b>: $h$ è un&rsquo;azione, $\sqrt{mT}$ è un impulso, e azione diviso impulso è una lunghezza. Chiamiamola $\lambda$, come fanno tutte e tre le fonti, e vediamo cosa diventa $z_1$:</p>
+   $$\lambda\equiv\frac{h}{\sqrt{2\pi mT}}$$
+   $$\lambda^3=\frac{h^3}{(2\pi mT)^{3/2}}\qquad z_1=\frac{V}{\lambda^3}$$
+   <p>La partizione di una particella <b>è il numero di celle di volume $\lambda^3$ che stanno dentro $V$</b>. È una lettura che fra poche tappe diventerà il criterio di validità di tutta la teoria; per ora è solo un&rsquo;osservazione dimensionale, ed è già abbastanza notevole che una teoria classica produca una lunghezza in cui compare la costante di Planck.</p>`},
+   {label:'Stirling, e la forma definitiva della energia libera', body:R`
+   <p>Da $Z_N=z_1^N/N!$ segue $\log Z_N=N\log z_1-\log N!$, e il fattoriale si tratta con l&rsquo;<span class="str" data-str="stirling">approssimazione di Stirling</span> nella forma che serve qui, $\log N!\simeq N\log N-N=N\log(N/e)$:</p>
+   $$\log Z_N=N\log z_1-\log N!\simeq N\log\frac{z_1e}{N}$$
+   <p>Vale la pena vedere <i>quanto</i> sia buona questa approssimazione, perché è la stessa che regge tutte le formule seguenti. Già per $N=100$ il logaritmo esatto del fattoriale vale circa $363{,}7$, e lo scarto dalla forma di Stirling è $\log(100!)-(100\log100-100)=3{,}222$ — meno dell&rsquo;uno per cento. E il margine migliora senza limite, perché <b>lo scarto cresce come $\log N$ mentre il termine principale cresce come $N$</b>: per $N$ dell&rsquo;ordine del numero di Avogadro l&rsquo;errore relativo è dell&rsquo;ordine di $10^{-22}$.</p>
+   <p>Il passaggio da $Z$ a $F$ è la definizione stessa dell&rsquo;energia libera di Helmholtz nel canonico, $F=-T\log Z$, e dà</p>
+   $$F=-T\log Z_N=-NT\log\left(\frac{V}{N\lambda^3}\,e\right)$$
+   <p>Questa è la forma da memorizzare, e vale la pena notare <b>cosa ci sta dentro e cosa no</b>: dentro c&rsquo;è il volume <i>per particella</i> $V/N$, non $V$ — ed è proprio l&rsquo;$N!$ ad averlo messo lì. Senza quel fattore avremmo $F=-NT\log(V/\lambda^3)$, e l&rsquo;energia libera non sarebbe estensiva. Da $F$ si legge tutta la termodinamica derivando.</p>`}
+  ]},
+  {t:'prosa', title:'Pressione, energia, calore specifico: tre derivate', tag:'costruzione', html:R`
+  <p><b>La pressione.</b> È la derivata di $F$ rispetto al volume, cambiata di segno. Nella $F$ appena scritta l&rsquo;unica dipendenza da $V$ è il termine $-NT\log V$, quindi</p>
+  $$P=-\left(\frac{\partial F}{\partial V}\right)_{T,N}=-\frac{\partial}{\partial V}\big(-NT\log V\big)=\frac{NT}{V}$$
+  <p>cioè $PV=NT$. <b>Questa è l&rsquo;equazione di stato dei gas perfetti, ricavata e non citata</b>, e conviene fermarsi un attimo su quanto poco sia servito: è bastato che $F$ contenesse $V$ dentro un logaritmo, con coefficiente $-NT$. Crisanti (pag. 211) fa notare che questo accade per <i>ogni</i> hamiltoniana di singola particella della forma $H_i=a|\mathbf p_i|^b$, perché il volume esce sempre dall&rsquo;integrale sulle posizioni allo stesso modo: la relazione $PV=NT$ non dipende dallo spettro, dipende solo dal fatto che le particelle non interagiscono.</p>
+  <p><b>L&rsquo;energia.</b> Si legge derivando $\log Z_N$ rispetto a $\beta$. La sola parte che dipende da $\beta$ è $-\tfrac{3N}{2}\log\beta$, dunque</p>
+  $$\frac{\partial\log Z_N}{\partial\beta}=-\frac{3N}{2\beta}$$
+  <p>e quindi</p>
+  $$E=-\frac{\partial\log Z_N}{\partial\beta}=\frac{3N}{2\beta}=\frac32NT$$
+  <p>Tre mezzi di $T$ per particella: tre gradi di libertà quadratici, mezzo $T$ ciascuno. È il primo incontro con l&rsquo;equipartizione, che dimostreremo nella tappa 05 invece di invocarla. <b>Il calore specifico</b> segue subito:</p>
+  $$C_V=\left(\frac{\partial E}{\partial T}\right)_{V}=\frac32N$$
+  <p>costante, indipendente da $T$ e dalla massa. È una previsione forte e verificabile, ed è anche il punto in cui la teoria classica si fa prendere in castagna: il calore specifico dei gas reali <i>non</i> è costante, quello dell&rsquo;idrogeno molecolare passa da $\tfrac32N$ a $\tfrac52N$ a $\tfrac72N$ salendo in temperatura, e il gas di elettroni di un metallo ha un contributo elettronico cento volte più piccolo di $\tfrac32N$. Di queste smentite la prima la spiega la tappa 05, la seconda la tappa 08.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In $Z_N=z_1^N/N!$ il fattore $1/N!$ non dipende né da $T$ né da $V$. Perché allora non è irrilevante?`,
+    a:R`Perché <b>dipende da $N$</b>, e le grandezze che si ottengono derivando rispetto a $N$ — il potenziale chimico $\mu=(\partial F/\partial N)_{T,V}$ — cambiano. E cambia soprattutto la <b>struttura</b> di $F$: senza $N!$ l&rsquo;energia libera contiene $\log V$ invece di $\log(V/N)$, e non è più estensiva. Il criterio invocato è che $P$ ed $E$ si ottengono derivando a $N$ fissato, e lì un termine indipendente da $T$ e $V$ muore; ma l&rsquo;estensività è una proprietà di come $F$ scala con $N$ e $V$ <i>insieme</i>, e lì il termine non muore affatto. È esattamente il contenuto del paradosso di Gibbs, nella prossima tappa.`}
+  ]}
+]},
+
+/* ---------------- 02 · IL CONTEGGIO DI BOLTZMANN ---------------- */
+{ num:'02', title:'Il conteggio di Boltzmann: il fattore N fattoriale, Gibbs, Sackur-Tetrode e la costante di Planck', meta:'entropia non estensiva · il paradosso del mescolamento · la cella semiclassica di volume h · il terzo principio violato',
+  blocchi:[
+  {t:'prosa', title:'Il conto fatto senza N fattoriale, e cosa va storto', tag:'costruzione', html:R`
+  <p>Riprendiamo il gas perfetto dal lato microcanonico, dove il difetto si vede meglio. Contando il volume di spazio delle fasi accessibile a energia $E$ <b>senza</b> dividere per $N!$, e con $u\equiv E/N$ l&rsquo;energia per particella, Crisanti (pag. 174) e Grilli-Giardina (pag. 42) arrivano allo stesso risultato:</p>
+  $$S=\log\Gamma=N\log\!\big(Vu^{3/2}\big)+NS_0,\qquad S_0=\frac32\left[1+\log\frac{4\pi m}{3h^2}\right]$$
+  <p>Sembra tutto a posto: derivando rispetto a $E$ si ritrova $E=\tfrac32NT$, derivando rispetto a $V$ si ritrova $PV=NT$. Ma l&rsquo;entropia deve essere <b>estensiva</b>: raddoppiando insieme energia, volume e numero di particelle deve raddoppiare. Verifichiamolo. Raddoppiando tutto, $u$ non cambia (è un rapporto fra due quantità raddoppiate), e</p>
+  $$S(2E,2V,2N)-2S(E,V,N)=2N\log 2$$
+  <p>L&rsquo;entropia calcolata così <b>non è estensiva</b>: sbaglia di un termine proporzionale a $N$, cioè dello stesso ordine dell&rsquo;entropia stessa. Non è un errore piccolo che si corregge con un&rsquo;approssimazione migliore: è un errore strutturale, e il modo in cui si manifesta ha un nome.</p>`},
+  {t:'reveal', title:'Il paradosso di Gibbs, e la sua riparazione', tag:'costruzione', steps:[
+   {label:'Due gas che si mescolano', body:R`
+   <p>Si prendano due gas identici, $N_1$ particelle in $V_1$ e $N_2$ in $V_2$, alla stessa temperatura e alla stessa densità, separati da un setto. L&rsquo;entropia totale iniziale è la somma delle due. Si tolga il setto: ora ci sono $N=N_1+N_2$ particelle in $V=V_1+V_2$. La variazione di entropia, usando la formula senza $N!$, è</p>
+   $$\Delta S=N_1\log\frac{V}{V_1}+N_2\log\frac{V}{V_2}$$
+   <p>che è <b>positiva</b>. Nel caso di due gas <i>diversi</i> — argon e neon — questo è giusto e si misura: è l&rsquo;entropia di mescolamento. Ma il conto non sa nulla dell&rsquo;identità dei gas, e dà lo stesso risultato anche se i due gas sono <b>lo stesso gas</b>. Prendiamo il caso simmetrico, $V_1=V_2=V/2$ e $N_1=N_2=N/2$:</p>
+   $$\Delta S=\frac N2\log 2+\frac N2\log 2=N\log 2$$
+   <p>Cioè: infilando e sfilando un setto in un gas omogeneo l&rsquo;entropia crescerebbe di $N\log2$ ogni volta, e ripetendo l&rsquo;operazione la si farebbe crescere quanto si vuole senza cambiare nulla del sistema. Grilli-Giardina (pag. 42) lo dice nel modo più duro possibile: <i>l&rsquo;entropia non esiste</i>, perché si può sempre immaginare che lo stato presente del gas sia stato raggiunto togliendo un numero arbitrario di setti, e allora $S$ è più grande di qualunque numero.</p>`},
+   {label:'La correzione di Gibbs e il suo prezzo', body:R`
+   <p>Gibbs propose la riparazione minima: il conteggio degli stati è sbagliato di un fattore $N!$, e va diviso. Due stati che differiscono solo per lo scambio di due particelle dello stesso gas <b>non sono due stati</b>, perché le particelle sono indistinguibili, e contarli due volte è ciò che gonfia $\Gamma$.</p>
+   <p>Fatta la divisione, con Stirling nella forma $N!\simeq(N/e)^N$, l&rsquo;entropia acquista un $-N\log(N/e)$ e diventa</p>
+   $$S=N\log\!\left[\frac VN\left(\frac EN\right)^{3/2}e^{5/2}\left(\frac{4\pi m}{3h^2}\right)^{3/2}\right]$$
+   <p>che è l&rsquo;<b>equazione di Sackur-Tetrode</b> nella forma di Crisanti (pag. 175). Ora $V$ compare solo attraverso $V/N$, cioè il volume specifico, che è una quantità <i>intensiva</i>: raddoppiando tutto, l&rsquo;argomento del logaritmo non cambia e $S$ raddoppia. L&rsquo;estensività è ripristinata, e con essa sparisce il paradosso: mescolando gas identici alla stessa densità si ha $N_1/V_1=N_2/V_2=N/V$ e dunque $\Delta S=0$, mentre per gas diversi $\Delta S>0$ resta, perché lì $N_1$ e $N_2$ contano separatamente prima e dopo.</p>
+   <p><b>Il prezzo è che la riparazione non ha una giustificazione classica.</b> Grilli-Giardina (pag. 43) e Falcioni-Vulpiani (pag. 30) lo scrivono entrambi, con parole quasi uguali: non è possibile capire classicamente perché si debba dividere per $N!$; la ragione è intrinsecamente quantistica. Lo stato di $N$ particelle identiche è descritto da una funzione d&rsquo;onda simmetrica o antisimmetrica sotto scambio, e una permutazione al massimo ne cambia il segno — cioè non produce uno stato nuovo. È un debito che la meccanica classica contrae e non può pagare.</p>`},
+   {label:'La stessa entropia, dal canonico', body:R`
+   <p>Vale la pena ritrovare Sackur-Tetrode per l&rsquo;altra strada, perché è la strada degli esercizi. Nel canonico $S$ si ottiene dalla <span class="str" data-str="trasformata-di-legendre">trasformata di Legendre</span> che lega $F(T,V,N)$ a $S(E,V,N)$, cioè $S=-(\partial F/\partial T)_{V,N}$. Scrivendo l&rsquo;energia libera della tappa precedente come $F=-NT\left[\log A+\tfrac32\log T+1\right]$, dove $A\equiv\dfrac VN\left(\dfrac{2\pi m}{h^2}\right)^{3/2}$ raccoglie tutto ciò che non dipende da $T$,</p>
+   $$S=-\left(\frac{\partial F}{\partial T}\right)_{V,N}=\frac{\partial}{\partial T}\Big[NT\big(\log A+\tfrac32\log T+1\big)\Big]=N\log A+\tfrac32N\log T+\tfrac52N$$
+   <p>e siccome $AT^{3/2}=\dfrac{V}{N\lambda^3}$, questo è</p>
+   $$S=N\left[\log\frac{V}{N\lambda^3}+\frac52\right]$$
+   <p>che è Sackur-Tetrode nella forma più leggibile di tutte: <b>l&rsquo;entropia per particella è il logaritmo del numero di celle termiche disponibili per particella, più cinque mezzi</b>. Falcioni-Vulpiani (pag. 29, eq. 2.26) scrivono la stessa formula con $k_B$ esplicito davanti, $S=Nk_B\left[\ln\frac VN\left(\frac EN\right)^{3/2}+\frac52+\frac32\ln\frac{4\pi m}{3h^2}\right]$, e aggiungono il dato storico che qui conta più della formula: nel 1912 Sackur e Tetrode ricavarono quella costante <b>dai dati sperimentali sul mercurio</b> nelle fasi solida, liquida e gassosa, e trovarono che tornava se e solo se la costante che vi compare era la costante di Planck.</p>`}
+  ]},
+  {t:'prosa', title:'Perche proprio h al cubo: il conto che misura la cella', tag:'costruzione', html:R`
+  <p>Il secondo intruso è il fattore $1/h^{3N}$. Formalmente serve a rendere $\Gamma$ adimensionale — un volume di spazio delle fasi ha dimensioni di (azione)$^{3N}$, e dentro un logaritmo non ci può andare una quantità dimensionale. Ma questa è una giustificazione debole: andrebbe bene qualunque costante $c/h^{3N}$. Crisanti (pag. 227) pone la domanda giusta: <b>quanto vale $c$?</b> E la risponde con un conto, non con una convenzione.</p>
+  <p>Si prenda una particella in una buca unidimensionale di lato $L$. Quantisticamente i livelli sono $E_n=\dfrac{\hbar^2\pi^2}{2mL^2}n^2$, spaziati e numerabili: fra $E_n$ ed $E_{n+1}$ c&rsquo;è <i>esattamente uno</i> stato. Classicamente, il volume di spazio delle fasi compreso fra quelle due energie è</p>
+  $$\Delta\Gamma=\int_{E_n}^{E_{n+1}}\!dE\int dq\,dp\;\delta\!\left(E-\frac{p^2}{2m}\right)$$
+  <p>Si risolve la <span class="str" data-str="delta-di-dirac">delta di Dirac</span> sugli zeri del suo argomento: $p=\pm\sqrt{2mE}$, con $|f'(p)|=|p|/m=\sqrt{2mE}/m$, e i due zeri contribuiscono entrambi, dunque</p>
+  $$\frac{2m}{\sqrt{2mE}}=\sqrt{\frac{2m}{E}}$$
+  <p>L&rsquo;integrale sulle posizioni dà $L$, e resta un integrale elementare in $E$:</p>
+  $$\Delta\Gamma=L\int_{E_n}^{E_{n+1}}\!dE\,\sqrt{\frac{2m}{E}}=2L\sqrt{2m}\left(\sqrt{E_{n+1}}-\sqrt{E_n}\right)$$
+  <p>Resta da valutare la differenza delle radici, e qui lo spettro fa il regalo: $\sqrt{E_n}=\dfrac{\pi\hbar\,n}{L\sqrt{2m}}$ è <b>lineare in $n$</b>, quindi la differenza è indipendente da $n$:</p>
+  $$\sqrt{E_{n+1}}-\sqrt{E_n}=\frac{\pi\hbar}{L\sqrt{2m}}\qquad\Longrightarrow\qquad\Delta\Gamma=2\pi\hbar=h$$
+  <p>Il volume di spazio delle fasi che corrisponde a <b>uno</b> stato quantistico è esattamente $h$, per ogni grado di libertà. Dunque $c=1$: il fattore $h^{3N}$ non è una convenzione, è una misura. Crisanti rifà lo stesso conto per l&rsquo;oscillatore armonico, dove i livelli sono $E_n=(n+\tfrac12)\hbar\omega$ e l&rsquo;area dell&rsquo;ellisse fra due livelli consecutivi vale di nuovo $h$, e conclude che la corrispondenza è generale e non un accidente della buca.</p>
+  <p><b>Il punto da portare via</b> è la stranezza della situazione, non il risultato. Stiamo facendo meccanica statistica <i>classica</i>, e per far tornare l&rsquo;entropia abbiamo dovuto infilare due oggetti che la meccanica classica non contiene: una cella di volume $h$ per grado di libertà, che viene dal principio di indeterminazione, e una divisione per $N!$, che viene dalla simmetria della funzione d&rsquo;onda. La teoria classica <b>non si chiude da sola</b>. La domanda naturale — <i>e allora fino a quando posso fidarmi?</i> — è la domanda a cui rispondono le tappe 07 e 08.</p>`},
+  {t:'prosa', title:'Il secondo segnale: il terzo principio', tag:'grammatica', html:R`
+  <p>C&rsquo;è un secondo modo, più netto del primo, in cui Sackur-Tetrode denuncia il proprio limite di validità. Si guardi $S=N\left[\log\frac{V}{N\lambda^3}+\frac52\right]$ e si abbassi la temperatura. La lunghezza termica $\lambda\propto T^{-1/2}$ <b>cresce</b>, quindi $V/(N\lambda^3)$ decresce come $T^{3/2}$, e il logaritmo diverge:</p>
+  $$\lim_{T\to0^+}\log T^{3/2}=-\infty$$
+  <p>L&rsquo;entropia del gas perfetto classico tende a $-\infty$ per $T\to0$. Ma il <b>terzo principio</b> (teorema di Nernst) pretende che l&rsquo;entropia tenda a una costante finita, convenzionalmente zero: un sistema a temperatura nulla sta nel suo stato fondamentale, e se quello è non degenere $\Omega=1$ e $S=0$. La formula classica viola il terzo principio in modo plateale, e non per poco.</p>
+  <p>Vale la pena capire <b>dove</b> comincia il guaio, perché il punto in cui la formula sbaglia è esattamente il punto in cui il criterio di validità scatta. L&rsquo;entropia per particella $S/N=\log\frac{V}{N\lambda^3}+\frac52$ diventa negativa quando $\frac{V}{N\lambda^3}<e^{-5/2}\approx0{,}082$, cioè quando la densità in unità di volume termico $n\lambda^3$ diventa dell&rsquo;ordine di dieci. Non è una coincidenza: è lo stesso numero, $n\lambda^3$, che la tappa 08 troverà partendo da tutt&rsquo;altro — dalla richiesta che i numeri di occupazione degli stati siano molto minori di uno. <b>Due sintomi diversi, una sola malattia.</b></p>
+  <p>Per fare i conti seguenti ci serve però la distribuzione microscopica, non solo i potenziali termodinamici: bisogna sapere come si distribuiscono <i>le velocità</i> delle particelle. È la prossima tappa, e la faremo due volte.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se il fattore $1/N!$ non cambia né $P$ né $E$, in che senso è «il conteggio corretto» e non un aggiustamento cosmetico?`,
+    a:R`Perché ciò che deve essere corretto non è il valore di una derivata, ma la <b>classe di funzione</b> a cui $S$ appartiene: l&rsquo;entropia deve essere una funzione di stato omogenea di grado uno in $(E,V,N)$. Senza $N!$ non lo è, e la conseguenza osservabile è il paradosso di Gibbs — un&rsquo;operazione reversibile che produce entropia. Il criterio invocato è l&rsquo;<b>estensività</b>, che è un vincolo sulla forma funzionale e non sul valore in un punto; e infatti la correzione si vede nelle grandezze che derivano rispetto a $N$ (il potenziale chimico) e nelle differenze di entropia fra configurazioni con $N$ ripartito diversamente, non in $P$ ed $E$ a $N$ fissato.`},
+   {q:R`Il conto della cella semiclassica usa lo spettro quantistico della buca. Non è circolare, usare la quantistica per giustificare una costante della statistica classica?`,
+    a:R`È circolare solo se si pretende che la meccanica statistica classica sia autosufficiente — ed è esattamente quello che il conto dimostra <b>falso</b>. La struttura logica corretta è: la meccanica statistica classica è un <i>limite</i> di quella quantistica, e in quel limite sopravvive una traccia della teoria di partenza, cioè la dimensione della cella elementare. Il criterio da riconoscere è che $h$ entra in $S$ come <b>costante di normalizzazione del conteggio</b>, non come parametro dinamico: non compare in $P$, non compare in $E$, non compare in $C_V$ — compare solo dove si contano stati. Il che è anche il motivo per cui Sackur e Tetrode poterono misurarla da dati di entropia nel 1912, dodici anni dopo Planck e tredici prima di Heisenberg.`}
+  ]}
+]},
+
+/* ---------------- 03 · LA DISTRIBUZIONE DI MAXWELL-BOLTZMANN ---------------- */
+{ num:'03', title:'La distribuzione di Maxwell-Boltzmann, ricavata per marginalizzazione', meta:'la media canonica di una somma di delta · la marginalizzazione sugli impulsi · la via microcanonica esatta · la gaussiana come limite',
+  blocchi:[
+  {t:'prosa', title:'Che cosa si vuole calcolare, esattamente', tag:'grammatica', html:R`
+  <p>Fin qui abbiamo maneggiato potenziali termodinamici — $F$, $E$, $S$, $P$ — che sono numeri, uno per stato macroscopico. Ma la domanda che un esperimento pone al gas è più fine: <i>quante particelle</i>, in media, hanno impulso vicino a $\mathbf p$ e posizione vicina a $\mathbf x$? È la domanda a cui risponde la <b>distribuzione di Maxwell-Boltzmann</b>, ed è anche la prima quantità di questo corso che si possa misurare <i>direttamente</i>, particella per particella, invece che dedurre da un calorimetro.</p>
+  <p>Grilli-Giardina (pag. 53) la imposta nel modo più pulito che conosca, e vale la pena copiarne la mossa. Si definisce, sullo spazio delle fasi del sistema intero, una funzione che <i>conta</i>:</p>
+  $$n(\{\mathbf x_j,\mathbf p_j\}\,|\,\mathbf x,\mathbf p)=\sum_{i=1}^N\delta(\mathbf x_i-\mathbf x)\,\delta(\mathbf p_i-\mathbf p)$$
+  <p>Attenzione ai due tipi di variabile, perché è il punto in cui ci si confonde: $\mathbf x$ e $\mathbf p$ sono <b>parametri</b> in $\mathbb R^3$, il punto dello spazio di singola particella in cui stiamo guardando; $\{\mathbf x_j,\mathbf p_j\}$ è invece un punto dello spazio delle fasi completo, in $\mathbb R^{6N}$. La funzione $n$ vale, per ogni configurazione del gas, il numero di particelle che si trovano esattamente lì. La distribuzione di Maxwell-Boltzmann è la sua <b>media d&rsquo;insieme</b>.</p>`},
+  {t:'reveal', title:'La strada corta: marginalizzare la densita canonica', tag:'costruzione', steps:[
+   {label:'Le N particelle sono equivalenti, e questo riduce il conto a uno', body:R`
+   <p>Mediamo $n$ con la densità canonica. Siccome l&rsquo;hamiltoniana totale è simmetrica sotto scambio di particelle, gli $N$ addendi della somma danno tutti lo stesso integrale, e ne basta calcolare uno moltiplicato per $N$:</p>
+   $$\bar n(\mathbf x,\mathbf p)=\Big\langle\sum_{i=1}^N\delta(\mathbf x_i-\mathbf x)\delta(\mathbf p_i-\mathbf p)\Big\rangle=N\,\frac{\int d\Gamma\;\delta(\mathbf x_1-\mathbf x)\,\delta(\mathbf p_1-\mathbf p)\,e^{-\beta H_T}}{\int d\Gamma\;e^{-\beta H_T}}$$
+   <p>Ora, in un gas perfetto $H_T=\sum_iH_i$ e la misura $d\Gamma$ si fattorizza: tutti gli integrali sulle particelle $2,\dots,N$ compaiono identici sopra e sotto e si semplificano. Le due delta eliminano l&rsquo;integrazione sulla particella $1$, e resta soltanto il peso di Boltzmann di <i>una</i> particella, normalizzato dalla sua partizione. Contando in celle di volume $h^3$ — che è, per il conto della tappa precedente, il volume di spazio delle fasi di uno stato — si ottiene il <b>numero medio di occupazione di uno stato di singola particella</b>:</p>
+   $$n_{\rm MB}(\mathbf x,\mathbf p)\equiv\bar n(\mathbf x,\mathbf p)\,h^3=N\,\frac{e^{-\beta H(\mathbf x,\mathbf p)}}{z_1}$$
+   <p>Questa quantità è il protagonista silenzioso di tutto il movimento. Tenetela d&rsquo;occhio: <b>la statistica classica varrà esattamente finché $n_{\rm MB}\ll1$</b>, cioè finché è raro che due particelle si contendano lo stesso stato. Per ora prendiamone la versione normalizzata a uno, che è la densità di probabilità di singola particella $\rho_1=e^{-\beta H}/z_1$.</p>`},
+   {label:'Gli impulsi: la gaussiana', body:R`
+   <p>Per avere la distribuzione dei soli impulsi si <b>marginalizza</b>, cioè si integra via ciò che non interessa — qui le posizioni. Con $H=|\mathbf p|^2/2m+V(\mathbf x)$, l&rsquo;integrale sulle coordinate compare identico al numeratore e al denominatore e si cancella, e resta</p>
+   $$\rho_p(\mathbf p)=\int d^3x\,\rho_1(\mathbf x,\mathbf p)=\frac{e^{-\beta p^2/2m}}{\left(\int dp_x\,e^{-\beta p_x^2/2m}\right)^3}=(2\pi mT)^{-3/2}\,e^{-\beta p^2/2m}$$
+   <p>dove il denominatore è di nuovo il cubo dell&rsquo;<span class="str" data-str="integrale-gaussiano">integrale gaussiano</span> della tappa 01. Due letture, entrambe da tenere: (i) <b>la distribuzione degli impulsi non dipende dal potenziale</b> — è la stessa in un gas libero, in un gas in campo gravitazionale, in un gas dentro una buca: il potenziale sposta le particelle nello spazio, non nelle velocità; (ii) le tre componenti sono <b>indipendenti</b> e ciascuna è gaussiana con varianza $mT$, perché l&rsquo;esponenziale di una somma di quadrati è un prodotto di gaussiane.</p>`},
+   {label:'Le coordinate: il fattore di Boltzmann nello spazio', body:R`
+   <p>Marginalizzando invece sugli impulsi si ottiene la distribuzione spaziale, dove il potenziale c&rsquo;è tutto:</p>
+   $$\rho_x(\mathbf x)=\int d^3p\,\rho_1(\mathbf x,\mathbf p)=\frac{e^{-\beta V(\mathbf x)}}{\int d^3x'\,e^{-\beta V(\mathbf x')}}$$
+   <p>Per un gas libero $V=0$ e la densità è uniforme; per un gas in campo gravitazionale $V=mgz$ e si ottiene subito $\rho_x\propto e^{-\beta mgz}$, da cui, moltiplicando per $NT$, la <b>formula barometrica</b></p>
+   $$P(z)=P(0)\,e^{-\beta mgz}$$
+   <p>Crisanti la ricava due volte — una nel microcanonico imponendo la costanza del potenziale chimico lungo la colonna (pag. 176-178), e una nel canonico partendo proprio da questa marginalizzazione (pag. 206-207) — e la seconda strada è quattro volte più corta. Falcioni-Vulpiani (pag. 81) ricordano che è la formula che <b>Perrin misurò al microscopio</b> su granelli di gommagutta di massa nota sospesi in acqua, ricavandone il numero di Avogadro: la stessa legge statistica, verificata su oggetti visibili invece che su molecole.</p>`}
+  ]},
+  {t:'prosa', title:'La strada lunga: la gaussiana e un limite, non un postulato', tag:'costruzione', html:R`
+  <p>La derivazione appena fatta ha un difetto pedagogico: usa il canonico, cioè assume già che il gas sia a temperatura fissata da un bagno. Falcioni-Vulpiani (pag. 40-41) la rifanno <b>restando nel microcanonico</b>, e il risultato vale la fatica perché mostra che la maxwelliana non è la definizione di nulla: è un <i>limite</i>.</p>
+  <p>Si consideri un gas isolato di $N$ particelle libere con energia esattamente $E$, e si chieda la densità di probabilità di una singola particella. È di nuovo una marginalizzazione: si integra sullo stato delle altre $N-1$. Il risultato è il rapporto fra la densità degli stati delle $N-1$ particelle residue, che hanno a disposizione l&rsquo;energia $E-p^2/2m$, e quella dell&rsquo;intero sistema:</p>
+  $$\rho(\mathbf x,\mathbf p)=\frac{\omega\big(E-\tfrac{p^2}{2m},V,N-1\big)}{\omega(E,V,N)}$$
+  <p>Per il gas ideale $\omega$ si conosce in forma chiusa — è la superficie di una ipersfera di raggio $\sqrt{2mE}$ in $3N$ dimensioni — e il rapporto si scrive <b>esattamente</b>, per ogni $N$ finito:</p>
+  $$\rho(\mathbf x,\mathbf p)=\frac1V\,\frac{\Gamma\big(\tfrac32N\big)}{\Gamma\big(\tfrac32(N-1)\big)}\,\frac{1}{(2\pi mE)^{3/2}}\left(1-\frac{p^2}{2mE}\right)^{3N/2-5/2}$$
+  <p>valida per $|\mathbf p|\le\sqrt{2mE}$ e <b>zero oltre</b>. Ecco la prima cosa che la formula canonica nasconde: in un sistema isolato nessuna particella può avere più energia di tutto il gas, quindi la distribuzione esatta ha un <b>taglio netto</b>, mentre la gaussiana ha code infinite. Le due coincidono solo nel limite in cui le code contano zero.</p>
+  <p>Facciamo il limite. Per $N\gg1$ il $5/2$ nell&rsquo;esponente è trascurabile davanti a $3N/2$, il rapporto dei due gamma vale</p>
+  $$\frac{\Gamma\big(\tfrac32N\big)}{\Gamma\big(\tfrac32(N-1)\big)}\simeq\left(\frac{3N}{2}\right)^{3/2}$$
+  <p>e il fattore che porta tutta la fisica è la parentesi elevata a $3N/2$. Si tiene fissa l&rsquo;energia per particella $u=E/N$ mentre $N\to\infty$ — è il limite termodinamico, non un limite qualsiasi — e si riscrive $\dfrac{p^2}{2mE}$ nella forma $\dfrac aN$, con $a=\dfrac{p^2}{2mu}$. Allora entra in gioco il limite notevole che definisce l&rsquo;esponenziale:</p>
+  $$\lim_{N\to\infty}\left(1-\frac{a}{N}\right)^{3N/2}=e^{-3a/2}$$
+  <p>Resta da riconoscere l&rsquo;esponente. Nel microcanonico la temperatura si legge dall&rsquo;entropia, $S=\tfrac32N\log E+\text{cost}$, e</p>
+  $$\frac{\partial S}{\partial E}=\frac{3N}{2E}\qquad\Longrightarrow\qquad u\equiv\frac EN=\frac32T$$
+  <p>cioè la solita equipartizione. Sostituendo,</p>
+  $$\frac{3a}{2}=\frac32\cdot\frac{p^2}{2m\,(3T/2)}=\frac{p^2}{2mT}$$
+  <p>e la distribuzione esatta diventa $\rho\propto e^{-p^2/2mT}$: <b>la maxwelliana</b>, identica a quella ottenuta nel canonico. Il conto ha però detto tre cose in più. Primo: la gaussiana è il limite $N\to\infty$ di una distribuzione a supporto compatto. Secondo: il parametro che compare nella gaussiana non è una temperatura imposta dall&rsquo;esterno ma l&rsquo;energia per particella del sistema isolato, e «temperatura» è il nome che le diamo. Terzo, ed è l&rsquo;osservazione che Falcioni-Vulpiani sottolineano a pag. 42: la maxwelliana ha un <b>doppio significato</b> — è la densità di probabilità di una singola particella <i>e</i> la distribuzione empirica delle velocità realizzata dalla quasi totalità degli stati del gas. I due significati coincidono per la legge dei grandi numeri, ed è questo che rende misurabile su <i>un solo</i> gas una quantità definita come media d&rsquo;insieme.</p>`},
+  {t:'plot', title:'La maxwelliana nel piano delle velocita: una campana isotropa',
+   intro:R`Superficie della densità di probabilità congiunta delle due componenti $(v_x,v_y)$ della velocità, in unità di $\sqrt{T/m}$. È il prodotto di due gaussiane indipendenti, $\rho\propto e^{-v_x^2/2}e^{-v_y^2/2}$. Trascina per ruotare.`,
+   plots:[
+    {kind:'surface3d', f:'exp(-(x*x+y*y)/2)', xr:[-3,3], yr:[-3,3], n:36, height:400,
+     title:'densita congiunta delle due componenti della velocita',
+     xlabel:'v_x', ylabel:'v_y'}
+   ],
+   leggi:R`<p><b>Una campana, e la sua simmetria è il contenuto.</b> La superficie dipende da $v_x$ e $v_y$ soltanto attraverso la combinazione $v_x^2+v_y^2$: le curve di livello sono cerchi. Questa <b>isotropia</b> non è stata imposta — è uscita dal fatto che l&rsquo;hamiltoniana dipende solo da $|\mathbf p|$ — e ha una conseguenza operativa che serve in ogni esercizio: la direzione della velocità è distribuita uniformemente sulla sfera, quindi ogni media angolare si fa a parte e i conti si riducono a integrali sul modulo.</p>
+   <p><b>La fattorizzazione si vede tagliando.</b> Un taglio a $v_y$ fissato dà una gaussiana in $v_x$ di larghezza sempre uguale: le due componenti sono <b>indipendenti</b>, non solo scorrelate. È la ragione per cui il conto di $\langle v_x^2\rangle$ non richiede di sapere nulla di $v_y$, e per cui scaldare un gas allarga tutte e tre le direzioni insieme e nella stessa misura.</p>
+   <p><b>Dove questa figura mente.</b> Disegna una campana che si estende all&rsquo;infinito, mentre la distribuzione esatta di un sistema isolato si annulla oltre $|\mathbf p|=\sqrt{2mE}$. La differenza è invisibile a $N$ grande — le code oltre il taglio pesano come $e^{-3N/2}$ — ma è la ragione per cui le domande d&rsquo;esame del tipo «quante particelle hanno energia maggiore di $10\,T$?» vanno prese sul serio solo finché la risposta è un numero molto minore di $N$.</p>`}
+]},
+
+/* ---------------- 04 · LE TRE VELOCITA ---------------- */
+{ num:'04', title:'Le tre velocita: la piu probabile, la media, la quadratica media', meta:'dalla distribuzione degli impulsi a quella del modulo · tre integrali · perche i tre numeri sono diversi e in quale ordine',
+  blocchi:[
+  {t:'prosa', title:'Dalla distribuzione vettoriale a quella del modulo', tag:'costruzione', html:R`
+  <p>La $\rho_p(\mathbf p)$ della tappa precedente è una densità nello spazio <i>vettoriale</i> degli impulsi. Quasi tutte le domande d&rsquo;esame riguardano invece il <b>modulo</b> della velocità: quante particelle vanno più veloci di tanto, qual è la velocità tipica, quale energia cinetica media. Il passaggio dall&rsquo;una all&rsquo;altra è puramente geometrico, e sbagliarlo è l&rsquo;errore più comune del capitolo.</p>
+  <p>Passando da $\mathbf p$ a $\mathbf v=\mathbf p/m$ e poi a coordinate sferiche, l&rsquo;elemento di volume $d^3v$ diventa $4\pi v^2dv$ dopo aver integrato sugli angoli — legittimo perché, come mostra la figura della tappa 03, la distribuzione è isotropa. Il fattore $4\pi v^2$ è la <b>superficie della sfera di raggio $v$</b>, cioè il numero di direzioni disponibili a quel modulo, e il suo effetto è decisivo: moltiplica una gaussiana decrescente per un fattore crescente, e produce una distribuzione con un <b>massimo a velocità non nulla</b>.</p>
+  $$F(v)\,dv=4\pi v^2\left(\frac{m}{2\pi T}\right)^{3/2}e^{-mv^2/2T}\,dv$$
+  <p>È la distribuzione di Maxwell delle velocità. Le sue tre velocità caratteristiche — la più probabile, la media, la quadratica media — sono <i>diverse fra loro</i>, e la domanda «quale delle tre?» compare in ogni scritto. Si ottengono con tre conti distinti, nessuno dei quali è la media aritmetica degli altri.</p>`},
+  {t:'reveal', title:'I tre conti, fino al numero', tag:'costruzione', steps:[
+   {label:'La velocita piu probabile: si deriva', body:R`
+   <p>Il massimo di $F(v)$ è il massimo di $v^2e^{-mv^2/2T}$, perché le costanti non spostano il picco. Deriviamo:</p>
+   $$\frac{d}{dv}\Big(v^2e^{-mv^2/2T}\Big)=\Big(2v-\frac{mv^3}{T}\Big)e^{-mv^2/2T}$$
+   <p>L&rsquo;esponenziale non si annulla mai, quindi il massimo è dove si annulla la parentesi: $2v=mv^3/T$, cioè $v^2$ vale $2T/m$, scartando la soluzione banale $v=0$ (che è un minimo, non un massimo). Dunque</p>
+   $$v_{\rm p}=\sqrt{\frac{2T}{m}}$$
+   <p>C&rsquo;è una lettura fisica immediata: l&rsquo;energia cinetica associata a $v_{\rm p}$ è esattamente $T$, non $\tfrac32T$. La velocità più probabile <b>non</b> è quella che porta l&rsquo;energia media, e confonderle è il modo più rapido di sbagliare un esercizio.</p>`},
+   {label:'La velocita media: si integra v per la distribuzione', body:R`
+   <p>La media del modulo richiede $\int_0^\infty v\,F(v)dv$, cioè un integrale in $v^3$:</p>
+   $$\int_0^{\infty}dv\,v^3e^{-mv^2/2T}=\frac{2T^2}{m^2}$$
+   <p>(si fa con la sostituzione $y=mv^2/2T$, che lo riduce, a meno di costanti, all&rsquo;integrale elementare $\int_0^\infty y\,e^{-y}dy$). Moltiplicando per la normalizzazione,</p>
+   $$\overline v=4\pi\left(\frac{m}{2\pi T}\right)^{3/2}\frac{2T^2}{m^2}=\sqrt{\frac{8T}{\pi m}}$$
+   <p>Compare un $\pi$ sotto radice, che è la firma inconfondibile della velocità <i>media</i>: se in un risultato d&rsquo;esame vedete $\sqrt{8T/\pi m}$ state guardando $\overline v$, e se vedete un risultato senza $\pi$ state guardando una delle altre due.</p>`},
+   {label:'La quadratica media: si integra v al quadrato', body:R`
+   <p>Per $\langle v^2\rangle$ serve l&rsquo;integrale in $v^4$:</p>
+   $$\int_0^{\infty}dv\,v^4e^{-mv^2/2T}=3\sqrt{\frac{\pi}{2}}\left(\frac Tm\right)^{5/2}$$
+   <p>e moltiplicando per la stessa normalizzazione</p>
+   $$\langle v^2\rangle=4\pi\left(\frac{m}{2\pi T}\right)^{3/2}\cdot3\sqrt{\frac{\pi}{2}}\left(\frac Tm\right)^{5/2}=\frac{3T}{m}$$
+   <p>cioè $v_{\rm rms}=\sqrt{3T/m}$, ed è l&rsquo;unica delle tre che si potesse prevedere senza integrare: $\langle\tfrac12mv^2\rangle=\tfrac32T$ è l&rsquo;equipartizione, e $\langle v^2\rangle=3T/m$ ne è la riscrittura. <b>È questa la velocità che compare nell&rsquo;energia</b>, e quindi nella pressione cinetica e in tutti i bilanci energetici.</p>`}
+  ]},
+  {t:'prosa', title:'I tre numeri, e perche sono in quest ordine', tag:'regola operativa', html:R`
+  <p>Tutte e tre le velocità sono della forma $\sqrt{T/m}$ moltiplicata per un numero puro, e i tre numeri sono $\sqrt2$, $\sqrt{8/\pi}$ e $\sqrt3$:</p>
+  $$v_{\rm p}:\overline v:v_{\rm rms}=1{,}414:1{,}596:1{,}732$$
+  <p>L&rsquo;ordine non è un accidente, ed è utile saperlo argomentare senza rifare i conti. La disuguaglianza $\overline v\le v_{\rm rms}$ è <b>Cauchy-Schwarz</b> applicata a $\langle v\cdot1\rangle^2\le\langle v^2\rangle\langle1\rangle$: la media di una quantità è sempre minore o uguale alla sua radice quadratica media, con uguaglianza solo se la distribuzione è concentrata in un punto. La disuguaglianza $v_{\rm p}\le\overline v$ viene invece dall&rsquo;<b>asimmetria</b> di $F(v)$: la coda di destra è lunga e quella di sinistra è tagliata a zero, quindi la media è tirata verso destra rispetto alla moda. <b>Il criterio da ricordare</b>: per ogni distribuzione positiva e asimmetrica a destra vale moda $\le$ media $\le$ radice quadratica media, e la maxwelliana ne è il caso di scuola.</p>
+  <p>Vale la pena sapere anche che questi numeri <b>si misurano</b>, e non da poco. Falcioni-Vulpiani (pag. 70-71) descrivono l&rsquo;esperimento diretto: si scalda del potassio in un forno con una fenditura, e si selezionano le particelle con due dischi rotanti a distanza $\ell$, sfasati di un angolo $\theta$ e in rotazione a velocità angolare $\omega$. Passa solo chi ha $v=\ell\omega/\theta$. Ma attenzione a cosa arriva al rivelatore: non $F(v)$, bensì $\text{cost}\times v^3e^{-mv^2/2k_BT}$, perché la frazione di particelle che riesce a infilarsi nelle fenditure è a sua volta proporzionale a $v$. È il genere di fattore che, dimenticato, fa sembrare sbagliata una teoria giusta.</p>
+  <p>Una seconda verifica è indiretta ma più facile e riguarda l&rsquo;astrofisica: l&rsquo;<b>allargamento Doppler</b> delle righe spettrali. Se un atomo in moto con velocità $v$ lungo la linea di vista emette a $\lambda_0$, si osserva $\lambda=\lambda_0(1+v/c)$; siccome $v$ è distribuita gaussianamente, il profilo della riga è gaussiano con semilarghezza $\delta=\sqrt{2k_BT\lambda_0^2/(mc^2)}$. Misurare la larghezza di una riga è misurare la temperatura di un gas che sta a mille anni luce — ed è la stessa maxwelliana, con $k_B$ scritto esplicito come fa quella fonte.</p>`},
+  {t:'plot', title:'La maxwelliana a tre temperature, con le tre velocita marcate',
+   intro:R`In ascissa il modulo della velocità in unità di $\sqrt{T_0/m}$; in ordinata la densità $F(v)$, normalizzata a uno. Le tre curve sono la stessa distribuzione a temperature $T/T_0$ pari a $0{,}5$, $1$ e $2$. Sulla curva intermedia sono marcate le tre velocità caratteristiche.`,
+   plots:[
+    {kind:'func2d', xr:[0,6], yr:[0,0.95], height:340, ticks:6,
+     title:'distribuzione di Maxwell del modulo della velocita',
+     curves:[
+      {f:'2.257*pow(x,2)*exp(-x*x)', col:'#5eead4', label:'T bassa: campana stretta e alta'},
+      {f:'0.798*pow(x,2)*exp(-x*x/2)', col:'#d8a13a', label:'T intermedia: le tre velocita marcate'},
+      {f:'0.2821*pow(x,2)*exp(-x*x/4)', col:'#ff6b6b', label:'T alta: campana larga e bassa, coda lunga'}
+     ],
+     marks:[
+      {x:1.414, y:0.587, label:'v piu probabile', col:'#ffffff', up:true},
+      {x:1.596, y:0.569, label:'v media', col:'#ffffff'},
+      {x:1.732, y:0.534, label:'v quadratica media', col:'#ffffff'}
+     ],
+     xlabel:'v (in unita di radice di T0 su m)', ylabel:'F(v)'}
+   ],
+   leggi:R`<p><b>Il picco non è a zero, e il motivo è geometrico.</b> Ogni singola componente della velocità è una gaussiana centrata in zero — la velocità più probabile lungo $x$ è nulla. Ma il <i>modulo</i> ha il fattore $4\pi v^2$ davanti, cioè il numero di direzioni disponibili, che a $v=0$ è nullo. Il massimo nasce dalla gara fra questo fattore crescente e l&rsquo;esponenziale decrescente, e cade dove le due pendenze si pareggiano.</p>
+   <p><b>Le tre velocità marcate sono vicine, e questo è il tranello.</b> Stanno entro il $23\%$ l&rsquo;una dall&rsquo;altra, quindi un errore di scelta non produce un risultato assurdo: produce un risultato plausibile e sbagliato, che è peggio. Il criterio per non sbagliare è chiedersi <i>cosa si sta mediando</i>: se la domanda contiene un&rsquo;energia serve $v_{\rm rms}$, se contiene un flusso o un cammino libero medio serve $\overline v$, se contiene «il valore tipico» serve $v_{\rm p}$.</p>
+   <p><b>Come si muove la campana con la temperatura.</b> Salendo in $T$ il picco si sposta a destra come $\sqrt T$ e si abbassa come $T^{-1}$, perché l&rsquo;area resta uno: la distribuzione non si scala, si <i>allarga</i>. La conseguenza che conta davvero è nella coda: la frazione di particelle con energia superiore a una soglia fissata cresce come $e^{-\varepsilon_0/T}$, ed è questo — non lo spostamento del picco — che accende le reazioni chimiche e le fusioni nucleari.</p>`}
+]},
+
+/* ---------------- 05 · EQUIPARTIZIONE ---------------- */
+{ num:'05', title:'Il teorema di equipartizione, e i tre modi in cui fallisce', meta:'enunciato e dimostrazione per parti nel canonico · la generalizzazione agli esponenti · spettri non quadratici, quanti, spettri limitati',
+  blocchi:[
+  {t:'reveal', title:'Enunciato e dimostrazione', tag:'costruzione', steps:[
+   {label:'Che cosa dice davvero il teorema', body:R`
+   <p>L&rsquo;equipartizione viene di solito enunciata così: «ogni grado di libertà quadratico porta $T/2$». È vero, ma è un corollario. L&rsquo;enunciato generale, quello che Crisanti (pag. 204) dimostra nel canonico, è una relazione fra coordinate e derivate dell&rsquo;hamiltoniana:</p>
+   $$\Big\langle p_i\frac{\partial H}{\partial p_j}\Big\rangle=\delta_{ij}T$$
+   <p>con la relazione gemella $\langle q_i\,\partial H/\partial q_j\rangle=\delta_{ij}T$ per le coordinate, e con le due medie miste $\langle q_i\,\partial H/\partial p_j\rangle$ e $\langle p_i\,\partial H/\partial q_j\rangle$ entrambe nulle. Formulato così, il teorema <b>non nomina la forma dell&rsquo;hamiltoniana</b>: vale per qualunque $H$, quadratica o no. È il passaggio successivo — dalla derivata all&rsquo;energia — che richiede un&rsquo;ipotesi sulla forma, ed è lì che nascono i fallimenti.</p>`},
+   {label:'La dimostrazione: una integrazione per parti', body:R`
+   <p>Si parte dalla media canonica e si usa un&rsquo;unica identità: il peso di Boltzmann <i>è</i> l&rsquo;esponenziale dell&rsquo;hamiltoniana, quindi derivarlo rispetto a un impulso fa scendere la derivata dell&rsquo;hamiltoniana,</p>
+   $$\frac{\partial}{\partial p_j}e^{-\beta H}=-\beta\frac{\partial H}{\partial p_j}e^{-\beta H}$$
+   <p>Invertendola si legge $p_i\,\partial_{p_j}H\,e^{-\beta H}$ come $-T\,p_i\,\partial_{p_j}e^{-\beta H}$, e si integra per parti in $p_j$: il termine di bordo contiene $p_i\,e^{-\beta H}$ valutato a impulso infinito, e <b>si annulla perché l&rsquo;esponenziale batte il polinomio</b> — questa è l&rsquo;unica ipotesi nascosta della dimostrazione, e ci torneremo. Resta</p>
+   $$\Big\langle p_i\frac{\partial H}{\partial p_j}\Big\rangle=T\Big\langle\frac{\partial p_i}{\partial p_j}\Big\rangle=\delta_{ij}T$$
+   <p>perché $\partial p_i/\partial p_j=\delta_{ij}$ è una costante e la sua media è sé stessa. Notare che $Z$ si è semplificato: il risultato non dipende dalla normalizzazione, e per questo non dipende dal sistema.</p>`},
+   {label:'Dal teorema al mezzo T, e alla sua generalizzazione', body:R`
+   <p>Applichiamolo a $H=p_x^2/2m$. La derivata $\partial H/\partial p_x$ vale $p_x/m$, dunque il teorema dice che la media di $p_x^2/m$ è $T$, cioè che il termine $p_x^2/2m$ porta in media $T/2$. Con tre componenti e $N$ particelle si ritrova $E=\tfrac32NT$, questa volta <i>dimostrata</i> e non dedotta dal conto della tappa 01.</p>
+   <p>La generalizzazione è immediata e serve più spesso di quanto si creda. Se un termine dell&rsquo;hamiltoniana è una potenza, $H_s=a|q|^s$, allora $q\,\partial H_s/\partial q$ vale $s\,H_s$, e il teorema dà</p>
+   $$s\langle H_s\rangle=T\qquad\Longrightarrow\qquad\langle H_s\rangle=\frac Ts$$
+   <p><b>Ogni termine di potenza $s$ porta $T/s$</b>: quadratico ($s=2$) porta $T/2$, lineare ($s=1$) porta $T$ intero, quartico ($s=4$) porta $T/4$. È la forma da usare negli esercizi con potenziali strani, e spiega in una riga un risultato che altrimenti sembra magico — il gas in campo gravitazionale, con il suo $mgz$ lineare, ha $E=\tfrac52NT$ e non $\tfrac32NT$.</p>`}
+  ]},
+  {t:'prosa', title:'Il gas di oscillatori: il caso in cui vale, e si vede', tag:'costruzione', html:R`
+  <p>Il collaudo canonico dell&rsquo;equipartizione è il gas di oscillatori armonici indipendenti, che Crisanti risolve nel microcanonico a pag. 179-180 e che nel canonico costa tre righe. In una dimensione $H_i=\dfrac{p^2}{2m}+\dfrac12m\omega^2q^2$: due termini quadratici, quindi l&rsquo;equipartizione predice $T/2$ per ciascuno, cioè un $T$ intero per oscillatore. Verifichiamo con la partizione, che è il prodotto di due gaussiane:</p>
+  $$z_1=\frac1h\sqrt{\frac{2\pi m}{\beta}}\sqrt{\frac{2\pi}{\beta m\omega^2}}=\frac{1}{\beta\hbar\omega}$$
+  <p>La massa se n&rsquo;è andata, e resta solo il rapporto fra l&rsquo;energia termica e il quanto $\hbar\omega$ — un&rsquo;altra comparsa non richiesta della costante di Planck dentro un conto classico. Da qui, siccome $\log z_1=-\log\beta+\text{cost}$,</p>
+  $$\frac{\partial\log z_1}{\partial\beta}=-\frac1\beta$$
+  $$E=-N\frac{\partial}{\partial\beta}\big(-\log\beta\big)=\frac N\beta=NT$$
+  <p>e il calore specifico è</p>
+  $$C_V=\frac{\partial E}{\partial T}=N$$
+  <p>esattamente il doppio di quello del gas libero, come l&rsquo;equipartizione aveva predetto contando i termini quadratici. È il genere di verifica che conviene fare sempre: <b>contare i termini quadratici prima di calcolare</b>, e usare il conto per controllare il conteggio.</p>`},
+  {t:'prosa', title:'I tre modi in cui il teorema fallisce', tag:'regola operativa', html:R`
+  <p><b>Primo fallimento: lo spettro non è quadratico.</b> Qui il teorema non è falso, è la sua <i>forma corollario</i> a non applicarsi. Per un gas ultrarelativistico $H_i=c|\mathbf p_i|$ la potenza è $s=1$, quindi ogni particella porta $3T$ e non $\tfrac32T$: Crisanti (pag. 183) trova infatti $E=3NT$, pur lasciando intatta $PV=NT$. In generale, per $H_i=a|\mathbf p_i|^b$ l&rsquo;energia è $E=3NT/b$ — per $b=1$ dà $E=3NT$, per $b=2$ dà $E=\tfrac32NT$. La lezione operativa: <b>l&rsquo;equazione di stato dipende solo dall&rsquo;assenza di interazione, la relazione energia-temperatura dipende dallo spettro.</b></p>
+  <p><b>Secondo fallimento: i quanti.</b> È il fallimento serio, quello che ha fatto nascere la meccanica quantistica. La dimostrazione per parti assume che $p$ e $q$ siano variabili <i>continue</i> su cui si può integrare; se lo spettro è discreto con spaziatura $\hbar\omega$, e se $\hbar\omega\gg T$, il grado di libertà non si eccita mai — <b>si congela</b> — e non porta nulla. Per un oscillatore quantistico il calore specifico per modo vale</p>
+  $$c_V(x)=\frac{x^2e^x}{(e^x-1)^2},\qquad x=\frac{\hbar\omega}{T}$$
+  <p>una funzione che ad alta temperatura tende al valore classico, $\dfrac{x^2e^x}{(e^x-1)^2}\to 1$ per $x\to0$, e a bassa temperatura tende a $\to 0$ esponenzialmente. È il motivo per cui il calore specifico dell&rsquo;idrogeno molecolare sale a gradini invece che restare costante: a temperatura ambiente le rotazioni sono attive e le vibrazioni congelate, e la salita da $\tfrac52N$ a $\tfrac72N$ avviene solo sopra i duemila gradi.</p>
+  <p><b>Terzo fallimento: lo spettro è limitato superiormente.</b> Qui cade l&rsquo;ipotesi nascosta della dimostrazione, quella del termine di bordo. Un sistema a due livelli $\pm\varepsilon$ non ha una coda esponenziale da sopprimere: l&rsquo;energia ha un tetto, e un sistema che non può assorbire energia oltre un massimo <b>smette di scaldarsi</b>. Il suo calore specifico non tende a una costante ma ha un massimo a temperatura intermedia e crolla da entrambi i lati — è l&rsquo;<b>anomalia di Schottky</b>, e il suo profilo è tanto diverso dall&rsquo;equipartizione da essere usato come firma sperimentale della presenza di livelli discreti isolati.</p>
+  <p>C&rsquo;è poi un caso che vale la pena isolare perché è quello che questo movimento sta inseguendo. Gli elettroni di conduzione di un metallo hanno un&rsquo;hamiltoniana <i>quadratica</i>, uno spettro <i>continuo</i> e <i>illimitato</i>: tutte le ipotesi del teorema sono soddisfatte, e l&rsquo;equipartizione predice un contributo elettronico $\tfrac32Nk_B$ al calore specifico. La misura dà circa un centesimo di quel valore. Nessuno dei tre fallimenti elencati spiega questo: l&rsquo;errore sta un passo più indietro, nell&rsquo;aver usato la <b>statistica</b> classica — cioè nell&rsquo;aver diviso per $N!$ invece di contare gli stati con Pauli. Falcioni-Vulpiani (pag. 73) lo dicono esplicitamente discutendo l&rsquo;effetto termoionico: il gas di elettroni di conduzione è degenere, e va trattato quantisticamente. Quanto degenere, lo dice il numero della tappa 08.</p>`},
+  {t:'plot', title:'Equipartizione, congelamento quantistico e anomalia di Schottky',
+   intro:R`In ascissa la temperatura in unità della scala caratteristica del sistema ($T/\theta$ con $\theta=\hbar\omega$ per l'oscillatore, $\theta=\varepsilon$ per il sistema a due livelli); in ordinata il calore specifico per grado di libertà, in unità del valore classico.`,
+   plots:[
+    {kind:'func2d', xr:[0.05,3], yr:[0,1.2], height:340, ticks:6,
+     title:'calore specifico per grado di liberta, tre spettri a confronto',
+     curves:[
+      {f:'1', col:'#5eead4', label:'equipartizione classica: costante, sempre'},
+      {f:'pow(1/x,2)*exp(1/x)/pow(exp(1/x)-1,2)', col:'#d8a13a', label:'oscillatore quantistico: congela a bassa T'},
+      {f:'pow(1/x,2)/pow(cosh(1/x),2)', col:'#ff6b6b', label:'due livelli: picco di Schottky, poi crolla'}
+     ],
+     xlabel:'T in unita della scala caratteristica', ylabel:'c_V in unita del valore classico'}
+   ],
+   leggi:R`<p><b>A destra tutte e tre coincidono, ed è il limite classico in una figura.</b> Quando $T$ supera la scala caratteristica, l&rsquo;oscillatore quantistico raggiunge il valore di equipartizione e ci resta: la discretizzazione dello spettro diventa invisibile perché i livelli sono molto più fitti dell&rsquo;energia termica. È lo stesso meccanismo del criterio $n\lambda^3\ll1$, visto su un grado di libertà invece che su un gas.</p>
+   <p><b>A sinistra le due curve quantistiche divergono fra loro, e la differenza è lo spettro.</b> L&rsquo;oscillatore (ocra) ha infiniti livelli equispaziati e il suo calore specifico crolla monotonamente: congela e basta. Il sistema a due livelli (rosso) crolla <i>dopo essere salito</i>, e il picco sta dove l&rsquo;energia termica pareggia la separazione dei livelli. <b>Il criterio da portare all&rsquo;orale</b>: uno spettro illimitato dà un $c_V$ monotono, uno spettro limitato superiormente dà sempre un massimo, perché oltre il tetto non c&rsquo;è più energia da assorbire.</p>
+   <p><b>Quello che la figura non mostra, e va detto.</b> Nessuna di queste curve descrive il gas di elettroni di un metallo, che pure ha spettro continuo e illimitato e dovrebbe stare sulla retta verde. Il suo calore specifico elettronico è lineare in $T$ e circa cento volte più piccolo, e la ragione non è nello spettro: è nella <i>statistica</i> con cui si occupano i livelli. È il buco che questo movimento sta scavando fin dalla prima tappa.</p>`}
+]},
+
+/* ---------------- 06 · LA DENSITA DEGLI STATI ---------------- */
+{ num:'06', title:'La densita degli stati: come una somma diventa un integrale', meta:'definizione con la delta · il conto in tre, due e una dimensione · il picco della distribuzione dell energia · quando la traduzione e lecita',
+  blocchi:[
+  {t:'prosa', title:'Il problema: si sommano stati, ma si integrano energie', tag:'grammatica', html:R`
+  <p>Tutte le medie fatte finora hanno la stessa forma: un integrale sullo spazio delle fasi di una funzione dell&rsquo;energia, pesata con $e^{-\beta H}$. Quando la funzione dipende <i>solo</i> dall&rsquo;energia — ed è quasi sempre così — quell&rsquo;integrale in sei variabili è uno spreco: basterebbe un integrale in una variabile sola, l&rsquo;energia, a patto di sapere <b>quanti stati ci sono a ciascuna energia</b>. Quella quantità è la <b>densità degli stati</b>, e imparare a calcolarla trasforma esercizi di sei integrali in esercizi di uno.</p>
+  <p>Grilli-Giardina (pag. 62) la definisce nel modo diretto, contando con una <span class="str" data-str="delta-di-dirac">delta di Dirac</span> gli stati che hanno energia esattamente $\varepsilon$:</p>
+  $$G(\varepsilon)=\int\frac{dq\,dp}{h^3}\,\delta\big(\varepsilon-H(q,p)\big)$$
+  <p>e con essa la densità di probabilità dell&rsquo;energia di una particella nel canonico, che si ottiene marginalizzando $\rho_1$ con la stessa delta. Il conto è di una riga, e la riga è istruttiva: la delta impone $H=\varepsilon$, quindi $e^{-\beta H}$ diventa $e^{-\beta\varepsilon}$, che è una costante rispetto all&rsquo;integrazione e <b>esce</b>:</p>
+  $$p(\varepsilon)=\int\frac{dq\,dp}{h^3}\,\rho_1(q,p)\,\delta\big(\varepsilon-H(q,p)\big)=\frac{e^{-\beta\varepsilon}}{z_1}\,G(\varepsilon)$$
+  <p>Questa è la formula che governa metà degli esercizi del corso: <b>la probabilità di un&rsquo;energia è il peso di Boltzmann moltiplicato per il numero di modi di realizzarla</b>. Il peso decresce, il numero di modi di solito cresce, e il risultato è un picco. Prima però bisogna saper calcolare $G$.</p>`},
+  {t:'reveal', title:'Il conto, in tre dimensioni e nelle altre due', tag:'costruzione', steps:[
+   {label:'La scorciatoia: contare prima, derivare poi', body:R`
+   <p>Si può attaccare la delta di petto, risolvendola sugli zeri del suo argomento come abbiamo fatto nella tappa 02 — è la strada che Grilli-Giardina percorre per esteso a pag. 63-64 — ma c&rsquo;è una scorciatoia che non sbaglia mai. Si calcola prima la funzione <b>cumulativa</b> $\Sigma(\varepsilon)$, cioè il volume di spazio delle fasi con energia <i>minore</i> di $\varepsilon$, che è un volume geometrico elementare; poi si deriva, perché la delta è la derivata della funzione gradino:</p>
+   $$\Sigma(\varepsilon)=\int\frac{dq\,dp}{h^3}\,\theta\big(\varepsilon-H(q,p)\big)$$
+   <p>In tre dimensioni la condizione $p^2/2m<\varepsilon$ definisce una palla di raggio $\sqrt{2m\varepsilon}$ nello spazio degli impulsi, e le posizioni danno $V$:</p>
+   $$\Sigma_3(\varepsilon)=\frac{V}{h^3}\cdot\frac{4\pi}{3}(2m\varepsilon)^{3/2}$$
+   $$G_3(\varepsilon)=\frac{d\Sigma_3}{d\varepsilon}=\frac{4\pi Vm}{h^3}\sqrt{2m\varepsilon}$$
+   <p>cioè $G_3\propto\sqrt\varepsilon$. <b>È il risultato più usato dell&rsquo;intera meccanica statistica</b>: ricompare identico nel gas di Fermi, nel gas di Bose, nel corpo nero (con la relazione di dispersione dei fotoni al posto di quella non relativistica), e conviene ricordarlo per la sua struttura — superficie della sfera in $p$, per il giacobiano $dp/d\varepsilon$.</p>`},
+   {label:'Due dimensioni, e una: la dipendenza cambia forma', body:R`
+   <p>Lo stesso conto in due dimensioni: la condizione definisce un <i>disco</i> di raggio $\sqrt{2m\varepsilon}$, di area $\pi\cdot2m\varepsilon$, lineare in $\varepsilon$. Derivando,</p>
+   $$\Sigma_2(\varepsilon)=\frac{A}{h^2}\,\pi\,(2m\varepsilon)$$
+   $$G_2(\varepsilon)=\frac{d\Sigma_2}{d\varepsilon}=\frac{2\pi Am}{h^2}$$
+   <p><b>costante</b>: in due dimensioni ci sono tanti stati a bassa energia quanti ad alta energia. In una dimensione la condizione definisce un segmento di lunghezza $2\sqrt{2m\varepsilon}$, e</p>
+   $$\Sigma_1(\varepsilon)=\frac{L}{h}\,2\sqrt{2m\varepsilon}$$
+   $$G_1(\varepsilon)=\frac{d\Sigma_1}{d\varepsilon}=\frac{L}{h}\sqrt{\frac{2m}{\varepsilon}}$$
+   <p>che <b>diverge</b> per $\varepsilon\to0$. Le tre dipendenze — $\varepsilon^{-1/2}$, costante, $\varepsilon^{+1/2}$ — sono la stessa formula $G\propto\varepsilon^{d/2-1}$ letta a $d=1,2,3$, e la loro differenza non è accademica: decide se un gas di bosoni può condensare (serve che $G$ si annulli abbastanza in fretta a bassa energia, e in due dimensioni non lo fa) e come si comporta un gas di elettroni confinato in un film sottile.</p>`},
+   {label:'Il picco della distribuzione dell energia', body:R`
+   <p>Torniamo a $p(\varepsilon)\propto G(\varepsilon)e^{-\beta\varepsilon}$ e mettiamoci in tre dimensioni, dove $G\propto\sqrt\varepsilon$. La competizione è fra una radice crescente e un&rsquo;esponenziale decrescente, e il massimo si trova derivando:</p>
+   $$\frac{d}{d\varepsilon}\Big(\sqrt\varepsilon\,e^{-\beta\varepsilon}\Big)=\Big(\frac{1}{2\sqrt\varepsilon}-\beta\sqrt\varepsilon\Big)e^{-\beta\varepsilon}$$
+   <p>La parentesi si annulla dove il termine crescente pareggia quello decrescente, cioè in</p>
+   $$\varepsilon^\ast=\frac{1}{2\beta}=\frac T2$$
+   <p>L&rsquo;energia <i>più probabile</i> di una particella è $T/2$, mentre l&rsquo;energia <i>media</i> è $\tfrac32T$: un fattore tre fra le due, molto più grande dello scarto fra le tre velocità della tappa precedente. Il motivo è la coda: $p(\varepsilon)$ è fortemente asimmetrica, e la media è tirata a destra dalle poche particelle molto energetiche. <b>È lo stesso fenomeno delle tre velocità, amplificato dal passaggio da $v$ a $v^2$.</b></p>`}
+  ]},
+  {t:'plot', title:'Gusci di impulso a energia fissata, e la densita degli stati in tre dimensionalita',
+   intro:R`A sinistra, il piano degli impulsi $(p_x,p_y)$: le circonferenze sono i luoghi a energia costante, e la densità degli stati misura quanto è spesso il guscio fra due energie vicine. A destra, $G(\varepsilon)$ in una, due e tre dimensioni, in unità arbitrarie.`,
+   plots:[
+    {kind:'curve', x:'1.2*cos(t)', y:'1.2*sin(t)', tr:[0,6.2832], xr:[-2.1,2.1], yr:[-2.1,2.1], height:300,
+     title:'superfici a energia costante nel piano degli impulsi',
+     rings:[{r:0.6, col:'#5eead4'},{r:1.8, col:'#ff6b6b'}],
+     marks:[{x:0.6,y:0,label:'eps piccola',col:'#5eead4'},{x:1.8,y:0,label:'eps grande',col:'#ff6b6b'}],
+     xlabel:'p_x', ylabel:'p_y'},
+    {kind:'func2d', xr:[0.05,3], yr:[0,4.6], height:300, ticks:6,
+     title:'densita degli stati G(eps) in d = 1, 2, 3',
+     curves:[
+      {f:'1/sqrt(x)', col:'#5eead4', label:'d = 1: diverge a energia nulla'},
+      {f:'1', col:'#d8a13a', label:'d = 2: costante'},
+      {f:'sqrt(x)', col:'#ff6b6b', label:'d = 3: si annulla a energia nulla'}
+     ],
+     xlabel:'eps (unita arbitrarie)', ylabel:'G(eps)'}
+   ],
+   leggi:R`<p><b>A sinistra: perché il conto è geometrico.</b> Gli stati con energia fra $\varepsilon$ ed $\varepsilon+d\varepsilon$ stanno in un guscio sferico di raggio $p=\sqrt{2m\varepsilon}$. Il loro numero è (superficie del guscio) per (spessore), cioè $4\pi p^2\cdot dp$, e lo spessore si converte in energia con il giacobiano $dp/d\varepsilon$, che vale $m/p$. Il prodotto dà $4\pi pm\,d\varepsilon$: <b>la densità degli stati in tre dimensioni è la circonferenza per il giacobiano</b>, e cresce perché la sfera cresce. In due dimensioni la «superficie» è una circonferenza, $2\pi p$, e il giacobiano $m/p$ la cancella esattamente — ecco perché $G_2$ è costante.</p>
+   <p><b>A destra: la stessa formula, tre comportamenti opposti.</b> Le tre curve sono $\varepsilon^{d/2-1}$ per $d=1,2,3$. A energia bassa divergono, restano costanti o si annullano, e il segno di quella pendenza decide questioni molto lontane fra loro: se un gas di bosoni può accumularsi nel fondamentale, se il calore specifico di un solido va come $T^3$ o come $T$, se un elettrone in un filo quantico si comporta come in un cristallo.</p>
+   <p><b>Cosa guardare per non confondersi.</b> $G(\varepsilon)$ non è una probabilità e non è normalizzata: è un <i>conteggio</i>, e le sue dimensioni sono inverso di un&rsquo;energia. La probabilità arriva solo moltiplicandola per il peso di Boltzmann e dividendo per $z_1$. Tenere separati i due fattori è ciò che permette, più avanti, di cambiare statistica — Fermi o Bose al posto di Boltzmann — lasciando $G(\varepsilon)$ identica.</p>`},
+  {t:'prosa', title:'Quando la traduzione da somma a integrale e lecita, e quando no', tag:'regola operativa', html:R`
+  <p>Dietro tutto questo c&rsquo;è un passaggio che si fa in automatico e che merita di essere guardato in faccia, perché è il punto in cui si rompe. In una scatola di lato $L$ gli impulsi sono <b>quantizzati</b>: $\mathbf p=\dfrac{2\pi\hbar}{L}(n_x,n_y,n_z)$ con $n_i$ interi, e una somma su stati è una somma su interi. La si trasforma in integrale moltiplicando e dividendo per la spaziatura</p>
+  $$\Delta p_x=\frac{2\pi\hbar}{L}$$
+  <p>e riconoscendo una somma di Riemann. Crisanti (pag. 253) la scrive così:</p>
+  $$\sum_{p_x}\to\frac{L}{2\pi\hbar}\int dp_x\qquad\sum_{\mathbf p}\to\frac{V}{(2\pi\hbar)^3}\int d^3p$$
+  <p>ed è da qui — non da un postulato — che arriva il $1/h^3$ per grado di libertà con cui abbiamo normalizzato ogni integrale di questo movimento.</p>
+  <p><b>La condizione di liceità ha due facce, e servono entrambe.</b> La prima è che la spaziatura sia piccola rispetto alla scala su cui varia il sommando, cioè rispetto all&rsquo;impulso termico $\sqrt{2\pi mT}$: questo equivale a $\lambda\ll L$, e per un gas macroscopico è vero con un margine ridicolo — per l&rsquo;elio a temperatura ambiente in una scatola di un centimetro il rapporto $\lambda/L$ vale circa $5{,}04\times10^{-9}$. Su questo fronte non ci sono problemi.</p>
+  <p>La seconda faccia è più sottile e non si vede stimando rapporti: <b>nessun singolo termine della somma deve portare una frazione finita del totale</b>. Una somma di Riemann approssima l&rsquo;integrale solo se nessun addendo è patologico, e in tre dimensioni $G(\varepsilon)\propto\sqrt\varepsilon$ <i>si annulla</i> a energia zero — il che significa che l&rsquo;integrale attribuisce peso nullo allo stato fondamentale. Finché lo stato fondamentale ospita una manciata di particelle non importa. Quando ne ospita una frazione macroscopica, l&rsquo;integrale la <b>perde</b>. Crisanti (pag. 254) lo dice senza mezzi termini a proposito del gas di bosoni: la formula ottenuta «non è corretta poiché siamo passati dalla sommatoria all&rsquo;integrale in modo illecito, perdendo un termine singolare, corrispondente al caso in cui $p=0$», e ripara aggiungendo a mano il termine mancante.</p>
+  <p>Quel termine aggiunto a mano <b>è</b> la condensazione di Bose-Einstein. Non è un dettaglio tecnico rattoppato: è un intero stato della materia che la traduzione somma-integrale aveva cancellato. E la condizione sotto cui la cancellazione è innocua — che nessuno stato sia macroscopicamente occupato — è ancora una volta la stessa cosa che chiediamo quando chiediamo $n_{\rm MB}\ll1$. Tutti i fili di questo movimento convergono sullo stesso numero, ed è ora di calcolarlo.</p>`}
+]},
+
+/* ---------------- 07 · LA LUNGHEZZA TERMICA ---------------- */
+{ num:'07', title:'La lunghezza termica di de Broglie: da dove viene, e perche proprio quella', meta:'da de Broglie alla convenzione con due pi greco · il pacchetto termico · il potenziale chimico · il criterio dedotto e non postulato',
+  blocchi:[
+  {t:'prosa', title:'Un atomo e un pacchetto d onda, e ha una taglia', tag:'costruzione', html:R`
+  <p>La lunghezza $\lambda$ è comparsa due volte per pura contabilità dimensionale — nella partizione di singola particella e nell&rsquo;entropia — e finora l&rsquo;abbiamo trattata come un&rsquo;abbreviazione. Ora le diamo il significato che ha, seguendo l&rsquo;argomento che Crisanti riporta da Huang (pag. 229): <i>gli atomi di un gas sono nella realtà dei pacchetti d&rsquo;onde; si possono descrivere come palle da biliardo solo ad alte temperature, perché lì le loro dimensioni sono molto più piccole delle distanze medie fra particelle.</i></p>
+  <p>Se un atomo è un pacchetto d&rsquo;onda, ha un&rsquo;estensione spaziale, e quell&rsquo;estensione si stima con de Broglie. L&rsquo;impulso tipico di una particella in un gas a temperatura $T$ si legge dall&rsquo;equipartizione, che fissa l&rsquo;energia cinetica media $p_0^2/2m$ al valore $\tfrac32T$; dunque</p>
+  $$p_0=\sqrt{3mT}\qquad\lambda_0=\frac{h}{p_0}$$
+  <p>cioè $\lambda_0$ vale $h/\sqrt{3mT}$. Il pacchetto si costruisce sovrapponendo onde piane di lunghezza d&rsquo;onda vicina a $\lambda_0$, e la sua delocalizzazione spaziale è governata dalla relazione di indeterminazione $\Delta x\,\Delta p\simeq\hbar$: c&rsquo;è una certa libertà nella ripartizione fra $\Delta x$ e $\Delta p$, ma l&rsquo;ordine di grandezza della delocalizzazione è proprio $\lambda_0$.</p>
+  <p><b>E qui arriva la domanda che nessuno pone e che vale la pena porre</b>: perché allora la letteratura, e tutte e tre le nostre fonti, definiscono la lunghezza termica con un $2\pi$ invece che con un $3$?</p>
+  $$\lambda\equiv\frac{h}{\sqrt{2\pi mT}}=\sqrt{\frac{2\pi\hbar^2}{mT}}$$
+  <p>La risposta è disarmante, e Crisanti (pag. 255) la scrive senza infiorettature: <i>i fattori numerici sono una scelta conveniente per avere delle relazioni termodinamiche in forma più semplice</i>. Il $2\pi$ non viene dalla fisica del pacchetto: viene dall&rsquo;integrale gaussiano della tappa 01, ed è scelto <b>apposta</b> perché la partizione di singola particella risulti $z_1=V/\lambda^3$ pulita, senza costanti davanti. Le due lunghezze differiscono di un fattore</p>
+  $$\frac{\lambda_0}{\lambda}=\sqrt{\frac{2\pi}{3}}\approx1{,}447$$
+  <p>cioè meno del cinquanta per cento. <b>Questo va tenuto a mente quando si usa il criterio</b>: $n\lambda^3\ll1$ è una condizione di ordine di grandezza, e non cambia natura se il numero puro davanti cambia del quaranta per cento. Le fonti stesse lo dicono — Crisanti parla di «grossolana separazione» fra la zona classica e quella quantistica. Quando il criterio dà $10^{-6}$ o $10^{3}$ la risposta è netta; quando dà $1{,}5$ bisogna fare il conto vero con la statistica giusta.</p>`},
+  {t:'prosa', title:'Il potenziale chimico, e il criterio che ne discende', tag:'costruzione', html:R`
+  <p>Adesso ricaviamo il criterio <i>deducendolo</i>, invece di annunciarlo. La strada è quella di Grilli-Giardina (pag. 55-56), e parte dalla quantità introdotta nella tappa 03: il numero medio di occupazione di uno stato di singola particella. Con il potenziale chimico esso si scrive in forma compatta,</p>
+  $$n_{\rm MB}(\mathbf x,\mathbf p)=e^{\beta(\mu-H(\mathbf x,\mathbf p))}$$
+  <p>e per arrivarci serve $\mu$. Lo si ottiene derivando l&rsquo;energia libera rispetto al numero di particelle. Scrivendo $F=-NT\log z_1+NT\log N-NT$, che è la forma esplicita della $F$ della tappa 01,</p>
+  $$\mu=\left(\frac{\partial F}{\partial N}\right)_{T,V}=-T\log z_1+T\log N$$
+  <p>— dove i due termini in $NT$ si cancellano derivando, ed è per questo che il risultato è così pulito. Raccogliendo il logaritmo, $\mu$ è meno $T$ per il logaritmo del rapporto $z_1/N$, che è la forma in cui quella fonte lo scrive. Esponenziando, e usando $z_1=V/\lambda^3$:</p>
+  $$e^{\beta\mu}=\frac{N}{z_1}=n\lambda^3$$
+  <p><b>Ecco il numero, e non l&rsquo;abbiamo postulato: è la fugacità del gas.</b> Adesso il criterio si legge da solo. Perché la prescrizione classica sia corretta — cioè perché sia lecito tenere conto della indistinguibilità dividendo per $N!$ invece che simmetrizzando le funzioni d&rsquo;onda — bisogna che sia <b>raro che due particelle occupino lo stesso stato</b>. In formule, serve $n_{\rm MB}\ll1$ per <i>ogni</i> stato $(\mathbf x,\mathbf p)$, e il caso peggiore è lo stato di energia più bassa, dove $e^{-\beta H}$ è massimo e vale circa uno. Dunque la condizione su tutti gli stati collassa in una condizione sola:</p>
+  $$e^{\beta\mu}\ll1\qquad\Longleftrightarrow\qquad n\lambda^3\ll1\qquad\Longleftrightarrow\qquad\lambda\ll n^{-1/3}$$
+  <p>Le tre scritture sono la stessa cosa detta in tre lingue. La prima dice che il potenziale chimico è <b>negativo e grande in modulo</b>, $\mu<0$ con $|\mu|\gg T$. La seconda dice che il <b>volume termico</b> $\lambda^3$ è molto minore del volume specifico $v=V/N$ a disposizione di ciascuna particella — è la forma $\lambda^3/v\ll1$ di Grilli-Giardina. La terza, la più visiva, dice che <b>il pacchetto d&rsquo;onda di una particella è molto più piccolo della distanza che la separa dalla vicina</b>: i pacchetti non si sovrappongono, e finché non si sovrappongono non c&rsquo;è modo di accorgersi che le particelle sono identiche.</p>
+  <p>C&rsquo;è una quarta lettura, equivalente e utile all&rsquo;orale: $z_1=V/\lambda^3$ è il <b>numero di stati termicamente accessibili</b> a una particella, e $n\lambda^3$ è il rapporto $N/z_1$ fra particelle e stati disponibili. La statistica classica vale quando <b>gli stati sono molti di più delle particelle</b>, perché allora la doppia occupazione è un evento raro e le differenze fra bosoni e fermioni non si manifestano. Detta così, si capisce anche perché il criterio si viola in due modi opposti — raffreddando (gli stati accessibili diminuiscono) o comprimendo (le particelle aumentano) — e perché entrambi portano nello stesso regime.</p>`}
+]},
+
+/* ---------------- 08 · IL CRITERIO E I NUMERI ---------------- */
+{ num:'08', title:'Il criterio della densita in unita di volume termico, e i numeri che lo decidono', meta:'la disuguaglianza da verificare sui numeri del problema · elio a temperatura ambiente · elettroni in un metallo · un condensato atomico',
+  blocchi:[
+  {t:'prosa', title:'Come si verifica un criterio, e con quali costanti', tag:'regola operativa', html:R`
+  <p>Il criterio della tappa precedente è scritto in unità con $k_B=1$, dove la temperatura è un&rsquo;energia. Per farci i conti bisogna rimetterlo in unità SI, e la lunghezza termica torna nella forma in cui va usata in laboratorio:</p>
+  $$\lambda=\frac{h}{\sqrt{2\pi mk_BT}}$$
+  <p>con $h=6{,}626\times10^{-34}$ J s, $k_B=1{,}381\times10^{-23}$ J/K, e $m$ la massa della singola particella. È qui che la divergenza di convenzione fra le fonti smette di essere accademica: Crisanti e Grilli-Giardina scrivono $\lambda=\sqrt{2\pi\hbar^2/(mT)}$ perché per loro $T$ è già un&rsquo;energia, Falcioni-Vulpiani tengono $k_B$ esplicito. <b>Le due formule sono la stessa formula</b>, e confonderle — mettere i kelvin dove va un&rsquo;energia — sbaglia il volume termico di decine di ordini di grandezza, cioè produce un verdetto privo di senso invece che impreciso.</p>
+  <p>La procedura da seguire, e da ripetere identica in ogni esercizio, è una lista di quattro righe. <b>(1)</b> Si estrae la densità $n$ dai dati: da pressione e temperatura con $n=p/(k_BT)$ per un gas, dalla densità di massa e dal peso atomico per un liquido o un solido, da un conteggio di elettroni per atomo per un metallo. <b>(2)</b> Si calcola $\lambda$ con la massa <i>della particella</i>, non della mole. <b>(3)</b> Si fa il prodotto $n\lambda^3$ e si guarda l&rsquo;esponente, non la mantissa: è un criterio a <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span>, e la cifra significativa non serve a nulla. <b>(4)</b> Si confronta anche $\lambda$ con la distanza interparticellare $n^{-1/3}$, che è la stessa informazione in forma geometrica ed è quella che si ricorda.</p>
+  <p>Facciamola su tre sistemi, scelti perché danno tre risposte diverse.</p>`},
+  {t:'reveal', title:'Tre casi, tre risposte', tag:'costruzione', steps:[
+   {label:'Elio gassoso a temperatura ambiente: classico con sei ordini di margine', body:R`
+   <p>Elio a $T=300$ K e pressione atmosferica, $p=1{,}013\times10^{5}$ Pa, con massa atomica $m\approx6{,}64\times10^{-27}$ kg. La densità si legge dall&rsquo;equazione di stato che abbiamo ricavato nella tappa 01: $n=2{,}45\times10^{25}\ \mathrm{m^{-3}}$. La lunghezza termica vale $\lambda=5{,}04\times10^{-11}\ \mathrm{m}$, cioè mezzo ångström — <b>più piccola dell&rsquo;atomo stesso</b>. La distanza media fra le particelle, $n^{-1/3}$, vale $3{,}45\times10^{-9}\ \mathrm{m}$, settanta volte tanto. Il criterio dà</p>
+   $$n\lambda^3=3{,}13\times10^{-6}$$
+   <p>e in forma geometrica $\lambda/n^{-1/3}=0{,}0146$. <b>Sei ordini di grandezza di margine</b>: la descrizione classica non è un&rsquo;approssimazione accettabile, è esatta per ogni scopo pratico. Si può chiedere quanto bisognerebbe raffreddare l&rsquo;elio per portarlo al confine. La temperatura di degenerazione si ottiene imponendo che $n\lambda^3$ valga uno, che dà $k_BT_0=\dfrac{2\pi\hbar^2}{m}n^{2/3}$, e per questa densità vale circa $0{,}064$ K. <b>Ma l&rsquo;elio liquefa a $4{,}2$ K</b>, sessanta volte prima: a pressione atmosferica il gas di elio non diventa mai quantistico, perché smette di essere un gas.</p>`},
+   {label:'Elettroni di conduzione in un metallo: quantistico di quattro ordini', body:R`
+   <p>Stesso conto, stessa temperatura, particella diversa. Nel rame ogni atomo cede circa un elettrone di conduzione, e la densità elettronica è $n=8{,}5\times10^{28}\ \mathrm{m^{-3}}$ — tremila volte quella del gas di elio. Ma il fattore che domina è un altro: la massa dell&rsquo;elettrone è $m=9{,}11\times10^{-31}$ kg, settemila volte più piccola di quella dell&rsquo;atomo di elio, e $\lambda\propto m^{-1/2}$. Il risultato è</p>
+   $$\lambda=4{,}30\times10^{-9}\ \mathrm{m}$$
+   <p>cioè <b>quarantatré ångström</b>, ottantacinque volte l&rsquo;elio. La distanza media fra elettroni è invece $2{,}27\times10^{-10}\ \mathrm{m}$, e il rapporto si è rovesciato: $\lambda$ è <b>diciannove volte più grande</b> della distanza interparticellare, $\lambda/n^{-1/3}\approx18{,}9$. Il criterio dà</p>
+   $$n\lambda^3=6{,}77\times10^{3}$$
+   <p>cioè quattro ordini di grandezza <i>dalla parte sbagliata</i>. La temperatura di degenerazione, con la stessa formula di prima, vale $T_0\approx1{,}07\times10^{5}$ K: <b>il rame fonde a $1358$ K</b>, ottanta volte meno, quindi il gas di elettroni di un metallo è degenere a <i>qualunque</i> temperatura a cui il metallo esista. Ecco perché l&rsquo;equipartizione sbaglia il calore specifico elettronico di due ordini di grandezza, ed ecco perché Falcioni-Vulpiani (pag. 73), per ricavare la legge di Richardson, usano Fermi-Dirac e non Maxwell-Boltzmann.</p>
+   <div class="note"><b>Un confronto con la tabella della fonte, e una discrepanza dichiarata.</b> Crisanti (pag. 230) riporta una tabella di temperature di degenerazione: idrogeno gassoso a $2\times10^{19}\ \mathrm{cm^{-3}}$ dà $5\times10^{-2}$ K, elio liquido a $2\times10^{22}\ \mathrm{cm^{-3}}$ dà $2$ K, elettroni in un metallo a $1\times10^{22}\ \mathrm{cm^{-3}}$ danno $1\times10^{4}$ K. Rifacendo il conto con la formula che la fonte stessa scrive, alla densità elettronica della tabella si ottiene $2{,}58\times10^{4}$ K, cioè <b>due volte e mezzo il valore tabulato</b>. Non è un errore da correggere: è la conferma che $T_0$ è definita a meno di fattori di ordine uno — dipende da quale convenzione di $\lambda$ si usa e da dove si mette l&rsquo;uguale nel criterio. La fonte stessa la chiama «una grossolana separazione fra zone a regime classico e quantistico». <b>Quando il verdetto sono quattro ordini di grandezza, un fattore due e mezzo non lo cambia</b>; quando il verdetto è al confine, la tabella non serve e serve il conto esatto.</div>`},
+   {label:'Un condensato atomico: esattamente al confine', body:R`
+   <p>Il terzo caso è quello per cui vale la pena aver fatto tutto il resto, perché è il caso in cui il criterio non dà una risposta ovvia ma <i>una soglia</i>. Un gas di atomi di rubidio-87 in una trappola ottica, $m=1{,}44\times10^{-25}$ kg, densità $n=10^{20}\ \mathrm{m^{-3}}$ — centomila volte più <b>rarefatto</b> dell&rsquo;aria — e temperatura $T=5\times10^{-7}$ K, cioè mezzo microkelvin. La rarefazione spinge verso il classico, il freddo verso il quantistico, e vince il freddo:</p>
+   $$\lambda=2{,}65\times10^{-7}\ \mathrm{m}$$
+   <p>un quarto di micron, cioè <b>una lunghezza d&rsquo;onda ottica</b>: il pacchetto d&rsquo;onda di un singolo atomo è grande come la luce che lo illumina. La distanza media fra gli atomi è $2{,}15\times10^{-7}\ \mathrm{m}$, praticamente la stessa cosa, e</p>
+   $$n\lambda^3=1{,}85$$
+   <p>Né molto minore né molto maggiore di uno: <b>siamo esattamente sul confine</b>, ed è lì che il criterio smette di essere un&rsquo;approssimazione comoda e diventa una previsione fisica. La teoria del gas di Bose ideale dice che la condensazione comincia quando la densità in unità di volume termico raggiunge il valore</p>
+   $$\zeta(3/2)=2{,}612$$
+   <p>— la funzione zeta di Riemann calcolata in tre mezzi, che compare perché somma i contributi di tutti gli stati eccitati. Il nostro gas sta appena sotto quella soglia. Raffreddandolo di un altro fattore $1{,}3$ in temperatura, $\lambda$ cresce di $1{,}14$, $n\lambda^3$ supera $2{,}6$, e una frazione macroscopica degli atomi cade nello stato fondamentale: <b>è il termine singolare $p=0$ che la tappa 06 aveva visto sparire nel passaggio dalla somma all&rsquo;integrale</b>. Il criterio di validità della statistica classica, letto al contrario, è la condizione di esistenza di uno stato della materia.</p>`}
+  ]},
+  {t:'plot', title:'Il piano densita-temperatura, e i tre confini',
+   intro:R`In ascissa il logaritmo decimale della densità in particelle per metro cubo; in ordinata il logaritmo decimale della temperatura in kelvin. Le curve continue sono i livelli di $n\lambda^3$ per l'elio; le tratteggiate sono il confine a $n\lambda^3$ unitario per gli elettroni e per il rubidio-87, che hanno massa diversa e quindi confine diverso. I tre punti sono i casi svolti.`,
+   plots:[
+    {kind:'contour', f:'x - 27.177 - 1.5*y', xr:[18,31], yr:[-7,4], equal:false, height:380, ticks:6,
+     levels:[-6,-3,0,3], col:'#5eead4', width:2,
+     label:'elio: livelli 10^-6, 10^-3, 1, 10^3 (il terzo e il confine)',
+     overlays:[
+      {f:'x - 21.383 - 1.5*y', levels:[0], col:'#ff6b6b', dash:true, width:2.4, label:'elettroni: confine n lambda^3 = 1'},
+      {f:'x - 29.183 - 1.5*y', levels:[0], col:'#b98cff', dash:true, width:2.4, label:'rubidio-87: confine n lambda^3 = 1'}
+     ],
+     marks:[
+      {x:25.39, y:2.48, label:'elio a 300 K', col:'#5eead4', up:true},
+      {x:28.93, y:2.48, label:'elettroni del rame', col:'#ff6b6b', left:true, up:true},
+      {x:20.0, y:-6.3, label:'rubidio ultrafreddo', col:'#b98cff'}
+     ],
+     title:'regime classico e regime quantistico nel piano densita-temperatura',
+     xlabel:'log10 della densita (particelle per metro cubo)', ylabel:'log10 della temperatura (K)'}
+   ],
+   leggi:R`<p><b>Le rette hanno tutte la stessa pendenza, e la pendenza è il contenuto.</b> Il luogo a $n\lambda^3$ costante è una retta di pendenza $3/2$ in questo piano, perché $\lambda^3\propto T^{-3/2}$: per restare sullo stesso valore del criterio, moltiplicare la densità per mille richiede di moltiplicare la temperatura per cento. <b>La temperatura è un&rsquo;arma più potente della densità</b>, ed è il motivo per cui la fisica degli atomi freddi lavora su gas centomila volte più rarefatti dell&rsquo;aria invece di comprimerli.</p>
+   <p><b>Le tre rette sono parallele ma traslate, e la traslazione è la massa.</b> Il confine si sposta di $\tfrac32\log_{10}(m/m')$ cambiando particella: gli elettroni, quasi ottomila volte più leggeri dell&rsquo;elio, hanno il confine spostato di quasi sei decadi verso sinistra — cioè diventano quantistici a densità molto più basse o temperature molto più alte. Il rubidio, ventidue volte più pesante dell&rsquo;elio, ha il confine spostato dalla parte opposta. <b>A parità di condizioni, più una particella è leggera più è quantistica.</b></p>
+   <p><b>Dove stanno i tre punti rispetto ai loro confini.</b> L&rsquo;elio a $300$ K sta sei decadi a sinistra del suo confine, in pieno regime classico. Gli elettroni del rame stanno quasi quattro decadi a destra del loro, in pieno regime degenere. Il rubidio ultrafreddo sta <i>sopra</i> la sua retta di un soffio, ed è la ragione per cui quel punto del piano ha richiesto un premio Nobel per essere raggiunto: non basta raffreddare, bisogna raffreddare senza che il gas diventi liquido, cioè restando rarefatti — che è l&rsquo;unico modo di attraversare il confine restando un gas.</p>`}
+]},
+
+/* ---------------- 09 · LE TRE STATISTICHE ---------------- */
+{ num:'09', title:'Le tre statistiche, e come collassano sulla stessa curva ad alta temperatura', meta:'numeri di occupazione · la fugacita come parametro piccolo · la prima correzione quantistica · la domanda finale di ogni esercizio',
+  blocchi:[
+  {t:'prosa', title:'Un unica formula con due segni, e il limite comune', tag:'architettura', html:R`
+  <p>Questa tappa risponde alla domanda che, misurata sulle prove d&rsquo;esame, è la più frequente di tutto il corso, e che non compare quasi mai da sola: arriva in fondo a un esercizio sul gas di Fermi o su quello di Bose, nella forma «si verifichi che nel limite di alta temperatura si ritrova il risultato classico». Saperla svolgere vale spesso più punti del corpo dell&rsquo;esercizio, e si svolge sempre allo stesso modo.</p>
+  <p>Il punto di partenza è che le tre statistiche <b>non sono tre teorie</b>: sono una formula con due segni più il suo limite. Il numero medio di occupazione di uno stato di energia $\varepsilon$ è</p>
+  $$\langle n_\varepsilon\rangle=\frac{1}{e^{\beta(\varepsilon-\mu)}\mp1}$$
+  <p>con il segno superiore per i bosoni (Bose-Einstein) e quello inferiore per i fermioni (Fermi-Dirac). Falcioni-Vulpiani (pag. 42) le ricavano entrambe da un problema di massimizzazione della molteplicità con i vincoli quantistici sull&rsquo;occupazione, e Crisanti (pag. 252) dalla partizione gran canonica. L&rsquo;unica differenza fra le due è quell&rsquo;$1$ al denominatore, con il suo segno, e <b>l&rsquo;unica cosa che conta è se quell&rsquo;uno è trascurabile</b> rispetto all&rsquo;esponenziale.</p>
+  <p>Quando $e^{\beta(\varepsilon-\mu)}\gg1$ per ogni stato, l&rsquo;$1$ si può buttare, e restano tutte e tre la stessa cosa. Usando la <span class="str" data-str="serie-geometrica">serie geometrica</span> per espandere il denominatore, e introducendo la <b>fugacità</b> $z=e^{\beta\mu}$,</p>
+  $$\frac{1}{e^{\beta(\varepsilon-\mu)}\mp1}\simeq e^{-\beta(\varepsilon-\mu)}=z\,e^{-\beta\varepsilon}$$
+  <p>che è la statistica di Maxwell-Boltzmann della tappa 03. <b>La condizione è $z\ll1$</b>, ed è la stessa cosa del criterio della tappa 08, perché — come abbiamo ricavato lì — la fugacità vale esattamente $n\lambda^3$, a meno della degenerazione di spin. In simboli, con $g_s=2S+1$ stati di spin,</p>
+  $$n=\frac{g_s}{\lambda^3}\,z\qquad\Longrightarrow\qquad z=\frac{n\lambda^3}{g_s}$$
+  <p>Tutto il movimento si chiude qui: il criterio classico, il parametro di sviluppo delle correzioni quantistiche e la fugacità sono <b>lo stesso numero</b>, e chi lo riconosce non deve ricordare tre cose.</p>`},
+  {t:'prosa', title:'La prima correzione quantistica, e il suo segno', tag:'costruzione', html:R`
+  <p>Se $z$ è il parametro piccolo, allora il limite classico non è un muro ma il primo termine di una serie, e vale la pena calcolarne il secondo — perché è lì che si vede la differenza fra bosoni e fermioni. Seguiamo Grilli-Giardina (pag. 93-95), che Crisanti (pag. 267) rifà con gli stessi passaggi.</p>
+  <p>Il gran potenziale del gas quantistico contiene l&rsquo;integrale $\displaystyle\int_0^\infty dy\,\frac{y^{3/2}}{z^{-1}e^{y}\mp1}$. Si riscrive l&rsquo;integrando come $ze^{-y}/(1\mp ze^{-y})$ e si espande il denominatore con la serie geometrica al primo ordine in $z$,</p>
+  $$\frac{1}{1\mp ze^{-y}}\simeq1\pm ze^{-y}$$
+  <p>così che l&rsquo;integrale si spezza in due integrali elementari, entrambi casi della <span class="str" data-str="funzione-gamma">funzione Gamma di Eulero</span>:</p>
+  $$\int_0^\infty dy\,y^{3/2}e^{-y}=\Gamma\!\left(\frac52\right)=\frac{3\sqrt\pi}{4}$$
+  $$\int_0^\infty dy\,y^{3/2}e^{-2y}=\frac{1}{2^{5/2}}\cdot\frac{3\sqrt\pi}{4}$$
+  <p>Il secondo differisce dal primo solo per il fattore $2^{-5/2}$, che arriva dal riscalamento della variabile nell&rsquo;esponenziale. Rimettendo tutto insieme, derivando il gran potenziale rispetto al volume e usando $z\simeq n\lambda^3/g_s$, si ottiene l&rsquo;equazione di stato corretta al primo ordine:</p>
+  $$PV=NT\left(1\mp\frac{n\lambda^3}{2^{5/2}g_s}\right)$$
+  <p>con il segno superiore per i bosoni e quello inferiore per i fermioni. Il coefficiente numerico è</p>
+  $$\frac{1}{2^{5/2}}=0{,}177$$
+  <p><b>Il segno è tutta la fisica, e va saputo leggere.</b> Per i fermioni la pressione è <i>più alta</i> di quella classica: il principio di esclusione impedisce a due particelle di stare nello stesso stato, e questa impossibilità si traduce in una resistenza extra al confinamento — una pressione che esiste anche a temperatura zero, e che è ciò che tiene in piedi le nane bianche. Per i bosoni la pressione è <i>più bassa</i>: i bosoni preferiscono stare nello stesso stato, e questa attrazione statistica scarica il gas. Grilli-Giardina (pag. 95) lo annota proprio così: i fermioni hanno difficoltà a stare vicini, e quindi oppongono maggiore resistenza al contenimento.</p>
+  <p>Vale la pena notare <i>quanto</i> vale la correzione nei tre casi della tappa precedente. Per l&rsquo;elio a temperatura ambiente, $0{,}177\times3{,}13\times10^{-6}$, cioè cinque parti su dieci milioni: invisibile. Per gli elettroni del rame la «correzione» varrebbe $1{,}2\times10^{3}$, cioè mille volte il termine che dovrebbe correggere — <b>e questo è il modo in cui uno sviluppo perturbativo dichiara di non valere</b>. Non c&rsquo;è correzione quantistica al gas classico di elettroni: c&rsquo;è un gas quantistico, e va risolto dall&rsquo;altro capo, quello degenere.</p>`},
+  {t:'prosa', title:'Due verifiche che non passano dal limite', tag:'regola operativa', html:R`
+  <p>Ci sono due relazioni che vale la pena tenere separate dal resto, perché sono <b>esatte</b> e quindi servono come controllo indipendente su qualunque conto, classico o quantistico. La prima è il legame fra pressione ed energia per un gas non relativistico in tre dimensioni: Grilli-Giardina la dimostrano confrontando le espressioni di $PV$ ed $E$ nel gran canonico e la enunciano come teorema, valida per fermioni e bosoni indifferentemente; Crisanti (pag. 262) la ottiene da $\Omega=-PV$ e la marca come risultato <b>esatto</b>, valido anche per il gas di Boltzmann. Verifichiamola nel caso classico, dove conosciamo tutto:</p>
+  $$PV=\frac23E=\frac23\cdot\frac32NT=NT$$
+  <p>torna. Il valore di questa relazione, in sede d&rsquo;esame, è che permette di ricavare la pressione senza derivare l&rsquo;energia libera: basta l&rsquo;energia.</p>
+  <p>La seconda verifica riguarda le adiabatiche. Crisanti (pag. 262-264) mostra che per un gas ideale <i>quantistico</i>, per pura omogeneità del gran potenziale, restano costanti lungo un&rsquo;adiabatica sia $VT^{3/2}$ sia $PV^{5/3}$ — cioè <b>valgono le stesse leggi del gas monoatomico classico</b>. Ma con un avvertimento che è una domanda d&rsquo;orale già pronta: nel caso quantistico quelle leggi <i>non</i> discendono dal rapporto $C_P/C_V$ pari a $5/3$ né dalla differenza $C_P-C_V$ pari a $1$, che nel caso quantistico sono entrambe false. Stessa equazione, ragione diversa. È il tipo di coincidenza che fa sbagliare chi ricorda le formule invece delle derivazioni.</p>
+  <p>Infine, un esempio in cui la scelta della statistica cambia la <i>forma funzionale</i> del risultato e non solo un coefficiente, perché è il caso in cui si vede che il criterio ha conseguenze misurabili. Falcioni-Vulpiani (pag. 72-73) calcolano la corrente termoionica emessa da un metallo caldo. Con Fermi-Dirac ottengono la <b>legge di Richardson</b></p>
+  $$j_x=\frac{4\pi emk_B^2}{h^3}\,T^2e^{-W/k_BT}$$
+  <p>con $W=e\varphi-\mu$ il lavoro di estrazione; con Maxwell-Boltzmann ottengono invece una dipendenza $T^{1/2}$ davanti all&rsquo;esponenziale e un esponente $e\varphi/k_BT$ al posto di $W/k_BT$. Le due si raccordano se si usa la fugacità classica</p>
+  $$e^{\beta\mu}=\frac{\rho h^3}{2(2\pi mk_BT)^{3/2}}$$
+  <p>— che è il nostro $n\lambda^3/g_s$ scritto nella convenzione con $k_B$ esplicito e con $g_s=2$ per lo spin dell&rsquo;elettrone. Ma quella fugacità è valida solo per $k_BT\gg\varepsilon_F$, e negli esperimenti reali vale l&rsquo;opposto: <b>la versione classica non è adatta a descrivere l&rsquo;effetto termoionico</b>, e quella fonte lo scrive esplicitamente. È il criterio della tappa 08 che decide quale delle due formule si confronta con i dati.</p>`},
+  {t:'plot', title:'Le tre statistiche: dove si separano e dove collassano',
+   intro:R`In ascissa la variabile $x=\beta(\varepsilon-\mu)$, cioè la distanza dell'energia dello stato dal potenziale chimico, in unità di $T$. In ordinata il numero medio di occupazione $\langle n\rangle$. Le tre curve sono Bose-Einstein, Maxwell-Boltzmann e Fermi-Dirac.`,
+   plots:[
+    {kind:'func2d', xr:[0.3,4], yr:[0,3], height:340, ticks:6,
+     title:'numero medio di occupazione nelle tre statistiche',
+     curves:[
+      {f:'1/(exp(x)-1)', col:'#5eead4', label:'Bose-Einstein: occupazione piu alta, diverge a x = 0'},
+      {f:'exp(-x)', col:'#d8a13a', label:'Maxwell-Boltzmann: esponenziale pura'},
+      {f:'1/(exp(x)+1)', col:'#ff6b6b', label:'Fermi-Dirac: occupazione piu bassa, satura a 1'}
+     ],
+     xlabel:'x = (eps - mu) / T', ylabel:'occupazione media'}
+   ],
+   leggi:R`<p><b>A destra le tre curve sono indistinguibili, ed è il limite classico.</b> Già a $x=2$ i tre valori stanno entro il venti per cento, a $x=3$ entro il cinque. Il motivo si legge nella formula: l&rsquo;$1$ al denominatore conta solo quando $e^{x}$ è dell&rsquo;ordine di uno, cioè per $x$ piccolo. <b>Il limite classico non è un limite di alta energia: è un limite di alta $x$</b>, e siccome $x=\beta(\varepsilon-\mu)$ lo si raggiunge rendendo $\mu$ molto negativo — che è esattamente $z\ll1$, cioè $n\lambda^3\ll1$.</p>
+   <p><b>A sinistra si separano, e il modo in cui si separano è il principio di Pauli.</b> La curva di Fermi (rossa) sta sempre <i>sotto</i> la maxwelliana: è più difficile mettere fermioni in uno stato. La curva di Bose (verde) sta sempre <i>sopra</i> e diverge quando l&rsquo;energia si avvicina al potenziale chimico: è più facile mettere bosoni dove ce ne sono già. La maxwelliana non sa distinguerli e passa in mezzo, il che è il senso preciso della frase «nel limite classico si perde la distinzione fra bosoni e fermioni».</p>
+   <p><b>Come si usa questa figura in sede d&rsquo;esame.</b> Quando l&rsquo;ultima domanda chiede di verificare il limite classico, quel che va mostrato è che il problema si colloca a $x$ grande, cioè che $z\ll1$, cioè che $n\lambda^3\ll1$; poi si sostituisce $\langle n\rangle\to ze^{-\beta\varepsilon}$ e si rifanno gli integrali, che diventano Gamma di Eulero. <b>Non si prende il limite $T\to\infty$ a cuor leggero</b>: quel che si sta facendo è uno sviluppo in $z$, e va detto qual è il parametro piccolo.</p>`}
+]},
+
+/* ---------------- 10 · ESERCIZI ---------------- */
+{ num:'10', title:'Esercizi — tocca a te', meta:'il gas con spettro a potenza qualsiasi · il gas in campo gravitazionale · il limite classico di un gas di fermioni',
+  blocchi:[
+  {t:'esercizio', title:'1 · Il gas perfetto con spettro a potenza qualsiasi',
+   src:'Crisanti, esercizio assegnato a pag. 210 e svolto a pag. 211: il caso che separa cio che dipende dallo spettro da cio che non ne dipende',
+   testo:R`Un gas perfetto di $N$ particelle ha hamiltoniana di singola particella $H_i=a|\mathbf p_i|^b$, con $a,b>0$. Calcola la funzione di partizione di singola particella, l'energia libera, l'energia media e la pressione. Discuti quali risultati dipendono da $b$ e quali no, e verifica i due casi noti $b=2$ (gas non relativistico) e $b=1$ (gas ultrarelativistico).`,
+   steps:[
+    {label:'La partizione: un cambio di variabile e una Gamma', body:R`
+    <p>Non essendoci interazione vale $Z_N=z_1^N/N!$, e l&rsquo;integrale sulle posizioni dà $V$. Restano gli impulsi, in coordinate sferiche:</p>
+    $$z_1=\frac{4\pi V}{h^3}\int_0^\infty dp\,p^2e^{-\beta ap^b}$$
+    <p>Il <span class="str" data-str="cambio-di-variabile">cambio di variabile</span> giusto è quello che rende l&rsquo;esponente lineare: $y=\beta ap^b$. Allora $p=(y/\beta a)^{1/b}$, e il differenziale porta un fattore $y^{1/b-1}$; insieme al $p^2$ l&rsquo;integrale diventa</p>
+    $$\int_0^\infty dy\,y^{3/b-1}e^{-y}=\Gamma\!\left(\frac3b\right)$$
+    <p>che è la definizione stessa della funzione Gamma di Eulero. Raccogliendo le costanti,</p>
+    $$z_1=\frac{4\pi V}{bh^3}\left(\frac Ta\right)^{3/b}\Gamma\!\left(\frac3b\right)$$
+    <p>Per $b=1$ l&rsquo;integrale si riduce al caso intero, $\Gamma(3)=2$, ed è il conto che Crisanti fa a pag. 202 per il gas relativistico. <b>Il criterio invocato</b> è che ogni integrale della forma $\int_0^\infty p^{n}e^{-\alpha p^b}dp$ si riduce a una Gamma con il cambio di variabile che linearizza l&rsquo;esponente: è la mossa standard, e conviene riconoscerla invece di reinventarla ogni volta.</p>`},
+    {label:'Energia e pressione: una dipende da b, l altra no', body:R`
+    <p>Tutta la dipendenza da $\beta$ sta nel fattore $(T/a)^{3/b}$, quindi $\log z_1=\text{cost}-\frac3b\log\beta$ e</p>
+    $$\frac{\partial\log z_1}{\partial\beta}=-\frac{3}{b\beta}$$
+    <p>da cui l&rsquo;energia media</p>
+    $$E=-N\frac{\partial\log z_1}{\partial\beta}=\frac{3N}{b\beta}=\frac{3NT}{b}$$
+    <p>Per la pressione si passa da $F=-T\log Z_N$: l&rsquo;unica dipendenza da $V$ resta il $\log V$ dentro $z_1$, con coefficiente $-NT$, esattamente come nella tappa 01. Dunque</p>
+    $$P=-\left(\frac{\partial F}{\partial V}\right)_{T,N}=\frac{NT}{V}$$
+    <p><b>Il risultato da portare via</b>: l&rsquo;equazione di stato $PV=NT$ non dipende da $b$, cioè <i>non dipende dallo spettro</i>; la relazione energia-temperatura sì. Verifica sui due casi noti: $b=2$ dà $E=\tfrac32NT$, il gas monoatomico; $b=1$ dà $E=3NT$, il gas ultrarelativistico — il doppio dell&rsquo;energia a parità di temperatura e di pressione. <b>Il criterio</b> è quello della tappa 05: l&rsquo;equipartizione generalizzata assegna $T/s$ per ogni termine di potenza $s$, e qui $s=b$ su tre gradi di libertà.</p>`}
+   ]},
+  {t:'esercizio', title:'2 · Il gas perfetto in campo gravitazionale',
+   src:'Crisanti pag. 205-207: il caso in cui il calore specifico non e quello che ci si aspetta, e il motivo sta in un esponente',
+   testo:R`$N$ particelle di massa $m$ sono in un cilindro di sezione $A$ e altezza infinita, in campo gravitazionale uniforme $g$, a temperatura $T$. Calcola la funzione di partizione di singola particella, l'energia media e il calore specifico a volume costante. Spiega perché il risultato è diverso da $\tfrac32NT$ senza rifare il conto, usando il teorema di equipartizione.`,
+   steps:[
+    {label:'La partizione si spezza in impulsi e quota', body:R`
+    <p>L&rsquo;hamiltoniana di singola particella è $H_i=\frac{p^2}{2m}+mgz$, somma di un pezzo che dipende solo dagli impulsi e di uno che dipende solo dalla quota. L&rsquo;esponenziale si fattorizza, e con essa l&rsquo;integrale:</p>
+    $$z_1=\frac{A}{h^3}\left(\frac{2\pi m}{\beta}\right)^{3/2}\int_0^\infty dz\,e^{-\beta mgz}$$
+    <p>dove il fattore con l&rsquo;esponente $3/2$ è il solito prodotto di tre gaussiane e $A$ viene dall&rsquo;integrazione sulle due coordinate orizzontali. L&rsquo;integrale in quota è elementare:</p>
+    $$\int_0^\infty dz\,e^{-\beta mgz}=\frac{1}{\beta mg}$$
+    <p>Notare che <b>converge solo perché il cilindro è infinito verso l&rsquo;alto e chiuso in basso</b>: se fosse infinito in entrambi i versi il gas non avrebbe stato di equilibrio, e la partizione divergerebbe. Il risultato complessivo è $z_1\propto\beta^{-5/2}$: tre mezzi dalle gaussiane degli impulsi, e <b>uno intero</b> dall&rsquo;esponenziale della quota.</p>`},
+    {label:'Energia, calore specifico, e la lettura con l equipartizione', body:R`
+    <p>Da $z_1\propto\beta^{-5/2}$,</p>
+    $$\frac{\partial\log z_1}{\partial\beta}=-\frac{5}{2\beta}$$
+    <p>e quindi</p>
+    $$E=\frac{5N}{2\beta}=\tfrac52NT$$
+    $$C_V=\frac{\partial E}{\partial T}=\tfrac52N$$
+    <p><b>La lettura senza conti</b>, che è ciò che l&rsquo;esercizio chiede davvero. L&rsquo;equipartizione generalizzata della tappa 05 dice che un termine di potenza $s$ porta $T/s$. Qui ci sono tre termini quadratici negli impulsi ($s=2$, dunque $T/2$ ciascuno) e <b>un termine lineare nella quota</b> ($s=1$, dunque $T$ intero). Il totale è</p>
+    $$3\times\tfrac T2+T=\tfrac52T$$
+    <p>per particella, cioè esattamente il conto appena fatto. <b>Il criterio da riconoscere</b>: non contare «gradi di libertà» ma <i>termini dell&rsquo;hamiltoniana con la loro potenza</i>. Un potenziale lineare vale il doppio di uno quadratico, e questo spiega anche l&rsquo;osservazione di Crisanti (pag. 205) che il calore specifico in campo gravitazionale è più grande di quello del gas libero: le particelle immagazzinano energia anche salendo, non solo correndo.</p>`}
+   ]},
+  {t:'esercizio', title:'3 · Il limite classico di un gas di fermioni',
+   src:'la domanda finale che 16 prove su 47 pongono: si verifichi che ad alta temperatura si ritrova il risultato classico',
+   testo:R`Per un gas ideale di fermioni di spin $1/2$ in tre dimensioni, mostra che nel limite di alta temperatura e bassa densità si ritrovano l'equazione di stato e l'energia del gas classico, e ricava la prima correzione quantistica. Dichiara esplicitamente qual è il parametro piccolo dello sviluppo, e verifica se l'espansione è utilizzabile per gli elettroni di conduzione di un metallo a temperatura ambiente.`,
+   steps:[
+    {label:'Il parametro piccolo, e lo sviluppo', body:R`
+    <p>Il primo passo è <b>nominare il parametro</b>, ed è l&rsquo;unico passo in cui si può sbagliare in modo irrimediabile: non si sta prendendo un limite $T\to\infty$, si sta espandendo in <b>fugacità</b> $z=e^{\beta\mu}$. La relazione fra fugacità e dati del problema è quella della tappa 09: il numero di particelle si scrive con la funzione di Fermi, il cui sviluppo per $z$ piccolo è $z-\dfrac{z^2}{2^{3/2}}+\cdots$, e all&rsquo;ordine dominante</p>
+    $$z\simeq\frac{n\lambda^3}{g_s}$$
+    <p>con $g_s=2$ per lo spin un mezzo. <b>Quindi il parametro piccolo è $n\lambda^3$</b>: lo stesso numero del criterio di validità, e questo non è un caso — il limite classico è, letteralmente, il primo ordine dello sviluppo in quel parametro.</p>`},
+    {label:'Ordine zero e primo ordine', body:R`
+    <p>All&rsquo;ordine zero in $z$ si ritrovano tutte le formule classiche: dall&rsquo;espressione del gran potenziale con la sola $\Gamma(5/2)$ si ottiene $PV=NT$, e dall&rsquo;energia con $\Gamma(5/2)$ al numeratore si ottiene $E=\tfrac32NT$. Il controllo incrociato lo dà la relazione esatta fra pressione ed energia, valida per tutte e tre le statistiche:</p>
+    $$\frac23E=\frac23\cdot\frac32NT=NT$$
+    <p>Al primo ordine, con il conto della tappa 09, resta un termine con il segno dei fermioni:</p>
+    $$PV=NT\left(1+\frac{n\lambda^3}{2^{5/2}g_s}\right)$$
+    <p>La pressione è <b>più alta</b> di quella classica. <b>Il criterio invocato</b> è il principio di esclusione di Pauli: due fermioni non possono occupare lo stesso stato, e l&rsquo;indisponibilità degli stati già occupati si manifesta come una repulsione effettiva — che non è una forza, è statistica.</p>`},
+    {label:'E per gli elettroni di un metallo?', body:R`
+    <p>Qui l&rsquo;esercizio chiede di fare la cosa che distingue chi ha capito: <b>verificare il criterio invece di assumerlo</b>. Con i numeri della tappa 08, per gli elettroni di conduzione del rame a temperatura ambiente $n\lambda^3$ vale $6{,}77\times10^{3}$. Il «piccolo» parametro dello sviluppo vale quasi settemila, e la «correzione» al primo ordine sarebbe $0{,}177\times6{,}77\times10^{3}$, cioè mille volte più grande del termine che dovrebbe correggere.</p>
+    <p><b>Conclusione da scrivere per esteso</b>: lo sviluppo non è utilizzabile, e il gas di elettroni di un metallo non è un gas classico con una piccola correzione quantistica — è un gas degenere, e va affrontato dal limite opposto, quello di temperatura nulla, dove gli stati si riempiono fino all&rsquo;energia di Fermi. È esattamente il motivo per cui Falcioni-Vulpiani (pag. 72-73), calcolando la corrente termoionica, scartano la versione classica: la condizione che la renderebbe valida, $k_BT\gg\varepsilon_F$, negli esperimenti reali è violata di due ordini di grandezza. <b>Una risposta che si limita a scrivere «per alte temperature si ritrova il classico» senza verificare il numero non risponde alla domanda</b>: la domanda è proprio se quel limite si applichi.</p>`}
+   ]}
+]},
+
+/* ---------------- 11 · IL SENSO E LE ROTTE ---------------- */
+{ num:'11', title:'Il senso, e le rotte', meta:'cosa lascia in mano · dove il criterio riappare in fisica · la domanda che porta avanti',
+  blocchi:[
+  {t:'prosa', title:'Cosa portarsi via', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Il gas perfetto classico si risolve per intero con tre mosse — fattorizzare la partizione, fare tre integrali gaussiani, derivare l&rsquo;energia libera — e restituisce $PV=NT$, $E=\tfrac32NT$ e l&rsquo;entropia di Sackur-Tetrode. Ma la costruzione porta dentro di sé due oggetti che la meccanica classica non contiene: la cella di volume $h$ per grado di libertà, senza la quale l&rsquo;entropia non è adimensionale, e la divisione per $N!$, senza la quale non è estensiva. Sono i due segnali che <b>la teoria classica è un limite di qualcos&rsquo;altro</b>, e il resto del movimento serve a dire di cosa e fin dove.</p>
+  <p><b>Che cosa ricordare, in ordine di durata.</b> Che la lunghezza termica $\lambda=h/\sqrt{2\pi mT}$ è la taglia del pacchetto d&rsquo;onda di una particella, e che $z_1=V/\lambda^3$ è il numero di stati che le sono accessibili. Che il criterio di validità $n\lambda^3\ll1$ ha quattro letture equivalenti — fugacità piccola, volume termico minore del volume specifico, pacchetti che non si sovrappongono, stati molti più delle particelle — e che <b>si verifica con i numeri del problema</b>, non si recita. Che la maxwelliana si ottiene marginalizzando, e che è un limite $N\to\infty$ di una distribuzione a supporto compatto. Che le tre velocità stanno nell&rsquo;ordine moda, media, quadratica media, e che si sceglie quella giusta chiedendosi cosa si sta mediando. Che l&rsquo;equipartizione generalizzata dà $T/s$ per un termine di potenza $s$, e che fallisce in tre modi: spettro non quadratico, spettro discreto con quanto grande, spettro limitato superiormente.</p>
+  <p><b>E i tre numeri</b>, che sono la cosa più utile di tutto il movimento: elio a temperatura ambiente $3\times10^{-6}$, elettroni di un metallo $7\times10^{3}$, gas atomico ultrafreddo circa uno. Il primo dice «usa Boltzmann senza pensarci», il secondo dice «Boltzmann è inutilizzabile, vai al limite degenere», il terzo dice «sei sulla soglia di un nuovo stato della materia». <b>Di un movimento fatto di formule facili, ciò che resta è un criterio: prima di risolvere, misura quanto è grande il pacchetto d&rsquo;onda rispetto alla distanza fra i vicini.</b></p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento',
+   oggetto:R`<b>Il confronto fra lunghezza termica e distanza interparticellare</b>: il numero puro $n\lambda^3$ che decide se un sistema di particelle identiche si può trattare come se fossero distinguibili.`,
+   rotte:[
+    {dove:'Gas degeneri<br>e materia compatta', txt:R`Quando $n\lambda^3\gg1$ e le particelle sono fermioni, gli stati si riempiono dal basso fino all&rsquo;<b>energia di Fermi</b> e il gas esercita una pressione anche a temperatura nulla. È la pressione che regge le <b>nane bianche</b> contro la gravità, e il suo cedimento al limite di Chandrasekhar è ciò che trasforma una stella in una supernova. Lo stesso conto, con i neutroni al posto degli elettroni, descrive le stelle di neutroni — e la scala di densità a cui il criterio si ribalta è quella che separa una stella da un residuo.`},
+    {dove:'Condensazione<br>e atomi ultrafreddi', txt:R`Per i bosoni lo stesso confine ha un esito opposto: superata la soglia $\zeta(3/2)$, una frazione macroscopica degli atomi collassa nello stato fondamentale — quel termine $p=0$ che la sostituzione somma-integrale aveva cancellato. È il <b>condensato di Bose-Einstein</b>, realizzato nel 1995 raffreddando vapori atomici fino al punto del piano densità-temperatura che abbiamo calcolato nella tappa 08, e oggi il banco su cui si studiano superfluidità, vortici quantizzati e simulazione quantistica di reticoli.`},
+    {dove:'Teoria cinetica<br>e trasporto', txt:R`La maxwelliana non descrive solo l&rsquo;equilibrio: è il punto fisso dell&rsquo;<b>equazione di Boltzmann</b>, e la distribuzione delle velocità è ciò da cui si calcolano cammino libero medio, viscosità, conducibilità termica e coefficienti di diffusione. Falcioni-Vulpiani mostrano che da questi, insieme ai dati termodinamici, si ricavano le <b>dimensioni delle molecole</b> e il numero di Avogadro — cioè che la meccanica statistica permette di contare gli atomi senza vederli.`},
+    {dove:'Astrofisica<br>e diagnostica spettrale', txt:R`La larghezza Doppler di una riga spettrale è la maxwelliana letta dallo spettrografo: misurando un profilo si misura la temperatura di un gas a distanza arbitraria. Sulla stessa scala, il criterio $n\lambda^3$ decide quale regione di una stella è un plasma classico e quale è degenere — il nucleo di una gigante rossa è degenere mentre il suo inviluppo è classico, e la differenza fra i due regimi è ciò che innesca il <b>flash dell&rsquo;elio</b>.`}
+   ],
+   domanda:R`Abbiamo trattato il criterio $n\lambda^3\ll1$ come una soglia: sopra si usa una teoria, sotto un&rsquo;altra. <b>Domanda che porti avanti:</b> ma una soglia fra due descrizioni è quasi sempre il segno di una <i>transizione</i>, e qui la transizione è di un tipo particolare — non c&rsquo;è nessuna interazione fra le particelle, eppure il sistema cambia stato. La condensazione di Bose è l&rsquo;unico esempio di transizione di fase di un gas <b>ideale</b>, prodotta da sola dalla statistica di occupazione degli stati. La domanda è quindi: che cosa gioca, qui, il ruolo che nelle transizioni ordinarie gioca l&rsquo;energia di interazione? La risposta è che lo gioca il vincolo di simmetria della funzione d&rsquo;onda, cioè un&rsquo;<b>interazione effettiva di origine puramente combinatoria</b> — la stessa che in questo movimento abbiamo incontrato in forma innocua come divisione per $N!$. Capire fin dove quella combinatoria può imitare una forza è una delle domande da cui parte la fisica dei sistemi fortemente correlati.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoms-09-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo ms-09 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
+    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
+    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
+    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
+    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: ms-09-gas-perfetto.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
