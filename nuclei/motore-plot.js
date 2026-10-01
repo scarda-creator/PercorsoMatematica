@@ -240,6 +240,17 @@
       g.beginPath();
       for (var a = 0; a <= 64; a++) { var th = a / 64 * 2 * Math.PI, px = m.X(cxr + R.r * Math.cos(th)), py = m.Y(cyr + R.r * Math.sin(th)); a ? g.lineTo(px, py) : g.moveTo(px, py); }
       g.stroke(); g.setLineDash([]);
+      /* IL LABEL DI UN RING ERA DOCUMENTATO E MAI DISEGNATO (riparato 2026-10-01, scrivendo
+       * em-04). Lo stesso difetto del `width` annotato qui sopra: l'API prometteva un campo e
+       * lo ignorava, e sei nuclei lo passavano da luglio senza che comparisse — fra cui
+       * `12-cauchy` con due cerchi di cui uno «esclude», indistinguibili in pagina. Posizione
+       * di default in cima al cerchio; `lx`/`ly` la spostano, come in `segs`. */
+      if (R.label) {
+        g.font = '12px Georgia'; g.fillStyle = col; g.textAlign = 'center';
+        g.fillText(R.label, m.X(R.lx !== undefined ? R.lx : cxr),
+                            m.Y(R.ly !== undefined ? R.ly : cyr + R.r) - 6);
+        g.textAlign = 'left';
+      }
     });
     // segs: [{x1,y1,x2,y2, col?, width?, dash?, arrow?, label?, lx?, ly?}] — segmenti retti.
     // Nati per la GEOMETRIA di Hilbert (vettore, proiezione, errore ortogonale): il disegno
