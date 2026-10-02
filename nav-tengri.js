@@ -28,9 +28,27 @@
   var base = sotto ? "../" : "";
   var dentroNucleo = /\/nuclei\/[^/]+\.html$/.test(p);
 
+  /* LE VOCI, riviste il 2026-10-02 su direttiva di Giuseppe.
+   *
+   * «e' importante che tu aggiunga un tasto home per tornare subito nella pagina
+   * iniziale, che avra' in alto lo scaffale e in basso la mappa.»
+   *
+   * Tre cambiamenti, e il primo e' il piu' importante: **la prima voce si chiama Home
+   * e si vede sempre**, anche quando sei nella pagina in cui porta. Prima si chiamava
+   * «Scaffale» e, trovandosi nella home, diventava un `<b>` non cliccabile: giusto per
+   * un menu, sbagliato per un tasto di ritorno — chi e' dentro un nucleo e vuole uscire
+   * cerca la parola «home», non il nome della stanza.
+   *
+   * «Percorso» esce: Giuseppe lo ha dichiarato obsoleto lo stesso giorno, perche'
+   * l'unita' di organizzazione e' la materia e non il movimento di un percorso unico.
+   * La pagina resta sul disco e raggiungibile per URL finche' la ragnatela non e'
+   * finita — si ritira un indirizzo quando c'e' dove mandare chi lo apriva, non prima
+   * (e' la lezione dei tre indirizzi dei quiz, ritirati il 29-08).
+   *
+   * «Mappa» e «Rotte» sono due voci per una cosa sola e vanno fuse nella ragnatela
+   * con la tesi al centro. Finche' quella non c'e', restano entrambe. */
   var VOCI = [
-    ["Scaffale", "index.html"],
-    ["Percorso", "percorso-app.html"],
+    ["Home", "index.html"],
     ["Mappa", "mappa-percorso.html"],
     ["Rotte", "carta-delle-rotte.html"]
   ];
@@ -46,6 +64,10 @@
     "  font-weight:500;transition:.14s;display:inline-flex;align-items:center;gap:5px}",
     ".tgn a:hover,.tgn button:hover{border-color:#5eead4;color:#fff}",
     ".tgn b{border-color:#5eead4;color:#5eead4;cursor:default}",
+    /* La casa si riconosce senza leggerla: bordo acceso e il glifo della casetta.
+       Serve dentro un nucleo, dove la barra ha dieci voci e si cerca l'uscita. */
+    ".tgn a.casa{border-color:#5eead4;color:#5eead4;font-weight:600}",
+    ".tgn a.casa:hover{background:#13302c;color:#fff}",
     /* Il marchio: non e' un bottone, e' il nome della casa. Nessun bordo, nessun
        riquadro - e sparisce sotto i 420px, dove ogni pixel serve alle voci. */
     ".tgn .marchio{background:none;border:0;padding:0 10px 0 4px;color:#5eead4;",
@@ -66,10 +88,14 @@
     '<span class="marchio" title="Tengri — la casa dello studio">Tengri</span>' +
     '<button data-tgn="back" title="Indietro">&#8592;</button>' +
     '<button data-tgn="fwd" title="Avanti">&#8594;</button>' +
-    VOCI.map(function (v) {
-      return (!sotto && v[1] === qui)
-        ? "<b>" + v[0] + "</b>"
-        : '<a href="' + base + v[1] + '">' + v[0] + "</a>";
+    VOCI.map(function (v, i) {
+      /* La Home resta un LINK sempre, anche quando sei gia' li': e' un tasto di
+         ritorno, non una voce di menu. Le altre diventano in grassetto quando sei
+         nella loro pagina, che e' il modo giusto di dire «sei qui». */
+      var ci_sono = !sotto && v[1] === qui;
+      if (ci_sono && i > 0) return "<b>" + v[0] + "</b>";
+      return '<a class="' + (i === 0 ? "casa" : "") + '" href="' + base + v[1] + '">'
+        + (i === 0 ? "&#8962; " : "") + v[0] + "</a>";
     }).join("") +
     '<span class="sp"></span><span class="vicini" id="tgn-vicini"></span>';
 
