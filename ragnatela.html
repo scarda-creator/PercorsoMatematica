@@ -1,0 +1,648 @@
+<!doctype html>
+<!-- ragnatela.html — la mappa e le rotte fuse in una raggiera a orbite, con la tesi al
+     centro. Dedalo, 2026-10-05, su progetto di Giuseppe del 2026-10-02.
+     Specifica: 00-capitano/dedalo/ragnatela-specifica.md
+     Dato: ragnatela-dati.js, generato da 00-capitano/scripts/ragnatela-dati.py
+
+     IL CENTRO E' UN CAMPO DA RIEMPIRE, e non un'etichetta. Direttiva testuale di Giuseppe
+     del 2026-10-03: «la tesi tienila come un campo da riempire nel percorso, costruita
+     sulle cose di cui abbiamo parlato e sugli input che immettero'». Per questo il nodo
+     centrale non porta un titolo, ha il bordo tratteggiato e un posto visibilmente vuoto.
+
+     COSTRUITA A MANO da Dedalo dopo QUATTRO dispacci caduti: il primo per peso in ingresso
+     (357 kB di letture obbligatorie), il secondo per la rete, il terzo e il quarto sul
+     tetto di 32000 token di uscita — il Demiurgo tentava la pagina in una scrittura sola
+     anche con un brief che imponeva sei passi. Scritta in sei pezzi, uno per chiamata. -->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0e1117">
+<title>La ragnatela — il percorso e la tesi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icona.png">
+<style>
+:root{--bg:#0e1117;--card:#161b22;--bordo:#2b333d;--txt:#eef3f8;--tenue:#9fb0c0;
+      --acc:#5eead4;--pro:#b98cff;--blu:#4c8dff;--grigio:#5b6878}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);
+     font:16px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 14px 80px}
+h1{margin:.1em 0 .1em;font-size:1.5rem;letter-spacing:-.01em}
+.sotto{color:var(--tenue);margin:0 0 14px;font-size:.92rem}
+
+/* ---------- la raggiera ---------- */
+#tela{width:100%;height:auto;display:block;touch-action:manipulation}
+#tela text{font-family:inherit;-webkit-user-select:none;user-select:none}
+.orbita{fill:none;stroke:#1b222c;stroke-width:1}
+.arco-ponte{stroke:var(--acc);fill:none;stroke-dasharray:7 6;opacity:.5;
+            cursor:pointer;transition:opacity .15s}
+.arco-ponte:hover,.arco-ponte.viva{opacity:1}
+.arco-portante{stroke:var(--pro);fill:none;stroke-width:1.1;opacity:.42}
+.nodo{cursor:pointer}
+.nodo circle{transition:r .16s,filter .16s}
+.nodo:hover circle{filter:brightness(1.35)}
+.nodo text{fill:var(--txt);font-size:12.5px;text-anchor:middle;pointer-events:none}
+.nodo.chiusa circle{fill:#232c37;stroke:var(--grigio)}
+.nodo.chiusa text{fill:var(--grigio)}
+.nodo.aperto circle{stroke-width:2.5}
+.etichetta-sigla{fill:#0e1117;font-size:11px;font-weight:700;text-anchor:middle;
+                 pointer-events:none}
+.nucleo text{font-size:10.5px;fill:var(--tenue)}
+.nucleo:hover text{fill:var(--acc)}
+/* il centro: bordo APERTO, non chiuso. E' la direttiva, resa in un attributo. */
+#centro-anello{fill:#11191c;stroke:var(--acc);stroke-width:2;stroke-dasharray:14 11;
+               opacity:.95}
+#centro-vuoto{fill:none;stroke:var(--acc);stroke-width:1;stroke-dasharray:3 5;opacity:.5}
+
+/* ---------- pannello ---------- */
+.pan{background:var(--card);border:1px solid var(--bordo);border-radius:14px;
+     padding:15px 16px;margin-top:16px}
+.pan h2{margin:0 0 4px;font-size:1.08rem;color:var(--acc)}
+.pan h3{margin:14px 0 5px;font-size:.92rem;color:var(--pro)}
+.pan p{margin:.45em 0;font-size:.92rem}
+.pan .da{color:var(--tenue);font-size:.76rem}
+.vuoto{border:1px dashed var(--bordo);border-radius:10px;padding:13px;
+       color:var(--tenue);font-size:.88rem;text-align:center;margin:8px 0}
+.chip{display:inline-block;font-size:.7rem;letter-spacing:.04em;padding:2px 9px;
+      border-radius:999px;border:1px solid var(--bordo);color:var(--tenue);margin:0 5px 5px 0}
+.chip.ok{border-color:var(--acc);color:var(--acc)}
+.chip.attesa{border-color:#6b5a2a;color:#e0b65e}
+.chip.sel{background:#13302c;border-color:var(--acc);color:var(--acc);cursor:pointer}
+.chip.cliccabile{cursor:pointer}
+textarea,input{width:100%;background:#0b0f14;color:var(--txt);border:1px solid var(--bordo);
+               border-radius:9px;padding:10px;font:inherit;font-size:.92rem}
+textarea{min-height:74px;resize:vertical}
+button{background:#13302c;color:var(--acc);border:1px solid var(--acc);border-radius:9px;
+       padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;min-height:40px}
+button.lieve{background:var(--card);color:var(--tenue);border-color:var(--bordo);
+             font-weight:400;padding:7px 13px;min-height:34px}
+.riga-idea{border-top:1px solid var(--bordo);padding:9px 0;font-size:.9rem}
+.legenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.8rem;
+         color:var(--tenue)}
+.legenda i{display:inline-block;width:26px;height:0;border-top:2px solid;
+           vertical-align:middle;margin-right:6px}
+@media(max-width:560px){
+  .wrap{padding:12px 10px 80px}
+  h1{font-size:1.28rem}
+  #tela text{font-size:11.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>La ragnatela</h1>
+  <p class="sotto">Al centro la tesi, che è un campo da riempire. Attorno le idee, le
+    materie e i loro movimenti. Le linee tratteggiate sono i ponti fra materie: più sono
+    spesse, più argomenti le legano.</p>
+
+  <svg id="tela" viewBox="0 0 1000 1000" role="img"
+       aria-label="raggiera del percorso di studio con la tesi al centro"></svg>
+
+  <div class="legenda">
+    <span><i style="border-color:#5eead4;border-top-style:dashed"></i>ponte fra materie</span>
+    <span><i style="border-color:#b98cff"></i>la materia serve l&rsquo;idea</span>
+    <span><i style="border-color:#5b6878"></i>materia superata</span>
+  </div>
+
+  <div id="pannello"></div>
+</div>
+
+<script src="ragnatela-dati.js"></script>
+<script src="nav-tengri.js"></script>
+<script>
+/* ===================================================================
+   Passo 2 — il dato e la geometria. Nessun disegno qui: solo posizioni.
+   =================================================================== */
+(function () {
+  var R = window.RAGNATELA;
+  var tela = document.getElementById("tela");
+  var pannello = document.getElementById("pannello");
+  if (!R || !tela) { return; }
+
+  var W = 1000, CX = 500, CY = 500;
+  var RAGGIO = { idee: 0.34 * W, materie: 0.62 * W / 2 * 2 / 2 * 2 };
+  /* i raggi in coordinate del viewBox: 34% e 62% del LATO, cioe' del semiasse disponibile */
+  RAGGIO.idee = 0.34 * (W / 2) * 1.0 + 60;     /* ~230 */
+  RAGGIO.materie = 0.62 * (W / 2) * 1.0 + 80;  /* ~390 */
+  RAGGIO.nuclei = RAGGIO.materie + 92;
+
+  /* --- L'ORDINE ANGOLARE DELLE MATERIE SI CALCOLA DAI PESI, non si cabla.
+     Il senso meta' della pagina e' che l'arco piu' pesante si veda CORTO: se
+     `meccanica-quantistica ↔ meccanica-statistica` (peso 11) attraversasse il disegno,
+     il disegno direbbe il contrario di cio' che misura. Si ordina con una greedy: si
+     parte dalla coppia piu' pesante e si aggiunge ogni volta la materia piu' legata a
+     un capo della catena. E' un'euristica, non un ottimo — e per otto nodi basta. --- */
+  function ordineMaterie(materie, archi) {
+    var peso = {};
+    archi.forEach(function (a) {
+      if (a.specie !== "ponte") return;
+      peso[a.a + "|" + a.b] = a.peso;
+      peso[a.b + "|" + a.a] = a.peso;
+    });
+    function w(x, y) { return peso[x + "|" + y] || 0; }
+    var id = materie.map(function (m) { return m.id; });
+    var ponti = archi.filter(function (a) { return a.specie === "ponte"; })
+                     .sort(function (p, q) { return q.peso - p.peso; });
+    if (!ponti.length) return id;
+    var catena = [ponti[0].a, ponti[0].b];
+    var fuori = id.filter(function (x) { return catena.indexOf(x) < 0; });
+    while (fuori.length) {
+      var best = null, bestW = -1, capo = null;
+      fuori.forEach(function (x) {
+        [["testa", catena[0]], ["coda", catena[catena.length - 1]]].forEach(function (c) {
+          var v = w(x, c[1]);
+          if (v > bestW) { bestW = v; best = x; capo = c[0]; }
+        });
+      });
+      if (capo === "testa") catena.unshift(best); else catena.push(best);
+      fuori = fuori.filter(function (x) { return x !== best; });
+    }
+    return catena;
+  }
+
+  /* posizioni: angolo in radianti, partendo dall'alto e girando in senso orario */
+  function posizioni(ids, raggio, sfasamento) {
+    var out = {};
+    ids.forEach(function (x, i) {
+      var a = -Math.PI / 2 + sfasamento + (2 * Math.PI * i / ids.length);
+      out[x] = { x: CX + raggio * Math.cos(a), y: CY + raggio * Math.sin(a), ang: a };
+    });
+    return out;
+  }
+
+  var ordine = ordineMaterie(R.materie, R.archi);
+  var posM = posizioni(ordine, RAGGIO.materie, 0);
+  var idIdee = R.idee.map(function (i) { return i.id; });
+  /* le idee sfasate di mezzo passo, cosi' non si allineano dietro le materie */
+  var posI = posizioni(idIdee, RAGGIO.idee, Math.PI / idIdee.length);
+
+  var perId = {};
+  R.materie.forEach(function (m) { perId[m.id] = m; });
+  R.idee.forEach(function (i) { perId[i.id] = i; });
+
+  window.__RAG = { R: R, tela: tela, pannello: pannello, CX: CX, CY: CY, W: W,
+                   RAGGIO: RAGGIO, posM: posM, posI: posI, ordine: ordine,
+                   perId: perId, aperta: null };
+})();
+</script>
+
+<script>
+/* ===================================================================
+   Passo 3 — gli archi. Due specie, distinguibili senza leggere la legenda:
+   `ponte` tratteggiato e di spessore proporzionale al peso, `portante` pieno e sottile.
+   =================================================================== */
+(function () {
+  var G = window.__RAG;
+  if (!G) return;
+  var NS = "http://www.w3.org/2000/svg";
+
+  function el(tag, attr) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attr) if (attr[k] !== null) n.setAttribute(k, attr[k]);
+    return n;
+  }
+  G.el = el;
+
+  var gArchi = el("g", { id: "archi" });
+  G.tela.appendChild(gArchi);
+
+  /* le orbite, come traccia leggerissima: danno la profondita' senza disegnare nulla */
+  [G.RAGGIO.idee, G.RAGGIO.materie].forEach(function (r) {
+    gArchi.appendChild(el("circle", { cx: G.CX, cy: G.CY, r: r, "class": "orbita" }));
+  });
+
+  function dove(id) { return G.posM[id] || G.posI[id] || { x: G.CX, y: G.CY }; }
+
+  /* UN ARCO CURVO, non un segmento. Due ragioni: fra otto nodi su un cerchio i segmenti
+     passano tutti vicino al centro e si accavallano sopra la tesi, che e' il nodo che
+     deve restare leggibile; e una curva che si incurva VERSO il centro dice «questi due
+     si parlano attraverso il percorso» invece di «questi due sono vicini». */
+  function curva(a, b, verso) {
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    var k = verso === undefined ? 0.42 : verso;
+    var qx = G.CX + (mx - G.CX) * k, qy = G.CY + (my - G.CY) * k;
+    return "M" + a.x.toFixed(1) + "," + a.y.toFixed(1) +
+           " Q" + qx.toFixed(1) + "," + qy.toFixed(1) +
+           " " + b.x.toFixed(1) + "," + b.y.toFixed(1);
+  }
+  G.curva = curva;
+
+  /* --- i ponti. Lo spessore E' l'informazione: i pesi veri vanno da 4 a 11, e la scala
+     parte da 1.6 px per non far sparire il 4. Non si normalizza sul massimo teorico ma
+     sul massimo OSSERVATO, altrimenti un dato futuro con un ponte da 30 schiaccerebbe
+     tutti gli altri a un capello. --- */
+  var ponti = G.R.archi.filter(function (a) { return a.specie === "ponte"; });
+  var maxP = Math.max.apply(null, ponti.map(function (a) { return a.peso || 1 ; }).concat([1]));
+  ponti.forEach(function (a, i) {
+    var p = G.el("path", {
+      d: curva(dove(a.a), dove(a.b)),
+      "class": "arco-ponte",
+      "stroke-width": (1.6 + 5.4 * (a.peso || 1) / maxP).toFixed(2),
+      "data-ponte": i, tabindex: "0",
+      role: "button",
+      "aria-label": (G.perId[a.a] ? G.perId[a.a].nome : a.a) + " e " +
+                    (G.perId[a.b] ? G.perId[a.b].nome : a.b) + ": " + a.peso + " ponti"
+    });
+    gArchi.appendChild(p);
+  });
+  G.ponti = ponti;
+
+  /* --- le portanti: materia→idea e idea→centro. Sottili e piene. Si disegnano DOPO i
+     ponti ma sotto i nodi, cosi' non coprono i bersagli di tocco. --- */
+  G.R.archi.filter(function (a) { return a.specie === "portante"; }).forEach(function (a) {
+    var A = dove(a.a), B = a.b === "tesi" ? { x: G.CX, y: G.CY } : dove(a.b);
+    if (a.a === "tesi") A = { x: G.CX, y: G.CY };
+    gArchi.appendChild(G.el("path", {
+      d: curva(A, B, 0.82), "class": "arco-portante"
+    }));
+  });
+})();
+</script>
+
+<script>
+/* ===================================================================
+   Passo 4 — i nodi: il centro, le idee, le materie.
+   =================================================================== */
+(function () {
+  var G = window.__RAG;
+  if (!G) return;
+  var el = G.el;
+
+  /* LE TRE TINTE PER LA NATURA DELL'IDEA, scelta mia dove il brief lasciava libero:
+     acqua = numerica (si calcola, si simula: e' il colore che la casa usa per «fatto»),
+     viola = analitica (si deriva a mano: il colore degli strumenti e dei pop-up),
+     blu   = esplorativa (non si sa ancora dove porta: il colore piu' freddo dei tre).
+     Non sono decorative: dicono CHE LAVORO sarebbe fare quella tesi. */
+  var TINTA = { numerica: "var(--acc)", analitica: "var(--pro)", esplorativa: "var(--blu)" };
+  function tinta(n) { return TINTA[(n || "").split(/[ ;]/)[0]] || "var(--tenue)"; }
+  G.tinta = tinta;
+
+  var gNodi = el("g", { id: "nodi" });
+  G.tela.appendChild(gNodi);
+
+  /* ---------- IL CENTRO: un campo da riempire ----------
+     Non porta un titolo. Tre segni dicono «in formazione» senza didascalia:
+     l'anello tratteggiato (bordo non chiuso), il conteggio dei frammenti raccolti, e un
+     anello interno piu' piccolo e piu' tenue che e' il posto VUOTO che aspetta. */
+  var gC = el("g", { "class": "nodo", id: "nodo-centro", tabindex: "0", role: "button",
+                     "aria-label": "la tesi, campo in formazione: " +
+                       (G.R.centro.frammenti || []).length + " frammenti raccolti" });
+  gC.appendChild(el("circle", { id: "centro-anello", cx: G.CX, cy: G.CY, r: 112 }));
+  gC.appendChild(el("circle", { id: "centro-vuoto", cx: G.CX, cy: G.CY, r: 74 }));
+  var t1 = el("text", { x: G.CX, y: G.CY - 16, style: "font-size:20px;font-weight:700;fill:var(--acc)" });
+  t1.textContent = "la tesi";
+  var t2 = el("text", { x: G.CX, y: G.CY + 8, style: "font-size:12px;fill:var(--tenue)" });
+  t2.textContent = "in formazione";
+  var t3 = el("text", { x: G.CX, y: G.CY + 34, style: "font-size:11.5px;fill:var(--tenue)" });
+  var nImm = (JSON.parse(localStorage.getItem("ragnatela-idee") || "[]")).length;
+  t3.textContent = (G.R.centro.frammenti || []).length + " frammenti" +
+                   (nImm ? " · " + nImm + " tuoi" : " · nessun tuo input");
+  gC.appendChild(t1); gC.appendChild(t2); gC.appendChild(t3);
+  gNodi.appendChild(gC);
+
+  /* ---------- LE IDEE ---------- */
+  G.R.idee.forEach(function (idea) {
+    var p = G.posI[idea.id];
+    if (!p) return;
+    var g = el("g", { "class": "nodo", tabindex: "0", role: "button",
+                      "data-nodo": idea.id,
+                      "aria-label": idea.sigla + ": " + idea.nome });
+    g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 21,
+                                 fill: tinta(idea.natura), stroke: "#0e1117",
+                                 "stroke-width": 2 }));
+    var s = el("text", { x: p.x, y: p.y + 4, "class": "etichetta-sigla" });
+    s.textContent = idea.sigla || "?";
+    g.appendChild(s);
+    /* il nome fuori dal cerchio, verso l'esterno, tagliato a vista e intero nel pannello */
+    var fuori = p.ang > -Math.PI / 2 && p.ang < Math.PI / 2;
+    var tx = el("text", { x: p.x, y: p.y + (p.y < G.CY ? -30 : 38),
+                          style: "font-size:11.5px;fill:var(--tenue)" });
+    tx.textContent = idea.nome.length > 26 ? idea.nome.slice(0, 25) + "…" : idea.nome;
+    g.appendChild(tx);
+    gNodi.appendChild(g);
+  });
+
+  /* ---------- LE MATERIE ---------- */
+  G.ordine.forEach(function (mid) {
+    var m = G.perId[mid], p = G.posM[mid];
+    if (!m || !p) return;
+    var chiusa = m.stato === "chiusa";
+    var g = el("g", { "class": "nodo" + (chiusa ? " chiusa" : ""), tabindex: "0",
+                      role: "button", "data-materia": mid,
+                      "aria-label": m.nome + ", " + m.nuclei.length + " movimenti" +
+                                    (chiusa ? ", superata" : "") });
+    g.appendChild(el("circle", { cx: p.x, cy: p.y, r: chiusa ? 22 : 31,
+                                 fill: chiusa ? "#232c37" : "#18222c",
+                                 stroke: chiusa ? "var(--grigio)" : "var(--acc)",
+                                 "stroke-width": 2 }));
+    var n = el("text", { x: p.x, y: p.y + 4,
+                         style: "font-size:" + (chiusa ? 11 : 13) + "px;font-weight:600" });
+    n.textContent = m.nuclei.length || "·";
+    g.appendChild(n);
+    /* il nome si spezza su due righe quando serve: meglio due righe corte che un'ellissi
+       su un nome come «Geometria Differenziale», che tagliato diventa illeggibile */
+    var parole = m.nome.split(" ");
+    var righe = parole.length > 1 && m.nome.length > 13
+      ? [parole.slice(0, Math.ceil(parole.length / 2)).join(" "),
+         parole.slice(Math.ceil(parole.length / 2)).join(" ")]
+      : [m.nome];
+    var dy0 = p.y < G.CY ? -(chiusa ? 30 : 40) - (righe.length - 1) * 13 : (chiusa ? 38 : 47);
+    righe.forEach(function (r, i) {
+      var t = el("text", { x: p.x, y: dy0 + i * 13.5 + (p.y < G.CY ? p.y : p.y) });
+      t.textContent = r;
+      g.appendChild(t);
+    });
+    gNodi.appendChild(g);
+  });
+
+  /* il contenitore dei nuclei, che si popola al clic: sta SOTTO i nodi nel DOM ma
+     disegnato dopo, perche' i nuclei sono link e devono stare sopra gli archi */
+  G.gNuclei = el("g", { id: "nuclei" });
+  G.tela.appendChild(G.gNuclei);
+})();
+</script>
+
+<script>
+/* ===================================================================
+   Passo 5 — le interazioni. Tutto quello che si rivela al passaggio si rivela ANCHE al
+   tocco: sul telefono l'hover non esiste, e un'informazione raggiungibile solo col mouse
+   su una pagina pensata per il telefono e' un'informazione che non c'e'.
+   =================================================================== */
+(function () {
+  var G = window.__RAG;
+  if (!G) return;
+  var el = G.el;
+
+  function svuota(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+
+  /* ---------- i nuclei di una materia, su un ARCO CORTO attorno a lei ----------
+     Non sparsi sulla circonferenza: devono restare visibilmente SUOI. L'arco si apre
+     verso l'esterno, centrato sull'angolo della materia, e si stringe quando i nuclei
+     sono molti (22 di Quantistica su un arco larghissimo tornerebbero a sembrare di
+     tutti). */
+  function apriNuclei(mid) {
+    svuota(G.gNuclei);
+    if (G.aperta === mid) { G.aperta = null; segnaAperta(); return; }
+    G.aperta = mid;
+    segnaAperta();
+    var m = G.perId[mid], p = G.posM[mid];
+    if (!m || !m.nuclei.length) { mostraMateria(mid); return; }
+    var n = m.nuclei.length;
+    var ampiezza = Math.min(Math.PI * 0.74, 0.16 * n);
+    var r = G.RAGGIO.nuclei;
+    m.nuclei.forEach(function (nu, i) {
+      var a = p.ang + (n === 1 ? 0 : -ampiezza / 2 + ampiezza * i / (n - 1));
+      var x = G.CX + r * Math.cos(a), y = G.CY + r * Math.sin(a);
+      var g = el("g", { "class": "nodo nucleo" });
+      var link = el("a", { href: nu.file });
+      link.appendChild(el("line", { x1: p.x, y1: p.y, x2: x, y2: y,
+                                    stroke: "var(--bordo)", "stroke-width": 1 }));
+      link.appendChild(el("circle", { cx: x, cy: y, r: 7,
+                                      fill: "#18222c", stroke: "var(--acc)",
+                                      "stroke-width": 1.4 }));
+      var t = el("text", { x: x, y: y + (y < G.CY ? -13 : 20) });
+      t.textContent = (nu.id || "").split("-").slice(0, 2).join("-");
+      link.appendChild(t);
+      g.appendChild(link);
+      G.gNuclei.appendChild(g);
+    });
+    mostraMateria(mid);
+  }
+
+  function segnaAperta() {
+    Array.prototype.forEach.call(G.tela.querySelectorAll("[data-materia]"), function (g) {
+      g.classList.toggle("aperto", g.getAttribute("data-materia") === G.aperta);
+    });
+  }
+
+  /* ---------- il pannello ---------- */
+  function pan(html) { G.pannello.innerHTML = '<div class="pan">' + html + "</div>"; }
+  G.pan = pan;
+
+  function mostraMateria(mid) {
+    var m = G.perId[mid];
+    if (!m) return;
+    var legami = G.ponti.filter(function (a) { return a.a === mid || a.b === mid; })
+      .sort(function (x, y) { return y.peso - x.peso; });
+    var h = "<h2>" + m.nome + "</h2>";
+    h += '<p class="sotto">' + m.nuclei.length + " movimenti" +
+         (m.stato === "chiusa" ? " · <b>esame superato</b>, i nuclei restano perché servono"
+                               : "") + "</p>";
+    if (legami.length) {
+      h += "<h3>Ponti con le altre materie</h3>";
+      legami.forEach(function (a) {
+        var altro = a.a === mid ? a.b : a.a;
+        h += '<p><span class="chip ok">' + a.peso + "</span> " +
+             (G.perId[altro] ? G.perId[altro].nome : altro) + "</p>";
+        (a.ponti || []).slice(0, 3).forEach(function (t) {
+          h += '<p class="da">· ' + t + "</p>";
+        });
+        if ((a.ponti || []).length > 3) {
+          h += '<p class="da">· …e altri ' + (a.ponti.length - 3) + "</p>";
+        }
+      });
+    }
+    pan(h);
+  }
+
+  function mostraIdea(iid) {
+    var i = G.perId[iid];
+    if (!i) return;
+    var h = "<h2>" + (i.sigla ? i.sigla + " · " : "") + i.nome + "</h2>";
+    if (i.natura) {
+      h += '<p><span class="chip" style="border-color:' + G.tinta(i.natura) +
+           ";color:" + G.tinta(i.natura) + '">' + i.natura + "</span></p>";
+    }
+    if (i.suo) {
+      h += '<p class="da">Idea tua, immessa il ' + (i.quando || "").slice(0, 10) + "</p>";
+    } else if (i.da) {
+      h += '<p class="da">da ' + i.da + "</p>";
+    }
+    pan(h);
+  }
+
+  function mostraPonte(k) {
+    var a = G.ponti[k];
+    if (!a) return;
+    var h = "<h2>" + (G.perId[a.a] ? G.perId[a.a].nome : a.a) + " e " +
+            (G.perId[a.b] ? G.perId[a.b].nome : a.b) + "</h2>";
+    h += '<p class="sotto"><b>' + a.peso + " ponti</b> legano queste due materie" +
+         (a.peso === Math.max.apply(null, G.ponti.map(function (x) { return x.peso; }))
+           ? " — è il legame più forte del percorso." : ".") + "</p>";
+    (a.ponti || []).forEach(function (t) { h += "<p>· " + t + "</p>"; });
+    pan(h);
+    Array.prototype.forEach.call(G.tela.querySelectorAll(".arco-ponte"), function (p) {
+      p.classList.toggle("viva", p.getAttribute("data-ponte") === String(k));
+    });
+  }
+
+  /* un solo ascoltatore sulla tela: funziona per clic e per tocco, e non si moltiplica
+     quando i nuclei si ridisegnano */
+  function gestisci(ev) {
+    var n = ev.target.closest ? ev.target.closest("[data-materia],[data-nodo],[data-ponte],#nodo-centro") : null;
+    if (!n) return;
+    if (n.id === "nodo-centro") { G.mostraCentro && G.mostraCentro(); return; }
+    if (n.hasAttribute("data-materia")) { apriNuclei(n.getAttribute("data-materia")); return; }
+    if (n.hasAttribute("data-nodo")) { mostraIdea(n.getAttribute("data-nodo")); return; }
+    if (n.hasAttribute("data-ponte")) { mostraPonte(+n.getAttribute("data-ponte")); }
+  }
+  G.tela.addEventListener("click", gestisci);
+  G.tela.addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter" || ev.key === " ") { gestisci(ev); ev.preventDefault(); }
+  });
+  G.apriNuclei = apriNuclei;
+})();
+</script>
+
+<script>
+/* ===================================================================
+   Passo 6 — il centro aperto e il campo «nuova idea».
+   Giuseppe ha scelto che l'idea si scriva DENTRO il sito, sapendo che il browser non puo'
+   committare. La soluzione in tre passi: localStorage subito (non si perde niente, mai),
+   consegna a `oceano_server.py` quando si e' in casa, e ritenta da se'.
+   =================================================================== */
+(function () {
+  var G = window.__RAG;
+  if (!G) return;
+
+  var CHIAVE = "ragnatela-idee", CHIAVE_HOST = "oceano-host";
+  var HOST_INIZIALE = "http://192.168.1.100:8077";
+
+  function leggi() {
+    try { return JSON.parse(localStorage.getItem(CHIAVE) || "[]"); } catch (e) { return []; }
+  }
+  function scrivi(v) {
+    try { localStorage.setItem(CHIAVE, JSON.stringify(v)); } catch (e) {}
+  }
+  function host() { return localStorage.getItem(CHIAVE_HOST) || HOST_INIZIALE; }
+
+  /* La consegna. Fuori casa FALLISCE, ed e' normale: non deve mai comparire un errore
+     allarmante — l'idea e' gia' salva, e questo passo e' solo il viaggio verso il repo.
+     `keepalive` perche' la pagina puo' chiudersi subito dopo il salvataggio. */
+  function consegna(voce) {
+    var ctl = ("AbortController" in window) ? new AbortController() : null;
+    if (ctl) setTimeout(function () { ctl.abort(); }, 3500);
+    return fetch(host() + "/", {
+      method: "POST", mode: "cors", keepalive: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: "idea-ragnatela", testo: voce.testo,
+                             collega: voce.collega, quando: voce.quando }),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (r) { return r.ok; }).catch(function () { return false; });
+  }
+
+  /* al caricamento, le non consegnate si riprovano UNA volta: scrivi un'idea in treno,
+     rientri a casa, apri il sito, e l'idea e' nel repo senza che nessuno travasi niente */
+  function ritenta() {
+    var v = leggi(), da = v.filter(function (x) { return !x.consegnata; });
+    if (!da.length) return;
+    Promise.all(da.map(function (x) {
+      return consegna(x).then(function (ok) { if (ok) x.consegnata = true; });
+    })).then(function () { scrivi(v); if (G.pannelloCentro) G.mostraCentro(); });
+  }
+
+  G.mostraCentro = function () {
+    var c = G.R.centro, mie = leggi();
+    var h = "<h2>la tesi — un campo da riempire</h2>";
+    h += '<p class="sotto">' + (c["come-si-riempie"] || "") + "</p>";
+
+    h += "<h3>Quello di cui abbiamo già parlato</h3>";
+    (c.frammenti || []).forEach(function (f) {
+      h += "<p>· " + f.testo + '<br><span class="da">' + f.da + "</span></p>";
+    });
+
+    h += "<h3>I tuoi input</h3>";
+    if (!mie.length) {
+      h += '<div class="vuoto">Ancora nessuno. Questo posto aspetta: scrivi qui sotto e '
+         + "l&rsquo;idea entra nella ragnatela.</div>";
+    } else {
+      mie.slice().reverse().forEach(function (x) {
+        h += '<div class="riga-idea">' + x.testo
+           + ' <span class="chip ' + (x.consegnata ? "ok" : "attesa") + '">'
+           + (x.consegnata ? "arrivata a casa" : "in attesa") + "</span>"
+           + '<br><span class="da">' + (x.quando || "").replace("T", " ").slice(0, 16)
+           + ((x.collega || []).length ? " · legata a " + x.collega.map(function (k) {
+               return G.perId[k] ? G.perId[k].nome : k; }).join(", ") : "")
+           + "</span></div>";
+      });
+    }
+
+    h += "<h3>Scrivine una</h3>";
+    h += '<textarea id="i-testo" placeholder="un&rsquo;idea, un dubbio, un aggancio…"></textarea>';
+    h += '<p class="sotto" style="margin:9px 0 4px">Legala a qualcosa (opzionale):</p><p>';
+    G.ordine.concat(G.R.idee.map(function (i) { return i.id; })).forEach(function (k) {
+      var o = G.perId[k];
+      if (!o) return;
+      h += '<span class="chip cliccabile" data-lega="' + k + '">'
+         + (o.sigla ? o.sigla : o.nome) + "</span>";
+    });
+    h += '</p><p><button id="i-salva">Salva</button></p>';
+    h += '<p class="da">L&rsquo;idea si salva subito su questo telefono, anche senza rete. '
+       + "Quando sei in casa viene consegnata alla navicella da sola.<br>"
+       + "Indirizzo di casa: <input id="
+       + '"i-host" value="' + host() + '" style="margin-top:5px">'
+       + "<br>Lo trovi con <code>python 00-capitano/scripts/oceano_server.py --indirizzo</code></p>";
+
+    G.pan(h);
+    G.pannelloCentro = true;
+
+    var scelti = [];
+    G.pannello.querySelectorAll("[data-lega]").forEach(function (ch) {
+      ch.addEventListener("click", function () {
+        var k = ch.getAttribute("data-lega"), i = scelti.indexOf(k);
+        if (i < 0) { scelti.push(k); ch.classList.add("sel"); }
+        else { scelti.splice(i, 1); ch.classList.remove("sel"); }
+      });
+    });
+    var ih = G.pannello.querySelector("#i-host");
+    ih.addEventListener("change", function () {
+      localStorage.setItem(CHIAVE_HOST, ih.value.trim());
+    });
+    G.pannello.querySelector("#i-salva").addEventListener("click", function () {
+      var testo = (G.pannello.querySelector("#i-testo").value || "").trim();
+      if (!testo) return;
+      var voce = { testo: testo, collega: scelti.slice(),
+                   quando: new Date().toISOString(), consegnata: false };
+      var v = leggi(); v.push(voce); scrivi(v);
+      /* l'idea compare SUBITO nella raggiera: e' sua, non dedotta, e si distingue */
+      aggiungiNodo(voce, v.length - 1);
+      G.mostraCentro();
+      consegna(voce).then(function (ok) {
+        if (!ok) return;
+        var w = leggi();
+        if (w.length) { w[w.length - 1].consegnata = true; scrivi(w); G.mostraCentro(); }
+      });
+    });
+  };
+
+  /* un'idea immessa si attacca all'orbita delle idee, in uno spazio libero, e si vede che
+     e' TUA: anello pieno di acqua invece del disco colorato per natura */
+  function aggiungiNodo(voce, i) {
+    var el = G.el;
+    var ang = -Math.PI / 2 + Math.PI / G.R.idee.length
+            + 2 * Math.PI * ((G.R.idee.length + i + 0.5) / (G.R.idee.length + 2));
+    var r = G.RAGGIO.idee;
+    var x = G.CX + r * Math.cos(ang), y = G.CY + r * Math.sin(ang);
+    var id = "mia-" + i;
+    G.perId[id] = { nome: voce.testo, sigla: "tua", natura: "", suo: true,
+                    quando: voce.quando };
+    var g = el("g", { "class": "nodo", "data-nodo": id, tabindex: "0", role: "button",
+                      "aria-label": "idea tua: " + voce.testo });
+    g.appendChild(el("circle", { cx: x, cy: y, r: 18, fill: "#11191c",
+                                 stroke: "var(--acc)", "stroke-width": 2.5 }));
+    var t = el("text", { x: x, y: y + (y < G.CY ? -26 : 34),
+                         style: "font-size:11px;fill:var(--acc)" });
+    t.textContent = voce.testo.length > 22 ? voce.testo.slice(0, 21) + "…" : voce.testo;
+    g.appendChild(t);
+    document.getElementById("nodi").appendChild(g);
+  }
+
+  /* le idee gia' immesse si ridisegnano al caricamento */
+  leggi().forEach(aggiungiNodo);
+  ritenta();
+})();
+</script>
+</body>
+</html>

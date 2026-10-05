@@ -47,10 +47,14 @@
    *
    * «Mappa» e «Rotte» sono due voci per una cosa sola e vanno fuse nella ragnatela
    * con la tesi al centro. Finche' quella non c'e', restano entrambe. */
+  /* AGGIORNATO IL 2026-10-05: «Mappa» e «Rotte» erano due voci per una cosa sola, e la
+   * ragnatela le ha fuse. Ora la barra ha tre voci e non quattro. Le due pagine vecchie
+   * restano sul disco e raggiungibili per URL — un indirizzo si ritira quando c'e' dove
+   * mandare chi lo apriva, e ora c'e': la lezione dei tre indirizzi dei quiz, 29-08. */
   var VOCI = [
     ["Home", "index.html"],
-    ["Mappa", "mappa-percorso.html"],
-    ["Rotte", "carta-delle-rotte.html"]
+    ["Ragnatela", "ragnatela.html"],
+    ["Stato", "stato.html"]
   ];
 
   var css = document.createElement("style");
