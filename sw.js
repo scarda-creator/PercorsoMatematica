@@ -6,8 +6,17 @@
  */
 /* VER alzato a 'tengri-v7' il 2026-09-20 col battesimo della casa: le pagine di
    primo livello sono cache-first, e senza questo salto chi ha gia' l'app installata
-   avrebbe continuato a leggere il nome vecchio dalla copia in cache. */
-var VER = 'tengri-v7';
+   avrebbe continuato a leggere il nome vecchio dalla copia in cache.
+
+   VER alzato a 'tengri-v8' il 2026-10-08, e stavolta il salto da solo non bastava.
+   Il 07-10 ho riparato i pop-up di tutti i nuclei, pubblicato, e verificato alla
+   fonte che il sito servisse le pagine nuove. Per Giuseppe non funzionava lo stesso:
+   l'app installata gli serviva la copia in cache, e la mia prova girava su file://
+   dove un service worker non esiste. Verde sul disco, vecchio sul suo schermo.
+   La causa vera non e' questa versione mancata: e' la riga qui sotto che diceva «i
+   nuclei sono scritti una volta e non cambiano». Non e' piu' vero da settembre — la
+   coda notturna li riscrive, e io ne ho rimontati settantaquattro in un colpo. */
+var VER = 'tengri-v8';
 var BASE = [
   './',
   'index.html',
@@ -54,12 +63,20 @@ self.addEventListener('fetch', function (e) {
   // a chi le deve studiare, a meno di alzare VER a mano dopo ogni notte. Cioè
   // esattamente il difetto che `pubblica-quiz.py` esiste per impedire, spostato di
   // un passo più in là — dal server al telefono.
-  // I nuclei NON stanno qui: sono scritti una volta e non cambiano, e per loro la
-  // cache-first è quel che serve in metro. Offline resta tutto comunque: se la rete
-  // manca, si serve la copia in cache.
+  // I NUCLEI STANNO QUI DENTRO dal 2026-10-08, e prima no. La riga di prima diceva
+  // che «sono scritti una volta e non cambiano»: era vero a luglio, quando il
+  // percorso era finito e fermo. Da settembre la coda notturna li riscrive — P1, P2,
+  // P4 e P6 hanno rifatto decine di movimenti — e il 07-10 ne ho rimontati 74 in un
+  // colpo per riparare i pop-up. Con la cache-first, ogni nucleo gia' aperto restava
+  // congelato sul telefono di Giuseppe FINO AL PROSSIMO salto di VER fatto a mano:
+  // cioe' il lavoro arrivava sul sito e non a lui, che e' lo stesso difetto che
+  // `pubblica-quiz.py` esiste per impedire, spostato di un passo piu' in la'.
+  // Offline non si perde niente: se la rete manca si serve la copia in cache, come
+  // prima. Si paga una richiesta di rete quando la rete c'e'.
   var via = new URL(req.url, self.location.href).pathname;
   var vivo = via.indexOf('/Quiz_') >= 0 ||          // i quattro quiz
              via.indexOf('nuclei-indice') >= 0 ||   // l'elenco dei nuclei
+             via.indexOf('/nuclei/') >= 0 ||        // i movimenti: cambiano ogni notte
              /(^|\/)(index\.html)?$/.test(via) ||   // la home e le sue sottocartelle
              via.indexOf('stato.html') >= 0;        // il cruscotto dei lavori
   if (vivo) {
