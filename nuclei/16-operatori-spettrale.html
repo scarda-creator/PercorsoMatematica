@@ -286,6 +286,50 @@ fonti:     Calogero cap. 3 §3.5, p. 81 («Matrici come rappresentazione di oper
 generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"01","appare":"\\lambda A|v\\rangle+\\mu A|u\\rangle",
+  "perche":"e' la definizione stessa di operatore lineare (l'assioma che lo introduce), non un conto derivato da verificare"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\lambda\\langle w|v\\rangle+\\mu\\langle w|u\\rangle",
+  "perche":"restituisce la linearita' del prodotto scalare nel secondo argomento, proprieta' assiomatica del prodotto scalare (nucleo 08), non un conto nuovo"},
+
+ {"tipo":"simbolico","dove":"01","appare":"\\lambda(A\\cdot v)_i+\\mu(A\\cdot u)_i",
+  "perche":"riscrive la stessa linearita' in componenti per il prodotto matrice-vettore: e' notazione, non un calcolo autonomo"},
+
+ {"tipo":"uguale",
+  "sinistra":"(Matrix([[s11,s12],[s21,s22]])*simplify(Matrix([[s11,s12],[s21,s22]]).inv()*Matrix([[a11,a12],[a21,a22]])*Matrix([[s11,s12],[s21,s22]]))*Matrix([[s11,s12],[s21,s22]]).inv())[0,0]",
+  "vale":"a11",
+  "ipotesi":{"s11":"real","s12":"real","s21":"real","s22":"real","a11":"real","a12":"real","a21":"real","a22":"real"},
+  "nota":"conferma l'ordine S*A'*S^{-1} (non scambiato): con S e S^{-1} invertiti l'identita' non regge per una S generica, verificato a parte",
+  "dove":"01","appare":"A=S\\cdot A'\\cdot S^{-1}"},
+
+ {"tipo":"uguale","sinistra":"simplify(Matrix([[cos(th),-sin(th)],[sin(th),cos(th)]]).inv())[0,1]",
+  "vale":"sin(th)","ipotesi":{"th":"real"},
+  "nota":"S^{-1}=S^{T} per la rotazione: l'elemento (0,1) e' +sin(theta)",
+  "dove":"01","appare":"S^{-1}=S^{T}=\\begin{pmatrix}\\cos\\theta&\\sin\\theta"},
+
+ {"tipo":"uguale","sinistra":"simplify(Matrix([[cos(th),-sin(th)],[sin(th),cos(th)]]).inv())[1,0]",
+  "vale":"-sin(th)","ipotesi":{"th":"real"},
+  "nota":"stesso controllo sull'elemento (1,0), che ha il segno opposto al (0,1)",
+  "dove":"01","appare":"S^{-1}=S^{T}=\\begin{pmatrix}\\cos\\theta&\\sin\\theta"},
+
+ {"tipo":"uguale","sinistra":"simplify(Matrix([[1,1/sqrt(2)],[0,1/sqrt(2)]]).inv())[0,1]",
+  "vale":"-1",
+  "nota":"l'inversa della base schiacciata, esempio NON ortonormale: S^{-1}!=S^{T} qui, ed e' il punto della finestra",
+  "dove":"01","appare":"S^{-1}=\\begin{pmatrix}1&-1"},
+
+ {"tipo":"uguale","sinistra":"simplify((Matrix([[1,1/sqrt(2)],[0,1/sqrt(2)]]).inv()*Matrix([u1,u2]))[0,0])",
+  "vale":"u1-u2","ipotesi":{"u1":"real","u2":"real"},
+  "nota":"le coordinate trasformate con S^{-1} (non con S): e' il conto che la tappa 05 richiama come trabocchetto",
+  "dove":"01","appare":"(u_1-u_2,\\ \\sqrt2\\,u_2)"},
+
+ {"tipo":"uguale","sinistra":"simplify((Matrix([[1,1/sqrt(2)],[0,1/sqrt(2)]]).inv()*Matrix([u1,u2]))[1,0])",
+  "vale":"sqrt(2)*u2","ipotesi":{"u1":"real","u2":"real"},
+  "dove":"01","appare":"(u_1-u_2,\\ \\sqrt2\\,u_2)"}
+]
+CONTROLLO*/
+
 /* ---------------- 00 · PERCHÉ QUESTO NUCLEO ---------------- */
 { num:'00', title:'Perché questo nucleo', meta:'Metodi · voce F.1 del programma · 11 prove su 24 lo toccano · e in quattro scritti la funzione di matrice è un esercizio intero',
   blocchi:[
@@ -868,10 +912,27 @@ function collaudoBlock(items){
     var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
     var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
     var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
-    btn.onclick=function(){ a.style.display='block'; typeset(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
     c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
   });
   return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
 }
 function sectionCollaudo(title, items){
   var wrap=document.createElement('section'); wrap.className='section';
@@ -905,16 +966,47 @@ function showTappa(num){
   typeset(head); m.appendChild(head);
 
   s.blocchi.forEach(function(b){
-    if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
-    else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
-    else if(b.t==='prolessi') m.appendChild(sectionProlessi(b));
-    else if(b.t==='reveal')m.appendChild(sectionReveal(b.title,b.tag,b.steps));
-    else if(b.t==='esercizio') m.appendChild(sectionEsercizio(b));
-    else if(b.t==='collaudo')  m.appendChild(sectionCollaudo(b.title,b.items));
-    else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
   });
   /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
   Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
 
   /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
      avanti/indietro mostrano i dollari nudi */
