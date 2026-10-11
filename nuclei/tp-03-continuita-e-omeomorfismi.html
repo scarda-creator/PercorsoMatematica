@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-03 — Continuita senza epsilon, e l omeomorfismo</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-03 — Continuita senza epsilon, e l omeomorfismo</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["proiezione-stereografica"] = {"nome":"Proiezione stereografica","riga":"Da un polo si proietta la sfera sul piano tangente al polo opposto: $\\sigma(x,y,z)=\\left(\\frac{x}{1-z},\\frac{y}{1-z}\\right)$ è un diffeomorfismo fra $S^{2}$ meno il polo nord e $\\mathbb{R}^{2}$, e la stessa formula funziona in ogni dimensione.","serve":"È la carta con cui si dimostra che la sfera è una varietà — due proiezioni, dai due poli, coprono tutto — ed è per questo la prima costruzione concreta del corso. Le due proprietà per cui la si sceglie fra tutte le mappe possibili sono che è **conforme** (conserva gli angoli, non le distanze) e che **manda circonferenze in circonferenze o rette**: una circonferenza che passa per il polo di proiezione diventa una retta, tutte le altre restano circonferenze. La seconda proprietà è ciò che la rende insostituibile quando si visualizza $S^{3}$: le fibre della fibrazione di Hopf sono cerchi, e dopo la proiezione restano cerchi — tranne una, quella che passa per il polo tolto, che diventa una retta. Il prezzo è che un punto va perso, e questo non è un difetto della carta ma un teorema: $S^{n}$ è compatta e $\\mathbb{R}^{n}$ no, quindi nessuna carta può coprire tutto.","esempio":"Il conto che si rifà ogni volta è la norma dell'immagine. Per $(x,y,z)\\in S^{2}$ vale $x^{2}+y^{2}=1-z^{2}$, quindi $\\lVert\\sigma(x,y,z)\\rVert^{2}=\\frac{1-z^{2}}{(1-z)^{2}}=\\frac{1+z}{1-z}$, dove la semplificazione è la differenza di quadrati. Da qui si legge tutto senza altri conti: l'equatore $z=0$ va nella circonferenza di raggio $1$, perché $\\frac{1+0}{1-0}=1$; l'emisfero sud $z\\lt0$ finisce dentro il disco unitario; avvicinandosi al polo nord $z\\to1$ la norma esplode, ed è il punto che manca. Il polo sud $z=-1$ va nell'origine, come dev'essere: $\\frac{1-1}{1+1}=0$.","debito":"la conformità e la proprietà «cerchi in cerchi» sono qui dichiarate e non dimostrate: la prima si prova calcolando la metrica indotta, che risulta un multiplo di quella euclidea, e la seconda si prova osservando che la proiezione è la restrizione di un'inversione. Entrambe stanno in Lee, cap. 1, e nessuna delle due serve per i conti del percorso.","controllo":[{"tipo":"uguale","sinistra":"1-z**2","vale":"(1-z)*(1+z)","dove":"esempio","appare":"1-z^{2}"},{"tipo":"uguale","sinistra":"(1-z**2)/(1-z)**2","vale":"(1+z)/(1-z)","dove":"esempio","appare":"\\frac{1+z}{1-z}"},{"tipo":"uguale","sinistra":"(1+0)/(1-0)","vale":"1","dove":"esempio","appare":"\\frac{1+0}{1-0}=1"},{"tipo":"uguale","sinistra":"(1-1)/(1+1)","vale":"0","dove":"esempio","appare":"\\frac{1-1}{1+1}=0"}]};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-03: Continuita senza epsilon, e l omeomorfismo <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-03 — continuita' senza epsilon, e l'omeomorfismo
+identita:  la continuita' si puo' dire senza distanze: la controimmagine di un aperto e'
+           un aperto. E' una definizione che sembra una furbizia tecnica e invece e'
+           quella giusta — da lei nasce l'omeomorfismo, cioe' il criterio con cui si
+           decide se due spazi sono LO STESSO spazio, ed e' il criterio su cui poggia
+           ogni carta locale
+copre:     1.3 del programma di recupero
+serve:     tp-01
+apre:      gd-01 e gd-02 — la carta e' un omeomorfismo su un aperto di R^n, e il
+           cambiamento di carta un diffeomorfismo
+strumenti: omeomorfismo, proiezione-stereografica, compattezza
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A (stampate 597, 602):
+           la definizione per controimmagini, l'omeomorfismo, l'omeomorfismo locale,
+           il Lemma A.19 «Continuity Is Local» e il Lemma A.20 di incollamento.
+           Abate, Tovena — Geometria Differenziale (stampate 63, 68-69, 79): la
+           Proposizione 2.1.8 che fa generare la topologia dall'atlante, l'Osservazione
+           2.1.11 sull'invarianza della dimensione, la proiezione stereografica
+           dell'Esempio 2.1.28 e il diffeomorfismo palla-spazio dell'Esempio 2.2.10.
+           Manetti — appunti GD 2008-09 (stampate 18-19): la Definizione 2.1 punto 2,
+           la carta locale come tripla, e l'atlante stereografico di S^n con l'inversa
+           calcolata per esteso.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.3
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"01","appare":"F^{-1}(U)=\\{x\\in X: F(x)\\in U\\}",
+  "perche":"e' la definizione insiemistica di controimmagine, non un conto: si nomina l'insieme su cui la definizione di continuita' quantifica"},
+
+ {"tipo":"uguale","sinistra":"(-2)**3","vale":"-8",
+  "dove":"01","appare":"(-2)^3=-8"},
+
+ {"tipo":"uguale","sinistra":"2**3","vale":"8",
+  "dove":"01","appare":"2^3=8"},
+
+ {"tipo":"limite","espr":"cos(2*pi*t)","var":"t","a":"1","verso":"-","vale":"1",
+  "dove":"03","appare":"\\lim_{t\\to1^-}\\cos 2\\pi t=1"},
+
+ {"tipo":"limite","espr":"sin(2*pi*t)","var":"t","a":"1","verso":"-","vale":"0",
+  "dove":"03","appare":"\\lim_{t\\to1^-}\\sin 2\\pi t=0"},
+
+ {"tipo":"uguale","sinistra":"((y**2-1)/(y**2+1))**2+(2*y/(y**2+1))**2","vale":"1",
+  "dove":"04","appare":"\\left(\\tfrac{y^2-1}{y^2+1}\\right)^2+\\left(\\tfrac{2y}{y^2+1}\\right)^2=1"},
+
+ {"tipo":"uguale","sinistra":"(2*y/(y**2+1))/(1-(y**2-1)/(y**2+1))","vale":"y",
+  "dove":"04","appare":"\\dfrac{2y/(y^2+1)}{1-(y^2-1)/(y^2+1)}=y"},
+
+ {"tipo":"uguale","sinistra":"(2*y/(y**2+1))/(1+(y**2-1)/(y**2+1))","vale":"1/y",
+  "dove":"04","appare":"\\varphi_2\\circ\\varphi_1^{-1}(y)=\\tfrac1y"},
+
+ {"tipo":"uguale","sinistra":"(1-x0**2)/(1-x0)**2","vale":"(1+x0)/(1-x0)",
+  "dove":"04","appare":"\\frac{1-x_0^2}{(1-x_0)^2}=\\frac{1+x_0}{1-x_0}"},
+
+ {"tipo":"uguale","sinistra":"(2**2-1)/(2**2+1)","vale":"3/5",
+  "dove":"04","appare":"\\tfrac{2^2-1}{2^2+1}=\\tfrac35"},
+
+ {"tipo":"uguale","sinistra":"(2*2)/(2**2+1)","vale":"4/5",
+  "dove":"04","appare":"\\tfrac{2\\cdot2}{2^2+1}=\\tfrac45"},
+
+ {"tipo":"uguale","sinistra":"(2*2/(2**2+1))/(1+(2**2-1)/(2**2+1))","vale":"1/2",
+  "dove":"04","appare":"\\tfrac{4/5}{1+3/5}=\\tfrac12"},
+
+ {"tipo":"uguale","sinistra":"s*(R**2-((sqrt(1+4*R**2*s**2)-1)/(2*s))**2)-(sqrt(1+4*R**2*s**2)-1)/(2*s)","vale":"0",
+  "ipotesi":{"s":"positive","R":"positive"},
+  "dove":"05","appare":"s\\left(R^2-\\rho^2\\right)-\\rho=0"},
+
+ {"tipo":"simbolico","dove":"05","appare":"F^{-1}(y)=\\frac{\\rho}{s}\\,y",
+  "perche":"e' la forma radiale dell'inversa: si dichiara che l'inversa non cambia la direzione di y e ne riscala soltanto la lunghezza da s a rho, e il conto da verificare e' quello sul solo raggio, asserito nella riga che segue"},
+
+ {"tipo":"uguale","sinistra":"((sqrt(5)-1)/2)/(1-((sqrt(5)-1)/2)**2)","vale":"1",
+  "dove":"05","appare":"\\dfrac{\\rho}{1-\\rho^2}=1"},
+
+ {"tipo":"uguale","sinistra":"tan(pi/4)","vale":"1",
+  "dove":"08","appare":"\\tan\\tfrac{\\pi}{4}=1"},
+
+ {"tipo":"limite","espr":"tan(t)","var":"t","a":"pi/2","verso":"-","vale":"oo",
+  "dove":"08","appare":"\\lim_{t\\to(\\pi/2)^-}\\tan t=+\\infty"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Topologia · sezione 1.3 del programma di recupero · la parola che la definizione di varieta usa prima di definirla',
+  blocchi:[
+  {t:'prosa', title:'La parola che il corso usa al secondo rigo', tag:'architettura', html:R`
+  <p>I due movimenti precedenti hanno costruito gli oggetti: gli aperti come dato primitivo (tp-01), e la famiglia piccola che li genera tutti (tp-02). Restano fuori le <b>mappe</b> — e senza mappe la topologia non serve a niente, perché tutto ciò che la geometria differenziale fa è <i>trasportare struttura lungo applicazioni</i>: una carta trasporta un pezzo di varietà in $\mathbb{R}^n$, un cambiamento di carta confronta due trasporti, un campo vettoriale si spinge avanti e una forma si tira indietro.</p>
+  <p>C'è un motivo più diretto per cui questo movimento viene adesso. La Definizione 2.1 di Manetti — quella che apre il corso che Giuseppe sta seguendo — al punto 2 dice che $X$ è «localmente omeomorfo ad aperti di $\mathbb{R}^n$», e la tripla $(U,V,\varphi)$ con $\varphi$ omeomorfismo <b>si chiama carta locale</b>. Tutto il corso è costruito su carte. Ma la parola «omeomorfismo» compare lì senza definizione: è dato per noto, e il programma di recupero la elenca nella sezione 1.3 proprio perché non lo è.</p>
+  <div class="note"><b>L'ordine dei movimenti, in una riga.</b> Tp-01 e tp-02 hanno spiegato due delle tre clausole della Definizione 2.1 (Hausdorff, base numerabile). Questo movimento spiega la terza, e non è un caso che sia la più lunga da spiegare: le altre due escludono patologie, questa <i>costruisce</i> il modo in cui si conosce una varietà.</div>`}
+]},
+
+/* ---------------- 01 · LA CONTINUITA ROVESCIATA ---------------- */
+{ num:'01', title:'La continuita rovesciata: la controimmagine di un aperto', meta:'la definizione per controimmagini · perche e equivalente a epsilon-delta · identita, costanti, composizione',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e perche va letta all indietro', tag:'grammatica', html:R`
+  <p>Siano $X$ e $Y$ spazi topologici. Un'applicazione $F:X\to Y$ si dice <b>continua</b> se per ogni aperto $U\subseteq Y$ la controimmagine $F^{-1}(U)=\{x\in X: F(x)\in U\}$ è aperta in $X$ (Lee, stampata 597).</p>
+  <p>La prima cosa da notare è il <b>verso</b>. La definizione non dice niente sulle immagini: non chiede che $F$ manda aperti in aperti, chiede che li <i>tira indietro</i>. È il contrario di come l'intuizione vorrebbe formularla, e vale la pena capire subito perché la formulazione intuitiva è sbagliata. Prendi la funzione costante $F:\mathbb{R}\to\mathbb{R}$, $F(x)=0$: è continua in qualunque senso ragionevole, e manda l'aperto $\mathbb{R}$ nel singoletto $\{0\}$, che non è aperto. Dunque «manda aperti in aperti» non può essere la definizione di continuità — è una proprietà <i>diversa</i>, che si chiama <b>applicazione aperta</b>, e ci sono funzioni continue non aperte (la costante) e funzioni aperte non continue.</p>
+  <p>La seconda cosa da notare è cosa <i>non</i> compare: nessuna distanza, nessun $\varepsilon$, nessun $\delta$. La definizione è scritta nel solo linguaggio che tp-01 ha messo a disposizione — gli aperti — e questo è esattamente ciò che la rende usabile su una varietà, dove di distanze non ce ne sono finché non si decide di metterne una.</p>`},
+  {t:'reveal', title:'Perche e la stessa cosa di epsilon-delta, nei due versi', tag:'first principles', steps:[
+   {label:'Da epsilon-delta alle controimmagini', body:R`
+   <p>Siano $M,N$ spazi metrici con le topologie indotte (tp-01, tappa delle palle). Supponi $F$ continua in senso $\varepsilon$-$\delta$: per ogni $x$ e ogni $\varepsilon>0$ esiste $\delta>0$ tale che $d(x,x')<\delta$ implica $d(F(x),F(x'))<\varepsilon$. Sia $U\subseteq N$ aperto e sia $x\in F^{-1}(U)$. Poiché $U$ è aperto e $F(x)\in U$, esiste $\varepsilon>0$ con $B_\varepsilon(F(x))\subseteq U$. Prendi il $\delta$ che la continuità in $x$ fornisce per quell'$\varepsilon$: allora $F(B_\delta(x))\subseteq B_\varepsilon(F(x))\subseteq U$, cioè $B_\delta(x)\subseteq F^{-1}(U)$. Ogni punto di $F^{-1}(U)$ ha dunque una palla contenuta in $F^{-1}(U)$, e per il criterio di tp-01 questo significa che $F^{-1}(U)$ è aperta.</p>`},
+   {label:'Dalle controimmagini a epsilon-delta', body:R`
+   <p>Viceversa, supponi che le controimmagini di aperti siano aperte, fissa $x$ e $\varepsilon>0$. La palla $B_\varepsilon(F(x))$ è un aperto di $N$, quindi $F^{-1}(B_\varepsilon(F(x)))$ è un aperto di $M$ che contiene $x$; dunque contiene una palla $B_\delta(x)$ per qualche $\delta>0$. Quel $\delta$ è esattamente quello che la definizione $\varepsilon$-$\delta$ chiedeva.</p>
+   <p><b>Dove è finito l'$\varepsilon$.</b> Non è scomparso: si è nascosto nella parola «aperto». L'enunciato $\varepsilon$-$\delta$ dice «per ogni intorno dell'immagine esiste un intorno della sorgente che vi finisce dentro», e la definizione topologica dice la stessa frase una volta per tutti gli intorni insieme, senza dover nominare un raggio. Il guadagno è che la seconda formulazione <b>sopravvive alla perdita della metrica</b>, e la prima no.</p>`},
+   {label:'Un conto concreto, per non restare nell astratto', body:R`
+   <p>Sia $f:\mathbb{R}\to\mathbb{R}$ data da $f(x)=x^3$. L'aperto $(-8,8)$ ha come controimmagine l'intervallo aperto di estremi $-2$ e $2$, perché $(-2)^3=-8$ e $2^3=8$ e la funzione cubo è strettamente crescente: la controimmagine è aperta, come la definizione vuole. Lo stesso conto fatto su $f(x)=x^2$ dà invece, per l'aperto $(1,4)$, l'unione di due intervalli aperti disgiunti — ed è ancora un aperto, perché l'unione di aperti è aperta (assioma 2 di tp-01). <b>La continuità non chiede che la controimmagine sia connessa, o un intervallo, o un pezzo solo</b>: chiede solo che sia aperta, e il secondo assioma di tp-01 è ciò che rende la richiesta facile da soddisfare.</p>`}
+  ]},
+  {t:'prosa', title:'Le tre continuita gratuite, e perche si citano', tag:'regola operativa', html:R`
+  <p>Tre fatti si dimostrano in una riga ciascuno e si usano in ogni dimostrazione successiva senza più nominarli (Lee, Esercizio A.2).</p>
+  <ul>
+   <li><b>L'identità è continua.</b> La controimmagine di $U$ sotto $\mathrm{id}_X$ è $U$ stessa, che è aperta per ipotesi.</li>
+   <li><b>Le costanti sono continue.</b> Se $F$ vale sempre $c$, la controimmagine di $U$ è tutto $X$ se $c\in U$, e l'insieme vuoto altrimenti: entrambi aperti per l'assioma 1 di tp-01.</li>
+   <li><b>La composizione di continue è continua.</b> Se $F:X\to Y$ e $G:Y\to Z$ sono continue e $W\subseteq Z$ è aperto, allora $(G\circ F)^{-1}(W)$ è la controimmagine secondo $F$ di $G^{-1}(W)$; quest'ultimo è aperto in $Y$ perché $G$ è continua, e la sua controimmagine secondo $F$ è aperta perché $F$ è continua.</li>
+  </ul>
+  <p>Il terzo è quello che porta tutto il peso in geometria differenziale. Abate-Tovena lo usa esattamente così per dimostrare che la composizione di applicazioni differenziabili fra varietà è differenziabile (stampata 77): il conto è una catena di tre carte, e la sola cosa che serve è che comporre conservi la proprietà. <b>Lo schema «la proprietà passa alla composizione» è il motivo per cui si può lavorare carta per carta e poi incollare</b>, ed è l'argomento della tappa che viene.</p>`}
+]},
+
+/* ---------------- 02 · LA CONTINUITA E LOCALE ---------------- */
+{ num:'02', title:'La continuita e locale, e il lemma di incollamento', meta:'Lemma A.19 di Lee · Lemma A.20 e la sua asimmetria · perche infiniti chiusi non bastano',
+  blocchi:[
+  {t:'prosa', title:'Il lemma che rende lecito lavorare per carte', tag:'first principles', html:R`
+  <p><b>Lemma (la continuità è locale; Lee, A.19).</b> Sia $F:X\to Y$ un'applicazione tale che ogni punto $p\in X$ abbia un intorno $U$ su cui la restrizione $F|_U$ è continua. Allora $F$ è continua.</p>
+  <p>La dimostrazione è breve e conviene averla vista, perché è il meccanismo con cui ogni dimostrazione di geometria differenziale passa dal locale al globale senza accorgersene. Sia $V\subseteq Y$ aperto. Per ogni $p\in F^{-1}(V)$ prendi l'intorno aperto $U_p$ su cui $F$ è continua; allora $(F|_{U_p})^{-1}(V)$ è aperto in $U_p$, e poiché $U_p$ è aperto in $X$, è aperto anche in $X$ (questo passaggio usa la topologia di sottospazio, che tp-04 formalizza: un aperto di un aperto è aperto). Contiene $p$ ed è contenuto in $F^{-1}(V)$. Dunque $F^{-1}(V)$ è unione di aperti, cioè aperto.</p>
+  <p><b>Perché è il lemma più usato del corso senza essere mai citato.</b> Dire che un'applicazione fra varietà è «di classe $C^\infty$» significa, per definizione, che lo è <i>letta in ogni coppia di carte</i> — cioè localmente. Senza questo lemma, dalla liscezza locale non si potrebbe nemmeno concludere la continuità globale, e la definizione stessa sarebbe mal posta. Manetti e Abate-Tovena lo danno per acquisito; il programma di recupero lo elenca nella sezione 1.3 perché è precisamente il pezzo di topologia che rende lecita quella definizione.</p>`},
+  {t:'reveal', title:'Il lemma di incollamento, e la sua asimmetria', tag:'costruzione', steps:[
+   {label:'L enunciato, con le due condizioni', body:R`
+   <p><b>Lemma (incollamento; Lee, A.20).</b> Siano $X,Y$ spazi topologici, e supponi che valga una delle due condizioni: (a) $B_1,\dots,B_n$ sono <i>finiti</i> sottoinsiemi <b>chiusi</b> di $X$ la cui unione è $X$; oppure (b) $\{B_i\}_{i\in A}$ è una collezione <i>arbitraria</i> di sottoinsiemi <b>aperti</b> la cui unione è $X$. Se per ogni $i$ è data $F_i:B_i\to Y$ continua, e le $F_i$ coincidono sulle sovrapposizioni, allora esiste un'unica $F:X\to Y$ continua che si restringe a ciascuna $F_i$.</p>
+   <p>Il caso (b) è il lemma precedente travestito: un ricoprimento aperto è una famiglia di intorni, e la continuità è locale. Il caso (a) è quello che sorprende, e la differenza di quantificatore — <i>finiti</i> chiusi contro <i>arbitrari</i> aperti — non è una cautela dell'autore: è necessaria.</p>`},
+   {label:'Perche gli infiniti chiusi non vanno, in tre righe', body:R`
+   <p>Prendi $X=\mathbb{R}$ e come famiglia di chiusi tutti i singoletti $\{x\}$, uno per ogni reale: sono chiusi, la loro unione è $\mathbb{R}$, e sono infiniti. Qualunque applicazione $g:\mathbb{R}\to\mathbb{R}$, continua o no, si restringe a ciascun singoletto in un'applicazione automaticamente continua — su uno spazio di un punto solo <i>ogni</i> applicazione è continua, perché gli unici aperti sono il vuoto e il punto. Le restrizioni coincidono sulle sovrapposizioni perché le sovrapposizioni sono vuote. Se il lemma valesse per famiglie infinite di chiusi, concluderebbe che ogni applicazione da $\mathbb{R}$ è continua — e la funzione indicatrice dei razionali dice che è falso.</p>
+   <p><b>Che cosa si rompe, precisamente.</b> La dimostrazione del caso (a) mostra che $F^{-1}(C)$ è <i>chiuso</i> per ogni chiuso $C$, scrivendolo come unione dei $(F_i)^{-1}(C)$, ciascuno chiuso in $B_i$ e quindi chiuso in $X$. Ma un'unione <b>infinita</b> di chiusi non è chiusa — è il duale esatto dell'assioma 3 di tp-01, dove l'intersezione infinita di aperti non era aperta. Lo stesso confine, visto dall'altro lato.</p>`},
+   {label:'Dove serve davvero, in geodiff', body:R`
+   <p>La versione aperta è quella che si usa continuamente: si costruisce un oggetto carta per carta e lo si incolla. La versione chiusa serve quando si incollano <i>pezzi con bordo</i> — due metà di una varietà lungo una sottovarietà comune, un cammino spezzato in due tratti che si saldano in un punto. L'esempio minimo è la funzione modulo: su $(-\infty,0]$ si definisce $x\mapsto-x$, su $[0,+\infty)$ si definisce $x\mapsto x$, i due chiusi coprono $\mathbb{R}$, sono due, le definizioni coincidono nell'unico punto comune, e il lemma restituisce che il modulo è continuo senza fare nessun conto di limiti.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · L OMEOMORFISMO ---------------- */
+{ num:'03', title:'L omeomorfismo, e la biiezione continua che non basta', meta:'definizione · perche l inversa continua va chiesta a parte · l intervallo semiaperto avvolto sulla circonferenza',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e la clausola che sembra pignoleria', tag:'grammatica', html:R`
+  <p>Un'applicazione $F:X\to Y$ continua, biiettiva, <b>con inversa continua</b> si chiama <span class="str" data-str="omeomorfismo">omeomorfismo</span>; se un omeomorfismo fra $X$ e $Y$ esiste, i due spazi si dicono <b>omeomorfi</b> (Lee, stampata 597). Lee aggiunge subito dopo una variante che serve quanto la principale: $F$ è un <b>omeomorfismo locale</b> se ogni punto $p\in X$ ha un intorno $U$ tale che $F(U)$ è aperto in $Y$ e $F$ ristretta a $U$ è un omeomorfismo su $F(U)$.</p>
+  <p>La clausola «con inversa continua» è quella che a prima lettura sembra superflua: se $F$ è una biiezione continua, l'inversa esiste come funzione, e la tentazione è pensare che sia continua per simmetria. <b>Non lo è</b>, e il motivo si vede meglio rileggendo la definizione di continuità: dire che $F^{-1}$ è continua significa che per ogni aperto $A\subseteq X$ l'insieme $(F^{-1})^{-1}(A)$, cioè $F(A)$, è aperto in $Y$. Quindi chiedere l'inversa continua equivale a chiedere che $F$ sia <b>aperta</b> — ed è proprio la proprietà che la tappa 01 ha mostrato essere indipendente dalla continuità.</p>
+  <p>Detto in una formula sola: <b>omeomorfismo = biiezione continua e aperta.</b> Le due richieste controllano i due versi, e il controesempio che segue mostra che un verso non implica l'altro.</p>`},
+  {t:'reveal', title:'L intervallo semiaperto avvolto sulla circonferenza', tag:'costruzione', steps:[
+   {label:'La costruzione', body:R`
+   <p>Sia $X=[0,1)$ con la topologia di sottospazio di $\mathbb{R}$, sia $Y=S^1$ la circonferenza unitaria nel piano, e sia $F(t)=(\cos 2\pi t,\sin 2\pi t)$. Allora:</p>
+   <ul>
+    <li><b>$F$ è continua</b>: le due componenti sono composizioni di funzioni continue di una variabile reale, e la continuità di un'applicazione a valori in un prodotto si controlla componente per componente (tp-04 lo dimostrerà; qui basta sapere che $\cos$ e $\sin$ sono continue).</li>
+    <li><b>$F$ è biiettiva</b>: iniettiva perché l'angolo $2\pi t$ percorre $[0,2\pi)$ senza ripetizioni, surgettiva perché ogni punto della circonferenza ha un unico angolo in quell'intervallo.</li>
+    <li><b>$F^{-1}$ non è continua.</b> Prendi l'aperto $A=[0,\tfrac12)$ di $X$ — aperto in $[0,1)$ perché è l'intersezione con $[0,1)$ dell'aperto $(-\tfrac12,\tfrac12)$ di $\mathbb{R}$. La sua immagine $F(A)$ è la semicirconferenza superiore <i>chiusa a un estremo</i>: contiene il punto $(1,0)$ e nessun arco attorno a esso, perché i punti della circonferenza immediatamente «sotto» $(1,0)$ corrispondono a valori di $t$ vicini a $1$, che non stanno in $A$. Quindi $F(A)$ non è aperto in $S^1$, e $F$ non è aperta.</li>
+   </ul>`},
+   {label:'Il punto esatto in cui si rompe', body:R`
+   <p>Il guasto si vede meglio in termini di limiti. Per $t\to1^-$ si ha $\lim_{t\to1^-}\cos 2\pi t=1$ e $\lim_{t\to1^-}\sin 2\pi t=0$: i punti $F(t)$ si avvicinano a $(1,0)$, che è $F(0)$. Ma nel dominio $[0,1)$ il valore $t=1$ non esiste, e i punti $t$ vicini a $1$ sono <b>lontanissimi</b> da $0$. L'applicazione $F$ ha incollato i due capi dell'intervallo senza che il dominio lo sapesse: ha creato una vicinanza che nella sorgente non c'era, e l'inversa dovrebbe tagliarla, cosa che nessuna applicazione continua può fare.</p>
+   <p><b>Formulazione da ricordare.</b> Una biiezione continua può solo <i>aggiungere</i> vicinanze, mai togliere. L'inversa continua è la richiesta che non ne aggiunga nessuna — e allora le due topologie sono letteralmente la stessa topologia, trasportata.</p>`},
+   {label:'Perche questo non e un caso patologico', body:R`
+   <p>In geometria differenziale la costruzione $[0,1)\to S^1$ non è un mostro da manuale: è il prototipo di come si costruiscono gli oggetti interessanti. Il toro si ottiene incollando i lati opposti di un quadrato, il nastro di Möbius incollandone due con un verso rovesciato, il proiettivo identificando gli antipodi di una sfera. <b>In ciascuno di questi casi l'applicazione naturale dal pezzo piatto all'oggetto incollato è una continua biiettiva che non è un omeomorfismo</b>, esattamente come qui — e il modo corretto di trattarla è la topologia quoziente, che è il lavoro di tp-05. Questo esempio è il più piccolo caso di quella storia, e va capito qui perché lì ci sarà da gestirne tre insieme.</p>`}
+  ]},
+  {t:'plot', title:'Il dominio con il capo aperto, e l oggetto che lo richiude',
+   intro:R`A sinistra il dominio $[0,1)$: l'estremo $0$ c'è (pieno), l'estremo $1$ no (vuoto), e l'aperto $A=[0,\tfrac12)$ è il tratto evidenziato. A destra l'immagine: $F(0)=(1,0)$ sta in $F(A)$, ma i punti appena sotto — che vengono da $t$ vicino a $1$ — non ci stanno.`,
+   plots:[
+    {kind:'func2d', f:'0', xr:[-0.22,1.25], yr:[-0.5,0.62], height:230, equal:false,
+     title:'il dominio [0,1) e il suo aperto A = [0, 1/2)',
+     segs:[{x1:0, y1:0, x2:1, y2:0, col:'#8ea0b8', width:2},
+           {x1:0, y1:0.16, x2:0.5, y2:0.16, col:'#5eead4', width:4, label:'A', lx:0.25, ly:0.3}],
+     marks:[{x:0, y:0, label:'t=0 (c e)', col:'#5eead4'},
+            {x:1, y:0, label:'t=1 (non c e)', col:'#ff6b6b', hollow:true},
+            {x:0.5, y:0.16, label:'', col:'#5eead4', hollow:true}]},
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:330, equal:true,
+     xr:[-1.5,2.3], yr:[-1.35,1.35],
+     title:'S^1: F(A) e l arco superiore piu il punto (1,0), e attorno a (1,0) non c e arco',
+     rings:[{r:0.32, x:1, y:0, col:'#ff6b6b', dash:true, label:'un intorno di (1,0)', lx:1.5, ly:0.42}],
+     marks:[{x:1, y:0, label:'F(0)=(1,0)', col:'#5eead4'},
+            {x:0, y:1, label:'F(1/4)', col:'#8ee0c8', up:true},
+            {x:-1, y:0, label:'F(1/2): non in F(A)', col:'#8ea0b8', left:true},
+            {x:0.92, y:-0.39, label:'F(t) per t vicino a 1', col:'#ff6b6b'}]}
+   ],
+   leggi:R`<p>La cosa da leggere nel cerchietto tratteggiato è che <b>taglia $F(A)$ in due</b>: la parte sopra l'asse appartiene a $F(A)$, la parte sotto no, e per quanto si rimpicciolisca il raggio questo resta vero. È la definizione di «non aperto» applicata al punto $(1,0)$: nessun intorno di $(1,0)$ in $S^1$ è contenuto in $F(A)$.</p>
+   <p>E la cosa da imparare, che è diversa: nel dominio i due punti responsabili — $t=0$ e i $t$ vicini a $1$ — sono agli <i>estremi opposti</i> del segmento, cioè i più lontani possibile; nell'immagine sono vicini quanto si vuole. <b>L'applicazione ha accorciato una distanza fino ad annullarla</b>, e nessuna applicazione continua può disfare questo: l'inversa dovrebbe spezzare un intorno connesso in due pezzi lontani. È lo stesso motivo per cui, in tp-05, il quoziente sarà l'unica delle tre costruzioni che può distruggere Hausdorff — incollare è l'operazione irreversibile.</p>`}
+]},
+
+/* ---------------- 04 · LA PROIEZIONE STEREOGRAFICA ---------------- */
+{ num:'04', title:'Un omeomorfismo scritto per intero: la proiezione stereografica', meta:'la formula di Manetti · l inversa calcolata e verificata · la funzione di transizione, e perche vale 1/y',
+  blocchi:[
+  {t:'prosa', title:'Perche questo esempio e non un altro', tag:'architettura', html:R`
+  <p>Fin qui l'omeomorfismo è stato definito e messo alla prova con un controesempio. Ne serve ora uno vero, costruito fino in fondo, e la scelta non è libera: la <span class="str" data-str="proiezione-stereografica">proiezione stereografica</span> è l'omeomorfismo che compare nel primo esempio sia di Manetti (stampata 19) sia di Abate-Tovena (stampata 68), ed è con quello che entrambi i testi costruiscono il primo atlante della sfera. Impararlo qui vuol dire aprire $\mathtt{gd}$-$02$ e riconoscere una cosa già vista, invece di vedere per la prima volta una formula di quattro righe che sembra arbitraria.</p>
+  <p>La costruzione geometrica è una sola frase: si toglie un punto alla sfera — chiamiamolo polo — e si manda ogni altro punto nell'intersezione fra l'iperpiano equatoriale e la retta che congiunge il polo al punto. Si fa un disegno e si crede; il lavoro è mostrare che l'applicazione così definita è un omeomorfismo, e per farlo <b>si esibisce l'inversa e si verifica che è continua</b>. È il modo più onesto di dimostrare che qualcosa è un omeomorfismo, e l'unico che insegna qualcosa.</p>`},
+  {t:'plot', title:'La proiezione stereografica in sezione: n = 1',
+   intro:R`La circonferenza di raggio $1$ nel piano delle coordinate $(x_0,x_1)$, il polo $N$ a destra, e la retta verticale $x_0=0$ che fa da copia di $\mathbb{R}$. Ogni raggio parte da $N$, taglia la circonferenza in un punto $p$ e arriva sulla verticale all'altezza $\varphi_1(p)$.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:400, equal:true,
+     xr:[-1.6,1.8], yr:[-1.6,2.5],
+     title:'tre raggi da N=(1,0): p=(0,1) va in 1, p=(0.6,0.8) va in 2, p=(-0.6,-0.8) va in -1/2',
+     segs:[{x1:0, y1:-1.75, x2:0, y2:2.45, col:'#8ea0b8', width:1.2, label:'la copia di R', lx:-0.42, ly:2.2},
+           {x1:1, y1:0, x2:0, y2:2, col:'#5eead4', width:1.5},
+           {x1:1, y1:0, x2:0, y2:1, col:'#8ee0c8', width:1.5},
+           {x1:1, y1:0, x2:0, y2:-0.5, col:'#d8a13a', width:1.5}],
+     marks:[{x:1, y:0, label:'N (togliere questo)', col:'#ff6b6b'},
+            {x:0.6, y:0.8, label:'p', col:'#5eead4', up:true},
+            {x:0, y:2, label:'2', col:'#5eead4', left:true},
+            {x:0, y:1, label:'1', col:'#8ee0c8', left:true},
+            {x:-0.6, y:-0.8, label:'q', col:'#d8a13a'},
+            {x:0, y:-0.5, label:'-1/2', col:'#d8a13a', left:true}]}
+   ],
+   leggi:R`<p>Tre cose nel disegno, e la terza è quella che fa capire l'inversa.</p>
+   <p><b>Uno.</b> Il punto $p=(0,1)$ sta sulla verticale e si manda in $1$, cioè in se stesso: l'equatore — qui i due punti $(0,\pm1)$ — resta fisso. <b>Due.</b> Più $p$ si avvicina a $N$, più il raggio si appiattisce e più lontano arriva sulla verticale: i punti vicini al polo vanno all'infinito, e questo è il motivo per cui il polo <i>deve</i> essere tolto. <b>Tre.</b> Per ogni altezza sulla verticale passa <i>esattamente un</i> raggio uscente da $N$, e quel raggio taglia la circonferenza in esattamente un altro punto. È questa unicità, leggibile nel disegno, che dice che l'applicazione è biiettiva — e la formula dell'inversa, nella prossima tappa, è solo il conto che la scrive.</p>`},
+  {t:'reveal', title:'La formula, l inversa, e la verifica', tag:'costruzione', steps:[
+   {label:'La formula di Manetti', body:R`
+   <p>Sia $S^n$ la sfera unitaria di $\mathbb{R}^{n+1}$, cioè l'insieme dei punti $x=(x_0,\dots,x_n)$ con $\sum_i x_i^2=1$. Manetti (stampata 19) scrive l'atlante a due carte $U_1=S^n\setminus\{(1,0,\dots,0)\}$ e $U_2=S^n\setminus\{(-1,0,\dots,0)\}$, con</p>
+   <p>$$\varphi_1(x_0,\dots,x_n)=\frac{1}{1-x_0}(x_1,\dots,x_n),\qquad \varphi_2(x_0,\dots,x_n)=\frac{1}{1+x_0}(x_1,\dots,x_n).$$</p>
+   <p>La prima è continua su $U_1$ perché è un quoziente di polinomi con denominatore mai nullo su $U_1$ — il solo punto in cui $1-x_0$ si annulla è il polo, che è stato tolto. Lo stesso per $\varphi_2$ con l'altro polo. La continuità è gratis; è l'inversa che va trovata.</p>`},
+   {label:'Il conto dell inversa', body:R`
+   <p>Poni $\varphi_1(x)=y$, cioè $y_i=x_i/(1-x_0)$ per $i=1,\dots,n$. Elevando al quadrato e sommando su $i$, e usando che $x$ sta sulla sfera (quindi $\sum_{i\ge1}x_i^2$ vale $1-x_0^2$), si ottiene</p>
+   <p>$$\sum_{i=1}^n y_i^2=\frac{1-x_0^2}{(1-x_0)^2}=\frac{1+x_0}{1-x_0},$$</p>
+   <p>dove l'ultimo passaggio è la semplificazione di $1-x_0^2$ come prodotto di $1-x_0$ e $1+x_0$. Chiamando $\sigma$ la somma $\sum_i y_i^2$ e risolvendo in $x_0$ si trova $x_0=(\sigma-1)/(\sigma+1)$, e rimettendo nella definizione di $y_i$:</p>
+   <p>$$\varphi_1^{-1}(y_1,\dots,y_n)=\left(\frac{\sigma-1}{\sigma+1},\ \frac{2y_1}{\sigma+1},\ \dots,\ \frac{2y_n}{\sigma+1}\right).$$</p>
+   <p>Anche questa è un quoziente di polinomi con denominatore $\sigma+1$ sempre positivo, dunque continua su tutto $\mathbb{R}^n$. Le due applicazioni sono continue e inverse l'una dell'altra: <b>$\varphi_1$ è un omeomorfismo fra $U_1$ e $\mathbb{R}^n$</b>, e con questo la sfera meno un punto è omeomorfa a uno spazio euclideo.</p>`},
+   {label:'La verifica, nel caso n = 1', body:R`
+   <p>Un'inversa scritta e non verificata è un'affermazione, non un fatto. Nel caso $n=1$ la formula dà $\varphi_1^{-1}(y)$ di componenti $(y^2-1)/(y^2+1)$ e $2y/(y^2+1)$, e ci sono due cose da controllare.</p>
+   <p><b>Il punto cade sulla circonferenza.</b> La somma dei quadrati vale $\left(\tfrac{y^2-1}{y^2+1}\right)^2+\left(\tfrac{2y}{y^2+1}\right)^2=1$, perché il numeratore $(y^2-1)^2+4y^2$ è il quadrato di $y^2+1$. Il conto è l'identità pitagorica scritta in forma razionale, la stessa che genera le terne pitagoriche.</p>
+   <p><b>Applicando $\varphi_1$ si torna indietro.</b> Qui conviene scrivere il quoziente per esteso: $\dfrac{2y/(y^2+1)}{1-(y^2-1)/(y^2+1)}=y$, perché il denominatore si semplifica in $2/(y^2+1)$ e i due fattori $y^2+1$ si cancellano. <b>Questo è il controllo che chiude la dimostrazione</b>: non si è trovata «una formula plausibile», si è verificato che la composizione è l'identità.</p>`},
+   {label:'La funzione di transizione, e perche e la cosa che serve a geodiff', body:R`
+   <p>Un atlante non è una collezione di carte: è una collezione di carte <i>compatibili</i>, e la compatibilità si legge nelle <b>funzioni di transizione</b> $\varphi_2\circ\varphi_1^{-1}$, definite dove le due carte si sovrappongono. Nel caso $n=1$ il conto è una riga: $\varphi_2\circ\varphi_1^{-1}(y)=\tfrac1y$. Si ottiene mettendo $\varphi_1^{-1}(y)$ dentro $\varphi_2$, cioè dividendo $2y/(y^2+1)$ per $1+(y^2-1)/(y^2+1)$, che vale $2y^2/(y^2+1)$.</p>
+   <p>Un valore concreto, per fissarlo. Con $y=2$ l'inversa dà il punto della circonferenza di prima coordinata $\tfrac{2^2-1}{2^2+1}=\tfrac35$ e seconda coordinata $\tfrac{2\cdot2}{2^2+1}=\tfrac45$; applicandogli $\varphi_2$ si ottiene $\tfrac{4/5}{1+3/5}=\tfrac12$, che è appunto l'inverso di $2$.</p>
+   <p><b>Perché è questo il punto d'arrivo del movimento.</b> La funzione $y\mapsto1/y$ è definita e di classe $C^\infty$ su $\mathbb{R}\setminus\{0\}$, che è esattamente il dominio della sovrapposizione — l'origine corrisponde al polo mancante dell'altra carta. Dunque l'atlante è $C^\infty$, e la sfera è una <i>varietà differenziabile</i> e non solo topologica. Si vede qui, in un conto di una riga, la divisione del lavoro di tutto il corso: <b>l'omeomorfismo dice che le carte esistono, la regolarità della transizione dice quanta struttura si può trasportare lungo di esse.</b> Tp-03 costruisce il primo pezzo; gd-02 costruisce il secondo sullo stesso esempio.</p>`}
+  ]}
+]},
+
+/* ---------------- 05 · LA PALLA E TUTTO LO SPAZIO ---------------- */
+{ num:'05', title:'La palla e tutto lo spazio sono omeomorfi, e cosa ne segue', meta:'il diffeomorfismo di Abate-Tovena · l inversa, verificata · perche aperto di R^n e R^n si possono scambiare nella definizione',
+  blocchi:[
+  {t:'prosa', title:'La dimensione si conserva, la taglia no', tag:'first principles', html:R`
+  <p>La Definizione 2.1 di Manetti chiede che ogni punto abbia un intorno omeomorfo a <b>un aperto di $\mathbb{R}^n$</b>. Abate-Tovena, nella stessa pagina in cui definisce le carte, le prende con immagine un aperto qualsiasi; Manetti negli esempi le prende con immagine <i>tutto</i> $\mathbb{R}^n$. Le due scelte sembrano diverse e non lo sono, e il motivo è un omeomorfismo esplicito che vale la pena avere in mano: <b>la palla aperta di raggio $R$ è omeomorfa a tutto $\mathbb{R}^n$</b>.</p>
+  <p>È un fatto che dice molto su cos'è un omeomorfismo. Due oggetti di «taglia» abissalmente diversa — uno limitato, l'altro no — sono lo stesso spazio topologico. Il che significa che <b>essere limitato non è una proprietà topologica</b>: dipende dalla metrica e non dalla famiglia degli aperti. Lo stesso vale per il diametro, per il volume, per la completezza come spazio metrico. Ciò che sopravvive agli omeomorfismi è un elenco molto più corto, di cui la tappa 06 dice qualcosa.</p>`},
+  {t:'reveal', title:'L applicazione, la sua inversa, e il conto che le lega', tag:'costruzione', steps:[
+   {label:'La formula', body:R`
+   <p>Abate-Tovena (stampata 79, Esempio 2.2.10) definisce $F$ dalla palla aperta $B^n_R$ a $\mathbb{R}^n$ con $F(x)=x/(R^2-\|x\|^2)$. È radiale: non cambia la direzione, allunga solo la distanza dall'origine. Il denominatore è positivo dentro la palla e tende a zero avvicinandosi al bordo, quindi $F$ spinge il bordo all'infinito. Essendo un quoziente di polinomi con denominatore mai nullo su $B^n_R$, è continua.</p>
+   <p>Poiché $F$ è radiale, tutto il problema si riduce al conto su un raggio: posto $r=\|x\|$ e $s=\|F(x)\|$, la relazione è $s=r/(R^2-r^2)$, e invertirla significa risolvere un'equazione di secondo grado in $r$.</p>`},
+   {label:'L inversa, e la verifica', body:R`
+   <p>Abate-Tovena dà l'inversa come moltiplicazione per uno scalare che dipende solo da $\|y\|$. Chiamando $s=\|y\|$ e $\rho$ il raggio cercato, la formula è</p>
+   <p>$$\rho=\frac{\sqrt{1+4R^2s^2}-1}{2s},\qquad F^{-1}(y)=\frac{\rho}{s}\,y.$$</p>
+   <p>Che sia l'inversa si verifica senza risolvere niente: basta rimettere $\rho$ dentro l'equazione di partenza, riscritta come $s\left(R^2-\rho^2\right)-\rho=0$. Il conto si chiude in forma esatta per ogni $s>0$ e ogni $R>0$, e questo è il controllo: non si è «risolto un'equazione sperando bene», si è verificato che la soluzione proposta la annulla.</p>
+   <p>Un caso numerico per fissarlo, con $R=1$ e $s=1$: la formula dà $\rho=\tfrac{\sqrt5-1}2$, il numero aureo diminuito di uno, e rimettendolo dentro si trova $\dfrac{\rho}{1-\rho^2}=1$ — cioè il punto a distanza $\rho$ dall'origine viene mandato a distanza $1$, come richiesto. Che compaia la sezione aurea non significa nulla di profondo: è solo il segno che l'equazione da risolvere era $\rho^2+\rho-1$ uguagliato a zero.</p>`},
+   {label:'La conseguenza, che e il motivo per cui questa tappa esiste', body:R`
+   <p>Sia ora $X$ uno spazio e $p\in X$ un punto con un intorno $U$ omeomorfo a un aperto $V\subseteq\mathbb{R}^n$. L'immagine di $p$ in $V$ ha attorno a sé una palla $B\subseteq V$, perché $V$ è aperto; la controimmagine di $B$ è un intorno più piccolo di $p$ omeomorfo a $B$, e $B$ è omeomorfa a $\mathbb{R}^n$ per quanto appena visto. Componendo i due omeomorfismi — e la composizione di omeomorfismi è un omeomorfismo, perché lo è per le continue in entrambi i versi — si ottiene un intorno di $p$ omeomorfo a tutto $\mathbb{R}^n$.</p>
+   <p><b>Dunque le due formulazioni della Definizione 2.1 coincidono</b>, e si può usare quella comoda al momento: «omeomorfo a un aperto di $\mathbb{R}^n$» quando si costruisce una carta da una formula che ha un dominio naturale, «omeomorfo a $\mathbb{R}^n$» quando serve una carta grande. È il genere di equivalenza che i testi usano senza dichiarare — e chi non l'ha vista una volta la legge come una contraddizione fra due libri.</p>`}
+  ]},
+  {t:'plot', title:'Il profilo radiale: la palla che si allunga fino all infinito',
+   intro:R`Il grafico della funzione che compie l'allungamento, lungo un raggio, con $R=1$: a sinistra e a destra il dominio finisce a $\pm1$, e il valore corre via.`,
+   plots:[
+    {kind:'func2d', f:'x/(1-x*x)', xr:[-0.97,0.97], yr:[-9,9], height:360, equal:false,
+     title:'r va in r/(1-r^2): dominio (-1,1), immagine tutto R',
+     segs:[{x1:-1, y1:-9, x2:-1, y2:9, col:'#ff6b6b', width:1.2, dash:true, label:'r=-1', lx:-1.12, ly:7.4},
+           {x1:1, y1:-9, x2:1, y2:9, col:'#ff6b6b', width:1.2, dash:true, label:'r=1', lx:1.12, ly:7.4}],
+     marks:[{x:0.618, y:1, label:'r=0,618 va in 1', col:'#5eead4'},
+            {x:0, y:0, label:'l origine resta ferma', col:'#8ee0c8', up:true}]}
+   ],
+   leggi:R`<p>Da guardare: la curva è ripidissima vicino ai due estremi e quasi la bisettrice vicino all'origine. <b>Vicino al centro l'omeomorfismo non fa quasi niente; tutto il lavoro è concentrato sul bordo</b>, dove un intervallo di lunghezza infinitesima viene stirato in un tratto di lunghezza arbitraria.</p>
+   <p>E da imparare: il punto segnato a $r\approx0{,}618$ è il caso numerico della tappa precedente, e si legge nel grafico come l'ascissa la cui ordinata è $1$. Che il grafico sia una funzione dispari e strettamente crescente dice già tutto ciò che serve — biiettiva su $\mathbb{R}$, continua, con inversa continua perché una monotona continua surgettiva fra intervalli ha inversa continua. <b>La verifica algebrica della tappa precedente e questa lettura del grafico dicono la stessa cosa in due lingue</b>, e conviene saperle entrambe: la prima si estende a $n$ qualunque, la seconda si vede.</p>`}
+]},
+
+/* ---------------- 06 · INVARIANTI, E QUANDO LA BIIEZIONE BASTA ---------------- */
+{ num:'06', title:'Invarianti topologici, e il caso in cui la biiezione continua basta', meta:'da compatto a Hausdorff · la dimostrazione · l invarianza della dimensione, dichiarata e non dimostrata',
+  blocchi:[
+  {t:'prosa', title:'Che cosa sopravvive a un omeomorfismo', tag:'grammatica', html:R`
+  <p>Una proprietà di uno spazio topologico si dice <b>invariante topologico</b> se, valendo per $X$, vale per ogni spazio omeomorfo a $X$. È una definizione che sembra vacua e invece è il criterio operativo più usato: per dimostrare che due spazi <i>non</i> sono omeomorfi non si prova a esaurire tutte le applicazioni possibili — si cerca un invariante che distingue.</p>
+  <p>Gli invarianti già incontrati sono tre: essere di Hausdorff (tp-01), avere una base numerabile (tp-02), e il numero di componenti connesse (tp-08 lo tratterà). La ragione per cui sono invarianti è sempre la stessa — sono enunciati nel solo linguaggio degli aperti, e un omeomorfismo è una corrispondenza biunivoca fra le due famiglie di aperti. <b>Il test da applicare a qualunque proprietà</b>: se si riesce a enunciarla senza nominare né distanze né coordinate né elementi particolari, è un invariante; se serve una metrica, non lo è. «Limitato» e «completo» cadono per questo motivo, come la tappa 05 ha mostrato con un esempio.</p>`},
+  {t:'reveal', title:'Il teorema che rende gratuita l inversa continua', tag:'costruzione', steps:[
+   {label:'L enunciato, e perche e cosi utile', body:R`
+   <p><b>Teorema.</b> Sia $F:X\to Y$ continua e biiettiva, con $X$ compatto e $Y$ di Hausdorff. Allora $F$ è un omeomorfismo.</p>
+   <p>Il contrasto con la tappa 03 è esatto: lì $X=[0,1)$ non era compatto, e l'inversa saltava. Il teorema dice che la <span class="str" data-str="compattezza">compattezza</span> della sorgente, insieme a Hausdorff sull'arrivo, <b>compra gratis la clausola che altrimenti va verificata a mano</b>. In pratica è il modo in cui si dimostrano quasi tutti gli omeomorfismi fra oggetti compatti senza calcolarne l'inversa — il che è una fortuna, perché nei casi interessanti l'inversa non si scrive.</p>`},
+   {label:'La dimostrazione, in tre fatti di compattezza', body:R`
+   <p>Serve far vedere che $F$ manda chiusi in chiusi; di qui l'inversa è continua, perché la controimmagine di un chiuso secondo $F^{-1}$ è $F$ del chiuso, e «controimmagini di chiusi chiuse» equivale a continuità (si passa ai complementari). Sia dunque $C\subseteq X$ chiuso. Tre passi, ciascuno un fatto standard che tp-07 dimostrerà per intero:</p>
+   <ol>
+    <li>un <b>chiuso dentro un compatto è compatto</b> — a un ricoprimento aperto di $C$ si aggiunge il complementare di $C$, si ottiene un ricoprimento di $X$, si estrae un sottoricoprimento finito e si butta via il pezzo aggiunto;</li>
+    <li>l'<b>immagine continua di un compatto è compatta</b> — un ricoprimento aperto dell'immagine si tira indietro in un ricoprimento aperto della sorgente, si riduce a finito, e si rimanda avanti;</li>
+    <li>un <b>compatto dentro un Hausdorff è chiuso</b> — ed è qui che Hausdorff serve: per separare un punto fuori dal compatto da tutto il compatto occorrono intorni disgiunti.</li>
+   </ol>
+   <p>Mettendoli in fila: $C$ è compatto per (1), $F(C)$ è compatto per (2), $F(C)$ è chiuso per (3). <b>La dimostrazione non usa mai la biiettività di $F$ per i tre passi</b> — serve solo alla fine, per poter parlare di $F^{-1}$ come funzione.</p>`},
+   {label:'Il collaudo del teorema sul controesempio', body:R`
+   <p>Un teorema si capisce vedendo quale ipotesi cade nel controesempio che gli sfugge. In tp-03, tappa 03: $X=[0,1)$, $Y=S^1$, $F$ continua e biiettiva, $Y$ di Hausdorff perché metrico. L'ipotesi che manca è la sola rimasta — $[0,1)$ <b>non è compatto</b>: il ricoprimento con gli intervalli $[0,1-\tfrac1n)$ per $n\ge2$ non ha sottoricoprimenti finiti, perché una famiglia finita di quegli intervalli è contenuta nel più grande di essi, che non copre $[0,1)$. Cambia una cosa sola e tutto funziona: su $[0,1]$ la stessa formula non è più iniettiva (i due estremi vanno nello stesso punto), e l'applicazione corretta diventa un <i>quoziente</i> — che è tp-05.</p>`}
+  ]},
+  {t:'prosa', title:'L invarianza della dimensione: il limite dichiarato di questo movimento', tag:'limite dichiarato', html:R`
+  <p>Resta un invariante che qui si enuncia e non si dimostra, e il motivo va detto apertamente. Abate-Tovena, Osservazione 2.1.11 (stampata 63): se uno spazio topologico ammette una struttura differenziabile di dimensione $n$, non può ammetterne una di dimensione $m$ diversa da $n$ — e ciò segue dal fatto che <b>due aperti di spazi euclidei di dimensione diversa non sono mai omeomorfi</b>, risultato noto come teorema di invarianza della dimensione.</p>
+  <p>Questo risultato non si dimostra con gli strumenti della topologia generale. La dimostrazione passa per l'omologia o per il grado di Brouwer, cioè per un corso di topologia algebrica che non è fra i prerequisiti e non è fra le fonti in casa — Abate-Tovena stesso lo rimanda a un esercizio del capitolo 5, che è oltre il materiale estratto qui. <b>Si cita, si usa, e si dichiara il debito</b>: è ciò che garantisce che la parola «dimensione» in «varietà di dimensione $n$» sia ben definita, e sarebbe disonesto far credere che sia un conto breve. Il caso $n=1$ contro $n=2$ si può fare a mano con la connessione (togliere un punto a un intervallo lo sconnette, togliere un punto a un disco no), e tp-08 lo mostrerà; il caso generale no.</p>`}
+]},
+
+/* ---------------- 07 · LA LINGUA DEL CORSO ---------------- */
+{ num:'07', title:'La lingua del corso: la carta locale, e la topologia generata dall atlante', meta:'Manetti, Definizione 2.1 punto 2 · la tripla (U,V,phi) · Abate-Tovena, Proposizione 2.1.8 e il verso rovesciato',
+  blocchi:[
+  {t:'prosa', title:'Come lo scrive Manetti, parola per parola', tag:'grammatica', html:R`
+  <p>Manetti (stampata 18), punto 2 della Definizione 2.1: «$X$ è localmente omeomorfo ad aperti di $\mathbb{R}^n$, ovvero per ogni $p\in X$ esistono un intorno aperto $U$ di $p$ e un aperto $V$ di $\mathbb{R}^n$ tali che esista un omeomorfismo $\varphi:U\to V$; la tripla $(U,V,\varphi)$ viene detta <b>carta locale</b>».</p>
+  <p>Tre dettagli della formulazione che adesso si possono leggere e prima no.</p>
+  <ul>
+   <li><b>«localmente»</b> significa che il testimone cambia da punto a punto: non si chiede un omeomorfismo da $X$ a $\mathbb{R}^n$, se esistesse la geometria differenziale non servirebbe. La tappa 02 ha mostrato perché questo basta: la continuità è locale, e quindi le proprietà che si verificano in carta si incollano.</li>
+   <li><b>«ad aperti di $\mathbb{R}^n$»</b>, al plurale e non «a $\mathbb{R}^n$»: la tappa 05 ha mostrato che le due versioni sono equivalenti, e quindi la scelta è di comodo.</li>
+   <li><b>La tripla, e non la sola $\varphi$.</b> Tenere nel dato anche $U$ e $V$ non è pedanteria contabile: la stessa formula può definire carte diverse su domini diversi, e il cambiamento di carta — che è l'oggetto vero del corso — si calcola sull'intersezione dei domini. Senza i domini nel dato, non si sa dove la funzione di transizione è definita, e la tappa 04 ha mostrato che è esattamente lì che si gioca tutto: $\varphi_2\circ\varphi_1^{-1}$ è $1/y$, ed è di classe $C^\infty$ solo <i>sul suo dominio</i>, l'origine esclusa.</li>
+  </ul>`},
+  {t:'prosa', title:'Il verso rovesciato: la topologia che nasce dall atlante', tag:'architettura', html:R`
+  <p>Abate-Tovena fa una scelta diversa e vale la pena conoscerla, perché è quella che si incontra quando una varietà va <i>costruita</i> e non riconosciuta. Parte da un insieme $M$ privo di topologia, con una famiglia di carte biiettive $\varphi_\alpha$ su aperti di $\mathbb{R}^n$, e dichiara aperto ogni $A\subseteq M$ tale che ogni $\varphi_\alpha(A\cap U_\alpha)$ sia aperto in $\mathbb{R}^n$. La Proposizione 2.1.8 (stampata 63) dimostra che questa famiglia è una topologia, che gli $U_\alpha$ ne sono aperti, che le $\varphi_\alpha$ ne sono omeomorfismi con l'immagine — <b>e che è l'unica topologia con queste proprietà</b>.</p>
+  <p>I due versi non si contraddicono, si completano. Manetti parte dallo spazio topologico e cerca le carte: è il punto di vista di chi riconosce che un oggetto noto (la sfera, il proiettivo) è una varietà. Abate-Tovena parte dalle carte e ottiene la topologia: è il punto di vista di chi costruisce un oggetto nuovo, e il caso in cui serve davvero è lo spazio quoziente — dove la topologia non si sa in anticipo e l'atlante è la sola cosa che si ha in mano. <b>L'unicità nella Proposizione 2.1.8 è ciò che rende le due vie compatibili</b>: se si parte dalle carte di un oggetto che già aveva una topologia e le carte erano omeomorfismi, si ritrova la topologia di prima e non un'altra.</p>
+  <p>Questo è anche il punto in cui si vede perché tp-02 veniva prima. La costruzione di Abate-Tovena non è altro che far generare una topologia da una famiglia dichiarata — esattamente il meccanismo delle basi, applicato alle controimmagini degli aperti di $\mathbb{R}^n$ invece che a una famiglia data a mano.</p>`}
+]},
+
+/* ---------------- 08 · ESERCIZI ---------------- */
+{ num:'08', title:'Esercizi — tocca a te', meta:'la tangente come omeomorfismo · un invariante che distingue · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · La tangente, e un intervallo omeomorfo alla retta', html:R`
+  <p>Mostra che $\tan$ ristretta all'intervallo aperto di estremi $-\pi/2$ e $\pi/2$ è un omeomorfismo su $\mathbb{R}$, e confronta questo esempio con quello della tappa 05. Poi spiega perché lo stesso argomento <b>non</b> si applica a $\tan$ sull'intervallo chiuso, e che cosa questo dice sulla necessità di togliere gli estremi.</p>`,
+   sol:R`<p>La funzione è continua sull'intervallo aperto, strettamente crescente — quindi iniettiva — e surgettiva su $\mathbb{R}$ perché $\lim_{t\to(\pi/2)^-}\tan t=+\infty$ e il limite all'altro estremo è $-\infty$, e per il teorema dei valori intermedi tutti i valori intermedi sono assunti. L'inversa è l'arcotangente, continua. Un valore concreto: $\tan\tfrac{\pi}{4}=1$, cioè metà dell'intervallo positivo copre metà della semiretta positiva — il resto viene stirato all'infinito, esattamente come nella tappa 05.</p>
+  <p><b>Il confronto.</b> Tangente e la funzione radiale di Abate-Tovena fanno la stessa cosa con due formule diverse: un intervallo aperto limitato diventa tutta la retta. Ne segue che <b>fra due omeomorfismi non c'è niente da scegliere</b>: se esistono entrambi, dicono lo stesso fatto topologico, e la formula più comoda si scegliere in base al conto che si deve fare dopo (la radiale si generalizza a $n$ dimensioni per radialità, la tangente no).</p>
+  <p><b>Sull intervallo chiuso.</b> Negli estremi $\tan$ non è definita, dunque non c'è neppure un'applicazione da discutere. E non si può «completarla» a piacere: l'intervallo chiuso è compatto e $\mathbb{R}$ non lo è, e la tappa 06 dice che l'immagine continua di un compatto è compatta — dunque nessuna applicazione continua dall'intervallo chiuso può essere surgettiva su $\mathbb{R}$, con qualunque definizione negli estremi. <b>La compattezza è l'invariante che impedisce il completamento</b>, e questo è il modo in cui un invariante si usa in pratica.</p>`},
+  {t:'esercizio', title:'2 · Due spazi che non sono omeomorfi, e il modo di dimostrarlo', html:R`
+  <p>Siano $X=(0,1)$ e $Y=[0,1]$, entrambi con la topologia di sottospazio di $\mathbb{R}$. Dimostra che non sono omeomorfi, esibendo un invariante che li distingue. Poi fallo una seconda volta con un invariante <i>diverso</i>, e di' quale delle due dimostrazioni si generalizza meglio.</p>`,
+   sol:R`<p><b>Prima dimostrazione, con la compattezza.</b> $Y$ è compatto (è chiuso e limitato in $\mathbb{R}$: è Heine-Borel, che tp-07 enuncia e il cui debito sta in Analisi), $X$ non lo è — il ricoprimento con gli intervalli di estremi $1/n$ e $1-1/n$ non ha sottoricoprimenti finiti. La compattezza è un invariante topologico perché si enuncia nel solo linguaggio dei ricoprimenti aperti. Quindi non esiste nessun omeomorfismo.</p>
+  <p><b>Seconda dimostrazione, con i punti che si possono togliere.</b> In $Y$ esistono due punti — gli estremi — la cui rimozione lascia lo spazio connesso; in $X$ la rimozione di <i>qualunque</i> punto lo sconnette in due pezzi. Poiché un omeomorfismo manda $X$ meno un punto in $Y$ meno la sua immagine, e la connessione è un invariante, nessun omeomorfismo può esistere. Questo argomento è quello che tp-08 formalizza.</p>
+  <p><b>Quale si generalizza.</b> La seconda, e vale la pena capire perché: è l'argomento che distingue $\mathbb{R}$ da $\mathbb{R}^2$ (togliere un punto sconnette la retta, non il piano), ed è il primo mattone di quell'invarianza della dimensione che la tappa 06 ha dichiarato come debito. La prima invece distingue solo compatti da non compatti, e due oggetti entrambi compatti — una sfera e un toro — restano indistinguibili. È il motivo per cui la topologia non si ferma qui.</p>`},
+  {t:'esercizio', title:'3 · La proiezione stereografica dal polo sud, a mano', html:R`
+  <p>Nel caso $n=1$, ripeti il conto della tappa 04 per $\varphi_2$ invece di $\varphi_1$: trova l'inversa di $\varphi_2(x_0,x_1)=x_1/(1+x_0)$, e verifica direttamente che $\varphi_1\circ\varphi_2^{-1}$ è ancora l'applicazione che manda $y$ nel suo reciproco. Poi spiega perché le due funzioni di transizione dell'atlante sono la stessa funzione.</p>`,
+   sol:R`<p>Il conto è identico con il segno di $x_0$ rovesciato: posto $\sigma=y^2$, si trova $x_0=(1-\sigma)/(1+\sigma)$ e $x_1=2y/(1+\sigma)$. Mettendo questo dentro $\varphi_1$ si divide $2y/(y^2+1)$ per $1-(1-y^2)/(1+y^2)$, che vale $2y^2/(1+y^2)$, e il risultato è il reciproco di $y$.</p>
+  <p><b>Perché è la stessa funzione.</b> Le due transizioni $\varphi_2\circ\varphi_1^{-1}$ e $\varphi_1\circ\varphi_2^{-1}$ sono inverse l'una dell'altra per costruzione, e l'applicazione che manda $y$ nel suo reciproco è <i>involutiva</i>: coincide con la propria inversa. Non è una coincidenza della sfera, è una conseguenza della simmetria fra i due poli — scambiare $N$ con $S$ è una riflessione della sfera, che coniuga una carta nell'altra. Manetti lo dice con una riga («in maniera del tutto analoga si dimostra che anche l'altra funzione di transizione è $C^\infty$») e il motivo è questo.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché «manda aperti in aperti» non è la definizione di continuità? Dai il controesempio e di' come si chiama la proprietà che invece esprime.</li>
+  <li>Nel lemma di incollamento, perché i chiusi devono essere in numero finito e gli aperti no? Indica l'assioma di tp-01 di cui questo è il duale.</li>
+  <li>Nel controesempio $[0,1)\to S^1$, quale delle ipotesi del teorema della tappa 06 cade? E se si sostituisce $[0,1)$ con $[0,1]$, che cosa si rompe invece?</li>
+  <li>La proiezione stereografica è definita su $S^n$ meno un punto. Perché il punto va tolto, e che cosa dice questo sul fatto che $S^n$ non è omeomorfa a $\mathbb{R}^n$?</li>
+  <li>Quali di queste proprietà sono invarianti topologici: essere limitato, essere compatto, avere diametro $3$, essere di Hausdorff, essere completo come spazio metrico?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>La funzione costante da $\mathbb{R}$ a $\mathbb{R}$ manda l'aperto $\mathbb{R}$ in un singoletto, che non è aperto, ed è continua in qualunque senso ragionevole. La proprietà «manda aperti in aperti» si chiama <b>essere un'applicazione aperta</b>, è indipendente dalla continuità, e insieme a quest'ultima e alla biiettività dà l'omeomorfismo.</li>
+   <li>Perché la dimostrazione del caso chiuso conclude scrivendo la controimmagine di un chiuso come <b>unione</b> dei pezzi, e l'unione infinita di chiusi non è chiusa. È il duale dell'assioma 3 di tp-01 — l'intersezione finita di aperti è aperta, quella infinita no — letto sui complementari. Nel caso aperto non serve nessuna finitezza perché lì si usa l'unione <i>arbitraria</i> di aperti, cioè l'assioma 2, che non ha restrizioni.</li>
+   <li>Cade la compattezza di $[0,1)$: tutte le altre ipotesi valgono ($F$ continua e biiettiva, $S^1$ di Hausdorff). Con $[0,1]$ la compattezza c'è ma si perde l'<b>iniettività</b>, perché $0$ e $1$ hanno la stessa immagine; l'applicazione diventa surgettiva e non biiettiva, e il modo corretto di trattarla è il quoziente di tp-05.</li>
+   <li>Il punto va tolto perché nella sua direzione il denominatore della formula si annulla: i punti che gli si avvicinano vengono mandati arbitrariamente lontano, e nessun valore finito può essere assegnato al polo. Questo dice che <b>$S^n$ meno un punto</b> è omeomorfa a $\mathbb{R}^n$, non $S^n$ — e infatti $S^n$ è compatta e $\mathbb{R}^n$ non lo è, quindi per la tappa 06 non possono essere omeomorfe. Serve più di una carta: è il motivo per cui esistono gli atlanti.</li>
+   <li>Invarianti: essere compatto, essere di Hausdorff. Non invarianti: essere limitato, avere diametro $3$, essere completo — tutte e tre nominano la metrica, e la tappa 05 dà il controesempio per tutte e tre contemporaneamente, perché la palla aperta è limitata, ha diametro finito, non è completa, ed è omeomorfa a $\mathbb{R}^n$ che è illimitato, di diametro infinito e completo.</li>
+   </ol>`}
+]},
+
+/* ---------------- 09 · IL SENSO ---------------- */
+{ num:'09', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove l idea di omeomorfismo riappare nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> La continuità si dice tirando indietro gli aperti, non spingendo avanti; è una proprietà locale, e due lemmi — la continuità è locale, e l'incollamento — permettono di costruirla pezzo per pezzo. L'omeomorfismo è una biiezione continua e aperta, cioè una corrispondenza fra le due famiglie di aperti, e la clausola sull'inversa non è eliminabile: l'intervallo semiaperto avvolto sulla circonferenza lo mostra in tre righe. Due omeomorfismi espliciti sono stati costruiti per intero e verificati — la proiezione stereografica, che è la carta con cui ogni testo apre il corso, e la palla che diventa tutto lo spazio, che rende equivalenti le due formulazioni della definizione di varietà. E un teorema compra la clausola difficile quando la sorgente è compatta e l'arrivo di Hausdorff.</p>
+  <p><b>Ciò che resta da fare, e che tp-03 non può fare.</b> Qui si è lavorato con topologie già date: la sfera «ha» la topologia di $\mathbb{R}^{n+1}$, l'intervallo quella di $\mathbb{R}$. Come si <i>mette</i> una topologia su un sottoinsieme e su un prodotto è tp-04, e questo movimento ha già dovuto prendere in prestito due volte il fatto che un aperto di un aperto è aperto. Come si mette una topologia su un insieme di classi di equivalenza — l'unica costruzione che può rovinare le proprietà buone, e quella di cui il controesempio della tappa 03 è l'anticamera — è tp-05. E gli strumenti di compattezza usati come scatola nera nella tappa 06 si aprono in tp-07.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>L'identificazione di due oggetti attraverso una corrispondenza che conserva la struttura</b>: cambiare descrizione senza cambiare contenuto.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`La trasformazione unitaria è l'omeomorfismo della meccanica quantistica: una biiezione fra spazi di Hilbert che conserva la struttura rilevante — qui il prodotto scalare invece della famiglia degli aperti — e per questo due descrizioni unitariamente equivalenti dello stesso sistema danno le stesse probabilità. La clausola «con inversa continua» ha il suo esatto corrispettivo nel fatto che per un operatore unitario l'inverso è l'aggiunto: è la richiesta che la corrispondenza funzioni nei due versi, e gli operatori che la violano (le isometrie non surgettive, come l'operatore di shift) sono il controesempio analogo a quello della tappa 03.`},
+    {dove:'Meccanica<br>statistica', txt:R`Il cambio di variabili fra ensemble — microcanonico, canonico, grancanonico — è la stessa operazione di cambiare carta: lo stesso sistema fisico descritto in coordinate diverse, con una funzione di transizione che è la trasformata di Legendre. E come la funzione di transizione della tappa 04 è regolare solo sul suo dominio, l'equivalenza fra ensemble vale solo dove la trasformata di Legendre è ben definita — cioe' dove l'energia libera e' convessa, e le transizioni di fase sono precisamente i punti in cui quel dominio ha un buco.`},
+    {dove:'Relativita<br>generale', txt:R`L'invarianza per diffeomorfismi è l'enunciato che la fisica non dipende dalla carta: le equazioni di campo si scrivono in coordinate ma il loro contenuto è quello che sopravvive a un cambiamento di coordinate, cioè il contenuto invariante nel senso della tappa 06. Il «problema del buco» di Einstein — due soluzioni che differiscono per un diffeomorfismo sono la stessa soluzione fisica — è la versione fisica del fatto che due spazi omeomorfi sono lo stesso spazio topologico, e del fatto che un invariante è l'unica cosa che si può misurare.`},
+    {dove:'Astrofisica', txt:R`La proiezione stereografica della tappa 04 non è un esercizio: è il modo in cui si disegna una mappa del cielo. Una sfera celeste non si appiattisce su un foglio senza tagliarla — è esattamente il contenuto del fatto che $S^2$ non è omeomorfa a $\mathbb{R}^2$ — e ogni proiezione cartografica è una carta locale che copre tutto tranne un punto o una linea, pagando il prezzo in deformazione di angoli o di aree.`}
+   ],
+   domanda:R`La tappa 06 ha dichiarato un debito: l'invarianza della dimensione si usa e non si dimostra, perché serve la topologia algebrica. <b>Domanda da portare avanti:</b> ogni volta che in geometria differenziale un enunciato parla di «dimensione», chiediti se sta usando la dimensione come numero di coordinate in una carta — dato di partenza, nessun problema — oppure come proprietà intrinseca dello spazio, e quindi come conseguenza di quel teorema non dimostrato. La differenza non è formale: nel primo caso si sta calcolando, nel secondo si sta usando un risultato profondo di cui questo prerequisito ha solo l'enunciato.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-03-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-03 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-03-continuita-e-omeomorfismi.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

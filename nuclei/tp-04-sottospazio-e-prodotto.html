@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-04 — Sottospazio e prodotto: le due costruzioni che non sorprendono</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-04 — Sottospazio e prodotto: le due costruzioni che non sorprendono</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-04: Sottospazio e prodotto: le due costruzioni che non sorprendono <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-04 — sottospazio e prodotto: le due costruzioni che non sorprendono
+identita:  come si mette una topologia su un pezzo di spazio e su una coppia di spazi.
+           Sono le due costruzioni che funzionano come ci si aspetta — e vanno fatte
+           prima del quoziente proprio per questo: servono a stabilire cosa vuol dire
+           «la costruzione giusta», cosi' che l'anomalia del quoziente si veda
+copre:     1.2 del programma di recupero
+serve:     tp-01, tp-03
+apre:      gd-03 (sottovarieta': la sfera S^n eredita la topologia da R^(n+1)) e gd-07
+           (il fibrato tangente, che localmente e' un prodotto)
+strumenti: omeomorfismo, compattezza, quoziente-topologico
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A (stampate 601-606): la
+           topologia di sottospazio e la Proposizione A.17 con le sue nove proprieta',
+           la topologia prodotto e la Proposizione A.23 con le sue dieci, l'unione
+           disgiunta e la Proposizione A.25, gli esercizi A.32-A.33 su proiezioni e
+           inclusioni aperte. Abate, Tovena — Geometria Differenziale (stampata 66):
+           l'atlante prodotto A x B su M x N, che e' la ragione per cui la topologia
+           prodotto serve a geodiff, e l'Esempio 2.1.22 con la quantita' piu' che
+           numerabile di origini, che qui riceve il suo nome ufficiale.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.2
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"01","appare":"\\left[0,\\tfrac12\\right)=\\left(-\\tfrac12,\\tfrac12\\right)\\cap[0,1)",
+  "perche":"e' un'identita' insiemistica fra intervalli, non un conto: serve a esibire l'aperto di R che taglia l'aperto relativo usato in tp-03, e sympy non confronta intervalli"},
+
+ {"tipo":"uguale","sinistra":"(1/2)**2+(sqrt(3)/2)**2","vale":"1",
+  "dove":"02","appare":"\\left(\\tfrac12\\right)^2+\\left(\\tfrac{\\sqrt3}{2}\\right)^2=1"},
+
+ {"tipo":"uguale","sinistra":"(1/sqrt(2))**2+(1/sqrt(2))**2","vale":"1",
+  "dove":"03","appare":"\\left(\\tfrac1{\\sqrt2}\\right)^2+\\left(\\tfrac1{\\sqrt2}\\right)^2=1"},
+
+ {"tipo":"uguale","sinistra":"(7/10)**2+(7/10)**2","vale":"49/50",
+  "dove":"03","appare":"\\left(\\tfrac7{10}\\right)^2+\\left(\\tfrac7{10}\\right)^2=\\tfrac{49}{50}"},
+
+ {"tipo":"disuguaglianza","sinistra":"49/50","relazione":"<","destra":"1",
+  "dove":"03","appare":"\\tfrac{49}{50}<1"},
+
+ {"tipo":"uguale","sinistra":"2-2*(7/8)","vale":"1/4",
+  "dove":"04","appare":"2-2\\cdot\\tfrac78=\\tfrac14"},
+
+ {"tipo":"uguale","sinistra":"2*(sqrt(2)/2)**2","vale":"1",
+  "dove":"07","appare":"2\\left(\\tfrac{\\sqrt2}{2}\\right)^2=1"},
+
+ {"tipo":"uguale","sinistra":"4**3","vale":"64",
+  "dove":"07","appare":"4^3=64"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Topologia · sezione 1.2 del programma di recupero · il metro con cui si giudichera il quoziente',
+  blocchi:[
+  {t:'prosa', title:'Da qui in avanti le topologie si costruiscono', tag:'architettura', html:R`
+  <p>I tre movimenti precedenti hanno lavorato con topologie <b>già date</b>: la sfera «aveva» quella di $\mathbb{R}^{n+1}$, l'intervallo semiaperto quella di $\mathbb{R}$, e ogni volta che serviva si è detto «con la topologia di sottospazio» rimandando qui. Tp-03 ha contratto due debiti espliciti in questo modo — che un aperto dentro un aperto è aperto, e che la continuità verso un prodotto si controlla componente per componente — e questo movimento li salda entrambi.</p>
+  <p>Ma il suo lavoro vero è un altro, e la mappa lo dichiara: <b>questo movimento è corto di proposito, perché serve a stabilire il metro</b>. Sottospazio e prodotto sono le due costruzioni che <i>funzionano come ci si aspetta</i>: ereditano tutto ciò che c'è da ereditare, non rompono niente, e si riconoscono da una proprietà che si ripete identica in entrambi. Vederle insieme serve a fissare che cosa voglia dire «la costruzione giusta» — perché tp-05 presenta la terza, il quoziente, che ha la stessa forma e <b>non</b> si comporta bene, e senza un metro quell'anomalia non si vede.</p>
+  <div class="note"><b>Il filo da tenere in mano, dichiarato all'inizio invece che alla fine.</b> Tutte e tre le costruzioni si definiscono nello stesso modo: non elencando gli aperti, ma dichiarando <i>quali applicazioni devono essere continue</i>. Lee chiama questa dichiarazione <b>proprietà caratteristica</b> e per ciascuna costruzione dimostra che la topologia che la soddisfa è <i>unica</i>. La tappa 06 mostra che la differenza fra le due costruzioni buone e quella cattiva sta tutta nel <b>verso</b> in cui la proprietà caratteristica guarda.</div>`}
+]},
+
+/* ---------------- 01 · LA TOPOLOGIA DI SOTTOSPAZIO ---------------- */
+{ num:'01', title:'La topologia di sottospazio, e il debito di tp-03 saldato', meta:'definizione per intersezioni · aperto relativo contro aperto · un aperto di un aperto e aperto · cosa si eredita',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e l aggettivo che evita tre quarti degli errori', tag:'grammatica', html:R`
+  <p>Sia $X$ uno spazio topologico e $S\subseteq X$ un sottoinsieme qualunque. La <b>topologia di sottospazio</b> su $S$ (detta anche indotta, o relativa) si definisce dichiarando aperto un $U\subseteq S$ se e solo se esiste un aperto $V$ di $X$ con $U$ uguale all'intersezione di $V$ e $S$ (Lee, stampata 601). Lee aggiunge subito la precauzione terminologica che conviene adottare: un sottoinsieme di $S$ aperto in questa topologia si dice <b>relativamente aperto</b> in $S$, per rendere chiaro che non si sta dicendo «aperto in $X$».</p>
+  <p>Quell'aggettivo è l'antidoto all'errore più frequente del corso, e vale la pena vederlo su un caso che è già servito. In tp-03, tappa 03, si è usato il fatto che $\left[0,\tfrac12\right)$ è aperto in $[0,1)$ — e letto come sottoinsieme di $\mathbb{R}$ non è aperto, perché nessun intorno di $0$ ci sta dentro. La definizione lo risolve esibendo il testimone: $\left[0,\tfrac12\right)=\left(-\tfrac12,\tfrac12\right)\cap[0,1)$, e il primo fattore è un aperto di $\mathbb{R}$. <b>Essere aperto non è una proprietà di un insieme: è una proprietà di un insieme dentro uno spazio</b>, e cambiare lo spazio cambia la risposta senza toccare l'insieme.</p>
+  <p>Due casi vanno però distinti, perché uno dei due è quello in cui l'aggettivo si può dimenticare senza danno. Se $S$ è <b>aperto</b> in $X$, allora un relativamente aperto di $S$ è anche aperto in $X$: è l'intersezione di due aperti di $X$, e l'assioma 3 di tp-01 la dà aperta. <b>Questo salda il primo debito di tp-03</b>, dove il Lemma A.19 aveva bisogno esattamente di questo passaggio. Se invece $S$ non è aperto — come $[0,1)$, o come la sfera dentro lo spazio — l'aggettivo è indispensabile e omettendolo si scrivono enunciati falsi.</p>`},
+  {t:'reveal', title:'Cosa si eredita, e la sola proprieta che non si eredita', tag:'regola operativa', steps:[
+   {label:'Le ereditarieta, dalla Proposizione A.17', body:R`
+   <p>Lee raccoglie nella Proposizione A.17 (stampata 602) nove proprietà del sottospazio. Quattro sono quelle che si usano continuamente:</p>
+   <ul>
+    <li><b>I chiusi si comportano allo stesso modo</b>: $K\subseteq S$ è chiuso in $S$ se e solo se è l'intersezione con $S$ di un chiuso di $X$. La dimostrazione è il passaggio ai complementari, e non c'è nessuna sorpresa — che è precisamente il punto di questo movimento.</li>
+    <li><b>La restrizione di una continua è continua</b>: se $F:X\to Y$ è continua, $F|_S$ lo è. Segue dalla definizione in una riga, perché la controimmagine secondo $F|_S$ è l'intersezione con $S$ della controimmagine secondo $F$.</li>
+    <li><b>Una base si restringe a una base</b>: se $\mathcal{B}$ è una base per $X$, la famiglia delle intersezioni dei suoi elementi con $S$ è una base per $S$. È il fatto usato in tp-02, tappa 05, per dire che la secondo-numerabilità si eredita: una famiglia non diventa più grande se la si interseca con qualcosa.</li>
+    <li><b>Hausdorff, primo-numerabile e secondo-numerabile si ereditano tutti e tre</b>: le proprietà che tp-01 e tp-02 hanno costruito passano a ogni sottoinsieme, senza ipotesi.</li>
+   </ul>
+   <p>È un elenco noioso, e la noia è l'informazione: <b>il sottospazio non ha patologie</b>. Vale la pena tenerlo a mente perché in tp-05 l'elenco corrispondente avrà dei buchi, e quei buchi saranno l'intero contenuto del movimento.</p>`},
+   {label:'L eccezione, e perche non e un difetto del sottospazio', body:R`
+   <p>Una proprietà non si eredita, e non è nell'elenco di Lee perché non è topologica: la <b>compattezza</b>. Un sottospazio di un compatto non è compatto in generale — l'intervallo aperto $(0,1)$ dentro $[0,1]$ è il controesempio minimo. Si eredita solo per i sottoinsiemi <i>chiusi</i>, ed è il primo dei tre passi che tp-03 ha usato nella dimostrazione del teorema compatto-Hausdorff. Lo <span class="str" data-str="compattezza">strumento della compattezza</span> lo porta scritto, e tp-07 lo dimostrerà.</p>
+   <p>La ragione per cui questo <i>non</i> rompe la regola enunciata sopra è che la compattezza non è una proprietà che si trasmette «verso il basso» per nessuna delle tre costruzioni: è una proprietà di tipo globale, e le costruzioni di questo movimento sono locali. Dirlo adesso evita di leggere l'elenco di tp-05 come se le due specie di eccezione fossero la stessa cosa.</p>`}
+  ]},
+  {t:'plot', title:'Un arco relativamente aperto, e il disco che lo taglia',
+   intro:R`La circonferenza $S^1$ dentro il piano, e un arco che <b>è</b> aperto in $S^1$ pur non essendo aperto in $\mathbb{R}^2$: è l'intersezione fra $S^1$ e un disco aperto del piano.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:340, equal:true,
+     xr:[-1.5,2.4], yr:[-1.35,1.35],
+     title:'l arco attorno a (1,0) e S^1 intersecato con il disco di raggio 1/2 centrato in (1,0)',
+     rings:[{r:0.5, x:1, y:0, col:'#5eead4', dash:true, label:'disco aperto di R^2', lx:1.62, ly:0.58}],
+     marks:[{x:1, y:0, label:'(1,0)', col:'#5eead4'},
+            {x:0.9682, y:0.25, label:'', col:'#8ee0c8'},
+            {x:0.9682, y:-0.25, label:'', col:'#8ee0c8'},
+            {x:-1, y:0, label:'fuori dall arco', col:'#8ea0b8', left:true}]}
+   ],
+   leggi:R`<p>Da guardare: l'arco è <b>spesso zero</b>. Come sottoinsieme del piano non contiene nessun disco, per piccolo che sia, e quindi non è aperto in $\mathbb{R}^2$; eppure è aperto in $S^1$, perché il disco tratteggiato è un aperto del piano e l'arco è esattamente ciò che ne resta intersecando con la circonferenza.</p>
+  <p>E da imparare: <b>la topologia di $S^1$ non sa niente del piano in cui vive</b>. Due circonferenze immerse in modo diverso — una piatta, una annodata in $\mathbb{R}^3$ — hanno la stessa topologia di sottospazio, perché gli aperti si contano sulla circonferenza e non sullo spazio ambiente. È il motivo per cui in geodiff una sottovarietà si studia come varietà a sé, e lo spazio ambiente serve solo a costruirla.</p>`}
+]},
+
+/* ---------------- 02 · LA PROPRIETA CARATTERISTICA ---------------- */
+{ num:'02', title:'La proprieta caratteristica, cioe la definizione giusta', meta:'applicazioni VERSO il sottospazio · l unicita della topologia · l immersione topologica',
+  blocchi:[
+  {t:'prosa', title:'Che cosa rende giusta una costruzione', tag:'first principles', html:R`
+  <p>La definizione per intersezioni è operativa ma non spiega niente: non dice <i>perché</i> quella famiglia di aperti sia la scelta giusta invece di un'altra. La risposta di Lee è la <b>proprietà caratteristica</b> (A.17(a)): se $Y$ è uno spazio topologico, un'applicazione $F:Y\to S$ è continua se e solo se è continua la sua composizione con l'inclusione, cioè la stessa $F$ letta come applicazione a valori in $X$.</p>
+  <p>Detta a parole: <b>per sapere se un'applicazione dentro $S$ è continua, non serve guardare $S$ — basta guardarla come applicazione dentro $X$.</b> È la cosa che si vuole, ed è quella che si usa senza accorgersene ogni volta che si dice «questa curva sta sulla sfera, e è continua perché le sue tre componenti lo sono».</p>
+  <p>Un esempio minimo, per vederlo funzionare. Sia $\gamma(t)=(\cos t,\sin t)$ pensata a valori in $S^1$. Che sia continua <i>in $S^1$</i> sarebbe laborioso da verificare con la definizione per intersezioni; con la proprietà caratteristica è immediato, perché è continua a valori in $\mathbb{R}^2$. Che l'immagine stia davvero in $S^1$ è un conto a parte: per $t=\pi/3$ il punto è $\left(\tfrac12,\tfrac{\sqrt3}{2}\right)$, e la somma dei quadrati $\left(\tfrac12\right)^2+\left(\tfrac{\sqrt3}{2}\right)^2=1$ lo conferma su quel valore; in generale è l'identità trigonometrica fondamentale.</p>`},
+  {t:'reveal', title:'L unicita, e perche e il cuore della faccenda', tag:'costruzione', steps:[
+   {label:'L enunciato di unicita', body:R`
+   <p>Lee, A.17(b): <b>la topologia di sottospazio è l'unica topologia su $S$ per cui la proprietà caratteristica vale</b>. Non è una curiosità: è ciò che trasforma la proprietà caratteristica da conseguenza in <i>definizione alternativa</i>. Si può dire «metto su $S$ la topologia tale che le applicazioni verso $S$ sono le applicazioni verso $X$ che atterrano in $S$», e quella frase determina una topologia e una sola.</p>`},
+   {label:'Perche l unicita e facile, e vale la pena vederlo', body:R`
+   <p>L'argomento è lo stesso, parola per parola, per tutte e tre le costruzioni di questo movimento e del prossimo, quindi conviene farlo una volta. Siano $\tau_1$ e $\tau_2$ due topologie su $S$ che soddisfano entrambe la proprietà caratteristica. Applica la proprietà di $\tau_1$ prendendo come $Y$ lo spazio $S$ con la topologia $\tau_2$ e come $F$ l'identità: l'identità è continua da $(S,\tau_2)$ a $X$, perché lo è l'inclusione; dunque è continua da $(S,\tau_2)$ a $(S,\tau_1)$, cioè $\tau_1\subseteq\tau_2$. Scambiando i ruoli si ottiene l'inclusione opposta.</p>
+   <p><b>Che cosa si è usato.</b> Solo che l'identità è continua, due volte. È lo schema di dimostrazione più economico della topologia generale, e si riconosce ogni volta che un oggetto è definito da una proprietà universale — in algebra funziona identico per il prodotto di gruppi e per il quoziente di anelli, e tp-10 lo riincontrerà lì.</p>`},
+   {label:'L immersione topologica', body:R`
+   <p>Un ultimo nome, che serve in gd-03 e che qui costa due righe. Un'applicazione $F:X\to Y$ continua e iniettiva si dice <b>immersione topologica</b> (<i>topological embedding</i>) se è un <span class="str" data-str="omeomorfismo">omeomorfismo</span> sulla propria immagine, dove l'immagine porta la topologia di sottospazio (Lee, stampata 601). L'inclusione di un sottospazio è sempre un'immersione topologica, per definizione; la cosa non banale è che esistono applicazioni continue e iniettive che <b>non</b> lo sono, e tp-03 ne ha già costruita una — l'intervallo semiaperto avvolto sulla circonferenza è continuo, iniettivo, e non è un omeomorfismo sulla sua immagine, che è tutta $S^1$.</p>
+   <p>Dunque «immersione topologica» non è un sinonimo elegante di «continua e iniettiva»: è quella parola <i>più</i> la condizione che tp-03 ha mostrato non essere automatica. È la distinzione che in geodiff separa le <i>immersioni</i> dalle <i>sottovarietà immerse</i>, e sbagliarla lì costa un controesempio intero.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · LA TOPOLOGIA PRODOTTO ---------------- */
+{ num:'03', title:'La topologia prodotto, e i rettangoli che sono solo una base', meta:'la base dei prodotti di aperti · perche NON tutti gli aperti sono rettangoli · proiezioni continue e aperte · la proprieta caratteristica',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e l errore da non fare', tag:'grammatica', html:R`
+  <p>Siano $X_1,\dots,X_k$ spazi topologici. La famiglia dei sottoinsiemi del prodotto cartesiano della forma $U_1\times\cdots\times U_k$, con ciascun $U_i$ aperto in $X_i$, <b>è una base</b> per una topologia sul prodotto, detta <b>topologia prodotto</b> (Lee, stampata 603). Gli insiemi di quella forma si chiamano <i>aperti prodotto</i>.</p>
+  <p>La parola «base» è tutto l'enunciato, ed è il punto in cui si sbaglia. La topologia prodotto <b>non</b> è la famiglia dei prodotti di aperti: è la famiglia delle loro unioni, nel senso esatto di tp-02. La differenza non è formale, perché gli aperti più comuni di $\mathbb{R}^2$ non sono rettangoli: il disco aperto non è un prodotto di due aperti di $\mathbb{R}$, e nemmeno lo è il complementare di una curva. Sono però entrambi <i>unioni</i> di rettangoli, e la figura lo mostra.</p>
+  <p>Che la famiglia dei rettangoli soddisfi le due condizioni di tp-02 è immediato e vale la pena notarlo, perché è il primo uso vero di quelle condizioni: il prodotto degli spazi interi copre tutto, e l'intersezione di due rettangoli è il rettangolo delle intersezioni componente per componente — dunque è ancora un elemento della famiglia, e la condizione 2 è soddisfatta nel modo più forte possibile. <b>La famiglia dei rettangoli è chiusa per intersezione finita</b>, e per questo genera una topologia senza dover aggiungere niente.</p>`},
+  {t:'plot', title:'Il disco non e un rettangolo, ed e un unione di rettangoli',
+   intro:R`Il disco aperto di raggio $1$ con due rettangoli dentro: il quadrato massimo inscritto, e un rettangolo piccolo attorno a un punto vicino al bordo. Ogni punto del disco ha un rettangolo che lo contiene e sta dentro — e questo basta.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:380, equal:true,
+     xr:[-1.35,1.35], yr:[-1.3,1.3],
+     title:'il quadrato inscritto (lato 2/sqrt2) e un rettangolo attorno al punto (0,6, 0,6)',
+     segs:[{x1:-0.7071, y1:-0.7071, x2:0.7071, y2:-0.7071, col:'#5eead4', width:1.6},
+           {x1:0.7071, y1:-0.7071, x2:0.7071, y2:0.7071, col:'#5eead4', width:1.6},
+           {x1:0.7071, y1:0.7071, x2:-0.7071, y2:0.7071, col:'#5eead4', width:1.6},
+           {x1:-0.7071, y1:0.7071, x2:-0.7071, y2:-0.7071, col:'#5eead4', width:1.6},
+           {x1:0.5, y1:0.5, x2:0.7, y2:0.5, col:'#d8a13a', width:1.6},
+           {x1:0.7, y1:0.5, x2:0.7, y2:0.7, col:'#d8a13a', width:1.6},
+           {x1:0.7, y1:0.7, x2:0.5, y2:0.7, col:'#d8a13a', width:1.6},
+           {x1:0.5, y1:0.7, x2:0.5, y2:0.5, col:'#d8a13a', width:1.6}],
+     marks:[{x:0.7071, y:0.7071, label:'il vertice sta sul bordo', col:'#5eead4', up:true},
+            {x:0.6, y:0.6, label:'', col:'#d8a13a'},
+            {x:0.7, y:0.7, label:'', col:'#d8a13a', hollow:true},
+            {x:0, y:-1.08, label:'il disco NON e un rettangolo', col:'#8ea0b8'}]}
+   ],
+   leggi:R`<p>Due letture, e la seconda è quella che fa la dimostrazione.</p>
+   <p><b>Uno.</b> Il quadrato grande ha i vertici sulla circonferenza, dunque il suo semilato è $\tfrac1{\sqrt2}$: infatti $\left(\tfrac1{\sqrt2}\right)^2+\left(\tfrac1{\sqrt2}\right)^2=1$. È il rettangolo più grande che sta dentro il disco, e <i>non lo esaurisce</i> — restano fuori i quattro spicchi lungo gli assi. Nessun rettangolo singolo può coprire il disco, ed è tutto ciò che serve per dire che il disco non è un aperto prodotto.</p>
+   <p><b>Due.</b> Il rettangolo piccolo attorno a $(0{,}6,\,0{,}6)$ è il procedimento generale: dato un punto interno, si prende un rettangolo abbastanza piccolo e si verifica che il suo vertice <i>più lontano dall'origine</i> sia ancora dentro. Qui il vertice è $(0{,}7,\,0{,}7)$, e $\left(\tfrac7{10}\right)^2+\left(\tfrac7{10}\right)^2=\tfrac{49}{50}$, che soddisfa $\tfrac{49}{50}<1$ — dunque il vertice è interno, e con esso tutto il rettangolo, perché la distanza dall'origine su un rettangolo è massima in un vertice. <b>Ripetendo questo per ogni punto e unendo, si ottiene il disco come unione di rettangoli</b>, cioè come aperto della topologia prodotto. È la condizione 1 di tp-02 messa al lavoro.</p>`},
+  {t:'reveal', title:'Le proiezioni, la proprieta caratteristica, e il debito di tp-03 saldato', tag:'costruzione', steps:[
+   {label:'Le proiezioni sono continue, e anche aperte', body:R`
+   <p>La $i$-esima <b>proiezione</b> manda una $k$-upla nella sua $i$-esima componente. È continua (Lee, A.23(c)) perché la controimmagine di un aperto $U_i$ è il rettangolo che ha $U_i$ al posto $i$ e gli spazi interi altrove. Ed è anche <b>aperta</b> (Lee, Esercizio A.32), cosa più rara: l'immagine di un rettangolo è il suo lato $i$-esimo, aperto per ipotesi, e l'immagine di un'unione è l'unione delle immagini.</p>
+   <p>Che una proiezione sia aperta e <i>non</i> chiusa è il caso da ricordare, perché è il controesempio standard alla simmetria fra le due nozioni di tp-03: l'iperbole $xy=1$ è chiusa in $\mathbb{R}^2$, e la sua proiezione sul primo asse è $\mathbb{R}$ privato dell'origine, che non è chiuso. <b>Chi dimentica questo esempio si convince che le proiezioni conservano tutto</b>, e in geodiff lo paga sul fibrato tangente, dove la proiezione sulla base è aperta e non chiusa per la stessa ragione.</p>`},
+   {label:'La proprieta caratteristica, e il debito saldato', body:R`
+   <p>Lee, A.23(a): se $B$ è uno spazio topologico, un'applicazione $F:B\to X_1\times\cdots\times X_k$ è continua <b>se e solo se</b> ciascuna delle sue componenti — la composizione con la proiezione $i$-esima — è continua. E A.23(b) dice che la topologia prodotto è l'unica per cui questo valga, con lo stesso argomento di unicità della tappa 02.</p>
+   <p><b>Questo salda il secondo debito di tp-03</b>, dove la continuità di $t\mapsto(\cos 2\pi t,\sin 2\pi t)$ era stata data per buona «componente per componente» rimandando qui. Il «se» è la direzione utile e non è gratis: dire che ciascuna componente è continua non dice niente di diretto sulle controimmagini dei rettangoli, e la dimostrazione passa dal fatto che la controimmagine di $U_1\times\cdots\times U_k$ è l'intersezione <b>finita</b> delle controimmagini delle singole componenti — dove «finita» è esattamente l'assioma 3 di tp-01, e il motivo per cui Lee tratta solo prodotti finiti.</p>`},
+   {label:'Le ereditarieta, e l atlante prodotto', body:R`
+   <p>Un prodotto finito di spazi di Hausdorff è di Hausdorff; di primo-numerabili è primo-numerabile; di secondo-numerabili è secondo-numerabile (Lee, A.23(h,i,j)). E A.23(g): il prodotto delle basi è una base, che è il modo più rapido di vedere le ultime due. <b>Di nuovo l'elenco è completo e noioso</b>: il prodotto non rompe niente, come il sottospazio.</p>
+   <p>La conseguenza che serve a geodiff la scrive Abate-Tovena (stampata 66) in una riga: se $\mathcal{A}$ è un atlante di $M$ e $\mathcal{B}$ di $N$, allora la famiglia delle coppie $(U_\alpha\times V_\beta,\ \varphi_\alpha\times\psi_\beta)$ è un atlante di $M\times N$. <b>Il prodotto di due varietà è una varietà</b>, e la verifica richiede precisamente le tre ereditarietà appena elencate — Hausdorff e base numerabile dalla lista di Lee, l'essere localmente euclideo dal fatto che il prodotto di due aperti euclidei è un aperto euclideo di dimensione la somma. È il motivo per cui il toro, il cilindro e lo spazio delle fasi della meccanica sono varietà senza che nessuno debba costruirne un atlante da zero.</p>`}
+  ]}
+]},
+
+/* ---------------- 04 · L UNIONE DISGIUNTA ---------------- */
+{ num:'04', title:'L unione disgiunta, e il controesempio di tp-02 che riceve il suo nome', meta:'la terza costruzione · le etichette · cosa si eredita e cosa solo in quantita numerabile',
+  blocchi:[
+  {t:'prosa', title:'La costruzione, in mezza pagina', tag:'grammatica', html:R`
+  <p>Lee tratta nella stessa sezione una terza costruzione, e qui va vista perché <b>tp-02 l'ha già usata senza nominarla</b>. Data una famiglia di insiemi indicizzata da $A$, la loro <b>unione disgiunta</b> è l'insieme delle coppie formate da un punto e dall'etichetta dell'insieme da cui viene (Lee, stampata 604). L'etichetta serve a tenere separati i pezzi anche quando sono lo stesso insieme ripetuto — che è esattamente il caso del controesempio di tp-02, dove le copie di $\mathbb{R}$ erano tutte identiche.</p>
+  <p>La topologia si dichiara nel modo più semplice possibile: un sottoinsieme è aperto se e solo se la sua intersezione con ciascun pezzo è aperta in quel pezzo. Le proprietà (Lee, A.25) sono tutte senza sorprese, con <b>una sola riserva, ed è la riserva che fa il contenuto di tp-02</b>:</p>
+  <ul>
+   <li>Hausdorff si eredita sempre, <b>qualunque sia la quantità di pezzi</b> (A.25(e)); lo stesso per il primo assioma di numerabilità (A.25(f));</li>
+   <li>la secondo-numerabilità si eredita <b>solo per unioni disgiunte di una quantità numerabile</b> di spazi secondo-numerabili (A.25(g)).</li>
+  </ul>
+  <p>Quella sola parola — «numerabile», presente in un enunciato e assente negli altri due — <i>è</i> il controesempio di tp-02, enunciato da Lee come proprietà invece che come patologia. E spiega anche l'Esempio 2.1.22 di Abate-Tovena, che aggiungendo «una quantità più che numerabile di punti» a $\mathbb{R}$ costruisce una varietà che non è a base numerabile <i>né</i> di Hausdorff: lì entrambe le clausole cadono perché i punti vengono incollati, non affiancati.</p>`},
+  {t:'prosa', title:'Il verso rovesciato, che e l anticipo di tp-05', tag:'architettura', html:R`
+  <p>La proprietà caratteristica dell'unione disgiunta (A.25(a)) ha una forma che va letta con attenzione perché è la <b>prima a guardare dall'altra parte</b>: un'applicazione <i>dall'</i>unione disgiunta verso uno spazio $Y$ è continua se e solo se lo è la sua composizione con ciascuna inclusione. Dunque qui la proprietà descrive le applicazioni che <b>escono</b>, mentre per sottospazio e prodotto descriveva quelle che <b>entrano</b>.</p>
+  <p>Il contrasto si vede nel modo in cui si <i>costruisce</i> un'applicazione. Per darne una continua <b>verso</b> un prodotto bisogna darne le componenti, una per fattore, e si può scegliere ciascuna liberamente. Per darne una continua <b>da</b> un'unione disgiunta bisogna darla su ciascun pezzo, e anche lì si sceglie liberamente pezzo per pezzo — con la differenza che qui la continuità è automatica, perché i pezzi sono aperti e la continuità è locale (tp-03, Lemma A.19). L'esercizio 3 conta quante sono in un caso concreto, e il numero che esce dice qualcosa sullo spazio e non sull'insieme.</p>
+  <p><b>Perché questo è un anticipo.</b> Il quoziente di tp-05 avrà la proprietà caratteristica nello stesso verso dell'unione disgiunta — descriverà le applicazioni che escono — e non avrà la lista completa di ereditarietà. La tappa che segue dice esattamente dove sta il legame fra queste due cose.</p>
+  <p>Un conto, per fissare la dimensione dell'arco relativamente aperto della tappa 01 in questo linguaggio: su $S^1$ l'intersezione con il disco di raggio $\tfrac12$ centrato in $(1,0)$ è l'insieme dei punti il cui quadrato della distanza da $(1,0)$ è minore di $\tfrac14$, e poiché su $S^1$ quel quadrato vale $2-2\cos\theta$, la condizione è che $\cos\theta$ superi $\tfrac78$ — si legge dal fatto che $2-2\cdot\tfrac78=\tfrac14$. L'arco è dunque un intervallo di angoli, cioè <b>un aperto di $S^1$ letto nella sua carta</b>: che la topologia di sottospazio e quella delle carte coincidano è un fatto di cui gd-03 farà uso continuo.</p>`}
+]},
+
+/* ---------------- 05 · IL FILO CHE LE LEGA ---------------- */
+{ num:'05', title:'Il filo che lega le tre costruzioni, e dove si spezzera', meta:'proprieta caratteristica come definizione · il verso · perche il verso predice la patologia',
+  blocchi:[
+  {t:'prosa', title:'Tre costruzioni, una sola forma', tag:'sintesi', html:R`
+  <p>Riassunte nella stessa lingua, le tre costruzioni di questo movimento sono tre istanze di una sola idea. In ciascun caso la topologia <b>non</b> si definisce elencando gli aperti: si dichiara quali applicazioni devono essere continue, e si dimostra che esiste una topologia e una sola che rende vera quella dichiarazione.</p>
+  <ul>
+   <li><b>Sottospazio.</b> Le applicazioni che <i>entrano</i> in $S$ sono quelle che entrano in $X$ e atterrano in $S$. Topologia unica (A.17(b)).</li>
+   <li><b>Prodotto.</b> Le applicazioni che <i>entrano</i> nel prodotto sono le $k$-uple di applicazioni che entrano nei fattori. Topologia unica (A.23(b)).</li>
+   <li><b>Unione disgiunta.</b> Le applicazioni che <i>escono</i> dall'unione sono le famiglie di applicazioni che escono dai pezzi. Topologia unica (A.25(b)).</li>
+  </ul>
+  <p>Vista così, la domanda interessante non è «quali sono gli aperti» ma «quale dichiarazione definisce l'oggetto». Ed è la domanda che si porta avanti: gd-07 definirà il fibrato tangente, gd-03 le sottovarietà, e in entrambi i casi la struttura si dichiara dicendo quali applicazioni devono essere lisce.</p>`},
+  {t:'prosa', title:'Dove si spezzera, e perche il verso lo prevede', tag:'prolessi locale', html:R`
+  <p>Il <span class="str" data-str="quoziente-topologico">quoziente topologico</span> di tp-05 è la quarta istanza: si dichiara che le applicazioni che <i>escono</i> dal quoziente sono le applicazioni che escono dallo spazio di partenza e sono costanti sulle classi. Anche lì la topologia è unica. Eppure il quoziente è l'unica delle quattro che può distruggere Hausdorff, e vale la pena capire adesso perché il verso lo fa prevedere, invece di scoprirlo come una sorpresa.</p>
+  <p>Hausdorff è una proprietà di <b>separazione</b>: chiede che esistano <i>abbastanza aperti</i> per separare due punti. Una proprietà caratteristica che descrive le applicazioni che <b>entrano</b> in uno spazio obbliga quello spazio ad avere tanti aperti quanti servono — ogni aperto dello spazio ambiente ne produce uno — e per questo sottospazio e prodotto non possono perdere la separazione. Una proprietà che descrive le applicazioni che <b>escono</b> fa il contrario: dichiara aperto solo ciò che la controimmagine autorizza, e quindi tende a <i>ridurre</i> la famiglia degli aperti. L'unione disgiunta se la cava perché le controimmagini sono i pezzi stessi, già separati; il quoziente no, perché identificare due punti può privarli dei loro intorni disgiunti.</p>
+  <p><b>La previsione, da verificare in tp-05.</b> La patologia non starà nella mancanza di una proprietà universale — il quoziente ne ha una perfetta — ma nel fatto che una proprietà universale «in uscita» non è obbligata a produrre abbastanza aperti. Se questa lettura è giusta, la retta con due zeri dovrà avere pochissimi aperti attorno ai due zeri, e sarà proprio quello che si vedrà. <b>Averlo previsto qui cambia come si leggerà il prossimo movimento</b>: non come una lista di incidenti, ma come la conseguenza di una scelta di verso.</p>`}
+]},
+
+/* ---------------- 06 · LA LINGUA DEL CORSO ---------------- */
+{ num:'06', title:'La lingua del corso: la sottovarieta e il prodotto di varieta', meta:'perche gd-03 e gd-07 cominciano qui · dove il sottospazio compare senza essere nominato',
+  blocchi:[
+  {t:'prosa', title:'Le due frasi che geodiff scrive senza spiegarle', tag:'grammatica', html:R`
+  <p>Due frasi del corso diventano leggibili con questo movimento, e vale la pena vederle nella forma in cui compaiono.</p>
+  <p><b>La prima.</b> «$S^n$ è una varietà topologica di dimensione $n$» — con la topologia che non viene nominata, perché si intende quella di sottospazio di $\mathbb{R}^{n+1}$. Manetti nella Definizione 2.1 chiede che la carta sia un omeomorfismo su un aperto di $\mathbb{R}^n$, e la tappa 04 ha mostrato che l'arco relativamente aperto della sfera si legge come aperto di angoli nella carta: le due topologie — quella ereditata dall'ambiente e quella generata dall'atlante nel senso della Proposizione 2.1.8 di Abate-Tovena, vista in tp-03 — <b>coincidono</b>. Non è un caso né un teorema profondo: è la definizione di carta compatibile con la topologia data, ed è il motivo per cui ogni esempio del corso funziona.</p>
+  <p><b>La seconda.</b> «Il prodotto di due varietà è una varietà», che Abate-Tovena liquida in una riga rimandando a un esercizio. L'esercizio è esattamente la verifica delle tre ereditarietà di A.23 più il conto delle dimensioni, e con questo movimento in mano è un controllo di dieci righe invece di un buco. È ciò che rende varietà il toro come prodotto di due circonferenze, il cilindro come prodotto di una circonferenza e una retta, e lo spazio delle fasi di $N$ particelle come prodotto di $6N$ rette — l'ultimo è l'oggetto su cui gira tutta la meccanica statistica.</p>
+  <div class="note"><b>Il debito che resta, dichiarato.</b> Sulla sottovarietà questo movimento dà la topologia e si ferma lì. Che un sottoinsieme <i>qualunque</i> della sfera sia una sottovarietà è falso, e la condizione giusta — essere localmente il grafico di una funzione liscia, o la controimmagine di un valore regolare — è di gd-03 e gd-08, non di un prerequisito di topologia. Qui si è costruito solo il contenitore: la topologia che una sottovarietà, quando c'è, porta addosso.</div>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'il disco come unione di rettangoli, con i numeri · la proiezione che non e chiusa · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · Il rettangolo piu grande dentro una palla, con i numeri', html:R`
+  <p>Nel piano, considera la palla aperta di raggio $1$ centrata nell'origine. Trova il semilato del quadrato aperto, centrato nell'origine e con i lati paralleli agli assi, di area massima contenuto nella palla, e verifica il conto. Poi di' perché questo quadrato <b>non</b> dimostra che la palla è un aperto prodotto, e che cosa invece bisogna fare per dimostrare che è un aperto della topologia prodotto.</p>`,
+   sol:R`<p>Il quadrato aperto di semilato $a$ sta nella palla se e solo se i suoi vertici, che sono i punti più lontani dall'origine, hanno distanza al più $1$; poiché il quadrato è aperto, la condizione limite si raggiunge con i vertici <i>sulla</i> circonferenza. Il semilato è dunque $\tfrac{\sqrt2}{2}$, e il conto è $2\left(\tfrac{\sqrt2}{2}\right)^2=1$: il doppio del quadrato del semilato dà il quadrato della distanza del vertice, che vale $1$.</p>
+  <p><b>Perché non basta.</b> Il quadrato è contenuto nella palla, non uguale a essa: restano fuori i quattro spicchi lungo gli assi. Un aperto prodotto è un singolo rettangolo, e nessun rettangolo coincide con la palla — se uno ci stesse dentro e la coprisse, conterrebbe i punti $(1^-,0)$ e $(0,1^-)$ vicino al bordo, e quindi anche il punto di coordinate entrambe vicine a $1$, che è fuori dalla palla.</p>
+  <p><b>Che cosa bisogna fare invece.</b> Esibire, per <i>ogni</i> punto della palla, un rettangolo che lo contiene e sta dentro — come la figura della tappa 03 fa per $(0{,}6,\,0{,}6)$ — e osservare che la palla è l'unione di tutti questi rettangoli. Questo la rende un'unione di elementi della base, cioè un aperto. <b>La differenza fra le due cose è la differenza fra «essere un elemento della base» e «essere un aperto»</b>, ed è il contenuto di tp-02.</p>`},
+  {t:'esercizio', title:'2 · Una proiezione aperta che non e chiusa', html:R`
+  <p>Sia $H$ il sottoinsieme di $\mathbb{R}^2$ dei punti con prodotto delle coordinate uguale a $1$ — un ramo d'iperbole per ciascun quadrante dispari. Mostra che $H$ è chiuso in $\mathbb{R}^2$, calcola la sua proiezione sul primo asse, e concludi che la proiezione non è un'applicazione chiusa. Poi di' perché questo non contraddice il fatto che le proiezioni sono aperte.</p>`,
+   sol:R`<p>$H$ è chiuso perché è la controimmagine del punto $1$ secondo l'applicazione continua che manda una coppia nel prodotto delle sue coordinate, e la controimmagine di un chiuso secondo una continua è chiusa (tp-03, tappa 01, passando ai complementari). La proiezione di $H$ sul primo asse è l'insieme dei primi fattori possibili: ogni reale non nullo compare, perché per ogni $x$ diverso da zero il punto con seconda coordinata il reciproco di $x$ sta in $H$; e lo zero non compare, perché nessun prodotto con zero fa $1$. Dunque l'immagine è $\mathbb{R}$ privato dell'origine, che <b>non</b> è chiuso: la proiezione manda un chiuso in un non chiuso, e non è un'applicazione chiusa.</p>
+  <p><b>Perché non è una contraddizione.</b> Aperta e chiusa sono due proprietà <i>indipendenti</i>, come tp-03 ha mostrato nel caso della continuità: non c'è nessun teorema che le leghi, e il passaggio ai complementari non funziona sulle immagini (l'immagine del complementare non è il complementare dell'immagine, a meno che l'applicazione sia iniettiva). <b>Questo esempio è il motivo per cui il teorema compatto-Hausdorff di tp-03 ha l'ipotesi di compattezza</b>: se $H$ fosse stato compatto, l'immagine sarebbe stata compatta e dunque chiusa, e il controesempio non esisterebbe. La compattezza è esattamente ciò che manca a $H$.</p>`},
+  {t:'esercizio', title:'3 · Quante applicazioni continue da un unione disgiunta', html:R`
+  <p>Sia $Z$ l'unione disgiunta di $3$ copie di uno spazio topologico connesso $W$, e sia $Y$ un insieme di $4$ elementi con la topologia discreta. Quante applicazioni continue da $Z$ a $Y$ ci sono? Usa la proprietà caratteristica, e di' dove entra la connessione di $W$.</p>`,
+   sol:R`<p>Per la proprietà caratteristica (A.25(a)) un'applicazione continua da $Z$ è esattamente una terna di applicazioni continue dalle tre copie di $W$. Un'applicazione continua da $W$ connesso a $Y$ discreto è <b>costante</b>: le controimmagini dei quattro punti sono aperte, disgiunte e coprono $W$, e se due fossero non vuote $W$ si spezzerebbe in due aperti disgiunti non vuoti, contro la connessione. Dunque ogni copia ha $4$ scelte, e le tre scelte sono indipendenti: il totale è $4^3=64$.</p>
+  <p><b>L'errore da non fare nel conto.</b> Scelte indipendenti si <b>moltiplicano fra loro</b>, non si moltiplicano per il numero di pezzi: il totale è $4\cdot4\cdot4$ e non $3\cdot4$. È lo stesso errore che si fa contando gli aperti di una base disgiunta in tp-02, tappa 01, dove su una base di due elementi gli aperti erano $2^2$ e non $2\cdot2$ (che qui coincidono, e per questo quell'esempio non lo smaschera).</p>
+  <p><b>Dove entra la connessione, e che cosa succede senza.</b> Senza connessione le applicazioni da $W$ a $Y$ sono molte di più — una per ogni modo di colorare le componenti connesse — e il conto diventa $4$ elevato al numero <i>totale</i> di componenti delle tre copie. <b>Il numero $64$ misura dunque qualcosa dello spazio, non dell'insieme</b>: è il modo più piccolo possibile di vedere che le applicazioni continue verso un discreto contano le componenti connesse, che è il contenuto di tp-08.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Un sottoinsieme di $S$ relativamente aperto è aperto in $X$: quando è vero e quando è falso? Dai un esempio per ciascun caso.</li>
+  <li>La topologia prodotto è la famiglia dei prodotti di aperti. Vero o falso, e con quale controesempio?</li>
+  <li>Enuncia la proprietà caratteristica delle tre costruzioni di questo movimento e indica, per ciascuna, il verso in cui guarda.</li>
+  <li>Quali ereditarietà hanno un'ipotesi di numerabilità e quali no, fra sottospazio, prodotto finito e unione disgiunta?</li>
+  <li>Perché l'argomento di unicità della topologia (tappa 02) si riscrive identico per tutte e tre le costruzioni? Che cosa usa, esattamente?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li><b>Vero se $S$ è aperto in $X$</b>, perché allora il relativamente aperto è intersezione di due aperti di $X$: per esempio $\left(\tfrac14,\tfrac12\right)$ è relativamente aperto in $(0,1)$ e aperto in $\mathbb{R}$. <b>Falso se $S$ non è aperto</b>: $\left[0,\tfrac12\right)$ è relativamente aperto in $[0,1)$ e non è aperto in $\mathbb{R}$, e un arco di $S^1$ è relativamente aperto in $S^1$ e non è aperto in $\mathbb{R}^2$.</li>
+   <li><b>Falso</b>: quella famiglia è solo una <i>base</i>. Il controesempio minimo è il disco aperto di $\mathbb{R}^2$, che non è un prodotto di due aperti di $\mathbb{R}$ (nessun rettangolo lo esaurisce) ed è un'unione di rettangoli, dunque un aperto.</li>
+   <li>Sottospazio: le applicazioni <i>verso</i> $S$ sono quelle verso $X$ che atterrano in $S$ — verso l'interno. Prodotto: le applicazioni <i>verso</i> il prodotto sono le $k$-uple di applicazioni verso i fattori — verso l'interno. Unione disgiunta: le applicazioni <i>dall'</i>unione sono le famiglie di applicazioni dai pezzi — verso l'esterno.</li>
+   <li>Sottospazio: nessuna ipotesi di numerabilità, eredita Hausdorff e i due assiomi senza condizioni. Prodotto: nessuna, ma solo perché il prodotto è <b>finito</b> — l'ipotesi di finitezza è nell'enunciato stesso. Unione disgiunta: Hausdorff e primo assioma senza condizioni, <b>secondo assioma solo per una quantità numerabile di pezzi</b>, ed è precisamente il controesempio di tp-02.</li>
+   <li>Usa solo che l'identità è continua, due volte: si applica la proprietà caratteristica di una delle due topologie prendendo come spazio di prova lo stesso insieme con l'altra topologia, e come applicazione l'identità. Ne esce un'inclusione fra le due famiglie di aperti, e scambiando i ruoli l'altra. <b>Non usa nulla di specifico della costruzione</b>, ed è per questo che si riscrive identico — e che si riscriverà identico anche per il quoziente di tp-05 e per il quoziente di anelli di tp-10.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove il prodotto e il sottospazio riappaiono nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Su un sottoinsieme la topologia si mette per intersezione con gli aperti dell'ambiente, e su un prodotto finito prendendo i prodotti di aperti come <i>base</i> e non come famiglia degli aperti. Entrambe ereditano Hausdorff e i due assiomi di numerabilità senza condizioni, e la terza costruzione della sezione — l'unione disgiunta — li eredita anch'essa, tranne il secondo assioma, che chiede una quantità numerabile di pezzi: ed è quella singola clausola a essere il controesempio costruito a mano in tp-02. Tutte e tre si definiscono dichiarando quali applicazioni sono continue, e in tutti e tre i casi la topologia che soddisfa quella dichiarazione è unica, con lo stesso argomento di tre righe. I due debiti di tp-03 sono saldati: un aperto di un aperto è aperto, e la continuità verso un prodotto si controlla componente per componente.</p>
+  <p><b>Ciò che resta da fare, e che tp-04 non può fare.</b> Qui nessuna costruzione ha rotto niente, e il movimento è corto perché non c'era niente da riparare. Tp-05 prende la costruzione che rompe — il quoziente — e la tappa 05 ha già messo per iscritto <i>la previsione</i> di dove e perché romperà, così che il prossimo movimento la verifichi invece di sorprendersi. Resta fuori anche la domanda di quando un sottoinsieme sia una sottovarietà e non solo un sottospazio: è gd-03 e gd-08, non un prerequisito di topologia.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Lo spazio dei gradi di libertà come prodotto</b>: un sistema composto si descrive sullo spazio prodotto dei suoi pezzi, e un vincolo si descrive su un sottospazio.`,
+   rotte:[
+    {dove:'Meccanica<br>statistica', txt:R`Lo spazio delle fasi di $N$ particelle è il prodotto di $6N$ copie di $\mathbb{R}$, e tutto l'apparato — la misura di Liouville, il contare le celle, l'entropia di Boltzmann — vive su quel prodotto. Le due ereditarietà di questa tappa sono ciò che lo rende trattabile: Hausdorff perché i microstati si separano, base numerabile perché le celle si enumerano. E l'ensemble a energia fissata non è il prodotto ma un <b>sottospazio</b> del prodotto, la superficie a energia costante, con la topologia di sottospazio esattamente nel senso della tappa 01: ogni difficoltà tecnica del microcanonico nasce lì, nel passaggio dal prodotto al suo sottoinsieme.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Il sistema composto si descrive sul <i>prodotto tensoriale</i> degli spazi di Hilbert, e la proprietà caratteristica del prodotto tensoriale è formalmente identica a quella della tappa 03: le applicazioni che entrano nel tensore sono determinate dalle applicazioni bilineari sui fattori. Ma qui la somiglianza si rompe in modo istruttivo: il prodotto tensoriale ha <i>più</i> stati del prodotto cartesiano degli stati, e quelli in più sono gli stati entangled. <b>L'entanglement è precisamente ciò che il prodotto topologico non ha e quello tensoriale sì</b>, e vedere le due proprietà universali affiancate è il modo più rapido di capire che l'entanglement non è un'aggiunta ma una conseguenza della scelta del prodotto.`},
+    {dove:'Relativita<br>generale', txt:R`Lo spazio-tempo di Minkowski è il prodotto dello spazio e del tempo <i>come varietà</i> e non come spazio con una metrica — la metrica non si fattorizza, ed è lì che sta tutta la relatività. La distinzione fra ciò che si eredita dal prodotto (la topologia, la struttura differenziabile) e ciò che non si eredita (la metrica, il cono di luce) è la stessa distinzione fra proprietà topologiche e metriche di tp-03, tappa 06, applicata all'oggetto centrale della teoria.`},
+    {dove:'Astrofisica', txt:R`La sfera celeste si tratta come sottospazio di $\mathbb{R}^3$ — ed è il motivo per cui il catalogo di una survey è una lista di punti su $S^2$ e non su un rettangolo di coordinate: ogni tentativo di trattarla come prodotto di due intervalli di angoli produce le singolarità ai poli, che sono l'eco della tappa 03 di tp-03 (l'intervallo che si avvolge) e non un difetto del sistema di coordinate.`}
+   ],
+   domanda:R`La tappa 05 ha fatto una <b>previsione</b>: il quoziente rompe Hausdorff perché la sua proprietà caratteristica guarda in uscita, e le proprietà in uscita tendono a produrre pochi aperti invece che molti. <b>Domanda da portare avanti:</b> leggendo tp-05, verifica la previsione invece di fidarti — e in particolare chiediti, ogni volta che un quoziente si comporta bene, se la ragione è che l'applicazione quoziente risulta <i>aperta</i>, cioè che il verso si è di fatto rovesciato. È il criterio che Lee mette nell'Esercizio A.36 e che separa i quozienti buoni dai mostri.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-04 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-04-sottospazio-e-prodotto.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

@@ -22,10 +22,28 @@
   if (window.__TGN__) return;
   window.__TGN__ = true;
 
-  /* Dove sono: i nuclei stanno un piano sotto, come le cartelle dei corsi. */
+  /* Dove sono: i nuclei stanno un piano sotto, come le cartelle dei corsi.
+   *
+   * RIPARATO il 2026-10-11 (run notturno, costruendo Topologia). Qui c'era un ELENCO A
+   * MANO delle cartelle che stanno un piano sotto, e tre corsi non vi erano mai stati
+   * aggiunti: `astrofisica`, `meccanica-quantistica`, `topologia`. Su quelle tre case
+   * la barra calcolava `base = ""` e mandava ogni voce DENTRO la cartella del corso
+   * invece che nella radice — tutti i link rotti, e rotti in silenzio, perche' nessuna
+   * macchina leggeva questo elenco.
+   *
+   * Il guasto non e' la dimenticanza: e' l'elenco. Ora la profondita' non si indovina e
+   * non si enumera, si LEGGE dove e' scritta per forza — nell'attributo `src` con cui
+   * questa pagina ha caricato questo script, che e' `../nav-tengri.js` un piano sotto e
+   * `nav-tengri.js` nella radice. Il prefisso di quel src *e'* `base`, per costruzione:
+   * se il link alla barra funziona, funzionano anche i link che la barra scrive.
+   * Aggiungere un corso non richiede piu' di toccare questo file. */
   var p = location.pathname.replace(/\\/g, "/");
-  var sotto = /\/(nuclei|analisi-vettoriale|metodi|meccanica|geometria|elettromagnetismo|geometria-differenziale|meccanica-statistica)\//.test(p);
-  var base = sotto ? "../" : "";
+  var mio = document.currentScript ? (document.currentScript.getAttribute("src") || "") : null;
+  // Fallback per il caso in cui lo script sia iniettato e `currentScript` sia nullo:
+  // li' non c'e' un src da leggere, e la sola cosa nota e' che i nuclei stanno sotto.
+  var base = mio === null ? (/\/nuclei\//.test(p) ? "../" : "")
+                          : mio.replace(/nav-tengri\.js.*$/, "");
+  var sotto = base !== "";
   var dentroNucleo = /\/nuclei\/[^/]+\.html$/.test(p);
 
   /* LE VOCI, riviste il 2026-10-02 su direttiva di Giuseppe.
@@ -140,13 +158,21 @@
       var k = stesso.indexOf(IDX.nuclei[io_]);
       var box = document.getElementById("tgn-vicini");
       var h = "";
+      // NESSUN `base` qui, e il perche' va detto perche' e' il contrario della riga
+      // sotto: queste due voci portano a un nucleo FRATELLO, cioe' a un file nella
+      // stessa cartella di quello che si sta leggendo. `base` vale `../` dentro un
+      // nucleo, e sommandolo si otteneva `../tp-02-....html`, cioe' la radice di
+      // percorso-matematica, dove nessun nucleo e' mai stato: «movimento precedente» e
+      // «successivo» erano 404 in OGNI nucleo di OGNI corso. Trovato e riparato il
+      // 2026-10-11. `nuclei-indice.js`, poco sotto, sta davvero un piano su: li' `base`
+      // ci vuole, ed e' quel contrasto a rendere sbagliato l'uso qui.
       if (k > 0) {
-        h += '<a href="' + base + stesso[k - 1].file.split("/").pop() +
+        h += '<a href="' + stesso[k - 1].file.split("/").pop() +
              '" title="' + testo(stesso[k - 1].titolo) + '">&#8592; ' +
              breve(stesso[k - 1].titolo) + "</a>";
       }
       if (k >= 0 && k < stesso.length - 1) {
-        h += '<a href="' + base + stesso[k + 1].file.split("/").pop() +
+        h += '<a href="' + stesso[k + 1].file.split("/").pop() +
              '" title="' + testo(stesso[k + 1].titolo) + '">' +
              breve(stesso[k + 1].titolo) + " &#8594;</a>";
       }

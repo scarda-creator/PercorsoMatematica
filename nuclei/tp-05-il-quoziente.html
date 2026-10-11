@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-05 — Il quoziente, e la prima topologia che si comporta male</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-05 — Il quoziente, e la prima topologia che si comporta male</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-05: Il quoziente, e la prima topologia che si comporta male <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-05 — il quoziente, e la prima topologia che si comporta male
+identita:  incollare punti e' l'operazione con cui si costruiscono gli oggetti che
+           interessano — il proiettivo, il toro, il nastro — ed e' anche l'unica delle
+           quattro costruzioni di base che puo' distruggere le proprieta' buone. La retta
+           con due zeri e' localmente euclidea e NON e' di Hausdorff
+copre:     1.2 del programma di recupero
+serve:     tp-01, tp-03, tp-04
+apre:      gd-01 (perche' T2 sta nella definizione), gd-03 (lo spazio proiettivo), gd-05
+strumenti: quoziente-topologico, omeomorfismo, compattezza
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A (stampate 604-607): la
+           topologia quoziente, il Teorema A.27 sulle proprieta' delle applicazioni
+           quoziente, l'Esercizio A.29 sui saturi, il Teorema A.30 (passaggio al
+           quoziente) e A.31 (unicita' dei quozienti), l'Esercizio A.36 (criterio di
+           Hausdorff per quozienti aperti) e il Teorema A.38 (mappe aperte o chiuse
+           bastano). Manetti, appunti GD 2008-09 (stampata 18): Osservazione 2.1, la
+           retta con due zeri, ed Esercizio 2.1, lo spazio proiettivo come varieta'.
+           Abate, Tovena — Geometria Differenziale (stampata 71): Definizione 2.1.31
+           dello spazio proiettivo come quoziente, ed Esempio 2.1.32 con le carte.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.2
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"1*4-2*2","vale":"0",
+  "dove":"06","appare":"1\\cdot4-2\\cdot2=0"},
+
+ {"tipo":"uguale","sinistra":"1*3-2*1","vale":"1",
+  "dove":"06","appare":"1\\cdot3-2\\cdot1=1"},
+
+ {"tipo":"uguale","sinistra":"(Rational(1,2))**2-(sqrt(3)/2)**2","vale":"-1/2",
+  "dove":"07","appare":"\\left(\\tfrac12\\right)^2-\\left(\\tfrac{\\sqrt3}{2}\\right)^2=-\\tfrac12"},
+
+ {"tipo":"uguale","sinistra":"2*(sqrt(3)/2)*(Rational(1,2))","vale":"sqrt(3)/2",
+  "dove":"07","appare":"2\\cdot\\tfrac{\\sqrt3}{2}\\cdot\\tfrac12=\\tfrac{\\sqrt3}{2}"},
+
+ {"tipo":"uguale","sinistra":"(-Rational(1,2))**2+(sqrt(3)/2)**2","vale":"1",
+  "dove":"07","appare":"\\left(-\\tfrac12\\right)^2+\\left(\\tfrac{\\sqrt3}{2}\\right)^2=1"},
+
+ {"tipo":"uguale","sinistra":"1-(Rational(3,5))**2-(Rational(4,5))**2","vale":"0",
+  "dove":"08","appare":"1-\\left(\\tfrac35\\right)^2-\\left(\\tfrac45\\right)^2=0"},
+
+ {"tipo":"uguale","sinistra":"1-(Rational(3,5))**2","vale":"16/25",
+  "dove":"08","appare":"1-\\left(\\tfrac35\\right)^2=\\tfrac{16}{25}"},
+
+ {"tipo":"uguale","sinistra":"sqrt(Rational(16,25))","vale":"4/5",
+  "dove":"08","appare":"\\sqrt{\\tfrac{16}{25}}=\\tfrac45"},
+
+ {"tipo":"uguale","sinistra":"(3*2)/(3*1)","vale":"2",
+  "dove":"09","appare":"\\dfrac{3\\cdot2}{3\\cdot1}=2"},
+
+ {"tipo":"uguale","sinistra":"(Rational(1,2))**2+(sqrt(3)/2)**2","vale":"1",
+  "dove":"10","appare":"\\left(\\tfrac12\\right)^2+\\left(\\tfrac{\\sqrt3}{2}\\right)^2=1"},
+
+ {"tipo":"uguale","sinistra":"2*4-1*8","vale":"0",
+  "dove":"10","appare":"2\\cdot4-1\\cdot8=0"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'la previsione di tp-04 verificata · il programma dei tre quozienti · perche e il movimento piu lungo',
+  blocchi:[
+  {t:'prosa', title:'Una previsione da onorare', tag:'architettura', html:R`
+  <p>Tp-04 ha chiuso con una previsione, scritta prima di avere le prove: il quoziente è l'unica delle costruzioni viste finora la cui proprietà caratteristica guarda <b>in uscita</b>, e una proprietà in uscita dichiara aperto solo ciò che la controimmagine autorizza — quindi tende a <i>ridurre</i> la famiglia degli aperti, mentre sottospazio e prodotto, guardando in entrata, sono obbligati ad averne quanti servono. Se la previsione è giusta, qualche quoziente dovrà avere pochi aperti attorno a certi punti, al punto da non poterli separare. Questo movimento la verifica, e lo fa due volte: una volta mostrando il caso in cui va male, una volta mostrando il caso in cui va bene — perché il quoziente non rompe <i>sempre</i> Hausdorff, e capire perché a volte no è la parte difficile.</p>
+  <p>Il caso che va male è la <b>retta con due zeri</b>: localmente euclidea, e non di Hausdorff. È il controesempio che spiega perché la definizione di varietà topologica ha tre clausole e non due — Hausdorff non segue da «localmente omeomorfo a $\mathbb{R}^n$», come tp-06 dirà con tutto l'agio che merita. Qui basta costruirlo e dimostrarlo.</p>
+  <p>Il caso che va bene — e che occupa la parte più lunga del movimento — è lo <b>spazio proiettivo reale</b>. È l'esempio che ritorna in geometria differenziale più di ogni altro, e va costruito per intero e visto in <b>tre modi</b>: come rette per l'origine, come sfera con gli antipodi identificati, come disco col bordo incollato. Non sono tre esempi diversi che assomigliano fra loro: sono <i>lo stesso spazio</i>, e lo strumento che lo dimostra — il teorema di unicità dei quozienti — è il risultato più utile che questo movimento porta a casa, perché si applica a ogni quoziente che si incontrerà da qui in avanti.</p>
+  <div class="note"><b>Il filo, dichiarato in apertura.</b> Tutto il movimento gira attorno a un solo meccanismo: una topologia quoziente si descrive dando una relazione di equivalenza, e si decide se due quozienti costruiti in modo diverso sono lo stesso spazio controllando se hanno le stesse classi — non ricostruendo un omeomorfismo a mano ogni volta. Imparare a usare quel meccanismo, invece di verificare omeomorfismi uno per uno, è il contenuto vero di questo movimento.</div>`}
+]},
+
+/* ---------------- 01 · LA TOPOLOGIA QUOZIENTE ---------------- */
+{ num:'01', title:'La topologia quoziente: proiezione, saturo, fibra', meta:'la definizione per via della proiezione · relazione di equivalenza e classi · il vocabolario che serve da qui in avanti',
+  blocchi:[
+  {t:'prosa', title:'La definizione, nella forma piu diretta', tag:'grammatica', html:R`
+  <p>Sia $X$ uno spazio topologico, $Y$ un insieme qualunque, e $\pi:X\to Y$ un'applicazione <b>surgettiva</b>. La <b>topologia quoziente</b> su $Y$ determinata da $\pi$ si definisce dichiarando aperto un $U\subseteq Y$ se e solo se $\pi^{-1}(U)$ è aperto in $X$ (Lee, stampata 604). Quando $X$ e $Y$ sono entrambi spazi topologici, un'applicazione $\pi:X\to Y$ si dice <b>applicazione quoziente</b> se è surgettiva, continua, e $Y$ porta esattamente la topologia quoziente determinata da $\pi$.</p>
+  <p>Il modo più comune di produrne una parte da una <b>relazione di equivalenza</b> $\sim$ su $X$: si pone $Y=X/\!\sim$, l'insieme delle classi, e $\pi$ la proiezione naturale che manda ogni punto nella sua classe. Munito della topologia quoziente determinata da $\pi$, lo spazio $X/\!\sim$ si chiama <b>spazio quoziente</b> (o spazio di identificazione) di $X$ secondo $\sim$.</p>
+  <p>Due parole in più, che serviranno a ogni tappa successiva. Un sottoinsieme $U\subseteq X$ è <b>saturo</b> rispetto a $\pi$ se è l'intera controimmagine della sua immagine, cioè $U=\pi^{-1}\big(\pi(U)\big)$ — equivalentemente, $U$ è un'unione di classi di equivalenza intere, non spezzate a metà. Dato $y\in Y$, l'insieme $\pi^{-1}(y)$ si chiama <b>fibra</b> di $\pi$ sopra $y$: è esattamente la classe di equivalenza che $y$ rappresenta. Un sottoinsieme saturo è dunque, detto senza tecnicismi, un'<i>unione di fibre</i>.</p>
+  <div class="note"><b>Perché questa definizione e non un'altra.</b> Si potrebbe pensare di definire gli aperti di $Y$ come le immagini degli aperti di $X$. Non funziona: l'immagine di un aperto saturo è aperta per costruzione, ma l'immagine di un aperto <i>non</i> saturo può non esserlo — l'immagine «perde pezzi» di classi di equivalenza e il risultato può fallire gli assiomi di tp-01. La definizione per controimmagini evita il problema alla radice, perché la controimmagine di un insieme è sempre l'unione di fibre intere, saturo per costruzione.</div>`}
+]},
+
+/* ---------------- 02 · IL TEOREMA DELLE QUATTRO PROPRIETA ---------------- */
+{ num:'02', title:'Il teorema A.27, e il criterio dei saturi', meta:'la proprieta caratteristica, stavolta in uscita · i chiusi · quando una biiezione quoziente e un omeomorfismo · il criterio operativo',
+  blocchi:[
+  {t:'reveal', title:'Le proprieta delle applicazioni quoziente', tag:'costruzione', steps:[
+   {label:'La proprieta caratteristica, e il verso rovesciato', body:R`
+   <p>Sia $\pi:X\to Y$ un'applicazione quoziente. Lee raccoglie nel Teorema A.27 (stampata 605) le proprietà che servono sempre. La prima è la <b>proprietà caratteristica</b>: se $B$ è uno spazio topologico, un'applicazione $F:Y\to B$ è continua se e solo se $F\circ\pi:X\to B$ è continua. È lo stesso schema di tp-04 — descrivere lo spazio dicendo quali applicazioni devono essere continue — ma qui, come già per l'unione disgiunta, il verso è rovesciato: la proprietà parla delle applicazioni che <b>escono</b> da $Y$, non di quelle che vi entrano. E, come in tp-04, la topologia quoziente è l'<b>unica</b> topologia su $Y$ per cui questa proprietà vale.</p>`},
+   {label:'I chiusi, e quando basta l iniettivita', body:R`
+   <p>Un sottoinsieme $K\subseteq Y$ è chiuso se e solo se $\pi^{-1}(K)$ è chiuso in $X$ — il passaggio ai complementari funziona esattamente come per la continuità, perché la definizione stessa è scritta in termini di controimmagini. E una conseguenza che chiude un debito aperto da tp-03: <b>se $\pi$ è iniettiva, allora è un omeomorfismo</b>. Un'applicazione quoziente iniettiva è biiettiva (è già surgettiva per definizione), e la continuità dell'inversa segue immediatamente dalla proprietà caratteristica applicata a $F=\pi^{-1}$: $F\circ\pi=\mathrm{id}_X$ è continua, dunque $F$ lo è. <b>Questo è esattamente ciò che tp-03, tappa 03, aveva lasciato in sospeso</b> parlando dell'intervallo semiaperto avvolto sulla circonferenza: quella applicazione non era un omeomorfismo perché non era iniettiva come applicazione quoziente nel senso giusto — era iniettiva come funzione insiemistica ma non c'era nessuna relazione di equivalenza a monte da cui discendesse una proprietà caratteristica.</p>`},
+   {label:'Restrizione a un saturo, e composizione', body:R`
+   <p>Due proprietà più tecniche, che serviranno nelle tappe 07 e 08. Se $U\subseteq X$ è un sottoinsieme saturo <b>aperto o chiuso</b>, la restrizione $\pi|_U:U\to\pi(U)$ è ancora un'applicazione quoziente. E la composizione di due applicazioni quoziente è un'applicazione quoziente. Entrambe si dimostrano controllando direttamente la definizione per controimmagini, e nessuna delle due userà l'iniettività.</p>`},
+   {label:'Il criterio operativo: i saturi aperti', body:R`
+   <p>Lee lascia come esercizio (A.29) un fatto che vale la pena avere a disposizione come criterio pratico: data $F:X\to Y$ continua e surgettiva, le tre affermazioni seguenti sono equivalenti — $F$ è un'applicazione quoziente; $F$ manda i sottoinsiemi saturi <b>aperti</b> in aperti; $F$ manda i sottoinsiemi saturi <b>chiusi</b> in chiusi. La dimostrazione, nella direzione che serve, è una riga: se $U\subseteq Y$ è aperto, $\pi^{-1}(U)$ è saturo per costruzione (è una controimmagine) e aperto per continuità; se vale il viceversa — ogni saturo aperto va in aperto — allora per ogni $V\subseteq X$ saturo aperto, $\pi(V)$ è aperto, e ponendo $V=\pi^{-1}(U)$ per un qualunque $U\subseteq Y$ si recupera esattamente la definizione di topologia quoziente.</p>
+   <p><b>Questo criterio è il filo conduttore di tutto il resto del movimento.</b> La tappa 03 lo userà al contrario — mostrando che un sottoinsieme saturo <i>non può</i> essere scelto piccolo attorno a certi punti — e le tappe 07 e 08 lo useranno per riconoscere nuove applicazioni quoziente senza dover verificare la definizione da capo.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · LA RETTA CON DUE ZERI ---------------- */
+{ num:'03', title:'La retta con due zeri: la previsione verificata', meta:'la costruzione di Manetti · perche i due zeri non si separano · il saturo che non si puo rimpicciolire',
+  blocchi:[
+  {t:'prosa', title:'La costruzione', tag:'grammatica', html:R`
+  <p>Si prendano due copie disgiunte di $\mathbb{R}$, etichettate $\mathbb{R}\times\{0\}$ e $\mathbb{R}\times\{1\}$, con la topologia dell'unione disgiunta di tp-04. Si definisca su questo spazio la relazione $\sim$ generata da $(x,0)\sim(x,1)$ per ogni $x\neq0$ — <b>i due zeri $(0,0)$ e $(0,1)$ non sono identificati</b> (Manetti, Osservazione 2.1, stampata 18). Lo spazio quoziente $X=\big(\mathbb{R}\times\{0,1\}\big)/\!\sim$ è la <b>retta con due zeri</b>.</p>
+  <p>Due carte bastano a coprirlo: $\big(\mathbb{R}\times\{0\},\ \mathrm{id}\big)$ e $\big(\mathbb{R}\times\{1\},\ \mathrm{id}\big)$ sono entrambe omeomorfismi su $\mathbb{R}$, perché $\mathbb{R}\times\{0\}$ e $\mathbb{R}\times\{1\}$ sono <b>saturi e aperti</b> nello spazio di partenza (sono intere componenti dell'unione disgiunta) e la restrizione di un'applicazione quoziente a un saturo aperto è un'applicazione quoziente — tappa 02. Dunque $X$ è <b>localmente omeomorfo a $\mathbb{R}$</b> in ogni suo punto: è una delle due clausole della definizione di varietà topologica, e qui vale.</p>`},
+  {t:'reveal', title:'Perche i due zeri non si separano', tag:'dimostrazione', steps:[
+   {label:'Che cosa deve contenere un intorno saturo', body:R`
+   <p>Un aperto di $X$ che contiene $[(0,0)]$ corrisponde, per definizione di topologia quoziente, a un saturo aperto $V$ dell'unione disgiunta che contiene $(0,0)$. Essendo $V$ aperto nell'unione disgiunta, la sua intersezione con $\mathbb{R}\times\{0\}$ è aperta in quella copia di $\mathbb{R}$ e contiene $0$: dunque contiene un intervallo $(-\varepsilon,\varepsilon)\times\{0\}$ per qualche $\varepsilon>0$. Ed essendo $V$ <b>saturo</b>, per ogni $x\neq0$ in quell'intervallo deve contenere anche il punto equivalente $(x,1)$ — altrimenti $V$ non sarebbe l'intera controimmagine della sua immagine. Dunque $V$ contiene $(-\varepsilon,\varepsilon)\times\{1\}$ <b>privato del solo punto $(0,1)$</b>.</p>
+   <p>Lo stesso argomento, ripetuto per un aperto saturo $W$ che contenga $(0,1)$, dà che $W$ contiene $(-\delta,\delta)\times\{0\}$ privato di $(0,0)$, per qualche $\delta>0$.</p>`},
+   {label:'La conclusione, in tre righe', body:R`
+   <p>Si prenda $\eta=\min(\varepsilon,\delta)$. Il punto $\left(\dfrac{\eta}{2},1\right)$ sta in $V$ — perché $\dfrac{\eta}2\neq0$ ed è dentro l'intervallo di raggio $\varepsilon$ — e il punto $\left(\dfrac{\eta}{2},0\right)$ sta in $W$ per la ragione simmetrica. Ma allora $V\cap\mathbb{R}\times\{1\}$ e $W\cap\mathbb{R}\times\{1\}$ si intersecano entrambi vicino a $\dfrac\eta2$ in modo da forzare $V\cap W\neq\emptyset$: più precisamente, $V$ contiene l'intera fascia $(-\varepsilon,\varepsilon)\setminus\{0\}$ su entrambe le copie, $W$ contiene l'intera fascia $(-\delta,\delta)\setminus\{0\}$ su entrambe le copie, e $(-\eta,\eta)\setminus\{0\}$, su entrambe le copie, sta in entrambi. <b>Nessun saturo aperto attorno a uno dei due zeri può evitare l'altro</b>: ogni volta che si prova a restringerlo, la condizione di saturazione lo costringe a riallargarsi sull'altra copia. $X$ non è di Hausdorff.</p>
+   <div class="note"><b>La previsione di tp-04 era esatta, e ora si vede perché precisamente.</b> Non è che manchino aperti in generale: ne esistono moltissimi. È che la proprietà caratteristica <i>in uscita</i> non impone nessun vincolo che obblighi un saturo piccolo a esistere attorno a un punto — a differenza delle costruzioni in entrata di tp-04, dove ogni aperto dell'ambiente produceva automaticamente un aperto nella costruzione. Qui la saturazione è un vincolo che <i>agisce contro</i> il restringersi degli intorni, e lo fa precisamente nei punti — i due zeri — dove la relazione di equivalenza «si rompe» senza preavviso al limite.</div>`}
+  ]},
+  {t:'plot', title:'Due copie di R, e la fascia che la saturazione non lascia restringere',
+   intro:R`Due rette parallele, rappresentanti le due copie $\mathbb{R}\times\{0\}$ e $\mathbb{R}\times\{1\}$. I due zeri sono distinti; ogni altro punto alla stessa coordinata è identificato (le linee verticali sottili), e un intorno saturo di uno zero deve portarsi dietro l'intera fascia identificata dell'altra copia.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0.35', tr:[-1.3,1.3], height:300, equal:false,
+     xr:[-1.4,1.4], yr:[-0.75,0.75],
+     title:'in alto R x {0}, in basso R x {1}: la fascia (-eta,eta) meno lo zero e condivisa',
+     segs:[{x1:-1.3,y1:0.35,x2:1.3,y2:0.35, col:'#5eead4', width:1.8},
+           {x1:-1.3,y1:-0.35,x2:1.3,y2:-0.35, col:'#5eead4', width:1.8},
+           {x1:-0.55,y1:0.35,x2:-0.55,y2:-0.35, col:'#8ee0c8', dash:true, width:1.1},
+           {x1:0.55,y1:0.35,x2:0.55,y2:-0.35, col:'#8ee0c8', dash:true, width:1.1},
+           {x1:-0.2,y1:0.35,x2:-0.2,y2:-0.35, col:'#8ee0c8', dash:true, width:1.1},
+           {x1:0.2,y1:0.35,x2:0.2,y2:-0.35, col:'#8ee0c8', dash:true, width:1.1}],
+     marks:[{x:0,y:0.35, label:'(0,0)', col:'#d8a13a'},
+            {x:0,y:-0.35, label:'(0,1)', col:'#d8a13a'},
+            {x:0.9,y:0.35, label:'R x {0}', col:'#5eead4', up:true},
+            {x:0.9,y:-0.35, label:'R x {1}', col:'#5eead4', up:true},
+            {x:-1.15,y:0, label:'fascia -eta..eta identificata, zeri esclusi', col:'#8ea0b8'}]}
+   ],
+   leggi:R`<p>Le linee verticali tratteggiate rappresentano i punti identificati (ogni $x\neq0$ con il corrispondente sopra e sotto). I due zeri, in arancio, <b>non</b> sono collegati da nessuna tratteggiata — restano distinti per costruzione. Un intorno saturo di $(0,0)$ che voglia essere piccolo deve comunque contenere la fascia tratteggiata vicino allo zero su <i>entrambe</i> le righe, perché saturo vuol dire «completo rispetto all'identificazione»: e quella stessa fascia è anche ciò di cui ha bisogno un intorno saturo di $(0,1)$. I due intorni sono condannati a sovrapporsi.</p>`}
+]},
+
+/* ---------------- 04 · IL CRITERIO DI HAUSDORFF PER QUOZIENTI APERTI ---------------- */
+{ num:'04', title:'Il criterio di Hausdorff per i quozienti aperti', meta:'applicazione quoziente aperta · esercizio A.36 · perche serve uno strumento diverso dalla saturazione a mano',
+  blocchi:[
+  {t:'prosa', title:'Perche la retta con due zeri non basta come metodo', tag:'first principles', html:R`
+  <p>L'argomento della tappa 03 ha funzionato, ma ha richiesto di seguire a mano la saturazione punto per punto — fattibile su un esempio con due soli punti sospetti, improponibile su un quoziente con una struttura più ricca come il proiettivo che arriva nella tappa 06. Serve un criterio che si applichi senza ripetere l'argomento ogni volta, e Lee lo dà nell'Esercizio A.36 (stampata 606), per la classe di quozienti più comoda da trattare: quelli in cui $\pi$ è anche un'applicazione <b>aperta</b> — cioè manda ogni aperto di $X$, non solo i saturi, in un aperto di $Y$.</p>`},
+  {t:'reveal', title:'Il criterio, e la sua dimostrazione', tag:'costruzione', steps:[
+   {label:'L enunciato', body:R`
+   <p><b>Esercizio A.36.</b> Sia $q:X\to Y$ un'applicazione quoziente <b>aperta</b>. Allora $Y$ è di Hausdorff se e solo se la relazione $R=\{(x_1,x_2)\in X\times X : q(x_1)=q(x_2)\}$ è un sottoinsieme <b>chiuso</b> di $X\times X$.</p>`},
+   {label:'Perche R chiuso implica Hausdorff', body:R`
+   <p>Siano $y_1\neq y_2$ in $Y$, e si scelgano $x_1,x_2\in X$ con $q(x_i)=y_i$. Allora $(x_1,x_2)\notin R$, e se $R$ è chiuso esiste un intorno prodotto $U_1\times U_2$ di $(x_1,x_2)$ disgiunto da $R$ — questa è la definizione di chiuso nella topologia prodotto di tp-04. Disgiunto da $R$ vuol dire: nessun punto di $U_1$ è equivalente a nessun punto di $U_2$. Essendo $q$ aperta, $q(U_1)$ e $q(U_2)$ sono aperti di $Y$, contengono $y_1$ e $y_2$ rispettivamente, e sono disgiunti — se avessero un punto comune $z$, ci sarebbero $u_1\in U_1$, $u_2\in U_2$ con $q(u_1)=q(u_2)=z$, cioè $(u_1,u_2)\in R\cap(U_1\times U_2)$, contro la scelta di $U_1\times U_2$.</p>`},
+   {label:'Perche Hausdorff implica R chiuso', body:R`
+   <p>Viceversa, se $Y$ è di Hausdorff e $(x_1,x_2)\notin R$, allora $q(x_1)\neq q(x_2)$ hanno intorni disgiunti $V_1,V_2$ in $Y$; le controimmagini $q^{-1}(V_1)$ e $q^{-1}(V_2)$ sono aperte per continuità, disgiunte (altrimenti $V_1\cap V_2\neq\emptyset$), e il loro prodotto è un intorno di $(x_1,x_2)$ interamente fuori da $R$. Dunque il complementare di $R$ è aperto.</p>
+   <p><b>Dove entra l'apertura di $q$, precisamente.</b> Serve solo nella prima direzione — per trasportare la disgiunzione da $X\times X$ a $Y$. Senza quell'ipotesi il criterio cade, e non per un dettaglio tecnico: è esattamente la ragione per cui la retta con due zeri non vi si presta nel modo diretto. Lì $q$ <i>non</i> è aperta — un piccolo intervallo aperto attorno a $0$ su $\mathbb{R}\times\{0\}$ ha come immagine un insieme che, visto nella carta attorno all'altro zero, non è un intorno di quel punto — e usare il criterio richiederebbe prima di dimostrare che non lo è, il che è più lavoro, non meno, della saturazione diretta già fatta.</p>`}
+  ]}
+]},
+
+/* ---------------- 05 · DA COMPATTO A HAUSDORFF, SENZA BIIETTIVITA ---------------- */
+{ num:'05', title:'Il lemma di tp-03, spogliato della biiettivita', meta:'ogni continua da compatto a Hausdorff e chiusa · il teorema A.38 · il filo lasciato in tp-03 si chiude',
+  blocchi:[
+  {t:'prosa', title:'Tre quarti del lavoro erano gia fatti', tag:'sintesi', html:R`
+  <p>Tp-03, tappa 06, ha dimostrato che una biiezione continua da un compatto $X$ a un Hausdorff $Y$ è un omeomorfismo, incatenando tre fatti: un chiuso dentro un compatto è compatto; l'immagine continua di un compatto è compatta; un compatto dentro un Hausdorff è chiuso. E ha notato, esplicitamente, che <b>la biiettività non serve nei tre passi</b> — serve solo alla fine, per poter chiamare $F^{-1}$ una funzione. Senza biiettività, la stessa catena dimostra un fatto più generale e altrettanto utile:</p>
+  <div class="note"><b>Ogni applicazione continua da uno spazio compatto a uno spazio di Hausdorff è un'applicazione chiusa.</b> Sia $C\subseteq X$ chiuso: è compatto (chiuso in compatto); $F(C)$ è compatto (immagine continua di compatto); $F(C)$ è chiuso (compatto in Hausdorff). Nessun passo usa che $F$ sia iniettiva o surgettiva.</div>`},
+  {t:'reveal', title:'Il teorema A.38, e il filo che chiude', tag:'costruzione', steps:[
+   {label:'Mappe aperte o chiuse bastano', body:R`
+   <p>Lee (Teorema A.38, stampata 607) osserva che essere aperta o chiusa è spesso più facile da controllare che verificare la definizione di applicazione quoziente, e che basta: se $F:X\to Y$ è continua e <b>surgettiva</b>, ed è aperta oppure chiusa, allora $F$ è un'applicazione quoziente. La dimostrazione è l'Esercizio A.29 applicato di peso: una mappa chiusa e surgettiva manda ogni saturo chiuso in un chiuso — in particolare ogni chiuso, saturo o no — e il criterio dei saturi dà la conclusione.</p>`},
+   {label:'Il filo lasciato da tp-03, chiuso', body:R`
+   <p>Tp-03, tappa 06, aveva lasciato esplicitamente in sospeso il caso dell'applicazione $F:[0,1]\to S^1$, $F(t)=(\cos2\pi t,\sin2\pi t)$: non iniettiva — $F(0)=F(1)$ — e dunque fuori dalla portata del teorema di quella tappa, con la nota «il modo corretto di trattarla è il quoziente di tp-05». Ora si può chiuderlo per intero. $[0,1]$ è compatto (chiuso e limitato in $\mathbb{R}$: Heine-Borel, il cui debito sta in Analisi, come già dichiarato in tp-03), $S^1$ è di Hausdorff (eredità di sottospazio da $\mathbb{R}^2$, tp-04 tappa 01); per il lemma appena dimostrato $F$ è <b>chiusa</b>; essendo anche continua e surgettiva, il Teorema A.38 la rende un'<b>applicazione quoziente</b>.</p>
+   <p>Le fibre di $F$ sono i singoletti $\{t\}$ per $t\in(0,1)$ e il paio $\{0,1\}$ — esattamente la relazione di equivalenza «$0\sim1$, nessun'altra identificazione» sull'intervallo. Lo spazio quoziente $[0,1]/\!\sim$ porta <i>per definizione</i> la stessa relazione, e ha dunque la stessa fibra di $F$: la tappa 07 enuncerà il teorema che trasforma questa coincidenza di fibre in un omeomorfismo esplicito (Teorema A.31). <b>$S^1$ è, in questo senso preciso, l'intervallo con gli estremi incollati</b> — non per analogia, ma come identità di spazi quoziente.</p>`}
+  ]}
+]},
+
+/* ---------------- 06 · IL PROIETTIVO, COSTRUZIONE I ---------------- */
+{ num:'06', title:'Lo spazio proiettivo reale, costruzione I: le rette per l origine', meta:'la definizione per rette · il criterio dei minori per Hausdorff · il quoziente che va bene',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Sia $V=\mathbb{R}^{n+1}\setminus\{O\}$. Si definisce su $V$ la relazione $v\sim w$ se $w=\lambda v$ per qualche $\lambda\in\mathbb{R}\setminus\{0\}$ — cioè $v$ e $w$ generano la stessa retta per l'origine (Abate-Tovena, Definizione 2.1.31, stampata 71). Lo spazio quoziente $\mathbb{P}^n(\mathbb{R})=V/\!\sim$, con la proiezione $\pi(v)=[v]$, è lo <b>spazio proiettivo reale</b> di dimensione $n$. Un punto $[v]$ si scrive anche $[v_0:\cdots:v_n]$, e le componenti di un rappresentante si dicono <b>coordinate omogenee</b>.</p>`},
+  {t:'reveal', title:'Hausdorff: il criterio dei minori', tag:'dimostrazione', steps:[
+   {label:'Pi e aperta', body:R`
+   <p>Per applicare il criterio della tappa 04 serve prima che $\pi$ sia aperta. Sia $U\subseteq V$ aperto; la sua controimmagine sotto se stesso (la saturazione) è $\pi^{-1}(\pi(U))=\bigcup_{\lambda\neq0}\lambda U$, unione — su tutti gli scalari non nulli — di copie di $U$ dilatate, ciascuna aperta perché la moltiplicazione per uno scalare fissato è un omeomorfismo di $V$ in sé. Un'unione di aperti è aperta, dunque la saturazione di $U$ è aperta, dunque $\pi(U)$ è aperto per definizione di topologia quoziente. $\pi$ è aperta.</p>`},
+   {label:'Il criterio dei minori per la relazione R', body:R`
+   <p>La relazione $R=\{(v,w)\in V\times V : v\sim w\}$ si scrive in modo completamente algebrico: $v\sim w$ se e solo se la matrice $2\times(n+1)$ con righe $v,w$ ha rango $\le1$, cioè se e solo se <b>tutti</b> i minori $2\times2$ si annullano: $v_iw_j-v_jw_i=0$ per ogni $i,j$. Ciascuna di queste è una funzione continua (polinomiale) di $(v,w)$, e $R$ è l'intersezione, su tutte le coppie $i,j$, degli zeri di queste funzioni, ristretta a $V\times V$ — un'intersezione di chiusi è chiusa, dunque $R$ è chiuso in $V\times V$.</p>
+   <p>Un conto per vedere il criterio al lavoro su due casi concreti. Per $v=(1,2)$, $w=(2,4)$: il minore è $1\cdot4-2\cdot2=0$, e infatti $w=2v$, sono sulla stessa retta. Per $v=(1,2)$, $w=(1,3)$: il minore è $1\cdot3-2\cdot1=1\neq0$, e infatti nessuno scalare manda $(1,2)$ in $(1,3)$. <b>Per il criterio della tappa 04, $\mathbb{P}^n(\mathbb{R})$ è di Hausdorff</b>: $\pi$ è aperta e $R$ è chiuso.</p>
+   <p><b>Il contrasto con la tappa 03, nella stessa lingua.</b> Lì il saturo non poteva essere scelto piccolo perché la relazione, vista come insieme nel prodotto, non era chiusa: una successione di coppie equivalenti $\big((x,0),(x,1)\big)$ con $x\to0$ convergeva a $\big((0,0),(0,1)\big)$, che non è nella relazione — $R$ aveva un punto di accumulazione fuori da sé. Qui $R$ è lo zero comune di polinomi, e uno zero comune di funzioni continue è automaticamente chiuso: non c'è spazio per quel tipo di fuga al limite. <b>La differenza fra i due quozienti non è nella definizione — entrambi guardano in uscita — ma in quanto la relazione di equivalenza sia topologicamente «compatta con se stessa»</b>, ed è esattamente ciò che il criterio dell'Esercizio A.36 misura.</p>`}
+  ]}
+]},
+
+/* ---------------- 07 · IL PROIETTIVO, COSTRUZIONE II ---------------- */
+{ num:'07', title:'Lo spazio proiettivo reale, costruzione II: la sfera con gli antipodi', meta:'la restrizione a S^n · chiusa perche compatto-Hausdorff · l unicita dei quozienti, A.31',
+  blocchi:[
+  {t:'prosa', title:'La restrizione alla sfera e il teorema di unicita', tag:'first principles', html:R`
+  <p>Ogni retta per l'origine incontra la sfera unitaria $S^n\subseteq\mathbb{R}^{n+1}$ in esattamente due punti antipodali $\pm x$. Sia $\varphi=\pi|_{S^n}:S^n\to\mathbb{P}^n(\mathbb{R})$, la restrizione della proiezione della tappa 06. È <b>surgettiva</b> per l'osservazione appena fatta, e continua perché restrizione di continua.</p>
+  <p>$S^n$ è compatto — chiuso e limitato in $\mathbb{R}^{n+1}$, di nuovo Heine-Borel, debito dichiarato — e $\mathbb{P}^n(\mathbb{R})$ è di Hausdorff per la tappa 06: per il lemma della tappa 05, $\varphi$ è <b>chiusa</b>. Essendo continua, surgettiva e chiusa, il Teorema A.38 la rende un'<b>applicazione quoziente</b>.</p>`},
+  {t:'reveal', title:'La stessa fibra, lo stesso spazio: il teorema A.31', tag:'dimostrazione', steps:[
+   {label:'Le fibre di phi sono l identificazione antipodale', body:R`
+   <p>$\varphi(x)=\varphi(y)$ se e solo se $x$ e $y$ generano la stessa retta e hanno entrambi norma $1$: $y=\lambda x$ con $|\lambda|\cdot|x|=|y|=1=|x|$, dunque $\lambda=\pm1$. Le fibre di $\varphi$ sono dunque esattamente le coppie $\{x,-x\}$: $\varphi$ è l'applicazione quoziente della relazione <b>antipodale</b> su $S^n$.</p>`},
+   {label:'Il teorema di unicita dei quozienti', body:R`
+   <p><b>Teorema A.31 (Unicità dei quozienti).</b> Se $q_1:Z\to Y_1$ e $q_2:Z\to Y_2$ sono applicazioni quoziente con le <b>stesse fibre</b> — $q_1(p)=q_1(q)$ se e solo se $q_2(p)=q_2(q)$ — allora esiste un unico omeomorfismo $\phi:Y_1\to Y_2$ con $\phi\circ q_1=q_2$.</p>
+   <p>La dimostrazione usa due volte il Teorema A.30 (passaggio al quoziente): siccome $q_2$ è costante sulle fibre di $q_1$ (per ipotesi, hanno le stesse fibre), $q_2$ passa al quoziente lungo $q_1$ e dà un'applicazione continua $\widetilde{q_2}:Y_1\to Y_2$ con $\widetilde{q_2}\circ q_1=q_2$; simmetricamente si ottiene $\widetilde{q_1}:Y_2\to Y_1$ con $\widetilde{q_1}\circ q_2=q_1$. Componendo, $\widetilde{q_2}\circ\widetilde{q_1}\circ q_2=q_2$: per l'<b>unicità</b> nel Teorema A.30 (applicato a $q_2$ sia come applicazione quoziente che come applicazione passata al quoziente), $\widetilde{q_2}\circ\widetilde{q_1}$ coincide con l'identità su $Y_2$. Un argomento simmetrico dà $\widetilde{q_1}\circ\widetilde{q_2}=\mathrm{id}_{Y_1}$, e dunque $\widetilde{q_2}=\phi$ è l'omeomorfismo cercato.</p>`},
+   {label:'La conclusione per il proiettivo', body:R`
+   <p>Applicato a $Z=S^n$, $q_1=\varphi$ (fibre: coppie antipodali) e $q_2$ la proiezione naturale $S^n\to S^n/\{\pm1\}$ (stessa relazione, per definizione): le fibre coincidono per costruzione, e il Teorema A.31 dà $\mathbb{P}^n(\mathbb{R})\cong S^n/\{\pm1\}$. <b>Lo spazio proiettivo reale è, letteralmente e non per analogia, la sfera con gli antipodi identificati.</b></p>
+   <p>Un effetto collaterale che vale la pena annotare: essendo $\varphi$ surgettiva e continua da un compatto, $\mathbb{P}^n(\mathbb{R})=\varphi(S^n)$ è <b>compatto</b> (immagine continua di compatto, tp-03 tappa 06) — un fatto che tp-09 userà per le partizioni dell'unità su spazi come questo.</p>
+   <p>Un caso piccolo per vedere il meccanismo con i numeri. Per $n=1$, l'applicazione «raddoppio dell'angolo» $\theta\mapsto2\theta$ manda $S^1$ su $S^1$ ed è precisamente $\varphi$ espressa in coordinate angolari: a $\theta=\pi/3$ corrisponde il punto $\left(\cos\tfrac\pi3,\sin\tfrac\pi3\right)=\left(\tfrac12,\tfrac{\sqrt3}2\right)$, e il suo raddoppio $2\theta=\tfrac{2\pi}3$ dà, per le formule di duplicazione, $\cos\tfrac{2\pi}3=\cos^2\tfrac\pi3-\sin^2\tfrac\pi3=\left(\tfrac12\right)^2-\left(\tfrac{\sqrt3}2\right)^2=-\tfrac12$ e $\sin\tfrac{2\pi}3=2\sin\tfrac\pi3\cos\tfrac\pi3=2\cdot\tfrac{\sqrt3}2\cdot\tfrac12=\tfrac{\sqrt3}2$. Si verifica che il punto immagine è ancora su $S^1$: $\left(-\tfrac12\right)^2+\left(\tfrac{\sqrt3}2\right)^2=1$. Il punto antipodale $\theta+\pi$ ha lo stesso raddoppio $2\theta+2\pi\equiv2\theta$: l'identificazione antipodale sparisce esattamente nel passaggio all'angolo doppio, che è l'immagine geometrica di $\varphi$ in dimensione $1$.</p>`}
+  ]},
+  {t:'plot', title:'S^1 e l identificazione antipodale',
+   intro:R`Tre coppie di punti antipodali sulla circonferenza, uniti dal diametro che li identifica: ciascuna coppia diventa un solo punto di $\mathbb{P}^1(\mathbb{R})$.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:360, equal:true,
+     xr:[-1.35,1.35], yr:[-1.3,1.3],
+     title:'tre diametri, tre coppie antipodali identificate da phi',
+     segs:[{x1:1,y1:0,x2:-1,y2:0, col:'#5eead4', dash:true, width:1.3},
+           {x1:0.5,y1:0.8660,x2:-0.5,y2:-0.8660, col:'#d8a13a', dash:true, width:1.3},
+           {x1:-0.8660,y1:0.5,x2:0.8660,y2:-0.5, col:'#8ee0c8', dash:true, width:1.3}],
+     marks:[{x:1,y:0, label:'x', col:'#5eead4'},
+            {x:-1,y:0, label:'-x', col:'#5eead4'},
+            {x:0.5,y:0.8660, label:'y', col:'#d8a13a', up:true},
+            {x:-0.5,y:-0.8660, label:'-y', col:'#d8a13a'},
+            {x:-0.8660,y:0.5, label:'z', col:'#8ee0c8', up:true},
+            {x:0.8660,y:-0.5, label:'-z', col:'#8ee0c8'}]}
+   ],
+   leggi:R`<p>Ogni diametro tratteggiato collega una coppia che $\varphi$ manda nello stesso punto di $\mathbb{P}^1(\mathbb{R})$. Il risultato è ancora una circonferenza — quella descritta dall'angolo doppio — ma <b>percorsa due volte più velocemente</b>: mentre $x$ fa un giro completo su $S^1$, la sua immagine $\varphi(x)$ ne fa due, e ritorna al punto di partenza dopo mezzo giro di $x$. Questo è il fatto che rende $\varphi$ un <b>rivestimento doppio</b>, e non solo un'applicazione quoziente: una nozione più fine che gd-13 incontrerà per le curve integrali.</p>`}
+]},
+
+/* ---------------- 08 · IL PROIETTIVO, COSTRUZIONE III ---------------- */
+{ num:'08', title:'Lo spazio proiettivo reale, costruzione III: il disco con il bordo incollato', meta:'l emisfero chiuso come disco · la sola identificazione sul bordo · le tre costruzioni sono un solo spazio',
+  blocchi:[
+  {t:'prosa', title:'L emisfero come disco', tag:'grammatica', html:R`
+  <p>Sia $H^n_+=\{x\in S^n : x_{n+1}\ge0\}$, l'<b>emisfero chiuso superiore</b>. È chiuso in $S^n$ perché è la controimmagine di $[0,+\infty)$, chiuso in $\mathbb{R}$, sotto l'ultima coordinata — una funzione continua (tp-03, tappa 01, continuità per controimmagini) — ed è dunque compatto, come chiuso dentro il compatto $S^n$ (tp-04, tappa 01).</p>
+  <p>L'applicazione $g:D^n\to H^n_+$, $g(x_1,\dots,x_n)=\Big(x_1,\dots,x_n,\sqrt{1-x_1^2-\cdots-x_n^2}\Big)$, dal disco chiuso $D^n=\{x\in\mathbb{R}^n:|x|\le1\}$, è continua — la radice è continua dove l'argomento è $\ge0$, e lo è su tutto $D^n$ per definizione del disco — e biiettiva sull'emisfero: ogni punto di $H^n_+$ ha un'unica radice non negativa che lo produce. $D^n$ è compatto (chiuso e limitato, Heine-Borel) e $H^n_+$ è di Hausdorff (sottospazio di $S^n$): per il teorema di tp-03 tappa 06 — biiezione continua da compatto a Hausdorff è omeomorfismo — <b>$g$ è un omeomorfismo</b>, senza bisogno di verificare a mano che l'inversa (la proiezione che scarta l'ultima coordinata) sia continua.</p>`},
+  {t:'reveal', title:'La restrizione a H^n_+ e il bordo che si incolla', tag:'dimostrazione', steps:[
+   {label:'phi ristretta a H^n_+ e ancora unapplicazione quoziente', body:R`
+   <p>Sia $\psi=\varphi|_{H^n_+}:H^n_+\to\mathbb{P}^n(\mathbb{R})$. È surgettiva: ogni retta per l'origine incontra l'emisfero chiuso superiore in almeno un punto — se incontra $S^n$ in $\pm x$ con $x_{n+1}\neq0$, uno dei due ha ultima coordinata positiva; se $x_{n+1}=0$, <b>entrambi</b> $\pm x$ sono già in $H^n_+$. $H^n_+$ è compatto (appena visto) e $\mathbb{P}^n(\mathbb{R})$ è di Hausdorff (tappa 06): per il lemma della tappa 05, $\psi$ è chiusa, e per il Teorema A.38 è un'applicazione quoziente.</p>`},
+   {label:'Le fibre: antipodale solo sul bordo', body:R`
+   <p>Le fibre di $\psi$ si leggono dal caso appena distinto. Se $x\in H^n_+$ ha $x_{n+1}>0$ (interno dell'emisfero, cioè, via $g$, interno del disco), il suo antipodale $-x$ ha ultima coordinata negativa e <b>non</b> sta in $H^n_+$: la fibra di $\psi$ sopra $\varphi(x)$ è il singoletto $\{x\}$. Se invece $x_{n+1}=0$ — il <b>bordo</b> dell'emisfero, cioè il bordo $\partial D^n=S^{n-1}$ via $g$ — allora $-x$ ha ancora ultima coordinata $0$ ed è anch'esso in $H^n_+$: la fibra è la coppia $\{x,-x\}$, l'identificazione antipodale ristretta al bordo.</p>
+   <p><b>La relazione indotta su $D^n$, via l'omeomorfismo $g$, è dunque: nessuna identificazione all'interno, antipodale solo sul bordo.</b> Per il Teorema A.31, con le stesse fibre di $\varphi$ e $\pi$, $\mathbb{P}^n(\mathbb{R})\cong D^n/\!\sim_\partial$, dove $\sim_\partial$ identifica $x$ con $-x$ soltanto per $x\in\partial D^n$.</p>`},
+   {label:'Le tre costruzioni, allineate', body:R`
+   <p>Si è ora dimostrato, con lo stesso meccanismo applicato tre volte — continua, surgettiva, compatto-a-Hausdorff dunque chiusa, dunque applicazione quoziente, dunque A.31 — che le tre costruzioni della mappa sono un solo spazio: $\mathbb{P}^n(\mathbb{R})=\big(\mathbb{R}^{n+1}\setminus\{O\}\big)/\!\sim\ \cong\ S^n/\{\pm1\}\ \cong\ D^n/\!\sim_\partial$. <b>Non sono tre modi di dire la stessa cosa: sono tre applicazioni quoziente diverse, con tre domini diversi, che il Teorema A.31 riconosce come lo stesso spazio perché hanno, alla fine, le stesse classi.</b> È lo strumento che rende inutile ricostruire un omeomorfismo esplicito ogni volta — e che in gd-03 e gd-05 si useranno per riconoscere altri quozienti senza ripetere questo lavoro da capo.</p>`}
+  ]},
+  {t:'plot', title:'Il caso n=1: il segmento con gli estremi incollati',
+   intro:R`Per $n=1$, $D^1=[-1,1]$ e $\partial D^1=\{-1,1\}$: la costruzione III dice che $\mathbb{P}^1(\mathbb{R})\cong[-1,1]/(-1\sim1)$, cioè il segmento con i due estremi incollati — una circonferenza, coerente con la tappa 07.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0', tr:[-1,1], height:260, equal:false,
+     xr:[-1.3,1.3], yr:[-0.5,0.5],
+     title:'il segmento [-1,1]: i due estremi sono lo stesso punto di P^1(R)',
+     marks:[{x:-1,y:0, label:'x=-1', col:'#d8a13a', up:true},
+            {x:1,y:0, label:'x=1', col:'#d8a13a', up:true},
+            {x:0,y:0, label:'interno: nessuna identificazione', col:'#8ea0b8', up:true}]}
+   ],
+   leggi:R`<p>Nessun punto interno al segmento è identificato con un altro — resta un punto distinto di $\mathbb{P}^1(\mathbb{R})$. I due estremi $x=-1$ e $x=1$, che sono il bordo $S^0=\{-1,1\}$ del disco $1$-dimensionale, diventano lo stesso punto: incollandoli, il segmento si chiude in una circonferenza. È l'istanza più piccola possibile della costruzione III, ed è quella su cui ogni conto si può controllare a vista.</p>`}
+]},
+
+/* ---------------- 09 · LE CARTE DEL PROIETTIVO ---------------- */
+{ num:'09', title:'Le carte del proiettivo, e perche e una varieta topologica', meta:'l atlante U_j · invarianza per scala · base numerabile ereditata attraverso un applicazione aperta',
+  blocchi:[
+  {t:'prosa', title:'Latlante', tag:'grammatica', html:R`
+  <p>Per $j=0,\dots,n$ sia $U_j=\{[x_0:\cdots:x_n]\in\mathbb{P}^n(\mathbb{R}) : x_j\neq0\}$ — ben definito, perché se $x_j\neq0$ per un rappresentante lo è per ogni rappresentante proporzionale. Si definisce $\varphi_j:U_j\to\mathbb{R}^n$ ponendo $\varphi_j([x_0:\cdots:x_n])=\left(\dfrac{x_0}{x_j},\dots,\dfrac{x_{j-1}}{x_j},\dfrac{x_{j+1}}{x_j},\dots,\dfrac{x_n}{x_j}\right)$ (Abate-Tovena, Esempio 2.1.32; Manetti, Esercizio 2.1). La definizione è <b>invariante per scala</b>, cioè non dipende dal rappresentante scelto: cambiando $x\mapsto\lambda x$, ogni rapporto $x_i/x_j$ resta lo stesso, perché il fattore $\lambda$ si cancella sopra e sotto. Un conto per vederlo con numeri: con $\lambda=3$, $x_0=1$, $x_1=2$, il rapporto $\dfrac{3\cdot2}{3\cdot1}=2$ coincide con $\dfrac21=2$ calcolato senza riscalare.</p>
+  <p>$U_0\cup\cdots\cup U_n=\mathbb{P}^n(\mathbb{R})$: ogni punto ha almeno una coordinata omogenea non nulla, per definizione di $\mathbb{R}^{n+1}\setminus\{O\}$. Ciascun $U_j$ è aperto — è la controimmagine sotto $\pi$ dell'aperto $\{x_j\neq0\}\subseteq\mathbb{R}^{n+1}\setminus\{O\}$, saturo perché la condizione $x_j\neq0$ è invariante per scala, e un saturo aperto ha immagine aperta ($\pi$ è aperta, tappa 06). E $\varphi_j$ è un omeomorfismo: è continua (è composizione di proiezione e divisione, continue dove $x_j\neq0$), biiettiva — l'inversa esplicita è $\varphi_j^{-1}(y_1,\dots,y_n)=[y_1:\cdots:y_j:1:y_{j+1}:\cdots:y_n]$ — e aperta, per lo stesso argomento di saturazione della tappa 06 applicato dentro $U_j$.</p>`},
+  {t:'prosa', title:'Varieta topologica, e il debito che resta', tag:'sintesi', html:R`
+  <p>Mettendo insieme le tre tappe precedenti: $\mathbb{P}^n(\mathbb{R})$ è di <b>Hausdorff</b> (tappa 06), è <b>localmente omeomorfo a $\mathbb{R}^n$</b> (l'atlante appena costruito), e la <b>base numerabile</b> si eredita: $\pi$ è aperta e surgettiva, e l'immagine di una base numerabile sotto un'applicazione aperta surgettiva è una base — per ogni aperto $W\subseteq Y$ e $y\in W$, scelto $x\in\pi^{-1}(y)$ e un elemento di base $B\ni x$ dentro l'aperto $\pi^{-1}(W)$, l'immagine $\pi(B)$ è un aperto che contiene $y$ ed è contenuto in $W$ — e un'immagine numerabile di una famiglia numerabile resta numerabile. <b>$\mathbb{P}^n(\mathbb{R})$ è una varietà topologica di dimensione $n$</b>, con le tre clausole della definizione verificate per intero e non date per buone.</p>
+  <div class="note"><b>Il debito che resta, dichiarato.</b> Che le funzioni di transizione $\varphi_i\circ\varphi_j^{-1}$ siano $C^\infty$ — necessario per un atlante differenziabile, non per una varietà topologica — è un conto di geometria differenziale e non di topologia: lo fa gd-03, con lo stesso schema delle transizioni calcolate esplicitamente in tp-03.</div>`}
+]},
+
+/* ---------------- 10 · ESERCIZI ---------------- */
+{ num:'10', title:'Esercizi — tocca a te', meta:'il nastro di Moebius come quoziente · la retta con due zeri non e metrizzabile · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · Il nastro di Moebius, come applicazione quoziente', html:R`
+  <p>Sul rettangolo $X=[0,1]\times[-1,1]$ si definisca la relazione che identifica $(0,t)$ con $(1,-t)$ per ogni $t\in[-1,1]$, senza toccare nessun'altra coppia di punti. Spiega perché la proiezione $q:X\to X/\!\sim$ è un'applicazione quoziente usando il Teorema A.38 — di che tipo è $X$, e quale ipotesi del teorema usi — e di' a parole cosa succede percorrendo il bordo $t=1$ fino a tornare al punto di partenza.</p>`,
+   sol:R`<p>$X=[0,1]\times[-1,1]$ è compatto, come prodotto di due compatti ($[0,1]$ e $[-1,1]$, entrambi chiusi e limitati); $X/\!\sim$ è di Hausdorff per lo stesso tipo di argomento della tappa 06, con il criterio dei minori rimpiazzato da un controllo diretto sulla relazione, che è chiusa in $X\times X$ (è l'unione della diagonale, chiusa, con il grafico chiuso dell'identificazione sul bordo). Per il lemma della tappa 05, $q$ è chiusa; essendo continua e surgettiva, il Teorema A.38 la rende un'applicazione quoziente.</p>
+  <p><b>Il bordo.</b> Percorrendo $t=1$ da $x=0$ a $x=1$ non si torna al punto di partenza: $(0,1)$ è identificato con $(1,-1)$, non con $(1,1)$. Bisogna continuare lungo $t=-1$ da $x=0$ a $x=1$ per richiudere il percorso, perché $(0,-1)\sim(1,1)$. <b>Il bordo del nastro di Moebius è un'unica circonferenza che gira due volte attorno al nastro</b>, non due circonferenze separate come nel cilindro ordinario — è la conseguenza visibile dell'aver incollato con un ribaltamento.</p>`},
+  {t:'esercizio', title:'2 · Perche la retta con due zeri non e metrizzabile', html:R`
+  <p>Usa il fatto che ogni spazio metrico è di Hausdorff per concludere, nel modo più diretto, che la retta con due zeri di tp-05 non può portare nessuna metrica compatibile con la sua topologia. Poi di' perché questo non contraddice il fatto che sia localmente omeomorfa a $\mathbb{R}$, che invece è metrizzabile.</p>`,
+   sol:R`<p>Essere di Hausdorff è una conseguenza immediata degli assiomi di metrica: se $d(p,q)=\varepsilon>0$, le palle di raggio $\varepsilon/2$ centrate in $p$ e $q$ sono disgiunte per la disuguaglianza triangolare. La tappa 03 ha dimostrato che la retta con due zeri <b>non</b> è di Hausdorff; dunque nessuna metrica può generare la sua topologia, perché ogni metrica genererebbe automaticamente la separazione che qui manca.</p>
+  <p><b>Perché non è una contraddizione.</b> Essere metrizzabile è una proprietà <b>globale</b> dello spazio intero, mentre «localmente omeomorfo a $\mathbb{R}$» parla solo di intorni di ciascun punto preso singolarmente. Ogni singola carta — $\mathbb{R}\times\{0\}$ o $\mathbb{R}\times\{1\}$, prese da sole — è metrizzabile, perché è una copia di $\mathbb{R}$. Il fallimento della metrizzabilità globale nasce esattamente da <i>come le carte si sovrappongono</i> vicino ai due zeri, un'informazione che nessuna carta singola può portare. È il motivo per cui la definizione di varietà topologica non si contenta della seconda clausola e ne richiede una terza indipendente.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Enuncia la proprietà caratteristica di un'applicazione quoziente e di' in che senso il suo verso è lo stesso dell'unione disgiunta di tp-04.</li>
+  <li>Perché la dimostrazione che i due zeri della retta con due zeri non si separano usa la saturazione e non, per esempio, la compattezza?</li>
+  <li>Enuncia il criterio di Hausdorff per i quozienti aperti (Esercizio A.36), e di' quale delle sue due ipotesi fallisce per la retta con due zeri.</li>
+  <li>Le tre costruzioni dello spazio proiettivo hanno tre domini diversi ($\mathbb{R}^{n+1}\setminus\{O\}$, $S^n$, $D^n$). Che cosa, esattamente, permette al Teorema A.31 di dire che producono lo stesso spazio?</li>
+  <li>Perché il lemma «continua da compatto a Hausdorff è chiusa» non richiede la biiettività, mentre il teorema di tp-03 (biiezione continua da compatto a Hausdorff è omeomorfismo) sì?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Un'applicazione $F$ da $Y=X/\!\sim$ è continua se e solo se $F\circ\pi$ lo è: la proprietà descrive le applicazioni che <b>escono</b> da $Y$, come per l'unione disgiunta e a differenza di sottospazio e prodotto.</li>
+   <li>Perché il problema non è la mancanza di aperti in generale ma la loro <b>forma obbligata</b> vicino ai due zeri: ogni saturo che ne contenga uno deve portarsi dietro una fascia intera dell'altra copia. La compattezza non entra: nessuno dei due spazi coinvolti ($\mathbb{R}\times\{0,1\}$ o il quoziente) è compatto, e il fenomeno non ha niente a che fare con ricoprimenti.</li>
+   <li>Se $q$ è un'applicazione quoziente aperta, $Y$ è di Hausdorff se e solo se $R=\{(x_1,x_2):q(x_1)=q(x_2)\}$ è chiuso in $X\times X$. Per la retta con due zeri fallisce la <b>prima</b> ipotesi: la proiezione non è aperta, e per questo il criterio non si applica affatto — il controesempio va dimostrato con la saturazione diretta, non con A.36.</li>
+   <li>Che le tre applicazioni quoziente abbiano, punto per punto, le <b>stesse fibre</b>: due punti dei rispettivi domini vanno allo stesso punto proiettivo esattamente quando generano la stessa retta per l'origine, in tutti e tre i casi. Il Teorema A.31 trasforma questa coincidenza insiemistica in un omeomorfismo, senza che serva costruirlo a mano.</li>
+   <li>Perché il lemma conclude solo che un'immagine di chiuso è chiusa — un fatto sulle <i>immagini</i>, indifferente a quanti punti del dominio vadano in ciascun punto dell'immagine. Il teorema di tp-03 vuole concludere che l'<i>inversa</i> è continua, e per parlare di una funzione inversa serve che $F$ sia biiettiva; è lì, e soltanto lì, che l'ipotesi in più entra in gioco.</li>
+   </ol>`}
+]},
+
+/* ---------------- 11 · IL SENSO ---------------- */
+{ num:'11', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove il quoziente riappare nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> La proprietà caratteristica del quoziente guarda in uscita, come quella dell'unione disgiunta, e questo è ciò che la rende capace di rompere Hausdorff: un saturo non è obbligato a potersi scegliere piccolo. La retta con due zeri lo mostra nel modo più nudo possibile; lo spazio proiettivo mostra che il quoziente non rompe <i>sempre</i> — e il criterio che decide quando ($\pi$ aperta e $R$ chiuso, Esercizio A.36) è uno strumento riusabile, non un conto da ripetere ogni volta. Il teorema di unicità dei quozienti (A.31) è il risultato più generale: due applicazioni quoziente con le stesse fibre producono lo stesso spazio, ed è così che le tre costruzioni del proiettivo — rette, sfera con gli antipodi, disco con il bordo incollato — si sono rivelate essere una sola.</p>
+  <p><b>Due debiti saldati che non erano previsti dalla mappa.</b> La previsione di tp-04 è stata verificata, non solo citata. E il filo lasciato in sospeso da tp-03 — l'applicazione $[0,1]\to S^1$ che non era biiettiva — si è chiuso riconoscendola come applicazione quoziente, con lo stesso lemma compatto-Hausdorff-chiusa che ha fatto tutto il lavoro pesante di questo movimento.</p>
+  <p><b>Ciò che resta fuori.</b> Tp-06 prende il controesempio appena costruito e ne fa il cuore della discussione sul perché la definizione di varietà richiede Hausdorff esplicitamente. Tp-09 userà la compattezza di $\mathbb{P}^n(\mathbb{R})$, dimostrata qui come sottoprodotto, per le partizioni dell'unità.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il quoziente come modo di descrivere ciò che davvero distingue due stati</b>, togliendo di mezzo l'informazione che la teoria dichiara irrilevante.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Uno stato fisico non è un vettore dello spazio di Hilbert $\mathcal H$: è una <b>retta</b>, perché $\psi$ e $e^{i\alpha}\psi$ descrivono lo stesso stato per ogni fase $\alpha$. Lo spazio degli stati puri è, precisamente, lo spazio proiettivo $\mathbb{P}(\mathcal H)$ — la stessa costruzione di questa tappa, con $\mathbb C$ al posto di $\mathbb R$ e dimensione infinita al posto di $n$. L'irrilevanza della fase globale non è un dettaglio notazionale: è la dichiarazione che la teoria vive sul <i>quoziente</i>, non sullo spazio vettoriale, ed è il motivo per cui due vettori «diversi» possono essere lo stesso stato fisico.`},
+    {dove:'Meccanica<br>statistica', txt:R`Lo spazio delle fasi di $N$ particelle identiche non è il prodotto $(\mathbb R^6)^N$ di tp-04: è quel prodotto <b>quozientato</b> per l'azione del gruppo delle permutazioni $S_N$, perché scambiare due particelle identiche non produce un microstato diverso. È precisamente la correzione che risolve il paradosso di Gibbs — l'entropia calcolata sul prodotto senza quozientare non è estensiva, e il fattore $1/N!$ di Boltzmann è la traccia numerica di questo stesso meccanismo di identificazione, applicato a un'azione di gruppo invece che a una singola relazione.`},
+    {dove:'Geometria<br>differenziale', txt:R`Il Lemma 2.6.14 di Abate-Tovena, incontrato nel dossier di questo stesso movimento, generalizza esattamente il criterio di apertura della tappa 06 — «la proiezione naturale per un'azione di gruppo di Lie è sempre un'applicazione aperta» — a ogni quoziente per azione di gruppo, non solo a quella per scalari. È lo strumento con cui gd-05 costruirà quozienti di varietà per azioni molto più generali della sola moltiplicazione scalare vista qui.`}
+   ],
+   domanda:R`Lo spazio proiettivo è risultato <b>compatto</b> come sottoprodotto della costruzione II. <b>Domanda da portare avanti, verso tp-07:</b> la compattezza della sfera si è trasmessa al quoziente perché l'immagine continua di un compatto è compatta — un fatto che non ha bisogno di sapere nulla sulla relazione di equivalenza. C'è invece qualche proprietà che il quoziente di uno spazio compatto <b>non</b> eredita mai, per la stessa ragione per cui Hausdorff può perdersi? Tienila in mente leggendo tp-07 e tp-08.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-05-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-05 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-05-il-quoziente.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

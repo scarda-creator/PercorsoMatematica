@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-02 — Le basi, e come si genera una topologia</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-02 — Le basi, e come si genera una topologia</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-02: Le basi, e come si genera una topologia <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-02 — le basi, e come si genera una topologia
+identita:  dichiarare tutti gli aperti e' impraticabile: si dichiara una famiglia piccola
+           e si lascia che le unioni facciano il resto. Da qui nasce il secondo assioma
+           di numerabilita', che non e' un tecnicismo — e' cio' che impedisce a una
+           varieta' di essere troppo grande per essere coperta da un atlante numerabile
+copre:     1.1, 1.4 del programma di recupero
+serve:     tp-01
+apre:      gd-01 — la definizione di varieta' topologica chiede «a base numerabile» e
+           non dice perche'
+strumenti: compattezza, omeomorfismo, quoziente-topologico
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A «Review of Topology»
+           (stampate 599-602): Bases and Countability, la Proposizione A.16 (Lindelof),
+           l'inizio di Subspaces. Abate, Tovena — Geometria Differenziale, Osservazioni
+           2.1.11-2.1.15 (stampate 63-65): il PERCHE' fisico della clausola, dentro la
+           definizione di varieta' differenziabile. Manetti — appunti GD 2008-09
+           (stampata 18): la Definizione 2.1, punto 3, e la nota sulla paracompattezza.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezioni 1.1 e 1.4
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"01","appare":"\\bigcup_{B\\in\\mathcal{B}}B=X",
+  "perche":"e' la prima delle due condizioni che Lee impone a una famiglia di sottoinsiemi di un insieme nudo perche' generi una topologia: si nomina la richiesta, non si calcola un valore"},
+
+ {"tipo":"uguale","sinistra":"2**2","vale":"4",
+  "dove":"01","appare":"2^{2}=4"},
+
+ {"tipo":"limite","espr":"1/n**2","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},
+  "dove":"02","appare":"\\lim_{n\\to\\infty}\\tfrac1{n^2}=0"},
+
+ {"tipo":"disuguaglianza","sinistra":"1/11","relazione":"<","destra":"1/10",
+  "dove":"02","appare":"\\tfrac1{11}<\\tfrac1{10}"},
+
+ {"tipo":"disuguaglianza","sinistra":"6","relazione":"<","destra":"73/10",
+  "dove":"03","appare":"6<7{,}3<8"},
+
+ {"tipo":"disuguaglianza","sinistra":"73/10","relazione":"<","destra":"8",
+  "dove":"03","appare":"6<7{,}3<8"},
+
+ {"tipo":"simbolico","dove":"04","appare":"X=\\bigsqcup_{i\\in I}\\mathbb{R}",
+  "perche":"e' la definizione dello spazio controesempio come unione disgiunta indicizzata da un insieme I non numerabile: si nomina l'oggetto, la non numerabilita' si argomenta a parole subito dopo"},
+
+ {"tipo":"simbolico","dove":"05","appare":"\\mathcal{B}_S=\\{B\\cap S : B\\in\\mathcal{B}\\}",
+  "perche":"e' la base ristretta a un sottospazio S come la scrive Lee nella Proposizione A.17(f): si nomina la costruzione, la numerabilita' segue dalla sola cardinalita' di B senza bisogno di un conto"},
+
+ {"tipo":"uguale","sinistra":"5*5","vale":"25",
+  "dove":"07","appare":"5\\cdot5=25"},
+
+ {"tipo":"uguale","sinistra":"10*5","vale":"50",
+  "dove":"07","appare":"10\\cdot5=50"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Topologia · sezioni 1.1 e 1.4 del programma di recupero · perche la clausola non e arbitraria',
+  blocchi:[
+  {t:'prosa', title:'Il problema che tp-01 ha lasciato aperto', tag:'architettura', html:R`
+  <p>Il movimento precedente ha fatto una scelta drastica: dichiarare direttamente <b>tutti</b> gli aperti, come famiglia $\tau$ chiusa per le due operazioni insiemistiche. Funziona, ma ha un costo che si nota appena si prova a <i>usarla</i>: su $\mathbb{R}$ la famiglia degli aperti ha la cardinalità del continuo elevato al continuo, e nessuna dimostrazione può passare in rassegna «tutti gli aperti» uno per uno. Tp-01 ha già mostrato la via d'uscita, nella tappa delle palle razionali, ma l'ha trattata come un fatto curioso. Qui quel fatto diventa un oggetto con un nome — <b>base</b> — e una domanda precisa: quanto piccola può essere una famiglia che genera comunque tutta la topologia?</p>
+  <p>La risposta non è solo di comodo calcolo. La definizione di varietà topologica — Manetti, Definizione 2.1 — chiede come terza e ultima condizione che lo spazio sia <b>a base numerabile</b>, dopo Hausdorff e localmente euclideo. Le prime due tp-01 le ha già spiegate (Hausdorff nella tappa 05, «localmente euclideo» cioè omeomorfo è il contenuto della tappa 03). Questa è la terza, e la domanda che il programma di recupero elenca nella sezione 1.4 — «secondo assioma di numerabilità» — è esattamente questa clausola.</p>
+  <div class="note"><b>Perché non è un tecnicismo, in una riga.</b> Senza questa richiesta esistono spazi perfettamente Hausdorff e perfettamente localmente euclidei che nessun geometra vuole chiamare varietà: troppo grandi per essere coperti da un atlante che si possa scrivere, indicizzare, sommare su. La tappa 04 ne costruisce uno per intero, perché Abate-Tovena lo cita e basta («è possibile, vedi [35, pag. 71]») e un prerequisito che scrive «vedi altrove» nel punto in cui serve il controesempio non ha fatto il suo lavoro.</div>`}
+]},
+
+/* ---------------- 01 · BASI, E COME GENERANO UNA TOPOLOGIA ---------------- */
+{ num:'01', title:'Basi: la famiglia piccola che genera quella grande', meta:'definizione di base · le due condizioni su un insieme nudo · perche una base e come la discreta di tp-01',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e il parallelo con le carte di Abate-Tovena', tag:'grammatica', html:R`
+  <p>Sia $(X,\tau)$ uno spazio topologico. Una famiglia $\mathcal{B}$ di aperti è una <b>base</b> per $\tau$ se ogni aperto è unione di elementi di $\mathcal{B}$ (Lee, stampata 601). Non si chiede che gli elementi di $\mathcal{B}$ siano «piccoli» in nessun senso metrico — le palle razionali di $\mathbb{R}^n$, già incontrate in tp-01, sono l'esempio canonico, ma la definizione non parla di distanze.</p>
+  <p>C'è una versione più forte, e più utile, che Lee enuncia subito dopo: si può <b>partire</b> da una famiglia $\mathcal{B}$ di sottoinsiemi di un insieme $X$ ancora privo di topologia, e farla generare una topologia da sola — esattamente come Abate-Tovena, in tp-01 tappa 05, fa generare la topologia da un atlante. Le condizioni sono due:</p>
+  <ol>
+   <li>$\bigcup_{B\in\mathcal{B}}B=X$ — ogni punto sta in qualche elemento di $\mathcal{B}$;</li>
+   <li>se $B_1,B_2\in\mathcal{B}$ e $x\in B_1\cap B_2$, esiste $B_3\in\mathcal{B}$ con $x\in B_3\subseteq B_1\cap B_2$.</li>
+  </ol>
+  <p>Allora la collezione di tutte le unioni di elementi di $\mathcal{B}$ è una topologia, detta <b>generata</b> da $\mathcal{B}$, e $\mathcal{B}$ ne è una base. La seconda condizione è il punto delicato, e vale la pena vedere perché non si può toglierla.</p>`},
+  {t:'reveal', title:'Perche serve la seconda condizione, e non solo la prima', tag:'costruzione', steps:[
+   {label:'Che cosa succede senza', body:R`
+   <p>Prendi $X=\mathbb{R}$ e $\mathcal{B}=\{(-1,1),(0,2)\}$: la prima condizione fallisce già da sola ($X$ non è l'unione di questi due), ma anche aggiungendo abbastanza intervalli a coprire $\mathbb{R}$ il problema vero si vede nell'intersezione. Le due aperte si incontrano nell'intervallo $(0,1)$: perché l'unione di tutte le unioni di elementi di $\mathcal{B}$ sia chiusa per <b>intersezione finita</b> — il terzo assioma di topologia — serve che ogni punto di $(0,1)$ abbia un elemento di $\mathcal{B}$ interamente contenuto in $(0,1)$. Se $\mathcal{B}$ non contiene un tale elemento, la famiglia delle unioni non soddisfa l'assioma 3, e non è una topologia.</p>`},
+   {label:'La dimostrazione, con la seconda condizione in mano', body:R`
+   <p>Siano $U,V$ unioni di elementi di $\mathcal{B}$, e $x\in U\cap V$. Allora $x\in B_1$ per qualche $B_1\subseteq U$ nell'unione che forma $U$, e $x\in B_2\subseteq V$ allo stesso modo. Per la condizione 2 esiste $B_3\in\mathcal{B}$ con $x\in B_3\subseteq B_1\cap B_2\subseteq U\cap V$. Quindi ogni punto di $U\cap V$ ha un elemento di $\mathcal{B}$ che lo contiene e sta dentro $U\cap V$: l'intersezione è essa stessa un'unione di elementi di $\mathcal{B}$, dunque aperta. L'unione arbitraria di aperti è aperta per costruzione — un'unione di unioni è un'unione — e la condizione 1 dà $X$ aperto. <b>I tre assiomi sono tutti e tre conseguenza delle due condizioni sulla base</b>, nello stesso modo in cui in tp-01 i tre assiomi su $M$ erano conseguenza dei tre assiomi su $\mathbb{R}^n$ attraverso le carte.</p>`},
+   {label:'Il caso in cui la condizione 2 e automatica', body:R`
+   <p>Quando gli elementi di $\mathcal{B}$ sono due a due <b>disgiunti</b> — una partizione di $X$ — la condizione 2 è vuota: non c'è nessun $x$ in $B_1\cap B_2$ con $B_1\ne B_2$ da controllare. Su $X=\{1,2,3\}$ con $\mathcal{B}=\{\{1\},\{2,3\}\}$, le unioni di elementi di $\mathcal{B}$ sono $\emptyset,\{1\},\{2,3\},\{1,2,3\}$: esattamente $2^{2}=4$ aperti, uno per ciascun sottoinsieme di $\mathcal{B}$ stesso, perché una base disgiunta non permette combinazioni che si sovrappongano. È il caso più semplice possibile, ed è quello su cui conviene calibrare l'intuizione prima di passare a basi che si sovrappongono come quella delle palle.</p>`}
+  ]},
+  {t:'prosa', title:'Un aside che serve una volta sola: la prebase', tag:'regola operativa', html:R`
+  <p>Una famiglia $\mathcal{S}$ di sottoinsiemi di $X$ che copre $X$ ma non soddisfa la condizione 2 si chiama <b>prebase</b> (o sottobase): non genera direttamente una topologia, ma la famiglia delle sue <i>intersezioni finite</i> sì, perché quella famiglia soddisfa automaticamente la condizione 2 (l'intersezione di due intersezioni finite è un'intersezione finita). È un modo comodo di dichiarare una base senza dover controllare la condizione 2 a mano — si controlla una volta che l'operazione di prendere intersezioni finite la risolve da sola — e ricompare nel corso ogni volta che una topologia si descrive «dando per aperti questi insiemi, e tutte le intersezioni finite fra loro».</p>`}
+]},
+
+/* ---------------- 02 · I DUE ASSIOMI DI NUMERABILITA ---------------- */
+{ num:'02', title:'Primo e secondo assioma: quanto piccola puo essere una base', meta:'base numerabile · base locale numerabile in un punto · perche il secondo implica il primo · gli spazi metrici',
+  blocchi:[
+  {t:'prosa', title:'Le due versioni della stessa domanda', tag:'grammatica', html:R`
+  <p>La domanda «quanto piccola può essere una base» ha due risposte, una locale e una globale (Lee, stampata 601).</p>
+  <ul>
+   <li>$X$ è <b>primo-numerabile</b> (<i>first-countable</i>) se ogni punto $p$ ha una <b>base locale numerabile</b>: una collezione numerabile $\mathcal{B}_p$ di intorni di $p$ tale che ogni intorno di $p$ ne contenga almeno uno;</li>
+   <li>$X$ è <b>secondo-numerabile</b> (<i>second-countable</i>) se ha una base numerabile <b>per tutta la topologia</b>.</li>
+  </ul>
+  <p>Il secondo implica il primo, e la dimostrazione è immediata: se $\mathcal{B}$ è una base numerabile per $X$, la sottofamiglia $\{B\in\mathcal{B}: p\in B\}$ è numerabile (sottoinsieme di un numerabile) ed è una base locale in $p$, perché ogni intorno di $p$ è unione di elementi di $\mathcal{B}$ e almeno uno di essi contiene $p$. <b>Il viceversa è falso</b>, e la ragione è nel nome stesso: avere una base piccola <i>in ogni singolo punto</i> non obbliga le basi locali di punti diversi a incollarsi in una famiglia numerabile sola — può servire un insieme di indici diverso, e potenzialmente non numerabile, punto per punto. La tappa 04 costruisce esattamente uno spazio così: primo-numerabile ovunque (ogni componente è $\mathbb{R}$, metrico, quindi primo-numerabile) ma non secondo-numerabile.</p>`},
+  {t:'reveal', title:'Ogni spazio metrico e primo-numerabile, e perche conviene saperlo', tag:'costruzione', steps:[
+   {label:'La base locale delle palle di raggio 1/n', body:R`
+   <p>Sia $(M,d)$ uno spazio metrico, $p\in M$. La famiglia $\mathcal{B}_p=\{B_{1/n}(p)\}$, per $n=1,2,3,\dots$, è numerabile ed è una base locale in $p$ (Lee, Exercise A.14): dato un intorno $U$ di $p$, esiste $r>0$ con $B_r(p)\subseteq U$, e basta prendere $n$ con $\tfrac1n<r$ — che esiste sempre, perché $\lim_{n\to\infty}\tfrac1{n^2}=0$ e quindi anche $\tfrac1n\to0$ — per avere $B_{1/n}(p)\subseteq B_r(p)\subseteq U$.</p>`},
+   {label:'Perche conviene che sia decrescente', body:R`
+   <p>Oltre a essere numerabile, questa base locale è <b>annidata</b>: $B_{1/(n+1)}(p)\subsetneq B_{1/n}(p)$ per ogni $n$, perché $\tfrac1{11}<\tfrac1{10}$ e in generale $\tfrac1{n+1}<\tfrac1n$. Una base locale annidata è quella che rende vero il <i>Lemma delle successioni</i> di Lee (Lemma A.12, citato in tp-01 solo di passaggio): in uno spazio primo-numerabile, $x$ sta nella chiusura di $A$ se e solo se $x$ è limite di una successione di punti di $A$. Senza numerabilità locale questa equivalenza cade — serve davvero poter <i>contare</i> gli intorni di un punto per poterne scegliere uno, via il lemma di scelta numerabile, per ciascun termine di una successione.</p>`},
+   {label:'Che cosa NON garantisce', body:R`
+   <p>La primo-numerabilità è una proprietà <b>puntuale</b>: dice qualcosa su ogni singolo $p$, separatamente. Non dice niente su quanti punti ci siano, né su come le basi locali di punti diversi si relazionino fra loro. $\mathbb{R}^n$ con la topologia discreta — ogni singoletto è aperto — è primo-numerabile in modo banale ($\mathcal{B}_p=\{\{p\}\}$, un solo elemento) ma non ha nessuna speranza di essere secondo-numerabile se l'insieme sottostante non è numerabile: un singolo elemento $\{p\}$ non può comparire in nessuna base più piccola, perché è l'unico aperto che contiene $p$ e non contiene nient'altro.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · PERCHE SERVE: LINDELOF ---------------- */
+{ num:'03', title:'Perche serve: ogni ricoprimento aperto ha un sottoricoprimento numerabile', meta:'la Proposizione A.16 di Lee · il contrasto con la compattezza · un esempio con i numeri',
+  blocchi:[
+  {t:'prosa', title:'La proprieta che la numerabilita compra', tag:'first principles', html:R`
+  <p>Ecco perché avere una base numerabile non è solo un fatto estetico sulla cardinalità. Un <b>ricoprimento</b> di $X$ è una famiglia $\mathcal{U}$ di sottoinsiemi la cui unione è $X$; è <b>aperto</b> se ogni elemento di $\mathcal{U}$ è aperto. Un <b>sottoricoprimento</b> è una sottofamiglia di $\mathcal{U}$ che è ancora un ricoprimento.</p>
+  <p><b>Proposizione A.16 (Lee).</b> Se $X$ è secondo-numerabile, ogni ricoprimento aperto di $X$ ammette un sottoricoprimento <b>numerabile</b>.</p>
+  <p>Questo va distinto con cura da quello che lo <span class="str" data-str="compattezza">strumento della compattezza</span> dà, perché la somiglianza del nome inganna: la compattezza dice che ogni ricoprimento aperto ha un sottoricoprimento <b>finito</b>, una proprietà dello spazio che non ha niente a che fare con la numerabilità della topologia — $\mathbb{R}$ non è compatto, ma è secondo-numerabile, e qui si ottiene comunque un sottoricoprimento, solo numerabile e non finito. Le due proprietà sono indipendenti: ci sono spazi compatti non secondo-numerabili, e spazi secondo-numerabili (come $\mathbb{R}^n$) che non sono compatti. Quello che condividono è lo <i>schema dell'argomento</i> — ridurre una famiglia arbitrariamente grande a una controllabile — e vale la pena vedere la dimostrazione per intero, perché è un modello che tornerà.</p>`},
+  {t:'reveal', title:'La dimostrazione, e dove usa la base', tag:'costruzione', steps:[
+   {label:'La costruzione', body:R`
+   <p>Sia $\mathcal{B}$ una base numerabile per $X$, e $\mathcal{U}$ un ricoprimento aperto arbitrario, anche non numerabile. Sia $\mathcal{B}_0\subseteq\mathcal{B}$ la sottofamiglia degli elementi $B$ che stanno interamente dentro <i>qualche</i> membro di $\mathcal{U}$. Per ciascun $B\in\mathcal{B}_0$ si <b>scelga</b> un particolare $U_B\in\mathcal{U}$ che lo contiene.</p>`},
+   {label:'Perche la famiglia scelta basta', body:R`
+   <p>$\{U_B : B\in\mathcal{B}_0\}$ è numerabile, perché $\mathcal{B}_0\subseteq\mathcal{B}$ e $\mathcal{B}$ è numerabile per ipotesi. Resta da vedere che copre $X$: dato $x\in X$, c'è qualche $V\in\mathcal{U}$ con $x\in V$ (perché $\mathcal{U}$ copre $X$), e siccome $\mathcal{B}$ è una base esiste $B\in\mathcal{B}$ con $x\in B\subseteq V$. Questo $B$ sta in $\mathcal{B}_0$ per costruzione — è contenuto in $V\in\mathcal{U}$ — quindi $x\in B\subseteq U_B$. <b>Il punto delicato</b>, e la ragione per cui serve davvero la base e non un'ipotesi più debole: la famiglia $\mathcal{B}_0$ è numerabile <i>perché</i> è una sottofamiglia della base globale, non perché qualcuno l'abbia contata a mano — se si fosse partiti da una base locale numerabile in ogni punto (primo-numerabilità) non ci sarebbe un modo di combinare le scelte in un'unica famiglia numerabile che funzioni per tutti i punti insieme.</p>`}
+  ]},
+  {t:'plot', title:'Un ricoprimento con centro reale, un sottoricoprimento con centro intero',
+   intro:R`Il ricoprimento di partenza usa un intervallo $(x-1,x+1)$ per <i>ogni</i> $x\in\mathbb{R}$ — una famiglia non numerabile. La base numerabile delle palle razionali estrae il sottoricoprimento $\{(n-1,n+1): n\in\mathbb{Z}\}$, disegnato qui per $n=5,\dots,9$.`,
+   plots:[
+    {kind:'func2d', f:'0', xr:[3.5,10.5], yr:[-0.18,1.25], height:330, equal:false,
+     title:'(n-1,n+1) per n=5..9: il punto 7,3 cade nel solo intervallo centrato in 7',
+     segs:[{x1:4, y1:0.2, x2:6, y2:0.2, col:'#8ee0c8', width:3, label:'n=5', lx:6.18, ly:0.2},
+           {x1:5, y1:0.36, x2:7, y2:0.36, col:'#8ee0c8', width:3, label:'n=6', lx:7.18, ly:0.36},
+           {x1:6, y1:0.52, x2:8, y2:0.52, col:'#5eead4', width:3, label:'n=7', lx:8.18, ly:0.52},
+           {x1:7, y1:0.68, x2:9, y2:0.68, col:'#8ee0c8', width:3, label:'n=8', lx:9.18, ly:0.68},
+           {x1:8, y1:0.84, x2:10, y2:0.84, col:'#8ee0c8', width:3, label:'n=9', lx:10.18, ly:0.84},
+           {x1:7.3, y1:1.0, x2:7.3, y2:0, col:'#ff6b6b', width:1.4, dash:true}],
+     marks:[{x:7.3, y:0, label:'7,3', col:'#ff6b6b'},
+            {x:6, y:0.52, label:'', col:'#5eead4', hollow:true},
+            {x:8, y:0.52, label:'', col:'#5eead4', hollow:true}]}
+   ],
+   leggi:R`<p>I cinque segmenti si sovrappongono a coppie consecutive — $(6,8)$ e $(7,9)$ condividono $(7,8)$ — e questo basta a coprire tutta la retta senza buchi, nonostante ciascun intervallo abbia lunghezza fissa 2. Il punto tratteggiato mostra il caso concreto: $6<7{,}3<8$, quindi $7{,}3$ sta nell'intervallo con $n=7$, e non serve nessuno degli altri quattro per catturarlo.</p>
+   <p>Da portare via: il ricoprimento <b>di partenza</b> non è disegnabile per intero — ha un intervallo per ogni numero reale, uno sopra l'altro all'infinito — ma il sottoricoprimento estratto si disegna con un intervallo per ogni intero, cioè una famiglia che si enumera con $\mathbb{Z}$. <b>È esattamente questo passaggio, da «uno per ogni reale» a «uno per ogni intero», che la base numerabile di $\mathbb{R}$ rende possibile</b>: la Proposizione A.16 non dice quale sottoricoprimento scegliere, ma garantisce che uno numerabile esiste sempre, e la base delle palle razionali è lo strumento con cui si costruisce.</p>`}
+]},
+
+/* ---------------- 04 · IL CONTROESEMPIO ---------------- */
+{ num:'04', title:'Il controesempio che fissa il confine: localmente euclideo, Hausdorff, non numerabile', meta:'unione disgiunta non numerabile di rette · perche ogni componente ruba un pezzo di base · dove Abate-Tovena si ferma',
+  blocchi:[
+  {t:'prosa', title:'Perche serve costruirlo, e non solo citarlo', tag:'architettura', html:R`
+  <p>Abate-Tovena, Osservazione 2.1.13, scrive: «costruire esempi di varietà Hausdorff non a base numerabile è molto più delicato [che costruire varietà non Hausdorff], ma è possibile (vedi [35, pag. 71])». Il libro a cui rimanda non è in casa, e in ogni caso il principio di questo prerequisito — un movimento che scrive «esercizio» o «vedi altrove» nel punto in cui serve il risultato non ha fatto il suo lavoro — vale anche quando la fonte manca fisicamente, non solo quando lascia un passaggio come esercizio. Il controesempio più semplice possibile non richiede l'apparato che Abate-Tovena lascia intendere: basta incollare insieme, senza farle toccare, una quantità non numerabile di copie della retta reale.</p>`},
+  {t:'reveal', title:'La costruzione, per intero', tag:'costruzione', steps:[
+   {label:'Lo spazio', body:R`
+   <p>Sia $I$ un insieme non numerabile — per esempio $I=\mathbb{R}$ stesso, serve solo che sia più che numerabile. Sia $X=\bigsqcup_{i\in I}\mathbb{R}$ l'<b>unione disgiunta</b>: formalmente, $X=\{(x,i):x\in\mathbb{R},\,i\in I\}$, cioè $|I|$ copie separate di $\mathbb{R}$ che non condividono nessun punto. La <b>topologia dell'unione disgiunta</b> dichiara aperto $A\subseteq X$ se e solo se $A\cap(\mathbb{R}\times\{i\})$ è aperto (nella topologia euclidea identificata con $\mathbb{R}$) per ogni $i\in I$. Ogni «copia» $\mathbb{R}\times\{i\}$ è quindi sia aperta che chiusa in $X$: aperta per definizione, chiusa perché il suo complementare — l'unione di tutte le altre copie — è anch'esso aperto per lo stesso motivo.</p>`},
+   {label:'E localmente euclideo, ed e di Hausdorff', body:R`
+   <p>Ogni punto $(x,i)$ ha come intorno la copia $\mathbb{R}\times\{i\}$ intera, che è <span class="str" data-str="omeomorfismo">omeomorfa</span> a $\mathbb{R}$ tramite la proiezione $(y,i)\mapsto y$ — l'identità, in sostanza, ristretta a quella componente. Quindi $X$ è localmente omeomorfo a $\mathbb{R}$: la seconda clausola della definizione di varietà è soddisfatta banalmente, componente per componente.</p>
+   <p>È anche di Hausdorff: due punti nella stessa componente si separano come in $\mathbb{R}$ (tp-01, tappa 03); due punti $(x,i)$ e $(y,j)$ con $i\ne j$ si separano con le due componenti stesse, che sono disgiunte per costruzione e ciascuna è un intorno del proprio punto. <b>Non c'è nessuna delle due patologie viste finora</b> — non è come la retta con due zeri di tp-01, dove la topologia proveniva da un incollamento mal fatto: qui non si incolla niente, e proprio per questo Hausdorff regge senza sforzo.</p>`},
+   {label:'E NON e a base numerabile', body:R`
+   <p>Supponiamo per assurdo che $\mathcal{B}$ sia una base numerabile per $X$. Fissa un punto $(0,i)$ in ciascuna componente $\mathbb{R}\times\{i\}$: l'intorno $(-1,1)\times\{i\}$ di questo punto è un aperto contenuto <i>interamente</i> in quella componente, e siccome $\mathcal{B}$ è una base, deve esistere $B_i\in\mathcal{B}$ con $(0,i)\in B_i\subseteq(-1,1)\times\{i\}$. Un tale $B_i$ è un sottoinsieme non vuoto della sola componente $i$, perché è contenuto in $(-1,1)\times\{i\}$ — non può quindi coincidere con nessun $B_j$ per $j\ne i$, dato che $\mathbb{R}\times\{i\}$ e $\mathbb{R}\times\{j\}$ sono disgiunte e $B_i,B_j$ sono entrambi non vuoti. Questo assegna a ciascuno degli $|I|$ indici un elemento <b>diverso</b> di $\mathcal{B}$, quindi $|\mathcal{B}|\ge|I|$. Ma $I$ è non numerabile e $\mathcal{B}$ per ipotesi lo è: contraddizione. <b>Nessuna base numerabile può esistere.</b></p>`}
+  ]},
+  {t:'plot', title:'Copie disgiunte di R: ciascuna ruba un pezzo di base tutto per se',
+   intro:R`Cinque delle $|I|$ copie di $\mathbb{R}$ che compongono $X$, disegnate come segmenti paralleli non comunicanti. Il cerchietto su ciascuna segna l'intorno $(-1,1)\times\{i\}$ del punto $(0,i)$: nessun elemento di base può attraversare da una copia all'altra.`,
+   plots:[
+    {kind:'func2d', f:'0', xr:[-3.4,3.4], yr:[-0.2,1.3], height:330, equal:false,
+     title:'cinque copie di R, e il punto di sospensione per le altre non numerabili',
+     segs:[{x1:-3, y1:0.1, x2:3, y2:0.1, col:'#8ea0b8', width:2.2, label:'R x {i_1}', lx:3.3, ly:0.1},
+           {x1:-3, y1:0.32, x2:3, y2:0.32, col:'#8ea0b8', width:2.2, label:'R x {i_2}', lx:3.3, ly:0.32},
+           {x1:-3, y1:0.54, x2:3, y2:0.54, col:'#8ea0b8', width:2.2, label:'R x {i_3}', lx:3.3, ly:0.54},
+           {x1:-3, y1:0.76, x2:3, y2:0.76, col:'#8ea0b8', width:2.2, label:'...', lx:3.3, ly:0.76},
+           {x1:-3, y1:0.98, x2:3, y2:0.98, col:'#8ea0b8', width:2.2, label:'(|I| non numerabile)', lx:3.55, ly:0.98}],
+     rings:[{r:0.26, x:0, y:0.1, col:'#5eead4', label:'(-1,1) x {i_1}', lx:0, ly:-0.08},
+            {r:0.26, x:0, y:0.32, col:'#5eead4', label:'', lx:0, ly:0.32},
+            {r:0.26, x:0, y:0.54, col:'#5eead4', label:'', lx:0, ly:0.54}],
+     marks:[{x:0, y:0.1, label:'', col:'#ff6b6b'},
+            {x:0, y:0.32, label:'', col:'#ff6b6b'},
+            {x:0, y:0.54, label:'', col:'#ff6b6b'}]}
+   ],
+   leggi:R`<p>Guarda i tre cerchietti, uno per riga: ciascuno è un intorno aperto del punto $(0,i)$ che <b>non esce</b> dalla propria copia. Qualunque elemento di base che testimoni per quel punto deve stare dentro al cerchietto, dunque dentro a quella sola riga. Due righe diverse non hanno niente in comune, quindi i due elementi di base che le testimoniano non possono essere lo stesso insieme.</p>
+   <p>Ed ecco il punto che la figura non può disegnare, perché richiede l'immaginazione e non la vista: ci sono tante righe quante $|I|$, <b>non numerabili</b>, e la riga coi puntini sospensivi ne nasconde infinite-più-che-numerabili altre. Ogni riga pretende il suo elemento di base privato. Una famiglia che debba contenere un elemento diverso per ciascuna di una quantità non numerabile di righe non può essere numerabile essa stessa — è lo stesso argomento con cui si mostra che $\mathbb{R}$ non si enumera: assegnare un'etichetta numerabile a ciascuna riga esaurirebbe $\mathbb{N}$ prima di esaurire $I$.</p>`},
+  {t:'prosa', title:'Dove questo si colloca rispetto a tp-01, e un limite dichiarato', tag:'sintesi', html:R`
+  <p>Tp-01 ha mostrato una varietà <b>non Hausdorff</b> (la retta con due zeri): un atlante legittimo la cui topologia indotta non separa due punti. Questa tappa mostra l'altra via di fallimento, <b>indipendente</b> dalla prima: uno spazio perfettamente Hausdorff, perfettamente localmente euclideo, che fallisce solo sulla taglia. Le due clausole della definizione — Hausdorff e base numerabile — non si implicano a vicenda in nessuna direzione, e un prerequisito che ne costruisse solo una lascerebbe l'altra come un'affermazione di fede.</p>
+  <p><b>Il limite, dichiarato.</b> Manetti osserva che l'ipotesi 3 (base numerabile) è equivalente alla paracompattezza <i>quando lo spazio ha al più un'infinità numerabile di componenti connesse</i>. Il nostro controesempio ha esattamente $|I|$ componenti connesse — non numerabili per costruzione — ed è il caso in cui quella equivalenza smette di valere nella forma debole: qui base numerabile e paracompattezza restano due modi <i>diversi</i> di escludere lo spazio, e verificare la paracompattezza di $X$ richiederebbe la nozione di raffinamento localmente finito, che aprirebbe un secondo apparato — quello di <span class="str" data-str="quoziente-topologico">tp-09</span> — che qui non serve: basta la sola via della base numerabile per escludere $X$ dalla classe delle varietà, e questo movimento si ferma lì.</p>`}
+]},
+
+/* ---------------- 05 · COSA SI EREDITA ---------------- */
+{ num:'05', title:'Cosa si eredita per sottospazio, e un limite che non si costruisce qui', meta:'sottospazio di uno spazio secondo-numerabile · prodotto finito · separabilita, e dove si ferma il parallelismo',
+  blocchi:[
+  {t:'prosa', title:'Il sottospazio, in tre righe', tag:'costruzione', html:R`
+  <p>Lee, Proposizione A.17(i): se $X$ è secondo-numerabile e $S\subseteq X$ è un sottospazio, allora $S$ è secondo-numerabile. La dimostrazione usa la parte (f) della stessa proposizione — se $\mathcal{B}$ è una base per $X$, allora $\mathcal{B}_S=\{B\cap S : B\in\mathcal{B}\}$ è una base per la topologia di sottospazio su $S$ — e il fatto che restringere una famiglia numerabile a un sottoinsieme non può aumentarne la cardinalità: $\mathcal{B}_S$ ha al più tanti elementi quanti $\mathcal{B}$.</p>
+  <p>Vale anche per il primo assioma, con lo stesso argomento applicato alle basi locali, e vale per <b>prodotti finiti</b>: se $X$ e $Y$ sono secondo-numerabili con basi $\mathcal{B}_X,\mathcal{B}_Y$, i rettangoli $\{B\times C : B\in\mathcal{B}_X, C\in\mathcal{B}_Y\}$ formano una base per $X\times Y$, numerabile perché prodotto di due famiglie numerabili. È questo, e non un'ipotesi aggiunta a parte, il motivo per cui $\mathbb{R}^n$ — il prodotto di $n$ copie di $\mathbb{R}$ — è secondo-numerabile: lo eredita da $\mathbb{R}$, un fattore alla volta, e tp-04 riprenderà questa stessa costruzione per lo spazio prodotto in generale.</p>`},
+  {t:'prosa', title:'Separabilita: una nozione vicina, e dove si ferma il confronto', tag:'trappola', html:R`
+  <p>$X$ è <b>separabile</b> se ha un sottoinsieme denso e numerabile — $\mathbb{Q}$ in $\mathbb{R}$ è l'esempio che tp-01 ha già usato per la densità. Secondo-numerabile implica separabile: prendendo un punto da ciascun elemento di una base numerabile si ottiene un insieme numerabile che incontra ogni aperto non vuoto (ogni aperto non vuoto contiene un elemento di base, per definizione di base, quindi contiene il punto scelto in esso o un punto equivalente abbastanza vicino).</p>
+  <p><b>Il viceversa, in generale, è falso</b> — esistono spazi separabili e persino primo-numerabili che non sono secondo-numerabili (la retta di Sorgenfrey, con la topologia generata dagli intervalli $[a,b)$, è l'esempio standard) — ma costruire quel controesempio richiede introdurre una topologia che il programma di recupero non elenca e che qui non serve a nessun movimento di geometria differenziale: è un debito dichiarato, non un buco nascosto. <b>Quello che conta per gd-01 è una sola direzione</b>, secondo-numerabile $\Rightarrow$ separabile, e quella è la dimostrazione appena data, completa.</p>`}
+]},
+
+/* ---------------- 06 · LA LINGUA DEL CORSO ---------------- */
+{ num:'06', title:'La lingua del corso: la terza clausola della Definizione 2.1', meta:'Manetti, punto 3 · la nota sulla paracompattezza · le due vie di fallimento, affiancate',
+  blocchi:[
+  {t:'prosa', title:'Il punto 3, e la nota che lo accompagna', tag:'grammatica', html:R`
+  <p>Manetti, Definizione 2.1 (stampata 18): una varietà topologica di dimensione $n$ è uno spazio $X$ di Hausdorff, localmente omeomorfo ad aperti di $\mathbb{R}^n$, e tale che <b>$X$ è a base numerabile</b>. La nota che segue immediatamente è quella già citata nella tappa 04: «l'ipotesi 3 è talvolta sostituita in letteratura assumendo che $X$ sia paracompatto […] le due ipotesi di numerabilità e paracompattezza coincidono se $X$ è connesso o se ha al più un'infinità numerabile di componenti connesse».</p>
+  <p>Questa nota, letta dopo aver costruito il controesempio della tappa 04, non è più una curiosità bibliografica: è la descrizione esatta del motivo per cui quel controesempio funziona. $X=\bigsqcup_{i\in I}\mathbb{R}$ ha $|I|$ componenti, non numerabili; la condizione «al più un'infinità numerabile di componenti» fallisce per costruzione, ed è per questo che base numerabile e paracompattezza restano due richieste scollegate su quello spazio — nessuna delle due implica l'altra, e la definizione di varietà le tratta come equivalenti solo nel caso (quasi sempre vero in pratica, mai vero nel nostro controesempio) in cui quella condizione regge.</p>`},
+  {t:'prosa', title:'Due patologie, due clausole, nessuna ridondanza', tag:'sintesi', html:R`
+  <p>Messe una accanto all'altra, le due tappe che hanno costruito controesempi — tp-01 tappa 05 per Hausdorff, questa per la base numerabile — dicono qualcosa che nessuna delle due dice da sola: <b>le tre clausole della Definizione 2.1 sono indipendenti</b>, e ciascuna esclude una famiglia di spazi che le altre due lasciano passare.</p>
+  <ul>
+   <li><b>Senza Hausdorff</b>: la retta con due zeri. Localmente euclidea (tp-01), a base numerabile (due sole carte), non Hausdorff.</li>
+   <li><b>Senza base numerabile</b>: l'unione disgiunta non numerabile di rette, di questa tappa. Localmente euclidea, Hausdorff, non a base numerabile.</li>
+   <li><b>Senza localmente euclideo</b>: quasi ogni spazio topologico — uno spazio discreto infinito, per dire, è Hausdorff e a base numerabile se l'insieme è numerabile, ma non è localmente omeomorfo a nessun $\mathbb{R}^n$ con $n\ge1$ perché ogni punto è isolato.</li>
+  </ul>
+  <p>Nessuna delle tre clausole si può dedurre dalle altre due: è per questo che la Definizione 2.1 le elenca tutte, e un corso che ne saltasse una starebbe, silenziosamente, ammettendo oggetti patologici fra le proprie varietà.</p>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'contare una base finita · il confine fra numerabile e non numerabile nelle unioni disgiunte · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · Una base finita esplicita per un quadrato', html:R`
+  <p>Nel piano, considera la base ristretta alle palle euclidee di raggio $1$ centrate nei punti a coordinate intere $(a,b)$ con $a,b\in\{-2,-1,0,1,2\}$. Quante palle ci sono in questa famiglia? Mostra che il loro insieme ricopre il quadrato $[-1,1]\times[-1,1]$, e spiega perché questo NON contraddice il fatto che una base per $\mathbb{R}^2$ debba contenere palle di ogni raggio razionale, non solo raggio $1$.</p>`,
+   sol:R`<p>Le coppie $(a,b)$ con $a,b\in\{-2,-1,0,1,2\}$ sono $5\cdot5=25$, quindi ci sono $25$ palle nella famiglia. Ogni punto $(x,y)\in[-1,1]\times[-1,1]$ dista al più $\sqrt2\approx1{,}41$ dal punto intero più vicino fra quelli elencati (quello ottenuto arrotondando $x$ e $y$ al più vicino intero in $\{-2,\dots,2\}$), e in generale dista meno di $1$ dalla palla centrata lì <i>se</i> l'arrotondamento è a distanza minore di $1$ — cosa che va verificata caso per caso, ma che per il quadrato piccolo $[-1,1]^2$ vale sempre, perché ogni suo punto ha un intero a distanza al più $\tfrac{\sqrt2}{2}<1$ in ciascuna coordinata. Quindi le $25$ palle coprono il quadrato.</p>
+   <p><b>Perché non basta come base per $\mathbb{R}^2$.</b> Questa famiglia finita non soddisfa la condizione 1 della tappa 01 su tutto $\mathbb{R}^2$ (non copre i punti lontani dall'origine) né dà intorni arbitrariamente piccoli — serve ESATTAMENTE la famiglia numerabile, raggio razionale e centro razionale, di tp-01 tappa 02, perché una base vera deve generare <b>ogni</b> aperto, compresi quelli piccoli a piacere attorno a ogni punto. Questo esercizio mostra solo un pezzo finito e locale di quella costruzione, utile per l'intuizione e non sostitutivo di essa.</p>`},
+  {t:'esercizio', title:'2 · Unione disgiunta NUMERABILE, e perche qui la base numerabile sopravvive', html:R`
+  <p>Ripeti la costruzione della tappa 04 ma con $I=\mathbb{N}$ al posto di un insieme non numerabile: $X'=\bigsqcup_{n\in\mathbb{N}}\mathbb{R}$. Mostra che $X'$ <b>è</b> secondo-numerabile, e individua esattamente dove l'argomento della tappa 04 si rompe in questo caso.</p>`,
+   sol:R`<p>Ogni copia $\mathbb{R}\times\{n\}$ ha una base numerabile (le palle razionali di tp-01, trasportate su quella componente). L'unione di tutte queste basi, al variare di $n\in\mathbb{N}$, è ancora numerabile: un'unione numerabile di famiglie numerabili è numerabile — se, per fissare le idee, ciascuna delle (qui, infinite) componenti avesse anche solo $5$ elementi di base «importanti» e ce ne fossero $10$ componenti, si avrebbero $10\cdot5=50$ elementi, un numero finito; con infinite componenti numerabili e infiniti elementi ciascuna, il totale resta numerabile per lo stesso principio, solo applicato a cardinalità infinite invece che a numeri finiti. Questa unione è una base per $X'$: ogni punto ha un intorno dentro la propria componente, e lì la base locale numerabile di quella componente basta.</p>
+   <p><b>Dove si rompe l'argomento della tappa 04.</b> Lì la dimostrazione assegnava un elemento di base <b>diverso</b> a ciascun indice $i\in I$, e concludeva $|\mathcal{B}|\ge|I|$. Con $I=\mathbb{N}$ questa conclusione dice solo $|\mathcal{B}|\ge\aleph_0$, che è vero e non è affatto una contraddizione — una base numerabile ha esattamente questa cardinalità. Il confine fra i due casi non è «unione disgiunta sì o no»: è se l'insieme degli indici $I$ è numerabile o non numerabile. È lo stesso confine, enunciato nello stesso linguaggio, dell'assioma 3 di tp-01: lì l'intersezione <b>finita</b> si comportava bene e quella infinita no; qui l'unione <b>numerabile</b> si comporta bene e quella non numerabile no.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Una famiglia di sottoinsiemi che copre $X$ ma non soddisfa la seconda condizione delle basi: che cosa va storto, esattamente, nella famiglia delle sue unioni?</li>
+  <li>Perché secondo-numerabile implica primo-numerabile e non viceversa? Indica dove, nella dimostrazione dell'implicazione, si usa che la base è UNA SOLA per tutto lo spazio.</li>
+  <li>Nel controesempio della tappa 04, quale delle tre clausole della Definizione 2.1 regge e quali cadono? E nella retta con due zeri di tp-01?</li>
+  <li>Perché l'argomento della Proposizione A.16 (Lindelöf) non si applica, parola per parola, come dimostrazione che $X$ è compatto?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>L'intersezione di due unioni di elementi della famiglia può non essere, a sua volta, un'unione di elementi della famiglia — manca un elemento «testimone» contenuto nell'intersezione e nella famiglia stessa. La famiglia delle unioni resta chiusa per unione arbitraria ma non necessariamente per intersezione finita, quindi non è una topologia.</li>
+   <li>Si usa nel passo in cui si estrae la sottofamiglia $\{B\in\mathcal{B}:p\in B\}$: è numerabile perché è un <i>sottoinsieme</i> di un'unica base globale numerabile $\mathcal{B}$, la stessa per ogni $p$. Senza una base globale comune, le basi locali di punti diversi potrebbero richiedere insiemi di indici scorrelati, e non c'è modo di incollarli in una famiglia numerabile unica — è esattamente il motivo per cui il controesempio della tappa 04 è primo-numerabile ovunque e non secondo-numerabile.</li>
+   <li>Nel controesempio della tappa 04: Hausdorff regge, localmente euclideo regge, base numerabile cade. Nella retta con due zeri (tp-01): localmente euclideo regge (anzi, a base numerabile: due sole carte), Hausdorff cade.</li>
+   <li>Perché l'argomento estrae un sottoricoprimento <b>numerabile</b>, scegliendo un $U_B$ per ciascun elemento di una base <i>numerabile</i> $\mathcal{B}_0$; la compattezza chiederebbe di scendere a un sottoricoprimento <b>finito</b>, e niente nell'argomento garantisce che la famiglia numerabile $\{U_B\}$ si possa ridurre a una finita — e infatti, su $\mathbb{R}$, non si può: il ricoprimento per intervalli unitari della tappa 03 non ha nessun sottoricoprimento finito.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove la numerabilita riappare nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Una base è una famiglia di aperti che genera tutta la topologia per unione; chiederne una numerabile è una richiesta che si può formulare in ogni punto (primo-numerabile) o su tutto lo spazio insieme (secondo-numerabile), e la seconda implica la prima ma non viceversa. Quando esiste, una base numerabile compra una proprietà precisa — ogni ricoprimento aperto si riduce a uno numerabile — che è il motivo tecnico per cui un atlante di varietà si può sempre scegliere numerabile, e con un atlante numerabile si possono fare induzioni, somme, limiti indicizzati da $\mathbb{N}$.</p>
+  <p><b>Ciò che resta da fare, e che tp-02 non può fare.</b> Sapere che una base numerabile esiste non dice ancora come usarla per <i>incollare</i> oggetti costruiti localmente in un oggetto globale — quello è il lavoro delle partizioni dell'unità, che tp-09 costruisce usando esattamente la Proposizione A.16 di questa tappa come primo passo. E sapere che Hausdorff e base numerabile sono indipendenti non dice ancora <i>come si rompe</i> Hausdorff quando si incollano spazi per quoziente — quello è tp-05 e tp-06.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>La numerabilità come confine di trattabilità</b>: non ogni struttura troppo grande per essere enumerata si comporta come ci si aspetta.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Lo spazio degli stati di un sistema quantistico è uno spazio di Hilbert, e l'ipotesi standard — quasi sempre lasciata implicita — è che sia <b>separabile</b>: ha un sottoinsieme denso numerabile, esattamente la nozione della tappa 05. È ciò che garantisce che esista una base numerabile di autostati (gli «stati $|n\rangle$» che si sommano con $\sum_n$), e la Proposizione A.16 di questa tappa è il motivo topologico per cui quella somma numerabile è legittima: senza separabilità, uno spazio di Hilbert esiste comunque ma «contare» i suoi stati non avrebbe più senso allo stesso modo.`},
+    {dove:'Meccanica<br>statistica', txt:R`Un ricoprimento dello spazio delle fasi con celle di volume fissato è numerabile solo se lo spazio è secondo-numerabile — ed è proprio la base numerabile di $\mathbb{R}^{6N}$, prodotto finito di rette come nella tappa 05, che rende sensata l'operazione di «contare le celle» alla base della definizione di entropia di Boltzmann, prima ancora di passare al limite continuo.`},
+    {dove:'Relativita<br>generale', txt:R`La richiesta che lo spazio-tempo sia una varietà — quindi a base numerabile — esclude patologie come l'unione disgiunta della tappa 04: senza quella clausola, nulla impedirebbe uno spazio-tempo con una quantità non numerabile di «universi paralleli» disconnessi che nessuna equazione differenziale potrebbe mai collegare, perché le equazioni di campo si risolvono componente per componente e non avrebbero modo di scambiare informazione fra le componenti.`},
+    {dove:'Teoria<br>degli insiemi', txt:R`Il confine fra «numerabile» e «non numerabile» che la tappa 04 usa per escludere il controesempio è lo stesso argomento diagonale di Cantor applicato alla cardinalità, in una forma topologica: non si dimostra che $\mathbb{R}$ non si enumera contando i suoi elementi, si dimostra che una famiglia che deve assegnare un oggetto diverso a ciascuno di una quantità non numerabile di indici non può essere essa stessa numerabile — lo schema logico è identico.`}
+   ],
+   domanda:R`La primo-numerabilità è una proprietà locale, verificabile punto per punto; la secondo-numerabilità è globale, e la tappa 04 ha appena mostrato che la prima non implica la seconda. <b>Domanda da portare avanti:</b> ogni volta che in geometria differenziale un enunciato vale «localmente», chiediti se la dimostrazione che lo estende «globalmente» usa davvero una base numerabile per tutto lo spazio, o solo una base locale in ogni punto. Le partizioni dell'unità di tp-09 sono il caso in cui questa domanda ha la risposta più importante del corso.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-02-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-02 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-02-basi-e-numerabilita.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

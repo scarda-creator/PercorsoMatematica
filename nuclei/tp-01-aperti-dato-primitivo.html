@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-01 — Gli aperti come dato primitivo: la topologia che si dichiara invece di dedurla dalle distanze</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-01 — Gli aperti come dato primitivo: la topologia che si dichiara invece di dedurla dalle distanze</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-01: Gli aperti come dato primitivo: la topologia che si dichiara invece di dedurla dalle distanze <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-01 — gli aperti come dato primitivo
+identita:  in R^n un aperto si riconosce con le palle; in uno spazio qualunque non ci sono
+           palle, e allora si rovescia la costruzione — si DICHIARA quali insiemi sono
+           aperti, e si chiede solo che unioni arbitrarie e intersezioni finite restino
+           aperte. Tutto il resto della topologia e' conseguenza di questa scelta
+copre:     1.1 del programma di recupero
+serve:     — (e' la radice del prerequisito)
+apre:      gd-01 — «localmente come R^n» non ha senso finche' non si sa cos'e' un aperto
+           fuori da R^n
+strumenti: omeomorfismo, compattezza, quoziente-topologico
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A «Review of Topology»
+           (stampate 596-602): e' LA SPINA, l'unico testo in casa che definisce aperto,
+           intorno, interno, chiusura, frontiera e Hausdorff in forma di richiamo.
+           Abate, Tovena — Geometria Differenziale, §2.1 (stampate 60-67): NON e' un
+           capitolo di topologia generale, ed e' per questo che serve — costruisce la
+           topologia come CONSEGUENZA dell'atlante (Prop. 2.1.8), cioe' nella direzione
+           opposta a Lee. Manetti — appunti GD 2008-09 (stampata 18): la Definizione 2.1
+           di varieta' topologica nella lingua esatta del corso.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.1
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"01","appare":"\\tau\\subseteq\\mathcal{P}(X)",
+  "perche":"e' la notazione con cui si dichiara che una topologia e' una famiglia di sottoinsiemi di X: si fissa un simbolo, non si calcola un valore"},
+
+ {"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},
+  "dove":"01","appare":"\\bigcap_{n\\ge1}(-\\tfrac1n,\\tfrac1n)=\\{0\\}"},
+
+ {"tipo":"uguale","sinistra":"Min(3/10-0, 1-3/10)","vale":"3/10",
+  "dove":"02","appare":"\\min\\{\\tfrac3{10}-0,\\;1-\\tfrac3{10}\\}=\\tfrac3{10}"},
+
+ {"tipo":"disuguaglianza","sinistra":"Abs(sqrt(2)/2-7/10)","relazione":"<","destra":"1/10",
+  "dove":"02","appare":"|\\tfrac{\\sqrt2}{2}-\\tfrac7{10}|<\\tfrac1{10}"},
+
+ {"tipo":"numero","espr":"1-sqrt(2)/2","vale":"0.293",
+  "dove":"02","appare":"1-\\tfrac{\\sqrt2}{2}\\approx0{,}293"},
+
+ {"tipo":"uguale","sinistra":"2**4","vale":"16",
+  "dove":"03","appare":"2^{4}=16"},
+
+ {"tipo":"uguale","sinistra":"(3/5)**2+(4/5)**2","vale":"1",
+  "dove":"04","appare":"(\\tfrac35)^2+(\\tfrac45)^2=1"},
+
+ {"tipo":"limite","espr":"1-1/n","var":"n","a":"oo","vale":"1","ipotesi":{"n":"positive"},
+  "dove":"04","appare":"\\lim_{n\\to\\infty}(1-\\tfrac1n)=1"},
+
+ {"tipo":"disuguaglianza","sinistra":"1/3","relazione":"<","destra":"7/20",
+  "dove":"04","appare":"\\tfrac13<\\tfrac7{20}<\\tfrac25"},
+
+ {"tipo":"disuguaglianza","sinistra":"7/20","relazione":"<","destra":"2/5",
+  "dove":"04","appare":"\\tfrac13<\\tfrac7{20}<\\tfrac25"},
+
+ {"tipo":"somma","espr":"2**k/3**(k+1)","var":"k","da":"0","a":"oo","vale":"1",
+  "ipotesi":{"k":"integer"},
+  "dove":"04","appare":"\\sum_{k\\ge0}\\frac{2^k}{3^{k+1}}=1"},
+
+ {"tipo":"simbolico","dove":"05","appare":"\\varphi_\\alpha(A\\cap U_\\alpha)",
+  "perche":"e' l'oggetto su cui poggia l'enunciato di Abate-Tovena Prop. 2.1.8 — l'immagine in R^n della parte di A che cade nel dominio della carta: si nomina un insieme, non si calcola"},
+
+ {"tipo":"simbolico","dove":"06","appare":"\\varphi:U\\to V\\subseteq\\mathbb{R}^n",
+  "perche":"e' la notazione della carta locale come la scrive Manetti nella Definizione 2.1: si fissa una notazione, non si calcola nulla"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Topologia · sezione 1.1 del programma di recupero · la radice del prerequisito',
+  blocchi:[
+  {t:'prosa', title:'La parola che manca, e dove manca', tag:'architettura', html:R`
+  <p>La definizione di varietà topologica dice: <i>uno spazio in cui ogni punto ha un <b>intorno aperto</b> omeomorfo a un <b>aperto</b> di $\mathbb{R}^n$</i>. La parola «aperto» compare due volte e significa due cose diverse. La seconda la sai dal primo anno: un sottoinsieme $A\subseteq\mathbb{R}^n$ è aperto se attorno a ogni suo punto c'è una pallina tutta contenuta in $A$. <b>La prima no</b>: lo spazio di cui si parla non ha nessuna distanza, quindi non ha palline, quindi quella frase — letta con l'unica definizione di «aperto» che si possiede — non dice niente.</p>
+  <p>Questo movimento riempie quel vuoto, e lo riempie nel modo che a prima vista sembra una resa: <b>si smette di <i>riconoscere</i> gli aperti e si comincia a <i>dichiararli</i></b>. Si dice quali insiemi sono aperti, si chiede che la famiglia dichiarata rispetti tre regole, e tutto il resto — intorno, chiuso, chiusura, frontiera, continuità, convergenza — si ricostruisce da lì senza mai più nominare una distanza.</p>
+  <p>Il guadagno non è astratto. In geometria differenziale si lavora continuamente su spazi che <b>non stanno dentro niente</b>: lo spazio-tempo della relatività generale, lo spazio delle configurazioni di un pendolo doppio, il quoziente di una sfera per l'identificazione degli antipodi. Su nessuno di questi c'è una distanza naturale e privilegiata, e tutte le volte che se ne sceglie una si sta aggiungendo struttura che non serve. <b>La topologia è esattamente ciò che resta di uno spazio metrico quando si butta la metrica e si tiene quello che la metrica permetteva di dire.</b></p>
+  <div class="note"><b>A che serve questo prerequisito, in una riga.</b> Il programma di recupero elenca nella sezione 1.1 «spazi topologici, aperti, chiusi, intorni, chiusura, parte interna». Non sono nozioni da sapere per un esame — non c'è nessun esame di topologia. Sono le parole che il corso di Geometria Differenziale usa dalla <i>prima</i> lezione senza definirle, e questo movimento esiste per una sola ragione: che aprendo la definizione di varietà non ci sia nessuna parola mai vista.</div>`},
+  {t:'prosa', title:'Tre libri, e uno di essi non dice quello che ti aspetti', tag:'regola operativa', html:R`
+  <p>Conviene sapere subito cosa aspettarsi da ciascuna delle tre fonti, perché una sorpresa è garantita.</p>
+  <ul>
+   <li><b>Lee, <i>Introduction to Smooth Manifolds</i>, Appendix A «Review of Topology»</b> (stampate 596-602) è la spina di questo movimento. Sono ventun pagine scritte <i>apposta</i> come richiamo per chi fa varietà: Lee dichiara in apertura che il libro «is written for readers who have already completed a rigorous course in basic topology», e nell'appendice «we state the most important definitions and results, <b>with most of the proofs left as exercises</b>». È in inglese, ed è la ragione per cui questo movimento esiste anche: quelle dimostrazioni lasciate per esercizio sono quelle che servono, e qui si fanno;</li>
+   <li><b>Abate-Tovena, <i>Geometria Differenziale</i>, §2.1</b> (stampate 60-67) <b>non è un capitolo di topologia generale</b>, e non contiene nessuna delle definizioni della sezione 1.1. Questo non è un buco: è il punto più interessante del movimento. Abate e Tovena dichiarano che partiranno «da un insieme, senza assumere (contrariamente a quanto fatto in molti altri testi) l'esistenza <i>a priori</i> di una topologia», e poi dimostrano che la topologia <b>nasce dall'atlante</b> ed è unica. È la direzione opposta a Lee, e messe una accanto all'altra le due direzioni spiegano <i>perché</i> gli assiomi di topologia sono quei tre e non altri;</li>
+   <li><b>Manetti, appunti di Geometria Differenziale 2008-09</b> (stampata 18) dà la Definizione 2.1 di varietà topologica nella lingua esatta del corso che stai seguendo, con l'Osservazione 2.1 subito sotto — il controesempio della retta con due zeri — che è il motivo per cui quella definizione ha tre richieste e non una.</li>
+  </ul>
+  <p><b>E un limite, dichiarato invece che aggirato</b>: nessuna delle tre è un trattato di topologia generale. Gli argomenti ci sono tutti, ma non hanno lo spazio di un corso dedicato, e in due punti si vede — la verifica che la topologia metrica <i>sia</i> una topologia e la caratterizzazione della chiusura sono esercizi in Lee (A.1, A.9, A.11) e non compaiono affatto negli altri due. Sono tre righe ciascuno e qui si dimostrano, perché un prerequisito che scrive «esercizio» nel punto in cui serve il risultato non è un prerequisito.</p>`}
+]},
+
+/* ---------------- 01 · I TRE ASSIOMI ---------------- */
+{ num:'01', title:'I tre assiomi, e perche l intersezione e finita', meta:'la famiglia dichiarata · unione arbitraria · intersezione finita · il controesempio che fissa il confine',
+  blocchi:[
+  {t:'prosa', title:'La definizione, nella forma di Lee', tag:'grammatica', html:R`
+  <p>Sia $X$ un insieme. Una <b>topologia</b> su $X$ è una famiglia $\tau$ di sottoinsiemi di $X$ — i cui elementi si chiamano <b>aperti</b> — tale che</p>
+  <ol>
+   <li>$X$ e $\emptyset$ sono aperti;</li>
+   <li>l'unione di una famiglia <b>qualunque</b> di aperti è aperta;</li>
+   <li>l'intersezione di una famiglia <b>finita</b> di aperti è aperta.</li>
+  </ol>
+  <p>La coppia $(X,\tau)$ si chiama <b>spazio topologico</b>; quando la topologia è sottintesa si dice semplicemente «$X$ è uno spazio topologico». Formalmente $\tau\subseteq\mathcal{P}(X)$, cioè una topologia è un elemento dell'insieme delle parti delle parti di $X$: un oggetto grande, e il fatto che sia grande è tutto il contenuto della cosa — <b>su uno stesso insieme ci sono molte topologie, e scegliere una topologia è un atto, non una scoperta</b>.</p>
+  <p>Due cose che a questa definizione <b>non</b> si chiedono, e che sono il motivo per cui è utile. Non si chiede che gli aperti siano «piccoli», «connessi» o «senza bordo»: non ci sono parole per dirlo, e non servono. Non si chiede nemmeno che un punto stia in un aperto minimo che lo contiene: quell'oggetto in generale non esiste, e la sua assenza è ciò che rende la topologia più debole di una metrica e quindi applicabile dove una metrica non c'è.</p>
+  <p><b>La domanda da porsi davanti a un'asimmetria, e questa definizione ne ha una vistosa</b>: l'unione è arbitraria, l'intersezione è finita. Perché?</p>`},
+  {t:'reveal', title:'Perche l intersezione non puo essere arbitraria', tag:'first principles', steps:[
+   {label:'Il controesempio, in R', body:R`
+   <p>In $\mathbb{R}$ con la nozione usuale di aperto, prendi gli intervalli $I_n=(-\tfrac1n,\tfrac1n)$ per $n=1,2,3,\dots$ Ciascuno è aperto: attorno a ogni suo punto c'è un intervallino contenuto in esso. Ma la loro intersezione è</p>
+   $$\bigcap_{n\ge1}\left(-\tfrac1n,\tfrac1n\right)=\{0\}$$
+   <p>— perché un numero $x\ne0$ ha $|x|>0$, e per $n$ abbastanza grande $\tfrac1n<|x|$, quindi $x$ cade fuori da $I_n$; mentre $0$ sta in tutti. Il passaggio che regge il conto è che $\tfrac1n$ tende a zero: la successione dei raggi non si ferma su un valore positivo, e non lasciando niente attorno allo zero riduce l'intersezione al solo punto.</p>
+   <p>E $\{0\}$ <b>non è aperto</b>: nessun intervallo attorno a $0$ è contenuto in $\{0\}$, perché ogni intervallo contiene infiniti altri punti. Quindi una topologia chiusa per intersezioni arbitrarie non potrebbe mai essere la topologia di $\mathbb{R}$.</p>`},
+   {label:'Che cosa si romperebbe, in positivo', body:R`
+   <p>L'argomento al rovescio è più istruttivo del controesempio. <b>Se le intersezioni arbitrarie fossero aperte, ogni punto avrebbe un aperto minimo che lo contiene</b>: basterebbe intersecare tutti gli aperti che lo contengono. Uno spazio con quella proprietà non ha il concetto di «arbitrariamente vicino»: la nozione di limite diventa banale, perché una successione converge a $p$ se e solo se entra definitivamente nell'aperto minimo di $p$ e lì si ferma.</p>
+   <p>Il punto non è tecnico: <b>è nella clausola «finita» che sta tutta l'analisi</b>. La finitezza è ciò che impedisce il collasso, e un passaggio al limite ha senso solo perché gli intorni di un punto si possono rimpicciolire indefinitamente senza che la famiglia si chiuda su un elemento minimo.</p>`},
+   {label:'E perche l unione invece e libera', body:R`
+   <p>Perché un aperto esprime una condizione <i>locale</i>: «stare in $A$» è una proprietà che si verifica guardando un intorno del punto, e se $x$ sta in uno degli $A_i$ allora l'intorno che testimonia per $A_i$ testimonia anche per l'unione. Non c'è niente da coordinare fra gli $A_i$, quindi non c'è nessuna ragione per limitarne il numero.</p>
+   <p>Con l'intersezione invece il testimone va costruito: servono tutti gli intorni, uno per ciascun $A_i$, e <b>bisogna prendere il più piccolo</b>. Su una famiglia finita il minimo esiste ed è positivo; su una famiglia infinita l'estremo inferiore può essere zero, e un intorno di raggio zero non è un intorno. <b>È esattamente qui, e solo qui, che la finitezza entra</b> — ed è il primo esempio dello schema che domina tutta la geometria differenziale: <i>una proprietà locale si estende a un numero finito di pezzi senza pagare niente, a un numero infinito di pezzi solo sotto ipotesi</i>.</p>`}
+  ]},
+  {t:'plot', title:'Le palle che si stringono: dove il raggio minimo svanisce',
+   intro:R`La retta reale, e sopra di essa i primi sei intervalli $I_n=(-\tfrac1n,\tfrac1n)$, disegnati a quote diverse per poterli distinguere. Ciascuno è aperto; l'unico punto che appartiene a tutti è lo zero.`,
+   plots:[
+    {kind:'func2d', f:'0', xr:[-1.25,1.25], yr:[-0.18,1.12], height:330, equal:false,
+     title:'I_n = (-1/n, 1/n) per n = 1..6: la famiglia e infinita e il raggio non si ferma',
+     segs:[{x1:-1, y1:1.0, x2:1, y2:1.0, col:'#5eead4', width:3, label:'n=1', lx:1.12, ly:1.0},
+           {x1:-0.5, y1:0.84, x2:0.5, y2:0.84, col:'#5eead4', width:3, label:'n=2', lx:0.66, ly:0.84},
+           {x1:-0.3333, y1:0.68, x2:0.3333, y2:0.68, col:'#8ee0c8', width:3, label:'n=3', lx:0.49, ly:0.68},
+           {x1:-0.25, y1:0.52, x2:0.25, y2:0.52, col:'#b7d9b0', width:3, label:'n=4', lx:0.41, ly:0.52},
+           {x1:-0.2, y1:0.36, x2:0.2, y2:0.36, col:'#d8a13a', width:3, label:'n=5', lx:0.36, ly:0.36},
+           {x1:-0.1667, y1:0.2, x2:0.1667, y2:0.2, col:'#d8a13a', width:3, label:'n=6', lx:0.33, ly:0.2},
+           {x1:0, y1:0.2, x2:0, y2:0, col:'#ff6b6b', width:1.4, dash:true}],
+     marks:[{x:0, y:0, label:'0 — il solo punto comune', col:'#ff6b6b'},
+            {x:1, y:1.0, label:'', col:'#5eead4', hollow:true},
+            {x:-1, y:1.0, label:'', col:'#5eead4', hollow:true}]}
+   ],
+   leggi:R`<p>Guarda i due cerchietti vuoti agli estremi del primo segmento: segnano che gli estremi <b>non</b> appartengono all'intervallo, e sono la ragione per cui ciascun $I_n$ è aperto. Ora scendi con lo sguardo: i segmenti si accorciano e <b>nessuno di essi è l'ultimo</b>. La figura non mostra l'intersezione — non si può disegnare un'intersezione infinita — ma mostra la cosa che la determina: <b>la successione delle lunghezze non ha un minimo positivo</b>.</p>
+   <p>Ed è questo il punto da portare via, perché è la forma di quasi tutti gli argomenti che seguiranno. Se la famiglia fosse finita, fra i segmenti disegnati ce ne sarebbe uno <i>più corto di tutti</i>, e l'intersezione sarebbe quello: aperta. È l'esistenza del minimo, non la cardinalità in sé, a fare la differenza — e si vede anche il contrario: se i raggi fossero $\tfrac12+\tfrac1n$ invece di $\tfrac1n$, la famiglia resterebbe infinita ma i segmenti scenderebbero verso una lunghezza <b>positiva</b>, e l'intersezione $(-\tfrac12,\tfrac12)$ sarebbe aperta. <b>L'assioma chiede «finita» perché è l'ipotesi più semplice che garantisce il minimo</b>, non perché l'infinito sia proibito.</p>`}
+]},
+
+/* ---------------- 02 · LA TOPOLOGIA METRICA ---------------- */
+{ num:'02', title:'La topologia metrica: come rientra tutto quello che sapevi', meta:'la palla aperta e aperta · la disuguaglianza triangolare come dimostrazione · le palle razionali',
+  blocchi:[
+  {t:'prosa', title:'La costruzione, e il controllo che nessuno dei tre libri fa', tag:'costruzione', html:R`
+  <p>Una <b>metrica</b> su un insieme $M$ è una funzione $d:M\times M\to\mathbb{R}$ con tre proprietà (Lee, Example A.5): positività — $d(x,y)\ge0$ con uguaglianza solo se $x=y$ —, simmetria, e <b>disuguaglianza triangolare</b> $d(x,z)\le d(x,y)+d(y,z)$. La <b>palla aperta</b> di centro $x$ e raggio $r>0$ è l'insieme dei punti a distanza minore di $r$:</p>
+  $$B_r(x)=\{y\in M:\ d(x,y)<r\}.$$
+  <p>La <b>topologia metrica</b> si definisce dichiarando aperto un insieme $S\subseteq M$ quando per ogni $x\in S$ esiste $r>0$ con $B_r(x)\subseteq S$. È la definizione del primo anno, promossa a caso particolare — e <b>va verificato che sia davvero una topologia</b>, cosa che Lee lascia implicita e che gli altri due testi non trattano affatto.</p>
+  <p><b>La verifica, per intero.</b> $M$ è aperto (ogni $r$ va bene) e $\emptyset$ lo è per vacuità. Se $\{S_i\}$ sono aperti e $x$ sta nell'unione, allora $x\in S_{i_0}$ per qualche indice, e la palla che testimonia per $S_{i_0}$ sta nell'unione: <b>unione arbitraria</b>, nessun costo. Se $S_1,\dots,S_k$ sono aperti e $x$ sta in tutti, ci sono $r_1,\dots,r_k>0$ con $B_{r_j}(x)\subseteq S_j$; posto $r=\min\{r_1,\dots,r_k\}$, che è <b>positivo perché i raggi sono in numero finito</b>, si ha $B_r(x)\subseteq S_1\cap\cdots\cap S_k$. È l'argomento della tappa precedente, ora in forma di dimostrazione: la clausola «finita» degli assiomi è precisamente ciò che rende questo minimo positivo.</p>`},
+  {t:'reveal', title:'Che una palla aperta sia aperta non e una tautologia', tag:'costruzione', steps:[
+   {label:'Il problema', body:R`
+   <p>C'è una cosa che il nome nasconde e che va dimostrata: <b>la palla aperta è un aperto della topologia metrica</b>. Non è automatico. La definizione di aperto chiede che attorno a <i>ogni</i> punto di $B_r(x)$ ci stia una palla contenuta in $B_r(x)$, e un punto $y$ vicino al bordo ha poco spazio. Quanto? Esattamente $r-d(x,y)$, e il fatto che quella quantità basti <b>è</b> la disuguaglianza triangolare.</p>`},
+   {label:'La dimostrazione', body:R`
+   <p>Sia $y\in B_r(x)$, poni $s=d(x,y)<r$ e $\rho=r-s>0$. Se $z\in B_\rho(y)$ allora</p>
+   $$d(x,z)\le d(x,y)+d(y,z)<s+\rho=r,$$
+   <p>cioè $z\in B_r(x)$. Quindi $B_\rho(y)\subseteq B_r(x)$, e $y$ era arbitrario. <b>La triangolare non è usata come stima ma come costruzione</b>: fornisce il raggio, e il raggio è ciò che la definizione di aperto richiede di esibire.</p>`},
+   {label:'Il caso concreto da tenere in testa', body:R`
+   <p>In $\mathbb{R}^2$, con $x$ l'origine, $r=1$ e $y=(\tfrac12,\tfrac12)$: la distanza è $\tfrac{\sqrt2}{2}$, e il raggio che resta è $1-\tfrac{\sqrt2}{2}\approx0{,}293$. Non è molto, ed è positivo: basta. Lo stesso in $\mathbb{R}$ con l'intervallo $(0,1)$ e il punto $\tfrac3{10}$ — il raggio buono è $\min\{\tfrac3{10}-0,\;1-\tfrac3{10}\}=\tfrac3{10}$, cioè la distanza dall'estremo più vicino, e questo mostra che <b>ogni intervallo aperto è aperto</b> senza bisogno di altro.</p>`}
+  ]},
+  {t:'plot', title:'Il raggio che resta: perche una palla aperta e un aperto',
+   intro:R`Un aperto irregolare del piano (la curva continua è il suo bordo, che non gli appartiene), la palla $B_r(x)$ che ci sta dentro, e un punto $y$ vicino al bordo con la sua palla $B_\rho(y)$ di raggio $\rho=r-d(x,y)$.`,
+   plots:[
+    {kind:'curve', x:'1.75*cos(t)+0.32*cos(3*t)', y:'1.35*sin(t)+0.26*sin(2*t)', tr:[0,6.2832],
+     height:360, equal:true, xr:[-2.5,2.6], yr:[-1.9,1.9],
+     title:'il bordo dell aperto, la palla B_r(x), e la palla B_rho(y) con rho = r - d(x,y)',
+     rings:[{r:0.95, x:-0.15, y:0.05, col:'#5eead4', label:'B_r(x)', lx:-0.15, ly:1.0},
+            {r:0.42, x:0.62, y:0.3, col:'#d8a13a', dash:true, label:'B_rho(y)', lx:0.95, ly:0.72}],
+     segs:[{x1:-0.15, y1:0.05, x2:0.62, y2:0.3, col:'#b98cff', width:1.6, label:'s = d(x,y)', ly:0.04},
+           {x1:0.62, y1:0.3, x2:1.04, y2:0.3, col:'#ff6b6b', width:1.6, label:'rho', ly:0.42}],
+     marks:[{x:-0.15, y:0.05, label:'x', col:'#5eead4', left:true},
+            {x:0.62, y:0.3, label:'y', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<p>Da guardare: il cerchio tratteggiato attorno a $y$ <b>tocca</b> il cerchio continuo attorno a $x$ senza uscirne. Non è un caso del disegno, è il contenuto della dimostrazione — $\rho$ è scelto come la distanza che <i>manca</i> per arrivare al bordo di $B_r(x)$, e la disuguaglianza triangolare dice che quella distanza non si può superare passando per $y$.</p>
+   <p>E da imparare, che è un'altra cosa: $\rho$ <b>dipende da $y$</b>, e si annulla quando $y$ si avvicina al bordo. Non esiste nessun raggio che vada bene per tutti i punti contemporaneamente. <b>Questa è la differenza fra «aperto» e «uniformemente spesso»</b>, e in un corso di varietà è la differenza fra una proprietà locale — vera attorno a ogni punto, con un testimone che cambia da punto a punto — e una proprietà uniforme, che richiede un testimone solo. Quasi tutte le difficoltà di geometria differenziale nascono nel passaggio dalla prima alla seconda, e lo strumento che lo compie è la <span class="str" data-str="compattezza">compattezza</span>.</p>`},
+  {t:'prosa', title:'Le palle razionali, e perche R^n e un caso fortunato', tag:'first principles', html:R`
+  <p>Un fatto di $\mathbb{R}^n$ che sembra un dettaglio e che è invece la ragione per cui la definizione di varietà porta la clausola «a base numerabile»: <b>per descrivere tutti gli aperti di $\mathbb{R}^n$ basta una famiglia numerabile di palle</b>. Precisamente, le palle con centro a coordinate razionali e raggio razionale — che sono tante quante $\mathbb{Q}^{n}\times\mathbb{Q}$, cioè numerabili (Lee, Exercise A.15).</p>
+  <p><b>Perché funziona.</b> Sia $S$ aperto e $x\in S$: esiste $r>0$ con $B_r(x)\subseteq S$. Si prende un centro razionale $q$ con $d(x,q)<\tfrac r4$ e un raggio razionale $\rho$ fra $\tfrac r4$ e $\tfrac r2$; allora $x\in B_\rho(q)$ e, per la triangolare, $B_\rho(q)\subseteq B_r(x)\subseteq S$. Quindi ogni aperto è unione di palle razionali, e la famiglia numerabile le genera tutte.</p>
+  <p>Il conto concreto che mostra che non c'è nulla di magico: il punto irrazionale $\tfrac{\sqrt2}{2}$ di $\mathbb{R}$ è catturato dalla palla di centro $\tfrac7{10}$ e raggio $\tfrac1{10}$, perché $|\tfrac{\sqrt2}{2}-\tfrac7{10}|<\tfrac1{10}$ — i razionali sono abbastanza fitti da inseguire qualunque punto, e abbastanza pochi da essere numerabili. <b>È questa doppia proprietà, e non una scelta estetica, che fa di $\mathbb{R}^n$ il modello su cui si costruiscono le varietà.</b> Uno spazio in cui non esiste una famiglia numerabile di aperti che generi tutti gli altri può essere localmente indistinguibile da $\mathbb{R}^n$ e comportarsi in modo completamente diverso in grande, ed è per escluderlo che la definizione di varietà aggiunge quella richiesta a mano.</p>`}
+]},
+
+/* ---------------- 03 · DUE TOPOLOGIE SULLO STESSO INSIEME ---------------- */
+{ num:'03', title:'Due topologie sullo stesso insieme: la scelta e un atto', meta:'topologia banale · topologia discreta · cosa misura una topologia · continuita senza epsilon',
+  blocchi:[
+  {t:'prosa', title:'I due estremi, sullo stesso insieme', tag:'costruzione', html:R`
+  <p>Prendi un insieme $X$ qualunque, con almeno due punti, e mettici sopra due topologie diverse.</p>
+  <ul>
+   <li>la <b>topologia banale</b> (Lee, Exercise A.9): gli unici aperti sono $X$ e $\emptyset$. È la famiglia più piccola che soddisfa gli assiomi, e li soddisfa in modo ovvio — unioni e intersezioni di questi due insiemi ridanno questi due insiemi;</li>
+   <li>la <b>topologia discreta</b> (Lee, Example A.4): <i>ogni</i> sottoinsieme è aperto. È la famiglia più grande possibile, e anche qui gli assiomi valgono senza nulla da verificare. Su un insieme di quattro elementi la discreta ha $2^{4}=16$ aperti, mentre la banale ne ha due.</li>
+  </ul>
+  <p>Sono topologie legittime su <b>lo stesso</b> insieme, e nessuna delle due viene da una proprietà dei punti: vengono da una decisione. Il fatto che si possa decidere è ciò che rende la topologia una <i>struttura</i> e non un attributo — <b>come scegliere una base in uno spazio vettoriale, con la differenza che qui le scelte non sono equivalenti fra loro</b>.</p>`},
+  {t:'prosa', title:'Che cosa si rompe in ciascuno dei due estremi', tag:'first principles', html:R`
+  <p>I due casi sono entrambi patologici, e lo sono in direzioni opposte. Confrontarli è il modo più rapido per capire <i>che cosa misura</i> una topologia.</p>
+  <p><b>Nella banale non si distingue niente.</b> Lee lo fa osservare con due conseguenze che si dimostrano in una riga ciascuna. Primo: <b>ogni successione converge a ogni punto</b>. Infatti un intorno di $p$ è un aperto che contiene $p$, e l'unico aperto non vuoto è $X$ stesso: qualunque successione è definitivamente in $X$, quindi converge a $p$, per <i>ogni</i> $p$. Secondo: <b>ogni applicazione da uno spazio qualunque in $X$ è continua</b>, perché le controimmagini da verificare sono solo quelle di $X$ e di $\emptyset$, cioè tutto e niente, entrambi aperti. Uno spazio con la topologia banale non ha informazione: la nozione di limite c'è e non serve a nulla.</p>
+  <p><b>Nella discreta si distingue troppo.</b> Qui ogni punto è un aperto, e quindi $\{p\}$ è un intorno di $p$: una successione converge a $p$ solo se è <b>definitivamente uguale</b> a $p$. Il limite esiste, è unico, e cattura solo la convergenza banale. Simmetricamente, <b>ogni</b> applicazione da $X$ verso uno spazio qualunque è continua, perché tutte le controimmagini sono aperte: la continuità c'è e non vincola niente. Una topologia troppo fine e una troppo grossa rendono inutile, in due modi diversi, la stessa coppia di nozioni.</p>
+  <div class="note"><b>Il metro, da qui in avanti.</b> Una topologia è interessante quando sta <i>fra</i> i due estremi: abbastanza aperti da separare i punti che vanno separati, abbastanza pochi da non separarli tutti. La topologia metrica di $\mathbb{R}^n$ sta in mezzo; la topologia di una varietà sta in mezzo per costruzione; e la condizione di Hausdorff, che nella definizione di varietà compare come prima richiesta, è esattamente la clausola che impedisce di scivolare verso il basso — dice «almeno tanti aperti quanti servono a separare due punti», che è il minimo per avere un limite unico.</div>`},
+  {t:'prosa', title:'Continuita e omeomorfismo, in forma topologica', tag:'grammatica', html:R`
+  <p>Una volta che gli aperti sono un dato, la continuità si dice senza epsilon e senza delta (Lee, stampata 597): <b>$F:X\to Y$ è continua se la controimmagine di ogni aperto di $Y$ è un aperto di $X$</b>. Sembra una riformulazione comoda e invece è più generale: non parla di distanze, quindi ha senso dove distanze non ci sono, e si riduce alla definizione epsilon-delta quando le topologie sono metriche.</p>
+  <p>Da qui nasce l'oggetto che decide tutto il resto. Un'applicazione continua e biiettiva <b>la cui inversa è pure continua</b> si chiama <span class="str" data-str="omeomorfismo">omeomorfismo</span>, e due spazi fra cui esiste un omeomorfismo sono <b>lo stesso spazio topologico</b>: tutto ciò che si può dire con gli aperti vale per entrambi. La richiesta sull'inversa non è una pignoleria — è la clausola che rende l'omeomorfismo una relazione <i>simmetrica</i>, e senza simmetria non si potrebbe parlare di «identificazione».</p>
+  <p>Perché questo chiude il movimento sul suo bersaglio: la definizione di varietà chiede che ogni punto abbia un intorno <b>omeomorfo</b> a un aperto di $\mathbb{R}^n$, e ora quella frase si legge per intero. L'intorno è un aperto della topologia dichiarata su $M$; l'aperto di $\mathbb{R}^n$ è un aperto della topologia metrica; l'omeomorfismo è una biiezione che trasporta gli aperti nei due versi. <b>Nessuna delle tre parole dipende da una distanza su $M$</b>, ed è proprio ciò che serviva.</p>`}
+]},
+
+/* ---------------- 04 · IL VOCABOLARIO ---------------- */
+{ num:'04', title:'Il vocabolario: interno, chiusura, frontiera, e i punti che non si toccano', meta:'chiuso come complementare · la chiusura come il piu piccolo chiuso · punti isolati e di accumulazione · densita',
+  blocchi:[
+  {t:'prosa', title:'Le definizioni, e il motivo per cui sono fatte con unioni e intersezioni', tag:'grammatica', html:R`
+  <p>Sia $X$ uno spazio topologico, $S\subseteq X$ e $p\in X$. Lee le elenca tutte in mezza pagina (stampate 596-597), e vale la pena notare la forma comune: <b>ogni nozione è un'unione o un'intersezione di aperti o di chiusi</b>, cioè è costruita con i soli strumenti che gli assiomi garantiscono.</p>
+  <ul>
+   <li>un <b>intorno</b> di $p$ è un aperto che contiene $p$ (e per un insieme $S$, un aperto che contiene $S$);</li>
+   <li>$S$ è <b>chiuso</b> se il complementare $X\setminus S$ è aperto. Non è «il contrario di aperto»: un insieme può essere entrambi — in ogni spazio lo sono $X$ e $\emptyset$, e nella topologia discreta lo sono tutti — oppure nessuno dei due, come $[0,1)$ in $\mathbb{R}$;</li>
+   <li>la <b>parte interna</b> $\operatorname{Int}S$ è l'unione di tutti gli aperti contenuti in $S$; l'<b>esterno</b> $\operatorname{Ext}S$ è l'unione di tutti gli aperti contenuti in $X\setminus S$;</li>
+   <li>la <b>chiusura</b> $\overline{S}$ è l'intersezione di tutti i chiusi che contengono $S$;</li>
+   <li>la <b>frontiera</b> è l'insieme dei punti che non stanno né nell'interno né nell'esterno, e si scrive $\partial S$;</li>
+   <li>$p\in S$ è <b>isolato</b> in $S$ se ha un intorno $U$ con $U\cap S=\{p\}$; $p\in X$ (anche fuori da $S$) è <b>di accumulazione</b> per $S$ se ogni suo intorno contiene almeno un punto di $S$ diverso da $p$;</li>
+   <li>$S$ è <b>denso</b> in $X$ se $\overline{S}=X$, cioè — equivalentemente — se ogni aperto non vuoto di $X$ contiene almeno un punto di $S$; ed è <b>mai denso</b> (<i>nowhere dense</i>) se la sua chiusura non contiene nessun aperto non vuoto.</li>
+  </ul>
+  <p><b>Le due proprietà che rendono utili queste definizioni</b>, e che Lee lascia per esercizio: $\operatorname{Int}S$ è il più grande aperto contenuto in $S$, e $\overline{S}$ è il più piccolo chiuso che contiene $S$. La prima è immediata — un'unione di aperti è aperta per l'assioma 2, sta in $S$ perché ciascun pezzo ci sta, e contiene ogni aperto contenuto in $S$ per costruzione. La seconda richiede un passo in più: un'intersezione di chiusi è chiusa perché il suo complementare è l'<i>unione</i> dei complementari, che sono aperti — <b>e qui l'assioma dell'unione arbitraria viene usato su una famiglia che può essere enorme</b>, il che è un altro modo di vedere perché quell'assioma non ha restrizioni di cardinalità.</p>
+  <p>Ne segue subito il criterio operativo che si usa tutte le volte: <b>$S$ è chiuso se e solo se $S=\overline{S}$</b>. Se $S$ è chiuso, è uno dei chiusi che si intersecano e contiene $S$, quindi l'intersezione è contenuta in esso; viceversa se $S$ coincide con la sua chiusura, è un'intersezione di chiusi, dunque chiuso.</p>`},
+  {t:'reveal', title:'Quattro esempi che vanno saputi a memoria, perche ritornano tutti', tag:'regola operativa', steps:[
+   {label:'L intervallo, e la chiusura come limite', body:R`
+   <p>In $\mathbb{R}$, $\operatorname{Int}(0,1)=(0,1)$, la chiusura è $[0,1]$, la frontiera è $\{0,1\}$. Che $0$ e $1$ stiano nella chiusura si vede esibendo le successioni che li raggiungono: $\tfrac1n$ tende a $0$, e $\lim_{n\to\infty}(1-\tfrac1n)=1$. <b>Nessuno dei due punti è nell'insieme, ed entrambi sono di accumulazione per esso</b>: è il caso più semplice in cui la chiusura è strettamente più grande dell'insieme, e la fonte di metà degli errori quando si confonde «chiuso» con «contiene i suoi estremi».</p>`},
+   {label:'Gli interi: chiusi, discreti, con interno vuoto', body:R`
+   <p>$\mathbb{Z}\subset\mathbb{R}$ è <b>chiuso</b> (il complementare è l'unione degli intervalli aperti $(n,n+1)$, aperta per l'assioma 2) e <b>ha interno vuoto</b> (nessun intervallo aperto è fatto di soli interi). Ogni suo punto è <b>isolato</b>: l'intorno $(n-\tfrac12,n+\tfrac12)$ incontra $\mathbb{Z}$ nel solo $n$. Quindi $\mathbb{Z}$ <b>non ha punti di accumulazione</b>, e la topologia che eredita da $\mathbb{R}$ è la topologia <i>discreta</i> — lo stesso oggetto che nella tappa precedente sembrava artificiale si presenta qui spontaneamente come sottospazio.</p>`},
+   {label:'I razionali: densi, con interno vuoto, e non chiusi', body:R`
+   <p>$\mathbb{Q}$ è <b>denso</b> in $\mathbb{R}$: fra due reali distinti c'è sempre un razionale, e un testimone concreto fra $\tfrac13$ e $\tfrac25$ è $\tfrac7{20}$, cioè $\tfrac13<\tfrac7{20}<\tfrac25$. Quindi $\overline{\mathbb{Q}}=\mathbb{R}$. Ma $\operatorname{Int}\mathbb{Q}=\emptyset$, perché ogni intervallo contiene irrazionali. <b>Un insieme può essere ovunque e non contenere nessun aperto</b>: è la combinazione che non esiste nel linguaggio metrico ingenuo e che il vocabolario topologico distingue senza fatica.</p>`},
+   {label:'Il Cantor: mai denso, e misura della lunghezza rimossa', body:R`
+   <p>L'insieme di Cantor si costruisce togliendo da $[0,1]$ il terzo centrale aperto, poi i terzi centrali dei due intervalli rimasti, e così via. Al passo $k$ si tolgono $2^k$ intervalli di lunghezza $3^{-(k+1)}$, e la lunghezza totale rimossa è</p>
+   $$\sum_{k\ge0}\frac{2^k}{3^{k+1}}=1,$$
+   <p>cioè si rimuove tutta la lunghezza di $[0,1]$. Quello che resta è chiuso, <b>non ha punti isolati</b> (ogni suo punto è di accumulazione per l'insieme stesso) e ha <b>interno vuoto</b>: è <i>mai denso</i>, l'ultima voce della lista di Lee. Serve conoscerlo perché è il controesempio standard a ogni affermazione della forma «un chiuso senza punti isolati deve contenere un intervallo», e perché in geometria differenziale la nozione gemella — un insieme chiuso e di misura nulla — è ciò che resta fuori dalle conclusioni del teorema di Sard.</p>`}
+  ]},
+  {t:'plot', title:'Interno, frontiera, esterno e un punto isolato, su un insieme solo',
+   intro:R`L'insieme $S$ è il disco aperto di raggio $1$ <i>più</i> il punto $(2,0)$. La circonferenza disegnata è la frontiera del disco, e nessuno dei suoi punti appartiene a $S$.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:340, equal:true,
+     xr:[-1.6,3.0], yr:[-1.5,1.5],
+     title:'S = disco aperto unito al punto (2,0): interno, frontiera, esterno, isolato',
+     rings:[{r:0.45, x:2, y:0, col:'#d8a13a', dash:true, label:'un intorno di (2,0)', lx:2, ly:0.45}],
+     marks:[{x:0.1, y:0.15, label:'interno', col:'#5eead4', up:true},
+            {x:0.6, y:0.8, label:'frontiera', col:'#ff6b6b'},
+            {x:-1.25, y:0.9, label:'esterno', col:'#8ea0b8'},
+            {x:2, y:0, label:'(2,0): punto isolato di S', col:'#d8a13a'},
+            {x:0.6, y:-0.8, label:'', col:'#ff6b6b'}]}
+   ],
+   leggi:R`<p>Tre cose da leggere nella figura, e la terza è quella che conta.</p>
+   <p><b>Uno.</b> L'interno di $S$ è il disco aperto: il punto $(2,0)$ <i>non</i> ci sta, perché nessun intorno di $(2,0)$ è contenuto in $S$ — il cerchietto tratteggiato, per quanto si rimpicciolisca, contiene sempre punti che non sono né nel disco né uguali a $(2,0)$. <b>Un punto può appartenere a un insieme senza essere nel suo interno.</b></p>
+   <p><b>Due.</b> La frontiera di $S$ è la circonferenza <i>più</i> il punto $(2,0)$. La circonferenza perché i suoi punti hanno in ogni intorno sia punti del disco sia punti esterni; il punto $(2,0)$ perché non è interno (appena visto) e non è esterno (ci appartiene). Così la frontiera, in generale, <b>non è un bordo</b>: è solo l'insieme dei punti indecisi.</p>
+   <p><b>Tre, ed è il punto.</b> $(2,0)$ è isolato in $S$ ma la circonferenza è fatta di punti di accumulazione <i>non appartenenti</i> a $S$. Le due nozioni sono indipendenti, e tenere separate «stare nell'insieme» e «essere raggiungibile dall'insieme» è ciò che in geometria differenziale permette di dire frasi come «una sottovarietà è chiusa in $M$» senza che siano circolari. Il punto $(3/5,4/5)$ segnato sulla circonferenza lo testimonia col conto: $(\tfrac35)^2+(\tfrac45)^2=1$, dunque sta esattamente sulla frontiera — fuori da $S$, e nella sua chiusura.</p>`}
+]},
+
+/* ---------------- 05 · IL ROVESCIAMENTO DI ABATE-TOVENA ---------------- */
+{ num:'05', title:'Il rovescio: la topologia come conseguenza delle carte', meta:'Abate-Tovena parte da un insieme nudo · la topologia indotta dall atlante · perche gli assiomi sono quei tre',
+  blocchi:[
+  {t:'prosa', title:'La sorpresa, aprendo Abate-Tovena', tag:'architettura', html:R`
+  <p>Questa tappa esiste per una ragione pratica. Aprendo Abate-Tovena al capitolo 2 — che è il capitolo delle varietà, e il libro di riferimento del corso — si trova in apertura questa dichiarazione: «Per semplificare alcune costruzioni successive, <b>partiremo da un insieme, senza assumere</b> (contrariamente a quanto fatto in molti altri testi) <b>l'esistenza a priori di una topologia</b>». E poi, per sette pagine, nessuna delle parole della tappa precedente: non si definisce aperto, non si definisce chiusura, non si parla di intorni.</p>
+  <p>Non è un'omissione. È una scelta <b>nella direzione opposta</b> a quella di Lee, e capirla è il modo più solido di capire perché gli assiomi di topologia sono quei tre. Abate e Tovena definiscono prima le <b>carte</b>: una $n$-carta di un insieme $M$ è una biiezione $\varphi:U\to V$ con $U\subseteq M$ e $V$ aperto di $\mathbb{R}^n$ (Definizione 2.1.1). Poi la <b>compatibilità</b> fra due carte, poi l'<b>atlante</b> come famiglia di carte compatibili i cui domini ricoprono $M$ (Definizione 2.1.5). A questo punto $M$ è ancora un insieme nudo: non c'è nessuna topologia, e la parola «aperto» è stata usata soltanto sull'immagine, in $\mathbb{R}^n$, dove la si conosce.</p>`},
+  {t:'reveal', title:'La Proposizione 2.1.8, e la sua dimostrazione', tag:'costruzione', steps:[
+   {label:'L enunciato', body:R`
+   <p><b>Proposizione 2.1.8 (Abate-Tovena).</b> Un atlante $\mathcal{A}=\{(U_\alpha,\varphi_\alpha)\}$ di dimensione $n$ su un insieme $M$ induce su $M$ una topologia, dichiarando che $A\subseteq M$ è <b>aperto</b> se e solo se $\varphi_\alpha(A\cap U_\alpha)$ è aperto in $\mathbb{R}^n$ <i>per ogni</i> carta dell'atlante. Inoltre questa è <b>l'unica</b> topologia su $M$ per cui tutti gli $U_\alpha$ sono aperti e tutte le $\varphi_\alpha$ sono omeomorfismi con l'immagine.</p>
+   <p>Si legga bene cosa è successo: <b>gli aperti non sono più dichiarati, sono calcolati</b>. La topologia non è un dato ma il risultato di un test, e il test si fa in $\mathbb{R}^n$, dove la nozione di aperto è quella metrica di sempre.</p>`},
+   {label:'Che sia una topologia: la dimostrazione, e dove usa la biiettivita', body:R`
+   <p>Abate e Tovena la fanno in cinque righe, e il cuore sono due identità insiemistiche. Poiché ogni carta è <b>biiettiva</b> sul suo dominio,</p>
+   $$\varphi_\alpha(A\cap B\cap U_\alpha)=\varphi_\alpha(A\cap U_\alpha)\cap\varphi_\alpha(B\cap U_\alpha)$$
+   <p>per ogni $A,B\subseteq M$, e analogamente l'immagine di un'unione arbitraria è l'unione delle immagini. Da qui: l'intersezione finita e l'unione arbitraria di insiemi che passano il test lo passano ancora, perché in $\mathbb{R}^n$ valgono gli stessi due assiomi. <b>I tre assiomi di $\tau$ su $M$ sono ereditati, uno per uno, dai tre assiomi della topologia di $\mathbb{R}^n$.</b></p>
+   <p>E il punto delicato è <i>l'iniettività</i>, perché l'immagine di un'intersezione è l'intersezione delle immagini solo per applicazioni iniettive. Una funzione che manda $1$ e $2$ nello stesso valore ha $\{1\}\cap\{2\}$ vuoto e immagini che si intersecano in quel valore: l'identità cadrebbe, e con essa l'assioma dell'intersezione. <b>È per questo che una carta è definita come una biiezione e non come una qualunque applicazione</b>, e la ragione non è di comodità: senza, la topologia non si potrebbe nemmeno costruire.</p>`},
+   {label:'L unicita, e perche e la parte che serve davvero', body:R`
+   <p>Sia $\tilde\tau$ un'altra topologia per cui gli $U_\alpha$ sono aperti e le $\varphi_\alpha$ sono omeomorfismi. Se $A\in\tau$, allora ogni $\varphi_\alpha(A\cap U_\alpha)$ è aperto in $\mathbb{R}^n$, quindi $A\cap U_\alpha$ è in $\tilde\tau$ perché $\varphi_\alpha$ è un omeomorfismo per $\tilde\tau$; e siccome gli $U_\alpha$ ricoprono $M$, l'insieme $A$ è l'unione degli $A\cap U_\alpha$, dunque sta in $\tilde\tau$. Lo stesso argomento al contrario dà l'inclusione opposta, e le due topologie coincidono.</p>
+   <p><b>L'unicità è la parte utile</b>, e vale dichiarare perché. Senza di essa, l'approccio di Abate sarebbe solo un modo diverso di arrivare allo stesso posto. Con essa, dice una cosa forte: <b>appena si decide come un oggetto «somiglia a $\mathbb{R}^n$», la sua topologia non è più negoziabile</b>. In geometria differenziale questo si usa ogni volta che si costruisce una varietà esibendo delle carte e <i>non</i> dichiarando una topologia — il toro come quoziente, la grassmanniana, la sfera di Riemann — e la domanda «ma la topologia qual è?» ha sempre la stessa risposta: l'unica compatibile.</p>`}
+  ]},
+  {t:'prosa', title:'Il prezzo del rovesciamento, e il buco che apre', tag:'trappola', html:R`
+  <p>Costruire la topologia dalle carte ha un costo, e Abate-Tovena lo pagano esplicitamente due pagine dopo. <b>Una topologia così ottenuta può non essere di Hausdorff.</b> L'Esempio 2.1.22 lo mostra con l'oggetto più piccolo possibile: si prende $M=\mathbb{R}\cup\{0'\}$, con $0'$ un punto nuovo, e due carte — l'identità su $\mathbb{R}$, e su $(\mathbb{R}\setminus\{0\})\cup\{0'\}$ l'applicazione che manda $x$ in sé e $0'$ in $0$. Sono compatibili, formano un atlante, e inducono una topologia in cui <b>i due punti $0$ e $0'$ non hanno intorni disgiunti</b>: ogni intorno di uno contiene tutti i punti vicini a zero, che stanno anche in ogni intorno dell'altro.</p>
+  <p>Lo stesso oggetto Manetti lo presenta come <span class="str" data-str="quoziente-topologico">quoziente</span> — $X=\mathbb{R}\times\{0,1\}$ con $(x,0)$ identificato a $(x,1)$ per $x\ne0$ (Osservazione 2.1) — ed è istruttivo che le due costruzioni siano la stessa: <b>un atlante che si sovrappone male e un incollamento fatto male sono la stessa patologia vista da due lati</b>. Nel linguaggio di Lee la conseguenza si dice in una riga: in questo spazio la successione $\tfrac1n$ converge sia a $0$ sia a $0'$, cioè <b>il limite non è unico</b>, e ogni argomento che passa per un limite perde senso.</p>
+  <p>Ecco perché la definizione di varietà <b>aggiunge Hausdorff a mano</b> invece di dedurlo. Non è un'ipotesi di eleganza: è la toppa su un buco che la costruzione per carte lascia aperto per sua natura, e sapere <i>da dove viene il buco</i> è più utile che sapere che la toppa esiste.</p>`}
+]},
+
+/* ---------------- 06 · LA LINGUA DEL CORSO ---------------- */
+{ num:'06', title:'La lingua del corso, e tre definizioni messe a confronto', meta:'la Definizione 2.1 di Manetti · dove i tre testi divergono · cosa si puo dire con la sola topologia',
+  blocchi:[
+  {t:'prosa', title:'La definizione come la scrive il corso', tag:'grammatica', html:R`
+  <p>Manetti, Definizione 2.1 (stampata 18): sia $X$ uno spazio topologico; $X$ si dice <b>varietà topologica di dimensione $n$</b> se</p>
+  <ol>
+   <li>$X$ è di Hausdorff;</li>
+   <li>$X$ è localmente omeomorfo ad aperti di $\mathbb{R}^n$: per ogni $p\in X$ esistono un intorno aperto $U$ di $p$ e un aperto $V$ di $\mathbb{R}^n$ tali che esista un omeomorfismo $\varphi:U\to V\subseteq\mathbb{R}^n$; la tripla $(U,V,\varphi)$ si dice <b>carta locale</b>;</li>
+   <li>$X$ è a base numerabile.</li>
+  </ol>
+  <p>Ora ogni parola di questa definizione ha un significato costruito: «spazio topologico» è la coppia insieme-più-famiglia degli assiomi della tappa 01; «intorno aperto» è un elemento della famiglia che contiene il punto; «aperto di $\mathbb{R}^n$» è la topologia metrica della tappa 02; «omeomorfismo» è la biiezione bicontinua della tappa 03; «Hausdorff» è la clausola che la tappa 05 ha mostrato necessaria; «a base numerabile» è la proprietà delle palle razionali della tappa 02, chiesta come ipotesi invece che dimostrata, perché su uno spazio qualunque non è automatica.</p>
+  <p>Manetti aggiunge una nota che vale la pena tenere, perché spiega una variante che si incontra: «l'ipotesi 3. è talvolta sostituita in letteratura assumendo che $X$ sia <b>paracompatto</b>, ovvero che ogni ricoprimento aperto di $X$ ammetta un raffinamento localmente finito», e precisa che le due ipotesi coincidono se $X$ è connesso o ha al più numerabili componenti connesse. <b>Non sono quindi due definizioni diverse di varietà</b>: sono due modi di chiedere la stessa cosa, e il secondo è quello da cui si estrae ciò che serve davvero — le partizioni dell'unità.</p>`},
+  {t:'prosa', title:'Dove i tre testi divergono, e non si scegliera in silenzio', tag:'trappola', html:R`
+  <p>Tre disaccordi, tutti e tre reali e tutti e tre fonte di confusione se non dichiarati.</p>
+  <p><b>1. Che cosa sia un «intorno.»</b> Lee definisce intorno di $p$ un <i>aperto</i> che contiene $p$, e avverte lui stesso: «be warned that some authors use the word <i>neighborhood</i> in the more general sense of a subset containing an open subset containing $p$». Manetti scrive sempre «intorno aperto», che è il modo di non dover scegliere. <b>La differenza cambia il senso di metà degli enunciati</b>: con la convenzione larga, «ogni intorno di $p$ incontra $S$» è una richiesta più forte, perché gli intorni sono più numerosi. In questo movimento si usa la convenzione di Lee — intorno uguale aperto contenente il punto — e quando una fonte userà l'altra lo si riconoscerà dal fatto che parla di «intorno chiuso», che con la convenzione stretta è un ossimoro.</p>
+  <p><b>2. Se la topologia è un dato o un risultato.</b> Lee e Manetti partono da uno spazio topologico; Abate-Tovena parte da un insieme e induce la topologia dall'atlante, ottenendo nella Definizione 2.1.14 una definizione di varietà differenziabile che <i>non menziona</i> una topologia preesistente. Le tre definizioni individuano gli stessi oggetti — è il contenuto della Proposizione 2.1.8 e della Definizione 2.1.10, dove Abate-Tovena introducono la nozione di atlante <i>compatibile con la topologia data</i> proprio per ricucire i due punti di vista — ma le <b>dimostrazioni</b> hanno forma diversa, e sapere in quale dei due mondi si sta evita di cercare un'ipotesi che lì non serve.</p>
+  <p><b>3. L'ordine delle tre richieste.</b> Manetti mette Hausdorff per primo, Lee per ultimo, Abate-Tovena la enuncia come Osservazione 2.1.13 (una convenzione valida per tutto il libro) invece che come clausola. Non cambia niente logicamente, e cambia tutto nella lettura: in Abate-Tovena, se si salta quell'osservazione, si legge un libro in cui le varietà possono non essere di Hausdorff e i teoremi sembrano falsi.</p>`},
+  {t:'prosa', title:'Che cosa si puo e cosa non si puo ancora dire', tag:'sintesi', html:R`
+  <p>Con la sola topologia dichiarata, su una varietà si può parlare di: insiemi aperti e chiusi, intorni, chiusura e frontiera, successioni e loro limiti, applicazioni continue, omeomorfismi, <span class="str" data-str="compattezza">compattezza</span>, connessione. Tutto il vocabolario costruito qui si trasporta <i>identico</i>, perché non ha mai usato una distanza.</p>
+  <p>Non si può ancora dire: «questa funzione è derivabile», «questo vettore è tangente», «questa curva ha lunghezza», «questi due vettori sono ortogonali». <b>Le prime due mancano perché servono le funzioni di transizione, le ultime due perché serve una metrica — e la differenza fra i due tipi di mancanza è il confine fra ciò che la geometria differenziale costruisce e ciò che aggiunge.</b> Abate-Tovena lo dicono in una riga che vale tutta la tappa: le varietà topologiche «non sono altro che le varietà di classe $C^0$, in cui i cambiamenti di carta sono solo degli omeomorfismi» (Osservazione 2.1.16). Una varietà topologica è un atlante in cui non si è chiesto nulla alle transizioni; tutto il resto del corso consiste nel chiedere qualcosa.</p>
+  <div class="note"><b>Una proprietà che si eredita gratis, e conviene saperla subito.</b> Abate-Tovena, Osservazione 2.1.12: la topologia di una varietà «ha le stesse proprietà <i>locali</i> della topologia di $\mathbb{R}^n$ — in particolare è localmente compatta, localmente connessa e localmente connessa per archi». La ragione è il solo fatto che le carte sono omeomorfismi su aperti di $\mathbb{R}^n$: tutto ciò che in $\mathbb{R}^n$ si verifica guardando un intorno si trasporta. <b>Ciò che non si eredita è tutto il resto</b>, cioè il globale — e la distinzione fra proprietà locali, gratis, e proprietà globali, da dimostrare, è l'asse intorno a cui gira il corso intero.</div>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'riconoscere una topologia · maneggiare chiusure · e un caso in cui gli assiomi cadono',
+  blocchi:[
+  {t:'esercizio', title:'1 · La topologia cofinita', html:R`
+  <p>Su un insieme infinito $X$, dichiara aperti $\emptyset$ e tutti i sottoinsiemi il cui complementare è <b>finito</b>. Verifica che è una topologia. Poi: è di Hausdorff? Quali sono i chiusi? Qual è la chiusura di un insieme infinito?</p>`,
+   sol:R`<p><b>È una topologia.</b> $\emptyset$ è aperto per decreto e $X$ lo è perché il suo complementare è vuoto, dunque finito. Un'unione di aperti non vuoti ha complementare uguale all'<i>intersezione</i> dei complementari, che sono finiti: un'intersezione di insiemi finiti è finita, quindi l'unione è aperta — e questo vale per famiglie arbitrarie. Un'intersezione finita ha complementare uguale all'unione di finitamente molti insiemi finiti, che è finita.</p>
+   <p><b>Notare dove serve la finitezza</b>, perché è la stessa lezione della tappa 01 in un abito diverso: un'unione <i>infinita</i> di insiemi finiti non è finita, quindi l'intersezione infinita di aperti cofiniti può non essere aperta. Per esempio in $\mathbb{N}$, gli aperti $X\setminus\{k\}$ al variare di $k\ge1$ hanno intersezione $\{0\}$, che non è cofinito. <b>L'assioma 3 è «finita» per la stessa ragione in ogni esempio</b>: perché è l'ipotesi sotto cui un'operazione che distrugge una proprietà la distrugge solo un numero controllato di volte.</p>
+   <p><b>Non è di Hausdorff.</b> Due aperti non vuoti hanno complementari finiti, quindi la loro intersezione ha complementare finito: in un insieme infinito non può essere vuota. Due aperti non vuoti si incontrano <i>sempre</i>, dunque nessuna coppia di punti si separa. I <b>chiusi</b> sono $X$ e i sottoinsiemi finiti. Di conseguenza la chiusura di un insieme infinito è $X$: <b>ogni insieme infinito è denso</b>. È lo spazio in cui «denso» non dice quasi nulla, e serve da calibro — la densità è una nozione che dipende dalla topologia tanto quanto gli aperti stessi.</p>`},
+  {t:'esercizio', title:'2 · Chiusura di un unione, e chiusura di un intersezione', html:R`
+  <p>In uno spazio topologico, dimostra che $\overline{A\cup B}$ coincide con l'unione delle due chiusure, e mostra con un esempio in $\mathbb{R}$ che per l'intersezione vale soltanto un'inclusione — quale, e perché l'altra fallisce.</p>`,
+   sol:R`<p><b>L'unione.</b> L'unione dei due chiusi $\overline{A}$ e $\overline{B}$ è un chiuso (unione <i>finita</i> di chiusi: il complementare è l'intersezione finita degli aperti complementari) e contiene $A\cup B$; essendo la chiusura il più piccolo chiuso che contiene l'insieme, si ha un'inclusione. Per l'altra: $A\subseteq A\cup B$ implica $\overline{A}\subseteq\overline{A\cup B}$ — la chiusura è monotona, perché un chiuso che contiene il grande contiene il piccolo — e lo stesso per $B$. Le due inclusioni danno l'uguaglianza.</p>
+   <p><b>L'intersezione: vale solo</b> che la chiusura dell'intersezione è contenuta nell'intersezione delle chiusure, per monotonia. L'altra inclusione cade: in $\mathbb{R}$ prendi $A=(0,1)$ e $B=(1,2)$. L'intersezione è vuota e la sua chiusura è vuota, mentre le due chiusure sono $[0,1]$ e $[1,2]$ e si incontrano in $\{1\}$.</p>
+   <p><b>Perché è l'asimmetria che ci si deve aspettare.</b> La chiusura aggiunge i punti di accumulazione, e due insiemi possono <i>accumularsi sullo stesso punto senza toccarsi</i>. La nozione topologica di «avvicinarsi» non è transitiva verso l'intersezione, ed è la stessa ragione per cui l'unione infinita di chiusi non è chiusa: gli infiniti pezzi possono accumularsi dove nessuno di essi arriva.</p>`},
+  {t:'esercizio', title:'3 · La topologia e piu grossa o piu fine? E la continuita?', html:R`
+  <p>Su $X$ siano $\tau_1\subseteq\tau_2$ due topologie ($\tau_2$ <b>più fine</b>). Rispondi, con dimostrazione: (a) l'identità da $(X,\tau_2)$ a $(X,\tau_1)$ è continua? E nell'altro verso? (b) Se una successione converge in $\tau_2$, converge in $\tau_1$? E viceversa? (c) Che cosa dicono (a) e (b) insieme sul perché la topologia discreta e quella banale sono inutili?</p>`,
+   sol:R`<p><b>(a)</b> L'identità $(X,\tau_2)\to(X,\tau_1)$ è continua: la controimmagine di un aperto di $\tau_1$ è lo stesso insieme, che sta in $\tau_1\subseteq\tau_2$, dunque è aperto nella partenza. Nell'altro verso in generale no: servirebbe che ogni aperto di $\tau_2$ stia in $\tau_1$, cioè che le due topologie coincidano. <b>Si va sempre dal fine al grosso</b>, mai all'indietro.</p>
+   <p><b>(b)</b> Se $p_i\to p$ in $\tau_2$, allora converge anche in $\tau_1$: gli intorni da controllare sono meno. Il viceversa è falso — in $\mathbb{R}$ con la topologia banale ogni successione converge a ogni punto, con quella euclidea no. <b>Più aperti, più difficile convergere; meno aperti, più facile.</b></p>
+   <p><b>(c)</b> Le due risposte insieme dicono che «fine» e «grosso» sono due monotonie <i>opposte</i>: la finezza rende difficile la convergenza e facile la continuità in uscita; la grossezza il contrario. Agli estremi, una delle due nozioni diventa vacua: nella discreta tutte le applicazioni uscenti sono continue e nessuna successione converge se non banalmente; nella banale tutte le applicazioni entranti sono continue e tutte le successioni convergono a tutto. <b>Una topologia utile è un compromesso fra due esigenze che tirano in direzioni opposte</b>, e la condizione di Hausdorff è il nome del limite inferiore di quel compromesso.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché l'assioma dell'unione non ha restrizioni di cardinalità mentre quello dell'intersezione sì? Dai la ragione strutturale, non il controesempio.</li>
+  <li>Un insieme può essere aperto e chiuso insieme? Dai due esempi in due spazi diversi.</li>
+  <li>$\mathbb{Q}$ e l'insieme di Cantor hanno entrambi interno vuoto in $\mathbb{R}$. Che cosa li distingue, nel vocabolario di questa tappa?</li>
+  <li>Abate-Tovena costruisce la topologia dall'atlante e dimostra che è unica. Che cosa <b>non</b> riesce a garantire, e come lo si ripara?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perché «stare in un aperto» è una condizione <b>locale</b> con un testimone per punto: per l'unione, il testimone di uno dei pezzi serve anche per l'unione, e non c'è niente da combinare. Per l'intersezione i testimoni vanno combinati prendendone il minimo, e un minimo positivo esiste su una famiglia finita ma non necessariamente su una infinita.</li>
+   <li>Sì. In ogni spazio topologico $X$ e $\emptyset$ lo sono. Nella topologia discreta su qualunque insieme, <i>tutti</i> i sottoinsiemi lo sono. In $\mathbb{R}$ con la topologia euclidea, invece, gli unici due sono $\mathbb{R}$ e $\emptyset$ — ed è esattamente l'enunciato «$\mathbb{R}$ è connesso».</li>
+   <li>$\mathbb{Q}$ è <b>denso</b> — la sua chiusura è tutto $\mathbb{R}$ — mentre il Cantor è <b>mai denso</b>: è già chiuso, e la sua chiusura (cioè lui stesso) non contiene nessun aperto non vuoto. Interno vuoto non distingue i due casi; la chiusura sì. E il Cantor è chiuso mentre $\mathbb{Q}$ non lo è: due insiemi con lo stesso interno possono stare agli antipodi per tutto il resto.</li>
+   <li>Non garantisce <b>Hausdorff</b>: l'Esempio 2.1.22 esibisce un atlante perfettamente legittimo la cui topologia indotta non separa due punti, e in quello spazio la successione $\tfrac1n$ ha due limiti. Si ripara aggiungendo Hausdorff come ipotesi nella definizione di varietà — Manetti come requisito 1, Abate-Tovena come convenzione nell'Osservazione 2.1.13 — e non è una toppa arbitraria: è la sola delle tre condizioni che la costruzione per carte può distruggere.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove il dato primitivo riappare in fisica',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Una topologia è una famiglia dichiarata di sottoinsiemi, chiusa per unioni arbitrarie e intersezioni finite. Non è una proprietà dell'insieme: è una struttura che si aggiunge, e sullo stesso insieme se ne possono mettere molte, dalla più povera alla più ricca. Da questa sola dichiarazione nascono — senza nessuna distanza — intorno, chiuso, interno, chiusura, frontiera, punto di accumulazione, densità, continuità, convergenza e omeomorfismo.</p>
+  <p><b>Ciò che resta da fare, e che questo movimento non può fare.</b> Gli aperti dichiarati non dicono quanti ne servono per descriverli tutti — e quella è la nozione di base, con la numerabilità che la definizione di varietà esige. Non dicono se due punti si separano, e quella è la condizione di Hausdorff. Non dicono come si costruisce una topologia nuova da una vecchia, e quelle sono le costruzioni di sottospazio, prodotto e quoziente. Ciascuno di questi tre è un pezzo mancante <i>di questa stessa definizione</i>, non un argomento ulteriore: la definizione di varietà topologica le nomina tutte e tre.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Gli aperti come dato primitivo</b>: una struttura dichiarata invece di dedotta da una distanza.`,
+   rotte:[
+    {dove:'Relativita<br>generale', txt:R`Lo spazio-tempo non ha una distanza prima che si scelga una metrica, e la metrica è <b>campo dinamico</b>, cioè un'incognita delle equazioni. Tutto ciò che si dice prima di risolverle — causalità, orientabilità, la struttura dei coni di luce come insiemi aperti — è <b>topologia</b>: la domanda «quali regioni sono aperte» precede la domanda «quanto distano i punti», e dev'essere formulabile senza la risposta alla seconda.`},
+    {dove:'Meccanica<br>statistica', txt:R`Lo spazio delle fasi si descrive con insiemi di microstati, e il teorema di Liouville afferma l'invarianza di un <i>volume</i>, non di una distanza. La <span class="str" data-str="compattezza">compattezza</span> della superficie a energia fissata è ciò che rende finita la misura microcanonica, ed è una proprietà topologica: non dipende da nessuna scelta di coordinate sullo spazio delle fasi.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Gli spazi di Hilbert portano una norma, quindi una topologia metrica — ma in dimensione infinita <b>le topologie utili sono più di una</b> (forte, debole, degli operatori) e non coincidono. Il fatto che «convergenza» sia una nozione <i>relativa alla topologia scelta</i>, che qui è un'osservazione sulla topologia banale, là è la differenza fra due teoremi.`},
+    {dove:'Materia<br>condensata', txt:R`Le fasi topologiche della materia prendono il nome da qui: sono classi che <b>non</b> si possono deformare l'una nell'altra con continuità, e l'invariante che le distingue è topologico — non cambia sotto omeomorfismo, quindi non dipende da nessuna delle grandezze metriche del materiale. È il motivo per cui la conduttanza di Hall quantistica è esatta e non approssimata.`}
+   ],
+   domanda:R`Dichiarare gli aperti invece di dedurli sembra togliere informazione, e in effetti la toglie: due spazi omeomorfi possono avere geometrie incomparabili. Eppure da quella dichiarazione si ricavano la compattezza, la connessione, la numerabilità del gruppo fondamentale di una varietà. <b>Domanda da portare avanti per tutto il corso:</b> qual è, esattamente, il confine fra ciò che si dimostra con i soli aperti e ciò che richiede le funzioni di transizione o una metrica? La risposta non è una lista da memorizzare: è il criterio con cui, davanti a un teorema, si capisce quale delle tre strutture si sta usando — e quindi quanto il teorema sia generale.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-01-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-01 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-01-aperti-dato-primitivo.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
