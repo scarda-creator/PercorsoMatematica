@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-08 — Connessione, componenti, e perche una varieta si studia un pezzo per volta</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-08 — Connessione</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-08: Connessione, componenti, e perche una varieta si studia un pezzo per volta <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-08 — connessione, componenti, e perche' una varieta' si studia un pezzo per volta
+identita:  connesso vuol dire che non si spezza in due aperti disgiunti; connesso per archi
+           che si puo' camminare da un punto all'altro. Le due nozioni non coincidono, e il
+           controesempio e' una curva che si avvicina a un segmento senza toccarlo. In geodiff
+           servono perche' le componenti connesse sono le unita' su cui gli argomenti globali
+           funzionano davvero
+copre:     1.5 del programma di recupero
+serve:     tp-01, tp-03
+apre:      gd-13 (curve integrali), gd-15 (flussi): entrambi ragionano per componente
+strumenti: omeomorfismo, compattezza, quoziente-topologico
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A (stampate 607-608): la
+           definizione di spazio connesso e sconnesso, la Proposizione A.39 (proprieta' degli
+           spazi connessi: immagine continua connessa, componenti chiuse e disgiunte, prodotto
+           finito connesso, quoziente connesso), la connessione per archi e la Proposizione
+           A.41, la connessione locale per archi e la Proposizione A.43 (dove le due nozioni
+           coincidono). Abate, Tovena — Geometria Differenziale (stampata 64): Osservazione
+           2.1.12 (una varieta' e' sempre localmente connessa per archi) e Osservazione 2.1.15
+           (le componenti connesse di una varieta' sono aperte, al piu' numerabili, e sono
+           esse stesse varieta').
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.5
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"sin(pi/2)","vale":"1",
+  "dove":"03","appare":"\\sin(\\pi/2)=1"},
+
+ {"tipo":"uguale","sinistra":"sin(pi)","vale":"0",
+  "dove":"03","appare":"\\sin(\\pi)=0"},
+
+ {"tipo":"uguale","sinistra":"sin(3*pi/2)","vale":"-1",
+  "dove":"03","appare":"\\sin(3\\pi/2)=-1"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'due nozioni che sembrano la stessa cosa · dove si separano · perche sulle varieta non importa',
+  blocchi:[
+  {t:'prosa', title:'Due modi di dire non si spezza', tag:'architettura', html:R`
+  <p>Uno spazio e' <b>connesso</b> se non si puo' scrivere come unione di due aperti disgiunti non vuoti — non si spezza in due pezzi separati. E' <b>connesso per archi</b> se, dati due punti qualunque, esiste un cammino continuo che li unisce. Le due idee sembrano la stessa cosa detta in due modi, e per lo spazio piu' familiare che si conosce — un aperto di $\mathbb{R}^n$ — lo sono davvero. Non lo sono in generale: questo movimento costruisce un controesempio esplicito, il <b>seno del topologo</b>, uno spazio connesso che non si puo' attraversare con un cammino.</p>
+  <p>La buona notizia, dichiarata subito perche' orienta tutta la lettura: <b>su una varieta' le due nozioni coincidono sempre</b>. Il seno del topologo non e' un controesempio che Giuseppe incontrera' mai dentro un argomento di geometria differenziale — e' importante proprio per il motivo opposto, perche' mostra <i>perche'</i> serve la clausola «localmente euclideo» per escluderlo, e aiuta a capire con precisione cosa significa che le componenti connesse di una varieta' sono «le unita' su cui si ragiona un pezzo per volta».</p>`}
+]},
+
+/* ---------------- 01 · LA DEFINIZIONE, E LE COMPONENTI ---------------- */
+{ num:'01', title:'Connessione: la definizione, e le componenti connesse', meta:'sconnesso come esistenza di una partizione in due aperti · componente come pezzo massimale · le proprieta di base',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Uno spazio topologico $X$ e' <b>sconnesso</b> se esistono due aperti $U,V\subseteq X$ non vuoti, disgiunti, con $U\cup V=X$; e' <b>connesso</b> altrimenti (Lee, stampata 607). Equivalentemente — e questa seconda forma e' spesso piu' comoda da verificare — $X$ e' connesso se e solo se gli unici sottoinsiemi di $X$ <b>sia</b> aperti <b>sia</b> chiusi sono $\emptyset$ e $X$ stesso: un $S$ aperto e chiuso diverso da questi due darebbe la partizione $X=S\cup(X\setminus S)$ in due aperti disgiunti non vuoti, e viceversa.</p>
+  <p>Dato uno spazio $X$ qualunque (non necessariamente connesso), un sottoinsieme <b>connesso massimale</b> — non contenuto propriamente in nessun sottoinsieme connesso piu' grande — si dice <b>componente</b> (o componente connessa) di $X$.</p>`},
+  {t:'reveal', title:'Le proprieta di base, raccolte', tag:'costruzione', steps:[
+   {label:'Limmagine continua di un connesso e connessa', body:R`
+   <p>Se $F:X\to Y$ e' continua e $X$ e' connesso, $F(X)$ e' connesso (Lee, Prop. A.39(a)) — <b>la connessione e' un invariante topologico</b>, come compattezza e Hausdorff, per la stessa ragione di fondo: una proprieta' definita solo in termini di aperti non puo' accorgersi di quale omeomorfismo la descrive.</p>`},
+   {label:'Ogni connesso sta dentro una sola componente', body:R`
+   <p>Ogni sottoinsieme connesso di $X$ e' contenuto in un'unica componente (Prop. A.39(b)) — altrimenti, se un connesso $A$ intersecasse due componenti diverse $C_1\neq C_2$, l'unione $C_1\cup C_2$ sarebbe connessa per il punto (c) seguente (hanno $A$, o almeno un suo punto, in comune), contro la massimalita' di $C_1$ e $C_2$ come componenti separate. E' il fatto che rende le componenti ben definite come partizione, non solo come famiglia di insiemi massimali: ogni punto appartiene esattamente a una componente, la propria.</p>`},
+   {label:'Le componenti sono chiuse e disgiunte', body:R`
+   <p>Le componenti di $X$ sono chiuse, a due a due disgiunte, e la loro unione e' tutto $X$ — formano cioe' una <b>partizione</b> di $X$ (Prop. A.39(d)). Non sono in generale aperte: lo sono quando $X$ e' <b>localmente connesso</b> (ammette una base di aperti connessi), come la tappa 04 chiarira' — ed e' esattamente il caso di ogni varieta', per Abate-Tovena Osservazione 2.1.12.</p>`},
+   {label:'Prodotto finito e quoziente', body:R`
+   <p>Un prodotto <b>finito</b> di spazi connessi e' connesso (Prop. A.39(f)) — coerente con tp-04. E ogni <span class="str" data-str="quoziente-topologico">quoziente</span> di uno spazio connesso e' connesso (Prop. A.39(g)): e' la risposta alla domanda che tp-07 aveva lasciato in prolessi — <b>la connessione, come la compattezza e a differenza di Hausdorff, non si rompe mai nel quoziente.</b> La dimostrazione e' immediata dal punto (a): il quoziente e' l'immagine continua (surgettiva, per di piu') dello spazio di partenza sotto la proiezione.</p>`}
+  ]}
+]},
+
+/* ---------------- 02 · CONNESSIONE PER ARCHI ---------------- */
+{ num:'02', title:'Connessione per archi: una nozione piu intuitiva, a prima vista piu forte', meta:'cammino, connesso per archi · proprieta analoghe · ogni connesso per archi e connesso',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Un <b>cammino</b> in $X$ da $p$ a $q$ e' un'applicazione continua $f:[0,1]\to X$ con $f(0)=p$, $f(1)=q$. $X$ e' <b>connesso per archi</b> se per ogni coppia $p,q\in X$ esiste un cammino da $p$ a $q$ (Lee, stampata 608). Le <b>componenti per archi</b> di $X$ sono i sottoinsiemi connessi per archi massimali.</p>
+  <div class="note">Le proprieta' della Proposizione A.39 valgono parola per parola sostituendo «connesso» con «connesso per archi» e «componente» con «componente per archi» (Prop. A.41(a)): immagine continua, prodotto finito, e cosi' via. L'unica asimmetria e' nel punto successivo.</div>`},
+  {t:'reveal', title:'Una sola implicazione, non due', tag:'dimostrazione', steps:[
+   {label:'Connesso per archi implica connesso', body:R`
+   <p>Ogni spazio connesso per archi e' connesso (Prop. A.41(b)). La dimostrazione usa il punto (a) appena visto: fissato $p\in X$, per ogni $q\in X$ esiste un cammino $f_q:[0,1]\to X$ da $p$ a $q$; l'immagine $f_q([0,1])$ e' connessa (immagine continua di $[0,1]$, che e' connesso — un intervallo di $\mathbb{R}$ non ammette partizioni in due aperti disgiunti, fatto che si puo' dare per noto dall'Analisi). L'unione $\bigcup_q f_q([0,1])$ di connessi con il punto $p$ in comune e' connessa (Prop. A.39(c)), ed e' tutto $X$.</p>`},
+   {label:'Il viceversa e falso in generale', body:R`
+   <p>Connesso <b>non</b> implica connesso per archi. La tappa 03 costruisce il controesempio canonico per intero: non un esempio patologico isolato, ma lo spazio che ogni libro di topologia cita per questo scopo esatto.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · IL SENO DEL TOPOLOGO ---------------- */
+{ num:'03', title:'Il seno del topologo: connesso, non connesso per archi', meta:'la costruzione esplicita · perche e connesso · perche nessun cammino arriva allorigine',
+  blocchi:[
+  {t:'prosa', title:'La costruzione', tag:'grammatica', html:R`
+  <p>Sia $S=\left\{\left(x,\sin\dfrac1x\right) : 0<x\le1\right\}\subset\mathbb{R}^2$ — il grafico di $\sin(1/x)$ per $x$ positivo, che oscilla sempre piu' rapidamente fra $-1$ e $1$ man mano che $x\to0^+$. Si calcolino tre valori per vedere l'oscillazione con numeri: a $x=2/\pi$, $\sin(\pi/2)=1$; a $x=1/\pi$, $\sin(\pi)=0$; a $x=2/(3\pi)$, $\sin(3\pi/2)=-1$. <b>Fra $x=2/(3\pi)\approx0{,}21$ e $x=2/\pi\approx0{,}64$ — un intervallo breve — la curva ha gia' toccato $-1$, $0$ e $1$</b>; restringendo ulteriormente $x$ verso $0$, lo stesso ciclo si ripete infinite volte, sempre piu' stretto.</p>
+  <p>Il <b>seno del topologo</b> e' $T=S\cup L$, dove $L=\{0\}\times[-1,1]$ e' il segmento verticale che chiude la chiusura di $S$ aggiungendo il «limite» verso cui la curva oscilla senza convergere a un punto solo.</p>`},
+  {t:'reveal', title:'T e connesso', tag:'dimostrazione', steps:[
+   {label:'S e connesso, ed e denso in T', body:R`
+   <p>$S$ e' l'immagine continua di $(0,1]$ (connesso, essendo un intervallo) sotto l'applicazione $x\mapsto(x,\sin(1/x))$: per Prop. A.39(a), $S$ e' connesso. E $T=\overline{S}$ — la chiusura di $S$ in $\mathbb{R}^2$ include esattamente $L$, perche' ogni punto $(0,y)$ con $y\in[-1,1]$ e' limite di punti di $S$ (scegliendo $x_n\to0$ opportunamente, la curva passa arbitrariamente vicino a ogni altezza $y$ infinite volte, per il ciclo di oscillazione appena visto).</p>`},
+   {label:'La chiusura di un connesso e connessa', body:R`
+   <p>Fatto generale, non specifico di questo esempio: se $A\subseteq X$ e' connesso, anche $\overline{A}$ lo e'. Se $\overline{A}=U\cup V$ fosse una partizione in due aperti (di $\overline A$) disgiunti non vuoti, $A=(A\cap U)\cup(A\cap V)$ sarebbe una partizione di $A$ in due aperti (di $A$) — uno dei due, diciamo $A\cap U$, dovrebbe essere vuoto, perche' $A$ e' connesso; ma allora $A\subseteq V$, e siccome $V$ e' chiuso in $\overline A$ (complementare di $U$ aperto) e contiene $A$, contiene anche $\overline A$, dunque $U\cap\overline A=\emptyset$, contro l'ipotesi che $U$ fosse non vuoto in $\overline A$. <b>$T=\overline S$ e' connesso.</b></p>`}
+  ]},
+  {t:'reveal', title:'T non e connesso per archi', tag:'dimostrazione', steps:[
+   {label:'Lidea: nessun cammino puo arrivare a (0,0)', body:R`
+   <p>Si supponga, per assurdo, che esista un cammino $f:[0,1]\to T$ con $f(0)=(0,0)\in L$ e $f(1)\in S$ (per esempio $f(1)=(1,\sin1)$). Scrivendo $f(t)=(x(t),y(t))$, entrambe le componenti sono continue.</p>`},
+   {label:'Il tempo in cui si esce da L per lultima volta', body:R`
+   <p>Sia $t_0=\sup\{t\in[0,1] : x(t)=0\}$ — l'ultimo istante in cui il cammino tocca l'asse verticale $L$ (l'insieme e' non vuoto, contiene $0$, ed e' chiuso per continuita' di $x$, dunque il sup e' un massimo ed e' raggiunto). Per $t>t_0$, $x(t)\neq0$, quindi $f(t)\in S$ e $y(t)=\sin(1/x(t))$.</p>`},
+   {label:'x(t) continua forza y(t) a oscillare senza limite', body:R`
+   <p>Per continuita' di $x$ in $t_0$, su ogni intervallo $(t_0,t_0+\delta)$ la funzione $x(t)$ assume <b>tutti</b> i valori sufficientemente vicini a $0$ (teorema dei valori intermedi, applicato a $x$ su $[t_0,t_0+\delta]$) — in particolare assume infiniti valori della forma $\dfrac{2}{(2k+1)\pi}$ per $k$ grande — i punti dove $\sin(1/x)$ vale alternativamente $1$ o $-1$, come calcolato sopra. Dunque $y(t)=\sin(1/x(t))$ assume i valori $+1$ e $-1$ infinite volte in ogni intorno destro di $t_0$: <b>$y$ non e' continua in $t_0$</b> (una funzione continua non puo' oscillare fra due valori distinti in ogni intorno di un punto senza convergere). Contraddizione: $f$ non puo' essere continua.</p>
+   <p><b>Nessun cammino puo' partire da $L$ ed entrare in $S$</b> — la stessa oscillazione infinita che rende $T$ connesso (ogni intorno di un punto di $L$ incontra $S$) e' esattamente cio' che impedisce a un cammino di attraversare il confine con continuita'.</p>`}
+  ]},
+  {t:'plot', title:'Il seno del topologo: la curva che oscilla, il segmento che la chiude',
+   intro:R`Il grafico di $\sin(1/x)$ per $x$ piccolo, con le tre altezze calcolate sopra marcate, e il segmento verticale $L$ che la chiusura aggiunge a $x=0$.`,
+   plots:[
+    {kind:'func2d', f:'sin(1/x)', tr:[0.06,1], height:320, equal:false,
+     xr:[-0.08,1.05], yr:[-1.3,1.3],
+     title:'S = grafico di sin(1/x) su (0,1], L = segmento verticale a x=0',
+     segs:[{x1:0,y1:-1,x2:0,y2:1, col:'#d8a13a', width:2.2}],
+     marks:[{x:0.6366,y:1, label:'x=2/pi: sin=1', col:'#5eead4', up:true},
+            {x:0.3183,y:0, label:'x=1/pi: sin=0', col:'#5eead4'},
+            {x:0.2122,y:-1, label:'x=2/(3pi): sin=-1', col:'#5eead4'},
+            {x:0,y:0, label:'L: nessun cammino da qui raggiunge S', col:'#8ea0b8', up:true}]}
+   ],
+   leggi:R`<p>La curva verde e' $S$; oscilla sempre piu' rapidamente avvicinandosi all'asse verticale, toccando ogni altezza fra $-1$ e $1$ infinite volte. Il segmento arancione $L=\{0\}\times[-1,1]$ e' cio' che la chiusura di $S$ aggiunge: ogni suo punto e' un limite di punti di $S$ (questo rende $T=S\cup L$ connesso), ma nessun cammino continuo puo' percorrere la distanza da $L$ a $S$ — l'oscillazione infinita vicino a $x=0$ costringerebbe la coordinata $y$ del cammino a saltare fra $-1$ e $1$ senza convergere, il che nessuna funzione continua puo' fare.</p>`}
+]},
+
+/* ---------------- 04 · LOCALMENTE CONNESSO PER ARCHI ---------------- */
+{ num:'04', title:'Localmente connesso per archi: dove le due nozioni tornano a coincidere', meta:'la Proposizione A.43 · componenti aperte · perche sulle varieta non succede mai',
+  blocchi:[
+  {t:'prosa', title:'Lipotesi che chiude il divario', tag:'first principles', html:R`
+  <p>$X$ e' <b>localmente connesso per archi</b> se ammette una base di aperti connessi per archi — ogni punto ha intorni arbitrariamente piccoli, ciascuno attraversabile con un cammino interno all'intorno stesso. Il seno del topologo <b>non</b> lo e': nessun intorno piccolo di un punto di $L$ e' connesso per archi, per lo stesso argomento della tappa 03 applicato localmente.</p>
+  <div class="note"><b>Proposizione A.43.</b> Se $X$ e' localmente connesso per archi: (a) le componenti di $X$ sono aperte; (b) le componenti per archi coincidono con le componenti; (c) $X$ e' connesso se e solo se e' connesso per archi; (d) ogni aperto di $X$ e' localmente connesso per archi.</div>
+  <p>Il punto (c) e' la riga che chiude il divario aperto dalla tappa 02: <b>sotto questa sola ipotesi aggiuntiva, le due nozioni tornano a essere la stessa cosa.</b> Non e' un caso isolato — e' esattamente la situazione in cui ci si trova lavorando con le varieta'.</p>`},
+  {t:'prosa', title:'Perche ogni varieta ha questa proprieta gratis', tag:'sintesi', html:R`
+  <p>Abate-Tovena lo osserva come conseguenza immediata della definizione (Osservazione 2.1.12, stampata 64): la topologia di una varieta' ha le stesse proprieta' locali della topologia di $\mathbb{R}^n$, <b>perche' ogni punto ha un intorno omeomorfo a una palla aperta di $\mathbb{R}^n$</b> — e una palla di $\mathbb{R}^n$ e' connessa per archi (basta il segmento che unisce due punti qualunque al suo interno, che resta dentro la palla per convessita'). <b>Il seno del topologo non puo' mai comparire come pezzo di una varieta'</b>: nel punto dove fallirebbe la connessione locale per archi (un punto di $L$), fallirebbe anche la clausola «localmente omeomorfo a $\mathbb{R}^n$» stessa — i due fallimenti sono la stessa cosa vista da due lati.</p>`}
+]},
+
+/* ---------------- 05 · R CONTRO R^2: UN PEZZO DELLINVARIANZA DELLA DIMENSIONE ---------------- */
+{ num:'05', title:'R non e omeomorfo a R^n per n maggiore di 1: un debito saldato in parte', meta:'togliere un punto · connesso contro sconnesso · perche questo non basta per il caso generale',
+  blocchi:[
+  {t:'prosa', title:'Il debito dichiarato da tp-03', tag:'first principles', html:R`
+  <p>Tp-03, tappa 06, aveva lasciato un debito esplicito: l'<b>invarianza della dimensione</b> — che $\mathbb{R}^n$ e $\mathbb{R}^m$ non sono omeomorfi per $n\neq m$ — e' citata da Abate-Tovena (Osservazione 2.1.11) ma non dimostrata, perche' il caso generale richiede strumenti di topologia algebrica (omologia, o il grado di Brouwer) che non sono nelle fonti di questo prerequisito. <b>Questo movimento salda il debito solo in parte</b>, ma per intero dove lo fa: distinguere $\mathbb{R}$ da $\mathbb{R}^n$ con $n\ge2$ si puo' fare con la sola connessione, senza nessun apparato in piu'.</p>`},
+  {t:'reveal', title:'Togliere un punto, e guardare cosa resta', tag:'dimostrazione', steps:[
+   {label:'R meno un punto si sconnette', body:R`
+   <p>$\mathbb{R}\setminus\{0\}=(-\infty,0)\cup(0,+\infty)$: due aperti disgiunti non vuoti la cui unione e' tutto l'insieme. <b>$\mathbb{R}\setminus\{0\}$ e' sconnesso</b>, e lo stesso vale togliendo un punto qualunque $p\in\mathbb{R}$ al posto di $0$ (trasla l'argomento).</p>`},
+   {label:'R^n meno un punto resta connesso, per n maggiore o uguale a 2', body:R`
+   <p>$\mathbb{R}^n\setminus\{p\}$ per $n\ge2$ e' invece connesso per archi, dunque connesso (Prop. A.41(b)): dati due punti $x,y\neq p$, se il segmento $[x,y]$ non passa per $p$ lo si usa direttamente come cammino; se ci passa, basta deviare — scegliere un punto $z$ fuori dalla retta per $x,y$ (possibile perche' $n\ge2$: c'e' piu' di una direzione) e usare la spezzata $x\to z\to y$, che evita $p$ perche' $p$ sta sulla retta originale e non sulle due nuove. <b>Qui entra in modo essenziale $n\ge2$</b>: in dimensione $1$ non esiste nessuna direzione «di lato» in cui deviare.</p>`},
+   {label:'La conclusione', body:R`
+   <p>Se esistesse un omeomorfismo $F:\mathbb{R}\to\mathbb{R}^n$ con $n\ge2$, la sua restrizione $\mathbb{R}\setminus\{0\}\to\mathbb{R}^n\setminus\{F(0)\}$ sarebbe anch'essa un omeomorfismo (un omeomorfismo globale resta tale togliendo un punto e la sua immagine da entrambi i lati). Ma la <span class="str" data-str="omeomorfismo">connessione e' un invariante topologico</span> (tappa 01): spazi omeomorfi sono entrambi connessi o entrambi sconnessi. Il dominio $\mathbb{R}\setminus\{0\}$ e' sconnesso, il codominio $\mathbb{R}^n\setminus\{F(0)\}$ e' connesso: <b>contraddizione. $\mathbb{R}$ non e' omeomorfo a $\mathbb{R}^n$ per nessun $n\ge2$.</b></p>`}
+  ]},
+  {t:'plot', title:'La deviazione che aggira un punto tolto, in due dimensioni',
+   intro:R`Il segmento diretto da $x$ a $y$ passa per $p$; la spezzata $x\to z\to y$, con $z$ fuori dalla retta $xy$, lo aggira restando dentro $\mathbb{R}^2\setminus\{p\}$. In $\mathbb{R}$ non esiste nessun punto $z$ «fuori dalla retta», perche' la retta e' tutto lo spazio.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0', tr:[-1.4,1.4], height:300, equal:true,
+     xr:[-1.6,1.6], yr:[-0.9,1.1],
+     title:'x, y sullasse orizzontale, p nel mezzo, z fuori dalla retta xy',
+     segs:[{x1:-1.2,y1:0,x2:1.2,y2:0, col:'#8ea0b8', dash:true, width:1.1},
+           {x1:-1.2,y1:0,x2:0,y2:0.8, col:'#5eead4', width:2},
+           {x1:0,y1:0.8,x2:1.2,y2:0, col:'#5eead4', width:2}],
+     marks:[{x:-1.2,y:0, label:'x', col:'#d8a13a', up:true},
+            {x:1.2,y:0, label:'y', col:'#d8a13a', up:true},
+            {x:0,y:0, label:'p (tolto)', col:'#c0524a'},
+            {x:0,y:0.8, label:'z: fuori dalla retta x-y', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p>La linea tratteggiata e' il segmento diretto $x$-$y$, che passa per $p$ e dunque non e' piu' disponibile. La spezzata verde $x\to z\to y$ lo sostituisce: resta interamente dentro $\mathbb{R}^2\setminus\{p\}$, perche' $z$ e' stato scelto fuori dalla retta originale e i due nuovi segmenti $x$-$z$ e $z$-$y$ non passano per $p$ (se lo facessero, $p$ starebbe sulla retta $xz$ o $zy$, non sulla $xy$ da cui $z$ e' stato escluso per costruzione). In $\mathbb{R}$, dove ogni punto sta sull'unica «retta» che e' lo spazio stesso, questa mossa non ha alcun analogo — ed e' esattamente dove l'argomento smette di funzionare in dimensione $1$.</p>`},
+  {t:'prosa', title:'Perche il caso generale resta un debito', tag:'sintesi', html:R`
+  <p>L'argomento appena fatto usa che togliere un punto da $\mathbb{R}^n$ con $n\ge2$ lascia uno spazio connesso — ma non distingue fra loro due dimensioni <b>entrambe</b> $\ge2$: togliere un punto da $\mathbb{R}^2$ e da $\mathbb{R}^3$ lascia in entrambi i casi uno spazio connesso (anzi connesso per archi), quindi questo argomento non puo' dire se $\mathbb{R}^2\cong\mathbb{R}^3$ oppure no. Per separare $\mathbb{R}^2$ da $\mathbb{R}^3$ servirebbe un invariante piu' fine della sola connessione — tipicamente il <b>gruppo fondamentale</b> ($\mathbb{R}^2\setminus\{p\}$ e $\mathbb{R}^3\setminus\{p\}$ hanno gruppi fondamentali diversi, $\mathbb{Z}$ contro il gruppo banale) o l'omologia, entrambi fuori dalle fonti di questo prerequisito. <b>Il debito verso il caso generale resta aperto</b>, dichiarato con precisione invece che lasciato vago: non «serve altro», ma «serve il gruppo fondamentale o l'omologia, e qui si ferma».</p>`}
+]},
+
+/* ---------------- 06 · PERCHE UNA VARIETA SI STUDIA UN PEZZO PER VOLTA ---------------- */
+{ num:'06', title:'Sintesi: le componenti come unita naturali di lavoro', meta:'componenti aperte, al piu numerabili, esse stesse varieta · perche si assume spesso connessa',
+  blocchi:[
+  {t:'prosa', title:'Il quadro completo, raccolto da Abate-Tovena', tag:'sintesi', html:R`
+  <p>Tre fatti sparsi nelle tappe precedenti — le componenti sono aperte, la base e' numerabile, un aperto di una varieta' e' ancora una varieta' — si combinano ora in un quadro solo, ed e' il momento di vederli insieme invece che uno alla volta.</p>`},
+  {t:'prosa', title:'Il conteggio delle componenti', tag:'grammatica', html:R`
+  <p>Mettendo insieme la tappa 04 (le componenti di una varieta' sono aperte, perche' una varieta' e' sempre localmente connessa per archi) con la <span class="str" data-str="compattezza">numerabilita'</span> della base (tp-02): una varieta' $M$ ha <b>al piu' un'infinita' numerabile di componenti connesse</b> (Abate-Tovena, Osservazione 2.1.15) — un ricoprimento con una base numerabile non puo' contenere piu' di un'infinita' numerabile di aperti disgiunti non vuoti, e le componenti, essendo aperte e disgiunte, lo sono. E <b>ogni componente connessa, essendo aperta, e' a sua volta una varieta' della stessa dimensione di $M$</b> (tp-04: un aperto di una varieta' eredita la struttura).</p>
+  <p><b>Questo e' il motivo preciso, non una convenzione pigra, per cui molti teoremi di geometria differenziale si enunciano per varieta' connesse.</b> Non si perde generalita' nel farlo: ogni varieta' qualsiasi e' un'unione disgiunta, al piu' numerabile, di varieta' connesse (le sue componenti), e un enunciato vero componente per componente e' automaticamente vero sull'unione. Studiare una varieta' «un pezzo per volta» non e' una semplificazione — e' una scomposizione esatta, senza perdita, nelle unita' dove gli argomenti connessi (letteralmente) si applicano.</p>
+  <p>Un'ultima osservazione, che chiude il cerchio con la tappa 04: la ragione per cui questa scomposizione e' cosi' pulita sulle varieta' — componenti aperte, disgiunte, numerabili, ciascuna essa stessa una varieta' — e' la stessa ragione per cui su una varieta' connesso e connesso per archi coincidono sempre. Entrambi i fatti discendono dalla stessa unica ipotesi, «localmente omeomorfo a $\mathbb{R}^n$»: non sono due regali separati che la definizione di varieta' fa, ma due facce della stessa proprieta' locale: avere, in ogni punto, un intorno che assomiglia a una palla di $\mathbb{R}^n$, con tutta la ricchezza che questo porta con se' gratuitamente.</p>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'un secondo spazio connesso non per archi · R^2 meno due punti · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · Un pettine spezzato', html:R`
+  <p>Sia $C=\big(\{0\}\times[0,1]\big)\cup\bigcup_{n\ge1}\big(\{1/n\}\times[0,1]\big)\cup\big([0,1]\times\{0\}\big)\subset\mathbb{R}^2$ (i «denti» verticali a $x=1/n$ e $x=0$, piu' la base orizzontale che li unisce in basso), privato pero' del punto $(0,1)$ in cima al dente sinistro. Argomenta se il risultato e' connesso, e se e' connesso per archi.</p>`,
+   sol:R`<p>$C\setminus\{(0,1)\}$ e' connesso: ogni dente e' collegato alla base, che e' connessa, e un'unione di connessi con un punto in comune (qualunque punto della base) e' connessa (Prop. A.39(c)) — e togliere un singolo punto dalla cima di un dente non sconnette l'insieme, perche' quel dente meno la sua cima resta connesso (e' ancora un intervallo, solo semiaperto) e resta attaccato alla base. <b>E' connesso per archi</b> fra due punti qualunque che non siano $(0,1)$: si scende lungo il proprio dente fino alla base, si attraversa la base, si sale lungo l'altro dente. Questo esempio — a differenza del seno del topologo — mostra che rimuovere un punto da un insieme connesso per archi puo' lasciarlo connesso per archi: non ogni rimozione rompe la proprieta', dipende da come il punto e' collegato al resto.</p>`},
+  {t:'esercizio', title:'2 · R^2 meno due punti', html:R`
+  <p>$\mathbb{R}^2$ privato di due punti distinti $p,q$ e' connesso per archi? E $\mathbb{R}$ privato di due punti?</p>`,
+   sol:R`<p>$\mathbb{R}^2\setminus\{p,q\}$ e' connesso per archi, con lo stesso argomento della tappa 05: dati due punti qualunque, o il segmento che li unisce evita entrambi $p$ e $q$, oppure si devia con una spezzata che li aggira (in $\mathbb{R}^2$ c'e' sempre una direzione libera). $\mathbb{R}\setminus\{p,q\}$ (con $p<q$) e' invece <b>sconnesso in tre pezzi</b>: $(-\infty,p)$, $(p,q)$, $(q,+\infty)$ — rimuovere punti da $\mathbb{R}$ aumenta sempre il numero di componenti di uno per ogni punto, mentre in $\mathbb{R}^n$ con $n\ge2$ non cambia nulla. E' lo stesso fenomeno della tappa 05, con due punti invece di uno.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perche' il seno del topologo e' connesso ma non connesso per archi? In quale passo esatto fallisce la continuita' di un ipotetico cammino?</li>
+  <li>Enuncia la Proposizione A.43(c), e di' perche' si applica a ogni varieta'.</li>
+  <li>Nella dimostrazione che $\mathbb{R}$ non e' omeomorfo a $\mathbb{R}^n$ ($n\ge2$), quale proprieta' topologica fa il lavoro, e in quale passo esatto entra l'ipotesi $n\ge2$?</li>
+  <li>Perche' questo argomento non puo' distinguere $\mathbb{R}^2$ da $\mathbb{R}^3$?</li>
+  <li>Perche' le componenti connesse di una varieta' sono sempre al piu' un'infinita' numerabile, e cosa esattamente lo garantisce?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>E' connesso perche' e' la chiusura di un connesso ($S$). Non e' connesso per archi perche' un ipotetico cammino da $L$ a $S$ dovrebbe avere, nell'ultimo istante $t_0$ in cui tocca $L$, una coordinata $y(t)$ che oscilla fra $-1$ e $1$ infinite volte in ogni intorno destro di $t_0$ — il teorema dei valori intermedi applicato alla coordinata $x$ lo forza, e questo rende $y$ discontinua in $t_0$.</li>
+   <li>«$X$ e' connesso se e solo se e' connesso per archi», valida quando $X$ e' localmente connesso per archi. Si applica a ogni varieta' perche' ogni punto ha un intorno omeomorfo a una palla di $\mathbb{R}^n$, e le palle sono connesse per archi per convessita'.</li>
+   <li>Fa il lavoro la <b>connessione</b>, invariante topologico: $\mathbb{R}\setminus\{0\}$ e' sconnesso, $\mathbb{R}^n\setminus\{p\}$ e' connesso per $n\ge2$. L'ipotesi $n\ge2$ entra nel costruire la spezzata che aggira il punto tolto: serve una direzione «di lato» che in dimensione $1$ non esiste.</li>
+   <li>Perche' togliere un punto da $\mathbb{R}^2$ e da $\mathbb{R}^3$ lascia in entrambi i casi uno spazio connesso per archi: l'argomento non vede nessuna differenza fra le due dimensioni, perche' entrambe hanno «direzioni di lato» a sufficienza. Servirebbe un invariante piu' fine, come il gruppo fondamentale.</li>
+   <li>Le componenti sono aperte (perche' la varieta' e' localmente connessa per archi) e disgiunte; uno spazio a base numerabile (tp-02) non puo' contenere piu' di un'infinita' numerabile di aperti disgiunti non vuoti, perche' ciascuno deve contenere almeno un elemento della base numerabile, e nessun elemento di base puo' stare in due aperti disgiunti diversi.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove la connessione riappare nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Connesso e connesso per archi sono la stessa cosa quasi sempre, e il seno del topologo mostra esattamente il meccanismo del quando non lo sono — una funzione continua costretta a oscillare infinite volte in un tempo finito. Su una varieta' il divario si chiude sempre, perche' «localmente euclideo» include gratuitamente «localmente connesso per archi». Le componenti connesse di una varieta', aperte e al piu' numerabili, sono la scomposizione esatta — non una semplificazione — che giustifica il lavorare «un pezzo per volta».</p>
+  <p><b>Un debito saldato in parte, dichiarato con precisione dove si ferma.</b> Il debito di tp-03 sull'invarianza della dimensione e' risolto per il caso $\mathbb{R}$ contro $\mathbb{R}^n$ ($n\ge2$) con la sola connessione; il caso generale, fra due dimensioni entrambe $\ge2$, resta aperto e richiede gruppo fondamentale o omologia. E una domanda di tp-07 (il quoziente rompe mai la connessione?) ha ricevuto risposta negativa, nello stesso modo in cui non rompe mai la compattezza.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>La connessione come cio che decide se un argomento vale ovunque o solo in un pezzo</b>, dal dominio di una soluzione di un'equazione differenziale alle fasi topologiche della materia.`,
+   rotte:[
+    {dove:'Geometria<br>differenziale', txt:R`Le curve integrali di un campo vettoriale (gd-13) e i flussi che generano (gd-15) sono definiti su intervalli di tempo che dipendono dal punto di partenza: il dominio massimale di una curva integrale e' sempre un <b>intervallo connesso</b> di $\mathbb{R}$ contenente $0$, mai un'unione di pezzi separati — ed e' esattamente la connessione di $\mathbb{R}$ stesso, vista in tp-01, a garantirlo. Su una varieta' con piu' componenti, un flusso non puo' mai portare un punto da una componente all'altra: resta intrappolato nella sua componente connessa per sempre, perche' l'immagine continua di un connesso e' connessa.`},
+    {dove:'Meccanica<br>statistica', txt:R`Lo spazio delle configurazioni accessibili a un sistema vincolato (per esempio un gas in un contenitore con due camere collegate da un foro stretto) puo' essere connesso ma «quasi sconnesso» nella pratica — ed e' precisamente la distinzione fra connessione topologica e tempi di attraversamento finiti, lo stesso tipo di fenomeno (ma rovesciato) del seno del topologo: li' la connessione topologica c'era ma nessun cammino continuo la attraversava in tempo finito, qui il cammino esiste ma richiede un tempo enormemente lungo. La teoria della nucleazione e delle transizioni di fase del primo ordine studia esattamente situazioni di questo tipo.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Il gruppo fondamentale dello spazio delle configurazioni — menzionato alla tappa 05 come lo strumento che servirebbe per il caso generale dell'invarianza della dimensione — e' anche cio' che distingue bosoni e fermioni in meccanica quantistica non relativistica: lo spazio delle configurazioni di due particelle identiche in $\mathbb{R}^3$ ha gruppo fondamentale $\mathbb{Z}/2$, mentre in $\mathbb{R}^2$ ha gruppo fondamentale $\mathbb{Z}$ (infinito) — il fatto geometrico dietro l'esistenza degli anioni, impossibili in tre dimensioni. La connessione e' il primo passo di una scala di invarianti di cui il gruppo fondamentale e' il secondo.`}
+   ],
+   domanda:R`Compattezza e connessione, le due proprieta' «globali» di questo prerequisito, sono entrambe sempre ereditate dal quoziente — a differenza di Hausdorff, che puo' rompersi. <b>Domanda da portare avanti, verso tp-09:</b> le partizioni dell'unita', il movimento che chiude il percorso di topologia generale, hanno bisogno di compattezza (locale) ma non sembrano aver bisogno ne' di connessione ne' della sua assenza. C'e' una ragione strutturale per cui alcune costruzioni topologiche dipendono dalla connessione e altre no?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-08-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-08 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-08-connessione.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

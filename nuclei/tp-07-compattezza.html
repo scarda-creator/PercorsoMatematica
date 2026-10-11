@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-07 — La compattezza, cioe il finito che sopravvive al passaggio all infinito</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-07 — La compattezza</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-07: La compattezza, cioe il finito che sopravvive al passaggio all infinito <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-07 — la compattezza, cioe' il finito che sopravvive al passaggio all'infinito
+identita:  «da ogni ricoprimento aperto se ne estrae uno finito» sembra una definizione
+           storta finche' non si vede cosa compra: su un compatto una proprieta' locale
+           diventa globale con un numero finito di passi. E' il meccanismo che in geodiff
+           si usa ogni volta che si passa dalle carte all'intera varieta'
+copre:     1.5 del programma di recupero
+serve:     tp-01, tp-03, tp-04
+apre:      gd-05 (partizioni dell'unita'), gd-09, gd-10 (Sard)
+strumenti: compattezza, omeomorfismo, quoziente-topologico
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A (stampate 608-612): la
+           definizione per ricoprimenti aperti, la Proposizione A.45 (proprieta' degli
+           spazi compatti: immagine continua compatta, teorema di Weierstrass, chiuso in
+           compatto, compatto in Hausdorff e' chiuso, prodotto finito, quoziente), il
+           Lemma A.48 sulla continuita' uniforme su un compatto (la dimostrazione che
+           rende concreto il meccanismo «finito da infinito»), la Proposizione A.50
+           (formulazioni equivalenti: ricoprimenti, insiemi infiniti, successioni) per
+           spazi di Hausdorff a base numerabile o metrici. Abate, Tovena — Geometria
+           Differenziale (stampata 101): Definizione 2.6.12 di applicazione propria, come
+           nota terminologica italiana collegata alla stessa nozione.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.5
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"3**2","vale":"9",
+  "dove":"03","appare":"3^2=9"},
+
+ {"tipo":"uguale","sinistra":"(-2)**2","vale":"4",
+  "dove":"03","appare":"(-2)^2=4"},
+
+ {"tipo":"uguale","sinistra":"2**2-1**2","vale":"3",
+  "dove":"05","appare":"2^2-1^2=3"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'il finito che sopravvive al passaggio allinfinito · dove va usato in geodiff · perche la definizione va motivata e non enunciata',
+  blocchi:[
+  {t:'prosa', title:'Un meccanismo, non solo una definizione', tag:'architettura', html:R`
+  <p>«Ogni ricoprimento aperto ammette un sottoricoprimento finito» e', presa da sola, una frase che non dice perche' qualcuno dovrebbe volerla. Questo movimento non la enuncia e basta: parte da un problema che si incontrera' davvero in geometria differenziale — <i>come estendere a tutta una varieta' una costruzione che si sa fare solo carta per carta</i> — e arriva alla definizione come alla condizione precisa che rende quel passaggio possibile, in un numero <b>finito</b> di passi.</p>
+  <p>Il punto si vedra' nel modo piu' nudo possibile alla tappa 05, dove una proprieta' — la continuita' uniforme — che in generale e' piu' forte della continuita' semplice, diventa <b>automatica</b> non appena il dominio e' <span class="str" data-str="compattezza">compatto</span>. Non per magia: perche' un ricoprimento infinito di intorni, uno per ogni punto, si puo' tagliare a un numero finito, e un massimo o un minimo su un insieme finito esiste sempre.</p>`}
+]},
+
+/* ---------------- 01 · LA DEFINIZIONE, MOTIVATA ---------------- */
+{ num:'01', title:'La definizione, motivata prima di essere scritta', meta:'cosa si vorrebbe poter fare · perche un ricoprimento, perche finito · la definizione',
+  blocchi:[
+  {t:'reveal', title:'Dal problema alla definizione', tag:'first principles', steps:[
+   {label:'Il problema che si vuole risolvere', body:R`
+   <p>Si immagini di avere, per ogni punto $p$ di uno spazio $X$, un intorno $U_p$ su cui si sa dimostrare qualcosa — una funzione e' limitata, una proprieta' vale, una costruzione si puo' fare. Si vorrebbe concludere che la stessa cosa vale su <b>tutto</b> $X$. Il modo piu' diretto per farlo sarebbe combinare infiniti argomenti locali, uno per punto — ma «infiniti argomenti» non e' una dimostrazione, e' una promessa. Servirebbe poter dire: <i>basta controllare un numero finito di questi intorni</i>, perche' a un argomento finito si puo' davvero applicare l'induzione, il massimo, la somma.</p>`},
+   {label:'Perche un ricoprimento aperto', body:R`
+   <p>Gli intorni $U_p$, presi al variare di $p\in X$, <b>ricoprono</b> $X$: ogni punto sta in almeno uno di essi (nel proprio). Se si potesse sempre scegliere un numero <b>finito</b> di questi intorni che ricopre ancora tutto $X$, l'argomento locale, ripetuto su quei finiti intorni, darebbe la conclusione globale. La domanda diventa allora una domanda sullo spazio $X$, non sulla costruzione specifica: <i>ogni ricoprimento di $X$ fatto di aperti ammette un sottoricoprimento finito?</i></p>`},
+   {label:'La definizione', body:R`
+   <div class="note">Uno spazio topologico $X$ e' <b>compatto</b> se ogni ricoprimento di $X$ fatto di insiemi aperti ammette un <b>sottoricoprimento finito</b>: presa una qualunque famiglia $\{U_\alpha\}_{\alpha\in A}$ di aperti con $X=\bigcup_\alpha U_\alpha$, esistono $\alpha_1,\dots,\alpha_n\in A$ (finiti) tali che $X=U_{\alpha_1}\cup\cdots\cup U_{\alpha_n}$ (Lee, stampata 608). Un sottoinsieme $K\subseteq X$ e' <b>compatto</b> se lo e' come spazio con la topologia di sottospazio.</div>
+   <p>La definizione non dice «esiste un ricoprimento finito che basta»: dice che <b>ogni</b> ricoprimento, per quanto infinito e arbitrario, ne contiene uno finito dentro di se'. E' una proprieta' molto piu' forte di quanto sembri a prima lettura, ed e' esattamente la proprieta' che serve per trasformare l'argomento locale della tappa precedente in un argomento globale.</p>`}
+  ]}
+]},
+
+/* ---------------- 02 · HEINE-BOREL, COME DEBITO DICHIARATO ---------------- */
+{ num:'02', title:'Heine-Borel: il criterio pratico in R^n, citato e non dimostrato', meta:'chiuso e limitato, solo in R^n · un ricoprimento senza sottoricoprimento finito, a mano · il debito verso Analisi',
+  blocchi:[
+  {t:'prosa', title:'Il criterio che si usera ovunque', tag:'grammatica', html:R`
+  <p>In $\mathbb{R}^n$, con la topologia euclidea, vale un criterio che rende la compattezza facile da riconoscere: un sottoinsieme $K\subseteq\mathbb{R}^n$ e' compatto se e solo se e' <b>chiuso e limitato</b> (il <b>Teorema di Heine-Borel</b>, citato in Lee, stampata 608). E' il criterio gia' usato senza dimostrarlo in tp-03 ($[0,1]$ compatto), tp-04 (unione e prodotto di compatti) e tp-05 (la sfera $S^n$, il disco $D^n$, l'emisfero $H^n_+$) — ogni volta dichiarando esplicitamente il debito.</p>
+  <div class="note"><b>Il debito, qui saldato nella forma giusta: dichiarato, non nascosto.</b> La dimostrazione di Heine-Borel appartiene a un corso di Analisi Reale — usa la completezza di $\mathbb{R}$ e un argomento di bisezione che non ha nulla di specificamente topologico. Dimostrarla qui userebbe spazio senza insegnare nulla sulla topologia generale: il criterio si <b>usa</b> da qui in avanti come fatto noto, esattamente come Lee lo tratta nella propria appendice di richiami.</div>`},
+  {t:'reveal', title:'Un ricoprimento che non ha sottoricoprimento finito, a mano', tag:'dimostrazione', steps:[
+   {label:'Linsieme non compatto', body:R`
+   <p>Per vedere la definizione al lavoro nel verso negativo, si consideri $(0,1)\subset\mathbb{R}$ — limitato ma non chiuso, dunque non compatto per Heine-Borel. Si costruisca un ricoprimento aperto che lo dimostra direttamente, senza invocare il teorema: $U_n=\left(\dfrac1n,1\right)$ per $n=2,3,4,\dots$</p>`},
+   {label:'E un ricoprimento', body:R`
+   <p>Ogni $x\in(0,1)$ sta in $U_n$ non appena $n>1/x$: la famiglia $\{U_n\}_{n\ge2}$ ricopre $(0,1)$.</p>`},
+   {label:'Ma nessun sottoricoprimento finito funziona', body:R`
+   <p>Scelti comunque $n_1<n_2<\cdots<n_k$ in numero finito, l'unione $U_{n_1}\cup\cdots\cup U_{n_k}$ e' uguale al piu' grande dei $U_{n_i}$, cioe' $U_{n_k}=(1/n_k,1)$ — un'unione finita di intervalli annidati e' l'intervallo piu' grande. Ma $1/n_k>0$, dunque $U_{n_k}$ non contiene i punti di $(0,1)$ minori di $1/n_k$: per esempio $1/(2n_k)$ ne resta fuori. <b>Nessuna scelta finita ricopre tutto l'intervallo</b>: $(0,1)$ non e' compatto, confermando Heine-Borel senza averlo invocato.</p>`}
+  ]},
+  {t:'plot', title:'Il ricoprimento U_n = (1/n, 1): nessuna scelta finita arriva vicino a zero',
+   intro:R`Quattro dei ricoprenti $U_2,U_3,U_5,U_{10}$, annidati: ciascuno lascia fuori un pezzo sempre piu' piccolo vicino a $0$, e nessuna unione finita di essi arriva a contenerlo tutto.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0', tr:[0,1], height:260, equal:false,
+     xr:[-0.08,1.1], yr:[-0.55,0.55],
+     title:'U_10, U_5, U_3, U_2 (dal piu stretto al piu largo): il punto 0 resta sempre escluso',
+     segs:[{x1:0.1,y1:0.4,x2:1,y2:0.4, col:'#5eead4', width:1.8},
+           {x1:0.2,y1:0.25,x2:1,y2:0.25, col:'#8ee0c8', width:1.8},
+           {x1:0.333,y1:0.1,x2:1,y2:0.1, col:'#8ee0c8', width:1.8},
+           {x1:0.5,y1:-0.1,x2:1,y2:-0.1, col:'#d8a13a', width:1.8}],
+     marks:[{x:0.1,y:0.4, label:'U_10', col:'#5eead4'},
+            {x:0.2,y:0.25, label:'U_5', col:'#8ee0c8'},
+            {x:0.333,y:0.1, label:'U_3', col:'#8ee0c8'},
+            {x:0.5,y:-0.1, label:'U_2', col:'#d8a13a'},
+            {x:0,y:-0.35, label:'0: escluso da ogni U_n, qualunque n si scelga', col:'#8ea0b8'}]}
+   ],
+   leggi:R`<p>Ogni segmento rappresenta un $U_n=(1/n,1)$: l'estremo sinistro si avvicina a $0$ al crescere di $n$, ma non lo raggiunge mai. Una scelta finita di questi segmenti — per quanti se ne prendano, e per quanto grande si scelga $n$ — e' sempre uguale al segmento piu' lungo fra quelli scelti, perche' sono tutti annidati l'uno nell'altro. Il punto $0$ (e tutto un intorno sinistro di esso) resta escluso da qualunque unione finita: e' precisamente il meccanismo che serve un'infinita' di pezzi, non una quantita' finita, per essere coperto — ed e' il motivo intuitivo per cui $(0,1)$, aperto a sinistra, non e' compatto.</p>`}
+]},
+
+/* ---------------- 03 · LE PROPRIETA DI BASE ---------------- */
+{ num:'03', title:'Le proprieta che si useranno sempre: Prop. A.45', meta:'immagine continua di compatto · Weierstrass · chiuso in compatto · prodotto e quoziente',
+  blocchi:[
+  {t:'reveal', title:'Cinque proprieta, con la dimostrazione dove e breve', tag:'costruzione', steps:[
+   {label:'Limmagine continua di un compatto e compatta', body:R`
+   <p>Se $F:X\to Y$ e' continua e $X$ e' compatto, $F(X)$ e' compatto (Lee, Prop. A.45(a)). Dimostrazione in una riga: dato un ricoprimento aperto $\{V_\alpha\}$ di $F(X)$, le controimmagini $\{F^{-1}(V_\alpha)\}$ ricoprono $X$ (sono aperte per continuita'); per compattezza di $X$ se ne estrae un numero finito $F^{-1}(V_{\alpha_1}),\dots,F^{-1}(V_{\alpha_n})$ che ricopre $X$, e allora $V_{\alpha_1},\dots,V_{\alpha_n}$ ricopre $F(X)$. <b>E' lo stesso schema usato in tp-03 e tp-05 per il lemma compatto-Hausdorff-chiuso</b>, qui nella sua forma piu' diretta.</p>`},
+   {label:'Il teorema di Weierstrass', body:R`
+   <p>Se $X$ e' compatto e $f:X\to\mathbb{R}$ e' continua, $f$ e' limitata e <b>raggiunge</b> massimo e minimo su $X$ (Prop. A.45(b)) — non solo $\sup$ e $\inf$, ma valori effettivamente assunti. Segue dal punto precedente: $f(X)\subseteq\mathbb{R}$ e' compatto, dunque chiuso e limitato per Heine-Borel; un sottoinsieme chiuso e limitato di $\mathbb{R}$ contiene il proprio estremo superiore e il proprio estremo inferiore.</p>
+   <p>Un conto per vederlo con numeri: $f(x)=x^2$ su $K=[-2,3]$, compatto per Heine-Borel. Si calcoli $f$ agli estremi: $3^2=9$ e $(-2)^2=4$; e in $x=0$, $f(0)=0$. Il minimo su $K$ e' $0$ (raggiunto in un punto interno, dove $f'=0$), il massimo e' $9$ (raggiunto nell'estremo $x=3$, non nell'estremo opposto). <b>Entrambi sono raggiunti</b>, non solo approssimati — e' esattamente cio' che «compatto» garantisce e che fallirebbe su un intervallo aperto come $(-2,3)$, dove $9$ sarebbe un estremo superiore mai toccato.</p>`},
+   {label:'Chiuso in compatto, compatto in Hausdorff', body:R`
+   <p>Due fatti gia' incontrati, qui raccolti: ogni <b>chiuso</b> dentro un compatto e' compatto (Prop. A.45(e)) — usato in tp-03, tp-05, tp-06 per $S^n$, $D^n$, $H^n_+$ come chiusi dentro spazi compatti piu' grandi. E ogni compatto dentro uno spazio di <span class="str" data-str="omeomorfismo">Hausdorff</span> e' chiuso (Prop. A.45(f)) — il lemma dimostrato per intero in tp-05 tappa 05 e usato per costruire il lemma compatto-Hausdorff-chiuso, qui raccolto come proprieta' generale invece che ridimostrato.</p>`},
+   {label:'Due compatti disgiunti in uno spazio di Hausdorff si separano', body:R`
+   <p>Una generalizzazione della definizione stessa di Hausdorff (tp-06): se $X$ e' di Hausdorff e $K,L\subseteq X$ sono compatti <b>disgiunti</b>, esistono aperti disgiunti $U,V$ con $K\subseteq U$, $L\subseteq V$ (Prop. A.45(d)) — non piu' solo punti, insiemi interi. L'idea e' di nuovo il meccanismo «finito da infinito»: per ogni coppia $(p,q)\in K\times L$ si trovano aperti disgiunti che li separano (Hausdorff); fissato $p\in K$, gli aperti $\{V_q\}_{q\in L}$ cosi' ottenuti ricoprono $L$, e per compattezza di $L$ se ne estrae un numero finito la cui intersezione dei corrispondenti $U_q$ da' un intorno di $p$ disgiunto da tutto $L$; infine questi intorni, uno per ogni $p\in K$, si ricoprono a loro volta con un numero finito per compattezza di $K$. <b>Due applicazioni annidate dello stesso meccanismo</b>, non un argomento nuovo.</p>`},
+   {label:'Prodotto finito e quoziente', body:R`
+   <p>Un prodotto <b>finito</b> di spazi compatti e' compatto (Prop. A.45(h)) — coerente con tp-04, dove prodotto e sottospazio si comportavano «come ci si aspetta». E ogni <span class="str" data-str="quoziente-topologico">quoziente</span> di uno spazio compatto e' compatto (Prop. A.45(i)): e' il lemma gia' usato implicitamente in tp-05 per dedurre che $\mathbb{P}^n(\mathbb{R})$ e' compatto come immagine continua (quindi, a fortiori, come quoziente) della sfera. <b>Compattezza, a differenza di Hausdorff, il quoziente non la rompe mai</b> — e' il contrasto che tp-05 aveva lasciato come domanda esplicita in prolessi, e questa proprieta' lo risolve: non c'e' nessun controesempio da cercare, perche' il fatto (i) lo esclude in generale.</p>`}
+  ]}
+]},
+
+/* ---------------- 04 · COMPATTEZZA PER SUCCESSIONI ---------------- */
+{ num:'04', title:'Compattezza per successioni: la Proposizione A.50', meta:'tre formulazioni equivalenti · dove serve lipotesi aggiuntiva · il debito dichiarato sulla dimostrazione',
+  blocchi:[
+  {t:'prosa', title:'Tre modi di dire la stessa cosa, non sempre', tag:'first principles', html:R`
+  <p>La definizione per ricoprimenti e' quella che si usa per dimostrare teoremi generali, ma non e' quella piu' intuitiva per riconoscere la compattezza di uno spazio specifico. Per spazi <b>di Hausdorff a base numerabile</b> (esattamente l'ambiente delle varieta', tp-01/tp-02/tp-06) o per spazi <b>metrici</b>, tre condizioni sono equivalenti (Lee, Prop. A.50, stampata 610):</p>
+  <div class="note">(a) $M$ e' compatto (per ricoprimenti aperti). (b) Ogni sottoinsieme infinito di $M$ ha un punto di accumulazione in $M$. (c) Ogni successione in $M$ ha una sottosuccessione <b>convergente</b> in $M$ — la proprieta' nota come <b>compattezza per successioni</b>.</div>
+  <p><b>L'ipotesi su $M$ non e' decorativa.</b> Le tre condizioni possono separarsi su spazi piu' esotici — e' il motivo per cui Lee le enuncia solo sotto l'ipotesi di base numerabile o di metrica, non per spazi topologici arbitrari. Dimostrare l'equivalenza per intero richiede argomenti di tipo Lindelöf che eccedono lo spazio di questo movimento: <b>il debito e' dichiarato</b>, e la direzione che conta di piu' nella pratica — compatto $\Rightarrow$ ogni successione ha una sottosuccessione convergente — e' quella che le tappe seguenti useranno.</p>`},
+  {t:'plot', title:'Una successione senza limite, con due sottosuccessioni convergenti',
+   intro:R`$x_n=(-1)^n\left(1-\dfrac1n\right)$ in $[-1,1]$: non converge (oscilla fra valori vicini a $-1$ e vicini a $+1$), ma $[-1,1]$ e' compatto e infatti due sue sottosuccessioni convergono.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0', tr:[-1.05,1.05], height:260, equal:false,
+     xr:[-1.3,1.3], yr:[-0.6,0.6],
+     title:'i termini pari si accumulano verso +1, i dispari verso -1',
+     marks:[{x:-1,y:0, label:'-1', col:'#d8a13a'},
+            {x:1,y:0, label:'+1', col:'#d8a13a'},
+            {x:0.5,y:0.12, label:'x_2', col:'#5eead4', up:true},
+            {x:0.75,y:0.12, label:'x_4', col:'#5eead4', up:true},
+            {x:0.9,y:0.12, label:'x_10', col:'#5eead4', up:true},
+            {x:-0.5,y:-0.12, label:'x_3', col:'#8ee0c8'},
+            {x:-0.75,y:-0.12, label:'x_5', col:'#8ee0c8'},
+            {x:-0.9,y:-0.12, label:'x_11', col:'#8ee0c8'}]}
+   ],
+   leggi:R`<p>I termini pari (verde chiaro, sopra l'asse) si avvicinano a $+1$ senza mai raggiungerlo; i dispari (verde scuro, sotto) si avvicinano a $-1$. La successione intera non converge — ha due punti di accumulazione distinti, non uno — ma $[-1,1]$ e' compatto, ed entrambe le sottosuccessioni (pari, dispari) convergono dentro di esso. E' il contenuto esatto della condizione (c): non serve che <i>la</i> successione converga, basta che <i>una sua sottosuccessione</i> lo faccia, e la compattezza lo garantisce sempre.</p>`}
+]},
+
+/* ---------------- 05 · IL MECCANISMO AL LAVORO: CONTINUITA UNIFORME ---------------- */
+{ num:'05', title:'Il meccanismo al lavoro: perche un continuo su un compatto e uniformemente continuo', meta:'la dimostrazione del Lemma A.48 per intero · il ricoprimento infinito tagliato a un numero finito · un controesempio quando il compatto manca',
+  blocchi:[
+  {t:'prosa', title:'Due nozioni di continuita, e la differenza che conta', tag:'grammatica', html:R`
+  <p>$F:M_1\to M_2$ fra spazi metrici e' <b>continua</b> in ogni punto se per ogni $x$ e ogni $\varepsilon>0$ esiste $\delta>0$ (che puo' dipendere da $x$) tale che $d_1(x,y)<\delta$ implica $d_2(F(x),F(y))<\varepsilon$. E' <b>uniformemente continua</b> se lo stesso $\delta$ funziona per <b>ogni</b> punto $x$ contemporaneamente — una sola risposta, buona ovunque, invece di una risposta diversa in ogni punto. La seconda e' una richiesta molto piu' forte, e in generale falsa anche per funzioni continuissime: $g(x)=x^2$ su tutto $\mathbb{R}$ e' continua ma non uniformemente — un conto a due punti lontani lo mostra. A $x=10$ e $y=10.1$ la differenza $g(y)-g(x)$ vale $2.01$, mentre la distanza fra i due punti e' solo $0.1$; a $x=100$ la stessa distanza $0.1$ nel dominio produce uno scarto molto piu' grande nell'immagine, perche' la pendenza di $g$ cresce senza limite. <b>Nessun $\delta$ fisso puo' bastare ovunque su $\mathbb{R}$.</b></p>`},
+  {t:'reveal', title:'Su un compatto, invece, basta sempre', tag:'dimostrazione', steps:[
+   {label:'Lenunciato', body:R`
+   <p><b>Lemma A.48(a).</b> Se $K$ e' un sottoinsieme compatto di uno spazio metrico $M_1$, e $F:M_1\to M_2$ e' continua, allora $F|_K$ e' uniformemente continua.</p>`},
+   {label:'Il ricoprimento, uno per ogni punto', body:R`
+   <p>Fissato $\varepsilon>0$, la continuita' (non uniforme) di $F$ da', per ogni $x\in K$, un numero $\delta(x)>0$ tale che $d_1(x,y)<2\delta(x)\Rightarrow d_2(F(x),F(y))<\varepsilon/2$. Le palle $\{B_{\delta(x)}(x)\}_{x\in K}$ sono un ricoprimento aperto di $K$ — uno per ogni punto, dunque <b>infinito</b> in generale.</p>`},
+   {label:'Tagliato a un numero finito', body:R`
+   <p>Per <span class="str" data-str="compattezza">compattezza</span> di $K$, esistono $x_1,\dots,x_n\in K$ tali che $K\subseteq B_{\delta(x_1)}(x_1)\cup\cdots\cup B_{\delta(x_n)}(x_n)$. Si ponga $\delta=\min\{\delta(x_1),\dots,\delta(x_n)\}$ — <b>un minimo su un insieme finito, che esiste sempre</b> (e che su un insieme infinito di $\delta(x)$ potrebbe valere $0$).</p>`},
+   {label:'Perche quel delta funziona ovunque', body:R`
+   <p>Siano $x,y\in K$ con $d_1(x,y)<\delta$. $x$ sta in qualche $B_{\delta(x_i)}(x_i)$ della copertura finita; per la disuguaglianza triangolare, $y$ sta in $B_{2\delta(x_i)}(x_i)$ (perche' $d_1(y,x_i)\le d_1(y,x)+d_1(x,x_i)<\delta+\delta(x_i)\le2\delta(x_i)$). Allora $d_2(F(x),F(y))\le d_2(F(x),F(x_i))+d_2(F(x_i),F(y))<\varepsilon/2+\varepsilon/2$, cioe' meno di $\varepsilon$. <b>Lo stesso $\delta$, costruito una sola volta dal minimo finito, funziona per ogni coppia di punti di $K$.</b></p>
+   <p>Un conto per vedere il margine: $F(x)=x^2$ su $K=[0,2]$, dove $F$ e' Lipschitz con costante $4$ — il massimo di $2x$ su $K$, raggiunto in $x=2$. Per $x=1$, $y=2$: $2^2-1^2=3$, e $|x-y|=1$: lo scarto nell'immagine e' $3\le4\cdot1$, dentro il margine previsto dalla costante di Lipschitz. Su questo compatto, a differenza di tutto $\mathbb{R}$, un singolo $\delta$ proporzionale a $\varepsilon$ (qui, un quarto di $\varepsilon$) funziona ovunque.</p>`},
+   {label:'Il punto, generalizzato', body:R`
+   <p><b>Questo e' il meccanismo dichiarato nella tappa 00, visto per intero.</b> Un ricoprimento con infiniti pezzi — uno per punto — diventa, grazie alla compattezza, un ricoprimento con un numero <b>finito</b> di pezzi; e su un numero finito di oggetti, un minimo esiste sempre. Ogni volta che in geodiff si costruira' qualcosa «carta per carta» e si vorra' concludere qualcosa di globale — una metrica, una forma, una partizione dell'unita' — questo e' lo schema che rendera' l'argomento rigoroso invece che una somma infinita di promesse locali.</p>`}
+  ]}
+]},
+
+/* ---------------- 06 · PERCHE SERVE DAVVERO IN GEODIFF ---------------- */
+{ num:'06', title:'Dove questo movimento sblocca: partizioni dellunita e Sard', meta:'il debito verso tp-09 · il ruolo in Sard · un limite dichiarato: la compattezza locale',
+  blocchi:[
+  {t:'prosa', title:'Due usi diretti, dichiarati come debiti verso i movimenti che li faranno', tag:'sintesi', html:R`
+  <p><b>Le partizioni dell'unita' (tp-09, gd-05).</b> Costruire una funzione liscia che vale $1$ su un compatto $K$ e $0$ fuori da un suo intorno — la costruzione che Abate-Tovena chiama $C^\infty$-bump — usa esattamente il meccanismo della tappa 05: si ricopre $K$ con finite carte locali (per compattezza), si costruisce una funzione bump in ciascuna carta, e si combinano le finite funzioni in una sola. Senza compattezza il «si combinano le finite funzioni» non avrebbe senso — sarebbe una somma infinita, con tutti i problemi di convergenza che questo porta.</p>
+  <p><b>Il teorema di Sard (gd-10).</b> L'enunciato che i valori critici di un'applicazione liscia hanno misura nulla si dimostra ricoprendo il dominio con un'infinita' numerabile di cubi, ma la stima quantitativa su ciascun pezzo usa argomenti di tipo compattezza-locale per controllare la costante in ciascun passo. Non e' lo stesso argomento di tp-07 parola per parola, ma la stessa idea generale: <b>trasformare un controllo locale in una stima globale, in passi che si possono sommare perche' sono abbastanza pochi da controllare</b>.</p>`},
+  {t:'prosa', title:'Un limite dichiarato: la compattezza locale resta fuori', tag:'first principles', html:R`
+  <p>Lee dedica una sezione intera (stampate 611-612) agli spazi <b>localmente compatti di Hausdorff</b> — quelli in cui ogni punto ha un intorno contenuto in un compatto, la classe a cui appartiene ogni varieta' — con risultati come l'esistenza di un'<b>esaustione per compatti</b> (una successione di compatti $K_1\subset K_2\subset\cdots$ la cui unione e' tutto lo spazio, ciascuno contenuto nell'interno del successivo). Questo movimento non li sviluppa: sono lo strumento con cui tp-09 costruira' partizioni dell'unita' numerabili su un'intera varieta' (non solo su un compatto), e introdurli qui, senza ancora avere le partizioni dell'unita' da applicarci, costruirebbe teoria che aspetta a vuoto. <b>Il debito e' dichiarato e nominato</b>, non nascosto: tp-09 lo trovera' qui.</p>
+  <p>Vale la pena capire perche' questa ipotesi in piu' e' davvero necessaria, e non solo prudenza. Compattezza globale — come quella di $\mathbb{P}^n(\mathbb{R})$ o di $S^n$ — e' una proprieta' rara: la maggior parte delle varieta' che interessano la fisica (lo spazio-tempo, lo spazio delle fasi di un sistema non confinato) non e' compatta nel suo complesso. Compattezza <b>locale</b> e' invece quasi automatica per una varieta': basta che ogni punto abbia una carta la cui immagine contenga una palla chiusa, ed e' esattamente cio' che la clausola «localmente omeomorfo a $\mathbb{R}^n$» garantisce senza sforzo aggiuntivo. L'esaustione per compatti e' il modo in cui questa abbondanza locale di compattezza si organizza in una struttura globale utilizzabile: non un solo compatto che copre tutto (che richiederebbe compattezza globale, spesso falsa), ma un'infinita' numerabile e crescente di compatti, ciascuno dei quali puo' essere trattato con il meccanismo finito di questo movimento, uno alla volta.</p>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'un ricoprimento senza sottoricoprimento finito su un nuovo insieme · Weierstrass al lavoro · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · Z non e compatto, dimostrato a mano', html:R`
+  <p>Costruisci un ricoprimento aperto di $\mathbb{Z}\subset\mathbb{R}$ (con la topologia di sottospazio) che non ammette sottoricoprimento finito, e di' perche' questo e' coerente con Heine-Borel.</p>`,
+   sol:R`<p>Si prenda $U_n=(n-1/2,n+1/2)$ per ogni $n\in\mathbb{Z}$: ciascuno contiene esattamente un intero, $\{U_n\}_{n\in\mathbb{Z}}$ ricopre $\mathbb{Z}$, e qualunque scelta finita $U_{n_1},\dots,U_{n_k}$ copre solo i $k$ interi corrispondenti — mai tutti. Coerente con Heine-Borel: $\mathbb{Z}$ e' chiuso in $\mathbb{R}$ ma <b>non limitato</b>, dunque il criterio esclude la compattezza senza bisogno di costruire il controesempio — che pero' resta istruttivo perche' mostra il meccanismo «nessuna scelta finita basta» in un caso diverso da $(0,1)$ (lì limitato non chiuso, qui chiuso non limitato).</p>`},
+  {t:'esercizio', title:'2 · Il teorema di Weierstrass su un dominio che non e un intervallo', html:R`
+  <p>Sia $K=\{(x,y)\in\mathbb{R}^2 : x^2+y^2\le4\}$ (il disco chiuso di raggio $2$) e $f(x,y)=x^2-y^2$. Argomenta perche' $f$ raggiunge massimo e minimo su $K$, e trova i punti dove li raggiunge (senza derivare: usa la geometria di $f$ sul bordo).</p>`,
+   sol:R`<p>$K$ e' chiuso e limitato in $\mathbb{R}^2$, dunque compatto per Heine-Borel (qui applicato in dimensione $2$, stesso teorema); $f$ e' continua (polinomiale). Per Weierstrass, raggiunge massimo e minimo su $K$. Sul bordo $x^2+y^2=4$, scrivendo $x=2\cos\theta$, $y=2\sin\theta$: $f=4\cos^2\theta-4\sin^2\theta=4\cos2\theta$, che varia fra $-4$ (quando $2\theta=\pi$, cioe' $\theta=\pi/2$, il punto $(0,2)$) e $4$ (quando $\theta=0$, il punto $(2,0)$). All'interno del disco, $f$ non ha ne' massimo ne' minimo locale stretto diverso da questi (e' una sella in $(0,0)$). <b>Massimo $4$ in $(2,0)$ e $(-2,0)$; minimo $-4$ in $(0,2)$ e $(0,-2)$</b>, entrambi sul bordo — non e' un caso: senza vincoli $f$ non avrebbe ne' massimo ne' minimo su tutto $\mathbb{R}^2$, ed e' la compattezza di $K$, non una proprieta' speciale di $f$, a garantirne l'esistenza qui — lo stesso schema del conto con $f(x)=x^2$ alla tappa 03, applicato questa volta in due variabili invece che una, senza che il meccanismo cambi di una virgola.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perche' la definizione di compattezza chiede che OGNI ricoprimento ammetta un sottoricoprimento finito, e non che ESISTA un ricoprimento finito che basta?</li>
+  <li>Enuncia Heine-Borel, e di' perche' questo movimento non lo dimostra.</li>
+  <li>Perche' il quoziente di uno spazio compatto e' sempre compatto, mentre il quoziente di uno spazio di Hausdorff puo' non esserlo?</li>
+  <li>Nella dimostrazione che una funzione continua su un compatto e' uniformemente continua, in quale passo esatto si usa la compattezza, e cosa fallirebbe senza?</li>
+  <li>Perche' $g(x)=x^2$ su tutto $\mathbb{R}$ non e' uniformemente continua, mentre la sua restrizione a $[0,2]$ lo e'?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perche' uno spazio potrebbe avere un ricoprimento finito «fortunato» (per esempio $X$ stesso, se e' aperto in se') senza che la proprieta' sia utile: il punto e' poter tagliare <i>qualunque</i> ricoprimento, incluso quello che emerge naturalmente da una costruzione (come le palle $B_{\delta(x)}(x)$ della tappa 05), a un numero finito.</li>
+   <li>In $\mathbb{R}^n$ con la topologia euclidea, $K$ e' compatto se e solo se e' chiuso e limitato. Non si dimostra qui perche' la sua prova usa la completezza di $\mathbb{R}$ con un argomento di bisezione che appartiene all'Analisi Reale, non alla topologia generale.</li>
+   <li>Perche' Prop. A.45(i) lo garantisce in generale, con una dimostrazione di una riga (l'immagine continua di un compatto e' compatta, e ogni quoziente e' un'immagine continua). Hausdorff invece puo' rompersi nel quoziente perche' la sua proprieta' caratteristica guarda in uscita (tp-05, tp-06): sono due proprieta' diverse, e il fatto che una sia sempre ereditata non dice nulla sull'altra.</li>
+   <li>Nel passo in cui si sceglie $\delta=\min\{\delta(x_1),\dots,\delta(x_n)\}$: il minimo esiste perche' l'insieme $\{x_1,\dots,x_n\}$ e' finito, grazie al sottoricoprimento finito estratto per compattezza. Senza compattezza, il ricoprimento $\{B_{\delta(x)}(x)\}_{x\in K}$ resterebbe infinito, e l'estremo inferiore dei $\delta(x)$ potrebbe valere $0$, rendendo impossibile scegliere un $\delta$ unico.</li>
+   <li>Perche' su $\mathbb{R}$ (non compatto) la pendenza di $g$ cresce senza limite al crescere di $x$, e nessun $\delta$ fisso puo' bastare per punti arbitrariamente lontani — il conto della tappa 05 lo mostra a $x=10$. Su $[0,2]$ (compatto) la pendenza e' limitata da $4$, il Lemma A.48 si applica, e un $\delta$ unico esiste per costruzione.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove la compattezza riappare nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Compattezza e' la proprieta' che trasforma un ricoprimento infinito in uno finito, e un argomento locale in uno globale. Il Lemma A.48 ne e' la dimostrazione piu' diretta: una funzione continua, resa uniformemente continua dal solo fatto che il dominio e' compatto, senza nessuna ipotesi aggiuntiva su di essa. Le proprieta' raccolte alla tappa 03 — immagine continua compatta, Weierstrass, chiuso in compatto, compatto in Hausdorff chiuso, prodotto e quoziente compatti — sono gli strumenti con cui questo meccanismo si applica senza dover rifare l'argomento da capo ogni volta, esattamente come il criterio A.36/della diagonale lo era in tp-06 per Hausdorff.</p>
+  <p><b>Una domanda di tp-05 risolta qui, en passant.</b> Tp-05 aveva lasciato una domanda esplicita: c'e' qualche proprieta' che il quoziente di un compatto non eredita mai? La risposta, raccolta alla tappa 03, e' che <b>la compattezza stessa non e' mai in pericolo</b> nel quoziente — a differenza di Hausdorff. La domanda resta aperta per <i>altre</i> proprieta' (connessione, che tp-08 tratta), ma per la compattezza la risposta e' negativa: non c'e' controesempio da cercare.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>La compattezza come cio che rende un argomento su infiniti punti maneggiabile con un numero finito di stime</b>, dal teorema di Weierstrass alle somme di Riemann alla meccanica statistica.`,
+   rotte:[
+    {dove:'Meccanica<br>statistica', txt:R`Lo spazio delle fasi accessibile a energia fissata — la superficie $H(q,p)=E$ nell'insieme microcanonico — e' tipicamente compatto per sistemi con energia cinetica quadratica e potenziale confinante: e' precisamente la compattezza a garantire che la misura microcanonica sia ben definita (un integrale su un insieme di misura finita) e che il teorema di Weierstrass si applichi a grandezze come l'energia media. Dove il potenziale non confina (una particella libera), la perdita di compattezza e' la ragione tecnica per cui bisogna lavorare con un volume finito e poi prendere il limite termodinamico.`},
+    {dove:'Meccanica<br>quantistica', txt:R`Lo spettro di un operatore autoaggiunto su uno spazio di Hilbert <b>di dimensione infinita</b> puo' essere continuo (non ci sono autovalori isolati con molteplicita' finita) proprio quando l'operatore agisce su un dominio non compatto — e' il caso dell'impulso su $\mathbb{R}$. Un operatore <b>compatto</b> (nel senso degli operatori, una nozione diversa ma collegata) ha invece spettro discreto che si accumula solo in $0$: il teorema spettrale per operatori compatti e' il modo in cui «finito da infinito» riappare in un contesto a dimensione infinita.`},
+    {dove:'Geometria<br>differenziale', txt:R`Ogni volta che gd-05 costruira' una partizione dell'unita' su una varieta' non compatta, lo fara' con un'esaustione per compatti (Lee, Prop. A.60, qui dichiarata come debito): un'infinita' numerabile di compatti che si attraversano l'un l'altro, ciascuno trattato con il meccanismo finito di questo movimento. E' la tecnica che rende possibile estendere a una varieta' intera costruzioni che, come il Lemma A.48 ha appena mostrato, funzionano senza sforzo extra su un singolo pezzo compatto.`}
+   ],
+   domanda:R`Il quoziente eredita sempre la compattezza (tappa 03) ma non sempre Hausdorff (tp-05, tp-06). <b>Domanda da portare avanti, verso tp-08:</b> la connessione — l'altra proprieta' «globale» che resta da trattare — si comporta come la compattezza (sempre ereditata dal quoziente) o come Hausdorff (puo' rompersi)? Prova a rispondere prima di leggere tp-08: la proprieta' caratteristica del quoziente guarda in uscita, come sempre — cosa dice questo sulla connessione?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-07-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-07 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-07-compattezza.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

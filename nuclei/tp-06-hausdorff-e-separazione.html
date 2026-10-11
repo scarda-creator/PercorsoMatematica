@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-06 — Hausdorff, e cosa si rompe senza</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-06 — Hausdorff, e cosa si rompe senza</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-06: Hausdorff, e cosa si rompe senza <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-06 — hausdorff, e cosa si rompe senza
+identita:  T2 non e' un assioma di eleganza: senza, una successione puo' convergere a
+           due punti diversi, e tutto cio' che in geometria differenziale si dimostra
+           «prendendo il limite» smette di valere. Il primo requisito della definizione
+           di varieta' topologica e' questo, e la ragione sta in cio' che si perde
+copre:     1.4 del programma di recupero
+serve:     tp-01, tp-05
+apre:      gd-01: il primo dei tre requisiti della definizione di varieta' topologica
+strumenti: omeomorfismo, quoziente-topologico, compattezza
+fonti:     Lee — Introduction to Smooth Manifolds, Appendix A (stampate 599-602): la
+           patologia della topologia banale (Esercizio A.9), la definizione di spazio di
+           Hausdorff, l'Esercizio A.10 (ogni metrico e' Hausdorff), l'Esercizio A.11
+           (in Hausdorff i finiti sono chiusi e i limiti sono unici), e la Proposizione
+           A.17(g) (un sottospazio di Hausdorff e' Hausdorff). Abate, Tovena — Geometria
+           Differenziale (stampate 64, 66): l'Osservazione 2.1.13 (le varieta' si
+           assumono sempre Hausdorff e a base numerabile) e l'Esempio 2.1.22, la stessa
+           retta con due zeri di tp-05 costruita in un libro diverso, con la stessa
+           conclusione. Manetti, appunti GD 2008-09 (stampata 18): la Definizione 2.1
+           di varieta' topologica e l'Osservazione 2.1 sulla non ridondanza della prima
+           clausola.
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.4
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"(8-0)/2","vale":"4",
+  "dove":"06","appare":"\\frac{8-0}{2}=4"},
+
+ {"tipo":"uguale","sinistra":"0+4","vale":"4",
+  "dove":"06","appare":"0+4=4"},
+
+ {"tipo":"uguale","sinistra":"8-4","vale":"4",
+  "dove":"06","appare":"8-4=4"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'il controesempio di tp-05 non si rifa · il criterio della diagonale come filo nuovo · due libri, lo stesso controesempio',
+  blocchi:[
+  {t:'prosa', title:'Un movimento che non costruisce un controesempio nuovo', tag:'architettura', html:R`
+  <p>Tp-05 ha gia' dimostrato, per saturazione diretta, che la retta con due zeri non e' di Hausdorff. Questo movimento non lo rifa': lo <b>usa</b>. Il suo lavoro e' un altro — mostrare perche' quella singola proprieta', $T_2$, vale la pena di essere isolata come clausola a se' nella definizione di varieta' topologica, cosa si perde esattamente senza di essa, e come riconoscerla con uno strumento che non richiede di ripetere un argomento di saturazione ogni volta.</p>
+  <p>Lo strumento e' il <b>criterio della diagonale</b>: uno spazio $X$ e' di Hausdorff se e solo se la diagonale $\Delta_X=\{(x,x):x\in X\}$ e' un sottoinsieme <b>chiuso</b> di $X\times X$. Chi ha letto tp-05 lo riconoscera' subito: e' il criterio dell'Esercizio A.36 — «$q$ aperta e $R$ chiuso» — applicato al caso particolare in cui $q$ e' l'identita' (sempre aperta) e $R$ e' la diagonale (la relazione «essere lo stesso punto»). Non e' un secondo criterio da imparare: e' lo stesso criterio, visto da un'angolazione che lo rende lo strumento giusto anche quando non c'e' nessun quoziente di mezzo.</p>
+  <div class="note"><b>Una conferma che vale la pena annotare.</b> Abate-Tovena, nell'Esempio 2.1.22, costruisce esattamente la stessa retta con due zeri di Manetti — stesso spazio, stessa conclusione, due libri indipendenti. Non e' un caso: e' <i>il</i> controesempio canonico, quello che ogni testo di geometria differenziale cita per primo quando deve giustificare perche' «localmente euclideo» non basta. Vederlo ricostruito identico altrove e' una verifica di realta' che tp-05 da solo non poteva offrire.</div>`}
+]},
+
+/* ---------------- 01 · LA DEFINIZIONE, E PERCHE NON E RIDONDANTE ---------------- */
+{ num:'01', title:'La definizione di Hausdorff, e perche non e ridondante', meta:'T2 nella forma diretta · un invariante topologico · il sottospazio lo eredita',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Uno spazio topologico $X$ e' di <b>Hausdorff</b> (si dice anche: soddisfa l'assioma $T_2$, o e' <b>separato</b>) se per ogni coppia di punti distinti $p,q\in X$ esistono aperti $U,V\subseteq X$ con $p\in U$, $q\in V$ e $U\cap V=\emptyset$ (Lee, stampata 600). Due punti diversi si possono sempre «tenere a distanza» con due aperti che non si toccano.</p>
+  <p>Essere di Hausdorff e' un <span class="str" data-str="omeomorfismo">invariante topologico</span>: se $X$ e $Y$ sono omeomorfi e $X$ e' di Hausdorff, lo e' anche $Y$, perche' un omeomorfismo trasporta aperti disgiunti in aperti disgiunti in entrambe le direzioni. E' la stessa ragione per cui compattezza e connessione, incontrate nei prossimi due movimenti, sono invarianti: una proprieta' definita solo in termini di aperti non puo' accorgersi di quale omeomorfismo si sta usando per descriverla.</p>`},
+  {t:'reveal', title:'Perche la seconda clausola non rende la prima superflua', tag:'first principles', steps:[
+   {label:'La tentazione', body:R`
+   <p>Manetti lo mette in guardia esplicitamente (Osservazione 2.1, stampata 18): la definizione di varieta' topologica chiede (1) Hausdorff, (2) localmente omeomorfo a $\mathbb{R}^n$, (3) base numerabile — e si potrebbe pensare che la (2) renda la (1) ridondante, visto che $\mathbb{R}^n$ stesso e' di Hausdorff ed essere Hausdorff sembra una proprieta' locale. <b>Non lo e'.</b> Il punto preciso dove l'intuizione sbaglia: «localmente omeomorfo a $\mathbb{R}^n$» descrive solo un intorno di <i>ciascun</i> punto preso da solo, mentre Hausdorff parla di <i>coppie</i> di punti — ed e' proprio nel modo in cui due carte diverse si incollano fra loro, non dentro una carta singola, che la separazione puo' fallire.</p>`},
+   {label:'Dove lo mostrera concretamente tp-05', body:R`
+   <p>Nella retta con due zeri, ogni singolo punto ha un intorno omeomorfo a $\mathbb{R}$ — le due copie $\mathbb{R}\times\{0\}$ e $\mathbb{R}\times\{1\}$ sono carte perfettamente buone, prese una alla volta. Il fallimento di Hausdorff non vive <i>dentro</i> nessuna carta: vive nella <b>sovrapposizione</b> fra le due, vicino ai punti dove l'identificazione si interrompe. Questo e' esattamente il motivo per cui la clausola (1) va dichiarata a parte: nessuna quantita' di informazione locale, presa carta per carta, puo' vederla.</p>`}
+  ]},
+  {t:'prosa', title:'Il sottospazio la eredita, il quoziente no', tag:'sintesi', html:R`
+  <p>Un fatto che tp-04 aveva lasciato implicito e vale la pena rendere esplicito ora, per contrasto: se $X$ e' di Hausdorff e $S\subseteq X$ e' un sottospazio, allora $S$ e' di Hausdorff (Lee, Proposizione A.17(g), stampata 602) — presi $p\neq q$ in $S$, gli aperti disgiunti che li separano in $X$ si intersecano con $S$ e restano disgiunti. <b>Il sottospazio non puo' mai rompere Hausdorff: puo' solo ereditarlo.</b> Il quoziente, come questo movimento dimostrera' per intero, e' l'esatto opposto: puo' romperlo, e lo fa precisamente perche' la sua proprieta' caratteristica guarda in uscita invece che in entrata — lo stesso contrasto che tp-04 e tp-05 avevano gia' tracciato, qui applicato a una proprieta' specifica invece che alla topologia nel suo complesso.</p>`}
+]},
+
+/* ---------------- 02 · LA PATOLOGIA, E LA GERARCHIA DI SEPARAZIONE ---------------- */
+{ num:'02', title:'La patologia senza alcuna separazione, e la gerarchia T0-T1-T2', meta:'la topologia banale, Esercizio A.9 · T0 e T1 definiti e distinti da T2 · un esempio che e T1 e non T2',
+  blocchi:[
+  {t:'prosa', title:'Il caso limite: nessuna separazione affatto', tag:'grammatica', html:R`
+  <p>Per vedere perche' serve <i>qualche</i> assioma di separazione, conviene prima guardare cosa succede senza nessuno. Sia $X$ un insieme qualunque con la <b>topologia banale</b> $\{X,\emptyset\}$ (Lee, Esercizio A.9, stampata 600): gli unici aperti sono l'insieme vuoto e tutto $X$. Allora <b>ogni</b> successione in $X$ converge a <b>ogni</b> punto di $X$ — l'unico intorno di qualunque punto e' $X$ stesso, e ogni successione sta sempre dentro $X$ — e <b>ogni</b> applicazione da uno spazio qualsiasi verso $X$ e' continua, perche' le uniche controimmagini da controllare sono quelle di $\emptyset$ e di $X$. La nozione di limite diventa priva di contenuto: dire «$x_n\to p$» non dice nulla su $p$, perche' varrebbe per ogni $p$ possibile.</p>`},
+  {t:'reveal', title:'Una gerarchia, non un salto netto', tag:'costruzione', steps:[
+   {label:'T0: distinguere, non separare', body:R`
+   <p>$X$ soddisfa l'assioma <b>$T_0$</b> se per ogni coppia di punti distinti $p\neq q$ esiste <i>almeno un</i> aperto che contiene uno dei due e non l'altro — non importa quale. E' la richiesta piu' debole possibile: basta che la topologia riesca a <i>distinguere</i> i punti, non a separarli con due aperti disgiunti.</p>`},
+   {label:'T1: ogni punto chiuso in se', body:R`
+   <p>$X$ soddisfa <b>$T_1$</b> se per ogni coppia $p\neq q$ esistono un aperto $U\ni p$ con $q\notin U$ <i>e</i> un aperto $V\ni q$ con $p\notin V$ — due condizioni simmetriche, ma gli aperti non devono essere disgiunti fra loro. Un fatto che caratterizza $T_1$ in modo pulito: $X$ e' $T_1$ se e solo se ogni insieme di un solo punto $\{p\}$ e' chiuso. (Se $\{p\}$ e' chiuso per ogni $p$, il complementare di $\{p\}$ da' l'aperto $V$ richiesto per ogni $q\neq p$, e viceversa.)</p>`},
+   {label:'Un esempio che separa T1 da T2: la topologia cofinita', body:R`
+   <p>Sia $X$ un insieme infinito (ad esempio $\mathbb{N}$), con la <b>topologia cofinita</b>: gli aperti sono $\emptyset$ e tutti i sottoinsiemi il cui complementare e' <b>finito</b>. E' $T_1$: il complementare di $\{p\}$ e' cofinito, dunque aperto, dunque $\{p\}$ e' chiuso, per ogni $p$. Ma <b>non</b> e' $T_2$: due aperti non vuoti qualunque $U,V$ hanno complementari finiti $X\setminus U$ e $X\setminus V$; se fosse $U\cap V=\emptyset$ si avrebbe $X=(X\setminus U)\cup(X\setminus V)$, unione di due insiemi finiti, dunque $X$ finito — contro l'ipotesi che $X$ sia infinito. <b>Due aperti non vuoti nella topologia cofinita si intersecano sempre.</b> $T_1$ non implica $T_2$: separare i punti uno alla volta (ogni singoletto e' chiuso) e' una richiesta piu' debole che separarli a coppie con aperti disgiunti.</p>`},
+   {label:'Oltre T2: gli spazi normali', body:R`
+   <p>All'estremo opposto della gerarchia rispetto alla topologia banale ci sono gli spazi <b>normali</b> (o $T_4$): $X$ e' normale se e' $T_1$ e, per ogni coppia di <i>chiusi</i> disgiunti $C,D\subseteq X$ (non solo punti), esistono aperti disgiunti che li contengono separatamente. Normale e' una richiesta genuinamente piu' forte di Hausdorff — separa insiemi interi, non solo coppie di punti — e il motivo per cui questo movimento la nomina, invece di lasciarla all'ambito dell'algebra generale, e' preciso: <b>e' l'ipotesi che tp-09 user&agrave; per costruire le partizioni dell'unit&agrave;</b>, lo strumento che incolla costruzioni locali in una globale. Dimostrare che ogni varieta' (Hausdorff, a base numerabile, localmente compatta) e' normale e' un argomento che richiede piu' spazio di quanto un capitolo di richiami possa dare: questo movimento lo dichiara come debito verso tp-09, invece di aggirarlo con un'affermazione non dimostrata spacciata per ovvia.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · L UNICITA DEL LIMITE ---------------- */
+{ num:'03', title:'Lunicita del limite: la dimostrazione in tre righe', meta:'Esercizio A.11 di Lee · dove entra Hausdorff, esattamente · perche conta in geometria differenziale',
+  blocchi:[
+  {t:'prosa', title:'Lenunciato', tag:'grammatica', html:R`
+  <p><b>Teorema (unicita' del limite).</b> Sia $X$ uno spazio di Hausdorff, e sia $(x_n)$ una successione in $X$. Se $x_n\to p$ e $x_n\to q$, allora $p=q$ (Lee, Esercizio A.11, stampata 600).</p>`},
+  {t:'reveal', title:'La dimostrazione, e dove entra Hausdorff', tag:'dimostrazione', steps:[
+   {label:'Per assurdo', body:R`
+   <p>Si supponga $p\neq q$. Per Hausdorff esistono aperti disgiunti $U\ni p$ e $V\ni q$, con $U\cap V=\emptyset$.</p>`},
+   {label:'Le due definizioni di convergenza, insieme', body:R`
+   <p>Da $x_n\to p$: esiste $N_1$ tale che $x_n\in U$ per ogni $n\ge N_1$. Da $x_n\to q$: esiste $N_2$ tale che $x_n\in V$ per ogni $n\ge N_2$. Preso $n\ge\max(N_1,N_2)$, il punto $x_n$ sta in <b>entrambi</b> gli aperti: $x_n\in U\cap V$.</p>`},
+   {label:'La contraddizione', body:R`
+   <p>Ma $U\cap V=\emptyset$, e nessun punto puo' stare in un insieme vuoto. L'assurdo nasce dall'aver supposto $p\neq q$: dunque $p=q$. <b>L'intera dimostrazione usa Hausdorff in un solo punto — per garantire che $U$ e $V$ esistano disgiunti — e lo stesso argomento, con $U\cap V$ non necessariamente vuoto, non concluderebbe nulla.</b> E' esattamente dove fallisce la topologia cofinita della tappa precedente: li' due aperti qualunque si intersecano sempre, quindi una successione potrebbe avvicinarsi a due punti distinti senza mai contraddire nulla.</p>`}
+  ]},
+  {t:'prosa', title:'Perche non e un tecnicismo', tag:'sintesi', html:R`
+  <p>In geometria differenziale «si passa al limite» continuamente: una curva integrale e' definita come limite di approssimazioni, una derivata e' un limite di rapporti incrementali trasportato su una carta, una successione di Cauchy su una varieta' riemanniana converge (o no) a un punto. <b>Ogni volta che si scrive $\lim_n x_n=p$ come se $p$ fosse un'informazione ben definita</b>, si sta usando silenziosamente che lo spazio ambiente e' di Hausdorff — altrimenti l'espressione «il limite» non avrebbe senso, perche' potrebbero essercene molti e nessuno sarebbe <i>il</i> limite. E' il motivo preciso, non estetico, per cui Hausdorff e' nella definizione di varieta' e non in un'appendice facoltativa.</p>`}
+]},
+
+/* ---------------- 04 · LA RETTA CON DUE ZERI, UNA SUCCESSIONE CON DUE LIMITI ---------------- */
+{ num:'04', title:'La retta con due zeri: una successione con due limiti', meta:'si usa il lemma di saturazione di tp-05, non se ne costruisce uno nuovo · il controesempio diventa concreto',
+  blocchi:[
+  {t:'prosa', title:'Il controesempio al teorema appena dimostrato', tag:'grammatica', html:R`
+  <p>Tp-05 ha dimostrato che nella retta con due zeri $X=(\mathbb{R}\times\{0,1\})/\!\sim$ ogni aperto saturo che contenga uno dei due zeri deve contenere una fascia punteggiata intera dell'altra copia. Questo movimento ne estrae una conseguenza che tp-05 non aveva bisogno di nominare: <b>esiste una successione in $X$ che converge a entrambi gli zeri</b> — l'esatto fenomeno che il teorema della tappa 03 esclude in uno spazio di Hausdorff.</p>
+  <p>Sia $x_n=(1/n,0)$ per $n=1,2,3,\dots$ — una successione sulla copia $\mathbb{R}\times\{0\}$, che tende a $0$ nel senso ordinario della retta reale.</p>`},
+  {t:'reveal', title:'Perche converge a entrambi i punti', tag:'dimostrazione', steps:[
+   {label:'Converge a (0,0): niente di nuovo', body:R`
+   <p>$\mathbb{R}\times\{0\}$ e' saturo e aperto (tp-04, tp-05 tappa 03), dunque e' una carta omeomorfa a $\mathbb{R}$ con la sua topologia ordinaria. Dentro quella carta $x_n=1/n\to0$ nel senso usuale: per ogni aperto $U$ di $X$ saturo che contenga $(0,0)$, $U\cap(\mathbb{R}\times\{0\})$ e' un aperto di $\mathbb{R}$ contenente $0$, dunque contiene $(-\varepsilon,\varepsilon)$ per qualche $\varepsilon>0$, dunque contiene $x_n$ per ogni $n>1/\varepsilon$. $x_n\to(0,0)$.</p>`},
+   {label:'Converge anche a (0,1): qui serve tp-05', body:R`
+   <p>Sia ora $W$ un aperto saturo qualunque contenente $(0,1)$. Per il lemma di saturazione dimostrato in tp-05 (tappa 03, primo passo), $W$ deve contenere $(-\delta,\delta)\times\{0\}$ <b>privato del solo punto $(0,0)$</b>, per qualche $\delta>0$ — e' precisamente l'argomento che mostrava come un intorno saturo di uno zero si porti dietro una fascia dell'altra copia. Ma $x_n=(1/n,0)$ ha prima coordinata $1/n\neq0$ per ogni $n\ge1$: dunque $x_n\in W$ non appena $1/n<\delta$, cioe' per ogni $n>1/\delta$. <b>$x_n\to(0,1)$.</b></p>`},
+   {label:'Il punto', body:R`
+   <p>Una sola successione, due limiti distinti. <b>Non e' un fenomeno nuovo rispetto a tp-05: e' lo stesso fenomeno, letto attraverso le successioni invece che attraverso gli intorni.</b> Il lemma di saturazione diceva che nessun intorno saturo di uno zero puo' evitare l'altro; tradotto nel linguaggio delle successioni, dice che una successione che si avvicina a uno zero si avvicina automaticamente anche all'altro. E' la ragione per cui questo movimento non ha dovuto costruire un controesempio da zero: quello di tp-05 bastava, bastava solo guardarlo da un'angolazione diversa.</p>`}
+  ]},
+  {t:'plot', title:'La successione x_n = 1/n, letta su entrambe le copie',
+   intro:R`Gli stessi punti $x_n=(1/n,0)$, mostrati sulla copia dove vivono (in alto) e nella fascia che, per saturazione, ogni intorno di $(0,1)$ deve contenere (in basso): la stessa successione numerica li attraversa entrambi.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0.35', tr:[0.05,1.3], height:300, equal:false,
+     xr:[-0.15,1.4], yr:[-0.75,0.75],
+     title:'x_n = 1/n su R x {0} converge a (0,0) per definizione, e alla fascia di (0,1) per saturazione',
+     segs:[{x1:-0.1,y1:0.35,x2:1.3,y2:0.35, col:'#5eead4', width:1.8},
+           {x1:-0.1,y1:-0.35,x2:1.3,y2:-0.35, col:'#5eead4', width:1.8}],
+     marks:[{x:0,y:0.35, label:'(0,0)', col:'#d8a13a'},
+            {x:0,y:-0.35, label:'(0,1)', col:'#d8a13a'},
+            {x:1,y:0.35, label:'x_1', col:'#8ee0c8', up:true},
+            {x:0.5,y:0.35, label:'x_2', col:'#8ee0c8', up:true},
+            {x:0.33,y:0.35, label:'x_3', col:'#8ee0c8', up:true},
+            {x:0.2,y:0.35, label:'x_5', col:'#8ee0c8', up:true},
+            {x:0.9,y:0, label:'gli stessi x_n stanno anche nella fascia richiesta attorno a (0,1)', col:'#8ea0b8'}]}
+   ],
+   leggi:R`<p>I punti verdi sono $x_1,x_2,x_3,x_5$, tutti sulla riga superiore (la copia $\mathbb{R}\times\{0\}$): visibilmente si accumulano verso $(0,0)$. Il lemma di tp-05 dice che gli stessi punti, pur non cambiando posizione, stanno anche dentro ogni intorno saturo richiesto attorno a $(0,1)$ — non perche' «si spostino», ma perche' la saturazione obbliga ogni intorno di $(0,1)$ a includerli. E' per questo che la stessa freccia di convergenza punta, letteralmente, a due bersagli.</p>`}
+]},
+
+/* ---------------- 05 · IL CRITERIO DELLA DIAGONALE ---------------- */
+{ num:'05', title:'Il criterio della diagonale: Hausdorff come un fatto sul quadrato X x X', meta:'Delta_X chiuso in X per X · dimostrazione nei due versi · il caso particolare di A.36',
+  blocchi:[
+  {t:'prosa', title:'Unosservazione che raccoglie tutto in un enunciato solo', tag:'first principles', html:R`
+  <p>La diagonale di $X$ e' il sottoinsieme $\Delta_X=\{(x,x):x\in X\}\subseteq X\times X$ — l'insieme delle coppie «un punto con se stesso». Dire che due punti $p\neq q$ hanno aperti disgiunti che li separano e dire che la coppia $(p,q)$ ha un intorno (nel prodotto) che evita del tutto $\Delta_X$ sono, letteralmente, la stessa frase scritta in due lingue diverse. Questo fa presagire il teorema:</p>
+  <div class="note"><b>Criterio della diagonale.</b> $X$ e' di Hausdorff se e solo se $\Delta_X$ e' <b>chiuso</b> in $X\times X$ (con la topologia prodotto di tp-04).</div>`},
+  {t:'reveal', title:'La dimostrazione, nei due versi', tag:'dimostrazione', steps:[
+   {label:'Hausdorff implica Delta chiusa', body:R`
+   <p>Sia $(p,q)\notin\Delta_X$, cioe' $p\neq q$. Per Hausdorff esistono aperti disgiunti $U\ni p$, $V\ni q$. Il prodotto $U\times V$ e' un aperto di $X\times X$ (base della topologia prodotto, tp-04) che contiene $(p,q)$. Ed e' <b>disgiunto da $\Delta_X$</b>: se $(x,x)\in U\times V$ per qualche $x$, allora $x\in U$ e $x\in V$, cioe' $x\in U\cap V=\emptyset$, assurdo. Ogni punto fuori da $\Delta_X$ ha un intorno che evita $\Delta_X$: il complementare di $\Delta_X$ e' aperto, cioe' $\Delta_X$ e' chiusa.</p>`},
+   {label:'Delta chiusa implica Hausdorff', body:R`
+   <p>Viceversa, siano $p\neq q$, cioe' $(p,q)\notin\Delta_X$. Se $\Delta_X$ e' chiusa, il suo complementare e' aperto e contiene $(p,q)$; per definizione di base della topologia prodotto esiste un aperto-base $U\times V\ni(p,q)$ interamente contenuto nel complementare di $\Delta_X$, cioe' $U\times V$ non interseca $\Delta_X$. Questo vuol dire esattamente $U\cap V=\emptyset$: se esistesse $x\in U\cap V$, il punto $(x,x)$ starebbe in $U\times V$ e anche in $\Delta_X$, contraddicendo la disgiunzione. $U\ni p$ e $V\ni q$ sono gli aperti disgiunti richiesti.</p>`},
+   {label:'Non e un secondo criterio: e lo stesso di tp-05', body:R`
+   <p>Si confronti con l'Esercizio A.36 di tp-05: data un'applicazione <span class="str" data-str="quoziente-topologico">quoziente</span> <b>aperta</b> $q:X\to Y$, $Y$ e' di Hausdorff se e solo se $R=\{(x_1,x_2):q(x_1)=q(x_2)\}$ e' chiusa in $X\times X$. Si prenda $Y=X$ e $q=\mathrm{id}_X$: l'identita' e' sempre un'applicazione quoziente aperta (e' un omeomorfismo), e la relazione $R$ diventa $\{(x_1,x_2):x_1=x_2\}=\Delta_X$. <b>Il criterio della diagonale e' il criterio A.36 applicato al caso in cui non c'e' nessun quoziente non banale</b> — e la dimostrazione appena vista, infatti, ripercorre esattamente gli stessi due passi, parola per parola, con $q$ sostituito dall'identita'. Non sono due strumenti da ricordare: e' uno strumento solo, visto una volta nel caso generale e una volta nel caso che lo contiene come degenerazione.</p>`}
+  ]}
+]},
+
+/* ---------------- 06 · IL CRITERIO AL LAVORO ---------------- */
+{ num:'06', title:'Il criterio al lavoro: la retta con due zeri rivista, gli spazi metrici, sottospazio e prodotto', meta:'la successione della tappa 04 mostra Delta non chiusa · il midpoint nei metrici · perche sottospazio e prodotto ereditano',
+  blocchi:[
+  {t:'reveal', title:'La retta con due zeri, vista attraverso la diagonale', tag:'costruzione', steps:[
+   {label:'La successione (x_n, x_n) sulla diagonale', body:R`
+   <p>Si riprenda la successione $x_n=(1/n,0)$ della tappa 04, e si guardi la successione di coppie $(x_n,x_n)\in\Delta_X\subseteq X\times X$ — ovviamente sulla diagonale, essendo coppie di un punto con se stesso. Nella topologia prodotto, $(x_n,x_n)\to(p,q)$ se e solo se $x_n\to p$ <b>e</b> $x_n\to q$ simultaneamente. La tappa 04 ha dimostrato esattamente questo con $p=(0,0)$ e $q=(0,1)$: dunque $(x_n,x_n)\to\big((0,0),(0,1)\big)$.</p>`},
+   {label:'Un punto limite fuori dalla diagonale', body:R`
+   <p>Ma $(0,0)\neq(0,1)$, dunque $\big((0,0),(0,1)\big)\notin\Delta_X$. Si e' trovata una successione di punti <i>di</i> $\Delta_X$ che converge a un punto <i>fuori</i> da $\Delta_X$: per definizione, $\Delta_X$ non contiene tutti i suoi punti limite, dunque <b>non e' chiusa</b>. Per il criterio della diagonale, $X$ non e' di Hausdorff — la stessa conclusione di tp-05, raggiunta questa volta passando per le successioni invece che per la saturazione diretta, e con lo stesso identico testimone (la successione $x_n$) che aveva gia' fatto il lavoro alla tappa precedente.</p>`}
+  ]},
+  {t:'prosa', title:'Il caso positivo: ogni spazio metrico', tag:'grammatica', html:R`
+  <p>All'estremo opposto, ogni spazio metrico e' di Hausdorff (Lee, Esercizio A.10). Dati $p\neq q$, sia $D$ la loro distanza — positiva, perche' $p\neq q$ — e si pongano $\varepsilon=D/2$ e le palle aperte $B(p,\varepsilon)$, $B(q,\varepsilon)$. Sono disgiunte per la disuguaglianza triangolare: se un punto $z$ stesse in entrambe, si avrebbe $D\le d(p,z)+d(z,q)<\varepsilon+\varepsilon$, cioe' $D<D$ — assurdo.</p>
+  <p>Un conto per vedere il margine con numeri concreti: $p=0$, $q=8$ sulla retta reale, $D=8$, $\varepsilon=\dfrac{8-0}{2}=4$. Le due palle sono $B(0,4)=(-4,4)$ e $B(8,4)=(4,12)$: il punto $0+4=4$ (bordo destro della prima) coincide esattamente col punto $8-4=4$ (bordo sinistro della seconda). Essendo <b>palle aperte</b>, il punto $4$ stesso non appartiene a nessuna delle due: gli intervalli sono tangenti ma disgiunti, non sovrapposti. E' il margine piu' stretto possibile — qualunque $\varepsilon$ piu' grande di $4$ farebbe toccare le due palle in un intervallo non vuoto.</p>`},
+  {t:'plot', title:'La diagonale di R, e un intorno disgiunto per due punti distinti',
+   intro:R`$\Delta_\mathbb{R}$ e' la retta $y=x$ nel piano $\mathbb{R}\times\mathbb{R}$. Il punto $(0,8)$, fuori dalla diagonale, ha un intorno quadrato che non la tocca: e' la figura geometrica dietro al conto appena fatto.`,
+   plots:[
+    {kind:'func2d', f:'x', tr:[-2,11], height:340, equal:true,
+     xr:[-2.5,11.5], yr:[-2.5,11.5],
+     title:'la diagonale y=x, e il quadrato (-4,4) x (4,12) attorno a (0,8)',
+     segs:[{x1:-4,y1:4,x2:4,y2:4, col:'#8ee0c8', dash:true, width:1.2},
+           {x1:4,y1:4,x2:4,y2:12, col:'#8ee0c8', dash:true, width:1.2},
+           {x1:4,y1:12,x2:-4,y2:12, col:'#8ee0c8', dash:true, width:1.2},
+           {x1:-4,y1:12,x2:-4,y2:4, col:'#8ee0c8', dash:true, width:1.2}],
+     marks:[{x:0,y:8, label:'(p,q) = (0,8), fuori da Delta', col:'#d8a13a', up:true},
+            {x:5,y:5, label:'un punto di Delta', col:'#5eead4'}]}
+   ],
+   leggi:R`<p>La retta tratteggiata diagonale e' $\Delta_\mathbb{R}$. Il quadrato $U\times V$, qui concretamente il rettangolo $(-4,4)\times(4,12)$, e' l'aperto-base attorno a $(0,8)$ costruito nella dimostrazione del criterio: e' interamente sopra la diagonale, non la tocca in nessun punto. Questo e' precisamente cio' che fallisce nella retta con due zeri — nessun quadrato aperto attorno a $\big((0,0),(0,1)\big)$ puo' evitare $\Delta_X$, perche' ogni suo intorno, per saturazione, deve contenere punti arbitrariamente vicini della diagonale stessa.</p>`},
+  {t:'prosa', title:'Perche sottospazio e prodotto non possono mai rompere Hausdorff', tag:'sintesi', html:R`
+  <p>Il criterio della diagonale rende trasparente anche l'eredita' vista alla tappa 01. Se $X,Y$ sono entrambi di Hausdorff, $X\times Y$ lo e': dati $(p_1,q_1)\neq(p_2,q_2)$, differiscono in almeno una coordinata, diciamo $p_1\neq p_2$; gli aperti disgiunti $U_1\ni p_1$, $U_2\ni p_2$ in $X$ danno $U_1\times Y$ e $U_2\times Y$, disgiunti e separanti, in $X\times Y$. E se $S\subseteq X$ e' un sottospazio, $\Delta_S=\Delta_X\cap(S\times S)$: l'intersezione di un chiuso ($\Delta_X$, se $X$ e' Hausdorff) con un sottoinsieme qualunque e' chiusa <i>in quel sottoinsieme</i> per definizione di topologia di sottospazio — dunque $\Delta_S$ e' chiusa in $S\times S$, e $S$ e' di Hausdorff. <b>In entrambi i casi la dimostrazione non richiede saturazione, successioni, o argomenti ad hoc: e' una riga di algebra degli insiemi applicata al criterio della diagonale.</b> E' la misura di quanto lo strumento sia piu' economico della verifica diretta, una volta dimostrato una volta per tutte.</p>`}
+]},
+
+/* ---------------- 07 · COSA SI ROMPE OLTRE AL LIMITE ---------------- */
+{ num:'07', title:'Cosa si rompe oltre allunicita del limite: compattezza e chiusura', meta:'un compatto non chiuso senza Hausdorff · il lemma di tp-03/tp-05 rivisto dallaltro verso · il debito verso tp-09',
+  blocchi:[
+  {t:'prosa', title:'Il lemma che tp-05 ha gia usato, visto al contrario', tag:'first principles', html:R`
+  <p>Tp-05 (tappa 05) ha dimostrato: ogni applicazione continua da uno spazio <span class="str" data-str="compattezza">compatto</span> a uno spazio <b>di Hausdorff</b> e' chiusa — in particolare, <b>ogni sottoinsieme compatto di uno spazio di Hausdorff e' chiuso</b> (applicando il lemma all'inclusione del compatto in se'). Questo movimento mostra perche' l'ipotesi di Hausdorff, li', non era decorativa: <b>senza di essa un compatto puo' non essere chiuso.</b></p>`},
+  {t:'reveal', title:'Un controesempio minimo', tag:'dimostrazione', steps:[
+   {label:'Due punti, la topologia banale', body:R`
+   <p>Sia $X=\{a,b\}$ con la topologia banale $\{\emptyset,X\}$ (tappa 02). L'insieme $\{a\}$ e' <b>compatto</b>: ogni ricoprimento aperto di $\{a\}$ deve contenere un aperto che include $a$, e l'unico aperto non vuoto e' $X$ stesso, che da solo ricopre $\{a\}$ — anzi ricopre tutto. Un ricoprimento con un solo elemento e' gia' un sottoricoprimento finito.</p>`},
+   {label:'Ma non e chiuso', body:R`
+   <p>Gli unici chiusi di $X$ sono i complementari degli aperti: $X\setminus\emptyset=X$ e $X\setminus X=\emptyset$. <b>$\{a\}$ non compare fra i chiusi</b> — non e' ne' $X$ ne' $\emptyset$. Un sottoinsieme finito (anzi, con un solo punto), compatto per banalita', che non e' chiuso: esattamente il tipo di patologia che il lemma di tp-05 esclude quando lo spazio ambiente e' di Hausdorff, e che qui sopravvive proprio perche' $X$ non lo e'.</p>`}
+  ]},
+  {t:'prosa', title:'Il debito dichiarato verso tp-09', tag:'sintesi', html:R`
+  <p>Quanto visto alla tappa 02 — che la costruzione delle partizioni dell'unita' richiede spazi <b>normali</b>, non solo Hausdorff — si lega qui: un compatto che potrebbe non essere chiuso renderebbe impossibile anche solo <i>formulare</i> l'argomento con cui si incollano funzioni bump locali in una globale, perche' quell'argomento usa ripetutamente che i compatti coinvolti sono chiusi per poter applicare Urysohn o le sue conseguenze dirette. Hausdorff non basta da solo a garantire tutto cio' che tp-09 user&agrave; — serve insieme alla compattezza locale e alla base numerabile — ma <b>senza Hausdorff il programma di tp-09 non parte nemmeno</b>: e' il primo mattone, non l'unico.</p>`}
+]},
+
+/* ---------------- 08 · PERCHE TRE CLAUSOLE E NON DUE ---------------- */
+{ num:'08', title:'Sintesi: perche la definizione di varieta ha tre clausole, e non due', meta:'le tre clausole sono indipendenti · un controesempio per ciascuna coppia · dove ciascuna serve davvero',
+  blocchi:[
+  {t:'prosa', title:'Tre proprieta indipendenti, non una gerarchia', tag:'sintesi', html:R`
+  <p>La definizione di varieta' topologica (Manetti, Definizione 2.1; Abate-Tovena, Definizione 2.1.14) chiede tre cose: Hausdorff, localmente omeomorfo a $\mathbb{R}^n$, base numerabile. Questo movimento, insieme a tp-02, mette ora a disposizione un controesempio per ciascuna coppia che manca di una sola clausola — mostrando che sono genuinamente indipendenti, non una conseguenza nascosta l'una dell'altra.</p>`},
+  {t:'reveal', title:'I tre controesempi, affiancati', tag:'costruzione', steps:[
+   {label:'Locale + numerabile, non Hausdorff', body:R`
+   <p>La retta con due zeri (tp-05, qui tappe 04-06): localmente omeomorfa a $\mathbb{R}$, a base numerabile (ha un atlante di due sole carte), <b>non</b> Hausdorff. Manca la clausola (1).</p>`},
+   {label:'Hausdorff + numerabile, non locale', body:R`
+   <p>Qualunque spazio di Hausdorff a base numerabile che non sia localmente euclideo da nessuna parte — ad esempio $\mathbb{Q}\subset\mathbb{R}$ con la topologia di sottospazio: e' Hausdorff (tappa 01, eredita da $\mathbb{R}$), a base numerabile (eredita da $\mathbb{R}$, tp-02), ma nessun suo punto ha un intorno omeomorfo a un aperto di $\mathbb{R}^n$ per nessun $n$ — $\mathbb{Q}$ e' totalmente sconnesso, mentre ogni aperto di $\mathbb{R}^n$ con $n\ge1$ contiene una copia di un intervallo. Manca la clausola (2).</p>`},
+   {label:'Hausdorff + locale, non numerabile', body:R`
+   <p>Tp-02 ha gia' costruito questo esempio nella sua tappa finale: uno spazio ottenuto incollando un'infinita' <b>piu' che numerabile</b> di copie della retta reale in un solo punto comune, localmente omeomorfo a $\mathbb{R}$ in ogni punto, Hausdorff (le carte locali separano facilmente punti vicini), ma che non ammette nessun atlante numerabile — e dunque, per l'equivalenza gia' citata in tp-02, non e' a base numerabile. Manca la clausola (3).</p>`},
+   {label:'Perche conta avere tutti e tre i controesempi', body:R`
+   <p>Senza i tre esempi affiancati, si potrebbe sospettare che una delle clausole sia conseguenza delle altre due — e infatti e' esattamente l'errore che l'Osservazione 2.1 di Manetti mette in guardia a proposito della coppia (1)-(2). Avendo un controesempio per ciascuna coppia mancante, si puo' affermare con certezza dimostrata, non per fiducia nel testo, che <b>le tre clausole sono logicamente indipendenti</b>: nessuna delle tre si puo' eliminare senza perdere spazi che si vogliono chiamare varieta'.</p>`}
+  ]}
+]},
+
+/* ---------------- 09 · ESERCIZI ---------------- */
+{ num:'09', title:'Esercizi — tocca a te', meta:'il criterio della diagonale su un esempio nuovo · T1 senza T2 rivisitato · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · La retta con due zeri, con un terzo zero', html:R`
+  <p>Si costruisca $X'=(\mathbb{R}\times\{0,1,2\})/\!\sim$, con $(x,i)\sim(x,j)$ per ogni $x\neq0$ e ogni $i,j\in\{0,1,2\}$ — tre copie di $\mathbb{R}$, identificate ovunque tranne nei tre zeri, che restano tre punti distinti. Usando il criterio della diagonale e una successione come quella della tappa 04, mostra che $X'$ non e' di Hausdorff, e di' quanti limiti distinti puo' avere una singola successione in questo spazio.</p>`,
+   sol:R`<p>La successione $x_n=(1/n,0)$ converge, per lo stesso argomento di tp-05 esteso a tre copie, a <b>tutti e tre</b> i punti $(0,0),(0,1),(0,2)$: ogni intorno saturo di uno qualunque dei tre zeri deve contenere, per saturazione, una fascia punteggiata su ciascuna delle altre due copie. Dunque $(x_n,x_n)\to\big((0,0),(0,1)\big)$, un punto fuori dalla diagonale: $\Delta_{X'}$ non e' chiusa, $X'$ non e' Hausdorff. Una singola successione puo' avere <b>fino a tre limiti distinti</b> qui — il numero di copie che si incollano in ciascun punto speciale, non un numero fissato a priori dalla topologia in generale.</p>`},
+  {t:'esercizio', title:'2 · T1 non implica normale', html:R`
+  <p>Si consideri $X=\mathbb{N}$ con la topologia cofinita della tappa 02 (T1, non T2). Mostra che $X$ non e' normale: trova due chiusi disgiunti che non si possono separare con aperti disgiunti.</p>`,
+   sol:R`<p>I chiusi della topologia cofinita sono $X$ stesso e tutti i sottoinsiemi <b>finiti</b> (i complementari degli aperti cofiniti). Siano $C=\{0\}$ e $D=\{1\}$, due chiusi disgiunti (entrambi finiti). Un aperto che contenga $C$ e uno che contenga $D$ sono entrambi cofiniti — complementari finiti — e due cofiniti non vuoti si intersecano sempre (tappa 02, stesso argomento usato per $T_2$): $X$ non puo' essere normale. Non e' un controesempio nuovo: <b>e' lo stesso meccanismo che impedisce $T_2$</b>, applicato a insiemi invece che a punti singoli, perche' in $X$ ogni insieme finito e' gia' chiuso (tappa 02) e dunque il fallimento di $T_2$ sui punti si propaga automaticamente al fallimento di $T_4$ sui chiusi che quei punti generano.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perche' «localmente omeomorfo a $\mathbb{R}^n$» non implica Hausdorff, anche se $\mathbb{R}^n$ stesso lo e'?</li>
+  <li>Enuncia il criterio della diagonale, e di' in che senso e' un caso particolare dell'Esercizio A.36 di tp-05.</li>
+  <li>Nella dimostrazione dell'unicita' del limite, in quale riga esatta si usa l'ipotesi di Hausdorff, e cosa fallirebbe senza?</li>
+  <li>Perche' un sottospazio di uno spazio di Hausdorff e' sempre di Hausdorff, mentre un quoziente puo' non esserlo?</li>
+  <li>Costruisci, anche solo a parole, uno spazio che sia $T_1$ ma non $T_2$ diverso dalla topologia cofinita.</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perche' la proprieta' locale descrive un intorno di <i>ciascun</i> punto preso da solo, mentre Hausdorff parla di <i>coppie</i> di punti: il fallimento vive nel modo in cui due carte si sovrappongono, non dentro una carta singola — la retta con due zeri lo mostra con due carte ciascuna perfettamente omeomorfa a $\mathbb{R}$.</li>
+   <li>$X$ e' Hausdorff se e solo se $\Delta_X=\{(x,x):x\in X\}$ e' chiusa in $X\times X$. E' l'Esercizio A.36 — $q$ aperta e $R$ chiusa — con $q=\mathrm{id}_X$ (sempre aperta) e $R=\Delta_X$ (la relazione «essere lo stesso punto»).</li>
+   <li>Nel passo in cui si sceglie $n\ge\max(N_1,N_2)$ e si conclude $x_n\in U\cap V$: senza Hausdorff, $U$ e $V$ potrebbero non esistere disgiunti, e l'argomento non produrrebbe nessuna contraddizione — e' esattamente cio' che succede nella topologia cofinita.</li>
+   <li>Il sottospazio eredita gli aperti disgiunti gia' esistenti in $X$ per intersezione — la proprieta' caratteristica guarda in entrata (tp-04), quindi ogni aperto dell'ambiente produce automaticamente un aperto nel sottospazio. Il quoziente guarda in uscita (tp-04, tp-05): un saturo non e' obbligato a potersi scegliere piccolo attorno a un punto, ed e' proprio li' che Hausdorff puo' rompersi.</li>
+   <li>Un esempio standard: la topologia dei complementari numerabili su un insieme piu' che numerabile (aperti: $\emptyset$ e i complementari di sottoinsiemi al piu' numerabili). I punti sono chiusi (complementari cofiniti... qui co-numerabili, dunque aperti), ma due aperti non vuoti qualunque si intersecano sempre, per lo stesso argomento cardinale della topologia cofinita applicato a insiemi numerabili invece che finiti.</li>
+   </ol>`}
+]},
+
+/* ---------------- 10 · IL SENSO ---------------- */
+{ num:'10', title:'Il senso, e le rotte', meta:'cosa lascia in mano, e dove Hausdorff riappare nella fisica che Giuseppe fara',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> Hausdorff non e' un dettaglio tecnico da verificare distrattamente: e' l'ipotesi che rende sensata la parola «limite», e senza di essa un compatto puo' non essere chiuso, due punti possono non avere intorni disgiunti, e un'intera successione puo' puntare contemporaneamente in due direzioni diverse. Il criterio della diagonale ($\Delta_X$ chiusa in $X\times X$) e' lo strumento che lo rende verificabile senza ricostruire un argomento di saturazione ogni volta — ed e', letteralmente, il criterio dei quozienti di tp-05 applicato al caso in cui non c'e' nessun quoziente non banale. Non e' un caso isolato: e' la seconda volta, dopo A.31 in tp-05, in cui un unico teorema generale fa il lavoro di argomenti diversi scritti a mano.</p>
+  <p><b>Un debito saldato, uno aperto, uno dichiarato.</b> La gerarchia $T_0\subset T_1\subset T_2$ e' ora completa con un esempio che separa ciascun livello dal successivo. Il collegamento fra Hausdorff e le partizioni dell'unita' di tp-09 e' dichiarato ma non dimostrato per intero — serve normalita', non solo separazione di punti, e il percorso completo fino a Urysohn eccede lo spazio di un prerequisito. E l'invarianza della dimensione, debito aperto da tp-03, resta tale.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Hausdorff come condizione implicita di ogni argomento che usa limiti, continuita o unicita di uno stato</b> — raramente nominata, perche quasi sempre soddisfatta, ma mai per questo superflua.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Lo spazio di Hilbert $\mathcal H$ e' uno spazio metrico, dunque di Hausdorff per l'Esercizio A.10 di questa tappa: e' la ragione silenziosa per cui «lo stato converge a $|\psi\rangle$» ha senso univoco quando si parla di convergenza in norma. Il quoziente $\mathbb{P}(\mathcal H)$ di tp-05, che rappresenta gli stati fisici a meno di fase, eredita Hausdorff dalla stessa famiglia di argomenti usata qui per il proiettivo reale — non e' un fatto che si puo' dare per scontato solo perche' $\mathcal H$ lo e'.`},
+    {dove:'Meccanica<br>statistica', txt:R`Il limite termodinamico — far tendere il numero di particelle $N$ e il volume $V$ all'infinito mantenendo $N/V$ fissato — e' un'affermazione su un limite, ed esiste solo se lo spazio in cui vive (lo spazio delle grandezze intensive, o lo spazio delle misure di probabilita' con una topologia debole) e' di Hausdorff abbastanza da garantire che quel limite, se esiste, sia unico. Le transizioni di fase sono descritte proprio come punti dove questa unicita' smette di valere in un senso preciso — un'eco fisica dell'unicita' del limite dimostrata in questa tappa.`},
+    {dove:'Geometria<br>differenziale', txt:R`Ogni volta che gd-05 o gd-07 costruiranno un quoziente di varieta' per un'azione di gruppo, il primo controllo — prima di parlare di carte o di struttura differenziabile — sara' proprio questo: verificare che il quoziente resti di Hausdorff, con lo stesso criterio della diagonale generalizzato ad azioni di gruppo (Abate-Tovena, Lemma 2.6.14, citato nel dossier di tp-05). E' il controllo che questo movimento ha reso uno strumento invece che un'eccezione da ricontrollare ogni volta a mano.`}
+   ],
+   domanda:R`Il controesempio della tappa 02 — la topologia cofinita — separa $T_1$ da $T_2$ usando una proprieta' puramente <b>cardinale</b> (finito contro infinito), non una costruzione geometrica come il quoziente. <b>Domanda da portare avanti, verso tp-07:</b> la compattezza, come $T_2$, e' definita in termini di ricoprimenti aperti — ha anch'essa esempi dove un argomento puramente cardinale, invece che geometrico, decide se una proprieta' vale o fallisce?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-06-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-06 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-06-hausdorff-e-separazione.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

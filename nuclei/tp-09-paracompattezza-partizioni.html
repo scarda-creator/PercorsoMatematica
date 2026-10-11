@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-09 — Paracompattezza e partizioni dell unita: il ponte dal locale al globale</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-09 — Partizioni dell’unità</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
+STRUM["serie-di-potenze"] = {"nome":"Serie di potenze","riga":"Una somma $\\sum_{n\\ge0}a_n(x-x_0)^{n}$, che converge dentro un intervallo (in campo complesso: un disco) di raggio $R$ centrato in $x_0$ e diverge fuori.","serve":"È la classe di serie di funzioni che si comporta meglio di tutte: dentro il raggio converge uniformemente sui compatti, quindi si deriva e si integra termine a termine infinite volte, e i coefficienti sono quelli di Taylor. Il raggio si calcola col rapporto $|a_{n+1}/a_n|$ o con Cauchy–Hadamard, e sul bordo non si sa niente a priori: va studiato a parte.","esempio":"Per $\\sum_{n\\ge0}\\dfrac{x^{n}}{n!}$ il rapporto fra coefficienti consecutivi tende a $0$: il raggio è infinito e la somma è $e^{x}$ su tutto $\\mathbb{R}$. Per $\\sum_{n\\ge1}n\\,x^{n}$ tende invece a $1$, quindi $R=1$, e in $x=\\tfrac12$ la somma vale $2$.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio, la derivazione termine a termine e l'identità con Taylor, nel nucleo sulle serie di funzioni"},"qui":{"metodi-e-modelli":{"serve":"In campo complesso la serie di potenze non è una classe fra altre: è la definizione stessa di analitica, e il teorema che olomorfa $=$ analitica dice che ogni funzione derivabile in senso complesso è già una serie di potenze. Il raggio smette anche di essere un conto sui coefficienti e diventa geometria: è la distanza dal centro alla singolarità più vicina — ed è il primo dei due raggi della corona di Laurent.","esempio":"La regola geometrica spiega i raggi reali che sembravano arbitrari: $\\dfrac{1}{1+x^{2}}$ è liscia su tutto $\\mathbb{R}$, ma il suo sviluppo in $0$ ha raggio $1$, perché in $\\pm i$ la funzione esplode e $|i|=1$. Dentro quel raggio il conto chiude: in $z=\\tfrac12$ la serie $1-z^{2}+z^{4}-\\cdots$ vale $\\tfrac45$."}},"controllo":[{"tipo":"limite","espr":"1/(n+1)","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $0$"},{"tipo":"limite","espr":"(n+1)/n","var":"n","a":"oo","vale":"1","ipotesi":{"n":"positive"},"dove":"esempio","appare":"a $1$"},{"tipo":"somma","espr":"n*(1/2)**n","var":"n","da":"1","a":"oo","vale":"2","dove":"esempio","appare":"vale $2$"},{"tipo":"uguale","sinistra":"Abs(I)","vale":"1","dove":"qui.metodi-e-modelli.esempio","appare":"|i|=1"},{"tipo":"somma","espr":"(-1)**n*(1/2)**(2*n)","var":"n","da":"0","a":"oo","vale":"4/5","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac45"}]};
+STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-09: Paracompattezza e partizioni dell unita: il ponte dal locale al globale <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-09 — paracompattezza e partizioni dell'unita', il ponte dal locale al globale
+identita:  e' il movimento per cui esiste tutto questo prerequisito. Una varieta' si conosce
+           per carte, cioe' localmente; ogni oggetto interessante (una metrica, un campo, una
+           forma) si costruisce localmente e poi va incollato. La partizione dell'unita' e' lo
+           strumento che fa l'incollamento senza rompere la regolarita', e la paracompattezza
+           e' la condizione che ne garantisce l'esistenza
+copre:     1.5 del programma di recupero
+serve:     tp-01, tp-02, tp-06, tp-07
+apre:      gd-05 (partizioni dell'unita'), e con esso ogni argomento globale del corso
+strumenti: compattezza, omeomorfismo, serie-di-potenze
+fonti:     Manetti, appunti GD 2008-09 (red. Monaco), sezione 1.2 (stampate 2-6): la funzione
+           a bernoccolo lambda(t)=e^{-1/t^2}, la sua composizione in una funzione a supporto
+           compatto, la definizione di famiglia localmente finita e di partizione dell'unita'
+           subordinata a un ricoprimento, il Lemma 1.1 (ricoprimento localmente finito per
+           gusci K_m) e il Teorema 1.1 (ogni ricoprimento aperto di R^n ammette una partizione
+           dell'unita' C-infinito), con dimostrazione completa. Abate, Tovena — Geometria
+           Differenziale (stampata 104-106): la Proposizione 2.7.2 (funzione C-infinito che
+           vale 1 su un compatto e 0 fuori da un intorno, costruita con la funzione a
+           bernoccolo h(t)=e^{-1/t} e finite carte locali) e i corollari sull'estensione di
+           funzioni da un compatto a tutta la varieta'. Lee, Introduction to Smooth Manifolds,
+           Appendix A (stampata 611-612): l'esaustione per compatti di uno spazio localmente
+           compatto di Hausdorff a base numerabile (Prop. A.60, qui il debito dichiarato da
+           tp-07 viene finalmente usato).
+registro:  nessun corso dell'ateneo: prerequisito costruito sul «Programma di Recupero:
+           Topologia e Algebra Astratta», sezione 1.5
+generata:  2026-10-11 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"1-0","vale":"1",
+  "dove":"03","appare":"1-0=1"},
+
+ {"tipo":"uguale","sinistra":"1-1","vale":"0",
+  "dove":"03","appare":"1-1=0"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'il movimento per cui esiste il prerequisito · tre debiti che si chiudono qui · il piano',
+  blocchi:[
+  {t:'prosa', title:'Il movimento che giustifica tutti gli altri', tag:'architettura', html:R`
+  <p>Una varieta' si conosce per carte — e' la sua definizione stessa, «localmente omeomorfa a $\mathbb{R}^n$». Ma quasi ogni oggetto che interessa davvero (una metrica riemanniana, una forma differenziale, un campo vettoriale con proprieta' prescritte) va costruito <b>globalmente</b>, su tutta la varieta'. Il modo standard per farlo e' costruirlo <b>pezzo per pezzo</b>, una carta alla volta, e poi <b>incollare</b> i pezzi — ma incollare funzioni lisce senza rompere la regolarita' ai bordi delle carte e' esattamente il problema che le <b>partizioni dell'unita'</b> risolvono. Questo movimento le costruisce per intero, dalla funzione piu' elementare possibile (la funzione a bernoccolo) fino al teorema generale.</p>
+  <div class="note"><b>Tre debiti dichiarati nei movimenti precedenti si chiudono qui.</b> Che ogni varieta' sia uno spazio <b>normale</b> (tp-06, necessario per separare chiusi con aperti) segue dalla paracompattezza, qui dimostrata. L'<b>esaustione per compatti</b> (tp-07, Lee A.60, lasciata come debito dichiarato) e' lo strumento con cui questo movimento, appoggiandosi alla <span class="str" data-str="compattezza">compattezza</span> di ogni singolo pezzo, costruisce partizioni numerabili su spazi non compatti. E la costruzione esplicita della <b>funzione bump</b> con $e^{-1/t}$, richiesta dalla mappa fin dall'inizio, e' il cuore tecnico delle tappe 02-03.</p>`}
+]},
+
+/* ---------------- 01 · PARACOMPATTEZZA, MOTIVATA ---------------- */
+{ num:'01', title:'Paracompattezza: perche serve una nozione piu debole della compattezza globale', meta:'il problema: coprire senza accumularsi · ricoprimento localmente finito · raffinamento · la definizione',
+  blocchi:[
+  {t:'reveal', title:'Dal problema alla definizione', tag:'first principles', steps:[
+   {label:'Il problema: la maggior parte delle varieta non e compatta', body:R`
+   <p>Il meccanismo «finito da infinito» di tp-07 funziona magnificamente quando tutto lo spazio e' compatto: un ricoprimento si taglia a un numero finito di pezzi, e un argomento locale ripetuto finite volte da' una conclusione globale. Ma $\mathbb{R}^n$ — il modello locale di ogni varieta' — <b>non e' compatto</b>, e la maggior parte delle varieta' che interessano la fisica (lo spazio-tempo, per dirne una) non lo e' nemmeno. Serve una condizione piu' debole della compattezza, che catturi comunque abbastanza del meccanismo «finito» da far funzionare le costruzioni per incollamento.</p>`},
+   {label:'Localmente finito: finito non ovunque, ma vicino a ogni punto', body:R`
+   <p>Una famiglia $\{A_i\}_{i\in I}$ di sottoinsiemi di $X$ e' <b>localmente finita</b> se ogni punto $x\in X$ ha un intorno che interseca <b>solo un numero finito</b> degli $A_i$ (Manetti, stampata 4). Non si chiede che la famiglia sia finita nel suo complesso — puo' avere infiniti pezzi — solo che vicino a ogni singolo punto, soltanto finiti di essi siano rilevanti. E' la versione «puntuale» del meccanismo finito di tp-07: non un taglio globale, ma una garanzia locale che si ripete ovunque.</p>`},
+   {label:'La definizione', body:R`
+   <div class="note">Uno spazio topologico $X$ e' <b>paracompatto</b> se ogni ricoprimento aperto di $X$ ammette un <b>raffinamento</b> aperto localmente finito — un secondo ricoprimento aperto $\{V_j\}$, ciascun $V_j$ contenuto in qualche $U_i$ del ricoprimento originale, che e' localmente finito nel senso appena definito.</div>
+   <p>Ogni spazio compatto e' paracompatto (il sottoricoprimento finito stesso e' gia' localmente finito, banalmente). La paracompattezza e' dunque una generalizzazione autentica: cattura l'essenziale del meccanismo «finito da infinito» — localmente, non c'e' mai un'infinita' di pezzi da gestire — senza richiedere che l'intero spazio sia coperto da finiti pezzi. Ed e', per il teorema di tp-07 (ogni spazio localmente compatto di Hausdorff a base numerabile ammette un'esaustione per compatti), una proprieta' che ogni varieta' possiede automaticamente: non va verificata caso per caso, discende dalle tre clausole della definizione di varieta' viste fin da tp-01.</p>`}
+  ]}
+]},
+
+/* ---------------- 02 · LA FUNZIONE A BERNOCCOLO ---------------- */
+{ num:'02', title:'La funzione a bernoccolo: dove il C-infinito fa cio che lanalitico non puo', meta:'lambda(t) costruita esplicitamente · liscia ovunque, con tutte le derivate nulle in zero · il bernoccolo con supporto compatto',
+  blocchi:[
+  {t:'prosa', title:'La costruzione, un pezzo alla volta', tag:'grammatica', html:R`
+  <p>Si definisca $\lambda:\mathbb{R}\to\mathbb{R}$ (Manetti, stampata 2; una variante equivalente in Abate-Tovena usa $e^{-1/t}$ invece di $e^{-1/t^2}$, stessa idea):</p>
+  <div class="note">$$\lambda(t)=\begin{cases}0 & t\le0\\ e^{-1/t^2} & t>0\end{cases}$$</div>
+  <p>Per $t<0$ e per $t>0$, $\lambda$ e' evidentemente liscia (e' $0$ costante, oppure composizione di funzioni lisce con $1/t^2$ mai singolare). Il punto delicato, e il cuore di questa tappa, e' <b>cosa succede in $t=0$</b>.</p>`},
+  {t:'reveal', title:'Perche e liscia anche in t=0, con tutte le derivate nulle', tag:'dimostrazione', steps:[
+   {label:'Il limite destro di ogni derivata e zero', body:R`
+   <p>Per $t>0$, ogni derivata $n$-esima di $\lambda$ ha la forma $\lambda^{(n)}(t)=P_n(1/t)\,e^{-1/t^2}$, dove $P_n$ e' un polinomio (si verifica per induzione: derivare $P(1/t)e^{-1/t^2}$ produce, per la regola del prodotto e della catena, di nuovo un polinomio in $1/t$ moltiplicato per $e^{-1/t^2}$). Posto $s=1/t\to+\infty$ quando $t\to0^+$, il limite diventa $\lim_{s\to+\infty}P_n(s)e^{-s^2}$: <b>l'esponenziale $e^{-s^2}$ vince su qualunque polinomio</b> — e' il fatto standard per cui l'esponenziale decresce piu' rapidamente di ogni potenza — dunque il limite e' $0$ per ogni $n$.</p>`},
+   {label:'Le derivate esistono in 0 e valgono 0', body:R`
+   <p>Per induzione su $n$: supposto $\lambda^{(n)}(0)=0$, il rapporto incrementale $\dfrac{\lambda^{(n)}(t)-\lambda^{(n)}(0)}{t}=\dfrac{\lambda^{(n)}(t)}{t}$ per $t>0$ ha ancora la forma $\tilde P(1/t)e^{-1/t^2}$ (un polinomio diverso, stesso argomento), dunque tende a $0$ per lo stesso fatto del passo precedente. Dunque $\lambda^{(n+1)}(0)=0$ esiste ed e' $0$. <b>$\lambda\in C^\infty(\mathbb{R})$, e $\lambda^{(n)}(0)=0$ per ogni $n\ge0$.</b></p>`},
+   {label:'Il punto profondo: C-infinito non e analitico', body:R`
+   <p>Se $\lambda$ fosse <b>analitica</b> vicino a $0$ (uguale alla propria <span class="str" data-str="serie-di-potenze">serie di Taylor</span>), avendo tutte le derivate nulle in $0$ la sua serie di Taylor sarebbe identicamente nulla, e $\lambda$ dovrebbe essere $0$ in un intero intorno di $0$ — ma $\lambda(t)=e^{-1/t^2}>0$ per ogni $t>0$, per quanto piccolo. <b>$\lambda$ e' liscia ma non analitica</b>: e' l'esempio piu' semplice possibile del fatto che $C^\infty$ e' una categoria genuinamente piu' grande di quella delle funzioni analitiche. Questo e' precisamente cio' che rende possibile tutto il resto del movimento: una funzione analitica non nulla non puo' mai annullarsi su un intero aperto senza essere ovunque nulla (principio di identita'); una funzione $C^\infty$ si', e questo e' cio' che permette di costruire funzioni a <b>supporto compatto</b> — nulle fuori da una regione, non nulle dentro — che nessuna funzione analitica non banale potrebbe mai essere.</p>`}
+  ]},
+  {t:'plot', title:'La funzione a bernoccolo lambda(t) = e^(-1/t^2)',
+   intro:R`Il grafico di $\lambda$: identicamente nulla per $t\le0$, positiva e liscia per $t>0$, con un contatto infinitamente piatto in $t=0$ — tutte le derivate si annullano li', ma la funzione non e' identicamente nulla a destra.`,
+   plots:[
+    {kind:'func2d', f:'x<=0 ? 0 : exp(-1/(x*x))', tr:[-1.5,1.5], height:300, equal:false,
+     xr:[-1.6,1.6], yr:[-0.15,1.15],
+     title:'lambda(t): zero a sinistra, liscia e positiva a destra, contatto piatto in 0',
+     marks:[{x:0,y:0, label:'t=0: tutte le derivate sono nulle qui', col:'#d8a13a', up:true},
+            {x:1,y:0.3679, label:'lambda(1) = 1/e', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p>A sinistra di $0$ la funzione e' esattamente nulla, non solo piccola. A destra cresce da un contatto infinitamente piatto (nessuna potenza di $t$, per quanto alta, descrive bene il comportamento vicino a $0$: la funzione va a zero piu' velocemente di <i>qualunque</i> potenza) fino a valori vicini a $1$ per $t$ non troppo piccolo. Questo andamento — zero piatto, poi crescita liscia — e' esattamente il profilo di cui ha bisogno un «bernoccolo»: un rialzo che si stacca dal piano con la massima dolcezza possibile.</p>`}
+]},
+
+/* ---------------- 03 · DAL BERNOCCOLO A UNA FUNZIONE CHE VALE 1 SU UN COMPATTO ---------------- */
+{ num:'03', title:'Dal bernoccolo a una funzione che vale 1 su un compatto: il meccanismo di tp-07 al lavoro', meta:'la funzione a supporto compatto · la Proposizione 2.7.2 di Abate · finite carte, perche compattezza',
+  blocchi:[
+  {t:'prosa', title:'Incollare due bernoccoli per fare un gradino liscio', tag:'grammatica', html:R`
+  <p>Fissato $\varepsilon>0$, si definisca $\varphi_\varepsilon(t)=\dfrac{\lambda(t)}{\lambda(t)+\lambda(\varepsilon-t)}$ (Manetti, stampata 3). Il denominatore non si annulla mai: se $t\le0$, $\lambda(\varepsilon-t)>0$ (perche' $\varepsilon-t\ge\varepsilon>0$); se $t\ge\varepsilon$, $\lambda(t)>0$. Dunque $\varphi_\varepsilon\in C^\infty(\mathbb{R})$, vale $0$ per $t\le0$ (dove $\lambda(t)=0$), vale $1$ per $t\ge\varepsilon$ (dove $\lambda(\varepsilon-t)=0$), e si raccorda in mezzo con la stessa dolcezza di $\lambda$.</p>
+  <p>Fissato poi $r>0$, la funzione $\varphi_{r,\varepsilon}(t)=1-\varphi_\varepsilon(|t|-r)$ vale $1$ per $|t|\le r$ e $0$ per $|t|\ge r+\varepsilon$ — <b>un gradino liscio che scende da $1$ a $0$</b> nell'anello $r\le|t|\le r+\varepsilon$. Due conti per vedere i due estremi. Al centro $t=0$: $|0|-r$ vale $-r$, che e' $\le0$, quindi $\varphi_\varepsilon(-r)=0$ e $\varphi_{r,\varepsilon}(0)=1-0=1$. Al bordo esterno $t=r+\varepsilon$: $|r+\varepsilon|-r$ vale esattamente $\varepsilon$, quindi $\varphi_\varepsilon(\varepsilon)=1$ e $\varphi_{r,\varepsilon}(r+\varepsilon)=1-1=0$. <b>Esattamente i due valori promessi.</b> Componendo con la norma euclidea si ottiene una funzione su $\mathbb{R}^n$, centrata in un punto $p$ qualunque, che vale $1$ sulla palla $B(p,r)$ e $0$ fuori da $B(p,r+\varepsilon)$: <b>la prima funzione a supporto compatto che questo movimento costruisce</b> (il supporto e' la palla chiusa di raggio $r+\varepsilon$, compatta per Heine-Borel).</p>`},
+  {t:'reveal', title:'Da una palla a un compatto qualunque: Prop. 2.7.2 di Abate', tag:'costruzione', steps:[
+   {label:'Lenunciato', body:R`
+   <p><b>Proposizione 2.7.2 (Abate-Tovena).</b> Sia $K\subset M$ un compatto di una varieta' $n$-dimensionale $M$, e $V\supset K$ un intorno aperto di $K$. Allora esiste $g\in C^\infty(M)$ tale che $g|_K\equiv1$ e $\mathrm{supp}(g)\subset V$.</p>`},
+   {label:'Il meccanismo di tp-07, applicato qui per intero', body:R`
+   <p>Per ogni $p\in K$ si sceglie una carta locale $(U_p,\phi_p)$ centrata in $p$, con $U_p\subset V$ e $\phi_p(U_p)=B_2\subset\mathbb{R}^n$ (la palla di raggio $2$), e si compone con una funzione bump $\eta$ — costruita come alla tappa precedente, con $r=1/2$, $\varepsilon=1/2$ — che vale $1$ su $B_{1/2}$ e $0$ fuori da $B_1$. Le controimmagini $\phi_p^{-1}(B_{1/2})$, al variare di $p\in K$, sono un <span class="str" data-str="omeomorfismo">ricoprimento aperto</span> di $K$: per la <span class="str" data-str="compattezza">compattezza</span> di $K$ — esattamente il meccanismo «finito da infinito» di tp-07 — se ne estraggono <b>finiti</b> $p_1,\dots,p_k$ che bastano gia' a ricoprire $K$.</p>`},
+   {label:'Combinare le finite funzioni', body:R`
+   <p>Si definisca $g_j=\eta\circ\phi_{p_j}$ su $U_{p_j}$ (e $0$ altrove: la funzione e' liscia perche' $\eta$ si annulla gia' vicino al bordo di $U_{p_j}$, quindi le due definizioni si raccordano senza strappi). Infine $g=1-\prod_{j=1}^k(1-g_j)$: se $q\in K$, qualche $g_j(q)=1$ (la carta che lo copre), dunque un fattore del prodotto e' $0$ e $g(q)=1$; se $q\notin\bigcup_j U_{p_j}\supset V$... piu' precisamente se $q$ e' fuori da tutte le $U_{p_j}$, ogni $g_j(q)=0$ e $g(q)=1-1=0$. <b>$g$ vale $1$ su $K$ e $0$ fuori dall'unione delle finite carte</b>, che e' contenuta in $V$. Il prodotto ha senso ed e' liscio perche' e' un prodotto di sole $k$ funzioni — <b>finite</b>, grazie alla compattezza.</p>`}
+  ]}
+]},
+
+/* ---------------- 04 · ESAUSTIONE PER COMPATTI E PARTIZIONI SU TUTTA LA VARIETA ---------------- */
+{ num:'04', title:'Oltre un compatto solo: lesaustione per compatti, debito di tp-07 ora usato', meta:'la successione K_1 dentro K_2 dentro... · costruire una partizione numerabile · il teorema di Manetti su R^n',
+  blocchi:[
+  {t:'prosa', title:'Il debito di tp-07, richiamato e messo al lavoro', tag:'first principles', html:R`
+  <p>tp-07 aveva dichiarato, senza svilupparlo, che ogni spazio localmente compatto di Hausdorff a base numerabile — ogni varieta', in particolare — ammette un'<b>esaustione per compatti</b>: una successione $K_1\subset K_2\subset\cdots$ di compatti con $\bigcup_iK_i=M$ e $K_i\subset\mathrm{Int}\,K_{i+1}$ per ogni $i$ (Lee, Prop. A.60). Questo movimento non la dimostra da capo — resterebbe un secondo debito dichiarato se lo facesse qui senza motivo — ma la <b>usa</b>: e' esattamente lo strumento che manca per estendere la Proposizione 2.7.2 (una funzione per un compatto alla volta) a una costruzione su <b>tutta</b> la varieta', non compatta.</p>`},
+  {t:'reveal', title:'Lo schema, in linee generali', tag:'costruzione', steps:[
+   {label:'Un bernoccolo per ogni guscio dellesaustione', body:R`
+   <p>Posto $K_0=\emptyset$, per ogni $i\ge1$ il «guscio» $K_{i+1}\setminus\mathrm{Int}\,K_i$ e' compatto (chiuso dentro il compatto $K_{i+1}$, tp-07). Applicando la Proposizione 2.7.2 a ciascun guscio, con l'aperto ambiente $\mathrm{Int}\,K_{i+2}\setminus K_{i-1}$, si costruisce per ogni $i$ una funzione bump che vale $1$ sul guscio e si annulla fuori da una regione che tocca al piu' i due gusci adiacenti.</p>`},
+   {label:'La somma e localmente finita, non per miracolo', body:R`
+   <p>Ogni punto $q\in M$ sta in $K_{i_0}$ per qualche $i_0$ (l'esaustione copre tutto), e un intorno di $q$ dentro $\mathrm{Int}\,K_{i_0+1}$ incontra solo i bernoccoli costruiti sui gusci vicini a $i_0$ — un numero <b>finito</b>, fissato indipendentemente da $q$ entro un raggio di indici. La somma $\sum_i\psi_i$ e' dunque localmente una somma finita, quindi liscia, e positiva ovunque (ogni punto sta in almeno un guscio). Normalizzando $\varphi_i=\psi_i/\sum_j\psi_j$ si ottiene una <b>partizione dell'unita' numerabile</b>, localmente finita, su tutta $M$ — esattamente come il Teorema 1.1 di Manetti lo fa su $\mathbb{R}^n$ con i gusci $K_m=\{m\le\|x\|\le m+1\}$, caso particolare di questa stessa costruzione con l'esaustione piu' semplice possibile.</p>`}
+  ]},
+  {t:'prosa', title:'Il teorema di Manetti su R^n, come caso gia completamente dimostrato', tag:'sintesi', html:R`
+  <p>Per $M=\mathbb{R}^n$, Manetti dimostra questo schema interamente e con tutti i dettagli (Teorema 1.1, stampate 4-5): il Lemma 1.1 costruisce un ricoprimento localmente finito per palle usando esattamente i gusci $K_m=\{x:m\le\|x\|\le m+1\}$ (compatti, ricoperti da finite palle ciascuno). Un conto per vedere la localita' finita con un caso preciso: le palle usate hanno raggio al piu' $1/2$, dunque una palla centrata in un punto di $K_3=\{3\le\|x\|\le4\}$ puo' raggiungere, da un lato, non meno della distanza $2{,}5$ dall'origine (cioe' $3$ meno il raggio $1/2$), e dall'altro non piu' di $4{,}5$ (cioe' $4$ piu' il raggio) — un intervallo di norme che tocca $K_2=\{2\le\|x\|\le3\}$, $K_3$ stesso e $K_4=\{4\le\|x\|\le5\}$, ma non puo' arrivare a $K_1$ (che richiederebbe norma $\le2$) ne' a $K_5$ (che richiederebbe norma $\ge5$). <b>Tre gusci coinvolti, non di piu', qualunque sia $m$</b>: e' esattamente la localita' finita richiesta dalla definizione, verificata con un conto invece che assunta.</p>
+  <p>Il Teorema 1.1 poi normalizza esattamente come descritto alla tappa precedente. <b>Niente di questo movimento e' lasciato come promessa</b>: il caso $\mathbb{R}^n$ e' interamente in Manetti con dimostrazione, e il caso di una varieta' generale e' lo stesso argomento applicato all'esaustione di tp-07 al posto dei gusci euclidei.</p>`},
+  {t:'plot', title:'Due bernoccoli che sommano a 1: una partizione dellunita in miniatura',
+   intro:R`Due funzioni a bernoccolo, centrate in punti vicini e costruite apposta perche' la loro somma sia costantemente $1$: e' la normalizzazione $\varphi_i=g_i/\sum_jg_j$ della tappa 04, vista nel caso piu' semplice possibile con due soli pezzi.`,
+   plots:[
+    {kind:'func2d', f:'exp(-(x+1)*(x+1)*2)/(exp(-(x+1)*(x+1)*2)+exp(-(x-1)*(x-1)*2))', tr:[-3.5,3.5], height:300, equal:false,
+     xr:[-3.6,3.6], yr:[-0.15,1.15],
+     title:'phi_1 (decresce da 1 a 0) e phi_2 = 1 - phi_1 (cresce da 0 a 1): la somma e sempre 1',
+     marks:[{x:-1,y:1, label:'centro di g_1', col:'#5eead4', up:true},
+            {x:1,y:1, label:'centro di g_2', col:'#d8a13a', up:true},
+            {x:0,y:0.5, label:'phi_1 = phi_2 = 0.5 qui, somma sempre 1', col:'#8ea0b8', up:true}]}
+   ],
+   leggi:R`<p>La curva mostra $\varphi_1$, che vale quasi $1$ vicino al centro della prima funzione bump e quasi $0$ vicino al centro della seconda. La funzione $\varphi_2=1-\varphi_1$, non disegnata, e' la stessa curva ribaltata: dove una e' alta l'altra e' bassa, e <b>la somma $\varphi_1+\varphi_2$ e' costantemente $1$ per costruzione</b> — non per una coincidenza numerica ma perche' $\varphi_2$ e' definita come il complemento esatto di $\varphi_1$. E' la stessa idea della normalizzazione generale ($\varphi_i=g_i/\sum_jg_j$), vista nel caso minimo di due soli addendi: ogni punto «vota» per i bernoccoli vicini in proporzione a quanto e' vicino al loro centro, e i voti sommano sempre a uno.</p>`}
+]},
+
+/* ---------------- 05 · IL DEBITO DI TP-06 SI CHIUDE: PARACOMPATTO IMPLICA NORMALE ---------------- */
+{ num:'05', title:'Il debito di tp-06 si chiude: ogni varieta e normale', meta:'paracompatto e Hausdorff implica normale · la dimostrazione usando le partizioni appena costruite · T6 chiuso per intero',
+  blocchi:[
+  {t:'prosa', title:'Il debito, richiamato con precisione', tag:'first principles', html:R`
+  <p>tp-06 aveva nominato gli spazi <b>normali</b> ($T_4$: $T_1$ piu' separazione di chiusi disgiunti con aperti disgiunti) come l'ipotesi che le partizioni dell'unita' avrebbero richiesto, dichiarando esplicitamente che dimostrarla li' sarebbe eccesso rispetto allo spazio di un capitolo di richiami. Avendo ora le partizioni dell'unita' a disposizione, il debito si chiude per intero.</p>`},
+  {t:'reveal', title:'Paracompatto piu Hausdorff implica normale', tag:'dimostrazione', steps:[
+   {label:'Lo schema', body:R`
+   <p>Siano $C,D\subseteq M$ chiusi disgiunti, $M$ paracompatto di Hausdorff. Per ogni $p\in C$ e $q\in D$, Hausdorff da' aperti disgiunti che li separano; variando $q\in D$ e usando che $D$ e' chiuso (dunque, se $M$ e' anche localmente compatto, ogni punto di $C$ ha un intorno la cui chiusura non tocca $D$) si costruisce, per ogni $p\in C$, un aperto $W_p\ni p$ con $\overline{W_p}\cap D=\emptyset$.</p>`},
+   {label:'Qui entra la partizione dellunita, non solo il raffinamento', body:R`
+   <p>Gli aperti $\{W_p\}_{p\in C}$, insieme a $M\setminus C$, formano un ricoprimento aperto di $M$: ogni punto di $C$ sta in qualche $W_p$ (ne' e' il proprio centro), e ogni punto fuori da $C$ sta in $M\setminus C$. La paracompattezza da' un raffinamento localmente finito di questo ricoprimento, e la costruzione delle tappe 03-04 (bump per ogni pezzo del raffinamento, somma localmente finita, normalizzazione) produce esattamente una partizione dell'unita' $\{\varphi_p\}_{p\in C}\cup\{\varphi_0\}$ subordinata — dove $\varphi_0$ e' la funzione associata al pezzo $M\setminus C$. Si definisca $f=\sum_{p\in C}\varphi_p=1-\varphi_0$: e' liscia (somma localmente finita di lisce), vale $f\equiv1$ su $C$ perche' li' $\varphi_0\equiv0$ (il suo supporto sta in un raffinamento di $M\setminus C$, che non tocca $C$), e vale $f\equiv0$ su $D$ perche' ogni $\varphi_p$ con supporto dentro (un raffinamento di) $W_p$ non puo' essere positiva su $D$, dato che $\overline{W_p}\cap D=\emptyset$ per costruzione.</p>
+   <p>Gli aperti $\{f>1/2\}$ e $\{f<1/2\}$ sono disgiunti per definizione (nessun punto puo' soddisfare entrambe le disuguaglianze), contengono rispettivamente $C$ (dove $f\equiv1>1/2$) e $D$ (dove $f\equiv0<1/2$): sono gli aperti disgiunti richiesti dalla normalita'.</p>`},
+   {label:'Perche conta: non e solo unesistenza, e uneconomia', body:R`
+   <p><b>Il punto che vale la pena annotare non e' solo che la dimostrazione esiste, ma che usa esattamente gli stessi strumenti gia' costruiti per un altro scopo</b> (le partizioni dell'unita', costruite per incollare oggetti geometrici) invece di richiedere un argomento di separazione ad hoc. E' lo stesso principio di economia gia' visto nel criterio della diagonale di tp-06 e nel meccanismo di tp-07: uno strumento costruito per un problema risolve, come sottoprodotto, un problema dichiarato altrove come debito.</p>`}
+  ]}
+]},
+
+/* ---------------- 06 · ESERCIZI ---------------- */
+{ num:'06', title:'Esercizi — tocca a te', meta:'una partizione su due soli aperti · perche non basta la continuita · collaudo',
+  blocchi:[
+  {t:'esercizio', title:'1 · Una partizione dellunita su due aperti', html:R`
+  <p>Siano $U_1=(-2,2)$ e $U_2=(1,5)$, un ricoprimento aperto di $(-2,5)\subset\mathbb{R}$. Usando $\varphi_\varepsilon$ della tappa 03, costruisci esplicitamente una partizione dell'unita' $\{\psi_1,\psi_2\}$ subordinata a questo ricoprimento (cioe' $\mathrm{supp}(\psi_i)\subset U_i$ e $\psi_1+\psi_2\equiv1$).</p>`,
+   sol:R`<p>Il punto delicato, che vale la pena isolare prima del conto: la transizione deve avvenire <b>dentro</b> la zona di sovrapposizione $U_1\cap U_2=(1,2)$, e i supporti vanno controllati come chiusure, non solo come insiemi dove la funzione e' positiva — altrimenti un punto di bordo puo' restare fuori dall'aperto che dovrebbe contenerlo.</p>
+   <p>Si scelgano due punti dentro la sovrapposizione, per esempio $1{,}3$ e $1{,}5$, e si ponga $\psi_2(t)=\varphi_{0.2}(t-1.3)$ — usando $\varphi_\varepsilon$ della tappa 03 con $\varepsilon=0.2$: vale $0$ per $t\le1.3$ e $1$ per $t\ge1.5$, con una transizione liscia nel mezzo. Il supporto di $\psi_2$ e' la chiusura dell'insieme dove e' positiva, cioe' $[1.3,5)$: e' contenuto in $U_2=(1,5)$ perche' $1.3>1$, l'estremo sinistro del supporto sta strettamente dentro $U_2$.</p>
+   <p>Si ponga $\psi_1=1-\psi_2$: vale $1$ per $t\le1.3$ e $0$ per $t\ge1.5$. Il suo supporto e' la chiusura di $\{t<1.5\}$, cioe' $(-2,1.5]$: e' contenuto in $U_1=(-2,2)$ perche' $1.5<2$. Per costruzione $\psi_1+\psi_2\equiv1$ su tutto l'intervallo $(-2,5)$, ciascuna delle due e' liscia (composizione di $\varphi_{0.2}$, gia' $C^\infty$, con una traslazione), e ciascuna ha supporto strettamente dentro l'aperto giusto: $\{\psi_1,\psi_2\}$ e' una partizione dell'unita' subordinata al ricoprimento $\{U_1,U_2\}$.</p>`},
+  {t:'esercizio', title:'2 · Perche la sola continuita non basterebbe altrettanto bene', html:R`
+  <p>Le partizioni dell'unita' si potrebbero costruire con funzioni solo continue, non lisce (basterebbe una variante continua, non $C^\infty$, della funzione a bernoccolo). Perche' in geometria differenziale questo non basterebbe?</p>`,
+   sol:R`<p>Perche' le partizioni dell'unita' servono a incollare oggetti <b>differenziabili</b> — una metrica riemanniana, una forma, un campo vettoriale $C^\infty$ — moltiplicandoli per le $\varphi_i$ e sommando. Se le $\varphi_i$ fossero solo continue, il prodotto $\varphi_i\cdot(\text{oggetto liscio})$ sarebbe in generale solo continuo, non liscio: l'incollamento distruggerebbe esattamente la regolarita' che si voleva preservare. Serve che le $\varphi_i$ siano $C^\infty$ quanto l'oggetto che devono aiutare a costruire — ed e' precisamente il punto della tappa 02: la funzione a bernoccolo esiste liscia (non solo continua) proprio perche' $C^\infty$ permette un contatto infinitamente piatto che l'analiticita' vieterebbe.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perche' la paracompattezza e' una condizione piu' debole della compattezza, e in che senso cattura comunque il meccanismo «finito da infinito» di tp-07?</li>
+  <li>Perche' $\lambda(t)=e^{-1/t^2}$ ha tutte le derivate nulle in $0$ ma non e' identicamente nulla vicino a $0$? Cosa impedirebbe questo a una funzione analitica?</li>
+  <li>Nella Proposizione 2.7.2, in quale passo esatto entra la compattezza di $K$, e cosa fallirebbe senza?</li>
+  <li>Come si usa l'esaustione per compatti di tp-07 per estendere una costruzione da un compatto a tutta la varieta'?</li>
+  <li>In che senso la dimostrazione che ogni varieta' e' normale (tappa 05) non e' un argomento nuovo ma un sottoprodotto di uno strumento gia' costruito?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Non chiede un sottoricoprimento finito dell'intero spazio, solo che ogni punto abbia un intorno che incontra finiti pezzi del raffinamento: il «finito» di tp-07 diventa locale invece che globale, e per questo si applica anche a spazi non compatti come $\mathbb{R}^n$.</li>
+   <li>Le derivate sono nulle perche' ogni derivata ha la forma $P(1/t)e^{-1/t^2}$, e l'esponenziale vince su ogni polinomio al limite. Non e' identicamente nulla perche' $e^{-1/t^2}>0$ per ogni $t>0$. Una funzione analitica con questa proprieta' dovrebbe coincidere con la propria serie di Taylor (identicamente nulla), dunque essere nulla in un intero intorno — $\lambda$ lo contraddice, ed e' per questo che non e' analitica.</li>
+   <li>Nel passo in cui le controimmagini $\phi_p^{-1}(B_{1/2})$, un ricoprimento aperto di $K$, si riducono a un numero <b>finito</b> grazie alla compattezza: senza, il prodotto $\prod_j(1-g_j)$ avrebbe infiniti fattori e la costruzione non garantirebbe piu' la liscezza (un prodotto infinito di funzioni lisce non e' automaticamente liscio).</li>
+   <li>Si applica la costruzione «un compatto alla volta» (Prop. 2.7.2) a ciascun guscio $K_{i+1}\setminus\mathrm{Int}\,K_i$ dell'esaustione, poi si sommano le funzioni cosi' ottenute: la somma e' localmente finita perche' ogni punto sta in un numero finito di gusci vicini, non perche' lo spazio intero sia compatto.</li>
+   <li>Perche' la separazione di due chiusi disgiunti si ottiene costruendo una funzione liscia che vale $1$ su uno e $0$ sull'altro — esattamente lo stesso tipo di oggetto (una partizione dell'unita' subordinata a un ricoprimento opportuno) gia' costruito per incollare oggetti geometrici, non un argomento di separazione pensato da capo per l'occasione.</li>
+   </ol>`}
+]},
+
+/* ---------------- 07 · IL SENSO ---------------- */
+{ num:'07', title:'Il senso, e le rotte', meta:'il prerequisito si chiude qui · tre debiti saldati · dove le partizioni dellunita riappaiono nella fisica',
+  blocchi:[
+  {t:'prosa', title:'Cosa lascia in mano, e la chiusura del prerequisito', tag:'sintesi', html:R`
+  <p><b>Il punto.</b> La funzione a bernoccolo $e^{-1/t^2}$ e' l'oggetto piu' piccolo possibile da cui discende tutto il resto: liscia, con un contatto infinitamente piatto che nessuna funzione analitica potrebbe avere, e a supporto compatto. Da li', il meccanismo «finito da infinito» di tp-07 (una compattezza alla volta) e l'esaustione per compatti (un'infinita' numerabile di compattezze, incollate) costruiscono partizioni dell'unita' prima su un compatto, poi su una varieta' intera. E le partizioni dell'unita', a loro volta, dimostrano come sottoprodotto che ogni varieta' e' normale — il debito che tp-06 aveva lasciato aperto con la massima precisione possibile su dove si fermava.</p>
+  <p><b>Il prerequisito di topologia, come insieme di nove movimenti puramente topologici (tp-01…tp-09), si chiude qui.</b> Resta tp-10, che e' algebra — anelli, ideali, l'anello dei germi — e non eredita nessun debito da questo movimento: e' il secondo buco misurato all'apertura della mappa, indipendente dal primo. Vale la pena ripercorrere in una riga sola il filo che lega i nove movimenti: tp-01-02 danno il vocabolario di base (aperti, basi); tp-03-05 le costruzioni (continuita', sottospazio e prodotto, quoziente); tp-06-08 le tre proprieta' che una varieta' deve avere o puo' avere (Hausdorff, compattezza, connessione); e questo movimento le mette tutte al lavoro insieme per costruire l'oggetto — la partizione dell'unita' — che rende possibile ogni argomento globale di geometria differenziale. E' per questo che la mappa lo chiama, fin dal primo giorno, «il movimento per cui esiste tutto questo prerequisito»: non e' l'ultimo argomento della lista per caso, e' il punto d'arrivo a cui tutti gli altri erano diretti — ed e' anche, per questo, il movimento che rende visibile quanto fosse giustificato l'ordine scelto dalla mappa fin dal primo giorno, non un'arbitrarieta' numerica da tp-01 a tp-09: ogni movimento precedente ha fornito esattamente un pezzo che questo ha usato, ne' uno di meno ne' uno sprecato, dal primo vocabolario di tp-01 fino all'ultima proprieta' di tp-08, in un arco di nove movimenti costruiti, fin dal primo giorno, con cura, per servire esattamente questo scopo finale e nessun altro.</p>`},
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Le partizioni dell'unita come lo strumento silenzioso dietro ogni oggetto globale costruito a pezzi</b>, dalle metriche riemanniane alle misure di probabilita su una varieta.`,
+   rotte:[
+    {dove:'Geometria<br>differenziale', txt:R`Ogni varieta' ammette una metrica riemanniana — un prodotto scalare su ogni spazio tangente, che varia lisciamente — e la dimostrazione standard e' esattamente lo schema di questo movimento: si mette un prodotto scalare arbitrario su ogni carta (banale, $\mathbb{R}^n$ ne ha uno standard), e si incollano con una partizione dell'unita' subordinata all'atlante. Senza le partizioni dell'unita', l'esistenza di una metrica riemanniana su una varieta' arbitraria non avrebbe una dimostrazione costruttiva.`},
+    {dove:'Meccanica<br>quantistica', txt:R`L'operatore identita' su uno spazio di Hilbert si scrive spesso come somma (o integrale) di proiettori su una base — una «partizione dell'unita'» nel senso degli operatori, $\sum_n|n\rangle\langle n|=\mathbb{1}$. Non e' la stessa costruzione di questo movimento, ma la stessa idea sotto un nome identico: decomporre l'identita' in pezzi locali (qui, in una base) che si sommano esattamente a uno, per poter studiare un operatore pezzo per pezzo invece che nella sua interezza.`},
+    {dove:'Meccanica<br>statistica', txt:R`Una misura di probabilita' su uno spazio delle fasi non compatto (per esempio una distribuzione canonica su uno spazio illimitato) va spesso costruita o approssimata localmente — su regioni limitate — e poi incollata con pesi che sommano a uno: lo stesso schema concettuale delle partizioni dell'unita', applicato a misure invece che a funzioni lisce. L'esaustione per compatti e' lo strumento standard con cui si definisce rigorosamente un integrale su uno spazio delle fasi non compatto, come limite di integrali su compatti via la successione $K_1\subset K_2\subset\cdots$.`}
+   ],
+   domanda:R`Questo movimento ha chiuso tre debiti (normalita', esaustione, funzione bump) usando strumenti costruiti altrove per altri scopi — il segno che il prerequisito, preso nel suo insieme, e' stato costruito con meno sprechi di quanto dieci movimenti scritti indipendentemente avrebbero prodotto. <b>Domanda per tp-10, l'ultimo:</b> l'anello dei germi e l'ideale massimale sono oggetti puramente algebrici — nessuno strumento topologico di tp-01...tp-09 dovrebbe servire a costruirli. Sara' davvero cosi', o la topologia user'a ancora qualcosa, magari per definire cosa sia un «germe» in un punto?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-09-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-09 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-09-paracompattezza-partizioni.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
