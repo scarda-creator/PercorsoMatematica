@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-03 — Che cosa si misura davvero: flusso, brillanza e la scala delle magnitudini</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-03 — Che cosa si misura davvero: flusso, brillanza e la scala delle magnitudini</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["parsec-e-parallasse"] = {"nome":"Parsec e parallasse","riga":"Il parsec è la distanza da cui il raggio dell'orbita terrestre è visto sotto un secondo d'arco: $1\\ \\mathrm{pc}=1\\,\\mathrm{UA}/1''=3{,}086\\cdot10^{16}$ m, e la distanza di una stella in parsec è l'inverso della sua parallasse in secondi d'arco.","serve":"A non portare mai un fattore di conversione a memoria. La definizione è geometrica e si ricostruisce in due righe: se $p$ è l'angolo sotto cui dalla stella si vede il semiasse maggiore dell'orbita terrestre, per angoli piccoli $p=R_{\\text{UA}}/d$, e scegliendo l'unità di distanza in modo che $p=1''$ corrisponda a $d=1$ si ottiene $d[\\mathrm{pc}]=1/p['']$. Il parsec non è un'unità più «astronomica» dell'anno luce: è l'unità in cui la misura che si fa davvero — un angolo — diventa direttamente una distanza, senza nessun conto intermedio. Nelle prove scritte di Astrofisica il valore $1\\ \\mathrm{pc}=3{,}086\\cdot10^{16}$ m è stampato in calce al foglio fra i dati: ciò che va saputo è l'inversione, non il numero.","esempio":"La stella più vicina, Proxima Centauri, ha parallasse $p=0{,}7687''$. Quindi $d=1/0{,}7687=1{,}301$ pc, e in anni luce $d=3{,}26/0{,}7687=4{,}24$ anni luce. Il controllo di coerenza è immediato: una parallasse inferiore al secondo d'arco vuol dire per forza una distanza superiore al parsec, e se il conto dà il contrario è stata invertita la frazione.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"02","come":"la derivazione del parsec dalla parallasse annua e le conversioni fra unità astronomica, anno luce e parsec, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"riga","appare":"3,086\\cdot10^{16}"},{"tipo":"numero","espr":"1/0.7687","vale":"1.301","dove":"esempio","appare":"1,301"},{"tipo":"numero","espr":"3.26/0.7687","vale":"4.24","dove":"esempio","appare":"4,24"},{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"serve","appare":"3,086\\cdot10^{16}"}]};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-03: Che cosa si misura davvero: flusso, brillanza e la scala delle magnitudini <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-03 — che cosa si misura davvero
+identita:  l'astrofisico non tocca il suo oggetto: tutto cio' che sa di una stella arriva come un flusso di
+           fotoni raccolto a milioni di anni luce di distanza, e ogni grandezza fisica che il resto del
+           corso user  liberamente - luminosita', temperatura, raggio, massa - e' una deduzione da quel
+           flusso, non una misura diretta. Questo movimento costruisce l'apparato di conversione.
+copre:     A.4, A.5, R.3
+serve:     as-01 (il dizionario delle unita': parsec, massa solare, luminosita' solare, tutti riusati qui)
+apre:      as-04 (radiazione termica e corpo nero, che usa qui solo come costante nota la legge di
+           Stefan-Boltzmann) e ogni movimento futuro su candele standard - Cefeidi, supernovae Ia - che
+           user  direttamente Pogson e il modulo di distanza senza piu' fermarsi a derivarli.
+profondita: IL MOVIMENTO PIU' ESAMINATO DELLA MATERIA - 43 prove su 60, densita' 7,6. Non e' un argomento
+           di comprensione concettuale: e' la macchina di conversione (flusso, brillanza, magnitudine,
+           distanza) che ogni problema del corso fa girare prima di arrivare alla domanda vera, e qui la
+           densita' va messa in esercizi svolti con dati reali e nelle trappole di segno e di base
+           logaritmica, non in prosa aggiuntiva.
+fonti:     de Bernardis, Dispense di Laboratorio di Astrofisica 1993/94, capitolo 1 "Le osservabili
+           astrofisiche", paragrafi 1.1-1.4 (pagine stampate 6-21, PDF 7-22): la fonte primaria e
+           pressoche' esclusiva di questo movimento, perche' e' lo stesso docente del corso, in italiano,
+           che distingue flusso e brillanza alla radice, deriva il teorema della brillanza, introduce
+           rapidita' ottica e angolo solido proiettato, i flussi specifici e la scala delle magnitudini
+           con la relazione di Pogson. Copre il buco dichiarato sul Carroll-Ostlie (di cui si ha solo il
+           manuale delle soluzioni) per tutta la prima meta' del corso.
+           LEZIONE3_2020 (pagine 1-8): le diapositive del docente confermano che questo e' esattamente il
+           contenuto portato a lezione, con lo stesso ordine (flusso, brillanza, flussi specifici,
+           luminosita') e lo stesso rimando esplicito alle dispense di laboratorio come riferimento.
+           Masani, Astrofisica, pagina stampata 8 (tabella riassuntiva del Sole: temperatura effettiva,
+           luminosita', magnitudine assoluta +4,8 e apparente -26,72), pagina 19 (indice di colore,
+           definizione indipendente che conferma quella di de Bernardis), pagina 93 (l'esempio svolto di
+           Sirio: parallasse, magnitudine, luminosita' e raggio dedotti in sequenza) - usato nella tappa
+           07 come secondo conto che torna.
+           lezione9_2017 (pagine 1-9): la missione Gaia e il confronto con Hipparcos, con le cifre di
+           precisione e di portata usate nella tappa 06.
+           Esercizi_Astrofisica(2005-2017), pagina 131 (Esonero di Astrofisica A, 5 dicembre 2012,
+           esercizio 2) e pagina 139 (Esonero B, stesso giorno, esercizio 2): l'esercizio svolto per
+           intero nella tappa 08, dichiarato come preso da un esonero scritto e non da una lezione.
+           BUCO DICHIARATO NEI CANDIDATI DI FONTE, risolto escludendo tre blocchi di pagine: le pagine
+           15, 51-54 e 110 di Marconi (Cosmologia) erano nei candidati assegnati a questo movimento
+           (densita' di chiavi, misurata il 2026-09-22), ma trattano la distribuzione delle galassie su
+           grande scala, la funzione di correlazione a due punti e la legge di Hubble - argomenti di
+           cosmologia che non usano ne' definiscono flusso, brillanza o magnitudine nel senso in cui
+           questo movimento li costruisce. Escluse per intero. Esclusa anche, dopo verifica a mano,
+           l'unica voce del campo esercizi-lezione attribuita "via registro" (lezione9_B_2020, pagine
+           29-30, un esercizio sulla temperatura di brillanza di una sorgente non termica a 22 GHz): il
+           testo estratto da quelle diapositive e' una tabella di formule con l'ordine dei simboli
+           smontato dall'estrazione automatica, e ricostruire la catena esatta (convenzione dell'angolo
+           solido usata, fattori numerici) senza poterla verificare sulla diapositiva originale avrebbe
+           significato inventare un passaggio - esattamente il rischio che il controllo matematico esiste
+           per escludere. L'esercizio della tappa 08 viene quindi da un esonero scritto, dichiarato come
+           tale.
+registro:  LEZIONE3_2020 (osservabili astrofisiche, flusso e brillanza)
+generata:  2026-10-12
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {
+  "tipo": "uguale",
+  "sinistra": "(K/r1**2)*(4*pi*r1**2) - (K/r2**2)*(4*pi*r2**2)",
+  "vale": "0",
+  "ipotesi": {"K": "positive", "r1": "positive", "r2": "positive"},
+  "dove": "01",
+  "appare": "F(r_{1})4\\pi r_{1}^{2}=F(r_{2})4\\pi r_{2}^{2}"
+ },
+ {
+  "tipo": "numero",
+  "espr": "3.845e26/(4*pi*(1.496e11)**2)",
+  "vale": "1367",
+  "dove": "01",
+  "appare": "1367"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "B(\\vec\\theta)=\\frac{dW}{dA\\,d\\Omega}",
+  "perche": "e' la definizione della brillanza, non un conto: la differenza con il flusso (integrale su tutte le direzioni) e' concettuale, introdotta per contrasto con la definizione di flusso della tappa 01."
+ },
+ {
+  "tipo": "numero",
+  "espr": "3.845e26/(4*pi**2*(6.957e8)**2)/1e7",
+  "vale": "2.012",
+  "dove": "02",
+  "appare": "2{,}012\\cdot10^{7}"
+ },
+ {
+  "tipo": "numero",
+  "espr": "(3.845e26/(4*pi**2*(6.957e8)**2))*pi*(6.957e8)**2/(1.496e11)**2",
+  "vale": "1367",
+  "dove": "02",
+  "appare": "1367\\ \\mathrm{W/m^2}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "B_{1}=B_{2}\\left(\\dfrac{n_{2}}{n_{1}}\\right)^{-2}",
+  "perche": "e' il teorema della brillanza come lo scrive de Bernardis dopo la derivazione con la legge di Snell: una conseguenza della conservazione della rapidita' ottica, non un conto numerico indipendente da verificare in questa riga."
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "pi*sin(pi/2)**2",
+  "vale": "pi",
+  "dove": "03",
+  "appare": "\\pi\\sin^2(90°)=\\pi"
+ },
+ {
+  "tipo": "numero",
+  "espr": "pi*sin(10*pi/180)**2",
+  "vale": "0.09473",
+  "dove": "03",
+  "appare": "0{,}09473"
+ },
+ {
+  "tipo": "numero",
+  "espr": "abs(pi*sin(10*pi/180)**2 - 2*pi*(1-cos(10*pi/180)))/(2*pi*(1-cos(10*pi/180)))*100",
+  "vale": "0.76",
+  "dove": "03",
+  "appare": "0{,}76\\%"
+ },
+ {
+  "tipo": "numero",
+  "espr": "(pi/4)/2**2 / ((pi/4)/4**2)",
+  "vale": "4",
+  "dove": "03",
+  "appare": "4"
+ },
+ {
+  "tipo": "numero",
+  "espr": "pi*sin(atan(1/4))**2 / (pi*sin(atan(1/8))**2)",
+  "vale": "3.824",
+  "dove": "03",
+  "appare": "3{,}824"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "lam*(Fv*c/lam**2) - (c/lam)*Fv",
+  "vale": "0",
+  "ipotesi": {"lam": "positive", "c": "positive", "Fv": "positive"},
+  "dove": "04",
+  "appare": "\\lambda F_\\lambda=\\nu F_\\nu"
+ },
+ {
+  "tipo": "numero",
+  "espr": "100**(1.0/5)",
+  "vale": "2.512",
+  "dove": "05",
+  "appare": "2{,}512"
+ },
+ {
+  "tipo": "numero",
+  "espr": "6+5*log(1000/7,10)",
+  "vale": "16.8",
+  "dove": "05",
+  "appare": "16{,}8"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "-2.5*log(D**2/100,10)",
+  "vale": "5-5*log(D,10)",
+  "ipotesi": {"D": "positive"},
+  "dove": "06",
+  "appare": "M=m+5-5\\log D(\\mathrm{pc})-A"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "M-m=-2{,}5\\log\\frac{F(10)}{F(D)}",
+  "perche": "e' l'applicazione della relazione di Pogson (tappa 05) al confronto fra la stella a distanza D e a 10 pc: il passo algebrico che segue, verificato dall'asserzione precedente, e' il conto vero e proprio."
+ },
+ {
+  "tipo": "numero",
+  "espr": "(1.496e11/3.086e16)*1e6",
+  "vale": "4.848",
+  "dove": "08",
+  "appare": "4{,}848\\cdot10^{-6}"
+ },
+ {
+  "tipo": "numero",
+  "espr": "-26.72+5-5*log(1.496e11/3.086e16,10)",
+  "vale": "4.852",
+  "dove": "08",
+  "appare": "4{,}852"
+ },
+ {
+  "tipo": "numero",
+  "espr": "1/0.377",
+  "vale": "2.653",
+  "dove": "08",
+  "appare": "2{,}653"
+ },
+ {
+  "tipo": "numero",
+  "espr": "-1.45+5-5*log(1/0.377,10)",
+  "vale": "1.432",
+  "dove": "08",
+  "appare": "1{,}432"
+ },
+ {
+  "tipo": "numero",
+  "espr": "-1.45-(-1.45+5-5*log(1/0.377,10))",
+  "vale": "-2.882",
+  "dove": "08",
+  "appare": "-2{,}882"
+ },
+ {
+  "tipo": "numero",
+  "espr": "10**(-0.4*((-1.45+5-5*log(1/0.377,10))-4.8))",
+  "vale": "22.25",
+  "dove": "08",
+  "appare": "22{,}25"
+ },
+ {
+  "tipo": "numero",
+  "espr": "sqrt((22.25*3.845e26)/(4*pi*5.670e-8*9500**4))/1e9",
+  "vale": "1.214",
+  "dove": "08",
+  "appare": "1{,}214\\cdot10^{9}"
+ },
+ {
+  "tipo": "numero",
+  "espr": "sqrt((22.25*3.845e26)/(4*pi*5.670e-8*9500**4))/6.957e8",
+  "vale": "1.745",
+  "dove": "08",
+  "appare": "1{,}745"
+ },
+ {
+  "tipo": "numero",
+  "espr": "4.3+2.5*log(2000,10)",
+  "vale": "12.55",
+  "dove": "09",
+  "appare": "12{,}55"
+ },
+ {
+  "tipo": "numero",
+  "espr": "14.4-2.5*log(30000,10)",
+  "vale": "3.207",
+  "dove": "09",
+  "appare": "3{,}207"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "F(D)/F(10)=(10/D)^2",
+  "perche": "e' la restituzione della legge dell'inverso del quadrato gia' derivata nella tappa 01, applicata qui al caso particolare D contro 10 pc: non e' un conto nuovo rispetto a quella identita'."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "M-m=-2{,}5\\log\\big(F(10)/F(D)\\big)=-2{,}5\\log\\big((D/10)^2\\big)",
+  "perche": "e' la restituzione, nel copione dell'orale, del passo algebrico gia' verificato con sympy nella tappa 06 (l'asserzione 'uguale' su D**2/100): qui e' ripetuto nell'ordine in cui si dice a voce, non e' un secondo conto indipendente."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "-5\\log(D/10)=-5\\log D+5\\log10=-5\\log D+5",
+  "perche": "e' la riscrittura algebrica di un logaritmo di rapporto come differenza di logaritmi (log(D/10)=logD-log10), un passo immediato e non un conto indipendente da quello gia' verificato con sympy nella tappa 06."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "M-m=5-5\\log D",
+  "perche": "e' la restituzione, nel copione dell'orale, del risultato gia' verificato algebricamente nella tappa 06: lo stesso passaggio ridetto nell'ordine in cui si pronuncia."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "M=m+5-5\\log D",
+  "perche": "e' la restituzione finale, senza il termine di assorbimento, del modulo di distanza gia' derivato nella tappa 06."
+ },
+ {
+  "tipo": "numero",
+  "espr": "-2.5*log(100,10)",
+  "vale": "-5",
+  "dove": "10",
+  "appare": "-2{,}5\\log(100)=-5"
+ },
+ {
+  "tipo": "numero",
+  "espr": "100**(1.0/5)",
+  "vale": "2.512",
+  "dove": "10",
+  "appare": "100^{1/5}=2{,}512"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "11",
+  "appare": "F_{\\oplus}\\simeq1367\\ \\mathrm{W/m^2}",
+  "perche": "restituzione del numero gia' verificato due volte nelle tappe 01 e 02, qui raccolto nell'elenco dei numeri del movimento senza un terzo conto."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "11",
+  "appare": "m-m_{o}=-2{,}5\\log(F/F_{o})",
+  "perche": "restituzione della relazione di Pogson gia' verificata nella tappa 05."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "11",
+  "appare": "M=m+5-5\\log D(\\mathrm{pc})-A",
+  "perche": "restituzione del modulo di distanza gia' verificato algebricamente nella tappa 06."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "11",
+  "appare": "m_{\\odot}=-26{,}72,\\ M_{\\odot}\\simeq4{,}85",
+  "perche": "restituzione dei numeri del Sole gia' verificati nella tappa 08."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "F(r)/F(r_0)=(r_0/r)^2",
+  "perche": "e' la restituzione, nella didascalia del grafico, della legge dell'inverso del quadrato appena derivata nel corpo della stessa tappa: non e' un secondo conto."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05",
+  "appare": "m-m_o=-2{,}5\\log\\frac{F}{F_o}",
+  "perche": "e' la definizione stessa della relazione di Pogson, non un conto: fissa come si passa da un rapporto di flusso a una differenza di magnitudine."
+ },
+ {
+  "tipo": "numero",
+  "espr": "-2.5*log(100,10)",
+  "vale": "-5",
+  "dove": "05",
+  "appare": "-2{,}5\\log(100)=-2{,}5\\cdot2=-5"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05",
+  "appare": "m_x-m_{x_o}=-2{,}5\\log",
+  "perche": "e' la generalizzazione della relazione di Pogson a un filtro specifico x, con il flusso misurato pesato dall'efficienza spettrale della tappa 04: una definizione che estende quella base, non un conto numerico."
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05",
+  "appare": "X-Y=m_X-m_Y",
+  "perche": "e' la definizione di indice di colore come differenza di magnitudini in bande diverse, non un conto da verificare numericamente."
+ }
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché questo movimento, prima di ogni stella', meta:'il dato grezzo è un flusso di fotoni · il movimento più esaminato della materia · niente corpo nero, niente parallasse per intero',
+  blocchi:[
+  {t:'prosa', title:'Un fatto che il resto del corso usa senza più dirlo', tag:'architettura', html:R`
+  <p>De Bernardis apre il suo capitolo sulle osservabili astrofisiche con una distinzione che vale la pena mettere subito in primo piano, perché organizza tutto quello che segue: <i>«per quanto riguarda i fotoni, si distinguono due tipi di osservabile: il flusso e la brillanza»</i>. Non sono sinonimi scelti per varietà di linguaggio: sono due modi diversi di raccogliere l&rsquo;unico dato che arriva davvero da una sorgente astrofisica — energia elettromagnetica che attraversa uno strumento — e la scelta tra l&rsquo;uno e l&rsquo;altro dipende da una domanda molto concreta: la sorgente è puntiforme, come quasi ogni stella vista da terra, o estesa, come una galassia o una nebulosa? <b>Nessuno dei due è «più fondamentale»</b>: sono la stessa energia, contata in due modi diversi, e questo movimento li costruisce entrambi, insieme all&rsquo;apparato — fotometria, flussi specifici, magnitudini — che li trasforma in numeri confrontabili fra telescopi e fra epoche.</p>
+  <p>Il programma del corso mette questo capitolo immediatamente dopo l&rsquo;introduzione alla scala del cosmo, prima di qualunque fisica stellare: senza un modo rigoroso di dire «quanto arriva» e «da dove arriva», non si può nemmeno formulare la domanda su cosa sia una stella. <b>Questo movimento non deriva la fisica interna delle stelle</b> — niente equilibrio idrostatico, niente reazioni termonucleari — e non deriva la legge di Planck per intero: il corpo nero compare solo come una costante nota, richiamata una volta nella tappa 07 per chiudere un conto sul raggio di una stella vera, e la sua derivazione appartiene al movimento successivo. Qui si costruisce esclusivamente l&rsquo;<b>apparato di misura</b>: che cosa significa «flusso», come si collega alla distanza, come diventa una magnitudine, e come la magnitudine diventa una distanza quando si conosce — da un&rsquo;altra via, la parallasse — quanto la sorgente sia davvero lontana.</p>
+  <p>Fra tutti i movimenti di questo corso, questo è quello con la densità più alta nelle prove d&rsquo;esame: <b>43 prove su 60</b>, densità 7,6 — il doppio di quasi ogni altro argomento. Non perché sia concettualmente il più difficile, ma perché è la macchina che ogni altro esercizio deve far girare prima di arrivare alla domanda vera: quasi nessun problema di astrofisica osservativa evita di passare da un flusso misurato a una magnitudine, o da una magnitudine a una distanza.</p>`},
+  {t:'prosa', title:'Cosa saprai fare, uscendo di qui', tag:'performance attesa', html:R`
+  <ul>
+  <li>Distinguere flusso e brillanza dalla loro definizione operativa, e dire perché una mappa del cielo è sempre una mappa di brillanza, mai di flusso.</li>
+  <li><b>Derivare la legge dell&rsquo;inverso del quadrato</b> del flusso da un principio di conservazione, non enunciarla come postulato, e usarla per ricavare la costante solare da due vie indipendenti che devono dare lo stesso numero.</li>
+  <li>Derivare il <b>teorema della brillanza</b> (la conservazione di $B/n^2$ lungo un raggio di luce) e spiegare perché nessun sistema ottico, per quanto sofisticato, può aumentare la brillanza apparente di una sorgente.</li>
+  <li>Calcolare un angolo solido <b>proiettato</b>, distinguerlo da quello ordinario, e collegarlo all&rsquo;apertura numerica $f/\#$ di un sistema ottico.</li>
+  <li>Scrivere la <b>relazione di Pogson</b> e spiegare da dove viene il fattore $2{,}512$, non come un numero arbitrario ma come la conseguenza di una scelta storica precisa.</li>
+  <li><b>Derivare il modulo di distanza</b> $M=m+5-5\log D-A$ a partire dalla sola legge dell&rsquo;inverso del quadrato, nell&rsquo;ordine in cui si dice a voce.</li>
+  <li>Applicare tutto quanto sopra a un caso reale con i numeri fino in fondo — un ammasso di stelle, il Sole, Sirio — e riconoscere quando un numero tabulato e un numero ricalcolato da zero non coincidono esattamente, e perché.</li>
+  </ul>`},
+  {t:'prosa', title:'Il patto sulle convenzioni, prima di cominciare', tag:'grammatica', html:R`
+  <p>Tre scelte, per non doverci tornare.</p>
+  <ul>
+  <li><b>Le costanti del dizionario di as-01 restano quelle</b>: $c=2{,}998\cdot10^{8}$ m/s, $G=6{,}674\cdot10^{-11}$ N m² kg⁻², $1$ UA $=1{,}496\cdot10^{11}$ m, $1$ pc $=3{,}086\cdot10^{16}$ m, $M_\odot=1{,}989\cdot10^{30}$ kg, $R_\odot=6{,}957\cdot10^{8}$ m, $L_\odot=3{,}845\cdot10^{26}$ W.</li>
+  <li><b>Il sistema di unità è quello della fonte, non uno scelto a priori.</b> De Bernardis lavora in SI (W/m²), Masani in CGS (erg/s/cm²): le due convenzioni convivono in questo movimento, e ogni numero dichiara la propria unità esplicitamente invece di uniformarle in silenzio.</li>
+  <li><b>L&rsquo;angolo solido che conta, in fotometria, è sempre quello proiettato</b> $d\Omega=\cos\theta\,d\omega$, non quello geometrico ordinario $d\omega=\sin\theta\,d\theta\,d\varphi$: la differenza è piccola per angoli piccoli ma non è mai zero, e la tappa 03 la misura.</li>
+  </ul>`}
+]},
+
+/* ---------------- 01 · FLUSSO E LA LEGGE DELL'INVERSO DEL QUADRATO ---------------- */
+{ num:'01', title:'Il flusso, e la legge dell’inverso del quadrato derivata, non enunciata', meta:'definizione operativa · conservazione dell’energia su due sfere · la costante solare, prima via',
+  blocchi:[
+  {t:'prosa', title:'Il flusso: energia per unità di tempo e di superficie, senza chiedere da dove', tag:'la definizione', html:R`
+  <p>De Bernardis definisce il flusso come <i>«la quantità totale di energia radiante che per unità di tempo attraversa l&rsquo;unità di superficie, indipendentemente dalla direzione di provenienza dei fotoni»</i>. In simboli,
+  $$F=\frac{dW}{dA}=h\nu\,\frac{dn}{dt\,dA},$$
+  dove $W$ è la potenza radiante, $h\nu$ l&rsquo;energia di ciascun fotone e $dn/dt$ il flusso fotonico (numero di fotoni per unità di tempo). La parola «indipendentemente dalla direzione» è la parte che conta: il flusso somma tutta l&rsquo;energia che arriva su quella superficie, qualunque sia la direzione da cui proviene. Per una stella isolata, a grande distanza, questo non è un limite: tutta la luce arriva praticamente dalla stessa direzione, e il flusso contiene già tutta l&rsquo;informazione utile.</p>`},
+  {t:'prosa', title:'Due sfere concentriche, e un argomento di conservazione', tag:'la derivazione, non il postulato', html:R`
+  <p>Per una sorgente isotropa — che emette energia uniformemente in tutte le direzioni, come una stella a simmetria sferica — il flusso osservato dipende dalla distanza in un modo che si deriva, non si enuncia. Si considerino due sfere concentriche centrate sulla stella, di raggio $r_1$ e $r_2$. In condizioni stazionarie, e senza assorbimento nello spazio fra le due sfere, la conservazione dell&rsquo;energia impone che l&rsquo;energia che attraversa per unità di tempo la sfera 1 sia identica a quella che attraversa la sfera 2 — altrimenti energia comparirebbe o scomparirebbe nel volume compreso fra le due. Scrivendo l&rsquo;energia attraversata come flusso per area della sfera,
+  $$F(r_1)\,4\pi r_1^{2}=F(r_2)\,4\pi r_2^{2}\ \Longrightarrow\ F(r)=\frac{K}{r^{2}},$$
+  con $K=W/4\pi$ costante, pari alla potenza totale emessa divisa per $4\pi$. <b>La legge dell&rsquo;inverso del quadrato non è un&rsquo;osservazione empirica aggiunta alla definizione di flusso</b>: è l&rsquo;unica forma compatibile con la conservazione dell&rsquo;energia per una sorgente che non assorbe e non crea energia nello spazio che la circonda. Qualunque altra dipendenza da $r$ violerebbe quella conservazione per qualche coppia di sfere.</p>`},
+  {t:'plot', title:'Come diluisce il flusso, confrontato con la distanza di riferimento',
+   intro:'Sull’asse orizzontale la distanza in unità della distanza di riferimento $r_0$, su quello verticale il rapporto $F(r)/F(r_0)=(r_0/r)^2$.',
+   plots:[
+    {kind:'func2d', f:'1/(x*x)', xr:[0.3,4], yr:[0,6], height:320, equal:false,
+     title:'x = r / r0      y = F(r) / F(r0)',
+     marks:[{x:1, y:1, label:'r = r0, F = F0', col:'#5eead4', up:true},
+            {x:2, y:0.25, label:'il doppio della distanza, un quarto del flusso', col:'#ff9b6b', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare: la curva precipita, non scende linearmente.</b> Raddoppiare la distanza non dimezza il flusso, lo porta a un quarto; decuplicarla lo porta a un centesimo. È lo stesso motivo algebrico per cui le stelle visibili a occhio nudo sono quasi tutte vicine rispetto alla dimensione della galassia: una stella dieci volte più lontana di un&rsquo;altra, a parità di luminosità intrinseca, è cento volte più debole.</p>
+   <p><b>Che cosa impararne: il flusso da solo non dice nulla sulla stella.</b> Una stella debole può essere intrinsecamente fioca e vicina, oppure intrinsecamente brillante e lontana: il flusso misurato è il prodotto di due cause (luminosità e distanza) che questa sola misura non separa. Separarle è esattamente il contenuto delle tappe 05 e 06.</p>`},
+  {t:'prosa', title:'Un primo numero che deve tornare: la costante solare, prima via', tag:'il mestiere comincia qui', html:R`
+  <p>Applicando $F(r)=K/r^2$ con $K=L_\odot/4\pi$ al caso del Sole visto dalla Terra, a distanza $1$ UA, si ottiene subito la potenza per unità di superficie che arriva in cima all&rsquo;atmosfera — la <b>costante solare</b>:
+  $$F_\oplus=\frac{L_\odot}{4\pi\,(1\ \mathrm{UA})^{2}}=\frac{3{,}845\cdot10^{26}}{4\pi\,(1{,}496\cdot10^{11})^{2}}=1367\ \mathrm{W/m^2}.$$
+  Questo numero tornerà, ricalcolato da un&rsquo;altra via — la brillanza, non la luminosità — nella tappa seguente: se le due vie non danno lo stesso numero, qualcosa nella catena logica è sbagliato. Qui è già la prima verifica di consistenza interna di questo movimento.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la legge dell’inverso del quadrato del flusso si deriva dalla conservazione dell’energia, e non si enuncia come postulato indipendente?`,
+    a:R`Perché per una sorgente isotropa, in assenza di assorbimento, l&rsquo;energia che attraversa per unità di tempo una sfera di raggio $r_1$ centrata sulla sorgente deve essere identica a quella che attraversa una sfera di raggio $r_2$: se fossero diverse, energia comparirebbe o scomparirebbe nel volume fra le due sfere, violando la conservazione. Imponendo $F(r_1)4\pi r_1^2=F(r_2)4\pi r_2^2$ per ogni coppia di raggi, l&rsquo;unica forma compatibile è $F(r)=K/r^2$: qualunque altra dipendenza funzionale romperebbe l&rsquo;uguaglianza per qualche scelta di $r_1,r_2$.`},
+   {q:R`Due stelle hanno lo stesso flusso misurato a terra. Si può concludere che hanno la stessa luminosità?`,
+    a:R`No. Il flusso dipende sia dalla luminosità intrinseca sia dalla distanza, $F=L/(4\pi r^2)$: due stelle con lo stesso flusso possono avere luminosità molto diverse, purché le distanze compensino esattamente — una stella debole e vicina può dare lo stesso flusso di una stella brillante e lontana. Separare le due cause richiede una misura indipendente della distanza, non il solo flusso.`}
+  ]}
+]},
+
+/* ---------------- 02 · BRILLANZA E IL TEOREMA FONDAMENTALE DELLA RADIOMETRIA ---------------- */
+{ num:'02', title:'La brillanza, la rapidità ottica, e il teorema che nessun sistema ottico può battere', meta:'perché una mappa è sempre brillanza · la conservazione lungo un raggio di luce, derivata con Snell · la costante solare, seconda via',
+  blocchi:[
+  {t:'prosa', title:'La brillanza: quando la direzione di provenienza conta', tag:'la definizione, per contrasto', html:R`
+  <p>Quando la sorgente non è puntiforme — una galassia, una nebulosa, il mezzo interstellare — il flusso da solo perde informazione: somma l&rsquo;energia su tutte le direzioni e non dice più nulla sulla <i>forma</i> di ciò che si osserva. La <b>brillanza</b> mantiene quell&rsquo;informazione: è definita come potenza per unità di superficie e per unità di angolo solido, proveniente da una direzione $\vec\theta$ specifica,
+  $$B(\vec\theta)=\frac{dW}{dA\,d\Omega}=h\nu\,\frac{dn}{dA\,d\Omega\,dt}.$$
+  Una mappa di una sorgente estesa <b>non è altro che una rappresentazione della brillanza in funzione della direzione in cielo</b>: le quattro mappe di Andromeda che de Bernardis mostra come esempio — nel blu, a 21 cm, nell&rsquo;infrarosso, in raggi X — sono quattro mappe di brillanza alla stessa posizione, in quattro bande diverse, ciascuna sensibile a una popolazione fisica diversa della galassia (stelle, idrogeno neutro, polvere, sorgenti compatte). Non esiste una «mappa di flusso»: il flusso, per definizione, ha già integrato via l&rsquo;informazione direzionale che una mappa deve mostrare.</p>`},
+  {t:'prosa', title:'La rapidità ottica: quanto un raggio di luce può trasportare', tag:'etendue', html:R`
+  <p>Per calcolare quanta radiazione arriva da una sorgente a uno strumento di misura, de Bernardis introduce il <b>raggio di luce</b>: un fascio di flusso radiativo di sezione infinitesima, che collega due superfici infinitesime $\Delta A_1$ e $\Delta A_2$ a distanza $s$, tale che tutta la potenza che fluisce attraverso $\Delta A_1$ fluisca anche attraverso $\Delta A_2$. Si definisce la <b>rapidità ottica</b> (o <i>etendue</i>) del raggio come il prodotto tra l&rsquo;area efficace e l&rsquo;angolo solido proiettato, e con un calcolo diretto sulle due superfici (fig. 4B-C di de Bernardis) si trova che le due rapidità ottiche calcolate ai due estremi del raggio coincidono — la rapidità ottica è costante lungo un raggio di luce in un mezzo omogeneo, conseguenza diretta della stessa conservazione dell&rsquo;energia usata nella tappa precedente.</p>`},
+  {t:'prosa', title:'Il teorema della brillanza, derivato dalla legge di Snell', tag:'il conto che vale la pena fare fino in fondo', html:R`
+  <p>Poiché la rapidità ottica $U$ è costante lungo il raggio e la potenza $W$ pure (nessuna energia si crea o si perde), il rapporto $B=W/U$ — la brillanza — è conservato:
+  $$B_1=\frac{\Delta W}{\Delta U_1}=\frac{\Delta W}{\Delta U_2}=B_2.$$
+  Questo vale in un mezzo omogeneo. Il passo in più, quello che rende il risultato generale, è considerare un raggio che attraversi una superficie di separazione tra due mezzi di indice di rifrazione diverso ($n_1$ e $n_2$), e che quindi si rifranga. Scrivendo la potenza che attraversa l&rsquo;interfaccia nei due sensi,
+  $$B_2=B_1\,\frac{\cos\theta_1\,\Delta\omega_1}{\cos\theta_2\,\Delta\omega_2},$$
+  e usando la legge di Snell $n_1\sin\theta_1=n_2\sin\theta_2$ — differenziata, $n_1\cos\theta_1\,\Delta\theta_1=n_2\cos\theta_2\,\Delta\theta_2$ — per eliminare gli angoli a favore degli indici di rifrazione, si arriva a
+  $$B_1=B_2\left(\frac{n_2}{n_1}\right)^{-2}.$$
+  Questo è il <b>teorema fondamentale della radiometria</b>: la quantità $B/n^2$ è invariante lungo qualunque raggio che si propaghi in un sistema ottico senza perdite, indipendentemente dal numero di lenti o specchi che lo compongono. Quando sorgente e osservatore sono nello stesso mezzo (quasi sempre, in astrofisica da terra), $n_1=n_2$ e il teorema dice qualcosa di sorprendentemente restrittivo: <b>nessun sistema ottico, per quanto elaborato, può aumentare la brillanza apparente di una sorgente</b>. Un telescopio raccoglie più fotoni — più potenza totale — ma non concentra la radiazione oltre la brillanza con cui è partita; ciò che il telescopio guadagna è nell&rsquo;angolo solido di raccolta, non nella brillanza per sé. Le sole eccezioni sono le ottiche a immersione, dove $n_2>n_1$ e la brillanza cresce proprio di quel fattore — un trucco che sfrutta il teorema, non lo viola.</p>`},
+  {t:'prosa', title:'La potenza raccolta da un rivelatore, e la costante solare da una seconda via', tag:'il controllo di consistenza', html:R`
+  <p>Integrando la brillanza su tutta l&rsquo;area e l&rsquo;angolo solido del raggio, per una sorgente a distanza $s$ grande rispetto alle dimensioni di sorgente e rivelatore, la potenza raccolta si semplifica in $W=B\,A_s\,A_c/s^2$, con $A_s$ l&rsquo;area (proiettata) della sorgente e $A_c$ quella del collettore. Applicando questo al Sole: la sua brillanza si ottiene dal rapporto fra la potenza totale emessa e la rapidità ottica della sua superficie emittente, $U_\odot=\pi R_\odot^2\times4\pi$ (area proiettata per angolo solido della semisfera esterna), quindi
+  $$B_\odot=\frac{L_\odot}{4\pi^{2}R_\odot^{2}}=\frac{3{,}845\cdot10^{26}}{4\pi^{2}\,(6{,}957\cdot10^{8})^{2}}=2{,}012\cdot10^{7}\ \mathrm{W/m^2/sr}.$$
+  Il flusso che arriva in cima all&rsquo;atmosfera terrestre, calcolato da questa brillanza invece che dalla luminosità totale,
+  $$F_\oplus=\frac{B_\odot\,\pi R_\odot^{2}}{(1\ \mathrm{UA})^{2}}=1367\ \mathrm{W/m^2}.$$
+  <b>È lo stesso numero della tappa 01</b>, ottenuto da un percorso concettualmente diverso — là la luminosità totale divisa per l&rsquo;area della sfera a distanza $1$ UA, qui la brillanza della superficie solare moltiplicata per la sua area proiettata e divisa per il quadrato della distanza. Che tornino esattamente non è un caso fortunato: sono due modi di contare la stessa energia, e se avessero dato numeri diversi uno dei due conti sarebbe stato sbagliato.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un telescopio raccoglie più luce di un occhio nudo. Significa che aumenta la brillanza della sorgente osservata?`,
+    a:R`No. Il teorema della brillanza dice che $B/n^2$ è invariante lungo un sistema ottico senza perdite; se l&rsquo;osservatore resta nello stesso mezzo (aria) prima e dopo lo strumento, $n$ non cambia e quindi $B$ nemmeno. Il telescopio aumenta la <b>potenza totale raccolta</b> (perché ha un&rsquo;area di apertura $A_c$ maggiore di quella della pupilla), non la brillanza per unità di superficie e di angolo solido: è per questo che un oggetto esteso (una galassia) non appare mai «più brillante per unità di superficie» in un telescopio più grande, appare solo più luminoso nel suo insieme e più ricco di dettaglio.`},
+   {q:R`Perché la costante solare calcolata dalla luminosità e quella calcolata dalla brillanza devono dare lo stesso numero?`,
+    a:R`Perché sono la stessa energia descritta in due linguaggi equivalenti: $F=L/(4\pi d^2)$ usa la potenza totale emessa dal Sole in tutte le direzioni, mentre $F=B\pi R_\odot^2/d^2$ usa la brillanza della superficie solare (energia per unità di superficie emittente e di angolo solido) integrata sull&rsquo;area del disco solare. La brillanza stessa, per costruzione, è definita in modo da restituire la luminosità totale quando viene integrata su tutta l&rsquo;area emittente e su tutto l&rsquo;angolo solido: le due vie non sono indipendenti nella fisica, solo nel percorso di calcolo, ed è per questo che il controllo numerico è un vero controllo e non una tautologia vuota.`}
+  ]}
+]},
+
+/* ---------------- 03 · ANGOLO SOLIDO PROIETTATO E L'APERTURA NUMERICA ---------------- */
+{ num:'03', title:'L’angolo solido che conta in fotometria, e l’apertura numerica di un sistema ottico', meta:'proiettato contro ordinario, la differenza misurata · l’f/#, derivato dalla geometria · il fattore che rende un obiettivo “luminoso”',
+  blocchi:[
+  {t:'prosa', title:'Due angoli solidi, e perché uno dei due è quello giusto', tag:'la trappola della proiezione', html:R`
+  <p>L&rsquo;angolo solido ordinario, quello della geometria elementare, è $d\omega=\sin\theta\,d\theta\,d\varphi$, e per un campo di vista a simmetria sferica di semiampiezza $\alpha$ vale
+  $$\omega=\int_0^{2\pi}d\varphi\int_0^{\alpha}\sin\theta\,d\theta=2\pi(1-\cos\alpha)\ \ (\mathrm{sr}).$$
+  Ma ogni volta che si usano flusso e brillanza, l&rsquo;angolo solido corretto è quello <b>proiettato</b>, $d\Omega=\cos\theta\,d\omega$ — il fattore $\cos\theta$ tiene conto del fatto che una superficie vista di taglio raccoglie meno energia di una vista frontalmente, esattamente come nella definizione stessa del flusso. Integrando,
+  $$\Omega=\int_0^{2\pi}d\varphi\int_0^{\alpha}\sin\theta\cos\theta\,d\theta=\pi\sin^{2}\alpha\ \ (\mathrm{sr}).$$
+  Per una semisfera completa ($\alpha=90°$), l&rsquo;angolo ordinario dà $2\pi$ (l&rsquo;area della semisfera unitaria) mentre il proiettato dà $\pi\sin^2(90°)=\pi$ — l&rsquo;area della sua proiezione sul piano di base. Sono numeri diversi di un fattore due, e non è un arrotondamento: sono due grandezze fisiche diverse.</p>`},
+  {t:'prosa', title:'Quanto vicini, per angoli piccoli — misurato, non solo affermato', tag:'il controllo numerico', html:R`
+  <p>De Bernardis osserva che le due formule coincidono entro l&rsquo;1% per angoli $\alpha<10°$, ed è un&rsquo;affermazione che vale la pena controllare con un numero invece di accettarla per fede. A $\alpha=10°$,
+  $$\omega_{\mathrm{ordinario}}=2\pi(1-\cos10°)=0{,}09546\ \mathrm{sr},\qquad \Omega_{\mathrm{proiettato}}=\pi\sin^2(10°)=0{,}09473\ \mathrm{sr},$$
+  con una differenza relativa di $0{,}76\%$ — <b>sotto l&rsquo;1% dichiarato</b>, e già al limite superiore dell&rsquo;intervallo in cui l&rsquo;affermazione resta valida: per campi di vista più larghi di $10°$ la differenza cresce oltre quella soglia, e a quel punto confondere i due angoli solidi non è più un arrotondamento innocuo.</p>`},
+  {t:'prosa', title:'L’apertura numerica: perché un obiettivo fotografico è “luminoso”', tag:'f/#', html:R`
+  <p>Il campo di vista di un sistema ottico si può anche esprimere tramite l&rsquo;<b>apertura relativa</b> o $f$-number, $f/\#=$ (lunghezza focale)/(diametro), legato all&rsquo;angolo del fascio da $f/\#=1/(2\tan\alpha)$, da cui, per angoli piccoli,
+  $$\Omega\simeq\frac{\pi}{4}\frac{1}{(f/\#)^{2}}.$$
+  Questa è la ragione per cui un obiettivo con $f/\#$ più piccolo è detto «più luminoso»: a parità di lunghezza focale, un $f/\#$ minore corrisponde a un diametro di apertura maggiore e quindi a un angolo solido di raccolta — e dunque a una potenza raccolta, per il risultato della tappa precedente — maggiore. Confrontando un obiettivo $f/2$ con un $f/4$ della stessa focale usando la formula approssimata,
+  $$\frac{\Omega_{f/2}}{\Omega_{f/4}}=\left(\frac{4}{2}\right)^{2}=4,$$
+  <b>un fattore quattro di potenza raccolta</b>, a parità di brillanza della scena fotografata e di area del fotogramma. Usando invece la relazione esatta $\alpha=\arctan\!\big(1/(2f/\#)\big)$ e l&rsquo;angolo solido proiettato esatto $\Omega=\pi\sin^2\alpha$ — non l&rsquo;approssimazione per angoli piccoli — lo stesso confronto dà
+  $$\frac{\pi\sin^2(\arctan(1/4))}{\pi\sin^2(\arctan(1/8))}=3{,}824,$$
+  <b>un numero leggermente più piccolo di quattro</b>: la differenza fra $4$ e $3{,}824$ è la stessa differenza fra angolo solido ordinario e proiettato della tappa precedente, qui applicata a un angolo ($\alpha=14°$ per $f/2$) già fuori dall&rsquo;intervallo dove l&rsquo;approssimazione dei piccoli angoli è innocua. De Bernardis cita per questo confronto il valore $3{,}9$: è compatibile con il calcolo esatto appena fatto, e la piccola differenza residua è nell&rsquo;ordine delle cifre con cui si arrotonda un $f/\#$ dichiarato da un produttore di obiettivi, non un errore di metodo.</p>`},
+  {t:'plot', title:'L’angolo solido proiettato, e dove la sua approssimazione comincia a cedere',
+   intro:'Sull’asse orizzontale la semiampiezza del campo di vista in gradi, su quello verticale l’angolo solido proiettato esatto $\Omega=\pi\sin^2\alpha$ (curva) confrontato con l’angolo ordinario $2\pi(1-\cos\alpha)$ (vedi marcature). Il punto a $10°$ è quello appena verificato con i numeri.',
+   plots:[
+    {kind:'func2d', f:'pi*sin(x*pi/180)**2', xr:[0,90], yr:[0,3.3], height:320, equal:false,
+     title:'x = alfa (gradi)      y = Omega proiettato (sr)',
+     marks:[{x:10, y:0.0947, label:'10 grad, differenza 0,76%', col:'#5eead4', up:true},
+            {x:90, y:3.1416, label:'90 grad, Omega = pi', col:'#ff9b6b', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare: la curva sale, raggiunge $\pi$ a $90°$ e lì si ferma — non continua a crescere come farebbe l&rsquo;angolo solido ordinario, che a $90°$ vale $2\pi$.</b> Il proiettato «vede» solo la proiezione della semisfera sul piano di base, e quella proiezione ha un&rsquo;area finita anche quando il campo di vista arriva a coprire l&rsquo;intera semisfera.</p>
+   <p><b>Che cosa impararne: per i campi di vista stretti di quasi ogni telescopio, la curva è quasi indistinguibile da una retta che parte dall&rsquo;origine</b> — ed è lì che vale l&rsquo;approssimazione $\Omega\simeq\pi\alpha^2$ (piccoli angoli) usata per l&rsquo;$f/\#$. Il punto a $10°$ marca dove quell&rsquo;approssimazione comincia, misurabilmente, a scostarsi.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché in fotometria si usa sempre l’angolo solido proiettato e non quello ordinario?`,
+    a:R`Perché flusso e brillanza sono definiti come energia per unità di superficie <i>vista frontalmente</i>: una superficie vista con inclinazione $\theta$ rispetto alla normale raccoglie o emette una potenza proporzionale a $\cos\theta$, lo stesso fattore che compare nella definizione del flusso. L&rsquo;angolo solido proiettato $d\Omega=\cos\theta\,d\omega$ incorpora questo fattore una volta per tutte; usare l&rsquo;angolo ordinario significherebbe contare come se ogni superficie fosse vista frontalmente, cosa falsa per qualunque direzione diversa dall&rsquo;asse.`},
+   {q:R`Un obiettivo f/2 e uno f/4 della stessa focale: quale raccoglie più luce, e di quanto?`,
+    a:R`L&rsquo;$f/2$, perché un $f/\#$ più piccolo corrisponde (a parità di focale) a un diametro maggiore e quindi a un angolo solido di raccolta maggiore. Con la formula approssimata $\Omega\propto1/(f/\#)^2$ il fattore è esattamente $4$; con il calcolo esatto, che usa l&rsquo;angolo solido proiettato vero e non la sua approssimazione per angoli piccoli, il fattore scende a $3{,}824$ — comunque un ordine di grandezza di «quattro volte più luce», non un numero radicalmente diverso.`}
+  ]}
+]},
+
+/* ---------------- 04 · FLUSSO E BRILLANZA SPECIFICI ---------------- */
+{ num:'04', title:'Flusso e brillanza specifici: lo spettro entra nella definizione', meta:'per frequenza, lunghezza d’onda o numero d’onde · la conversione fra le tre, verificata · fotometri contro spettrometri',
+  blocchi:[
+  {t:'prosa', title:'Perché un numero solo non basta più', tag:'dal totale allo spettro', html:R`
+  <p>Flusso e brillanza, come definiti nelle tappe 01 e 02, integrano l&rsquo;energia su tutte le frequenze: dicono «quanto», non «a che colore». Per una radiazione non monocromatica si definiscono flusso e brillanza <b>specifici</b>, cioè per unità di frequenza, lunghezza d&rsquo;onda, o numero d&rsquo;onde ($\sigma=1/\lambda$):
+  $$F_\nu=\frac{dW}{dA\,d\nu},\quad F_\lambda=\frac{dW}{dA\,d\lambda},\quad F_\sigma=\frac{dW}{dA\,d\sigma},$$
+  e analogamente per $B_\nu,B_\lambda,B_\sigma$ aggiungendo $d\Omega$ al denominatore. Le unità cambiano con la convenzione: W/m²/Hz nel sistema internazionale, ma è normale incontrare unità ibride — erg/s/cm²/Å nel visibile, W/cm²/sr/µm nell&rsquo;infrarosso — e il movimento le userà entrambe, sempre dichiarate.</p>`},
+  {t:'prosa', title:'Una conversione che deve tornare, verificata e non solo scritta', tag:'il controllo algebrico', html:R`
+  <p>Le tre forme (per $\nu$, $\lambda$, $\sigma$) descrivono la stessa energia fisica, e passare da una all&rsquo;altra richiede di tenere conto che $d\lambda$ e $d\nu$ non hanno la stessa grandezza: da $\lambda=c/\nu$ segue $|d\lambda|=c\,d\nu/\nu^2$, cioè $|d\lambda/\lambda|=|d\nu/\nu|$. Imponendo che l&rsquo;energia infinitesima sia la stessa comunque la si descriva,
+  $$F_\lambda\,|d\lambda|=F_\nu\,|d\nu|\ \Longrightarrow\ F_\lambda=F_\nu\,\frac{\nu^2}{c}\ \Longrightarrow\ \lambda F_\lambda=\lambda\cdot F_\nu\frac{\nu^2}{c}=\nu F_\nu,$$
+  avendo usato $\lambda\nu=c$ nell&rsquo;ultimo passaggio. La catena si estende allo stesso modo a $\sigma$: $\lambda F_\lambda=\nu F_\nu=\sigma F_\sigma$. <b>Questa identità è il controllo pratico che un flusso specifico espresso in due unità diverse è stato convertito correttamente</b>: se il prodotto $\lambda F_\lambda$ (calcolato con $\lambda$ in metri) non coincide con $\nu F_\nu$ (con $\nu$ in hertz) per lo stesso dato fisico, la conversione ha un errore.</p>`},
+  {t:'prosa', title:'Efficienza spettrale: cosa vede davvero uno strumento', tag:'fotometri contro spettrometri', html:R`
+  <p>Nessun rivelatore reale è sensibile a una sola lunghezza d&rsquo;onda: davanti al rivelatore si pone normalmente un filtro, e la sensibilità combinata di rivelatore e filtro si descrive con l&rsquo;<b>efficienza spettrale</b> $e(\lambda)=e_R(\lambda)\times t(\lambda)$ (se l&rsquo;osservazione è da terra, si moltiplica anche per la trasmissione atmosferica $e_A(\lambda)$). Il flusso che il rivelatore misura davvero è un integrale pesato del flusso specifico vero della sorgente,
+  $$F_m=\int_0^\infty F_\lambda\,e(\lambda)\,d\lambda,$$
+  sempre inferiore al flusso integrato $F=\int_0^\infty F_\lambda\,d\lambda$, e in generale non invertibile per risalire a $F$ senza conoscere $e(\lambda)$ per intero. Gli strumenti che misurano $F_m$ su una banda larga sono i <b>fotometri</b>; quelli che ricostruiscono $F_\lambda(\lambda)$ punto per punto, risolvendo lo spettro, sono gli <b>spettrometri</b>. De Bernardis introduce anche la <b>lunghezza d&rsquo;onda efficace</b> $\lambda_{\mathrm{eff}}=\int\lambda F(\lambda)e(\lambda)d\lambda\big/\int F(\lambda)e(\lambda)d\lambda$ — una media pesata sia dal filtro sia dallo spettro della sorgente stessa, che si avvicina alle righe spettrali più intense dentro la banda passante del filtro, e che dipende dalla forma dello spettro ma non dalla sua ampiezza totale: due sorgenti con lo stesso spettro normalizzato e luminosità diverse hanno la stessa $\lambda_{\mathrm{eff}}$.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché il flusso misurato da un fotometro è sempre inferiore al flusso integrato vero della sorgente?`,
+    a:R`Perché $F_m=\int F_\lambda\,e(\lambda)\,d\lambda$ pesa il flusso specifico vero con un&rsquo;efficienza spettrale $e(\lambda)\le1$ che non è mai uguale a 1 su tutto lo spettro: ogni filtro e rivelatore reale lascia fuori parte della radiazione, assorbe o riflette alcune lunghezze d&rsquo;onda, quindi l&rsquo;integrale pesato è necessariamente più piccolo dell&rsquo;integrale puro $F=\int F_\lambda\,d\lambda$.`},
+   {q:R`Due astronomi misurano lo stesso flusso specifico, uno in funzione di $\lambda$ e l’altro in funzione di $\nu$. Come verificano di essere d’accordo?`,
+    a:R`Calcolano $\lambda F_\lambda$ dal primo dato e $\nu F_\nu$ dal secondo, usando $\lambda\nu=c$ per associare la stessa lunghezza d&rsquo;onda alla stessa frequenza: se la sorgente e la misura sono le stesse, i due prodotti devono coincidere esattamente, perché entrambi rappresentano la stessa energia per decade logaritmica di lunghezza d&rsquo;onda o frequenza. Una discrepanza segnala un errore di conversione, quasi sempre un fattore $\nu^2/c$ scordato o invertito.`}
+  ]}
+]},
+
+/* ---------------- 05 · LA SCALA DELLE MAGNITUDINI ---------------- */
+{ num:'05', title:'La scala delle magnitudini: da Ipparco a Pogson, con il fattore derivato', meta:'una scala logaritmica, e perché · il fattore 2,512 non è arbitrario · magnitudine limite, occhio e telescopio',
+  blocchi:[
+  {t:'prosa', title:'Una scala vecchia di duemila anni, formalizzata nel 1856', tag:'da dove viene', html:R`
+  <p>Nell&rsquo;astronomia ottica si usa correntemente una scala logaritmica di flusso, la <b>magnitudine apparente</b>, definita dalla relazione di Pogson:
+  $$m-m_o=-2{,}5\log\frac{F}{F_o},$$
+  dove $F$ è il flusso della stella in esame e $m_o,F_o$ sono magnitudine e flusso di una stella di riferimento. Il segno è quello che genera più errori sotto pressione: <b>al crescere del flusso, la magnitudine diminuisce</b> — le stelle più luminose hanno magnitudine più piccola, e le più brillanti del cielo hanno magnitudine negativa. Questa scala non è un&rsquo;invenzione del 1856: nasce dalla classificazione di circa mille stelle fatta da Ipparco nel II secolo a.C., in sei classi di «grandezza», e si è conservata per un motivo fisiologico oltre che storico — la sensazione prodotta nell&rsquo;occhio umano da un flusso crescente varia essa stessa in modo approssimativamente logaritmico con il flusso.</p>`},
+  {t:'prosa', title:'Il fattore 2,512 non è arbitrario: viene da un numero tondo', tag:'perché 2,5 e non un altro numero', html:R`
+  <p>Il coefficiente $-2{,}5$ nella relazione di Pogson è stato scelto, nel 1856, per riprodurre un fatto empirico già nella classificazione di Ipparco: le stelle che Ipparco classificava con una differenza di «grandezza» pari a $5$ risultavano avere, quando misurate fotometricamente in epoca moderna, un rapporto di flussi pari a circa $100$. Imponendo che una differenza di $5$ magnitudini corrisponda esattamente a un fattore $100$ in flusso,
+  $$\Delta m=5\ \Longleftrightarrow\ \frac{F_1}{F_2}=100\ \Longrightarrow\ -2{,}5\log(100)=-2{,}5\cdot2=-5\ \checkmark,$$
+  si fissa il coefficiente $2{,}5$ e, di conseguenza, il fattore di flusso corrispondente a <i>una sola</i> magnitudine:
+  $$\left(\frac{F_1}{F_2}\right)_{\Delta m=1}=100^{1/5}=2{,}512.$$
+  <b>Il numero $2{,}512$ non è una costante fondamentale della natura</b>: è la quinta radice di cento, ed esiste perché qualcuno, duemila anni prima di Pogson, aveva diviso il cielo visibile in sei classi che la fisiologia dell&rsquo;occhio rendeva, a posteriori, equispaziate in logaritmo del flusso con un passo di $5$ magnitudini su un fattore $100$.</p>`},
+  {t:'plot', title:'La relazione di Pogson: una retta in scala logaritmica, non in scala lineare',
+   intro:'Sull’asse orizzontale $\log_{10}(F/F_o)$, su quello verticale $\Delta m=m-m_o=-2{,}5\log_{10}(F/F_o)$. Due punti segnati: il passo di Ipparco (fattore 100, cinque magnitudini) e il passo unitario (fattore 2,512, una magnitudine).',
+   plots:[
+    {kind:'func2d', f:'-2.5*x', xr:[-2.3,2.3], yr:[-6,6], height:320, equal:false,
+     title:'x = log10(F/Fo)      y = m - mo',
+     marks:[{x:2, y:-5, label:'fattore 100, 5 magnitudini (Ipparco)', col:'#5eead4', up:true},
+            {x:0.4, y:-1, label:'fattore 2,512, 1 magnitudine', col:'#ff9b6b', left:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare: la retta è diritta perché l’asse orizzontale è già logaritmico.</b> In flusso lineare, la scala delle magnitudini sarebbe un’esponenziale che precipita; nel piano $(\log F,\,m)$ diventa una semplice retta di pendenza $-2{,}5$ — ed è proprio questo che rende la scala comoda: differenze di magnitudine si sommano e si sottraggono come numeri ordinari, mentre i rapporti di flusso si moltiplicano.</p>
+   <p><b>Che cosa impararne: il punto di Ipparco non è un punto a caso sulla retta, è il punto che l’ha definita.</b> Qualunque altra coppia (intervallo di magnitudini, fattore di flusso) sulla stessa retta è una conseguenza di quella scelta storica, non un fatto fisico indipendente.</p>`},
+  {t:'prosa', title:'Fin dove si vede: occhio, telescopio, CCD', tag:'la magnitudine limite', html:R`
+  <p>Le stelle più deboli visibili a occhio nudo hanno magnitudine apparente $6$ — la <b>magnitudine limite</b> dell&rsquo;occhio umano adattato al buio, con pupilla di diametro $d=7$ mm. Un telescopio di diametro $D$ raccoglie il flusso su un&rsquo;area $\pi D^2/4$ invece di $\pi d^2/4$, concentrando tutto sulla stessa pupilla: la potenza raccolta cresce del fattore $(D/d)^2$, e tradotto in magnitudini (un fattore di potenza diventa un $-2{,}5\log$),
+  $$m_{\mathrm{lim,Tel}}=m_{\mathrm{lim}}+5\log\frac{D}{d}=6+5\log\frac{D(\mathrm{m})}{0{,}007}=16{,}8+5\log D(\mathrm{m}).$$
+  Un telescopio di un metro di diametro spinge quindi la magnitudine limite da $6$ a circa $16{,}8$ — oltre diecimila volte più debole di quanto l&rsquo;occhio nudo veda. Sostituire una lastra fotografica all&rsquo;occhio guadagna altre $2$-$4$ magnitudini; le migliori osservazioni con camere CCD moderne arrivano fino a magnitudine limite $30$, <b>un fattore di oltre $10^{9}$ in flusso rispetto al limite dell&rsquo;occhio nudo</b> — la differenza fra vedere una stella e vedere una galassia a miliardi di anni luce.</p>`},
+  {t:'prosa', title:'Diversi filtri, diverse magnitudini', tag:'verso gli indici di colore', html:R`
+  <p>Poiché ogni filtro ha la propria efficienza spettrale $e_x(\lambda)$, esistono tanti tipi di magnitudine apparente quante sono le bande fotometriche usate — generalizzando la relazione di Pogson con il flusso misurato (eq. 1.19 della tappa 04),
+  $$m_x-m_{x_o}=-2{,}5\log\frac{\int_0^\infty F_\lambda\,e_x(\lambda)\,d\lambda}{\int_0^\infty F_{o,\lambda}\,e_x(\lambda)\,d\lambda}.$$
+  I filtri standard del visibile e del vicino infrarosso — U, B, V, R, I, J, K e altri — sono costruiti per approssimare, quando usati con un fotocatodo adatto, la risposta spettrale dell&rsquo;occhio umano (B e V) o per rientrare nelle finestre di trasparenza dell&rsquo;atmosfera terrestre (gli infrarossi, dove non esiste alcuna finestra utilizzabile fra $20$ e $350$ µm per il forte assorbimento del vapor d&rsquo;acqua). Le costanti $F_o$ per ciascuna banda sono scelte, per convenzione, in modo che gli <b>indici di colore</b> — differenze di magnitudine fra bande diverse, $X-Y=m_X-m_Y$ — risultino nulli per le stelle di sequenza principale di tipo spettrale A0: una convenzione di zero, non una legge fisica, ma è quella da cui ogni catalogo fotometrico moderno parte.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché una variazione di una magnitudine corrisponde a un fattore 2,512 e non a un numero “più pulito” come 2 o 3?`,
+    a:R`Perché la scala delle magnitudini è stata calibrata su un fatto storico-empirico specifico: le sei classi di Ipparco, quando misurate fotometricamente, davano un rapporto di flusso di circa $100$ per una differenza di $5$ classi. Fissato questo vincolo, il fattore per <i>una sola</i> classe è obbligato a essere $100^{1/5}=2{,}512$: non è una scelta indipendente, è la conseguenza aritmetica di aver voluto che cinque magnitudini corrispondessero esattamente a cento volte il flusso.`},
+   {q:R`Un telescopio di diametro doppio rispetto a un altro guadagna quante magnitudini di profondità?`,
+    a:R`$m_{\mathrm{lim,Tel}}=6+5\log(D/d)$: raddoppiare $D$ aggiunge $5\log2=1{,}505$ magnitudini alla profondità raggiungibile, indipendentemente dal diametro di partenza — è una conseguenza diretta del fatto che la potenza raccolta scala come $D^2$ e la relazione fra potenza e magnitudine è logaritmica con base fissa $2{,}512$.`}
+  ]}
+]},
+
+/* ---------------- 06 · MAGNITUDINE ASSOLUTA E MODULO DI DISTANZA ---------------- */
+{ num:'06', title:'Magnitudine assoluta e modulo di distanza: separare la stella dalla sua distanza', meta:'una magnitudine “standardizzata” a 10 parsec · derivata dalla sola legge dell’inverso del quadrato · l’assorbimento, dichiarato come correzione',
+  blocchi:[
+  {t:'prosa', title:'Il problema che il flusso da solo non risolve, risolto per definizione', tag:'perché serve una seconda magnitudine', html:R`
+  <p>La tappa 01 ha mostrato che il flusso misurato confonde luminosità intrinseca e distanza: una stella debole può essere fioca o lontana, e il flusso da solo non lo dice. La <b>magnitudine assoluta</b> $M$ risolve il problema per costruzione: è definita come <i>la magnitudine apparente che la sorgente avrebbe se si trovasse a una distanza standard di $10$ parsec</i>. Fissando la distanza, $M$ dipende solo dalla luminosità intrinseca — è, in altre parole, la magnitudine «spogliata» dell&rsquo;effetto della distanza.</p>`},
+  {t:'prosa', title:'Il modulo di distanza, derivato dalla legge dell’inverso del quadrato', tag:'il conto, non il postulato', html:R`
+  <p>La relazione fra $m$ (alla distanza vera $D$, in parsec) e $M$ (alla distanza standard di $10$ pc) si ottiene applicando due volte la stessa legge $F(r)=K/r^2$ della tappa 01, una volta a ciascuna distanza, e confrontando con Pogson. Spostando idealmente la stella dalla sua distanza reale $D$ a $10$ pc, il flusso cambia del fattore
+  $$\frac{F(D)}{F(10)}=\left(\frac{10}{D}\right)^{2},$$
+  e per la relazione di Pogson della tappa 05, applicata al confronto fra le due magnitudini della stessa stella alle due distanze,
+  $$M-m=-2{,}5\log\frac{F(10)}{F(D)}=-2{,}5\log\left(\frac{D}{10}\right)^{2}=-5\log\frac{D}{10}=5-5\log D.$$
+  Aggiungendo la correzione per un eventuale assorbimento interstellare $A$ (in magnitudini, lungo la linea di vista fra la stella e il telescopio — la luce assorbita o diffusa dalla polvere rende la stella apparentemente più debole di quanto la sola distanza giustifichi, quindi si sottrae dalla magnitudine assoluta dedotta),
+  $$\boxed{M=m+5-5\log D(\mathrm{pc})-A}.$$
+  <b>Non è un postulato aggiunto alla fotometria</b>: è la stessa legge dell&rsquo;inverso del quadrato della tappa 01, scritta nel linguaggio logaritmico di Pogson invece che in quello lineare del flusso.</p>`},
+  {t:'plot', title:'Il modulo di distanza: una retta in log(d), con due stelle vere segnate sopra',
+   intro:'Sull’asse orizzontale $\log_{10}D(\mathrm{pc})$, su quello verticale il modulo di distanza $m-M=5\log_{10}D-5$. I due punti segnati sono il Sole (distanza 1 UA, un modulo fortemente negativo) e Sirio A (distanza 2,65 pc, un modulo appena negativo), calcolati nella tappa successiva.',
+   plots:[
+    {kind:'func2d', f:'5*x-5', xr:[-6,3], yr:[-35,10], height:340, equal:false,
+     title:'x = log10(D in pc)      y = m - M',
+     marks:[{x:1, y:0, label:'D = 10 pc, m - M = 0', col:'#5eead4', up:true},
+            {x:0.4237, y:-2.882, label:'Sirio A, D = 2,65 pc', col:'#ff9b6b', up:true},
+            {x:-5.3145, y:-31.572, label:'il Sole, D = 1 UA', col:'#d8a13a', left:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare: la retta passa per zero esattamente a $10$ pc, per costruzione.</b> È il punto che definisce $M$: una stella alla distanza standard ha, per definizione, $m=M$. Più vicina di $10$ pc, il modulo diventa negativo — la stella appare più brillante di quanto la sua sola luminosità «di targa» indicherebbe a quella distanza standard.</p>
+   <p><b>Che cosa impararne: il Sole, a un decimilionesimo di parsec, sta a un estremo della retta impossibile da disegnare alla stessa scala del resto del diagramma — il suo modulo di distanza è $-31{,}6$.</b> Questo non è un difetto del Sole: è la misura di quanto le distanze stellari tipiche ($10^0$-$10^3$ pc) siano enormi rispetto alla distanza Terra-Sole, ed è esattamente il motivo per cui il Sole, intrinsecamente una stella di luminosità del tutto ordinaria, ci appare come l&rsquo;oggetto più brillante del cielo per enormi distanze.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché il modulo di distanza m - M è negativo per una stella più vicina di 10 parsec, e positivo per una più lontana?`,
+    a:R`Perché $m-M=5\log(D/10)$: se $D<10$ pc l&rsquo;argomento del logaritmo è minore di $1$, il logaritmo è negativo e quindi $m-M<0$ — la stella appare più brillante ($m$ più piccola) di quanto risulterebbe alla distanza standard, perché è effettivamente più vicina. Se $D>10$ pc vale il contrario: la stella è più lontana della distanza standard, appare più debole, e $m>M$.`},
+   {q:R`Da dove viene esattamente il fattore 5 nella formula del modulo di distanza, e perché non è indipendente dal fattore 2,5 di Pogson?`,
+    a:R`Viene dal fatto che il rapporto di flusso fra le due distanze è un quadrato, $(D/10)^{-2}$, e la relazione di Pogson introduce un fattore $-2{,}5$ davanti al logaritmo del rapporto di flusso: $-2{,}5\log\!\big((10/D)^2\big)=-2{,}5\cdot2\cdot\log(10/D)=-5\log(10/D)=5\log(D/10)$. Il $5$ non è un secondo numero scelto indipendentemente: è il prodotto del $2{,}5$ di Pogson per il $2$ dell&rsquo;esponente della legge dell&rsquo;inverso del quadrato.`}
+  ]}
+]},
+
+/* ---------------- 07 · PARALLASSE, HIPPARCOS, GAIA ---------------- */
+{ num:'07', title:'Come si calibra M senza fidarsi della fotometria: la parallasse, da Hipparcos a Gaia', meta:'una distanza indipendente da ogni ipotesi sulla stella · il salto di precisione del 2013 · perché serve comunque, accanto alla magnitudine',
+  blocchi:[
+  {t:'prosa', title:'Il problema circolare, e come si rompe', tag:'perché la parallasse non è un dettaglio tecnico', html:R`
+  <p>Il modulo di distanza della tappa 06 ha una debolezza che va dichiarata subito: per usarlo e ottenere $M$ da $m$, serve già conoscere $D$. Se $D$ si ottenesse a sua volta assumendo una luminosità per la stella, il ragionamento sarebbe circolare — si presuppone ciò che si vuole dedurre. La <b>parallasse</b>, già introdotta nel dizionario di as-01 come definizione del parsec, rompe esattamente questo cerchio: è una misura puramente <b>geometrica</b> della distanza, l&rsquo;angolo sotto cui si vede il semiasse dell&rsquo;orbita terrestre, che non richiede nessuna ipotesi sulla fisica della stella osservata. È per questo che la parallasse — non la fotometria — è il metodo con cui si calibrano per la prima volta le magnitudini assolute di un campione di stelle, da cui poi si deducono relazioni (come quella periodo-luminosità delle Cefeidi, o la sequenza principale del diagramma di Hertzsprung-Russell) applicabili a stelle troppo lontane per avere una parallasse misurabile.</p>`},
+  {t:'prosa', title:'Hipparcos: centoventimila parallasse, un limite di precisione', tag:'1989-1993', html:R`
+  <p>Il satellite Hipparcos dell&rsquo;Agenzia Spaziale Europea, lanciato nel 1989, ha misurato le posizioni e le parallassi di circa $120\,000$ stelle con una precisione di circa $1$ millisecondo d&rsquo;arco (mas), fino a una magnitudine limite di $12$. Con quella precisione, una parallasse è misurata con un errore relativo contenuto (e quindi una distanza affidabile) solo fino a circa $1$ kiloparsec — il «limite di distanza effettivo» del catalogo Hipparcos: oltre quella soglia, l&rsquo;incertezza sulla parallasse diventa comparabile alla parallasse stessa, e la distanza dedotta perde di significato.</p>`},
+  {t:'prosa', title:'Gaia: lo stesso principio, tre ordini di grandezza più lontano', tag:'2013 in avanti', html:R`
+  <p>La missione Gaia, lanciata nel dicembre 2013, applica lo stesso principio geometrico con una precisione radicalmente maggiore: circa $7$ microsecondi d&rsquo;arco (µas) a magnitudine $10$, $26$ µas a magnitudine $15$ — mille volte meglio di Hipparcos — su un catalogo di oltre un miliardo di stelle, con un limite di distanza effettivo dichiarato attorno a $50$ kiloparsec, cinquanta volte più lontano del predecessore. Non è un affinamento incrementale: Hipparcos misurava parallasse affidabili essenzialmente nel vicinato solare, Gaia le misura fino a toccare il bulge galattico e oltre, restituendo per la prima volta una mappa tridimensionale della Via Lattea costruita quasi esclusivamente da misure geometriche, non da assunzioni fisiche sulle stelle. Dove Hipparcos forniva una singola stima di parallasse per ogni stella bersaglio, Gaia la fornisce — insieme a fotometria multibanda e, per un sottoinsieme, velocità radiale — per un numero di stelle superiore di quattro ordini di grandezza.</p>`},
+  {t:'prosa', title:'Perché la parallasse resta necessaria anche dopo aver costruito Pogson', tag:'il cerchio si chiude', html:R`
+  <p>Con un campione di stelle di parallasse nota, e dunque di distanza nota per via puramente geometrica, il modulo di distanza della tappa 06 si inverte: da $m$ misurata e $D$ nota dalla parallasse, si ricava $M$ senza alcuna ipotesi circolare. È esattamente questa calibrazione — ripetuta su migliaia di stelle da Hipparcos e oggi su scala enormemente più ampia da Gaia — che rende possibile usare, per le stelle troppo lontane per avere una parallasse misurabile, relazioni fotometriche pure (colore, tipo spettrale, periodo di variabilità) per stimare $M$ e quindi, da $m$ osservata, la distanza. La parallasse non compete con la fotometria: è la fondazione geometrica su cui ogni scala di distanza fotometrica dell&rsquo;astrofisica moderna è costruita.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché non si può usare direttamente il modulo di distanza di una stella per calibrare la sua stessa magnitudine assoluta?`,
+    a:R`Perché il modulo di distanza $M=m+5-5\log D-A$ richiede di conoscere $D$ in anticipo: se $D$ fosse a sua volta stimata assumendo una luminosità (cioè una $M$) per la stella, il ragionamento sarebbe circolare — si presupporrebbe il risultato che si vuole ottenere. Serve una misura di $D$ indipendente da qualunque ipotesi fisica sulla stella: la parallasse, essendo pura geometria (un angolo e la lunghezza nota del semiasse dell&rsquo;orbita terrestre), è esattamente questo.`},
+   {q:R`In che senso Gaia non è solo “un Hipparcos migliore”?`,
+    a:R`Perché il salto di precisione (da 1 mas a pochi µas) non è un affinamento incrementale ma cambia il tipo di scienza possibile: Hipparcos restituiva distanze affidabili essenzialmente nel vicinato solare (fino a circa 1 kpc), mentre Gaia le estende fino a circa 50 kpc, permettendo per la prima volta di calibrare geometricamente, senza assumere nulla sulla fisica stellare, campioni di stelle che attraversano gran parte della Via Lattea.`}
+  ]}
+]},
+
+/* ---------------- 08 · IL MESTIERE: IL SOLE E SIRIO, I CONTI CHE TORNANO ---------------- */
+{ num:'08', title:'Il mestiere: il Sole e Sirio, due conti che devono tornare', meta:'il Sole verificato contro la propria tabella · Sirio dalla parallasse al raggio, in quattro passi · un forward dichiarato, non nascosto',
+  blocchi:[
+  {t:'prosa', title:'Il Sole: verificare il +4,8 tabulato, non solo citarlo', tag:'un controllo di consistenza a distanza nota', html:R`
+  <p>Masani tabula per il Sole magnitudine apparente $m_\odot=-26{,}72$ e magnitudine assoluta $M_\odot=+4{,}8$. Sono due numeri misurati indipendentemente — $m_\odot$ dal flusso solare osservato, $M_\odot$ (storicamente) da confronto con altre stelle di parallasse nota — ma il modulo di distanza della tappa 06 impone una relazione precisa fra loro, <i>dato che si conosce esattamente</i> la distanza Terra-Sole: $D_\odot=1$ UA, che in parsec è
+  $$D_\odot(\mathrm{pc})=\frac{1{,}496\cdot10^{11}}{3{,}086\cdot10^{16}}=4{,}848\cdot10^{-6}\ \mathrm{pc}.$$
+  Applicando il modulo di distanza con $A=0$ (nessun assorbimento interstellare su una distanza di un centomilionesimo di parsec),
+  $$M_\odot=m_\odot+5-5\log D_\odot=-26{,}72+5-5\log(4{,}848\cdot10^{-6})=4{,}852.$$
+  <b>Il valore ricalcolato, $4{,}852$, coincide con il valore tabulato $+4{,}8$ entro il secondo decimale</b> — la piccola differenza è compatibile con l&rsquo;arrotondamento a una cifra decimale della tabella di Masani, non un errore nella catena di ragionamento. È il tipo di controllo che vale sempre la pena fare quando una tabella fornisce un numero che una formula, derivata altrove, permette di ricostruire in modo indipendente.</p>`},
+  {t:'prosa', title:'Sirio A: dalla parallasse alla luminosità, passo per passo', tag:'il secondo conto', html:R`
+  <p>Sirio — non la nana bianca compagna, Sirio B, già incontrata nel movimento precedente come esercizio sul redshift gravitazionale, ma la stella principale del sistema, Sirio A — ha parallasse misurata $p=0{,}377''$. Per la definizione di <span class="str" data-str="parsec-e-parallasse">parsec</span> (dizionario di as-01), la distanza è semplicemente l&rsquo;inverso della parallasse in secondi d&rsquo;arco:
+  $$D=\frac{1}{p}=\frac{1}{0{,}377}=2{,}653\ \mathrm{pc}.$$
+  La magnitudine apparente osservata è $m=-1{,}45$ (la stella più brillante del cielo notturno dopo il Sole). Applicando il modulo di distanza,
+  $$M=m+5-5\log D=-1{,}45+5-5\log(2{,}653)=1{,}432,$$
+  <b>in accordo con il valore $1{,}42$ di Masani</b> entro l&rsquo;arrotondamento della parallasse di partenza a tre cifre. Il modulo di distanza stesso,
+  $$m-M=-1{,}45-1{,}432=-2{,}882,$$
+  è il punto segnato in figura nella tappa 06: negativo, come deve essere per una stella a meno di $10$ pc.</p>`},
+  {t:'prosa', title:'Dalla magnitudine assoluta alla luminosità, e al raggio — con un prestito dichiarato', tag:'un forward esplicito, non un rimando muto', html:R`
+  <p>Dalla definizione stessa di magnitudine assoluta come confronto a distanza fissata, la differenza $M-M_\odot$ è di nuovo una magnitudine di Pogson, applicata questa volta al rapporto di luminosità (non più di flusso, perché a distanza fissata luminosità e flusso sono proporzionali con lo stesso fattore per entrambe le stelle):
+  $$\frac{L}{L_\odot}=10^{-0{,}4(M-M_\odot)}=10^{-0{,}4(1{,}432-4{,}8)}=22{,}25,$$
+  <b>Sirio A irradia circa ventidue volte più energia del Sole</b> — in accordo con il $22{,}4$ di Masani. Per andare dalla luminosità al raggio serve un&rsquo;informazione che questo movimento non deriva: la legge di Stefan-Boltzmann, $L=4\pi R^2\sigma T_e^4$, che lega luminosità, raggio e temperatura effettiva per una sorgente che irraggia come un corpo nero — argomento proprio del movimento successivo, qui usato soltanto come <b>costante nota</b>, dichiarata e non derivata. Con la temperatura effettiva di Sirio A, $T_e=9500$ K (dal suo tipo spettrale A1, misurato spettroscopicamente, non dedotto qui),
+  $$R=\sqrt{\frac{L}{4\pi\sigma T_e^4}}=\sqrt{\frac{22{,}25\,L_\odot}{4\pi\sigma\,(9500)^4}}=1{,}214\cdot10^{9}\ \mathrm{m}=1{,}745\ R_\odot,$$
+  <b>in buon accordo con il $1{,}8\,R_\odot$ di Masani</b> — la differenza, un po&rsquo; più ampia che nei conti precedenti, riflette la sensibilità molto alta di $R$ alla quarta potenza di $T_e$: un piccolo scarto nella temperatura effettiva assunta (il valore esatto dipende dal metodo spettroscopico usato) si amplifica in un raggio percepibilmente diverso.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché ha senso controllare il valore tabulato M☉ = +4,8 ricalcolandolo dalla distanza Terra-Sole, invece di accettarlo come dato?`,
+    a:R`Perché $m_\odot$ e $M_\odot$ sono misurati per vie indipendenti, e il modulo di distanza fornisce una relazione rigida fra loro una volta che $D_\odot$ è nota con grandissima precisione (è una distanza del sistema solare, non una stima astrofisica incerta). Se il valore ricalcolato non fosse compatibile con quello tabulato, significherebbe un errore in uno dei due dati di partenza o nella formula; il fatto che tornino entro l&rsquo;arrotondamento è una verifica indipendente della coerenza interna dell&rsquo;intero apparato costruito in questo movimento.`},
+   {q:R`Perché il raggio di Sirio A, calcolato da L e Te, si allontana di più dal valore tabulato rispetto a quanto si allontanano M e L?`,
+    a:R`Perché $R\propto\sqrt{L/T_e^4}$: il raggio dipende dalla temperatura effettiva alla <i>quarta potenza sotto radice</i>, cioè una piccola incertezza relativa su $T_e$ si traduce in un&rsquo;incertezza su $R$ amplificata rispetto a quella su $M$ o $L$, che dipendono da $T_e$ solo indirettamente (tramite il tipo spettrale usato per stimarla) o non ne dipendono affatto. È una sensibilità intrinseca della formula, non un segno che il conto sia sbagliato.`}
+  ]}
+]},
+
+/* ---------------- 09 · L'ESERCIZIO: L'AMMASSO GLOBULARE ---------------- */
+{ num:'09', title:'L’esercizio: un ammasso globulare, la magnitudine di una sola stella', meta:'dichiarato: da un esonero scritto, non da una lezione · la somma dei flussi, non delle magnitudini · verificato nelle due direzioni',
+  blocchi:[
+  {t:'prosa', title:'Da dove viene questo esercizio, dichiarato per quello che è', tag:'non un esercizio di lezione', html:R`
+  <p>Il dossier degli esercizi fatti a lezione non attribuisce a questo movimento nessun esercizio svolto in aula con dati numerici completi: l&rsquo;unica voce segnalata dall&rsquo;attribuzione automatica (una diapositiva della lezione 9 su una sorgente radio non termica a 22 GHz) risulta, a una verifica a mano del testo estratto, troppo corrotta dall&rsquo;estrazione automatica per ricostruirne la catena di calcolo senza rischiare di inventare un passaggio — l&rsquo;ordine dei simboli nella tabella di formule non è recuperabile con certezza dal solo testo. <b>Questo esercizio viene quindi da un esonero scritto</b> — l&rsquo;Esonero di Astrofisica A del 5 dicembre 2012, esercizio 2 — e va dichiarato come tale: è il tipo di conto su cui cade regolarmente la seconda domanda dell&rsquo;orale, anche se non proviene da una lezione in senso stretto.</p>`},
+  {t:'prosa', title:'Il problema, e la domanda che nasconde una trappola', tag:'un ammasso di stelle uguali', html:R`
+  <p>Un ammasso globulare formato da $N=2000$ stelle, tutte assunte identiche, ha magnitudine apparente complessiva $m_{\mathrm{ammasso}}=4{,}3$. Si chiede la magnitudine apparente $m_\star$ di una singola stella componente. <b>La trappola è trattare $N$ come se operasse direttamente sulle magnitudini</b> — non è così: le magnitudini sono logaritmi di flusso, e sono i <b>flussi</b> a somma diretta, non le magnitudini. Se ciascuna stella emette flusso $F_\star$, il flusso totale dell&rsquo;ammasso è $F_{\mathrm{ammasso}}=N\,F_\star$ — una somma lineare, non logaritmica.</p>`},
+  {t:'prosa', title:'Lo svolgimento, con Pogson applicato al rapporto giusto', tag:'il conto, per intero', html:R`
+  <p>Applicando la relazione di <span class="str" data-str="magnitudine">Pogson</span> al confronto fra l&rsquo;ammasso e una singola stella componente,
+  $$m_{\mathrm{ammasso}}-m_\star=-2{,}5\log\frac{F_{\mathrm{ammasso}}}{F_\star}=-2{,}5\log N,$$
+  da cui, risolvendo per $m_\star$,
+  $$m_\star=m_{\mathrm{ammasso}}+2{,}5\log N=4{,}3+2{,}5\log(2000)=12{,}55.$$
+  <b>Ciascuna stella dell&rsquo;ammasso, presa singolarmente, è di magnitudine $12{,}55$</b> — oltre otto magnitudini più debole dell&rsquo;ammasso intero, un fattore di flusso di circa duemila esattamente per costruzione. Il segno è quello che conta: aggiungere stelle identiche rende l&rsquo;insieme <i>più brillante</i> (magnitudine complessiva più piccola) della singola componente, non più debole — ed è per questo che la formula richiede un $+2{,}5\log N$ (che aumenta $m_\star$ rispetto a $m_{\mathrm{ammasso}}$) e non un $-2{,}5\log N$.</p>`},
+  {t:'prosa', title:'Lo stesso conto, nella direzione opposta: una verifica indipendente', tag:'l’esonero B dello stesso giorno', html:R`
+  <p>L&rsquo;Esonero B dello stesso giorno pone lo stesso tipo di problema invertito: un ammasso di $N=30\,000$ stelle identiche, ciascuna di magnitudine apparente $m_\star=14{,}4$, e chiede la magnitudine dell&rsquo;ammasso intero. Usando la stessa relazione, risolta questa volta per $m_{\mathrm{ammasso}}$,
+  $$m_{\mathrm{ammasso}}=m_\star-2{,}5\log N=14{,}4-2{,}5\log(30\,000)=3{,}207.$$
+  <b>Le due versioni usano esattamente la stessa formula, applicata nelle due direzioni possibili</b>: dato il totale, trovare la componente (Esonero A); dato il numero di componenti e la magnitudine di ciascuna, trovare il totale (Esonero B). Che il segno del termine $2{,}5\log N$ si inverta correttamente fra le due direzioni, e che il risultato abbia sempre il senso fisico giusto (l&rsquo;ammasso è sempre più brillante della singola stella, mai il contrario), è il controllo di aver applicato Pogson al rapporto di flusso giusto e non al suo reciproco.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché non si può semplicemente dividere la magnitudine dell’ammasso per il numero di stelle per ottenere la magnitudine di una singola stella?`,
+    a:R`Perché la magnitudine è un logaritmo di flusso, e il logaritmo di una somma non è la somma dei logaritmi né un suo multiplo semplice: è il <b>flusso</b> dell&rsquo;ammasso che è $N$ volte quello di una singola stella, non la sua magnitudine. Bisogna passare da $m_{\mathrm{ammasso}}$ al rapporto di flusso implicito ($-2{,}5\log N$) e poi tornare a una magnitudine, cioè applicare correttamente Pogson al rapporto $F_{\mathrm{ammasso}}/F_\star=N$, non dividere $m_{\mathrm{ammasso}}$ per $N$.`},
+   {q:R`In quale dei due esoneri l’ammasso ha, in valore assoluto, la differenza di magnitudine maggiore rispetto alla singola stella, e perché?`,
+    a:R`Nell&rsquo;Esonero B, dove $N=30\,000$ contro i $2000$ dell&rsquo;Esonero A: la differenza di magnitudine fra ammasso e singola stella è $2{,}5\log N$, una funzione crescente di $N$, quindi un ammasso con quindici volte più stelle ha una differenza di magnitudine proporzionalmente maggiore ($2{,}5\log(30\,000)=11{,}19$ contro $2{,}5\log(2000)=8{,}25$) — non proporzionale a $N$ stesso, ma al suo logaritmo, la stessa compressione logaritmica che rende la scala delle magnitudini comoda su range di flusso enormi.`}
+  ]}
+]},
+
+/* ---------------- 10 · ALL'ORALE ---------------- */
+{ num:'10', title:'All’orale: il modulo di distanza, derivato nell’ordine in cui si dice', meta:'da F=K/r² a M=m+5-5logD, mossa per mossa · perché 2,5 e non un altro numero, raccontato a voce',
+  blocchi:[
+  {t:'prosa', title:'Perché proprio questa derivazione, e cosa deve restare in piedi senza appunti', tag:'quello che dice la mappa', html:R`
+  <p>Il campo <code>orale.domanda-teorica</code> di questo movimento chiede <i>«la scala delle magnitudini e il modulo di distanza»</i>: non la citazione delle due formule, ma la catena che le lega, perché è lì che si vede se chi risponde ha capito che il modulo di distanza non è un fatto isolato da ricordare ma la stessa legge dell&rsquo;inverso del quadrato della tappa 01, scritta nel linguaggio di Pogson. È anche la derivazione più corta di tutto il movimento, e la più facile da sbagliare a voce proprio per la sua brevità: un segno invertito o una base di logaritmo sbagliata passano via in una riga, senza il tempo di accorgersene.</p>`},
+  {t:'reveal', title:'Le mosse della derivazione, nell’ordine in cui si dicono', tag:'il copione', steps:[
+   {label:'Mossa 1 — parti dal flusso, non dalla magnitudine', body:R`<p>«Il punto di partenza è la legge dell&rsquo;inverso del quadrato del flusso, $F(r)=K/r^2$, derivata dalla conservazione dell&rsquo;energia su due sfere concentriche attorno alla sorgente. Confrontando la stessa stella a due distanze diverse, $D$ e $10$ parsec, il rapporto di flusso è $F(D)/F(10)=(10/D)^2$.»</p>`},
+   {label:'Mossa 2 — introduci Pogson, e dichiara subito il segno', body:R`<p>«La relazione di Pogson dice $m-m_o=-2{,}5\log(F/F_o)$: al <i>crescere</i> del flusso la magnitudine <i>diminuisce</i>, quindi il segno davanti al logaritmo è negativo. Applico questa relazione al confronto fra la magnitudine $m$ alla distanza vera $D$ e la magnitudine $M$ alla distanza standard di 10 parsec — questa è, per definizione, la magnitudine assoluta.»</p>`},
+   {label:'Mossa 3 — sostituisci il rapporto di flusso appena trovato', body:R`<p>«$M-m=-2{,}5\log\big(F(10)/F(D)\big)=-2{,}5\log\big((D/10)^2\big)$. Il quadrato dentro il logaritmo esce come fattore 2 davanti: $-2{,}5\cdot2\cdot\log(D/10)=-5\log(D/10)$.»</p>`},
+   {label:'Mossa 4 — riscrivi il logaritmo di un rapporto, e isola M', body:R`<p>«$-5\log(D/10)=-5\log D+5\log10=-5\log D+5$, quindi $M-m=5-5\log D$, cioè $M=m+5-5\log D$. Il fattore 5 non è un secondo numero scelto a parte: è il prodotto del 2,5 di Pogson per il 2 dell&rsquo;esponente della legge dell&rsquo;inverso del quadrato — dirlo esplicitamente mostra che la formula non è stata solo ricordata, ma ricostruita.»</p>`},
+   {label:'Mossa 5 — aggiungi l’assorbimento, e chiudi con un numero vero', body:R`<p>«Se c&rsquo;è assorbimento interstellare lungo la linea di vista, la stella appare più debole di quanto la sola distanza giustifichi: si sottrae una correzione $A$ in magnitudini, $M=m+5-5\log D-A$. Per il Sole, con $D=4{,}848\cdot10^{-6}$ pc e $A=0$, questo dà $M_\odot\simeq4{,}85$, in accordo con il valore tabulato $+4{,}8$.»</p>`},
+   {label:'Mossa 6 — se chiede anche il fattore 2,512, raccontalo come una scelta storica', body:R`<p>«Il coefficiente 2,5 in Pogson non è arbitrario: viene dal vincolo che cinque magnitudini (le sei classi di Ipparco) corrispondano a un fattore cento in flusso, $-2{,}5\log(100)=-5$. Da questo vincolo segue che il fattore per una singola magnitudine è $100^{1/5}=2{,}512$: una conseguenza aritmetica di una scelta di duemila anni fa, non una costante fisica fondamentale.»</p>`}
+  ]}
+]},
+
+/* ---------------- 11 · I NUMERI, E IL SENSO ---------------- */
+{ num:'11', title:'I numeri di questo movimento, e dove questa macchina torna', meta:'otto voci, non una di più · il filo che lega Sirio A a Sirio B · dove la fotometria riappare per tutto il resto del corso',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Legge dell&rsquo;inverso del quadrato:</b> $F(r)=K/r^2$, derivata dalla conservazione dell&rsquo;energia — non un postulato.</li>
+  <li><b>Costante solare, verificata due volte:</b> $F_{\oplus}\simeq1367\ \mathrm{W/m^2}$, dalla luminosità totale e dalla brillanza della superficie solare.</li>
+  <li><b>Teorema della brillanza:</b> $B/n^2$ invariante lungo un raggio di luce; nessun sistema ottico aumenta la brillanza apparente di una sorgente nello stesso mezzo.</li>
+  <li><b>Angolo solido proiettato:</b> $\Omega=\pi\sin^2\alpha$, diverso da quello ordinario $2\pi(1-\cos\alpha)$ di oltre l&rsquo;1% per campi di vista più larghi di $10°$.</li>
+  <li><b>Relazione di Pogson:</b> $m-m_{o}=-2{,}5\log(F/F_{o})$, fattore $2{,}512$ per magnitudine, derivato dal vincolo storico di Ipparco (5 magnitudini = fattore 100).</li>
+  <li><b>Modulo di distanza:</b> $M=m+5-5\log D(\mathrm{pc})-A$, conseguenza diretta di Pogson applicato alla legge dell&rsquo;inverso del quadrato.</li>
+  <li><b>Il Sole:</b> $m_{\odot}=-26{,}72,\ M_{\odot}\simeq4{,}85$ — verificato per coerenza interna, non solo citato.</li>
+  <li><b>Parallasse e distanza:</b> $D(\mathrm{pc})=1/p('')$; Hipparcos (1989) precisione $1$ mas fino a $\sim1$ kpc, Gaia (2013) precisione fino a pochi µas fino a $\sim50$ kpc.</li>
+  </ul>`},
+  {t:'prosa', title:'Il filo che lega questo movimento al precedente, e a quello che segue', tag:'Sirio, due volte', html:R`
+  <p>Sirio A e Sirio B sono la stessa stella doppia, vista con due strumenti diversi di questo corso. Il movimento precedente ha usato Sirio B, la nana bianca compagna, per un esercizio di relatività generale — il redshift gravitazionale delle sue righe spettrali, che dipende dal rapporto $GM/(Rc^2)$ e non richiede sapere nulla sul flusso o la magnitudine della stella. Questo movimento ha usato Sirio A, la componente principale, per l&rsquo;esercizio opposto: partendo da una parallasse (una misura puramente geometrica) e da una magnitudine apparente (una misura puramente fotometrica), si è risaliti alla luminosità e, con un unico ingrediente preso in prestito dal movimento successivo, al raggio. <b>Lo stesso sistema binario, attraversato due volte da due apparati di misura completamente diversi</b> — relatività generale in campo debole da un lato, fotometria e parallasse dall&rsquo;altro — e nessuno dei due basta da solo a dire cosa sia davvero una nana bianca o una stella di sequenza principale: serviranno entrambi, insieme, quando il corso arriverà a derivare la struttura interna delle stelle.</p>`},
+  {t:'prosa', title:'Dove questa macchina torna, per tutto il resto del corso', tag:'perché vale la pena che sia solido', html:R`
+  <p>Ogni volta che un movimento successivo introdurrà una nuova classe di oggetti — una stella variabile, una supernova, una galassia lontana — il primo passo sarà quasi sempre lo stesso: un flusso misurato, convertito in magnitudine, confrontato con una magnitudine assoluta nota o stimata da un&rsquo;altra relazione fisica, per ottenere una distanza. Le <b>Cefeidi</b>, variabili pulsanti la cui magnitudine assoluta è legata al periodo di pulsazione da una relazione empirica, e le <b>supernove di tipo Ia</b>, la cui magnitudine assoluta al picco di luminosità è notoriamente quasi costante — le due «candele standard» più usate in astrofisica per misurare distanze cosmologiche — non fanno altro che fornire una via <i>diversa</i> per conoscere $M$ senza una parallasse diretta, da inserire nello stesso modulo di distanza derivato in questo movimento. La legge di Stefan-Boltzmann, presa qui in prestito senza dimostrarla per chiudere il raggio di Sirio A, sarà il contenuto per intero del movimento che segue — e lì, per la prima volta in questo corso, il flusso smetterà di essere solo un numero da convertire e diventerà esso stesso una conseguenza della temperatura di un corpo che irraggia.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-03-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-03 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-03-che-cosa-si-misura-davvero.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
