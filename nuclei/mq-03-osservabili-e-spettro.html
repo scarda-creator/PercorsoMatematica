@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento mq-03 — Osservabili: autoaggiunti, spettro, autovettori: dove la richiesta fisica di numeri reali diventa una richiesta matematica esatta</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Meccanica Quantistica · Movimento <b>mq-03 — Osservabili: autoaggiunti, spettro, autovettori</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'meccanica-quantistica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["operatore-aggiunto"] = {"nome":"Operatore aggiunto e autoaggiunto","riga":"L'aggiunto e' definito da $\\langle\\phi|\\hat A\\psi\\rangle=\\langle\\hat A^{\\dagger}\\phi|\\psi\\rangle$ per ogni coppia di stati, e l'operatore e' autoaggiunto quando coincidono sia $\\hat A^{\\dagger}$ con $\\hat A$ sia i loro domini.","serve":"E' la condizione che rende un operatore un'osservabile: autovalori reali, e autovettori di autovalori distinti ortogonali. In dimensione finita «autoaggiunto» e «hermitiano» coincidono; in dimensione infinita no, e la differenza non e' pedanteria — l'operatore impulso su una semiretta e' hermitiano e non autoaggiunto, e infatti non e' un'osservabile.","esempio":"Se $\\hat A\\psi=a\\psi$ con $\\hat A$ autoaggiunto, allora $a\\langle\\psi|\\psi\\rangle=\\langle\\psi|\\hat A\\psi\\rangle=\\langle\\hat A\\psi|\\psi\\rangle=a^{*}\\langle\\psi|\\psi\\rangle$; siccome la norma non e' nulla segue $a=a^{*}$, cioe' l'autovalore e' reale. Tre righe, e sono la ragione per cui le osservabili si rappresentano cosi'.","debito":"la distinzione fra hermitiano e autoaggiunto in dimensione infinita — domini, estensioni, indici di difetto — e' il programma di von Neumann e sta fuori da questo percorso: qui si dichiara che esiste e si lavora nel caso buono. La regola di inversione dell'ordine nell'aggiunto di un prodotto si usa e non si dimostra.","controllo":[{"tipo":"uguale","sinistra":"conjugate(a)","vale":"a","ipotesi":{"a":"real"},"dove":"esempio","appare":"a=a^{*}"}],"qui":{},"pieno":null};
+STRUM["spazio-di-hilbert"] = {"nome":"Spazio di Hilbert","riga":"E' uno spazio vettoriale complesso con prodotto interno, completo nella norma che ne deriva e separabile, cosicche' ogni stato si scrive come somma numerabile $|\\psi\\rangle=\\sum_n c_n|n\\rangle$ con $c_n=\\langle n|\\psi\\rangle$.","serve":"E' la casa degli stati, e le tre parole della definizione fanno tre lavori diversi. Il prodotto interno da' le ampiezze, e quindi le probabilita'. La completezza garantisce che il limite di una successione di stati sia ancora uno stato: senza, uno sviluppo in serie potrebbe convergere fuori dallo spazio. La separabilita' permette di scrivere un vettore con una lista numerabile di coefficienti, cioe' di fare i conti.","esempio":"La relazione di completezza $\\sum_n|n\\rangle\\langle n|=\\hat 1$ e' lo strumento operativo piu' usato della teoria: infilata dentro un prodotto scalare lo spezza in una somma. La norma diventa $\\langle\\psi|\\psi\\rangle=\\sum_n|c_n|^{2}$, e se lo stato e' normalizzato quella somma vale uno: i moduli quadri dei coefficienti sono probabilita', e sommano a uno per costruzione.","debito":"la costruzione di $L^{2}$ come completamento, la misura di Lebesgue che serve a definirlo e il teorema di Riesz-Fischer stanno nei movimenti di Metodi; qui si usa il risultato.","controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"1","a":"oo","vale":"1","ipotesi":{"n":"positive-integer"},"dove":"esempio","appare":"sommano a uno"},{"tipo":"simbolico","dove":"esempio","appare":"\\sum_n|n\\rangle\\langle n|=\\hat 1","perche":"e' la relazione di completezza: i proiettori sugli elementi di una base ortonormale sommano all'identita'. E' la proprieta' che definisce una base completa, non un conto"}],"qui":{},"pieno":null};
+STRUM["spettro"] = {"nome":"Spettro di un operatore","riga":"Lo spettro di un operatore e' l'insieme dei possibili esiti di una misura: i suoi autovalori. Puo' essere discreto (autovalori separati, autovettori in $\\mathcal H$), continuo (autovalori che riempiono un intervallo, autovettori non normalizzabili), o misto.","serve":"E' la quantita' che la fisica chiede davvero: scrivere l'hamiltoniana e trovarne lo spettro E' il problema d'esame. La distinzione discreto/continuo non e' tecnica — decide se un autostato e' uno stato preparabile (discreto) o una distribuzione che vive fuori dallo spazio di Hilbert (continuo), come l'onda piana e la delta.","esempio":"Per $\\sigma_z$ di Pauli lo spettro e' $\\{+1,-1\\}$, discreto; la somma dei due autovalori, cioe' la traccia, e' $1+(-1)=0$. Per l'operatore posizione lo spettro e' tutta la retta reale, continuo.","debito":"la costruzione rigorosa dello spettro continuo (teorema spettrale generalizzato, misura spettrale $E(\\lambda)$ di von Neumann) sta fuori da questo percorso: qui si dichiara che esiste e si lavora coi casi concreti. La separazione fra spettro continuo e spettro residuo non si tratta.","controllo":[{"tipo":"uguale","sinistra":"1+(-1)","vale":"0","dove":"esempio","appare":"1+(-1)=0"}],"qui":{},"pieno":null};
+STRUM["proiettore-ortogonale"] = {"nome":"Proiettore ortogonale","riga":"Un proiettore ortogonale e' un operatore $\\hat P$ che soddisfa due condizioni insieme: $\\hat P^2=\\hat P$ (idempotenza) e $\\hat P^{\\dagger}=\\hat P$ (autoaggiuntezza). La prima dice che proiettare due volte equivale a proiettare una volta; la seconda rende la proiezione perpendicolare al sottospazio invece che obliqua.","serve":"E' il mattone di tutta la teoria della misura: $\\hat P=|\\psi\\rangle\\langle\\psi|$ su un ket normalizzato e' l'osservabile «lo stato e' $|\\psi\\rangle$?» con esiti $1$ e $0$, e il suo valor medio e' la probabilita'. L'identita' si scrive come somma di proiettori, $\\mathbb 1=\\sum_i\\hat P_i$, ed e' con questa che si cambia base e si decompone un'osservabile.","esempio":"Da $|\\psi\\rangle=(\\tfrac35,\\tfrac45)$ normalizzato si costruisce $\\hat P=|\\psi\\rangle\\langle\\psi|$ con entrate $\\tfrac{9}{25},\\tfrac{12}{25},\\tfrac{16}{25}$. L'elemento $(1,1)$ di $\\hat P^2$ vale $(\\tfrac{9}{25})^2+(\\tfrac{12}{25})^2=\\tfrac{9}{25}$, cioe' $\\hat P^2=\\hat P$; la traccia e' $\\tfrac{9}{25}+\\tfrac{16}{25}=1$, come per ogni proiettore di rango uno.","debito":"la decomposizione spettrale di un operatore autoaggiunto con spettro continuo in una famiglia di proiettori $E(\\lambda)$ (la misura spettrale) sta fuori da qui: si usa il caso discreto, dove i proiettori sono $|i\\rangle\\langle i|$.","controllo":[{"tipo":"simbolico","dove":"esempio","appare":"\\hat P^2=\\hat P","perche":"e' l'idempotenza, meta' della definizione di proiettore: un'identita' fra operatori, non un conto numerico. Il caso concreto che la sostiene e' l'entrata $(1,1)$ asserita qui sotto, dove i numeri ci sono"},{"tipo":"uguale","sinistra":"(Rational(9,25))**2+(Rational(12,25))**2","vale":"9/25","dove":"esempio","appare":"(\\tfrac{9}{25})^2+(\\tfrac{12}{25})^2=\\tfrac{9}{25}"},{"tipo":"uguale","sinistra":"Rational(9,25)+Rational(16,25)","vale":"1","dove":"esempio","appare":"\\tfrac{9}{25}+\\tfrac{16}{25}=1"}],"qui":{},"pieno":null};
+STRUM["delta-di-dirac"] = {"nome":"Delta di Dirac","riga":"Non è una funzione ma un funzionale, definito da $\\int f(x)\\,\\delta(x-a)\\,dx=f(a)$, che composto con una funzione si spezza sui suoi zeri come $\\delta(g(x))=\\sum_i \\delta(x-x_i)/|g'(x_i)|$.","serve":"Serve come macchina per cambiare variabile senza invertire nulla. La densità di $y=f(x)$ si scrive $p_Y(y)=\\int p_X(x)\\,\\delta(y-f(x))\\,dx$, e la delta produce da sola il fattore $1/|f'|$ che altrimenti andrebbe messo a mano: i rami molteplici si contano da soli invece di doverli ricordare. È la ragione pratica per cui il formalismo con la delta compare in ogni soluzione d'esame che tocchi una distribuzione, mentre il cambio di variabile esplicito compare quasi mai.","esempio":"$\\delta(x^2-a^2)$ con $a$ positivo. Gli zeri sono $x=\\pm a$; la derivata dell'argomento è $2x$, che in modulo vale $2a$ su entrambi. Quindi $\\delta(x^2-a^2)=\\dfrac{1}{2a}\\big[\\delta(x-a)+\\delta(x+a)\\big]$. Il caso si ripete identico in fisica statistica con $\\varepsilon=p^2/2m$ in una dimensione, dove i due rami $p=\\pm\\sqrt{2m\\varepsilon}$ contribuiscono entrambi — e dimenticarne uno dimezza la risposta.","pieno":{"file":"15-distribuzioni.html","tappa":"01","come":"le distribuzioni come funzionali, la delta e le sue proprietà, nel nucleo di Metodi"},"qui":{"meccanica-statistica":{"serve":"È lo strumento con cui si calcola la densità degli stati, cioè l'oggetto su cui poggia tutto il secondo tempo del corso: $g(\\varepsilon)=\\int d^dp\\,d^dq\\;\\delta(\\varepsilon-H)/h^d$. L'identità che si usa davvero non è la definizione ma questa: $\\delta(\\varepsilon-H)=\\partial_\\varepsilon\\,\\theta(\\varepsilon-H)$. Si scambia l'integrale con la derivata e ci si ritrova a calcolare il volume della regione dove l'hamiltoniana sta sotto $\\varepsilon$ — un integrale elementare — invece di un integrale con una delta dentro. La $g$ così ottenuta è pura geometria dello spazio delle fasi: non sa nulla della temperatura, e per questo resta identica quando si passa da Boltzmann a Fermi o a Bose.","esempio":"Particella libera in due dimensioni. Il volume della regione $p^2/2m$ sotto $\\varepsilon$ è il disco di area $2\\pi m\\varepsilon$; derivando rispetto a $\\varepsilon$ si ottiene $2\\pi m$, cioè una densità degli stati costante. Non è una curiosità: è la ragione per cui in due dimensioni una particella libera non condensa, e per cui le prove che chiedono la condensazione in $d=2$ mettono sempre un potenziale confinante, che porta la $g$ da costante a crescente."}},"controllo":[{"tipo":"derivata","espr":"x**2-a**2","rispetto":["x"],"vale":"2*x","ipotesi":{"x":"positive","a":"positive"},"dove":"esempio","appare":"2x"},{"tipo":"uguale","sinistra":"1/Abs(2*a)","vale":"1/(2*a)","ipotesi":{"a":"positive"},"dove":"esempio","appare":"\\dfrac{1}{2a}"},{"tipo":"derivata","espr":"2*pi*m*e","rispetto":["e"],"vale":"2*pi*m","ipotesi":{"m":"positive","e":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"2\\pi m"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo mq-03: Osservabili: autoaggiunti, spettro, autovettori: dove la richiesta fisica di numeri reali diventa una richiesta matematica esatta <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        mq-03 — osservabili: autoaggiunti, spettro, autovettori
+identita:  perche' proprio gli operatori autoaggiunti: l'unico posto in cui la richiesta
+           fisica (numeri reali quando si misura) si traduce in una richiesta matematica
+           esatta, e dove quella richiesta si spezza in due appena lo spazio diventa a
+           dimensione infinita
+copre:     Q.2 (condizioni su un operatore osservabile, hermitiano vs autoaggiunto, domini
+           ed estensioni autoaggiunte, spettro discreto e continuo, autovettore vero e
+           generalizzato, autovalori degeneri e autospazi, operatori unitari, proiettori
+           ortogonali, traccia e valor medio)
+serve:     mq-02 (l'aggiunto definito via Riesz, i proiettori, la delta come vettore dello
+           spazio esteso Omega-coniugato)
+apre:      lo calcola verifica-mappa.py invertendo i `serve` degli altri movimenti
+strumenti: operatore-aggiunto (richiamato da mq-02), spazio-di-hilbert, delta-di-dirac,
+           commutatore
+fonti:     Picasso, Lezioni di Meccanica Quantistica (ETS 2015) e la gemella inglese
+           Lectures in Quantum Mechanics (Springer 2016) — l'impianto di lavoro, in
+           italiano con l'inglese piu' pulito accanto. L'osservabile definita per via
+           fisica: autostati, autovalori, il postulato di von Neumann sulla proiezione
+           (pag. stampata 59-72); ad ogni osservabile corrisponde un operatore
+           autoaggiunto, con la dimostrazione che i suoi autovalori sono reali e gli
+           autovettori di autovalori distinti ortogonali (pag. 69); la distinzione fra
+           limitato e non limitato, il dominio denso, e il punto cruciale — in dimensione
+           infinita «hermitiano» e «autoaggiunto» non coincidono, servono i domini uguali
+           (Lectures pag. 73-74, par. 4.6); l'esempio dell'operatore f(x)->x f(x) su
+           L^2(a,b), autoaggiunto e senza autovettori, cioe' a spettro continuo (pag. 69);
+           la notazione di Dirac, i proiettori e la relazione di completezza come somma di
+           proiettori, l'operatore di valor medio (pag. 70-72); la dimostrazione rigorosa
+           che q e p non hanno autovettori in H e la costruzione dei vettori impropri come
+           limiti (pag. 101-120).
+           Ballentine, Quantum Mechanics: A Modern Development — i due paragrafi assegnati
+           per titolo. Par. 1.2-1.3: l'aggiunto ricavato via Riesz, la traccia e la sua
+           indipendenza dalla base, la definizione di autoaggiunto con la coincidenza dei
+           domini, i tre teoremi (A=A-croce dalla realta' dei valor medi, autovalori reali,
+           autovettori ortogonali), e il contro-esempio che regge l'intero movimento:
+           l'operatore D=-i d/dx su quattro spazi diversi, dove la stessa formula e'
+           autoaggiunta o no, con o senza autovettori, a seconda delle condizioni al bordo
+           (pag. stampata 11-23). Par. 2.2: la condizione perche' un operatore rappresenti
+           un'osservabile, dedotta dal fatto che un valor medio di una grandezza reale deve
+           essere reale (pag. 48-49).
+           von Neumann, Mathematical Foundations of Quantum Mechanics — la voce del rigore.
+           Vedi il blocco `voci-fondative`.
+           Shankar, Principles of Quantum Mechanics — il problema agli autovalori per via
+           matriciale: l'equazione caratteristica, i teoremi su hermitiani e unitari, la
+           degenerazione con l'esempio esplicito dell'autospazio bidimensionale, le
+           proprieta' della traccia e del determinante invarianti per cambio di base
+           unitario (pag. stampata 30-42).
+           Sakurai-Napolitano, Modern Quantum Mechanics — il confronto notazionale e lo
+           spettro continuo: osservabili unitariamente equivalenti hanno lo stesso spettro,
+           il passaggio dal delta di Kronecker alla delta di Dirac nella completezza, gli
+           insiemi completi di osservabili compatibili (pag. stampata 40, 61-63, 193, 222).
+           Usato come sostituto del Sakurai italiano, che non si apre (vedi LIMITE).
+           Griffiths, Introduction to Quantum Mechanics — gli esempi concreti: l'operatore
+           i d/dphi sul cerchio con spettro gli interi, gli autostati di impulso e di
+           posizione non normalizzabili con l'ortonormalita' alla Dirac, il sistema a due
+           stati risolto per intero, il proiettore P=|a><a| idempotente (pag. stampata
+           102-125).
+voci-fondative:
+           VON NEUMANN, pagine stampate 10-13 e 67-123, lette nel dossier delle voci.
+           Il programma: fondare la meccanica quantistica sugli operatori autoaggiunti e
+           sulla loro risoluzione spettrale, non sull'euristica. Il problema agli autovalori
+           nella forma di Hilbert fallisce quando lo spettro non e' puramente discreto (pag.
+           68), e questo fallimento E' la definizione di spettro continuo; la distinzione
+           fra operatore hermitiano, hermitiano massimale e autoaggiunto, con l'esempio
+           dell'operatore h/i d/dq che su un intervallo finito non e' hermitiano se non si
+           fissano le condizioni al bordo, e su una semiretta e' hermitiano massimale ma
+           non ammette risoluzione dell'identita' (pag. 84, 98-99); la trasformata di
+           Cayley U=(A-i)/(A+i) che manda gli autoaggiunti negli unitari (pag. 99); la
+           traccia Tr(AB)=Tr(BA) costruita rigorosamente via Sigma (pag. 119-121).
+           DIRAC, pagine stampate 40-56, lette nel dossier delle voci, in italiano con OCR
+           sporco (`poich6`, `cio`, `pifi`): si cita solo cio' che si legge senza ambiguita'.
+           La strada opposta a von Neumann, e la divergenza E' il contenuto: Dirac parte
+           dall'equazione agli autovalori di una variabile dinamica (pag. 40), ricava tre
+           risultati — autovalori reali, autobra e autoket con gli stessi autovalori,
+           l'immaginario coniugato di un autoket e' un autobra (pag. 42) — e definisce
+           un'OSSERVABILE come una variabile dinamica reale i cui autostati formano un
+           insieme completo (pag. 49-50). Dove von Neumann dimostra, Dirac postula; dove von
+           Neumann costruisce lo spazio, Dirac dichiara che il suo «e' uno spazio piu'
+           generale di quello di Hilbert» (pag. 54). Il fuoco: la membrana e la completezza
+           come condizione di misurabilita', non come teorema.
+registro:  Terzo movimento del corso, e il piu' delicato: qui si paga il conto dell'intero
+           corso. Misurato su 28 prove su 47 con densita' 1,4. La ragione di scriverlo a
+           fondo non e' la densita' ma il fatto che la distinzione hermitiano/autoaggiunto,
+           invisibile in dimensione finita, decide quali operatori sono osservabili, e Q.6
+           ci torna sopra con lo spettro continuo.
+           LIMITE DICHIARATO: le pagine di Sakurai italiano (stampate 10-22, 23-35) sono
+           nelle coordinate della mappa ma NON si aprono — e' una scansione da zero
+           caratteri estraibili. Non e' stata aperta e niente di quanto scritto le
+           attribuisce qualcosa: dove serviva quel terreno ho usato Sakurai-Napolitano
+           (inglese, stesso impianto, estraibile) e lo dichiaro nel punto.
+generata:  2026-10-12 dal ciclo notturno (voce D3), su fonti aperte e lette nei DUE dossier
+           del movimento — `mq-03-dossier-fonti.txt` per la sostanza e
+           `mq-03-dossier-voci.txt` per le voci fondative. Mescolanza: Picasso (impianto
+           fisico, operatore associato all'osservabile, vettori impropri) + Ballentine
+           (aggiunto via Riesz, autoaggiunto coi domini, il contro-esempio D=-i d/dx,
+           traccia) + von Neumann (rigore spettrale, Cayley, hermitiano massimale) + Dirac
+           (osservabile via completezza, la divergenza) + Shankar (equazione caratteristica,
+           teoremi, degenerazione) + Sakurai-Napolitano e Griffiths (confronto e esempi).
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"uguale","sinistra":"3+1","vale":"4","dove":"01","appare":"3+1=4"},
+ {"tipo":"uguale","sinistra":"3*1-I*(-I)","vale":"2","dove":"01","appare":"3\\cdot1-i\\cdot(-i)=3-1=2"},
+ {"tipo":"uguale","sinistra":"3-1","vale":"2","dove":"01","appare":"3-1=2"},
+ {"tipo":"uguale","sinistra":"(4+sqrt(8))/2","vale":"2+sqrt(2)","dove":"01","appare":"\\frac{4+\\sqrt{8}}{2}=2+\\sqrt2"},
+ {"tipo":"uguale","sinistra":"(4-sqrt(8))/2","vale":"2-sqrt(2)","dove":"01","appare":"\\frac{4-\\sqrt{8}}{2}=2-\\sqrt2"},
+ {"tipo":"uguale","sinistra":"conjugate(a)","vale":"a","ipotesi":{"a":"real"},"dove":"01","appare":"a=a^{*}"},
+ {"tipo":"simbolico","dove":"01","appare":"\\hat A|\\phi\\rangle=a|\\phi\\rangle",
+  "perche":"e' l'equazione agli autovalori, [9.1] di Dirac (pag. stampata 40): la DEFINIZIONE di autoket e autovalore, non una conseguenza. I suoi membri sono un vettore e il suo multiplo, non numeri da ricalcolare"},
+ {"tipo":"simbolico","dove":"01","appare":"\\langle u|\\rho|u\\rangle=\\operatorname{Tr}(\\rho\\hat P_u)",
+  "perche":"e' l'uguaglianza fra valor medio e traccia con cui Ballentine (par. 2.2, pag. stampata 48) deduce rho=rho-croce: la traccia di un prodotto scritta per un proiettore, un'identita' fra forme su operatori arbitrari e non un conto numerico"},
+
+ {"tipo":"uguale","sinistra":"2+2","vale":"4","dove":"02","appare":"2+2=4"},
+ {"tipo":"uguale","sinistra":"2*2-1*1","vale":"3","dove":"02","appare":"2\\cdot2-1\\cdot1=3"},
+ {"tipo":"uguale","sinistra":"(4+2)/2","vale":"3","dove":"02","appare":"\\frac{4+2}{2}=3"},
+ {"tipo":"uguale","sinistra":"(4-2)/2","vale":"1","dove":"02","appare":"\\frac{4-2}{2}=1"},
+ {"tipo":"uguale","sinistra":"3+1","vale":"4","dove":"02","appare":"3+1=4"},
+ {"tipo":"uguale","sinistra":"3*1","vale":"3","dove":"02","appare":"3\\cdot1=3"},
+ {"tipo":"uguale","sinistra":"1*1+1*(-1)","vale":"0","dove":"02","appare":"1\\cdot1+1\\cdot(-1)=0"},
+ {"tipo":"simbolico","dove":"02","appare":"(a_1-a_2)\\langle\\phi_2|\\phi_1\\rangle=0",
+  "perche":"e' il nocciolo della dimostrazione di ortogonalita' (Ballentine teorema 3, pag. stampata 17; Dirac pag. 43): vale per OGNI coppia di autovettori di autovalori distinti, senza numeri assegnati. Da qui segue che il prodotto scalare si annulla quando gli autovalori differiscono"},
+
+ {"tipo":"simbolico","dove":"01","appare":"a\\langle\\phi|\\phi\\rangle=\\langle\\phi|\\hat A|\\phi\\rangle=\\langle\\phi|\\hat A|\\phi\\rangle^{*}=a^{*}\\langle\\phi|\\phi\\rangle",
+  "perche":"e' la catena della dimostrazione in tre righe: l'uguaglianza centrale e' la definizione di autoaggiunto applicata allo stesso vettore (non un conto), e l'ultimo membro e' cio' da cui si divide per concludere a=a*. E' un'identita' dimostrata nel corpo del testo, non un numero da ricalcolare"},
+ {"tipo":"uguale","sinistra":"(3-x)*(1-x)-(I)*(-I)","vale":"x**2-4*x+2","dove":"01","appare":"\\lambda^2-4\\lambda+2=0"},
+
+ {"tipo":"uguale","sinistra":"3+3","vale":"6","dove":"05","appare":"3+3=6"},
+ {"tipo":"uguale","sinistra":"3*3-1*1","vale":"8","dove":"05","appare":"3\\cdot3-1\\cdot1=8"},
+ {"tipo":"uguale","sinistra":"(6+sqrt(36-32))/2","vale":"4","dove":"05","appare":"\\frac{6\\pm\\sqrt{36-32}}{2}=\\frac{6\\pm2}{2}=4,2"},
+ {"tipo":"uguale","sinistra":"(6-sqrt(36-32))/2","vale":"2","dove":"05","appare":"\\frac{6\\pm\\sqrt{36-32}}{2}=\\frac{6\\pm2}{2}=4,2"},
+ {"tipo":"uguale","sinistra":"(2-x)*((3-x)**2-1)","vale":"(2-x)**2*(4-x)","dove":"05",
+  "appare":"(2-\\lambda)\\big[(3-\\lambda)^2-1\\big]=(2-\\lambda)^2(4-\\lambda)"},
+ {"tipo":"uguale","sinistra":"cos(theta)**2+sin(theta)**2","vale":"1","dove":"05","appare":"\\langle f_1|f_1\\rangle=\\cos^2\\theta+\\sin^2\\theta=1"},
+ {"tipo":"uguale","sinistra":"0**2+(1/sqrt(2))**2","vale":"1/2","dove":"05","appare":"0^2+\\big(\\tfrac1{\\sqrt2}\\big)^2=\\tfrac12"},
+ {"tipo":"uguale","sinistra":"sin(theta)**2/2+cos(theta)**2/2","vale":"1/2","dove":"05",
+  "appare":"\\tfrac{\\sin^2\\theta}{2}+\\tfrac{\\cos^2\\theta}{2}=\\tfrac12"},
+ {"tipo":"uguale","sinistra":"-x**3+8*x**2-20*x+16","vale":"(2-x)**2*(4-x)","dove":"05",
+  "appare":"p(\\lambda)=-\\lambda^3+8\\lambda^2-20\\lambda+16"},
+ {"tipo":"uguale","sinistra":"-3*2**2+16*2-20","vale":"0","dove":"05","appare":"p'(2)=0"},
+ {"tipo":"uguale","sinistra":"-3*4**2+16*4-20","vale":"-4","dove":"05","appare":"p'(4)=-4"},
+
+ {"tipo":"simbolico","dove":"06","appare":"u_i^{*}u_i=1",
+  "perche":"e' lo stesso argomento di tappa 01 (a=a*) applicato all'ipotesi unitaria invece che autoaggiunta: si deduce dalla definizione di unitario applicata allo stesso autovettore, non e' un numero da ricalcolare"},
+ {"tipo":"uguale","sinistra":"(8-6*I)/10","vale":"4/5-3*I/5","dove":"06","appare":"\\frac{8-6i}{10}=\\frac45-\\frac35\\,i"},
+ {"tipo":"uguale","sinistra":"(4/5)**2+(3/5)**2","vale":"1","dove":"06","appare":"\\tfrac{16}{25}+\\tfrac9{25}=1"},
+ {"tipo":"uguale","sinistra":"((x-I)*(x+I))/((x+I)*(x-I))","vale":"1","dove":"06","appare":"\\dfrac{(\\lambda-i)(\\lambda+i)}{(\\lambda+i)(\\lambda-i)}=1"},
+ {"tipo":"uguale","sinistra":"I*(1+(x-I)/(x+I))/(1-(x-I)/(x+I))","vale":"x","dove":"06","appare":"A=i\\,\\frac{\\mathbb 1+U}{\\mathbb 1-U}"},
+ {"tipo":"uguale","sinistra":"8/10","vale":"4/5","dove":"06","appare":"(9-1)/(9+1)=8/10=4/5"},
+ {"tipo":"simbolico","dove":"06","appare":"\\hat U^{\\dagger}\\hat U=\\hat U\\hat U^{\\dagger}=\\mathbb 1",
+  "perche":"e' la DEFINIZIONE di operatore unitario (la condizione che sostituisce A=A-dagger), non un conto da verificare"},
+
+ {"tipo":"simbolico","dove":"07","appare":"\\hat P_v^2|u\\rangle=|v\\rangle\\langle v|v\\rangle\\langle v|u\\rangle=|v\\rangle\\cdot1\\cdot\\langle v|u\\rangle=\\hat P_v|u\\rangle",
+  "perche":"e' la dimostrazione dell'idempotenza per un vettore normalizzato: usa chi v|v)=1 per definizione, non e' un conto numerico da ricalcolare"},
+ {"tipo":"simbolico","dove":"07","appare":"\\hat P_V^2=\\sum_{i,j}|v_i\\rangle\\langle v_i|v_j\\rangle\\langle v_j|=\\sum_i|v_i\\rangle\\langle v_i|=\\hat P_V",
+  "perche":"generalizza la stessa idempotenza a un sottospazio con base ortonormale, usando delta_ij per cancellare i termini incrociati: e' un'identita' strutturale, non un numero"},
+ {"tipo":"uguale","sinistra":"(1/2)*(1/2)+(-1/2)*(-1/2)","vale":"1/2","dove":"07","appare":"\\cdot\\big(\\!-\\!\\tfrac12\\big)=\\tfrac12"},
+ {"tipo":"uguale","sinistra":"(1/2)*(1/2)+(-1/2)*(1/2)","vale":"0","dove":"07","appare":"\\cdot\\tfrac12=0"},
+ {"tipo":"uguale","sinistra":"1/2+1/2","vale":"1","dove":"07","appare":"\\tfrac12+\\tfrac12=1"},
+ {"tipo":"uguale","sinistra":"2*(1/2)+4*(1/2)","vale":"3","dove":"07","appare":"4\\cdot\\tfrac12=1+2=3"},
+ {"tipo":"uguale","sinistra":"2*(-1/2)+4*(1/2)","vale":"1","dove":"07","appare":"4\\cdot\\tfrac12=-1+2=1"},
+ {"tipo":"uguale","sinistra":"1+1/2+1/2","vale":"2","dove":"07","appare":"\\operatorname{Tr}P(2)=2"},
+ {"tipo":"uguale","sinistra":"1/2+1/2","vale":"1","dove":"07","appare":"\\operatorname{Tr}P(4)=1"},
+ {"tipo":"uguale","sinistra":"2/3+1/3","vale":"1","dove":"07","appare":"2/3+1/3=1"},
+ {"tipo":"uguale","sinistra":"2*2+4*1","vale":"8","dove":"07","appare":"2\\cdot2+4\\cdot1=8"},
+ {"tipo":"simbolico","dove":"07","appare":"P(2)=|\\phi_1\\rangle\\langle\\phi_1|+|\\phi_2\\rangle\\langle\\phi_2|=\\begin{pmatrix}1&0&0",
+  "perche":"e' la scrittura per esteso della matrice P(2) come definizione dai due autovettori: le sue entrate sono verificate una per una nel paragrafo successivo (idempotenza, ortogonalita', completezza), qui e' solo la notazione"},
+ {"tipo":"simbolico","dove":"07","appare":"0&\\tfrac12&\\tfrac12\\end{pmatrix}",
+  "perche":"chiusura della matrice P(4) nella stessa definizione per esteso: le sue entrate sono verificate individualmente piu' sotto"},
+ {"tipo":"simbolico","dove":"07","appare":"P(2)+P(4)=\\mathbb 1",
+  "perche":"e' la relazione di completezza applicata a questo caso specifico: la sua verita' numerica e' gia' controllata entrata per entrata (la (2,2) vale 1/2+1/2=1) qui sopra, questa e' solo la scrittura simbolica della stessa conclusione"},
+
+ {"tipo":"uguale","sinistra":"(2+sin(2*phi))+(2-sin(2*phi))","vale":"4","dove":"08","appare":"(2+\\sin2\\varphi)+(2-\\sin2\\varphi)=4"},
+ {"tipo":"uguale","sinistra":"4-sin(2*phi)**2-cos(2*phi)**2","vale":"3","dove":"08","appare":"4-\\sin^22\\varphi-\\cos^22\\varphi=3"},
+ {"tipo":"simbolico","dove":"08","appare":"\\operatorname{Tr}\\hat B=\\operatorname{Tr}(U^{\\dagger}\\hat AU)=\\operatorname{Tr}(\\hat AUU^{\\dagger})=\\operatorname{Tr}\\hat A",
+  "perche":"e' l'argomento generale di ciclicita' della traccia (Tr(XY)=Tr(YX) applicato a X=AU, Y=U-dagger), non un conto numerico: la verifica numerica e' gia' fatta sopra sulla matrice esplicita"},
+ {"tipo":"uguale","sinistra":"2+1","vale":"3","dove":"08","appare":"2+1=3"},
+ {"tipo":"simbolico","dove":"08","appare":"\\hat B=U^{T}\\hat AU=\\begin{pmatrix}2+\\sin2\\varphi&\\cos2\\varphi",
+  "perche":"e' la scrittura per esteso della matrice ruotata come definizione: le sue entrate e la loro traccia/determinante sono verificate numericamente qui sotto"},
+ {"tipo":"simbolico","dove":"08","appare":"UU^{\\dagger}=\\mathbb 1",
+  "perche":"e' la condizione di unitarieta' di U (tappa 06) usata come ipotesi nel passaggio, non un conto da verificare qui"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Meccanica Quantistica · voce Q.2 · perche gli operatori autoaggiunti, e perche la richiesta si spezza in due in dimensione infinita',
+  blocchi:[
+  {t:'prosa', title:'Una richiesta fisica che diventa una richiesta matematica', tag:'architettura', html:R`
+  <p>Il movimento precedente ha costruito <b>la casa</b> — lo spazio di Hilbert — e <b>la grammatica</b> — bra e ket. Questo movimento mette in quella casa i suoi abitanti principali: gli <b>operatori che rappresentano le osservabili</b>, cioè le grandezze che un esperimento misura. La domanda da cui tutto parte è una sola, ed è fisica prima che matematica: <i>quale proprietà deve avere un operatore perché i suoi possibili esiti di misura siano numeri reali?</i></p>
+  <p>La risposta è «autoaggiunto», e sembra un dettaglio tecnico. Non lo è. È l&rsquo;unico punto di tutto il corso in cui una richiesta della fisica — quando misuri, leggi sullo strumento un numero reale — si traduce in una richiesta matematica <i>esatta</i> su un operatore. Tutto il resto del formalismo è convenzione comoda; questa è necessità. E c&rsquo;è di più: la richiesta sembra identica a «hermitiano», e in dimensione finita lo è; ma appena lo spazio diventa a dimensione infinita — cioè sempre, per una particella sulla retta — le due cose <b>si separano</b>, e la differenza decide quali grandezze sono osservabili e quali no. L&rsquo;impulso di una particella libera lo è; l&rsquo;impulso della stessa particella confinata su una semiretta non lo è, pur essendo l&rsquo;operatore «lo stesso». Questo è il conto che si paga qui, una volta e per bene, perché il movimento sullo spettro continuo ci tornerà sopra.</p>`},
+  {t:'prosa', title:'Due strade per lo stesso oggetto, e la divergenza è il contenuto', tag:'architettura', html:R`
+  <p>Come in mq-02, le due grandi fonti fondative <b>non concordano</b>, e di nuovo la loro divergenza non è rumore storico: è esattamente ciò che il programma chiede di capire.</p>
+  <p><b>Dirac</b> (1930) procede da fisico. Parte dall&rsquo;equazione agli autovalori di una variabile dinamica, ne ricava tre proprietà, e poi <i>definisce</i> un&rsquo;osservabile come «una variabile dinamica reale i cui autostati formano un insieme completo». Completezza come <b>condizione di misurabilità</b>, non come teorema: se gli autostati non bastano a sviluppare ogni stato, la grandezza semplicemente non è misurabile. E quando gli autovalori riempiono un intervallo, Dirac abbandona senza esitare la finitezza delle norme e dichiara che il suo spazio «è uno spazio più generale di quello di Hilbert».</p>
+  <p><b>von Neumann</b> (1932) procede da matematico, e fa l&rsquo;operazione opposta. Per lui l&rsquo;operatore autoaggiunto è il <i>fondamento</i>, non una proprietà da verificare: la meccanica quantistica si fonda sulla risoluzione spettrale degli operatori autoaggiunti. Il problema agli autovalori nella forma ingenua — trovare abbastanza autovettori da formare una base — <i>fallisce</i> in casi perfettamente regolari, e quel fallimento non è una patologia: è la <b>definizione</b> di spettro continuo. Dove Dirac postula la completezza, von Neumann costruisce la famiglia di proiettori che la sostituisce.</p>
+  <p>Chi ha ragione? Come in mq-02: Dirac sul fatto e sull&rsquo;audacia, von Neumann sul rigore. La sintesi è il teorema spettrale, e il programma di questo corso — «spettro discreto e continuo, autovettori generalizzati, operatore posizione» — <i>è</i> questa divergenza messa in forma di esame. Non si capisce se non si sa che c&rsquo;è.</p>`},
+  {t:'prosa', title:'Come è fatto il movimento', tag:'architettura', html:R`
+  <p><b>La rotta.</b> La tappa 01 ricava dalla fisica la condizione sull&rsquo;operatore (valor medio reale ⟹ autoaggiunto) e dimostra che gli autovalori sono reali, seguendo l&rsquo;argomento di Ballentine e quello di Dirac affiancati. La 02 aggiunge l&rsquo;ortogonalità degli autovettori di autovalori distinti e la porta in forma matriciale con l&rsquo;equazione caratteristica di Shankar, su un esempio svolto. La 03 è il cuore: hermitiano contro autoaggiunto, i domini, le estensioni autoaggiunte, e il contro-esempio di Ballentine e von Neumann — l&rsquo;operatore derivata su intervalli diversi — che mostra la stessa formula essere osservabile o no a seconda delle condizioni al bordo. La 04 apre lo spettro: discreto, continuo, misto, e la differenza fra autovettore vero e autovettore generalizzato (la delta), con gli esempi di Griffiths. La 05 tratta la degenerazione e la non unicità della base nell&rsquo;autospazio. La 06 introduce gli operatori unitari e mostra che il cambio di base di mq-02 ne era un caso particolare. La 07 costruisce i proiettori ortogonali come le due metà di una definizione, e la risoluzione spettrale. La 08 porta la traccia, la sua invarianza, e il valor medio. L&rsquo;ultima raccoglie il senso.</p>
+  <p><b>Che cosa questo movimento non fa.</b> Non enuncia il postulato della misura nella sua forma completa, non risolve l&rsquo;equazione di Schrödinger, non tratta la teoria rigorosa delle estensioni autoaggiunte (indici di difetto) — che si dichiara e si costeggia. Costruisce lo strumentario con cui le osservabili si manipolano, e la lucidità su quando una manipolazione è lecita.</p>`}
+]},
+
+/* ---------------- 01 · LA CONDIZIONE FISICA, E GLI AUTOVALORI REALI ---------------- */
+{ num:'01', title:'La condizione fisica, e gli autovalori reali', meta:'il valor medio reale forza l&rsquo;autoaggiuntezza · l&rsquo;osservabile di Dirac · perche gli autovalori di un operatore autoaggiunto sono reali',
+  blocchi:[
+  {t:'prosa', title:'Dal risultato di una misura alla proprietà dell’operatore', tag:'costruzione', html:R`
+  <p>Il punto di partenza è lo stesso di mq-02: una misura dà come esito un numero, e quel numero — la lettura sullo strumento — è <b>reale</b>. La domanda è che cosa questo imponga all&rsquo;operatore $\hat A$ che rappresenta la grandezza. Ballentine dà l&rsquo;argomento nella forma più nuda, nel paragrafo 2.2 «Conditions on Operators», e vale seguirlo perché è il modo in cui una richiesta fisica diventa un&rsquo;equazione.</p>
+  <p>Si consideri una grandezza che può valere solo $0$ o $1$ — l&rsquo;osservabile «lo stato è $|u\rangle$?», rappresentata dal proiettore <span class="str" data-str="operatore-aggiunto">$\hat P_u=|u\rangle\langle u|$</span>. Il suo valor medio in uno stato descritto dall&rsquo;operatore $\rho$ è $\langle u|\rho|u\rangle=\operatorname{Tr}(\rho\hat P_u)$. Ora, <i>la media di una grandezza che assume solo valori reali deve essere reale</i>; e se lo imponiamo per ogni vettore $|u\rangle$, un teorema che vedremo fra poco (Ballentine, Teorema 1) costringe l&rsquo;operatore a essere uguale al proprio aggiunto. La stessa catena, applicata a una generica osservabile $\hat R$ con $\rho=|\Psi\rangle\langle\Psi|$, dà $\langle\Psi|\hat R|\Psi\rangle$ reale per ogni $|\Psi\rangle$, dunque $\hat R=\hat R^{\dagger}$.</p>
+  <p>Ballentine è onesto sul fatto che questo argomento «ha meno sostanza di quanta sembri avere» — usare numeri reali per i valori è in fondo una convenzione, e si potrebbe immaginare una fisica che li codifica altrimenti. Ma la proprietà degli operatori autoaggiunti che serve davvero non è questa: è che <b>hanno autovalori reali e un insieme di autovettori con cui si costruisce lo spettro</b>. È lì che si va.</p>`},
+  {t:'reveal', title:'L’osservabile secondo Dirac: completezza come condizione di misura', tag:'costruzione', steps:[
+   {label:'L’equazione agli autovalori, e le tre proprietà', body:R`
+   <p>Dirac parte dall&rsquo;altra estremità. Nel capitolo sulle variabili dinamiche introduce l&rsquo;equazione</p>
+   $$\hat A|\phi\rangle=a|\phi\rangle$$
+   <p>e la legge così: «l&rsquo;operatore lineare $\hat A$ applicato al ket $|\phi\rangle$ lo moltiplica semplicemente per un fattore numerico senza cambiarne la direzione». Chiama $a$ un <b>autovalore</b> e $|\phi\rangle$ un <b>autoket</b>. Osserva subito che solo la direzione di $|\phi\rangle$ conta — moltiplicarlo per un numero non nullo non cambia nulla — il che è coerente con lo stato-raggio di mq-02.</p>
+   <p>Limitandosi agli operatori <i>reali</i> (il suo nome per gli autoaggiunti), Dirac ricava «tre risultati di grande importanza». Primo: <b>gli autovalori sono tutti reali</b>. Secondo: gli autovalori associati agli autoket coincidono con quelli associati agli autobra. Terzo: l&rsquo;immaginario coniugato di un autoket è un autobra appartenente allo stesso autovalore. È quest&rsquo;ultimo che gli fa dire che ha senso parlare di <i>autostato</i> della variabile dinamica, senza distinguere ket e bra.</p>`},
+   {label:'Che cos’è un’osservabile, e il fuoco di Dirac', body:R`
+   <p>E qui arriva la definizione, che è il contributo concettuale di Dirac e il punto in cui diverge da von Neumann. Non tutte le variabili dinamiche reali sono misurabili: «quelle i cui autostati non formano un insieme completo non sono quantità misurabili». Da cui, parole sue:</p>
+   <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>«Chiameremo osservabile ogni variabile dinamica reale i cui autostati formino un insieme completo. Ogni quantità misurabile risulta così un&rsquo;osservabile.»</i> — Dirac, pag. stampata 49-50</p>
+   <p>La <b>completezza degli autostati è la condizione di misurabilità</b>, non un teorema da dimostrare: è il criterio che separa gli operatori che rappresentano qualcosa di fisico da quelli che non lo fanno. Picasso, cinquant&rsquo;anni dopo, dice la stessa cosa al rovescio: parte dalla fisica (autostati, autovalori come esiti) e <i>deduce</i> che l&rsquo;operatore associato è autoaggiunto. Dove Dirac impone la completezza a mano, Picasso la ricava dal postulato di von Neumann sulla misura. Due porte per la stessa stanza.</p>`}
+  ]},
+  {t:'reveal', title:'Perché gli autovalori sono reali: due dimostrazioni, la stessa idea', tag:'costruzione', steps:[
+   {label:'La dimostrazione in tre righe', body:R`
+   <p>Sia $\hat A$ autoaggiunto e $\hat A|\phi\rangle=a|\phi\rangle$. Moltiplicando a sinistra per $\langle\phi|$ e usando $\langle\phi|\hat A|\phi\rangle=\langle\phi|\hat A|\phi\rangle^{*}$ (è la definizione di autoaggiunto applicata allo stesso vettore), si ha</p>
+   $$a\langle\phi|\phi\rangle=\langle\phi|\hat A|\phi\rangle=\langle\phi|\hat A|\phi\rangle^{*}=a^{*}\langle\phi|\phi\rangle.$$
+   <p>Poiché $\langle\phi|\phi\rangle$ non è nullo (un autoket non è il vettore nullo), segue $a=a^{*}$, cioè $a$ reale. È la stessa catena in Dirac, in Ballentine (Teorema 2), in Picasso, in Shankar e in Griffiths: la si incontra in ogni libro perché è la giustificazione, in tre righe, del perché la fisica usa proprio questi operatori.</p>`},
+   {label:'Perché serve l’aggiunto, e non basta l’intuizione', body:R`
+   <p>Vale notare dove entra l&rsquo;ipotesi. Non si usa che $\hat A$ sia «simmetrico in qualche senso vago»: si usa l&rsquo;uguaglianza esatta $\langle\phi|\hat A|\psi\rangle=\langle\psi|\hat A|\phi\rangle^{*}$ <b>per ogni coppia</b> di vettori, che in dimensione finita è la definizione di matrice hermitiana $M_{ij}=M_{ji}^{*}$. Ballentine la rende ancora più tagliente con il suo Teorema 1: <i>basta</i> che $\langle\psi|\hat A|\psi\rangle$ sia reale per ogni singolo $|\psi\rangle$ — il caso diagonale — per dedurre l&rsquo;uguaglianza completa e quindi $\hat A=\hat A^{\dagger}$. La dimostrazione sceglie $|\psi\rangle=|\phi_1\rangle+|\phi_2\rangle$ e poi $|\psi\rangle=|\phi_1\rangle+i|\phi_2\rangle$, e la seconda scelta — l&rsquo;unità immaginaria — è essenziale: «nessun analogo di questo teorema può esistere per spazi vettoriali reali». È la prima avvisaglia che la struttura complessa dello spazio di Hilbert non è un lusso.</p>`}
+  ]},
+  {t:'plot', title:'Un operatore hermitiano con entrate complesse ha comunque autovalori reali',
+   intro:R`Si prenda la matrice hermitiana $\hat A=\begin{pmatrix}3&i\\-i&1\end{pmatrix}$: è uguale alla trasposta coniugata, $\hat A=\hat A^{\dagger}$. La traccia è $3+1=4$ e il determinante $3\cdot1-i\cdot(-i)=3-1=2$, entrambi reali nonostante le entrate complesse. Gli autovalori risolvono $\lambda^2-4\lambda+2=0$, cioè $\frac{4+\sqrt{8}}{2}=2+\sqrt2$ e $\frac{4-\sqrt{8}}{2}=2-\sqrt2$: due numeri reali. La parabola qui sotto è il polinomio caratteristico, e le sue radici sono gli autovalori.`,
+   plots:[
+    {kind:'func2d', xr:[-0.5,4.5], yr:[-1.2,3], height:320, ticks:6,
+     title:'il polinomio caratteristico e le sue due radici reali',
+     curves:[
+      {f:'x*x-4*x+2', col:'#4c8dff', width:2.6, label:'p(λ)=λ²−4λ+2'},
+      {f:'0', col:'#8a93a6', width:1.2, label:'asse λ'}
+     ],
+     xlabel:'λ', ylabel:'p(λ)'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> La parabola taglia l&rsquo;asse in due punti, $2-\sqrt2\approx0{,}59$ e $2+\sqrt2\approx3{,}41$: sono gli autovalori, entrambi reali. Che un&rsquo;entrata della matrice sia $i$ non li sposta nel piano complesso — è l&rsquo;hermitianità ($\hat A=\hat A^{\dagger}$) a inchiodarli sull&rsquo;asse reale. <b>Che cosa impararne.</b> Una matrice generica $2\times2$ con entrate complesse ha autovalori complessi; l&rsquo;hermitianità è precisamente la condizione che li costringe reali, e la figura mostra <i>perché</i> «autovalore reale» significa «radice reale del caratteristico». Il vertice della parabola sta a $\lambda=2$, che è la semisomma delle radici, cioè metà della traccia: traccia e determinante sono reali prima ancora di risolvere, ed è un controllo rapido che una matrice potrebbe essere hermitiana.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un collega sostiene che ogni matrice con autovalori reali è hermitiana. Vero?`,
+    a:R`Falso, e il contro-esempio è istruttivo. La matrice $\begin{pmatrix}2&1\\0&2\end{pmatrix}$ ha autovalore $2$ (doppio), reale, ma non è hermitiana ($M_{12}=1\neq0=\overline{M_{21}}$) — e infatti è <b>difettosa</b>: ha un solo autovettore indipendente, non due, quindi i suoi autovettori non formano una base. L&rsquo;implicazione corretta ha un verso solo: hermitiano ⟹ autovalori reali <i>e</i> autovettori che formano una base ortonormale. Il verso opposto fallisce perché «autovalori reali» non dice nulla sugli autovettori. È per questo che la condizione fisica non è «autovalori reali» ma «autoaggiunto»: serve anche la completezza degli autostati, cioè la seconda metà, quella che Dirac mette nella definizione stessa di osservabile.`},
+   {q:R`Nel teorema di Ballentine la premessa ($\langle\psi|\hat A|\psi\rangle$ reale per ogni $\psi$) sembra più debole della conclusione ($\hat A=\hat A^{\dagger}$). Come può il caso diagonale implicare quello generale?`,
+    a:R`Perché lo spazio è <b>complesso</b>, e questo dà due equazioni invece di una. Imponendo la realtà di $\langle\psi|\hat A|\psi\rangle$ su $|\psi\rangle=|\phi_1\rangle+|\phi_2\rangle$ si ottiene una relazione fra i termini misti $\langle\phi_1|\hat A|\phi_2\rangle$ e $\langle\phi_2|\hat A|\phi_1\rangle$; imponendola su $|\psi\rangle=|\phi_1\rangle+i|\phi_2\rangle$ se ne ottiene una seconda, <i>indipendente</i> perché l&rsquo;$i$ ruota i termini misti. Due equazioni fissano entrambi i termini e danno $\langle\phi_1|\hat A|\phi_2\rangle=\langle\phi_2|\hat A|\phi_1\rangle^{*}$ per ogni coppia. Su uno spazio reale avremmo solo la prima equazione, e la conclusione cadrebbe: lì esistono operatori con tutti i valor medi diagonali reali che non sono simmetrici. È la ragione profonda per cui la meccanica quantistica vive su un campo complesso — non per comodità di calcolo, ma perché solo lì «valor medio reale» e «autoaggiunto» sono la stessa condizione.`}
+  ]}
+]},
+
+/* ---------------- 02 · AUTOVETTORI ORTOGONALI, E L'EQUAZIONE CARATTERISTICA ---------------- */
+{ num:'02', title:'Autovettori ortogonali, e l’equazione caratteristica', meta:'autovalori distinti danno autovettori ortogonali · il problema agli autovalori per via matriciale · un esempio svolto fino in fondo',
+  blocchi:[
+  {t:'prosa', title:'La seconda proprietà: autovalori distinti, autovettori ortogonali', tag:'costruzione', html:R`
+  <p>Un operatore autoaggiunto non dà solo autovalori reali: dà autovettori che, quando appartengono ad autovalori <i>diversi</i>, sono automaticamente <b>ortogonali</b>. È la proprietà che rende possibile usare gli autovettori come base, e quindi leggere le probabilità come moduli quadri di componenti — tutto l&rsquo;impianto di mq-02.</p>
+  <p>La dimostrazione è di nuovo corta e identica in tutte le fonti. Siano $\hat A|\phi_1\rangle=a_1|\phi_1\rangle$ e $\hat A|\phi_2\rangle=a_2|\phi_2\rangle$, con $\hat A$ autoaggiunto. Dalla definizione $\langle\phi_1|\hat A|\phi_2\rangle=\langle\phi_2|\hat A|\phi_1\rangle^{*}$ e dalla realtà degli autovalori si ottiene, sottraendo, $(a_1-a_2)\langle\phi_2|\phi_1\rangle=0$. Se $a_1\neq a_2$ il primo fattore non si annulla, quindi $\langle\phi_2|\phi_1\rangle=0$. Dirac la chiama «teorema di ortogonalità» e la usa per dire che «due stati per i quali una misura dà con certezza due risultati diversi sono fra loro ortogonali» — la lettura fisica dell&rsquo;ortogonalità.</p>
+  <p>Resta scoperto il caso $a_1=a_2$: lì la dimostrazione tace, e per una buona ragione — due autovettori dello <i>stesso</i> autovalore non devono essere ortogonali. È la degenerazione, argomento della tappa 05. Per ora teniamo il caso non degenere, dove gli autovettori di un&rsquo;osservabile formano una base ortonormale e si possono normalizzare a $\langle\phi_i|\phi_j\rangle=\delta_{ij}$.</p>`},
+  {t:'reveal', title:'Il problema agli autovalori in pratica: l’equazione caratteristica', tag:'costruzione', steps:[
+   {label:'Da operatore a matrice a polinomio', body:R`
+   <p>In dimensione finita trovare autovalori e autovettori è un algoritmo, e Shankar lo espone con cura. Si scrive l&rsquo;equazione come $(\hat A-\lambda\mathbb 1)|\phi\rangle=0$: perché esista un $|\phi\rangle$ non nullo, l&rsquo;operatore $(\hat A-\lambda\mathbb 1)$ non può essere invertibile, cioè</p>
+   $$\det(\hat A-\lambda\mathbb 1)=0.$$
+   <p>Proiettando su una base ortonormale questo diventa l&rsquo;annullarsi del determinante di una matrice, e l&rsquo;espansione dà un <b>polinomio caratteristico</b> di grado $N$ in $\lambda$. Shankar nota il punto che rende il metodo robusto: «gli autovalori, che sono le sue radici, sono indipendenti dalla base, perché definiti dall&rsquo;equazione astratta che non fa riferimento ad alcuna base». Un polinomio di grado $N$ ha $N$ radici (nel campo complesso, contate con molteplicità): quindi ogni operatore in dimensione $N$ ha $N$ autovalori — ma, avverte Shankar, <i>non</i> necessariamente $N$ autovettori indipendenti, a meno che non sia hermitiano o unitario.</p>`},
+   {label:'Un esempio svolto: la matrice reale simmetrica', body:R`
+   <p>Si prenda $\hat A=\begin{pmatrix}2&1\\1&2\end{pmatrix}$, hermitiana (reale e simmetrica). La traccia è $2+2=4$, il determinante $2\cdot2-1\cdot1=3$. Il caratteristico è $\lambda^2-4\lambda+3=0$, e le radici sono $\frac{4+2}{2}=3$ e $\frac{4-2}{2}=1$. Entrambe reali, come deve essere. Si verifica al volo che la somma delle radici $3+1=4$ è la traccia e il prodotto $3\cdot1=3$ è il determinante: due controlli che non costano nulla e prendono quasi ogni errore di conto.</p>
+   <p>Per l&rsquo;autovalore $3$ l&rsquo;autovettore risolve $(2-3)x+y=0$, cioè $y=x$: la direzione $(1,1)$, normalizzata $\tfrac1{\sqrt2}(1,1)$. Per l&rsquo;autovalore $1$: $(2-1)x+y=0$, cioè $y=-x$, la direzione $(1,-1)$. Il loro prodotto scalare è $1\cdot1+1\cdot(-1)=0$: ortogonali, come garantito dal teorema, perché gli autovalori $3$ e $1$ sono distinti. Non abbiamo dovuto <i>imporre</i> l&rsquo;ortogonalità: è venuta da sola dall&rsquo;hermitianità.</p>`}
+  ]},
+  {t:'plot', title:'Due autovettori ortogonali, due direzioni fissate dall’operatore',
+   intro:R`La matrice $\begin{pmatrix}2&1\\1&2\end{pmatrix}$ agisce sul piano. Le due rette disegnate sono le direzioni che essa <i>non ruota</i>, solo riscala: la direzione $(1,1)$, allungata di un fattore $3$, e la direzione $(1,-1)$, lasciata di fattore $1$. Sono perpendicolari, e la perpendicolarità non è un caso: è il teorema di ortogonalità in forma geometrica.`,
+   plots:[
+    {kind:'func2d', xr:[-3,3], yr:[-3,3], height:340, ticks:6,
+     title:'le due direzioni proprie, perpendicolari',
+     curves:[
+      {f:'x', col:'#4c8dff', width:2.6, label:'autovettore (1,1), autovalore 3'},
+      {f:'-x', col:'#ff8a5c', width:2.6, label:'autovettore (1,−1), autovalore 1'}
+     ],
+     xlabel:'prima componente', ylabel:'seconda componente'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> Un vettore sulla retta blu, applicato $\hat A$, resta sulla retta blu (triplicato); uno sulla retta arancio resta sulla retta arancio (invariato). Qualunque altro vettore viene <i>ruotato</i> verso la retta blu, perché l&rsquo;autovalore più grande domina. Le due rette formano un angolo retto. <b>Che cosa impararne.</b> Diagonalizzare un operatore hermitiano significa trovare queste direzioni perpendicolari: nella base $\{(1,1),(1,-1)\}/\sqrt2$ la matrice diventa $\operatorname{diag}(3,1)$. La perpendicolarità garantisce che la base sia ortonormale senza ritocchi, ed è ciò che permette di leggere le componenti come ampiezze e i loro moduli quadri come probabilità. Se la matrice non fosse stata simmetrica, le due direzioni proprie potrebbero esistere ma non essere perpendicolari — e allora la base non sarebbe ortonormale.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Il polinomio caratteristico ha grado $N$ e quindi $N$ radici: perché allora un operatore $N\times N$ può avere meno di $N$ autovettori indipendenti?`,
+    a:R`Perché «$N$ radici» conta gli autovalori con molteplicità, non gli autovettori. Quando una radice si ripete (autovalore degenere) la teoria <i>non</i> garantisce che le righe indipendenti del sistema $(\hat A-\lambda\mathbb 1)\phi=0$ siano tante quanto la molteplicità. Per un operatore <b>hermitiano o unitario</b> lo sono sempre — il teorema di diagonalizzabilità assicura un autospazio di dimensione pari alla molteplicità — ma per un operatore generico no: la matrice $\begin{pmatrix}3&1\\0&3\end{pmatrix}$ ha $\lambda=3$ doppio e un solo autovettore. Questa è la differenza fra molteplicità <i>algebrica</i> (quante volte la radice compare nel polinomio) e <i>geometrica</i> (la dimensione dell&rsquo;autospazio): per gli hermitiani coincidono sempre, ed è esattamente la proprietà che li rende adatti a rappresentare osservabili.`},
+   {q:R`Perché conviene calcolare traccia e determinante <i>prima</i> di risolvere il caratteristico?`,
+    a:R`Perché sono la somma e il prodotto degli autovalori, e danno un controllo immediato. Per una matrice $2\times2$ con traccia $t$ e determinante $d$ il caratteristico è esattamente $\lambda^2-t\lambda+d=0$: non serve nemmeno espandere il determinante con $\lambda$ dentro, basta leggere $t$ e $d$ dalla matrice di partenza. E una volta trovate le radici, verificare che la loro somma faccia $t$ e il prodotto $d$ prende quasi ogni errore aritmetico. Nell&rsquo;esempio: $3+1=4=\operatorname{tr}$ e $3\cdot1=3=\det$. La traccia e il determinante sono inoltre <b>invarianti per cambio di base</b> (tappa 08), quindi questo controllo non dipende dalla rappresentazione scelta — un&rsquo;ulteriore rete di sicurezza.`}
+  ]}
+]},
+
+/* ---------------- 03 · HERMITIANO NON E' AUTOAGGIUNTO: I DOMINI ---------------- */
+{ num:'03', title:'Hermitiano non è autoaggiunto: i domini, e la stessa formula su quattro spazi', meta:'perche in dimensione infinita la condizione si spezza in due · il dominio denso · la derivata su intervalli diversi · le estensioni autoaggiunte',
+  blocchi:[
+  {t:'prosa', title:'Dove la definizione si sdoppia', tag:'costruzione', html:R`
+  <p>Fin qui &laquo;autoaggiunto&raquo; è stato usato come sinonimo di &laquo;hermitiano&raquo;, e in dimensione finita lo è: una matrice $N\times N$ con $M_{ij}=M_{ji}^{*}$ è definita su tutto lo spazio, la sua aggiunta pure, e non c&rsquo;è niente che le distingua. Ma la definizione completa ha <b>due clausole</b>, e la seconda in dimensione finita è automatica. Ballentine la scrive per intero:</p>
+  <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;Un operatore $A$ che è uguale al suo aggiunto $A^{\dagger}$ si dice autoaggiunto. Questo significa che soddisfa $\langle\phi|A|\psi\rangle=\langle\psi|A|\phi\rangle^{*}$ <b>e che il dominio di $A$</b> (cioè l&rsquo;insieme dei vettori $\phi$ su cui $A\phi$ è ben definito) <b>coincide con il dominio di $A^{\dagger}$</b>. Un operatore che soddisfa soltanto [la prima] si dice hermitiano.&raquo;</i> &mdash; Ballentine, par. 1.3, pag. stampata 15</p>
+  <p>Due operatori possono dunque agire con la stessa formula e non essere lo stesso operatore, se sono definiti su insiemi di vettori diversi. In dimensione finita questa frase è vuota &mdash; il dominio è tutto lo spazio e non c&rsquo;è scelta. In dimensione infinita è il punto su cui gira il corso.</p>
+  <p><b>Un disaccordo di terminologia, da dichiarare e non appianare.</b> Ballentine aggiunge in nota che &laquo;gli operatori che chiamiamo <i>hermitiani</i> sono spesso chiamati <i>simmetrici</i> nella letteratura matematica&raquo; e giudica quella terminologia &laquo;discutibile, perché entra in conflitto con le proprietà corrispondenti delle matrici&raquo;. Picasso dice la cosa opposta partendo dallo stesso fatto: poiché il dominio $D_\xi$ è denso, &laquo;il termine corretto sarebbe <i>simmetrico</i>, tuttavia useremo sempre il termine <i>hermitiano</i>, che è quello normalmente usato dai fisici&raquo;. Hanno il medesimo uso e ragioni contrarie: uno difende la parola per analogia con le matrici, l&rsquo;altro la adotta per consuetudine ammettendo che è impropria. Chi legge una fonte matematica deve sapere che &laquo;simmetrico&raquo; è ciò che qui si chiama hermitiano, e che <b>&laquo;autoaggiunto&raquo; è la parola che in entrambe le lingue significa la stessa cosa</b> &mdash; è il motivo per cui conviene usare quella.</p>`},
+  {t:'reveal', title:'Da dove salta fuori un dominio: il conto di Picasso', tag:'costruzione', steps:[
+   {label:'L’operatore si definisce sulla base, e la serie può divergere', body:R`
+   <p>Picasso costruisce l&rsquo;operatore associato a un&rsquo;osservabile nel modo più diretto possibile: lo <i>definisce</i> sugli autovettori. Scelta una base di autovettori $|\xi_i\rangle$ dell&rsquo;osservabile $\xi$, si pone $\xi_{\rm op}|\xi_i\rangle\equiv\xi_i|\xi_i\rangle$ e si estende per linearità alle combinazioni finite. Finché le combinazioni sono finite non c&rsquo;è nessun problema. Il problema nasce al passo successivo &mdash; estendere alle combinazioni <i>infinite</i>, che sono la maggioranza dei vettori di $\mathcal H$ &mdash; e Picasso lo mostra calcolando la norma del risultato:</p>
+   $$\Big\|\sum_{i=1}^{n}a_i\xi_i|\xi_i\rangle\Big\|^{2}=\sum_{i=1}^{n}\xi_i^{2}|a_i|^{2}.$$
+   <p>Il vettore di partenza $|A\rangle=\sum a_i|\xi_i\rangle$ sta in <span class="str" data-str="spazio-di-hilbert">$\mathcal H$</span> perché $\sum|a_i|^{2}<\infty$. Ma la serie che conta è un&rsquo;altra: $\sum\xi_i^{2}|a_i|^{2}$, con gli autovalori dentro. Se gli autovalori crescono, quella serie può divergere mentre la prima converge &mdash; e allora $\xi_{\rm op}|A\rangle$ <b>non è un vettore di $\mathcal H$</b>. L&rsquo;operatore non si può definire su tutto lo spazio.</p>
+   <p>Quello che resta è il <b>dominio</b>: l&rsquo;insieme $D_\xi$ dei vettori per cui $\sum\xi_i^{2}|a_i|^{2}<\infty$. Non è un sottoinsieme sparuto &mdash; contiene tutte le combinazioni finite, e quindi è <b>denso</b> in $\mathcal H$: ogni vettore dello spazio è limite di vettori del dominio. Questa è l&rsquo;unica cosa che salva il formalismo, e si scrive $\overline{D_\xi}=\mathcal H$.</p>`},
+   {label:'Quando il dominio è tutto, e perché in fisica non succede mai', body:R`
+   <p>C&rsquo;è un caso in cui il problema non esiste: se gli autovalori sono <b>limitati</b>, $|\xi_i|<M$ per ogni $i$, allora $\sum\xi_i^{2}|a_i|^{2}<M^{2}\sum|a_i|^{2}<\infty$ sempre, e l&rsquo;operatore è definito su tutto $\mathcal H$. Si chiama <b>operatore limitato</b>, e per i limitati &laquo;hermitiano&raquo; e &laquo;autoaggiunto&raquo; coincidono di nuovo, come in dimensione finita.</p>
+   <p>Qui Picasso fa un&rsquo;osservazione che vale più di un teorema, e che è il motivo per cui questo paragrafo non è matematica fine a sé stessa:</p>
+   <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;In principio si dovrebbe affermare che dal punto di vista fisico tutte le osservabili sono rappresentate da operatori limitati ($|\xi_i|<M$ per ogni $i$), poiché nessuno strumento può dare risultati &ldquo;grandi quanto si vuole&rdquo;: la scala di uno strumento è sempre limitata sia dall&rsquo;alto che dal basso. La sola ragione per cui, in pratica, non possiamo dimenticare totalmente i problemi di dominio sta nel fatto che quasi tutti gli operatori associati alle osservabili $f(q,p)$ presenteranno uno spettro non limitato [&hellip;] la radice dei problemi di dominio sta nella schematizzazione matematica, non nella fisica.&raquo;</i> &mdash; Picasso, par. 4.6</p>
+   <p>È una posizione precisa e discutibile, e Picasso la dichiara come tale: i domini sono il prezzo di aver idealizzato uno strumento reale (una scala con un fondo e un cielo) in un operatore con spettro illimitato. Si paga quel prezzo perché l&rsquo;idealizzazione rende i conti possibili &mdash; ma chi dimentica il prezzo poi si stupisce che l&rsquo;impulso di una particella su una semiretta non sia un&rsquo;osservabile. Tanto netta è la posizione che Picasso <b>si rifiuta di definire l&rsquo;aggiunto per gli operatori non limitati</b>: &laquo;coerentemente con l&rsquo;affermazione appena fatta che non vogliamo essere sopraffatti dai problemi di dominio, nel caso di operatori non limitati non diamo né la definizione di operatore aggiunto né quella di operatore autoaggiunto&raquo;. Dimostra che $\xi_{\rm op}$ è <i>hermitiano</i>, e si ferma lì. Per vedere che cosa si perde fermandosi lì, serve l&rsquo;esempio che segue.</p>`}
+  ]},
+  {t:'reveal', title:'Lo stesso simbolo, quattro operatori: la derivata su spazi diversi', tag:'costruzione', steps:[
+   {label:'Il termine di bordo, e la condizione che impone', body:R`
+   <p>Si prenda l&rsquo;operatore più innocuo che si possa scrivere: $D=-i\,d/dx$ sulle funzioni derivabili in $a\le x\le b$, con $a$ e $b$ eventualmente infiniti. Per identificarne l&rsquo;<span class="str" data-str="operatore-aggiunto">aggiunto</span> si impone la definizione, che qui è un integrale, e si integra per parti:</p>
+   $$\int_a^b\phi^{*}(x)\,D^{\dagger}\psi(x)\,dx=\Big[\int_a^b\psi^{*}(x)\,D\phi(x)\,dx\Big]^{*}=\int_a^b\phi^{*}(x)\,D\psi(x)\,dx+i\big[\psi(x)\phi^{*}(x)\big]_a^b.$$
+   <p>L&rsquo;ultimo termine è il <b>termine di bordo</b>, e tutto dipende da lui: se le condizioni al contorno lo annullano, allora $D^{\dagger}$ agisce come $D$ e l&rsquo;operatore è hermitiano; se non lo annullano, non lo è. Ballentine scrive esattamente questo e nota, con una parola scelta, che in quel caso $D$ sarà <i>apparentemente</i> hermitiano &mdash; l&rsquo;avverbio anticipa che non basterà.</p>
+   <p>Von Neumann aveva fatto lo stesso conto nel 1932 sull&rsquo;operatore $\frac{\hbar}{i}\frac{\partial}{\partial q}$, e vale guardare la sua versione perché lui non si ferma al termine di bordo: lo <i>risolve</i>. Trova</p>
+   $$(A'f,g)-(f,A'g)=\frac{\hbar}{i}\big[f(q)\overline{g(q)}\big]_a^b=\frac{\hbar}{i}\big[f(b)\overline{g(b)}-f(a)\overline{g(a)}\big]$$
+   <p>e osserva che per annullarlo il dominio va limitato &laquo;in modo tale che per due $f,g$ scelte arbitrariamente in esso valga $f(a)\overline{g(a)}=f(b)\overline{g(b)}$&raquo;, cioè $f(a):f(b)=\overline{g(b)}:\overline{g(a)}$. Poi la mossa: &laquo;se facciamo variare $f$ a $g$ fissata, vediamo che $f(a):f(b)$ deve essere lo <b>stesso numero</b>&raquo; per tutte le funzioni del dominio. Non una condizione per funzione: <b>un unico numero</b>, fissato una volta per tutte, che è un parametro libero del problema. Su $-\infty<q<+\infty$ il termine si annulla da sé e la questione non si pone; su un intervallo finito, quel numero va scelto, e scegliendolo si scelgono operatori diversi.</p>`},
+   {label:'I quattro spazi, uno per uno', body:R`
+   <p>L&rsquo;equazione agli autovalori è la stessa in tutti i casi, ed è un&rsquo;equazione differenziale che si risolve subito: $-i\frac{d}{dx}e^{i\lambda x}=\lambda e^{i\lambda x}$, quindi $\phi(x)=c\,e^{i\lambda x}$ con $c$ costante. Ma &mdash; e qui sta tutto &mdash; di quelle soluzioni interessano <i>solo quelle che stanno nello spazio vettoriale scelto</i>. Ballentine elenca quattro scelte.</p>
+   <p><b>$V_1$ &middot; nessuna condizione al contorno.</b> Ogni $\lambda$ complesso è autovalore: $e^{i\lambda x}$ è derivabile qualunque sia $\lambda$. Ma senza condizioni il termine di bordo non si annulla, quindi $D$ non è hermitiano e il caso &laquo;non ha ulteriore interesse&raquo; &mdash; autovalori complessi, nessuna osservabile.</p>
+   <p><b>$V_2$ &middot; tutta la retta, $|\phi(x)|$ limitata per $|x|\to\infty$.</b> Autovalori: tutti i $\lambda$ <b>reali</b>, perché $e^{i\lambda x}$ è limitata esattamente quando $\lambda$ è reale. Le autofunzioni non sono normalizzabili &mdash; $\int|e^{i\lambda x}|^{2}dx$ diverge &mdash; ma formano un insieme completo &laquo;nel senso che una funzione arbitraria può essere rappresentata come un integrale di Fourier, che si può riguardare come una combinazione lineare <i>continua</i> delle autofunzioni&raquo;. Spettro continuo, autofunzioni fuori dallo spazio di Hilbert.</p>
+   <p><b>$V_3$ &middot; il segmento $[-L/2,+L/2]$ con condizioni periodiche $\phi(-L/2)=\phi(L/2)$.</b> La condizione richiede $e^{i\lambda L}=1$, cioè $\lambda_n=2\pi n/L$ con $n$ intero di segno qualunque: uno spettro <b>discreto</b>, una scala di gradini equispaziati. Le autofunzioni $\frac{1}{\sqrt L}e^{2\pi inx/L}$ formano un insieme ortonormale completo, e la completezza è il teorema delle serie di Fourier: la normalizzazione si legge da $\int_{-L/2}^{L/2}\frac{1}{L}\,dx=1$ e l&rsquo;ortogonalità si vede su un caso, $\int_{-1/2}^{1/2}e^{2\pi ix}e^{-4\pi ix}\,dx=0$.</p>
+   <p><b>$V_4$ &middot; tutta la retta, $\phi(x)\to0$ per $x\to\pm\infty$.</b> Qui il termine di bordo si annulla, quindi $D$ <i>è</i> hermitiano &mdash; e <b>non ha nessuna autofunzione in quello spazio</b>, perché $e^{i\lambda x}$ non tende a zero per nessun $\lambda$ reale, e per $\lambda$ complesso esplode da un lato. Un operatore hermitiano, perfettamente rispettabile, con spettro vuoto.</p>
+   <p>Ballentine tira la conclusione in una riga: &laquo;questi esempi bastano a mostrare che un operatore hermitiano in uno spazio a dimensione infinita <b>può avere o non avere</b> un insieme completo di autovettori, a seconda della natura precisa dell&rsquo;operatore <i>e dello spazio vettoriale</i>&raquo;. La formula $-i\,d/dx$, da sola, non identifica un operatore: identifica una regola di calcolo. L&rsquo;operatore è la regola <i>più</i> il dominio.</p>`},
+   {label:'Le estensioni autoaggiunte, e perché sono infinite', body:R`
+   <p>Resta la domanda che von Neumann si pone e Ballentine lascia stare: dato un operatore hermitiano definito su un dominio troppo piccolo, lo si può <i>allargare</i> fino a renderlo autoaggiunto? E in quanti modi?</p>
+   <p>Von Neumann lavora sull&rsquo;intervallo $[0,1]$ e costruisce una famiglia di operatori, uno per ogni fase $\alpha$: il dominio del membro $\alpha$ contiene $e^{i\alpha q}$, cioè fissa pari a $e^{i\alpha}$ il rapporto fra i valori al bordo. Poi dimostra che due di questi non hanno nessuna estensione hermitiana comune, calcolando</p>
+   $$(A'e^{i\alpha q},e^{i\gamma q})-(e^{i\alpha q},A'e^{i\gamma q})=i(\alpha-\gamma)\int_0^1e^{i(\alpha-\gamma)q}\,dq=e^{i(\alpha-\gamma)}-1\neq0$$
+   <p>per $\alpha\neq\gamma$: gli operatori sono genuinamente diversi. La conclusione, parole sue: &laquo;il processo di estensione è <b>infinitamente multivoco</b>, poiché ciascun [membro della famiglia] può essere usato e ciascuno produce un&rsquo;altra soluzione del problema agli autovalori. (Si tratta sempre di uno spettro puramente discreto, ma esso <i>dipende</i> da $\alpha$: $\lambda_k=h\left(\frac{\alpha}{2\pi}+k\right)$, $k=0,\pm1,\pm2,\dots$)&raquo;.</p>
+   <p>Von Neumann dà anche il nome alla proprietà che separa i buoni dai cattivi: un operatore che non ammette estensioni proprie &mdash; &laquo;già definito in tutti i punti in cui potrebbe essere definito in modo ragionevole, cioè senza violare la sua natura hermitiana&raquo; &mdash; lo chiama <b>massimale</b>. E dimostra che &laquo;risoluzioni dell&rsquo;identità possono appartenere soltanto a operatori massimali&raquo;: se l&rsquo;operatore si può ancora allargare, il suo problema agli autovalori non ha <i>una</i> soluzione, ne ha tante quante le estensioni. La parola moderna per &laquo;massimale e hermitiano&raquo; è <i>autoaggiunto</i>, e il teorema di von Neumann è il motivo per cui la seconda clausola di Ballentine non è un cavillo: senza di essa non c&rsquo;è <i>uno</i> spettro di cui parlare. Von Neumann avverte però che l&rsquo;esistenza non è garantita nemmeno così: &laquo;a un dato operatore hermitiano massimale appartiene nessuna o esattamente una risoluzione dell&rsquo;identità, e la prima situazione talvolta si verifica; cioè il problema agli autovalori è certamente unico, ma sotto certe condizioni è insolubile&raquo;.</p>
+   <p><b>Che cosa significa in fisica.</b> L&rsquo;impulso di una particella confinata in un segmento non è un&rsquo;osservabile, è una <b>famiglia a un parametro</b> di osservabili, e il parametro $\alpha$ non è matematica: è la condizione al bordo, cioè che cosa fa la particella quando arriva all&rsquo;estremo. Lo spettro $\lambda_k=h(\alpha/2\pi+k)$ dice che i valori misurabili dell&rsquo;impulso <i>slittano</i> al variare di quella scelta, restando equispaziati. Due laboratori che confinano la stessa particella con bordi fisicamente diversi misurano insiemi di valori diversi &mdash; e la teoria glielo dice in anticipo.</p>`}
+  ]},
+  {t:'plot', title:'Lo spettro che slitta: una famiglia di operatori, non un operatore',
+   intro:R`Ogni retta è un livello $\lambda_k=h(\alpha/2\pi+k)$ della famiglia di von Neumann, in unità $h=1$, al variare della fase al bordo $\alpha$ fra $0$ e $2\pi$. Fissare $\alpha$ significa tagliare la figura con una verticale: i punti d&rsquo;intersezione sono lo spettro di <i>quel</i> membro della famiglia.`,
+   plots:[
+    {kind:'func2d', xr:[0,6.3], yr:[-2.2,3.2], height:360, ticks:7,
+     title:'i livelli della derivata sul segmento, al variare della condizione al bordo',
+     curves:[
+      {f:'x/(2*3.141592653589793)-2', col:'#8a93a6', width:1.8, label:'k=−2'},
+      {f:'x/(2*3.141592653589793)-1', col:'#5c9cff', width:2.0, label:'k=−1'},
+      {f:'x/(2*3.141592653589793)', col:'#4c8dff', width:2.6, label:'k=0'},
+      {f:'x/(2*3.141592653589793)+1', col:'#ff8a5c', width:2.0, label:'k=1'},
+      {f:'x/(2*3.141592653589793)+2', col:'#ffb45c', width:1.8, label:'k=2'}
+     ],
+     xlabel:'fase al bordo α', ylabel:'autovalore λ (unità h)'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> A $\alpha=0$ (condizioni periodiche) gli autovalori sono gli interi: è il caso $V_3$ di Ballentine. Spostando $\alpha$ verso destra tutta la scala sale rigidamente, e a $\alpha=2\pi$ è tornata su sé stessa con $k$ traslato di uno &mdash; cioè la famiglia è periodica in $\alpha$, e due fasi che differiscono di $2\pi$ danno lo <i>stesso</i> operatore. La distanza fra due righe consecutive non cambia mai: resta $h$. <b>Che cosa impararne.</b> La figura è il contro-esempio reso visivo: se &laquo;la derivata sul segmento&raquo; identificasse un operatore, ci sarebbe una sola riga orizzontale di valori possibili. Ce n&rsquo;è invece un fascio, e scegliere il dominio significa scegliere la verticale su cui leggere. Si vede anche perché nessuna misura può distinguere $\alpha$ da $\alpha+2\pi$ &mdash; e perché, al contrario, $\alpha=0$ e $\alpha=\pi$ danno spettri che non hanno <i>nessun</i> valore in comune: con $\alpha=\pi$ i livelli stanno a $\pm\tfrac12,\pm\tfrac32,\dots$, tutti semidispari. Fisicamente: cambiare la condizione al bordo non cambia la <i>spaziatura</i> dei livelli, cambia la loro <i>origine</i>.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se &laquo;hermitiano&raquo; e &laquo;autoaggiunto&raquo; coincidono per gli operatori limitati, e in fisica (dice Picasso) gli strumenti sono limitati, perché non si lascia perdere la distinzione?`,
+    a:R`Perché gli operatori che si <i>scrivono</i> non sono limitati, anche se gli strumenti lo sono. Posizione, impulso, energia cinetica hanno spettro illimitato per costruzione &mdash; $q$ va su tutta la retta, $p$ pure, $p^{2}/2m$ cresce senza tetto &mdash; e sono proprio quelli con cui si fanno i conti. Picasso è esplicito: la radice del problema sta nella schematizzazione, non nella fisica. Ma il prezzo di quella schematizzazione è reale e si paga in conti sbagliati, non in filosofia: l&rsquo;impulso sul segmento ha spettri <i>diversi</i> secondo il dominio, e chi ignora la distinzione non ha modo di sapere quale dei fasci di livelli stia usando. La distinzione non serve a essere rigorosi: serve a sapere di quale operatore si stanno calcolando gli autovalori.`},
+   {q:R`Nel caso $V_4$ l&rsquo;operatore è hermitiano e non ha autofunzioni; nel caso $V_2$ ha come autovalori tutti i reali. Ma $V_4$ è <i>contenuto</i> in $V_2$ (le funzioni che tendono a zero sono limitate). Come può un sottoinsieme avere meno autovettori di zero?`,
+    a:R`Non ha &laquo;meno di zero&raquo;: ne ha zero, e $V_2$ ne ha infiniti, ed è coerente perché gli autovettori di $V_2$ <b>non appartengono a $V_4$</b>. Le $e^{i\lambda x}$ sono limitate (stanno in $V_2$) ma non tendono a zero (non stanno in $V_4$): restringendo lo spazio si sono buttati via esattamente i vettori che risolvevano l&rsquo;equazione. È la lezione del contro-esempio nella sua forma più nuda: la domanda &laquo;$\hat A$ ha autovettori?&raquo; non ha senso senza specificare <i>dove</i> li si cerca, perché l&rsquo;equazione agli autovalori è un vincolo su una funzione, e appartenere allo spazio è un secondo vincolo indipendente. Si noti che $V_4$ non è patologico né artificiale: contiene tutte le funzioni d&rsquo;onda normalizzabili che decadono, cioè gli stati fisici di una particella libera.`}
+  ]}
+]},
+
+/* ---------------- 04 · LO SPETTRO: DISCRETO, CONTINUO, MISTO ---------------- */
+{ num:'04', title:'Lo spettro: discreto, continuo, misto, e l’autovettore che non c’è', meta:'il fallimento del problema agli autovalori come definizione · autovettore vero e generalizzato · il teorema spettrale di Stieltjes · impulso e posizione',
+  blocchi:[
+  {t:'prosa', title:'Un operatore autoaggiunto senza nemmeno un autovettore', tag:'costruzione', html:R`
+  <p>Il contro-esempio della derivata mostrava che un operatore hermitiano <i>può</i> non avere autovettori. Ma lì si poteva sospettare che la colpa fosse della scelta un po&rsquo; artificiosa dello spazio. L&rsquo;esempio che segue chiude quella via di fuga, perché l&rsquo;operatore è il più semplice immaginabile e lo spazio è quello naturale.</p>
+  <p>Nello spazio $L^{2}(a,b)$ delle funzioni a quadrato sommabile sull&rsquo;intervallo, si consideri l&rsquo;operatore che <b>moltiplica per la variabile</b>: $f(x)\mapsto x\,f(x)$. È autoaggiunto &mdash; verificarlo è immediato, perché moltiplicare per un numero reale commuta col prodotto scalare e non produce termini di bordo. E non ha <b>nessun</b> autovettore. Picasso lo liquida in una parentesi, ed è la parentesi più importante del capitolo: l&rsquo;equazione $x\,f(x)=\lambda f(x)$ si riscrive $(x-\lambda)f(x)=0$, e poiché $x-\lambda$ si annulla in un solo punto, questa impone $f(x)=0$ per ogni $x\neq\lambda$ &mdash; cioè, come elemento di $L^{2}$, $f\sim0$. E il vettore nullo non è un autovettore.</p>
+  <p>Si confronti con la dimensione finita: lì il polinomio caratteristico ha sempre almeno una radice, a quella radice corrisponde sempre almeno un autovettore, e un operatore senza autovettori non esiste. Ballentine dice perché l&rsquo;argomento non si trasporta: &laquo;se si lascia $N$ diventare infinito, $\det|M-\lambda I|=0$ diventa una serie di potenze infinita in $\lambda$, che <i>non deve necessariamente possedere radici</i>, anche se converge. (In realtà il determinante di una matrice a dimensione infinita è indefinibile, tranne in casi speciali.)&raquo; Il metodo che in dimensione finita <i>è</i> il problema agli autovalori, in dimensione infinita non esiste nemmeno come enunciato.</p>`},
+  {t:'reveal', title:'Von Neumann: il fallimento non è una patologia, è la definizione', tag:'costruzione', steps:[
+   {label:'Che cosa significa esattamente «spettro continuo»', body:R`
+   <p>Von Neumann affronta la cosa di petto e ne ricava una definizione, che è il contributo che regge tutta la teoria moderna. Il problema agli autovalori &laquo;nel senso della meccanica quantistica&raquo;, dice, richiederebbe di trovare abbastanza soluzioni $\psi_1,\psi_2,\dots$ di $H\psi=\lambda\psi$ da formarne un insieme ortonormale <b>completo</b>. Poi constata che &laquo;questo non è possibile in generale&raquo;, e porta l&rsquo;esempio dell&rsquo;atomo di idrogeno di Schrödinger, dove una parte delle soluzioni necessarie a sviluppare ogni funzione d&rsquo;onda ha integrale del modulo quadro infinito: &laquo;dunque non appartiene allo spazio di Hilbert. Quindi non c&rsquo;è un insieme ortonormale completo di soluzioni nello spazio di Hilbert&raquo;.</p>
+   <p>E poi la mossa:</p>
+   <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;Se ciò si verifica, cioè se l&rsquo;insieme ortonormale scelto fra le soluzioni di E non è completo, allora possiamo dire che esiste uno &ldquo;spettro continuo di $H$&rdquo;. ($\lambda_1,\lambda_2,\dots$ formano lo spettro &ldquo;puntuale&rdquo; o &ldquo;discreto&rdquo; di $H$.)&raquo;</i> &mdash; von Neumann, pag. stampata 68</p>
+   <p>Non si <i>spiega</i> il fallimento, non lo si <i>aggira</i>: lo si battezza. Lo <span class="str" data-str="spettro">spettro</span> continuo <b>è</b> il modo in cui il problema agli autovalori non si risolve, e chiamarlo così trasforma un ostacolo in un oggetto. Von Neumann aggiunge, da matematico onesto, che &laquo;la teoria di Hilbert del problema agli autovalori mostra che questo fenomeno non rappresenta in alcun modo un&rsquo;eccezione al comportamento degli operatori, nemmeno di quelli continui&raquo; &mdash; cioè: è il caso generico, non il caso strano.</p>`},
+   {label:'La definizione che sostituisce gli autovettori', body:R`
+   <p>Avendo rinunciato agli autovettori, von Neumann deve dire dove sta lo spettro, e lo fa con la famiglia di proiettori $E(\lambda)$. La definizione è di una concisione che vale citare, perché è esattamente quella dei testi di oggi:</p>
+   <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;Le discontinuità di $E(\lambda)$ sono note come lo spettro discreto di $A$. Sono gli stessi $\lambda$ per i quali $Af=\lambda f$, $f\neq0$ è risolubile. [&hellip;] <b>Tutti i punti nell&rsquo;intorno dei quali $E(\lambda)$ non è costante formano lo spettro di $A$.</b>&raquo;</i> &mdash; von Neumann, pag. stampata 80</p>
+   <p>Si guardi che cosa ha fatto. &laquo;Autovalore&raquo; era una proprietà di un&rsquo;<i>equazione</i> (esiste un vettore che&hellip;); &laquo;punto dello spettro&raquo; è una proprietà di una <b>funzione crescente</b>: $\lambda$ sta nello spettro se $E$ cresce intorno a $\lambda$. I salti di $E$ sono gli autovalori veri; i tratti di crescita continua sono lo spettro continuo; i tratti costanti sono il complementare, dove non c&rsquo;è niente. La stessa definizione copre i tre casi senza distinguerli, e questo è il motivo per cui funziona anche quando una delle due descrizioni non è disponibile. Von Neumann dimostra anche, con un argomento di ortogonalità, che i $\lambda$ dello spettro discreto &laquo;formano al più una successione&raquo;: gli autovalori veri sono sempre numerabili, mai un continuo.</p>`}
+  ]},
+  {t:'reveal', title:'Il teorema spettrale, e l’integrale che somma sui salti', tag:'costruzione', steps:[
+   {label:'Perché serve un integrale di Stieltjes', body:R`
+   <p>Si vuole una formula che ricostruisca l&rsquo;operatore dai suoi autovalori e che funzioni <i>sia</i> quando lo spettro è una scala di gradini <i>sia</i> quando è un continuo. La somma $\hat A=\sum_a a\,P(a)$ fa il primo caso e non il secondo; l&rsquo;integrale $\int a\,\rho(a)\,da$ fa il secondo e non il primo. L&rsquo;oggetto che fa entrambi è l&rsquo;<b>integrale di Stieltjes</b>, definito da</p>
+   $$\int_a^b g(x)\,d\sigma(x)=\lim_{n\to\infty}\sum_{k=1}^{n}g(x_k)\big[\sigma(x_k)-\sigma(x_{k-1})\big],$$
+   <p>dove $\sigma$ è una funzione non decrescente detta <b>misura</b>. Se $\sigma(x)=x$ si ritrova Riemann; se $\sigma$ è derivabile si ritrova $\int g(x)\frac{d\sigma}{dx}dx$. La generalizzazione diventa non banale, dice Ballentine, &laquo;solo quando si permette a $\sigma(x)$ di essere discontinua&raquo;: con $\sigma(x)=h\,\theta(x-c)$ il solo termine della somma che contribuisce è quello con $x_{k-1}<c<x_k$, e l&rsquo;integrale vale $h\,g(c)$. Un <i>salto</i> della misura produce un termine di <i>somma</i>. È il meccanismo che fa convivere i due casi in una formula.</p>`},
+   {label:'L’enunciato, e i due esempi che lo verificano', body:R`
+   <p><b>Teorema spettrale</b> (Ballentine, Teorema 4). A ogni operatore autoaggiunto $\hat A$ corrisponde un&rsquo;unica famiglia di <span class="str" data-str="proiettore-ortogonale">proiettori</span> $E(\lambda)$, $\lambda$ reale, tale che: <i>(i)</i> se $\lambda_1<\lambda_2$ allora $E(\lambda_1)E(\lambda_2)=E(\lambda_2)E(\lambda_1)=E(\lambda_1)$ &mdash; informalmente, $E(\lambda)$ proietta sul sottospazio degli autovalori minori o uguali a $\lambda$; <i>(ii)</i> $E(\lambda+\varepsilon)|\psi\rangle\to E(\lambda)|\psi\rangle$ per $\varepsilon\to0$; <i>(iii)</i> $E(\lambda)|\psi\rangle\to0$ per $\lambda\to-\infty$; <i>(iv)</i> $E(\lambda)|\psi\rangle\to|\psi\rangle$ per $\lambda\to+\infty$; <i>(v)</i> e la formula che conta,</p>
+   $$\int_{-\infty}^{+\infty}\lambda\,dE(\lambda)=\hat A.$$
+   <p>Le proprietà (iii) e (iv) dicono che la famiglia parte da niente e arriva a tutto; la (ii) che è continua da destra. Von Neumann le enumera nello stesso ordine e avverte di un punto tecnico che vale ricordare: &laquo;l&rsquo;espressione $H=\int\lambda\,dE(\lambda)$ è priva di significato, poiché l&rsquo;integrale di Stieltjes è definito per numeri e non per operatori&raquo;. La si legge come abbreviazione formale di $(Hf,g)=\int\lambda\,(dE(\lambda)f,g)$, che è un&rsquo;uguaglianza fra numeri. È la stessa prudenza che gli fa distinguere hermitiano da autoaggiunto.</p>
+   <p><b>Caso discreto.</b> Qui $E(\lambda)=\sum_i|\phi_i\rangle\langle\phi_i|\theta(\lambda-a_i)$ è una scala: salta di $|\phi_i\rangle\langle\phi_i|$ ogni volta che $\lambda$ supera un autovalore, ed è costante fra due autovalori consecutivi. Il contributo di un salto è esattamente il termine della somma, perché $\int_{-\infty}^{+\infty}\lambda\,\delta(\lambda-a)\,d\lambda=a$ &mdash; l&rsquo;integrale di Stieltjes su un gradino restituisce il valore nel punto del salto, e la (v) si riduce a $\hat A=\sum_a a\,P(a)$.</p>
+   <p><b>Caso continuo.</b> Si prenda l&rsquo;operatore posizione, $Q\psi(x)=x\psi(x)$: quello che non ha autovettori. I suoi proiettori si scrivono comunque, e sono il troncamento a sinistra: $E(\lambda)\psi(x)=\theta(\lambda-x)\psi(x)$, cioè la funzione tenuta per $x<\lambda$ e azzerata per $x>\lambda$. Si verifica la (v) direttamente, ricordando che $\lambda$ è la variabile d&rsquo;integrazione e $x$ una costante: poiché $\frac{d}{d\lambda}\theta(\lambda-x)=\delta(\lambda-x)$, l&rsquo;integrale $\int\lambda\,d[\theta(\lambda-x)\psi(x)]$ raccoglie il valore $\lambda=x$ e dà $x\,\psi(x)=Q\psi(x)$. L&rsquo;operatore è ricostruito per intero <b>senza che esista un solo autovettore</b>, e questa è la ragione per cui il teorema spettrale sostituisce la diagonalizzazione invece di estenderla.</p>`}
+  ]},
+  {t:'plot', title:'La misura spettrale: dove cresce E(λ), là c’è spettro',
+   intro:R`Le due curve sono due famiglie $E(\lambda)$, lette come numeri su un vettore fissato. La blu è una scala: cresce per salti in $\lambda=-1$, $\lambda=0$ e $\lambda=2$, e resta piatta altrove. L&rsquo;arancio cresce senza salti su tutto l&rsquo;intervallo da $-1$ a $2$. Le proprietà <i>(iii)</i> e <i>(iv)</i> del teorema impongono che entrambe partano da zero e arrivino a uno.`,
+   plots:[
+    {kind:'func2d', xr:[-3,4], yr:[-0.15,1.25], height:340, ticks:7,
+     title:'spettro discreto (scala) e spettro continuo (rampa)',
+     curves:[
+      {f:'(x>-1)*0.4+(x>0)*0.35+(x>2)*0.25', col:'#4c8dff', width:2.6, label:'E(λ) discreto: tre salti'},
+      {f:'(x>=-1)*(x<=2)*((x+1)/3)+(x>2)*1', col:'#ff8a5c', width:2.6, label:'E(λ) continuo: una rampa'},
+      {f:'1', col:'#8a93a6', width:1.0, label:'livello 1'}
+     ],
+     xlabel:'λ', ylabel:'valor medio di E(λ) sullo stato'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> Sulla curva blu lo spettro è fatto dei tre punti dove la scala salta: $-1$, $0$, $2$. L&rsquo;altezza di ciascun salto è il peso di quell&rsquo;autovalore nello stato &mdash; $0{,}40$, $0{,}35$, $0{,}25$ &mdash; e la somma dei salti fa uno, che è la conservazione della probabilità. Fra i salti la curva è piatta: lì non c&rsquo;è spettro, e non c&rsquo;è niente da misurare. Sulla curva arancio non c&rsquo;è <i>nessun</i> salto, quindi nessun autovalore vero; ma la curva cresce su tutto l&rsquo;intervallo, e per la definizione di von Neumann l&rsquo;intero intervallo è spettro. <b>Che cosa impararne.</b> La figura è la ragione per cui conviene definire lo spettro con $E$ invece che con l&rsquo;equazione agli autovalori: le due curve sono lo stesso tipo di oggetto &mdash; monotone, da zero a uno &mdash; e un solo criterio (&laquo;dove non è costante&raquo;) le legge entrambe. Si vede anche cos&rsquo;è uno spettro <b>misto</b>: basta una curva che salta in un punto e poi sale in rampa, e la fisica ne è piena &mdash; i livelli legati dell&rsquo;idrogeno sono i salti, il continuo di ionizzazione è la rampa. Infine, la pendenza della rampa è la densità: dove $E$ sale più ripida, quell&rsquo;intervallo di valori è più probabile.</p>`},
+  {t:'prosa', title:'Dirac dall’altra parte: lo spazio si allarga, e la norma diventa infinita', tag:'costruzione', html:R`
+  <p>Dirac arriva allo stesso punto dalla direzione opposta, e il confronto è istruttivo perché nessuno dei due è &laquo;il modo corretto&raquo;: sono due prezzi diversi pagati per lo stesso oggetto. Dirac vuole tenere gli autovettori. Per tenerli, è costretto a buttare via lo spazio di Hilbert.</p>
+  <p>Il conto che lo costringe è questo. Se $|X\rangle$ e $|Y\rangle$ si scrivono come integrali di autoket di un&rsquo;osservabile $\xi$ i cui autovalori riempiono un intervallo, il teorema di ortogonalità dice che l&rsquo;integrando $\langle\xi'_x|\xi''_y\rangle$ è nullo in tutto l&rsquo;intervallo d&rsquo;integrazione tranne nel punto $\xi''=\xi'$. Se in quel punto fosse <i>finito</i>, l&rsquo;integrale sarebbe nullo, e dunque $\langle X|Y\rangle$ sarebbe nullo per ogni coppia &mdash; che è falso. Dirac conclude che il prodotto scalare di due autoket coincidenti &laquo;deve essere <b>infinitamente grande</b> per poter rendere finita e diversa da zero&raquo; l&rsquo;espressione. Ponendo $|Y\rangle=|X\rangle$: la norma di un autovettore dello spettro continuo è infinita.</p>
+  <p>E allora, con una frase che è il manifesto del suo metodo:</p>
+  <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;Lo spazio dei vettori bra o ket, nel caso in cui essi abbiano lunghezze finite e prodotti scalari pure finiti, è chiamato dai matematici spazio di Hilbert. I vettori bra e ket da noi ora adoperati formano uno spazio più generale di quello di Hilbert.&raquo;</i> &mdash; Dirac, pag. stampata 54</p>
+  <p>Non è un&rsquo;ammissione di sconfitta, è una decisione: se l&rsquo;oggetto fisico richiede vettori di norma infinita, si cambia spazio. Nella stessa pagina Dirac dà anche la forma generale della condizione di osservabile per lo spettro misto &mdash; ogni ket si scrive come un <b>integrale più una somma</b> di autoket, l&rsquo;integrale sull&rsquo;intervallo continuo e la somma sui valori discreti fuori di esso &mdash; e dimostra che quella scrittura è <i>unica</i>, purché non vi siano nella somma due termini relativi allo stesso autovalore.</p>
+  <p>La divergenza con von Neumann, in una riga: von Neumann tiene lo spazio e perde gli autovettori; Dirac tiene gli autovettori e perde lo spazio. Il formalismo che si usa oggi fa entrambe le cose e dichiara quale sta usando &mdash; ed è per questo che bisogna conoscerle entrambe. Ballentine lo dice senza girarci intorno: &laquo;la formulazione di Dirac non entra nella teoria matematica dello spazio di Hilbert, che ammette solo vettori di norma finita&raquo;, e aggiunge che il proiettore $E(\lambda)=\int_{-\infty}^{\lambda}|q\rangle\langle q|\,dq$ è ben definito nello spazio di Hilbert <i>mentre la sua derivata</i> $dE(q)/dq=|q\rangle\langle q|$ non lo è. La derivata di un oggetto buono non è un oggetto buono: è esattamente lì che sta la differenza.</p>`},
+  {t:'reveal', title:'Impulso e posizione: gli autovettori generalizzati al lavoro', tag:'esempio', steps:[
+   {label:'L’impulso, e l’ortonormalità alla Dirac', body:R`
+   <p>Griffiths svolge i due casi concreti che servono, ed è la fonte da aprire qui perché non scantona né nel rigore né nell&rsquo;euristica: fa il conto e dichiara che cosa non torna. L&rsquo;autofunzione dell&rsquo;impulso risolve $-i\hbar\frac{d}{dx}f_p(x)=p\,f_p(x)$, dunque $f_p(x)=A\,e^{ipx/\hbar}$. Non è a quadrato sommabile per <i>nessun</i> valore complesso di $p$: &laquo;l&rsquo;operatore impulso non ha autofunzioni nello spazio di Hilbert&raquo;. Ma restringendosi agli autovalori reali si recupera &laquo;una specie di ortonormalità surrogata&raquo;:</p>
+   $$\langle f_{p'}|f_p\rangle=|A|^{2}\!\!\int_{-\infty}^{+\infty}\!\!e^{i(p-p')x/\hbar}dx=|A|^{2}\,2\pi\hbar\,\delta(p-p'),$$
+   <p>e scegliendo $A=1/\sqrt{2\pi\hbar}$ si ottiene $\langle f_{p'}|f_p\rangle=\delta(p-p')$ &mdash; che Griffiths battezza <b>ortonormalità alla Dirac</b>, notando che &laquo;gli indici sono ora variabili continue, e la delta di Kronecker è diventata una <span class="str" data-str="delta-di-dirac">delta di Dirac</span>, ma per il resto ha esattamente lo stesso aspetto&raquo;. La completezza diventa un integrale, e l&rsquo;espansione $f(x)=\frac{1}{\sqrt{2\pi\hbar}}\int c(p)\,e^{ipx/\hbar}dp$ &laquo;non è altro che una trasformata di Fourier&raquo;. Il trucco di Fourier per estrarre i coefficienti funziona identico: $\langle f_{p'}|f\rangle=\int c(p)\delta(p-p')dp=c(p')$.</p>
+   <p>In nota, Griffiths chiude il cerchio con una distinzione che molti libri saltano: che ne è delle autofunzioni con autovalore <i>non</i> reale? &laquo;Non sono semplicemente non normalizzabili: esplodono a $\pm\infty$&raquo;. Le funzioni dei &laquo;sobborghi&raquo; dello spazio di Hilbert &mdash; l&rsquo;area metropolitana, scrive, si chiama a volte <i>rigged Hilbert space</i>, e cita Ballentine per nome &mdash; hanno la proprietà che, pur non avendo prodotto scalare finito con sé stesse, <i>ammettono</i> prodotto scalare con tutti i membri dello spazio di Hilbert; e questo per le autofunzioni di $p$ con autovalore immaginario è falso. Da cui la frase esatta: &laquo;in questo senso ogni numero complesso è autovalore dell&rsquo;operatore $p$, ma solo i numeri reali sono autovalori dell&rsquo;operatore <b>hermitiano</b> $p$ &mdash; gli altri cadono fuori dallo spazio su cui $p$ è hermitiano&raquo;. L&rsquo;hermitianità non è una proprietà della formula: è una proprietà della coppia formula-dominio, di nuovo.</p>`},
+   {label:'La posizione, e il senso di una delta come autovettore', body:R`
+   <p>Per la posizione la domanda di Griffiths è la più diretta che si possa fare: &laquo;quale funzione di $x$ ha la proprietà che moltiplicarla per $x$ equivale a moltiplicarla per la costante $y$?&raquo;. Ovviamente deve essere nulla dappertutto tranne nel punto $x=y$; e &laquo;infatti non è altro che la funzione delta di Dirac&raquo;, $g_y(x)=A\,\delta(x-y)$. Anche qui l&rsquo;autovalore è costretto reale, le autofunzioni non sono a quadrato sommabile, e vale l&rsquo;ortonormalità alla Dirac: con $A=1$ si ha $\langle g_{y'}|g_y\rangle=\delta(y-y')$. La completezza è immediata, $f(x)=\int c(y)\,\delta(x-y)\,dy$ con $c(y)=f(y)$ &mdash; &laquo;banale in questo caso, ma la si può ottenere dal trucco di Fourier se si insiste&raquo;.</p>
+   <p>Vale notare che questo è lo <i>stesso</i> operatore di cui Picasso ha dimostrato che non ha autovettori e di cui Ballentine ha costruito i proiettori: si sta guardando una cosa sola da tre posizioni. Picasso guarda dentro $L^{2}$ e conclude correttamente che non c&rsquo;è niente; Ballentine rinuncia a cercare e costruisce $E(\lambda)$, che esiste; Griffiths esce da $L^{2}$ e trova $\delta(x-y)$, che è &laquo;un autovettore&raquo; nel senso allargato. <b>Nessuna delle tre risposte contraddice le altre</b>, e tenerle tutte e tre è ciò che permette di leggere qualunque libro senza restare sorpresi. Il nome moderno di questa distinzione è <i>autovettore vero</i> contro <i>autovettore generalizzato</i>: il primo sta nello spazio, il secondo no, e il secondo è utile perché ammette prodotto scalare con tutto ciò che sta nello spazio.</p>
+   <p>Griffiths chiude con l&rsquo;assioma che Dirac aveva postulato e lui dichiara come restrizione: &laquo;le autofunzioni di un operatore osservabile sono <b>complete</b>: ogni funzione (nello spazio di Hilbert) può essere espressa come combinazione lineare di esse&raquo;. E ammette l&rsquo;imbarazzo di chiamarlo assioma: &laquo;è un po&rsquo; goffo chiamare &ldquo;assioma&rdquo; qualcosa che in certi casi è dimostrabile, ma non conosco un modo migliore di trattarlo&raquo;. Picasso lo tratta diversamente &mdash; <i>postula</i> che ogni operatore autoaggiunto a spettro puramente discreto sia associato a un&rsquo;osservabile, e poi mostra che gli spettri misti si guadagnano il nome come &laquo;limiti&raquo; di quelli discreti, con l&rsquo;esempio dell&rsquo;energia dell&rsquo;atomo di idrogeno: &laquo;ci sono i livelli energetici, che costituiscono la componente discreta dello spettro, e c&rsquo;è il continuo degli stati di ionizzazione&raquo;, e sono &laquo;casi limite di osservabili <i>bona fide</i>, come quei concetti limite così frequenti nella fisica: punto materiale, velocità istantanea&raquo;. Tre autori, tre modi di mettere in conto la stessa lacuna, e nessuno che la nasconda.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se l&rsquo;operatore posizione non ha autovettori, in che senso &laquo;la misura di posizione dà il valore $x_0$&raquo; ha un significato?`,
+    a:R`Nel senso che dà il valore <i>in un intervallo</i>, e il formalismo lo dice con precisione. Il proiettore $E(\lambda)$ dell&rsquo;operatore posizione tronca la funzione d&rsquo;onda a $x<\lambda$, quindi la differenza $E(b)-E(a)$ proietta sul sottospazio &laquo;la particella sta fra $a$ e $b$&raquo;, e il suo valor medio nello stato è $\int_a^b|\psi|^{2}dx$: un numero fra zero e uno, perfettamente definito, senza bisogno di nessun autovettore. La probabilità di trovare la particella in un <i>punto</i> è invece zero, come per qualunque variabile continua &mdash; ed è coerente col fatto che l&rsquo;autovettore relativo a quel punto non esiste. Griffiths lo dice nella sua interpretazione statistica generalizzata: per spettro continuo si assegna $|c(z)|^{2}dz$, una densità, non un peso. Il &laquo;collasso in $\delta(x-x_0)$&raquo; è un&rsquo;idealizzazione utile che corrisponde, nella sua nota, a &laquo;un intervallo stretto attorno al valore misurato, a seconda della precisione dello strumento&raquo;.`},
+   {q:R`Lo spettro continuo nasce dalla dimensione infinita. Ma $L^{2}(a,b)$ su un intervallo <i>finito</i> è anch&rsquo;esso a dimensione infinita, e lì la derivata con condizioni periodiche ha spettro discreto. Che cosa decide fra i due?`,
+    a:R`Decide se le autofunzioni candidate <b>appartengono</b> allo spazio, e su un intervallo finito appartengono quasi sempre. Le $e^{i\lambda x}$ sul segmento sono a quadrato sommabile per ogni $\lambda$ &mdash; l&rsquo;intervallo è corto e non c&rsquo;è niente che diverga: la condizione al bordo seleziona allora un insieme <i>numerabile</i> di $\lambda$, e lo spettro è discreto. Sulla retta intera le stesse funzioni non sono più sommabili per nessun $\lambda$, non c&rsquo;è nessuna condizione al bordo che selezioni, e tutti i $\lambda$ reali passano: spettro continuo. Il meccanismo generale è questo: la condizione al contorno è un <i>vincolo discreto</i> che quantizza, e un dominio infinito è un dominio dove quel vincolo non c&rsquo;è. È lo stesso motivo per cui una corda di chitarra ha armoniche e il mare no &mdash; e la stessa ragione per cui l&rsquo;idrogeno ha livelli discreti sotto la soglia di ionizzazione (dove la funzione d&rsquo;onda <i>deve</i> decadere) e un continuo sopra (dove non deve).`}
+  ]}
+]},
+
+/* ---------------- 05 · LA DEGENERAZIONE: L'AUTOSPAZIO, E LA BASE CHE NON E' UNICA ---------------- */
+{ num:'05', title:'La degenerazione: l’autospazio, e la base che non è unica', meta:'dove tace la dimostrazione di ortogonalità · il proiettore sull’autospazio di Ballentine · perché due basi diverse rappresentano lo stesso fatto fisico',
+  blocchi:[
+  {t:'prosa', title:'Il buco lasciato aperto nella tappa 02', tag:'costruzione', html:R`
+  <p>La dimostrazione di ortogonalità della tappa 02 partiva da $(a_1-a_2)\langle\phi_2|\phi_1\rangle=0$ e concludeva dividendo per $a_1-a_2$. Quella divisione è illegittima esattamente quando $a_1=a_2$: non è un dettaglio tecnico rimandabile, è il caso che la fisica incontra più spesso di quanto i libri introduttivi lascino credere — il momento angolare orbitale, l&rsquo;energia dell&rsquo;oscillatore armonico isotropo in più dimensioni, lo spettro dell&rsquo;idrogeno rispetto a $\ell$ e $m$. Shankar lo dice senza girarci intorno: &laquo;che la dimostrazione di ortogonalità fallisca per $\omega_i=\omega_j$ non deve sorprendere, perché due vettori etichettati da un autovalore degenere possono essere una qualunque coppia di membri dello spazio degenere, che non devono necessariamente essere ortogonali&raquo;. Il teorema tace; non vuol dire che non ci sia niente da dire, vuol dire che bisogna dirlo con uno strumento diverso.</p>`},
+  {t:'reveal', title:'L’autospazio, e il proiettore che lo rappresenta', tag:'costruzione', steps:[
+   {label:'Che cos’è un autospazio', body:R`
+   <p>Quando $a_1=a_2=a$, l&rsquo;insieme di <i>tutti</i> i vettori $|\phi\rangle$ che risolvono $\hat A|\phi\rangle=a|\phi\rangle$ non è più una singola retta: è un sottospazio, chiamato <b>autospazio</b> di $\hat A$ relativo all&rsquo;autovalore $a$, e la sua dimensione è il <b>grado di degenerazione</b> di $a$. Ballentine lo scrive nella forma che userà per il resto del capitolo: se l&rsquo;operatore ha autovalori ripetuti, si raccolgono tutti gli autovettori con lo stesso $a_i$ in un unico proiettore,</p>
+   $$P(a)=\sum_i|\phi_i\rangle\langle\phi_i|\,\delta_{a,a_i},\qquad \hat A=\sum_a a\,P(a),$$
+   <p>dove la somma su $i$ corre su <i>tutta</i> la base ortonormale e il delta di Kronecker seleziona solo gli indici con quell&rsquo;autovalore. $P(a)$ proietta esattamente sull&rsquo;autospazio, qualunque sia la sua dimensione — e questa è la generalizzazione di $\hat A=\sum_i a_i|\phi_i\rangle\langle\phi_i|$ (tappa 02) al caso in cui più di un indice $i$ condivide lo stesso $a_i$. È il punto da cui la tappa 07 ripartirà per la risoluzione spettrale completa.</p>`},
+   {label:'Un esempio che si porta dietro fino alla fine del movimento', body:R`
+   <p>Si prenda l&rsquo;operatore (hermitiano, verificabile a vista) $\hat A=\begin{pmatrix}2&0&0\\0&3&1\\0&1&3\end{pmatrix}$. È a blocchi: il primo autovalore si legge subito, $2$, e il blocco $2\times2$ restante ha traccia $3+3=6$ e determinante $3\cdot3-1\cdot1=8$, quindi autovalori $\frac{6\pm\sqrt{36-32}}{2}=\frac{6\pm2}{2}=4,2$. Il polinomio caratteristico completo è</p>
+   $$\det(\hat A-\lambda\mathbb 1)=(2-\lambda)\big[(3-\lambda)^2-1\big]=(2-\lambda)^2(4-\lambda),$$
+   <p>e l&rsquo;autovalore $2$ compare <b>due volte</b>: è degenere, con grado di degenerazione $2$; l&rsquo;autovalore $4$ è semplice. Risolvendo $(\hat A-2\mathbb 1)|\phi\rangle=0$ si trova che la prima riga si annulla identicamente (il blocco $2\times2$ meno $2\mathbb 1$ ha solo la seconda e terza riga) e restano i vettori $(x,y,-y)$ per $x,y$ arbitrari: un <b>piano</b>, non una retta. Due scelte ortonormali comode sono $|\phi_1\rangle=(1,0,0)$ e $|\phi_2\rangle=\tfrac1{\sqrt2}(0,1,-1)$; per $\lambda=4$ si trova invece la retta $|\phi_3\rangle=\tfrac1{\sqrt2}(0,1,1)$, non degenere.</p>`}
+  ]},
+  {t:'reveal', title:'La base non è unica, ma il proiettore sì', tag:'costruzione', steps:[
+   {label:'Ruotare dentro il piano degenere', body:R`
+   <p>Shankar fa l&rsquo;osservazione che è il cuore di questa tappa: oltre a $|\phi_1\rangle,|\phi_2\rangle$ esiste &laquo;un&rsquo;infinità di coppie ortonormali $|\phi_1'\rangle,|\phi_2'\rangle$, ottenute per rotazione rigida di $|\phi_1\rangle,|\phi_2\rangle$, fra le quali si può scegliere qualunque coppia nel costruire la base propria&raquo;. Si verifichi: per un angolo $\theta$ qualunque,</p>
+   $$|f_1\rangle=\cos\theta\,|\phi_1\rangle+\sin\theta\,|\phi_2\rangle,\qquad |f_2\rangle=-\sin\theta\,|\phi_1\rangle+\cos\theta\,|\phi_2\rangle$$
+   <p>restano autovettori di $\hat A$ con lo stesso autovalore $2$ (combinazione lineare di autovettori dello stesso autospazio) e restano ortonormali, perché $\langle f_1|f_1\rangle=\cos^2\theta+\sin^2\theta=1$ per ogni $\theta$. <b>Nessuna misura di $\hat A$ può distinguere la base $\{\phi_1,\phi_2\}$ dalla base $\{f_1,f_2\}$</b>: entrambe diagonalizzano l&rsquo;operatore con lo stesso autovalore, ed è qui che la degenerazione smette di essere un tecnicismo — dice che l&rsquo;operatore da solo non seleziona una base nell&rsquo;autospazio, e che se la fisica ne vuole una (per esempio $\ell,m$ invece di una combinazione qualunque) serve un <b>secondo</b> operatore, compatibile col primo, che tolga quella libertà. È esattamente il tema di mq-02 sugli insiemi completi di osservabili compatibili, e la degenerazione è la ragione per cui quel tema serve davvero.</p>`},
+   {label:'Che cosa resta fisso: il proiettore, non i suoi vettori', body:R`
+   <p>Il punto che la rotazione rende visibile è che $P(2)=|\phi_1\rangle\langle\phi_1|+|\phi_2\rangle\langle\phi_2|$ e $P'(2)=|f_1\rangle\langle f_1|+|f_2\rangle\langle f_2|$ sono <b>lo stesso operatore</b>, anche se i vettori con cui li si è scritti sono diversi. La componente $(2,2)$ di $P(2)$, calcolata con $|\phi_1\rangle,|\phi_2\rangle$, è $0^2+\big(\tfrac1{\sqrt2}\big)^2=\tfrac12$; calcolata con $|f_1\rangle,|f_2\rangle$ diventa $\big(\!-\!\tfrac{\sin\theta}{\sqrt2}\big)^2+\big(\!-\!\tfrac{\cos\theta}{\sqrt2}\big)^2=\tfrac{\sin^2\theta}{2}+\tfrac{\cos^2\theta}{2}=\tfrac12$: <b>indipendente da $\theta$</b>. Il proiettore sull&rsquo;autospazio è un oggetto fisico ben definito — &ldquo;la probabilità di trovare il sistema nell&rsquo;autospazio di $a$&rdquo; non dipende da quale base si è scelta per descriverlo; i singoli autovettori che lo compongono sono convenzione di calcolo, usabile ma non osservabile.</p>`}
+  ]},
+  {t:'plot', title:'Il grafico mostra la degenerazione prima ancora di risolvere l’equazione',
+   intro:R`Il polinomio caratteristico di $\hat A$, espanso, è $p(\lambda)=-\lambda^3+8\lambda^2-20\lambda+16$. Le sue radici sono gli autovalori: la curva lo mostra, e mostra anche <i>come</i> le tocca.`,
+   plots:[
+    {kind:'func2d', xr:[0.5,4.7], yr:[-3,3], height:340, ticks:6,
+     title:'il polinomio caratteristico: una radice doppia, una semplice',
+     curves:[
+      {f:'-x*x*x+8*x*x-20*x+16', col:'#4c8dff', width:2.6, label:'p(λ)=−λ³+8λ²−20λ+16'},
+      {f:'0', col:'#8a93a6', width:1.2, label:'asse λ'}
+     ],
+     xlabel:'λ', ylabel:'p(λ)'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> A $\lambda=4$ la curva <i>attraversa</i> l&rsquo;asse — è una radice semplice, $p'(4)=-4\ne0$. A $\lambda=2$ la curva <b>tocca</b> l&rsquo;asse senza attraversarlo e riparte dalla stessa parte: è tangente, e si calcola che $p'(2)=0$. Questa è la firma grafica di una radice doppia, ed è visibile <i>prima</i> di risolvere nulla: una tangenza è la degenerazione fatta immagine. <b>Che cosa impararne.</b> Se il polinomio caratteristico di un operatore hermitiano tocca l&rsquo;asse invece di attraversarlo, quell&rsquo;autovalore porta con sé un autospazio di dimensione maggiore di uno — e il grafico lo segnala senza bisogno di conoscere gli autovettori. È lo stesso fatto della tappa 02 (traccia e determinante come controllo rapido) portato un passo oltre: qui il controllo rapido è la <i>forma</i> della curva, non solo il suo valore.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se il proiettore sull’autospazio è ben definito indipendentemente dalla base, perché preoccuparsi di quale coppia $|\phi_1\rangle,|\phi_2\rangle$ si sceglie?`,
+    a:R`Perché la scelta conta per <i>altre</i> domande, anche se non conta per $\hat A$. Se si vuole calcolare il valor medio di un <i>secondo</i> operatore $\hat B$ che non commuta con $\hat A$, o se si vuole etichettare gli stati con numeri quantici fisicamente significativi (il momento angolare lungo un asse, per esempio), la base interna all&rsquo;autospazio smette di essere indifferente: diventa la base che diagonalizza anche $\hat B$ ristretto a quell&rsquo;autospazio. La libertà di ruotare non è un difetto da eliminare, è lo spazio esatto in cui un secondo operatore compatibile può agire per togliere l&rsquo;ambiguità — ed è per questo che si parla di <i>insieme completo</i> di osservabili compatibili, non di un&rsquo;osservabile sola.`},
+   {q:R`La tangenza nel grafico sembra un fatto sul polinomio, non sull’operatore. Che relazione c’è davvero?`,
+    a:R`La relazione è diretta: il polinomio caratteristico è $p(\lambda)=\det(\hat A-\lambda\mathbb 1)$, e una radice di molteplicità due significa — per un operatore hermitiano, dove la molteplicità algebrica coincide sempre con quella geometrica (tappa 02) — un autospazio di dimensione due. Non è un fatto sul polinomio <i>invece che</i> sull&rsquo;operatore: è lo stesso fatto letto nella rappresentazione algebrica anziché in quella vettoriale. La differenza pratica è che la tangenza si vede a colpo d&rsquo;occhio senza risolvere il sistema lineare, mentre il piano degenere richiede di risolverlo — motivo in più per guardare prima la forma del grafico, come controllo di cosa aspettarsi.`}
+  ]}
+]},
+
+/* ---------------- 06 · OPERATORI UNITARI, E LA TRASFORMATA DI CAYLEY ---------------- */
+{ num:'06', title:'Operatori unitari, e la trasformata di Cayley', meta:'autovalori di modulo uno · il cambio di base che era già un unitario · la mappa di von Neumann dagli autoaggiunti agli unitari',
+  blocchi:[
+  {t:'prosa', title:'Il terzo tipo di operatore, dopo autoaggiunto e proiettore', tag:'costruzione', html:R`
+  <p>Il programma di questo movimento (voce Q.2) nomina esplicitamente gli <b>operatori unitari</b> accanto agli autoaggiunti. Non è un argomento parallelo e indipendente: è lo stesso impianto — autovalori, autovettori, teorema spettrale — applicato a una condizione diversa, $\hat U^{\dagger}\hat U=\hat U\hat U^{\dagger}=\mathbb 1$ al posto di $\hat U=\hat U^{\dagger}$. E il cambio di base della tappa 02, che diagonalizzava $\begin{pmatrix}2&1\\1&2\end{pmatrix}$ nella base $\{(1,1),(1,-1)\}/\sqrt2$, <i>era già</i> un operatore unitario, senza che il nome fosse stato detto.</p>`},
+  {t:'reveal', title:'Autovalori di modulo uno, autovettori ortogonali: gli stessi teoremi, un’altra ipotesi', tag:'costruzione', steps:[
+   {label:'Che cosa cambia nella dimostrazione', body:R`
+   <p>Shankar tratta gli unitari come il caso gemello degli hermitiani, e lo fa alla lettera: <b>Teorema 11</b>, gli autovalori di un operatore unitario sono numeri complessi di modulo unitario; <b>Teorema 12</b>, i suoi autovettori (non degeneri) sono mutuamente ortogonali. Sia $\hat U|u_i\rangle=u_i|u_i\rangle$: prendendo l&rsquo;aggiunto della relazione e usando $\hat U^{\dagger}\hat U=\mathbb 1$ al posto di $\hat A=\hat A^{\dagger}$, la stessa manipolazione che in tappa 01 dava $a=a^{*}$ dà qui $u_i^{*}u_i=1$, cioè $|u_i|=1$: non reale, <b>di modulo uno</b>. È il punto in cui la dimostrazione diverge: l&rsquo;ipotesi diversa produce una conclusione diversa con lo stesso metodo.</p>`},
+   {label:'Ogni base ortonormale diagonalizzante è un unitario', body:R`
+   <p>Shankar nota il fatto che chiude il cerchio con mq-02: l&rsquo;operatore $\hat U$ che fa passare dalla base originaria $\{|i\rangle\}$ alla base degli autovettori $\{|\omega_i\rangle\}$ di un hermitiano $\hat R$ è &laquo;chiaramente unitario, perché &lsquo;ruota&rsquo; una base ortonormale in un&rsquo;altra&raquo; — le sue colonne contengono le componenti di autovettori ortonormali, che è esattamente la condizione di unitarietà. Da qui il teorema di diagonalizzazione nella sua forma operativa: <i>ogni matrice hermitiana $R$ su $V_n(\mathbb C)$ ammette una matrice unitaria $U$ (costruita con i suoi autovettori) tale che $U^{\dagger}RU$ sia diagonale</i>. Trovare la base che diagonalizza $R$ e risolvere il suo problema agli autovalori sono, letteralmente, lo stesso problema.</p>`}
+  ]},
+  {t:'reveal', title:'La trasformata di Cayley: da autoaggiunto a unitario, in una formula', tag:'costruzione', steps:[
+   {label:'La mappa, e perché funziona', body:R`
+   <p>Von Neumann costruisce il ponte esplicito fra le due famiglie. Nota prima il fatto in dimensione finita: una funzione razionale $f(\lambda)$ di una matrice diagonalizzabile conserva gli autovettori e manda gli autovalori $\lambda_i\mapsto f(\lambda_i)$; se $f$ manda l&rsquo;asse reale sulla circonferenza unitaria, allora manda le matrici con autovalori reali (hermitiane) in matrici con autovalori di modulo $1$ (unitarie). La funzione che lo fa è</p>
+   $$f(\lambda)=\frac{\lambda-i}{\lambda+i},\qquad U=\frac{A-i\mathbb 1}{A+i\mathbb 1},\qquad A=i\,\frac{\mathbb 1+U}{\mathbb 1-U},$$
+   <p>e von Neumann la chiama, dandole il nome che porta ancora oggi, <b>trasformata di Cayley</b>. La seconda formula è l&rsquo;inversa: dato un unitario $U$ (con $1$ non autovalore) si ricostruisce l&rsquo;autoaggiunto $A$ che lo genera. La coppia di formule è una corrispondenza biunivoca fra autoaggiunti e unitari (privati del punto singolare), ed è il motivo per cui in meccanica quantistica &ldquo;simmetria continua&rdquo; (unitaria, per Wigner) e &ldquo;generatore&rdquo; (autoaggiunto, l&rsquo;osservabile conservata) sono facce della stessa trasformazione — il tema che Noether lega alle quantità conservate, e che mq-07 di questo corso riprenderà sulle simmetrie.</p>`},
+   {label:'Un numero, non un operatore: perché il conto numerico convince', body:R`
+   <p>Prima di fidarsi della formula su un operatore, vale verificarla dove si può controllare a mano: su un singolo numero reale, trattato come &ldquo;operatore&rdquo; $1\times1$. Con $\lambda=3$ (un autovalore reale qualunque), la trasformata dà</p>
+   $$U=\frac{3-i}{3+i}=\frac{(3-i)^2}{(3+i)(3-i)}=\frac{8-6i}{10}=\frac45-\frac35\,i,$$
+   <p>e si verifica che $\big(\tfrac45\big)^2+\big(\tfrac35\big)^2=\tfrac{16}{25}+\tfrac9{25}=1$: modulo esattamente uno, come il teorema promette, per un numero che di per sé non aveva nulla di speciale. Il conto generale lo conferma per <i>ogni</i> $\lambda$ reale: $\lambda-i$ e $\lambda+i$ sono l&rsquo;uno il coniugato dell&rsquo;altro (per $\lambda$ reale, il coniugato di $\lambda-i$ è $\lambda+i$), quindi $U\,\overline U=\dfrac{(\lambda-i)(\lambda+i)}{(\lambda+i)(\lambda-i)}=1$ perché numeratore e denominatore sono lo stesso prodotto, scritto in due ordini diversi. E l&rsquo;inversione si verifica altrettanto esplicitamente: sostituendo $U=(\lambda-i)/(\lambda+i)$ nella seconda formula si ritrova esattamente $\lambda$, per ogni $\lambda$ — la coppia di formule è davvero una corrispondenza, non un&rsquo;approssimazione.</p>`}
+  ]},
+  {t:'plot', title:'La retta reale si avvolge sul cerchio unitario',
+   intro:R`Ogni punto $\lambda$ della retta reale (asse orizzontale) va a finire in un punto del cerchio unitario nel piano complesso, tramite $U(\lambda)=(\lambda-i)/(\lambda+i)$. La curva qui sotto mostra la parte reale di $U(\lambda)$ al variare di $\lambda$: parte da $-1$ (per $\lambda\to-\infty$), passa per $0$ a $\lambda=0$, e tende a $1$ per $\lambda\to+\infty$ senza mai uscire dall’intervallo $[-1,1]$ — la traccia, sull’asse reale, del fatto che il punto resta sempre sul cerchio di raggio uno.`,
+   plots:[
+    {kind:'func2d', xr:[-10,10], yr:[-1.3,1.3], height:320, ticks:8,
+     title:'Re[U(λ)] = (λ²−1)/(λ²+1), mai fuori da [−1,1]',
+     curves:[
+      {f:'(x*x-1)/(x*x+1)', col:'#4c8dff', width:2.6, label:'Re U(λ)'},
+      {f:'1', col:'#8a93a6', width:1.0, label:'limite +1'},
+      {f:'-1', col:'#8a93a6', width:1.0, label:'limite −1'}
+     ],
+     xlabel:'λ (autovalore reale)', ylabel:'Re U(λ)'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> La curva è compresa per sempre fra $-1$ e $1$, e li tocca solo nei limiti $\lambda\to\mp\infty$, mai per un $\lambda$ finito: coerente con $|U(\lambda)|=1$ esattamente, non approssimativamente. A $\lambda=3$ si legge $\mathrm{Re}\,U(3)=(9-1)/(9+1)=8/10=4/5$, lo stesso numero calcolato a mano sopra. <b>Che cosa impararne.</b> L&rsquo;intera retta reale — tutti gli infiniti autovalori possibili di un operatore autoaggiunto — si comprime sul cerchio unitario senza buchi e senza sovrapposizioni (tranne il punto $\lambda=\infty$, che manca all&rsquo;appello e corrisponde a $U=1$): è una mappa <i>biunivoca</i> fra retta e cerchio meno un punto, lo stesso tipo di corrispondenza della proiezione stereografica. La trasformata di Cayley è quella mappa applicata non ai numeri ma agli <i>operatori</i> che li generano.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché conviene dimostrare prima il Teorema 11 (autovalori di modulo uno) sul caso numerico $\lambda=3$ invece che direttamente in astratto?`,
+    a:R`Perché il caso numerico espone <i>dove</i> entra l&rsquo;ipotesi, nello stesso modo in cui l&rsquo;esempio $\hat A=\begin{pmatrix}3&i\\-i&1\end{pmatrix}$ in tappa 01 esponeva perché servisse l&rsquo;aggiunto e non una nozione vaga di simmetria. Qui si vede concretamente che $|U|^2=1$ non dipende dal valore di $\lambda$ scelto — vale $4/5,3/5$ per $\lambda=3$ tanto quanto per qualunque altro reale — perché la struttura $U=(\lambda-i)/(\lambda+i)$ mette sempre al numeratore e al denominatore una coppia di coniugati. Il conto astratto ripete lo stesso argomento con $\lambda$ lasciato libero; il conto numerico è la prova che l&rsquo;argomento non nasconde un caso speciale.`},
+   {q:R`La trasformata di Cayley manda autoaggiunti in unitari. Ma mq-03 ha appena mostrato (tappa 03) che non tutti gli operatori hermitiani sono autoaggiunti: che succede se si prova ad applicarla a uno che non lo è?`,
+    a:R`Von Neumann costruisce esattamente questo caso, ed è la ragione per cui introduce la trasformata nel paragrafo sulle estensioni: applicata a un operatore hermitiano ma non massimale (per esempio $-i\,d/dx$ su un dominio con condizioni al bordo non ancora fissate), la trasformata associata non è <i>univocamente</i> definita come operatore unitario su tutto lo spazio — resta un&rsquo;isometria parziale, definita solo dove il termine di bordo si comporta bene. È lo stesso fenomeno della tappa 03 letto nel linguaggio della tappa 06: l&rsquo;ostruzione del dominio non sparisce cambiando rappresentazione, perché la trasformata di Cayley è una corrispondenza fra <i>autoaggiunti</i> e <i>unitari definiti ovunque</i> — un hermitiano non massimale non è né l&rsquo;uno né, tramite Cayley, genera l&rsquo;altro. Risolvere quell&rsquo;ambiguità — scegliere quale estensione autoaggiunta usare — è esattamente scegliere quale trasformata di Cayley (quale condizione al bordo) si vuole.`}
+  ]}
+]},
+
+/* ---------------- 07 · PROIETTORI ORTOGONALI, E LA RISOLUZIONE SPETTRALE ---------------- */
+{ num:'07', title:'Proiettori ortogonali, e la risoluzione spettrale', meta:'P²=P come definizione · il proiettore sull’autospazio ricostruisce l’operatore · lo stesso esempio di tappa 05, chiuso',
+  blocchi:[
+  {t:'prosa', title:'Un mattone solo, usato ovunque finora senza nominarlo', tag:'costruzione', html:R`
+  <p>I proiettori sono già comparsi in ogni tappa precedente senza che il movimento si fermasse a definirli: $\hat P_u=|u\rangle\langle u|$ nella tappa 01 (il valor medio come traccia), $P(a)$ nella tappa 05 (il proiettore sull&rsquo;autospazio degenere), $E(\lambda)$ nella tappa 04 (la famiglia che sostituisce gli autovettori). Questa tappa raccoglie il filo: che cos&rsquo;è esattamente un proiettore, perché l&rsquo;idempotenza $\hat P^2=\hat P$ è <i>la</i> definizione e non una proprietà accessoria, e come l&rsquo;operatore degenere di tappa 05 si ricostruisce per intero dai suoi due proiettori.</p>`},
+  {t:'reveal', title:'Dal ket alla proiezione: la definizione, e perché è idempotente', tag:'costruzione', steps:[
+   {label:'Il caso più semplice: proiettare su una retta', body:R`
+   <p>Picasso lo introduce nel modo più diretto: sia $|v\rangle$ normalizzato, $\langle v|v\rangle=1$; l&rsquo;operatore di proiezione sulla retta generata da $|v\rangle$ si scrive, per ogni $|u\rangle\in\mathcal H$, $\hat P_v|u\rangle=|v\rangle\langle v|u\rangle$, cioè $\hat P_v=|v\rangle\langle v|$. Griffiths lo chiede esplicitamente come esercizio e lo chiama con il nome che è rimasto: &laquo;mostrare che gli operatori di proiezione sono idempotenti: $\hat P^2=\hat P$&raquo;. La dimostrazione è immediata e vale la pena farla perché mostra <i>dove</i> entra la normalizzazione:</p>
+   $$\hat P_v^2|u\rangle=|v\rangle\langle v|v\rangle\langle v|u\rangle=|v\rangle\cdot1\cdot\langle v|u\rangle=\hat P_v|u\rangle,$$
+   <p>per ogni $|u\rangle$, dunque $\hat P_v^2=\hat P_v$. Se $|v\rangle$ non fosse normalizzato comparirebbe un fattore $\langle v|v\rangle\ne1$ e l&rsquo;idempotenza cadrebbe: è la stessa clausola di normalizzazione che rende $\hat P_v$ hermitiano, $\hat P_v^{\dagger}=(|v\rangle\langle v|)^{\dagger}=|v\rangle\langle v|=\hat P_v$ (tappa 03, la regola per l&rsquo;aggiunto di un prodotto esterno).</p>`},
+   {label:'Su un sottospazio: la somma che conta i vettori della base', body:R`
+   <p>Se il sottospazio $V$ ha dimensione maggiore di uno, con base ortonormale $|v_i\rangle$, il proiettore si generalizza a $\hat P_V=\sum_i|v_i\rangle\langle v_i|$ (Picasso, eq. 4.24), ed è questa la forma che compare in $P(a)$ di tappa 05. L&rsquo;idempotenza si verifica identica, usando l&rsquo;ortonormalità $\langle v_i|v_j\rangle=\delta_{ij}$ per cancellare i termini incrociati: $\hat P_V^2=\sum_{i,j}|v_i\rangle\langle v_i|v_j\rangle\langle v_j|=\sum_i|v_i\rangle\langle v_i|=\hat P_V$. Quando $V$ è <i>tutto</i> $\mathcal H$ con una base completa, $\hat P_V=\mathbb 1$: è la relazione di completezza, eq. (4.25) di Picasso, e Ballentine la scrive identica in (1.26). Un proiettore interpola fra &ldquo;niente&rdquo; ($\hat P=0$) e &ldquo;tutto&rdquo; ($\hat P=\mathbb 1$): nel mezzo, seleziona esattamente un sottospazio.</p>`}
+  ]},
+  {t:'reveal', title:'Chiudere l’esempio di tappa 05: l’operatore ricostruito dai suoi due proiettori', tag:'esempio', steps:[
+   {label:'I due proiettori scritti per intero', body:R`
+   <p>Per l&rsquo;operatore $\hat A=\begin{pmatrix}2&0&0\\0&3&1\\0&1&3\end{pmatrix}$ di tappa 05, con autospazi generati da $|\phi_1\rangle=(1,0,0)$, $|\phi_2\rangle=\tfrac1{\sqrt2}(0,1,-1)$ (autovalore $2$) e $|\phi_3\rangle=\tfrac1{\sqrt2}(0,1,1)$ (autovalore $4$), i due proiettori sono</p>
+   $$P(2)=|\phi_1\rangle\langle\phi_1|+|\phi_2\rangle\langle\phi_2|=\begin{pmatrix}1&0&0\\0&\tfrac12&-\tfrac12\\0&-\tfrac12&\tfrac12\end{pmatrix},\qquad P(4)=|\phi_3\rangle\langle\phi_3|=\begin{pmatrix}0&0&0\\0&\tfrac12&\tfrac12\\0&\tfrac12&\tfrac12\end{pmatrix}.$$
+   <p>Si controllano le tre proprietà sulla singola entrata $(2,2)$ e $(2,3)$, che bastano perché la struttura delle altre è identica. <b>Idempotenza</b>: l&rsquo;entrata $(2,2)$ di $P(2)^2$ è $\tfrac12\cdot\tfrac12+\big(\!-\!\tfrac12\big)\cdot\big(\!-\!\tfrac12\big)=\tfrac12$, uguale all&rsquo;entrata di partenza. <b>Ortogonalità</b>: l&rsquo;entrata $(2,2)$ di $P(2)P(4)$ è $\tfrac12\cdot\tfrac12+\big(\!-\!\tfrac12\big)\cdot\tfrac12=0$ — i due proiettori si annullano a vicenda, come deve essere per autospazi distinti. <b>Completezza</b>: l&rsquo;entrata $(2,2)$ di $P(2)+P(4)$ è $\tfrac12+\tfrac12=1$, la stessa entrata dell&rsquo;identità: $P(2)+P(4)=\mathbb 1$ su questo spazio a tre dimensioni, perché non resta nessun terzo autospazio da coprire.</p>`},
+   {label:'La risoluzione spettrale discreta, verificata entrata per entrata', body:R`
+   <p>La formula di Ballentine $\hat A=\sum_a a\,P(a)$ (eq. 1.34) diventa qui $\hat A=2\,P(2)+4\,P(4)$, ed è il momento di verificarla e non solo crederla. Entrata $(2,2)$: $2\cdot\tfrac12+4\cdot\tfrac12=1+2=3$, che è esattamente $\hat A_{22}$. Entrata $(2,3)$: $2\cdot\big(\!-\!\tfrac12\big)+4\cdot\tfrac12=-1+2=1$, esattamente $\hat A_{23}$. L&rsquo;operatore con cui si è aperta la tappa 05 non era un dato arbitrario: era già, implicitamente, la somma pesata dei suoi proiettori — la tappa 05 lo scompone, questa lo ricompone, e il fatto che tornino a coincidere entrata per entrata è il teorema spettrale discreto visto funzionare, non solo enunciato.</p>`}
+  ]},
+  {t:'plot', title:'La misura spettrale di questo operatore, non di uno generico',
+   intro:R`Come in tappa 04, ma ora con i numeri di un operatore scritto per intero: la traccia di un proiettore è la dimensione del sottospazio su cui proietta, quindi $\operatorname{Tr}P(2)=2$ e $\operatorname{Tr}P(4)=1$, su una traccia totale di $3=\dim\mathcal H$. Normalizzando, il salto a $\lambda=2$ pesa $2/3$ e quello a $\lambda=4$ pesa $1/3$, e $2/3+1/3=1$: la misura spettrale di un vettore uniformemente distribuito fra gli autospazi.`,
+   plots:[
+    {kind:'func2d', xr:[0,5.5], yr:[-0.12,1.2], height:320, ticks:6,
+     title:'E(λ) per questo operatore: un salto di peso 2/3, poi uno di peso 1/3',
+     curves:[
+      {f:'(x>2)*(2/3)+(x>4)*(1/3)', col:'#4c8dff', width:2.6, label:'E(λ), pesi dalla degenerazione'},
+      {f:'1', col:'#8a93a6', width:1.0, label:'livello 1'}
+     ],
+     xlabel:'λ', ylabel:'peso cumulato'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> Il primo salto, a $\lambda=2$, è il più alto: pesa il doppio del secondo perché il suo autospazio ha dimensione doppia. È la traduzione visiva del grado di degenerazione introdotto in tappa 05 — non un&rsquo;etichetta astratta, ma letteralmente <i>quanto pesa</i> quell&rsquo;autovalore nella risoluzione spettrale. <b>Che cosa impararne.</b> La traccia di un proiettore non è un numero neutro: è il grado di degenerazione dell&rsquo;autovalore corrispondente, e la relazione $\operatorname{Tr}\hat A=\sum_a a\operatorname{Tr}P(a)$ — qui $2\cdot2+4\cdot1=8$, la traccia calcolata direttamente in tappa 05 — è esattamente la tappa 08 anticipata di una riga: la traccia totale si scompone sui pesi degli autospazi, non sui singoli autovettori che si è scelto di usare per scriverli.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché l’idempotenza $\hat P^2=\hat P$ si prende come DEFINIZIONE di proiettore, invece di definirlo come «l’operatore $|v\rangle\langle v|$ per un vettore normalizzato»?`,
+    a:R`Perché la seconda definizione presuppone già di sapere su quale sottospazio si vuole proiettare e di averne scelto una base, mentre $\hat P^2=\hat P$ (insieme a $\hat P=\hat P^{\dagger}$) caratterizza la famiglia intera senza riferimento a nessuna base: è la stessa mossa della tappa 04, dove $E(\lambda)$ sostituiva gli autovettori con una proprietà strutturale. E coglie esattamente il fatto di tappa 05: $P(2)$ scritto con $|\phi_1\rangle,|\phi_2\rangle$ o con la coppia ruotata $|f_1\rangle,|f_2\rangle$ è lo stesso operatore idempotente, anche se le due costruzioni &ldquo;$|v\rangle\langle v|$ per vettore normalizzato&rdquo; partono da vettori diversi. La definizione operativa vede l&rsquo;invariante; quella costruttiva vede la scelta arbitraria.`},
+   {q:R`La risoluzione spettrale $\hat A=\sum_a aP(a)$ sembra ridire soltanto $\hat A=\hat A$, una volta che si conoscono già gli autovalori e i proiettori. Che cosa aggiunge davvero?`,
+    a:R`Aggiunge che la ricostruzione **non richiede** di scegliere una base dentro ogni autospazio degenere — i proiettori $P(a)$ sono ben definiti indipendentemente da quella scelta (tappa 05), mentre la scrittura $\hat A=\sum_i a_i|\phi_i\rangle\langle\phi_i|$ richiede di avere fissato $|\phi_1\rangle,|\phi_2\rangle$ in un ordine e con un orientamento precisi. È la differenza fra una formula che funziona per OGNI base ortonormale dell&rsquo;autospazio e una che ne richiede una fissata: la prima è un fatto sull&rsquo;operatore, la seconda sul calcolo particolare che si sta facendo. Ed è la forma che sopravvive quando lo spettro diventa continuo (tappa 04), dove gli $\hat A=\sum a_i|\phi_i\rangle\langle\phi_i|$ non hanno più senso ma $\hat A=\int\lambda\,dE(\lambda)$ sì.`}
+  ]}
+]},
+
+/* ---------------- 08 · LA TRACCIA: UN NUMERO CHE NON DIPENDE DALLA BASE ---------------- */
+{ num:'08', title:'La traccia: un numero che non dipende dalla base', meta:'la definizione di Ballentine · perché è invariante per cambio di base unitario · la traccia di un proiettore è una dimensione · il valor medio richiuso',
+  blocchi:[
+  {t:'prosa', title:'Un numero già incontrato, mai definito per intero', tag:'costruzione', html:R`
+  <p>La traccia è comparsa fin dalla tappa 01, nella formula $\langle u|\rho|u\rangle=\operatorname{Tr}(\rho\hat P_u)$ con cui Ballentine deduce che l&rsquo;osservabile associata a un proiettore è autoaggiunta. È tempo di definirla per intero. Ballentine la scrive così:</p>
+  <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;Una caratteristica utile di un operatore $A$ è la sua traccia, definita come $\operatorname{Tr}A=\sum_j\langle u_j|A|u_j\rangle$, dove $\{|u_j\rangle\}$ può essere una base ortonormale qualunque. Si può dimostrare che il valore di $\operatorname{Tr}A$ è indipendente dalla particolare base ortonormale scelta per calcolarlo.&raquo;</i> &mdash; Ballentine, par. 1.2, pag. stampata 15</p>
+  <p>Due cose in questa definizione meritano peso uguale: che la traccia <i>si calcoli</i> come somma di elementi diagonali in una base, e che il suo <i>valore non dipenda</i> da quale base si è scelta per calcolarla. La seconda è il punto delicato — e ne è stata appena vista una dimostrazione implicita, senza che il movimento la nominasse: in tappa 05, la traccia dei proiettori $P(2)$ e $P(4)$ non è cambiata ruotando $|\phi_1\rangle,|\phi_2\rangle$ in $|f_1\rangle,|f_2\rangle$.</p>`},
+  {t:'reveal', title:'Perché un cambio di base unitario non tocca la traccia', tag:'costruzione', steps:[
+   {label:'La verifica diretta, sulla stessa matrice di tappa 02', body:R`
+   <p>Shankar lo chiede come esercizio nella forma più operativa: &laquo;la traccia di una matrice non è alterata da un cambio di base unitario $|i\rangle\to U|i\rangle$&raquo; (Esercizio 1.7.1), e lo stesso per il determinante (Esercizio 1.7.2). Si verifichi sulla matrice di tappa 02, $\hat A=\begin{pmatrix}2&1\\1&2\end{pmatrix}$, traccia $4$ e determinante $3$. Ruotandola con $U=\begin{pmatrix}\cos\varphi&-\sin\varphi\\\sin\varphi&\cos\varphi\end{pmatrix}$ (un unitario reale, cioè ortogonale) si ottiene $\hat B=U^{T}\hat AU=\begin{pmatrix}2+\sin2\varphi&\cos2\varphi\\\cos2\varphi&2-\sin2\varphi\end{pmatrix}$: le singole entrate <i>oscillano</i> con $\varphi$ — a $\varphi=\pi/4$, per dire, $\hat B$ diventa diagonale — ma</p>
+   $$\operatorname{Tr}\hat B=(2+\sin2\varphi)+(2-\sin2\varphi)=4,\qquad \det\hat B=(2+\sin2\varphi)(2-\sin2\varphi)-\cos^22\varphi=4-\sin^22\varphi-\cos^22\varphi=3,$$
+   <p>entrambi <b>indipendenti da $\varphi$</b>, uguali ai valori di partenza per ogni angolo. Non è una coincidenza di questo esempio: è la dimostrazione generale di Shankar applicata a un caso che si può disegnare.</p>`},
+   {label:'L’argomento generale, in una riga', body:R`
+   <p>Perché la traccia sia invariante basta la proprietà ciclica $\operatorname{Tr}(XY)=\operatorname{Tr}(YX)$ (von Neumann la dimostra per esteso nel paragrafo sulla traccia, costruendola a partire dalla radice quadrata di operatori positivi, per renderla valida anche in dimensione infinita): scrivendo $\hat B=U^{\dagger}\hat AU$ si ha $\operatorname{Tr}\hat B=\operatorname{Tr}(U^{\dagger}\hat AU)=\operatorname{Tr}(\hat AUU^{\dagger})=\operatorname{Tr}\hat A$, usando $UU^{\dagger}=\mathbb 1$ (tappa 06) nell&rsquo;ultimo passo. La traccia non vede la base <i>perché</i> l&rsquo;unitarietà è precisamente la condizione che permette di far scorrere $U$ da un lato all&rsquo;altro del prodotto senza lasciare resti.</p>`}
+  ]},
+  {t:'reveal', title:'La traccia di un proiettore è un conteggio, non un numero qualunque', tag:'costruzione', steps:[
+   {label:'Un intero che misura la dimensione di un sottospazio', body:R`
+   <p>Si applichi la definizione di Ballentine a $\hat P_V=\sum_i|v_i\rangle\langle v_i|$ (tappa 07), usando come base di calcolo gli stessi $|v_i\rangle$ completati a base di $\mathcal H$: ogni $|v_i\rangle$ della base del sottospazio dà $\langle v_i|\hat P_V|v_i\rangle=\langle v_i|v_i\rangle=1$, e ogni vettore ortogonale a $V$ dà $0$. Quindi $\operatorname{Tr}\hat P_V=\dim V$ — <b>sempre un intero</b>, mai un numero qualunque, perché conta vettori di base, non li pesa. È esattamente ciò che tappa 07 aveva calcolato sul caso specifico: $\operatorname{Tr}P(2)=2$ e $\operatorname{Tr}P(4)=1$, i gradi di degenerazione dei due autovalori, e la loro somma $2+1=3$ è la dimensione dell&rsquo;intero spazio — la stessa cosa detta tre volte, con la traccia, con la somma dei gradi di degenerazione, e con $\dim\mathcal H$.</p>`},
+   {label:'Il valor medio richiuso: dove tutto il movimento confluisce', body:R`
+   <p>La tappa 01 era partita da $\langle u|\rho|u\rangle=\operatorname{Tr}(\rho\hat P_u)$ per dedurre l&rsquo;autoaggiuntezza. Ora si può scrivere la formula generale del valor medio di un&rsquo;osservabile <i>degenere</i>, usando la risoluzione spettrale di tappa 05 e 07:</p>
+   $$\langle\hat A\rangle_\rho=\operatorname{Tr}(\rho\hat A)=\operatorname{Tr}\Big(\rho\sum_a aP(a)\Big)=\sum_a a\,\operatorname{Tr}\big(\rho P(a)\big)=\sum_a a\,p(a),$$
+   <p>dove $p(a)=\operatorname{Tr}(\rho P(a))$ è la probabilità di ottenere $a$ — la generalizzazione della regola di Born al caso in cui un autovalore ha più di un autovettore. La formula non privilegia nessun autovettore particolare dentro l&rsquo;autospazio di $a$, esattamente perché $P(a)$ non lo privilegia (tappa 05): la probabilità di misurare $a$ dipende solo dalla proiezione <i>sull&rsquo;intero autospazio</i>, non da come lo si è scelto di descrivere. Questo chiude il cerchio aperto in tappa 01: lì si era vista la condizione sull&rsquo;operatore che rende reale un valor medio; qui si vede la formula completa che quel valor medio calcola, con la degenerazione messa in conto fin dall&rsquo;inizio.</p>`}
+  ]},
+  {t:'plot', title:'Le entrate oscillano, la somma resta piatta',
+   intro:R`Le due entrate diagonali di $\hat B=U^{T}\hat AU$ al variare dell’angolo di rotazione $\varphi$: ciascuna sale e scende, ma la loro somma — la traccia — è la retta orizzontale che non si muove.`,
+   plots:[
+    {kind:'func2d', xr:[0,6.3], yr:[-0.3,4.3], height:340, ticks:7,
+     title:'B₁₁(φ), B₂₂(φ) oscillano; B₁₁+B₂₂ = 4 sempre',
+     curves:[
+      {f:'2+sin(2*x)', col:'#4c8dff', width:2.2, label:'B₁₁(φ)=2+sin2φ'},
+      {f:'2-sin(2*x)', col:'#ff8a5c', width:2.2, label:'B₂₂(φ)=2−sin2φ'},
+      {f:'4', col:'#8a93a6', width:2.4, label:'traccia = 4, costante'}
+     ],
+     xlabel:'φ', ylabel:'valore'}
+   ],
+   leggi:R`<p><b>Che cosa guardare.</b> Le due curve blu e arancio si intrecciano, ciascuna oscillando fra $1$ e $3$: a $\varphi=0$ si ha $(2,2)$ — la base di partenza — e a $\varphi=\pi/4$ si ha $(3,1)$, che sono esattamente gli <i>autovalori</i> di $\hat A$ trovati in tappa 02 (coerente: a quell&rsquo;angolo $U$ diagonalizza $\hat A$). La retta grigia orizzontale, somma delle due, non si piega mai. <b>Che cosa impararne.</b> La traccia è l&rsquo;unica combinazione delle entrate diagonali che resta cieca al cambio di base — non la singola entrata, non la loro differenza (che oscilla fra $-2$ e $2$ esattamente come le entrate stesse), solo la somma. È il motivo per cui la traccia, e non una singola componente, è la quantità che compare nelle formule fisiche (il valor medio, la normalizzazione di uno stato misto $\operatorname{Tr}\rho=1$): è l&rsquo;unico numero del genere che non dipende da una scelta arbitraria di assi.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se la traccia non dipende dalla base, perché Ballentine si prende la briga di dimostrarlo invece di darlo per ovvio?`,
+    a:R`Perché non è ovvio finché non si usa la proprietà ciclica — e la proprietà ciclica stessa non è ovvia in dimensione infinita, dove una somma infinita non si può sempre riordinare senza cambiarne il valore. Von Neumann costruisce la traccia apposta per sopravvivere a quel caso, passando per la radice quadrata di un operatore positivo invece che per la somma diretta degli elementi diagonali — un prezzo pagato precisamente perché &ldquo;ovvio in dimensione finita&rdquo; non basta quando lo spazio è $\mathcal H$ di dimensione infinita, lo stesso spazio dove in tappa 03 e 04 &ldquo;ovvio&rdquo; falliva regolarmente.`},
+   {q:R`La formula $\langle\hat A\rangle_\rho=\sum_a a\,p(a)$ sembra identica alla tappa 01 ($\varepsilon=\sum_i\varepsilon_i p_i$ di Picasso, eq. 4.28). Che cosa aggiunge la versione con $P(a)$?`,
+    a:R`Aggiunge che $p(a)=\operatorname{Tr}(\rho P(a))$ è definito anche quando $a$ è degenere, sommando correttamente su TUTTO l&rsquo;autospazio invece che su un singolo autovettore — se si scrivesse $p_i=\langle\phi_i|\rho|\phi_i\rangle$ per un singolo $|\phi_i\rangle$ dentro un autospazio di dimensione due, il risultato dipenderebbe da quale dei due vettori (o quale combinazione) si fosse scelto, contraddicendo tappa 05. La formula di Picasso era già corretta ma lasciava sottinteso che ogni autovalore avesse un solo autovettore; la riscrittura con $P(a)$ rende quell&rsquo;ipotesi esplicita rimuovendola — vale per operatori degeneri e non degeneri senza bisogno di due formule diverse.`}
+  ]}
+]},
+
+/* ---------------- 09 · IL SENSO: DALLA CONDIZIONE FISICA ALLA MACCHINA COMPLETA ---------------- */
+{ num:'09', title:'Il senso: dalla condizione fisica alla macchina completa', meta:'il filo ricomposto, tappa per tappa · ciò che questo movimento non ha fatto, e a chi tocca · un’ultima parola a chi lo ha fondato',
+  blocchi:[
+  {t:'prosa', title:'Il filo ricomposto', tag:'architettura', html:R`
+  <p>Il movimento è partito da una domanda fisica — quale proprietà rende reali i risultati di una misura — e ha dovuto costruire otto strumenti per rispondere per intero. La tappa 01 ha tradotto quella domanda in $\hat A=\hat A^{\dagger}$ e dimostrato che gli autovalori sono reali; la 02 ha aggiunto l&rsquo;ortogonalità degli autovettori, lasciando scoperto apposta il caso degenere. La 03 ha mostrato che in dimensione infinita &laquo;hermitiano&raquo; si spezza in due, e che la seconda metà — i domini — non è un cavillo: è ciò che decide se l&rsquo;impulso su una semiretta sia un&rsquo;osservabile. La 04 ha affrontato il caso in cui non c&rsquo;è nemmeno un autovettore, con la risposta di von Neumann (la famiglia $E(\lambda)$) e quella di Dirac (uscire dallo spazio di Hilbert) affiancate senza dichiarare un vincitore. La 05 ha richiuso il buco lasciato in tappa 02: la degenerazione non rompe la teoria, produce un autospazio e una libertà di base che nessuna misura di $\hat A$ può togliere. La 06 ha aperto il secondo tipo di operatore — unitario, non autoaggiunto — e mostrato con la trasformata di Cayley che i due tipi sono due facce della stessa trasformazione. La 07 ha nominato il mattone comune a tutte le tappe precedenti, il proiettore, e ricostruito l&rsquo;operatore di tappa 05 dai suoi due pezzi. La 08 ha chiuso con la traccia: il numero che non dipende dalla base, e che nella formula $\langle\hat A\rangle_\rho=\sum_a a\operatorname{Tr}(\rho P(a))$ raccoglie tutto il resto — autovalori, proiettori, probabilità — in un&rsquo;unica espressione.</p>`},
+  {t:'reveal', title:'Che cosa questo movimento non ha chiuso, e perché è giusto così', tag:'architettura', steps:[
+   {label:'Tre debiti dichiarati, non dimenticati', body:R`
+   <p>Primo: <b>mq-07</b> resta un buco dichiarato nella mappa — le simmetrie e i loro generatori, dove la trasformata di Cayley di questa tappa 06 diventerà il ponte fra operatore unitario di simmetria e osservabile conservata, via Noether. Richiede Sakurai, che non si apre: è lavoro per il modello forte, non per questa coda. Secondo: la <b>degenerazione</b> di tappa 05 ha introdotto, senza risolverlo, il problema di <i>quale</i> secondo operatore serva per toglierla — è l&rsquo;argomento di <b>mq-05</b>, gli insiemi completi di osservabili compatibili (CSCO) e l&rsquo;indeterminazione che nasce quando due operatori non commutano. Terzo: la tappa 04 ha trattato lo spettro continuo <i>in generale</i>, con $Q\psi(x)=x\psi(x)$ come unico esempio esplicito — <b>mq-06</b> prende posizione e impulso insieme e mostra come la loro incompatibilità reciproca sia la stessa storia della tappa 03 (domini, condizioni al bordo) letta come principio fisico.</p>`},
+   {label:'Il postulato della misura, rimandato di proposito', body:R`
+   <p>Questo movimento ha costruito $\langle\hat A\rangle_\rho=\operatorname{Tr}(\rho\hat A)$ e la probabilità $p(a)=\operatorname{Tr}(\rho P(a))$, ma non ha enunciato <i>il collasso</i> — che cosa succede allo stato <i>dopo</i> la misura, quando $|\Psi\rangle$ diventa (proporzionale a) $P(a)|\Psi\rangle$. Picasso lo chiama il postulato di von Neumann e lo introduce a parte, come un quinto postulato indipendente dai primi quattro; tenerlo fuori da qui non è una lacuna, è la stessa disciplina della tappa 03 (&laquo;che cosa questo movimento non fa&raquo;): mescolare &ldquo;come si calcola un valor medio&rdquo; con &ldquo;che cosa succede allo stato&rdquo; renderebbe questo movimento due movimenti mal cuciti. È per intero il programma di <b>mq-04</b>.</p>`}
+  ]},
+  {t:'prosa', title:'Un’ultima parola, a chi lo ha fondato', tag:'architettura', html:R`
+  <p>Il movimento chiude dove Dirac chiude il suo capitolo sulle osservabili, e vale lasciargli l&rsquo;ultima parola perché è lui ad aver scelto la via più audace di tutte e tre quelle viste qui — von Neumann, Ballentine, lo stesso Dirac: tenere gli autovettori a costo di uscire dallo spazio di Hilbert. Definendo l&rsquo;osservabile come variabile dinamica reale i cui autostati formano un insieme completo, scrive che questa è &laquo;un&rsquo;assunzione essenziale della teoria quantistica&raquo;, e non una conseguenza che si dimostra da principi più semplici. È la stessa onestà che ha attraversato tutto il movimento: Picasso dichiara che il suo argomento sul valor medio reale &laquo;ha meno sostanza di quanta sembri avere&raquo; (tappa 01); von Neumann avverte che il problema agli autovalori, anche quando è unico, può essere insolubile (tappa 03); Ballentine sceglie di <i>non</i> definire l&rsquo;aggiunto per operatori non limitati invece di far finta che il problema non esista (tappa 03). Nessuno dei quattro autori nasconde dove la propria costruzione smette di essere ovvia — ed è esattamente lì, in quei punti dichiarati, che si misura quanto a fondo si è davvero capito l&rsquo;operatore che si sta usando.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se dovessi riassumere in una frase perché «autoaggiunto» e non «hermitiano» è la condizione giusta, quale sceglieresti?`,
+    a:R`Perché «hermitiano» è una condizione sulla <i>formula</i> dell&rsquo;operatore, mentre «autoaggiunto» è una condizione sulla formula <i>e</i> sul dominio insieme — ed è questa seconda parte, invisibile in dimensione finita, a decidere se esista un&rsquo;unica risoluzione spettrale di cui parlare (tappa 03, teorema di von Neumann sull&rsquo;operatore massimale). Una frase sola che la cattura: due operatori con la stessa regola di calcolo ma domini diversi sono, in generale, operatori diversi — e solo uno dei due (al più) è davvero un&rsquo;osservabile.`},
+   {q:R`Il movimento ha usato lo stesso operatore — quello di tappa 05 — in tappa 05, 07 e 08. Perché non costruirne uno nuovo a ogni tappa, come fa la maggior parte dei libri?`,
+    a:R`Perché la ripetizione è il punto, non un risparmio di fatica: vedere lo <i>stesso</i> $2$ e $4$ ricomparire come autovalori (05), poi come coefficienti della risoluzione spettrale (07), poi come addendi pesati nella traccia (08) mostra che non sono tre fatti distinti su tre oggetti diversi — sono tre descrizioni dello stesso oggetto, lette con tre strumenti diversi. È lo stesso principio che Shankar enuncia per la traccia e il determinante: invarianti perché non dipendono dalla rappresentazione, e qui si vede che anche la <i>scomposizione</i> in autovalori e proiettori non dipende da quale tappa del movimento la sta leggendo.`}
+  ]}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleomq-03-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo mq-03 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: mq-03-osservabili-e-spettro.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
