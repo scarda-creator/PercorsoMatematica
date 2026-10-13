@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento mq-05 — Commutare o no: osservabili compatibili, CSCO, indeterminazione: che cosa si può sapere insieme</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Meccanica Quantistica · Movimento <b>mq-05 — Commutare o no: compatibili, CSCO, indeterminazione</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'meccanica-quantistica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["commutatore"] = {"nome":"Commutatore","riga":"$[\\hat A,\\hat B]=\\hat A\\hat B-\\hat B\\hat A$, antisimmetrico, con la regola di Leibniz $[\\hat A,\\hat B\\hat C]=[\\hat A,\\hat B]\\hat C+\\hat B[\\hat A,\\hat C]$ e la relazione canonica $[\\hat x,\\hat p]=i\\hbar$.","serve":"E' la misura di quanto due operazioni dipendano dall'ordine, e qui l'ordine e' fisica: due osservabili che non commutano non hanno una base comune di autostati, quindi non si misurano insieme con precisione arbitraria. Quasi ogni conto che sembra magico — l'algebra del momento angolare, gli operatori di salita e discesa, il teorema di Ehrenfest — e' una manipolazione di commutatori fatta con quelle regole e nient'altro.","esempio":"Dalla regola di Leibniz, $[\\hat x,\\hat p^{2}]=[\\hat x,\\hat p]\\hat p+\\hat p[\\hat x,\\hat p]=2i\\hbar\\hat p$. E' il conto che fa uscire il teorema di Ehrenfest: la meccanica classica ricompare come relazione fra valori medi, e ricompare perche' quel commutatore vale proprio $2i\\hbar\\hat p$.","debito":"l'identita' di Jacobi si enuncia e non si dimostra; la corrispondenza fra commutatore e parentesi di Poisson — che e' l'idea di Dirac e non un'analogia decorativa — sta in mq-07, e li' va letta per intero.","controllo":[{"tipo":"uguale","sinistra":"I*hbar*p + p*I*hbar","vale":"2*I*hbar*p","ipotesi":{"hbar":"positive","p":"real"},"dove":"esempio","appare":"2i\\hbar\\hat p"},{"tipo":"simbolico","dove":"riga","appare":"[\\hat x,\\hat p]=i\\hbar","perche":"e' la relazione di commutazione canonica, il POSTULATO da cui discende il resto della teoria: non si dimostra, si assume, ed e' cio' che separa la meccanica quantistica dalla classica"}],"qui":{},"pieno":null};
+STRUM["spazio-di-hilbert"] = {"nome":"Spazio di Hilbert","riga":"E' uno spazio vettoriale complesso con prodotto interno, completo nella norma che ne deriva e separabile, cosicche' ogni stato si scrive come somma numerabile $|\\psi\\rangle=\\sum_n c_n|n\\rangle$ con $c_n=\\langle n|\\psi\\rangle$.","serve":"E' la casa degli stati, e le tre parole della definizione fanno tre lavori diversi. Il prodotto interno da' le ampiezze, e quindi le probabilita'. La completezza garantisce che il limite di una successione di stati sia ancora uno stato: senza, uno sviluppo in serie potrebbe convergere fuori dallo spazio. La separabilita' permette di scrivere un vettore con una lista numerabile di coefficienti, cioe' di fare i conti.","esempio":"La relazione di completezza $\\sum_n|n\\rangle\\langle n|=\\hat 1$ e' lo strumento operativo piu' usato della teoria: infilata dentro un prodotto scalare lo spezza in una somma. La norma diventa $\\langle\\psi|\\psi\\rangle=\\sum_n|c_n|^{2}$, e se lo stato e' normalizzato quella somma vale uno: i moduli quadri dei coefficienti sono probabilita', e sommano a uno per costruzione.","debito":"la costruzione di $L^{2}$ come completamento, la misura di Lebesgue che serve a definirlo e il teorema di Riesz-Fischer stanno nei movimenti di Metodi; qui si usa il risultato.","controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"1","a":"oo","vale":"1","ipotesi":{"n":"positive-integer"},"dove":"esempio","appare":"sommano a uno"},{"tipo":"simbolico","dove":"esempio","appare":"\\sum_n|n\\rangle\\langle n|=\\hat 1","perche":"e' la relazione di completezza: i proiettori sugli elementi di una base ortonormale sommano all'identita'. E' la proprieta' che definisce una base completa, non un conto"}],"qui":{},"pieno":null};
+STRUM["proiettore-ortogonale"] = {"nome":"Proiettore ortogonale","riga":"Un proiettore ortogonale e' un operatore $\\hat P$ che soddisfa due condizioni insieme: $\\hat P^2=\\hat P$ (idempotenza) e $\\hat P^{\\dagger}=\\hat P$ (autoaggiuntezza). La prima dice che proiettare due volte equivale a proiettare una volta; la seconda rende la proiezione perpendicolare al sottospazio invece che obliqua.","serve":"E' il mattone di tutta la teoria della misura: $\\hat P=|\\psi\\rangle\\langle\\psi|$ su un ket normalizzato e' l'osservabile «lo stato e' $|\\psi\\rangle$?» con esiti $1$ e $0$, e il suo valor medio e' la probabilita'. L'identita' si scrive come somma di proiettori, $\\mathbb 1=\\sum_i\\hat P_i$, ed e' con questa che si cambia base e si decompone un'osservabile.","esempio":"Da $|\\psi\\rangle=(\\tfrac35,\\tfrac45)$ normalizzato si costruisce $\\hat P=|\\psi\\rangle\\langle\\psi|$ con entrate $\\tfrac{9}{25},\\tfrac{12}{25},\\tfrac{16}{25}$. L'elemento $(1,1)$ di $\\hat P^2$ vale $(\\tfrac{9}{25})^2+(\\tfrac{12}{25})^2=\\tfrac{9}{25}$, cioe' $\\hat P^2=\\hat P$; la traccia e' $\\tfrac{9}{25}+\\tfrac{16}{25}=1$, come per ogni proiettore di rango uno.","debito":"la decomposizione spettrale di un operatore autoaggiunto con spettro continuo in una famiglia di proiettori $E(\\lambda)$ (la misura spettrale) sta fuori da qui: si usa il caso discreto, dove i proiettori sono $|i\\rangle\\langle i|$.","controllo":[{"tipo":"simbolico","dove":"esempio","appare":"\\hat P^2=\\hat P","perche":"e' l'idempotenza, meta' della definizione di proiettore: un'identita' fra operatori, non un conto numerico. Il caso concreto che la sostiene e' l'entrata $(1,1)$ asserita qui sotto, dove i numeri ci sono"},{"tipo":"uguale","sinistra":"(Rational(9,25))**2+(Rational(12,25))**2","vale":"9/25","dove":"esempio","appare":"(\\tfrac{9}{25})^2+(\\tfrac{12}{25})^2=\\tfrac{9}{25}"},{"tipo":"uguale","sinistra":"Rational(9,25)+Rational(16,25)","vale":"1","dove":"esempio","appare":"\\tfrac{9}{25}+\\tfrac{16}{25}=1"}],"qui":{},"pieno":null};
+STRUM["matrici-di-pauli"] = {"nome":"Matrici di Pauli","riga":"Sono le tre matrici $2\\times2$ hermitiane a traccia nulla il cui quadrato e' l'identita' e il cui commutatore riproduce l'algebra del momento angolare, da cui lo spin $\\hat S_i=\\tfrac{\\hbar}{2}\\sigma_i$.","serve":"Sono la rappresentazione piu' piccola non banale del momento angolare, e insieme all'identita' formano una base di tutte le matrici due per due hermitiane: qualunque osservabile di un sistema a due stati e' una combinazione dell'identita' e delle tre. Ogni conto di spin un mezzo — Stern-Gerlach, precessione, risonanza magnetica, qubit — si riduce alla loro algebra.","esempio":"Siccome il quadrato di una combinazione unitaria delle tre e' l'identita', qualunque esponenziale collassa: l'operatore di rotazione dello spinore diventa $\\cos(\\theta/2)$ per l'identita' meno $i\\sin(\\theta/2)$ per la combinazione. Il mezzo nell'angolo e' la ragione per cui una rotazione di un giro intero cambia segno allo stato, perche' $\\cos(\\pi)=-1$.","debito":"la costruzione generale delle rappresentazioni di SU(2) e il suo legame con SO(3) stanno nel movimento sul momento angolare; qui c'e' il caso di spin un mezzo con le sue regole di calcolo.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi/2)","vale":"-1","dove":"esempio","appare":"\\cos(\\pi)=-1"},{"tipo":"uguale","sinistra":"cos(pi/3)**2+sin(pi/3)**2","vale":"1","dove":"esempio","appare":"\\sin(\\theta/2)"}],"qui":{},"pieno":null};
+STRUM["operatore-aggiunto"] = {"nome":"Operatore aggiunto e autoaggiunto","riga":"L'aggiunto e' definito da $\\langle\\phi|\\hat A\\psi\\rangle=\\langle\\hat A^{\\dagger}\\phi|\\psi\\rangle$ per ogni coppia di stati, e l'operatore e' autoaggiunto quando coincidono sia $\\hat A^{\\dagger}$ con $\\hat A$ sia i loro domini.","serve":"E' la condizione che rende un operatore un'osservabile: autovalori reali, e autovettori di autovalori distinti ortogonali. In dimensione finita «autoaggiunto» e «hermitiano» coincidono; in dimensione infinita no, e la differenza non e' pedanteria — l'operatore impulso su una semiretta e' hermitiano e non autoaggiunto, e infatti non e' un'osservabile.","esempio":"Se $\\hat A\\psi=a\\psi$ con $\\hat A$ autoaggiunto, allora $a\\langle\\psi|\\psi\\rangle=\\langle\\psi|\\hat A\\psi\\rangle=\\langle\\hat A\\psi|\\psi\\rangle=a^{*}\\langle\\psi|\\psi\\rangle$; siccome la norma non e' nulla segue $a=a^{*}$, cioe' l'autovalore e' reale. Tre righe, e sono la ragione per cui le osservabili si rappresentano cosi'.","debito":"la distinzione fra hermitiano e autoaggiunto in dimensione infinita — domini, estensioni, indici di difetto — e' il programma di von Neumann e sta fuori da questo percorso: qui si dichiara che esiste e si lavora nel caso buono. La regola di inversione dell'ordine nell'aggiunto di un prodotto si usa e non si dimostra.","controllo":[{"tipo":"uguale","sinistra":"conjugate(a)","vale":"a","ipotesi":{"a":"real"},"dove":"esempio","appare":"a=a^{*}"}],"qui":{},"pieno":null};
+STRUM["spettro"] = {"nome":"Spettro di un operatore","riga":"Lo spettro di un operatore e' l'insieme dei possibili esiti di una misura: i suoi autovalori. Puo' essere discreto (autovalori separati, autovettori in $\\mathcal H$), continuo (autovalori che riempiono un intervallo, autovettori non normalizzabili), o misto.","serve":"E' la quantita' che la fisica chiede davvero: scrivere l'hamiltoniana e trovarne lo spettro E' il problema d'esame. La distinzione discreto/continuo non e' tecnica — decide se un autostato e' uno stato preparabile (discreto) o una distribuzione che vive fuori dallo spazio di Hilbert (continuo), come l'onda piana e la delta.","esempio":"Per $\\sigma_z$ di Pauli lo spettro e' $\\{+1,-1\\}$, discreto; la somma dei due autovalori, cioe' la traccia, e' $1+(-1)=0$. Per l'operatore posizione lo spettro e' tutta la retta reale, continuo.","debito":"la costruzione rigorosa dello spettro continuo (teorema spettrale generalizzato, misura spettrale $E(\\lambda)$ di von Neumann) sta fuori da questo percorso: qui si dichiara che esiste e si lavora coi casi concreti. La separazione fra spettro continuo e spettro residuo non si tratta.","controllo":[{"tipo":"uguale","sinistra":"1+(-1)","vale":"0","dove":"esempio","appare":"1+(-1)=0"}],"qui":{},"pieno":null};
+STRUM["armoniche-sferiche"] = {"nome":"Armoniche sferiche","riga":"$Y_\\ell^{m}(\\theta,\\varphi)$ sono le autofunzioni simultanee di $\\hat L^{2}$, con autovalore $\\hbar^{2}\\ell(\\ell+1)$, e di $\\hat L_z$, con autovalore $\\hbar m$, ortonormali e complete sulla sfera.","serve":"Sono la parte angolare di ogni problema a simmetria sferica: appena il potenziale dipende solo dalla distanza, l'equazione si separa e la dipendenza angolare e' sempre una di queste, qualunque sia il potenziale. Cio' che cambia da problema a problema e' solo la parte radiale — per questo si imparano una volta e si riusano sempre.","esempio":"Per ogni $\\ell$ ci sono $2\\ell+1$ valori di $m$: e' la degenerazione essenziale di ogni livello a simmetria sferica, e non dipende dal potenziale. Per $\\ell=2$ vengono $2\\cdot2+1=5$ stati. La prima armonica e' costante, ed e' il motivo per cui lo stato fondamentale di un potenziale centrale e' sempre sfericamente simmetrico.","debito":"la costruzione esplicita dai polinomi di Legendre associati, e le formule di ricorrenza, non stanno qui: si usano gli enunciati e l'ortonormalita'.","controllo":[{"tipo":"uguale","sinistra":"2*2+1","vale":"5","dove":"esempio","appare":"2\\cdot2+1=5"},{"tipo":"simbolico","dove":"riga","appare":"\\hbar^{2}\\ell(\\ell+1)","perche":"e' l'autovalore del quadrato del momento angolare, che discende dall'algebra dei commutatori e non dalla forma esplicita delle armoniche. Si enuncia qui perche' e' cio' che le definisce"}],"qui":{},"pieno":null};
+STRUM["derivazione"] = {"nome":"Derivazione (regola di Leibniz)","riga":"Un operatore lineare $D$ su un'algebra che rispetta la regola del prodotto: $D(fg)=f\\,D(g)+g\\,D(f)$. È la proprietà che isola «derivare» fra tutti gli operatori lineari possibili.","serve":"È il modo algebrico di definire la derivata senza limiti, e serve ogni volta che si vuole derivare su un oggetto dove non c'è un rapporto incrementale da fare — su una varietà astratta, su un'algebra di matrici, su un anello di polinomi. La conseguenza operativa più usata è che **una derivazione è determinata dai suoi valori sui generatori**: su $\\mathbb{R}^{n}$ basta sapere quanto vale sulle coordinate $x^{1},\\dots,x^{n}$, e da lì Leibniz e la linearità danno tutto il resto. È il motivo per cui un vettore tangente, definito come derivazione, si scrive sempre come combinazione delle $\\partial/\\partial x^{i}$: non perché lo si sia scelto, ma perché non c'è altro. Un secondo fatto, che si dimostra in due righe e si usa continuamente: la **composizione** di due derivazioni non è una derivazione (compaiono derivate seconde), ma la loro **differenza incrociata** $DE-ED$ lo è, perché i termini secondi si cancellano a coppie.","esempio":"Su $\\mathbb{R}$, l'operatore $d/dx$ verificato sul prodotto $f=x^{2}$ e $g=x^{3}$: la regola dice $x^{2}\\cdot3x^{2}+x^{3}\\cdot2x$, cioè $5x^{4}$, e la derivata diretta di $x^{5}$ dà lo stesso $5x^{4}$. Il conto è banale ed è il punto: Leibniz non aggiunge informazione su $\\mathbb{R}$, dove la derivata si sa già fare. Aggiunge informazione quando è l'unica cosa che si ha — per esempio sull'algebra delle matrici, dove $D(A)=MA-AM$ per una matrice fissata $M$ è una derivazione, e la verifica di Leibniz consiste nello sviluppare $M(AB)-(AB)M$ e riconoscerlo come somma di $A\\,D(B)$ e $D(A)\\,B$, cosa che riesce perché i due termini $AMB$ introdotti dallo sviluppo compaiono con segni opposti e si cancellano.","debito":"che le derivazioni in un punto di una varietà siano esattamente i vettori tangenti è il teorema di gd-06 e non si ripete qui; il caso delle algebre non commutative è citato come esempio e non sviluppato.","controllo":[{"tipo":"uguale","sinistra":"x**2*3*x**2+x**3*2*x","vale":"5*x**4","ipotesi":{"x":"real"},"dove":"esempio","appare":"5x^{4}"},{"tipo":"derivata","espr":"x**5","rispetto":["x"],"vale":"5*x**4","ipotesi":{"x":"real"},"dove":"esempio","appare":"derivata diretta di $x^{5}$"}]};
+STRUM["disuguaglianza-di-schwarz"] = {"nome":"Disuguaglianza di Cauchy-Schwarz","riga":"$|\\langle\\phi|\\psi\\rangle|^{2}\\le\\langle\\phi|\\phi\\rangle\\,\\langle\\psi|\\psi\\rangle$, con l'uguaglianza se e solo se i due vettori sono proporzionali.","serve":"E' la disuguaglianza da cui nasce il principio di indeterminazione. Applicata agli scarti di due osservabili, e tenendo la sola parte immaginaria del prodotto scalare, da' un limite inferiore al prodotto delle due varianze pari al quadrato di $\\tfrac{1}{2i}\\langle[\\hat A,\\hat B]\\rangle$. L'indeterminazione non e' un postulato: e' Cauchy-Schwarz piu' un commutatore.","esempio":"Con posizione e impulso il commutatore vale $i\\hbar$, e la disuguaglianza diventa $\\sigma_x^{2}\\sigma_p^{2}\\ge\\hbar^{2}/4$, cioe' $\\sigma_x\\sigma_p\\ge\\hbar/2$. Il fattore un mezzo viene dal $2i$ al denominatore, non da una convenzione scelta.","debito":"la dimostrazione della disuguaglianza — il discriminante della norma quadra di una combinazione lineare — e' quella standard degli spazi con prodotto interno e non si ripete qui.","controllo":[{"tipo":"uguale","sinistra":"(1/(2*I)*(I*hbar))**2","vale":"hbar**2/4","ipotesi":{"hbar":"positive"},"dove":"esempio","appare":"\\hbar^{2}/4"},{"tipo":"uguale","sinistra":"sqrt(hbar**2/4)","vale":"hbar/2","ipotesi":{"hbar":"positive"},"dove":"esempio","appare":"\\hbar/2"}],"qui":{},"pieno":null};
+STRUM["integrale-gaussiano"] = {"nome":"Integrale gaussiano","riga":"$\\displaystyle\\int_{-\\infty}^{+\\infty} e^{-ax^{2}}\\,dx=\\sqrt{\\pi/a}$ per $a>0$, e $\\displaystyle\\int_{-\\infty}^{+\\infty} x^{2}e^{-ax^{2}}\\,dx=\\tfrac12\\sqrt{\\pi/a^{3}}$.","serve":"E' l'unico integrale che serve davvero sapere a memoria in meccanica statistica, perche' l'energia cinetica e' quadratica nell'impulso e quindi ogni integrazione sugli impulsi e' una gaussiana. Il trucco della dimostrazione — elevare al quadrato e passare in coordinate polari — vale la pena di vederlo una volta: e' il motivo per cui compare un $\\pi$ in una formula che di cerchi non parla.","esempio":"Da $I^{2}=\\iint e^{-a(x^{2}+y^{2})}dx\\,dy=2\\pi\\int_{0}^{\\infty}re^{-ar^{2}}dr=\\pi/a$ segue $I=\\sqrt{\\pi/a}$. I momenti superiori si ottengono derivando rispetto ad $a$ sotto il segno: $-\\partial_a I=\\int x^{2}e^{-ax^{2}}dx=\\tfrac12\\sqrt{\\pi}\\,a^{-3/2}$. Derivare rispetto a un parametro e' piu' rapido che integrare per parti, e funziona per tutti i momenti pari.","pieno":null,"qui":{"meccanica-statistica":{"serve":"La funzione di partizione di una particella libera e' un prodotto di tre gaussiane negli impulsi, e da li' esce la lunghezza d'onda termica $\\lambda=h/\\sqrt{2\\pi m k T}$ — che e' la grandezza con cui si misura quando un gas smette di essere classico.","esempio":"$\\int e^{-\\beta p^{2}/2m}dp=\\sqrt{2\\pi m/\\beta}$, quindi $Z_{1}=\\dfrac{V}{h^{3}}(2\\pi mkT)^{3/2}=V/\\lambda^{3}$. Lo stesso integrale col peso $p^{2}$ da' $\\langle p^{2}/2m\\rangle=\\tfrac12 kT$ per grado di liberta': l'equipartizione non e' un principio a parte, e' questo integrale."}}};
+STRUM["trasformata-di-fourier"] = {"nome":"Trasformata di Fourier","riga":"L'operazione $\\hat f(k)=\\int f(x)\\,e^{-ikx}\\,dx$, che riscrive una funzione come sovrapposizione di onde piane e manda la derivata in una moltiplicazione per $ik$.","serve":"È lo strumento che rende ALGEBRICA un'equazione differenziale lineare a coefficienti costanti: con $\\partial_x$ che diventa $ik$, un'equazione differenziale in $x$ diventa un'equazione algebrica in $k$, si risolve, e si antitrasforma. Le due cose da non perdere sono la convenzione dei $2\\pi$, che cambia da testo a testo e va dichiarata una volta, e Plancherel, che dice che la trasformata conserva la norma $L^{2}$ — in fisica, l'energia.","esempio":"La gaussiana $f(x)=e^{-x^{2}/2}$ ha trasformata $\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2}e^{-ikx}\\,dx=\\sqrt{2\\pi}\\,e^{-k^{2}/2}$: ancora una gaussiana, tanto più larga quanto l'originale è stretta. È il caso in cui si vede meglio il principio di indeterminazione come fatto puramente matematico.","pieno":{"file":"15-distribuzioni.html","tappa":"02","come":"le proprietà, la derivata che diventa un prodotto e Plancherel, nel nucleo delle distribuzioni"},"qui":{"elettromagnetismo":{"serve":"Serve appena si scrive un'onda generica invece di una monocromatica: ogni soluzione delle equazioni di Maxwell nel vuoto è una sovrapposizione di onde piane $e^{i(\\mathbf k\\cdot\\mathbf x-\\omega t)}$, e la trasformata è il modo di scomporla. Su ciascuna componente l'equazione delle onde si riduce alla relazione di dispersione, e la propagazione diventa un far girare fasi: ogni modo viaggia da solo, e nel vuoto tutti alla stessa velocità — per questo un impulso non si deforma.","esempio":"La sostituzione $\\partial_x\\to ik$ e $\\partial_t\\to-i\\omega$ manda le derivate seconde in $(ik)^{2}=-k^{2}$ e $(-i\\omega)^{2}=-\\omega^{2}$: l'equazione delle onde diventa $\\omega^{2}=c^{2}k^{2}$, cioè un'equazione di secondo grado al posto di una differenziale, e la sua radice positiva $\\omega=ck$ è la relazione di dispersione del vuoto."}},"controllo":[{"tipo":"integrale","espr":"exp(-x**2/2)*exp(-I*k*x)","var":"x","da":"-oo","a":"oo","vale":"sqrt(2*pi)*exp(-k**2/2)","ipotesi":{"k":"real"},"dove":"esempio","appare":"\\sqrt{2\\pi}\\,e^{-k^{2}/2}"},{"tipo":"uguale","sinistra":"(I*k)**2","vale":"-k**2","ipotesi":{"k":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-k^{2}"},{"tipo":"uguale","sinistra":"(-I*w)**2","vale":"-w**2","ipotesi":{"w":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-\\omega^{2}"},{"tipo":"uguale","sinistra":"(c*k)**2","vale":"c**2*k**2","dove":"qui.elettromagnetismo.esempio","appare":"c^{2}k^{2}"}]};
+STRUM["traccia"] = {"nome":"Traccia di un operatore","riga":"La traccia e' la somma degli elementi diagonali, $\\operatorname{tr}\\hat A=\\sum_i\\langle i|\\hat A|i\\rangle$. Non dipende dalla base ortonormale scelta, perche' e' invariante per permutazione ciclica: $\\operatorname{tr}(\\hat A\\hat B)=\\operatorname{tr}(\\hat B\\hat A)$, da cui $\\operatorname{tr}(\\hat U^{\\dagger}\\hat A\\hat U)=\\operatorname{tr}\\hat A$.","serve":"E' il modo di estrarre un numero da un operatore senza privilegiare una rappresentazione. Il valor medio di un'osservabile su uno stato si scrive $\\langle A\\rangle=\\operatorname{tr}(\\rho\\hat A)$ con $\\rho=|\\psi\\rangle\\langle\\psi|$, e questa forma — a differenza di $\\langle\\psi|\\hat A|\\psi\\rangle$ — vale identica per gli stati misti, dove $\\rho$ non e' piu' un proiettore: e' la porta verso la matrice densita' e la decoerenza.","esempio":"Per $A=\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}$ e $B=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}$, pur essendo $AB\\neq BA$, le due tracce coincidono: $\\operatorname{tr}(AB)=2+3=5=\\operatorname{tr}(BA)$. La traccia di un proiettore di rango uno vale $1$, e in generale la traccia di un proiettore e' la dimensione del sottospazio su cui proietta.","debito":"la traccia di un operatore in dimensione infinita esiste solo per la classe degli operatori a traccia (totalmente continui), e la costruzione rigorosa — $\\operatorname{tr}(\\hat A^{\\dagger}\\hat A)=\\sum_\\mu\\|\\hat A\\phi_\\mu\\|^2$ indipendente dalla base, von Neumann cap. II.11 — qui si cita. Si lavora col caso in cui la somma converge.","controllo":[{"tipo":"uguale","sinistra":"2+3","vale":"5","dove":"esempio","appare":"\\operatorname{tr}(AB)=2+3=5"}],"qui":{},"pieno":null};
+STRUM["delta-di-dirac"] = {"nome":"Delta di Dirac","riga":"Non è una funzione ma un funzionale, definito da $\\int f(x)\\,\\delta(x-a)\\,dx=f(a)$, che composto con una funzione si spezza sui suoi zeri come $\\delta(g(x))=\\sum_i \\delta(x-x_i)/|g'(x_i)|$.","serve":"Serve come macchina per cambiare variabile senza invertire nulla. La densità di $y=f(x)$ si scrive $p_Y(y)=\\int p_X(x)\\,\\delta(y-f(x))\\,dx$, e la delta produce da sola il fattore $1/|f'|$ che altrimenti andrebbe messo a mano: i rami molteplici si contano da soli invece di doverli ricordare. È la ragione pratica per cui il formalismo con la delta compare in ogni soluzione d'esame che tocchi una distribuzione, mentre il cambio di variabile esplicito compare quasi mai.","esempio":"$\\delta(x^2-a^2)$ con $a$ positivo. Gli zeri sono $x=\\pm a$; la derivata dell'argomento è $2x$, che in modulo vale $2a$ su entrambi. Quindi $\\delta(x^2-a^2)=\\dfrac{1}{2a}\\big[\\delta(x-a)+\\delta(x+a)\\big]$. Il caso si ripete identico in fisica statistica con $\\varepsilon=p^2/2m$ in una dimensione, dove i due rami $p=\\pm\\sqrt{2m\\varepsilon}$ contribuiscono entrambi — e dimenticarne uno dimezza la risposta.","pieno":{"file":"15-distribuzioni.html","tappa":"01","come":"le distribuzioni come funzionali, la delta e le sue proprietà, nel nucleo di Metodi"},"qui":{"meccanica-statistica":{"serve":"È lo strumento con cui si calcola la densità degli stati, cioè l'oggetto su cui poggia tutto il secondo tempo del corso: $g(\\varepsilon)=\\int d^dp\\,d^dq\\;\\delta(\\varepsilon-H)/h^d$. L'identità che si usa davvero non è la definizione ma questa: $\\delta(\\varepsilon-H)=\\partial_\\varepsilon\\,\\theta(\\varepsilon-H)$. Si scambia l'integrale con la derivata e ci si ritrova a calcolare il volume della regione dove l'hamiltoniana sta sotto $\\varepsilon$ — un integrale elementare — invece di un integrale con una delta dentro. La $g$ così ottenuta è pura geometria dello spazio delle fasi: non sa nulla della temperatura, e per questo resta identica quando si passa da Boltzmann a Fermi o a Bose.","esempio":"Particella libera in due dimensioni. Il volume della regione $p^2/2m$ sotto $\\varepsilon$ è il disco di area $2\\pi m\\varepsilon$; derivando rispetto a $\\varepsilon$ si ottiene $2\\pi m$, cioè una densità degli stati costante. Non è una curiosità: è la ragione per cui in due dimensioni una particella libera non condensa, e per cui le prove che chiedono la condensazione in $d=2$ mettono sempre un potenziale confinante, che porta la $g$ da costante a crescente."}},"controllo":[{"tipo":"derivata","espr":"x**2-a**2","rispetto":["x"],"vale":"2*x","ipotesi":{"x":"positive","a":"positive"},"dove":"esempio","appare":"2x"},{"tipo":"uguale","sinistra":"1/Abs(2*a)","vale":"1/(2*a)","ipotesi":{"a":"positive"},"dove":"esempio","appare":"\\dfrac{1}{2a}"},{"tipo":"derivata","espr":"2*pi*m*e","rispetto":["e"],"vale":"2*pi*m","ipotesi":{"m":"positive","e":"positive"},"dove":"qui.meccanica-statistica.esempio","appare":"2\\pi m"}]};
+STRUM["operatore-unitario"] = {"nome":"Operatore unitario","riga":"Un operatore $\\hat U$ e' unitario quando $\\hat U^{\\dagger}\\hat U=\\hat U\\hat U^{\\dagger}=\\mathbb 1$, cioe' $\\hat U^{\\dagger}=\\hat U^{-1}$. Equivale a dire che conserva il prodotto interno: $\\langle \\hat U\\phi|\\hat U\\psi\\rangle=\\langle\\phi|\\psi\\rangle$ per ogni coppia di stati.","serve":"Conservare il prodotto interno vuol dire conservare le probabilita': ogni trasformazione fisica che non cambia gli esiti di una misura — un cambio di base, una traslazione, una rotazione, l'evoluzione temporale — e' unitaria. I suoi autovalori hanno modulo uno, e due osservabili legate da un operatore unitario hanno lo stesso spettro.","esempio":"La rotazione del piano $\\hat U=\\begin{pmatrix}\\cos\\theta&-\\sin\\theta\\\\\\sin\\theta&\\cos\\theta\\end{pmatrix}$ e' unitaria e ha autovalori $e^{\\pm i\\theta}$, di modulo $|e^{i\\theta}|=1$. La matrice $S$ del cambio di base ortonormale e' unitaria per lo stesso motivo: manda una base ortonormale in un'altra.","debito":"la trasformata di Cayley $\\hat U=(\\hat A-i)/(\\hat A+i)$, che lega operatori autoaggiunti e unitari e con cui von Neumann risolve il problema agli autovalori in dimensione infinita, si cita e non si costruisce.","controllo":[{"tipo":"uguale","sinistra":"Abs(exp(I*theta))","vale":"1","ipotesi":{"theta":"real"},"dove":"esempio","appare":"|e^{i\\theta}|=1"}],"qui":{},"pieno":null};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo mq-05: Commutare o no: osservabili compatibili, CSCO, indeterminazione: che cosa si può sapere insieme <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        mq-05 — commutare o no: osservabili compatibili, CSCO, indeterminazione
+identita:  cosa si puo' sapere insieme, e perche' la risposta e' un commutatore. Due voci
+           del programma in un movimento solo, e stanno insieme perche' sono la stessa
+           domanda letta nei due versi: se due osservabili commutano esiste una base in cui
+           entrambe hanno valore certo (Q.4), e se non commutano c'e' un pavimento sotto il
+           prodotto delle loro indeterminazioni (Q.3). La disuguaglianza e' DEDOTTA, non
+           enunciata, e la funzione d'onda che la satura e' CALCOLATA, non citata
+copre:     Q.3 (relazioni di indeterminazione; funzioni d'onda con minimo prodotto
+           dell'indeterminazione fra posizione e impulso), Q.4 (basi comuni di osservabili
+           che commutano; insiemi completi di osservabili che commutano, CSCO)
+serve:     mq-03 (l'osservabile come operatore autoaggiunto, lo spettro, gli autovettori,
+           i proiettori ortogonali, la traccia), mq-04 (la statistica di una misura: valor
+           medio, probabilita' di un esito, scarto quadratico medio, misure successive)
+apre:      lo calcola verifica-mappa.py invertendo i `serve` degli altri movimenti
+strumenti: commutatore, disuguaglianza-di-schwarz, spettro, proiettore-ortogonale,
+           operatore-aggiunto, operatore-unitario, spazio-di-hilbert, matrici-di-pauli,
+           integrale-gaussiano, trasformata-di-fourier, traccia, delta-di-dirac,
+           armoniche-sferiche, derivazione
+fonti:     Picasso, Lezioni di Meccanica Quantistica (ETS 2015) — la fonte portante, e in
+           italiano. Il §4.10 «Osservabili Compatibili» da' le DUE definizioni di
+           compatibilita' (stessi autovettori · la seconda misura non perturba) e dimostra
+           che sono equivalenti, prima nel caso non degenere con due diagrammi e poi nel
+           caso generale usando il postulato di von Neumann (pag. stampata 79). Il teorema
+           che due osservabili sono compatibili se e solo se gli operatori commutano, con
+           il LEMMA isolato di proposito — se il commutatore e' nullo e |xi'> e' autovettore
+           di xi, allora eta|xi'> e' ancora autovettore di xi con lo stesso autovalore — e
+           la dimostrazione per il caso degenere: ogni autospazio e' invariante, eta agisce
+           indipendentemente dentro ciascuno (pag. 79-81). Le tre osservazioni che valgono
+           quanto il teorema, fra cui che l'identita' commuta con tutto e che [xi,eta] non
+           nullo non vieta QUALCHE autovettore simultaneo (pag. 81). La definizione di
+           sistema completo di osservabili compatibili come insieme GLOBALMENTE non
+           degenere (pag. 81). Il §4.11: la relazione di indeterminazione attribuita a
+           H. P. Robertson e dimostrata con a = xi + i*x*eta e il discriminante della forma
+           quadratica in x (pag. 82-83); il caso in cui il commutatore e' un c-numero e la
+           frase che decide lo status della cosa — «in realta' nella teoria quantistica non
+           e' un principio, ma un teorema» (pag. 54). Il §4.12: le sei proprieta' dei
+           commutatori con l'identita' di Jacobi, il postulato di quantizzazione per analogia
+           con le parentesi di Poisson, le CCR, e il caso [q^2,p^2] in cui l'analogia FALLISCE
+           per l'ordine dei fattori (pag. 84-86). Gli esempi fisici di CSCO: gli stati
+           stazionari dell'atomo isolato |E,L,M,w> con l'operatore di inversione spaziale
+           (pag. 214), e l'aggiunta di s_z ai gradi orbitali (pag. 250).
+           Ballentine, Quantum Mechanics: A Modern Development — i due capitoli assegnati per
+           titolo. Il §2.1 per la definizione di stato come specificazione di una
+           distribuzione di probabilita' per ogni osservabile, che e' cio' che rende sensata
+           la domanda di questo movimento (pag. stampata 42-47). Il §8.4 «Indeterminacy
+           Relations» per la deduzione che funziona anche sugli stati non puri: Tr(rho T T^)
+           >= 0 con T = A_0 + i*omega*B_0, minimizzazione in omega, e il risultato
+           Delta A Delta B >= |<C>|/2 (pag. 223-224). La classificazione COMPLETA degli stati
+           di minima indeterminazione: la condizione T^|psi> = 0, l'equazione differenziale
+           che ne segue, la gaussiana generale con x_0 e k_0, e il teorema che uno stato di
+           minima indeterminazione DEVE essere puro — Stoler e Newman 1972 — dimostrato
+           osservando che due gaussiane di quella forma non sono mai ortogonali (pag. 224-225).
+           Il paragrafo «Operational significance», che e' la parte che nessun manuale mette:
+           Delta Q e Delta P NON sono errori di misura, la prova sperimentale NON coinvolge
+           misure simultanee, la lettura statistica e' di K. R. Popper (1934), e l'esempio di
+           cristallografia di Jauch in cui il limite quantistico e' quasi raggiunto
+           (pag. 225-227). Il problema 8.10, che chiede di rifare la deduzione con omega
+           COMPLESSO e ottenere una disuguaglianza piu' forte (pag. 229): e' svolto qui.
+           Sakurai-Napolitano, Modern Quantum Mechanics — il §1.4, cioe' la sezione che
+           tratta insieme i due argomenti di questo movimento. Il Teorema 1.2 nella sua
+           forma matriciale, (a''-a')<a''|B|a'> = 0, che e' la stessa cosa del lemma di
+           Picasso scritta in componenti; la costruzione delle combinazioni lineari dentro
+           l'autospazio nel caso n volte degenere; l'indice collettivo K' per la n-upla di
+           autovalori; e la dimostrazione che due osservabili incompatibili non possono avere
+           un insieme COMPLETO di autoket simultanei, con l'eccezione del sottospazio —
+           lo stato l=0 e' autostato simultaneo di L_x e L_z (pag. stampata 28-35). Le misure
+           selettive in sequenza A -> B -> C, il confronto fra la somma sui cammini b' e
+           l'assenza del filtro B, e la frase che chiude il confronto: «here lies the heart
+           of quantum mechanics» (pag. 32-33). La deduzione della disuguaglianza per via di
+           Schwarz con i tre lemmi, e l'osservazione che buttare il termine con
+           l'anticommutatore puo' solo indebolirla (pag. 34-35). Il commutatore fra posizioni
+           a tempi diversi e lo sparpagliamento che ne segue (pag. 85), e l'avvertenza che la
+           relazione tempo-energia e' di natura diversa (pag. 80).
+           Shankar, Principles of Quantum Mechanics — il mestiere e il lessico. La procedura
+           con cui si inchioda una base comune aggiungendo operatori finche' la n-upla e'
+           unica, e l'osservazione che un operatore non degenere e' da solo un insieme
+           completo (pag. stampata 46, 133). Le due avvertenze sul caso incompatibile:
+           P(omega,lambda) non e' P(lambda,omega), e P(omega,lambda) NON e' la probabilita'
+           di produrre uno stato con valori definiti di entrambe, perche' uno stato cosi' non
+           esiste per definizione (pag. 133). Il capitolo 9: la deduzione che TRATTIENE
+           l'anticommutatore e arriva alla disuguaglianza piu' forte, con le due condizioni di
+           uguaglianza, e il pacchetto di minima indeterminazione (pag. 237-239).
+           Griffiths, Introduction to Quantum Mechanics — la forma compatta e il meccanismo
+           di laboratorio. Il principio di indeterminazione generalizzato come conseguenza
+           dell'interpretazione statistica e non come assunzione in piu'; la risposta alla
+           domanda «perche' in laboratorio non si puo'»: la misura di posizione fa collassare
+           su un picco stretto, che per Fourier porta una banda larga di lunghezze d'onda; e
+           la nota su Bohr e sui dibattiti con Einstein (pag. stampata 113-114). I problemi
+           3.18 e 3.20, le identita' [AB,C] = A[B,C] + [A,C]B e [x^n,p] = i*hbar*n*x^(n-1),
+           il calcolo esplicito di [L_x,L_y] = i*hbar*L_z e di [L^2,L_z] = 0, e il problema
+           4.19(d): H, L^2 e L_z sono compatibili se il potenziale dipende solo da r
+           (pag. 113-114, 163, 169).
+           Il Sakurai italiano NON si apre: e' una scansione a zero caratteri estraibili, e
+           niente di quanto scritto qui le attribuisce qualcosa. La sezione 1.4 che la mappa
+           indicava per questo movimento e' stata letta nell'edizione Sakurai-Napolitano in
+           inglese, che ha testo.
+voci-fondative:
+           HEISENBERG, pagine stampate 24-27 e 32-35 nel dossier delle voci, in italiano con
+           OCR ad accenti persi: si cita solo cio' che si legge senza ambiguita', e nessuna
+           formula si ricostruisce dall'OCR. Qui c'e' il capitolo 2, «Critica dei concetti
+           fisici del modello corpuscolare», e contiene DUE deduzioni e non una. La prima e'
+           ondulatoria e conta le lunghezze d'onda: un pacchetto largo Delta q contiene circa
+           n = Delta q / lambda lunghezze d'onda, e perche' le onde si annullino fuori dal
+           pacchetto devono entrare nella sovrapposizione anche quelle che ce ne fanno stare
+           n+1 (pag. 25-26). La seconda e' il MICROSCOPIO: la risoluzione e' lambda/sin(eps),
+           almeno un quanto deve essere diffuso e raggiungere l'occhio, e quel quanto cede per
+           effetto Compton un rinculo mal noto perche' la sua direzione dentro il fascetto e'
+           ignota (pag. 33). E c'e' la parte che quasi nessuno cita: Heisenberg CONFUTA due
+           obiezioni, quella del microscopio su supporto mobile e quella del massimo della
+           figura di diffrazione misurato su m quanti — l'esattezza migliora di radice di m e
+           l'indeterminazione dell'impulso peggiora di radice di m, e il prodotto non si muove
+           (pag. 33-34). Infine, e smentisce il luogo comune per cui Heisenberg avrebbe avuto
+           solo l'argomento euristico: a pag. 27 definisce Delta q come SCARTO QUADRATICO
+           MEDIO sull'ampiezza di probabilita', cita Kennard, e dice che le relazioni si
+           possono dedurre «senza immediato riferimento al modello ondulatorio» dallo schema
+           matematico. La riga di fuoco e' la frase sul significato delle parole fuori dai
+           limiti, e la nota a pie' di pagina sull'espressione «in realta'».
+           DIRAC, pagine stampate 70-71, 75-80, 122, 126 e 133-137 nel dossier delle voci, in
+           italiano con OCR sporco. Due contributi che nessun manuale moderno rifa'. Il primo
+           e' il §13: la funzione prodotto degli indicatori, il cui valor medio E' la
+           probabilita' congiunta, e il prodotto e' indipendente dall'ordine dei fattori
+           esattamente perche' le osservabili commutano (pag. 70); poi la tesi, che e' una
+           tesi e non una definizione — «due o piu' osservabili che commutino fra loro possono
+           essere considerate come un'unica osservabile, la cui misura dia come risultato due
+           o piu' numeri» (pag. 71), introdotta da una frase che dice perche' la cosa gli
+           sembrava notevole. Il secondo e' il §14, dove la nozione di INSIEME COMPLETO DI
+           OSSERVABILI CHE COMMUTANO nasce — e nasce per costruire una rappresentazione, non
+           per etichettare stati: i bra fondamentali di una rappresentazione ortogonale sono
+           autobra simultanei di un insieme completo, e viceversa, e qualunque insieme di
+           osservabili che commutano si puo' completare aggiungendone altre (pag. 77-78). Il
+           §22, dove Dirac SI FERMA a chiedersi se le q siano un insieme completo, dichiara
+           di assumerlo e paga il debito quattro pagine dopo (pag. 122 e 126). Il §24, in cui
+           ricava Delta q Delta p = hbar dalla relazione di Fourier fra i due
+           rappresentativi, e aggiunge che quella vale «solo nel caso piu' favorevole» del
+           pacchetto d'onde (pag. 135-136). Le pagine 406-419 che un accoppiamento per densita'
+           di chiavi aveva messo nel dossier sono elettrodinamica quantistica e non c'entrano:
+           sono state tolte, e il motivo sta nel taccuino.
+registro:  Quinto movimento del corso. Misurato su 10 scritti su 47, densita' 1,6. E' il
+           movimento in cui il formalismo produce per la prima volta un fatto fisico che
+           nessuno gli aveva messo dentro — un pavimento sotto un prodotto di indeterminazioni
+           — e per questo la deduzione si fa per intero: e' corta, e il programma la chiede
+           («relazioni di indeterminazione»), e la funzione d'onda che la satura e' nominata
+           esplicitamente nella voce Q.3.
+           DISACCORDO DICHIARATO E NON RISOLTO. Sulla disuguaglianza le fonti concordano;
+           su CHE COSA MISURA no. Heisenberg la ricava da un disturbo — il quanto che
+           strappa l'elettrone — e in quella lettura Delta p e' l'incertezza introdotta
+           DALLA misura; Ballentine dedica un paragrafo a negarlo, e dichiara che Delta Q e
+           Delta P non sono errori di misura, che la verifica sperimentale non coinvolge
+           misure simultanee, e che la lettura statistica e' di Popper nel 1934. Non si
+           sceglie in silenzio: il movimento mostra che le due letture rispondono a DUE
+           domande diverse (quanto disturba uno strumento · quanto e' larga una
+           distribuzione su un insieme di preparazioni identiche), che la seconda e' quella
+           che il teorema dimostra, e che la prima non e' falsa — e' un'altra cosa, vera nel
+           suo caso e non deducibile dalla disuguaglianza.
+           SECONDO DISACCORDO, piu' tecnico e piu' utile all'esame: Picasso e Ballentine
+           arrivano alla forma DEBOLE (Robertson), Shankar e il problema 8.10 di Ballentine
+           alla forma FORTE (Schroedinger, col termine di covarianza). Le due non sono
+           alternative: la seconda implica la prima, e c'e' uno stato in cui la prima dice
+           zero e la seconda e' un'uguaglianza. Qui e' calcolato.
+generata:  2026-10-13 dal ciclo notturno (voce D3), su fonti aperte e lette nei DUE dossier
+           del movimento — `mq-05-dossier-fonti.txt` per la sostanza (Picasso italiano,
+           Ballentine §2.1 e §8.4, Sakurai-Napolitano §1.4, Shankar cap. 1 e 9, Griffiths) e
+           `mq-05-dossier-voci.txt` per le voci fondative (Heisenberg e Dirac, entrambi in
+           italiano). Il dossier delle voci e' stato RIGENERATO prima di scrivere: nella sua
+           prima forma non conteneva il §13-14 di Dirac, cioe' il luogo in cui la nozione di
+           insieme completo di osservabili che commutano e' stata inventata. Mescolanza:
+           Dirac (la compatibilita' come tesi, il CSCO come strumento di rappresentazione) +
+           Picasso (i teoremi dimostrati, in italiano, e la via al discriminante) +
+           Ballentine (la deduzione valida sugli stati non puri, la classificazione degli
+           stati di minima indeterminazione, e la critica di che cosa misura Delta) +
+           Sakurai-Napolitano (la forma matriciale, le misure in sequenza) + Shankar (la
+           forma forte e le condizioni di uguaglianza) + Griffiths (il meccanismo di
+           laboratorio e i commutatori del momento angolare) + Heisenberg (le due deduzioni
+           del 1930 e le confutazioni).
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo":"simbolico","dove":"01","appare":"\\delta_{\\xi a}\\,\\delta_{\\eta b}\\,\\delta_{\\zeta c}",
+  "perche":"la funzione prodotto degli indicatori costruita da Dirac, pag. stampata 70: e' una definizione di funzione di piu' osservabili, non un calcolo"},
+ {"tipo":"uguale","sinistra":"(1/sqrt(2))**2+(1/sqrt(2))**2","vale":"1","dove":"01","appare":"\\Big(\\frac{1}{\\sqrt2}\\Big)^{2}+\\Big(\\frac{1}{\\sqrt2}\\Big)^{2}=1"},
+ {"tipo":"uguale","sinistra":"(1+1+3)/3","vale":"5/3","dove":"01","appare":"\\frac{1+1+3}{3}=\\frac53"},
+ {"tipo":"uguale","sinistra":"(1+1+5)/3","vale":"7/3","dove":"01","appare":"\\frac{1+1+5}{3}=\\frac73"},
+ {"tipo":"uguale","sinistra":"(2/sqrt(6))**2","vale":"2/3","dove":"01","appare":"\\Big(\\frac{2}{\\sqrt6}\\Big)^{2}=\\frac23"},
+ {"tipo":"uguale","sinistra":"2/3+0+1/3","vale":"1","dove":"01","appare":"\\frac23+0+\\frac13=1"},
+ {"tipo":"uguale","sinistra":"1*(2/3)+3*(1/3)","vale":"5/3","dove":"01","appare":"1\\cdot\\tfrac23+1\\cdot0+3\\cdot\\tfrac13=\\tfrac53"},
+ {"tipo":"uguale","sinistra":"1*(2/3)+5*(1/3)","vale":"7/3","dove":"01","appare":"1\\cdot\\tfrac23+(-1)\\cdot0+5\\cdot\\tfrac13=\\tfrac73"},
+ {"tipo":"uguale","sinistra":"(0-l)*(0-l)-1*1","vale":"l**2-1","dove":"01","appare":"(0-\\lambda)(0-\\lambda)-1\\cdot1=\\lambda^{2}-1"},
+ {"tipo":"simbolico","dove":"01","appare":"|1,+1\\rangle=\\frac{|1\\rangle+|2\\rangle}{\\sqrt2}",
+  "perche":"etichettatura dell'autovettore comune come combinazione dei vettori di base: e' una scelta di notazione (l'indice collettivo di autovalori), non un conto"},
+ {"tipo":"simbolico","dove":"01","appare":"|1,-1\\rangle=\\frac{|1\\rangle-|2\\rangle}{\\sqrt2}",
+  "perche":"stessa notazione dell'autovettore comune, secondo autovalore: definizione, non calcolo"},
+ {"tipo":"simbolico","dove":"01","appare":"|1,-1\\rangle=(|1\\rangle-|2\\rangle)/\\sqrt2",
+  "perche":"lo stesso vettore richiamato nel collaudo in forma di frazione in linea invece che \\frac: stessa definizione, stessa esenzione"},
+
+ {"tipo":"uguale","sinistra":"(1-l)**2*(3-l)","vale":"3-7*l+5*l**2-l**3","dove":"02","appare":"(1-\\lambda)^{2}(3-\\lambda)=3-7\\lambda+5\\lambda^{2}-\\lambda^{3}"},
+ {"tipo":"uguale","sinistra":"(0-l)*(0-l)-1*1","vale":"l**2-1","dove":"02","appare":"(0-\\lambda)(0-\\lambda)-1\\cdot1=\\lambda^{2}-1"},
+ {"tipo":"uguale","sinistra":"(1-l)**2-4","vale":"(l-3)*(l+1)","dove":"02","appare":"(1-\\lambda)^{2}-4=(\\lambda-3)(\\lambda+1)"},
+ {"tipo":"uguale","sinistra":"(-2*I)*(-I)","vale":"-2","dove":"02","appare":"-2i\\cdot(-i)=-2"},
+ {"tipo":"uguale","sinistra":"(-2*I)*(I)","vale":"2","dove":"02","appare":"-2i\\cdot(+i)=+2"},
+ {"tipo":"simbolico","dove":"02","appare":"G=\\mathbb 1-2\\,\\sigma_y=\\begin{pmatrix}1&2i\\\\-2i&1\\end{pmatrix}",
+  "perche":"definizione dell'operatore di confronto costruito da sigma_y: la sua autoaggiuntezza e il suo spettro sono verificati dalle asserzioni numeriche che seguono, non e' la definizione in se' un conto"},
+ {"tipo":"simbolico","dove":"02","appare":"(G+\\mathbb 1)=\\begin{pmatrix}2&2i\\\\-2i&2\\end{pmatrix}",
+  "perche":"matrice intermedia per l'equazione agli autovettori di G con autovalore -1: notazione, il conto vero e' nell'asserzione sul prodotto -2i*(-i)"},
+ {"tipo":"simbolico","dove":"02","appare":"(G-3\\mathbb 1)=\\begin{pmatrix}-2&2i\\\\-2i&-2\\end{pmatrix}",
+  "perche":"matrice intermedia per l'equazione agli autovettori di G con autovalore 3: notazione, il conto vero e' nell'asserzione sul prodotto -2i*(+i)"},
+ {"tipo":"simbolico","dove":"02","appare":"-2iv_1+2v_2=-2i(-iv_2)+2v_2",
+  "perche":"sostituzione algebrica v_1=-i v_2 nella riga 2 di (G+1)v=0: il passo e' difeso dall'asserzione numerica -2i*(-i)=-2 appena dopo, qui e' solo l'espressione letterale con v_2 libero"},
+ {"tipo":"simbolico","dove":"02","appare":"-2iv_1-2v_2=-2i(iv_2)-2v_2",
+  "perche":"sostituzione algebrica v_1=i v_2 nella riga 2 di (G-3)v=0: difesa dall'asserzione numerica -2i*(+i)=+2 appena dopo"},
+ {"tipo":"simbolico","dove":"02","appare":"|{-}1\\rangle_G=(-i,1)/\\sqrt2",
+  "perche":"etichettatura dell'autovettore di G per l'autovalore -1: notazione del vettore, non un conto"},
+ {"tipo":"simbolico","dove":"02","appare":"\\langle a''|[A,B]|a'\\rangle=(a''-a')\\langle a''|B|a'\\rangle=0",
+  "perche":"Teorema 1.2 di Sakurai-Napolitano, eq. (1.4.28) pag. stampata 29: e' l'elemento di matrice del commutatore nullo valutato fra autoket di A, non un conto numerico"},
+ {"tipo":"simbolico","dove":"02","appare":"L_x|\\ell=0\\rangle=L_z|\\ell=0\\rangle=0",
+  "perche":"l'eccezione del sottospazio, Sakurai-Napolitano pag. stampata 32: lo stato con momento angolare nullo e' autostato simultaneo di due operatori che NON commutano, con autovalore zero per entrambi. E' un fatto citato dalla fonte, non ricalcolato qui"},
+
+ {"tipo":"somma","espr":"2*l+1","var":"l","da":"0","a":"n-1","vale":"n**2","dove":"03","appare":"\\sum_{\\ell=0}^{n-1}(2\\ell+1)=n^{2}"},
+ {"tipo":"uguale","sinistra":"1+3+5","vale":"3**2","dove":"03","appare":"1+3+5=3^{2}=9"},
+ {"tipo":"simbolico","dove":"03","appare":"|E,L,M,w\\rangle",
+  "perche":"etichettatura degli stati stazionari dell'atomo isolato con gli autovalori di un insieme completo che include la hamiltoniana, Picasso pag. stampata 214: e' una notazione, non un risultato"},
+ {"tipo":"simbolico","dove":"03","appare":"[H,L^{2}]=[H,L_z]=0\\quad\\text{se }V=V(r)",
+  "perche":"Griffiths problema 4.19(d), pag. stampata 169: enunciato del problema che la fonte lascia al lettore, qui citato come fatto e usato come esempio di CSCO"},
+
+ {"tipo":"derivata","espr":"x**4","rispetto":["x"],"vale":"4*x**3","dove":"04","appare":"\\frac{d}{dx}x^{4}=4x^{3}"},
+ {"tipo":"uguale","sinistra":"I*hb*diff(x**3,x)","vale":"3*I*hb*x**2","ipotesi":{"hb":"positive","x":"real"},"dove":"04","appare":"[x^{3},p]=i\\hbar\\,\\frac{d(x^{3})}{dx}=3i\\hbar x^{2}"},
+ {"tipo":"uguale","sinistra":"diff(q**2,q)*diff(p**2,p)","vale":"4*q*p","ipotesi":{"q":"real","p":"real"},"dove":"04","appare":"[q^{2},p^{2}]_{\\mathrm{PB}}=\\frac{\\partial q^{2}}{\\partial q}\\frac{\\partial p^{2}}{\\partial p}-\\frac{\\partial q^{2}}{\\partial p}\\frac{\\partial p^{2}}{\\partial q}=4qp"},
+ {"tipo":"uguale","sinistra":"2*I*hb*(2*X-I*hb)","vale":"4*I*hb*X+2*hb**2","ipotesi":{"hb":"positive","X":"real"},"dove":"04","appare":"2i\\hbar\\,(2qp-i\\hbar)=4i\\hbar\\,qp+2\\hbar^{2}"},
+ {"tipo":"uguale","sinistra":"-I*hb*y*px+I*hb*x*py","vale":"I*hb*(x*py-y*px)","ipotesi":{"hb":"positive","x":"real","y":"real","px":"real","py":"real"},"dove":"04","appare":"-i\\hbar\\,yp_x+i\\hbar\\,xp_y=i\\hbar\\,(xp_y-yp_x)=i\\hbar L_z"},
+ {"tipo":"uguale","sinistra":"sqrt(1*(1+1)-0*(0+1))","vale":"sqrt(2)","dove":"04","appare":"\\sqrt{\\ell(\\ell+1)-m(m+1)}=\\sqrt{2}"},
+ {"tipo":"uguale","sinistra":"p*(I*hb)+(I*hb)*p","vale":"2*I*hb*p","ipotesi":{"hb":"positive","p":"real"},"dove":"04","appare":"p[q,p]+[q,p]p=p(i\\hbar)+(i\\hbar)p=2i\\hbar p"},
+ {"tipo":"simbolico","dove":"04","appare":"[A,A]=0,\\quad[A,B]=-[B,A],\\quad[A,B+C]=[A,B]+[A,C],",
+  "perche":"le prime tre proprieta' del commutatore sono identita' immediate dalla definizione [A,B]=AB-BA per operatori generici: non sono un conto su numeri, sono proprieta' algebriche"},
+ {"tipo":"simbolico","dove":"04","appare":"[A,[B,C]]+[B,[C,A]]+[C,[A,B]]=0",
+  "perche":"l'identita' di Jacobi per operatori generici: proprieta' algebrica, non un conto numerico"},
+ {"tipo":"simbolico","dove":"04","appare":"[x^n,p]=i\\hbar\\,n\\,x^{n-1}",
+  "perche":"formula generale ottenuta iterando Leibniz, valida per ogni n: e' il risultato che le due istanze numeriche (n=3,n=4) sotto applicano, non un conto a se'"},
+ {"tipo":"simbolico","dove":"04","appare":"\\{x^n,p\\}_{\\mathrm{PB}}=n x^{n-1}=\\tfrac{d}{dx}x^{n}",
+  "perche":"la parentesi di Poisson classica per x^n,p in forma generale: definizione, l'istanza numerica n=4 e' asserita subito dopo"},
+ {"tipo":"simbolico","dove":"04","appare":"[q^2,p^2]=q[q,p^2]+[q,p^2]q=q(2i\\hbar p)+(2i\\hbar p)q=2i\\hbar(qp+pq)",
+  "perche":"catena di applicazione di Leibniz che porta a 2i\\hbar(qp+pq): il passo finale numerico (sostituzione pq=qp-i\\hbar e il risultato 4i\\hbar qp+2\\hbar^2) e' asserito nella riga successiva, qui e' lo sviluppo algebrico letterale"},
+
+ {"tipo":"simbolico","dove":"05","appare":"\\langle s|a^{\\dagger}a|s\\rangle\\ \\ge\\ \\langle s|a^{\\dagger}|s\\rangle\\langle s|a|s\\rangle",
+  "perche":"disuguaglianza (4.45) di Picasso, pag. stampata 82: segue dalla completezza o da Schwarz, ed e' il passo che lui dimostra a parole. Qui e' l'ipotesi del conto che segue, non il conto"},
+ {"tipo":"uguale","sinistra":"(I*(I*c))**2","vale":"c**2","ipotesi":{"c":"real"},"dove":"05","appare":"\\big(i\\,(ic)\\big)^{2}=c^{2}"},
+ {"tipo":"disuguaglianza","sinistra":"c**2-4*(c**2/4)","relazione":"<=","destra":"0","ipotesi":{"c":"real"},"dove":"05","appare":"c^{2}-4(\\Delta\\xi)^{2}(\\Delta\\eta)^{2}\\le0"},
+ {"tipo":"uguale","sinistra":"a+(-c/(2*b))*c+(-c/(2*b))**2*b","vale":"a-c**2/(4*b)","ipotesi":{"b":"positive","a":"positive","c":"real"},"dove":"05","appare":"\\Delta A^{2}+\\omega\\langle C\\rangle+\\omega^{2}\\Delta B^{2}\\Big|_{\\omega=-\\frac{\\langle C\\rangle}{2\\Delta B^{2}}}=\\Delta A^{2}-\\frac{\\langle C\\rangle^{2}}{4\\Delta B^{2}}"},
+ {"tipo":"uguale","sinistra":"abs(I*c)**2/4","vale":"c**2/4","ipotesi":{"c":"real"},"dove":"05","appare":"\\tfrac14\\big|\\langle[A,B]\\rangle\\big|^{2}=\\tfrac14\\langle C\\rangle^{2}"},
+ {"tipo":"uguale","sinistra":"11/3-(5/3)**2","vale":"8/9","dove":"05","appare":"\\frac{11}{3}-\\Big(\\frac53\\Big)^{2}=\\frac89"},
+ {"tipo":"uguale","sinistra":"sqrt(8/9)","vale":"2*sqrt(2)/3","dove":"05","appare":"\\Delta A=\\sqrt{\\tfrac89}=\\frac{2\\sqrt2}{3}"},
+ {"tipo":"uguale","sinistra":"9-(7/3)**2","vale":"32/9","dove":"05","appare":"9-\\Big(\\frac73\\Big)^{2}=\\frac{32}{9}"},
+ {"tipo":"uguale","sinistra":"sqrt(32/9)","vale":"4*sqrt(2)/3","dove":"05","appare":"\\Delta B=\\sqrt{\\tfrac{32}{9}}=\\frac{4\\sqrt2}{3}"},
+ {"tipo":"uguale","sinistra":"(2*sqrt(2)/3)*(4*sqrt(2)/3)","vale":"16/9","dove":"05","appare":"\\Delta A\\,\\Delta B=\\frac{2\\sqrt2}{3}\\cdot\\frac{4\\sqrt2}{3}=\\frac{16}{9}"},
+ {"tipo":"simbolico","dove":"05","appare":"a^\\dagger a=(\\xi-i\\omega\\eta)(\\xi+i\\omega\\eta)=\\xi^2+\\omega^2\\eta^2+i\\omega(\\xi\\eta-\\eta\\xi)=\\xi^2+\\omega^2\\eta^2+i\\omega[\\xi,\\eta]",
+  "perche":"sviluppo algebrico del prodotto di operatori a^dagger a: espansione letterale, il risultato numerico finale e' nell'asserzione sul discriminante"},
+ {"tipo":"simbolico","dove":"05","appare":"[A,B]^\\dagger=-[A,B]",
+  "perche":"proprieta' generale dell'aggiunto del commutatore di due operatori Hermitiani: e' la ragione per cui <[A,B]> e' immaginario puro, non un conto numerico"},
+ {"tipo":"simbolico","dove":"05","appare":"A^2=\\mathrm{diag}(1,1,9)",
+  "perche":"il quadrato della matrice diagonale A=diag(1,1,3): notazione del risultato, il conto numerico su <A^2> e' nell'asserzione successiva"},
+ {"tipo":"simbolico","dove":"05","appare":"B^2=\\mathrm{diag}(1,1,25)",
+  "perche":"il quadrato di B, usando sigma_x^2=1 sul blocco 2x2 e 5^2=25 su |3>: notazione, il conto su <B^2> e' nell'asserzione successiva"},
+ {"tipo":"simbolico","dove":"05","appare":"\\sigma_x^2=\\mathbb 1",
+  "perche":"proprieta' standard delle matrici di Pauli usata per ottenere B^2: identita' algebrica, non un conto numerico specifico"},
+
+ {"tipo":"uguale","sinistra":"a+((-c/(2*b))**2+(S/b)**2)*b+(-c/(2*b))*c-2*S*(S/b)","vale":"a-c**2/(4*b)-S**2/b","ipotesi":{"b":"positive","a":"positive","c":"real","S":"real"},"dove":"06","appare":"\\Delta A^{2}+(u^{2}+v^{2})\\Delta B^{2}+u\\langle C\\rangle-2Sv\\Big|_{\\min}=\\Delta A^{2}-\\frac{\\langle C\\rangle^{2}}{4\\Delta B^{2}}-\\frac{S^{2}}{\\Delta B^{2}}"},
+ {"tipo":"uguale","sinistra":"-2*sin(phi)*cos(phi)","vale":"-sin(2*phi)","ipotesi":{"phi":"real"},"dove":"06","appare":"\\langle\\{\\sigma_x^{0},\\sigma_y^{0}\\}\\rangle=-2\\sin\\varphi\\cos\\varphi=-\\sin2\\varphi"},
+ {"tipo":"uguale","sinistra":"sin(phi)**2*cos(phi)**2","vale":"sin(2*phi)**2/4","ipotesi":{"phi":"real"},"dove":"06","appare":"\\Delta\\sigma_x^{2}\\,\\Delta\\sigma_y^{2}=\\sin^{2}\\varphi\\cos^{2}\\varphi=\\tfrac14\\sin^{2}2\\varphi"},
+ {"tipo":"uguale","sinistra":"sin(pi/4)**2*cos(pi/4)**2","vale":"1/4","dove":"06","appare":"\\sin^{2}\\tfrac\\pi4\\cos^{2}\\tfrac\\pi4=\\tfrac14"},
+ {"tipo":"simbolico","dove":"06","appare":"a^\\dagger a=(\\xi+\\bar\\lambda\\eta)(\\xi+\\lambda\\eta)",
+  "perche":"espansione letterale del prodotto con parametro complesso lambda: notazione, il risultato numerico e' nell'asserzione sulla forma quadratica"},
+ {"tipo":"simbolico","dove":"06","appare":"\\sigma_x^2=\\sigma_y^2=\\mathbb 1",
+  "perche":"proprieta' standard delle matrici di Pauli, usata per ottenere Delta sigma_x^2 e Delta sigma_y^2: identita' algebrica, gia' usata in tappa 05 per sigma_x"},
+ {"tipo":"simbolico","dove":"06","appare":"\\sigma_x^{0}=\\sigma_x-\\langle\\sigma_x\\rangle",
+  "perche":"definizione dell'operatore di deviazione per sigma_x: notazione, non un conto"},
+ {"tipo":"simbolico","dove":"06","appare":"\\sigma_y^{0}=\\sigma_y-\\langle\\sigma_y\\rangle",
+  "perche":"definizione dell'operatore di deviazione per sigma_y: notazione, non un conto"},
+ {"tipo":"simbolico","dove":"06","appare":"\\sin(\\pi/4)=\\cos(\\pi/4)=1/\\sqrt2",
+  "perche":"valore standard delle funzioni trigonometriche a pi/4: fatto noto, usato per il controllo numerico diretto"},
+ {"tipo":"simbolico","dove":"06","appare":"\\Delta\\sigma_x^2=\\Delta\\sigma_y^2=1/2",
+  "perche":"conseguenza immediata di sin(pi/4)=cos(pi/4)=1/sqrt2 sostituito in Delta sigma_x^2=sin^2(pi/4): il conto numerico sul prodotto e' nell'asserzione precedente"},
+
+ {"tipo":"uguale","sinistra":"x*exp(-x**2/(2*al))+al*diff(exp(-x**2/(2*al)),x)","vale":"0","ipotesi":{"al":"positive","x":"real"},"dove":"07","appare":"\\Big(x+\\alpha\\frac{d}{dx}\\Big)e^{-x^{2}/2\\alpha}=0"},
+ {"tipo":"integrale","espr":"exp(-x**2/(2*s**2))","var":"x","da":"-oo","a":"oo","vale":"s*sqrt(2*pi)","ipotesi":{"s":"positive","x":"real"},"dove":"07","appare":"\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2\\sigma^{2}}dx=\\sigma\\sqrt{2\\pi}"},
+ {"tipo":"integrale","espr":"x**2*exp(-x**2/(2*s**2))/(s*sqrt(2*pi))","var":"x","da":"-oo","a":"oo","vale":"s**2","ipotesi":{"s":"positive","x":"real"},"dove":"07","appare":"\\langle x^{2}\\rangle=\\sigma^{2}"},
+ {"tipo":"integrale","espr":"p**2*exp(-2*s**2*p**2/hb**2)","var":"p","da":"-oo","a":"oo","vale":"hb**3*sqrt(2*pi)/(8*s**3)","ipotesi":{"s":"positive","hb":"positive","p":"real"},"dove":"07","appare":"\\int_{-\\infty}^{+\\infty}p^{2}e^{-2\\sigma^{2}p^{2}/\\hbar^{2}}dp=\\frac{\\hbar^{3}\\sqrt{2\\pi}}{8\\sigma^{3}}"},
+ {"tipo":"integrale","espr":"exp(-2*s**2*p**2/hb**2)","var":"p","da":"-oo","a":"oo","vale":"hb*sqrt(2*pi)/(2*s)","ipotesi":{"s":"positive","hb":"positive","p":"real"},"dove":"07","appare":"\\int_{-\\infty}^{+\\infty}e^{-2\\sigma^{2}p^{2}/\\hbar^{2}}dp=\\frac{\\hbar\\sqrt{2\\pi}}{2\\sigma}"},
+ {"tipo":"uguale","sinistra":"(hb**3*sqrt(2*pi)/(8*s**3))/(hb*sqrt(2*pi)/(2*s))","vale":"hb**2/(4*s**2)","ipotesi":{"s":"positive","hb":"positive"},"dove":"07","appare":"\\langle p^{2}\\rangle=\\frac{\\hbar^{2}}{4\\sigma^{2}}"},
+ {"tipo":"uguale","sinistra":"s*(hb/(2*s))","vale":"hb/2","ipotesi":{"s":"positive","hb":"positive"},"dove":"07","appare":"\\Delta x\\,\\Delta p=\\sigma\\cdot\\frac{\\hbar}{2\\sigma}=\\frac{\\hbar}{2}"},
+ {"tipo":"integrale","espr":"exp(-x**2/(4*s**2))*exp(-(x-d)**2/(4*s**2))/(s*sqrt(2*pi))","var":"x","da":"-oo","a":"oo","vale":"exp(-d**2/(8*s**2))","ipotesi":{"s":"positive","d":"real","x":"real"},"dove":"07","appare":"\\langle\\psi_{0}|\\psi_{d}\\rangle=e^{-d^{2}/8\\sigma^{2}}"},
+
+ {"tipo":"simbolico","dove":"08","appare":"\\Delta Q\\,\\Delta P\\ \\ge\\ \\tfrac12\\hbar\\quad\\text{con}\\quad\\delta Q,\\ \\delta P\\ \\text{indipendenti}",
+  "perche":"distinzione di Ballentine fra le larghezze statistiche Delta e la risoluzione strumentale delta, figura 8.2 pag. stampata 226: e' una dichiarazione sul significato dei simboli, non un conto"},
+ {"tipo":"simbolico","dove":"08","appare":"\\Delta t\\,\\Delta E\\gtrsim\\hbar",
+  "perche":"relazione tempo-energia, Sakurai-Napolitano eq. (2.1.74) pag. stampata 80: la fonte stessa dichiara che e' «di natura molto diversa» dalla disuguaglianza fra due osservabili incompatibili, e qui e' citata per il confronto"},
+
+ {"tipo":"simbolico","dove":"09","appare":"(\\Delta q)^{2}=\\int (q'-\\bar q)^{2}\\,|S(q')|^{2}\\,dq'",
+  "perche":"definizione di Delta q come scarto quadratico medio, Heisenberg eq. [3.8] pag. stampata 27: e' la definizione che l'autore da', e serve per mostrare che la lettura statistica e' sua e non posteriore"},
+ {"tipo":"uguale","sinistra":"sqrt(16)","vale":"4","dove":"09","appare":"\\sqrt{m}=4\\ \\text{per}\\ m=16"},
+ {"tipo":"uguale","sinistra":"(1/sqrt(16))*sqrt(16)","vale":"1","dove":"09","appare":"\\frac{\\Delta x}{\\sqrt m}\\cdot\\sqrt m\\,\\Delta p_x=\\Delta x\\,\\Delta p_x"},
+ {"tipo":"simbolico","dove":"09","appare":"|\\langle q'|p'\\rangle|^{2}=\\frac1h",
+  "perche":"modulo quadro della funzione di trasformazione, Dirac eq. [23.6] pag. stampata 133: indipendente da q', ed e' l'argomento con cui conclude che se p e' esatto tutti i valori di q sono equiprobabili. Risultato citato dalla fonte"},
+
+ {"tipo":"uguale","sinistra":"2*sin(th/2)**2*cos(th/2)**2","vale":"sin(th)**2/2","ipotesi":{"th":"real"},"dove":"10","appare":"\\cos^{2}\\tfrac\\vartheta2\\sin^{2}\\tfrac\\vartheta2+\\sin^{2}\\tfrac\\vartheta2\\cos^{2}\\tfrac\\vartheta2=\\tfrac12\\sin^{2}\\vartheta"},
+ {"tipo":"uguale","sinistra":"sin(pi/2)**2/2","vale":"1/2","dove":"10","appare":"\\tfrac12\\sin^{2}\\tfrac\\pi2=\\tfrac12"},
+ {"tipo":"uguale","sinistra":"abs(-I*hb*t/m)/2","vale":"hb*t/(2*m)","ipotesi":{"hb":"positive","t":"positive","m":"positive"},"dove":"10","appare":"\\tfrac12\\big|\\langle[x(t),x(0)]\\rangle\\big|=\\frac{\\hbar t}{2m}"},
+ {"tipo":"uguale","sinistra":"(t*(hb/(2*s))/m)**2","vale":"hb**2*t**2/(4*m**2*s**2)","ipotesi":{"hb":"positive","t":"positive","m":"positive","s":"positive"},"dove":"10","appare":"\\Big(\\frac{t\\,\\Delta p}{m}\\Big)^{2}=\\frac{\\hbar^{2}t^{2}}{4m^{2}\\sigma^{2}}"},
+ {"tipo":"uguale","sinistra":"hb*t/(2*m)+hb**2*t**2/(4*m**2*(hb*t/(2*m)))","vale":"hb*t/m","ipotesi":{"hb":"positive","t":"positive","m":"positive"},"dove":"10","appare":"\\Delta x(t)^{2}\\Big|_{\\sigma^{2}=\\hbar t/2m}=\\frac{\\hbar t}{2m}+\\frac{\\hbar t}{2m}=\\frac{\\hbar t}{m}"},
+ {"tipo":"simbolico","dove":"10","appare":"[x(t),x(0)]=\\big[x(0)+\\tfrac{pt}{m},\\,x(0)\\big]=\\frac{t}{m}[p,x(0)]=-\\frac{i\\hbar t}{m}.",
+  "perche":"derivazione letterale del commutatore a due istanti dall'equazione del moto x(t)=x(0)+pt/m e dal commutatore fondamentale [p,x]=-i hbar: il conto numerico sul modulo e' nell'asserzione successiva (hbar t/(2m))"},
+ {"tipo":"simbolico","dove":"10","appare":"\\Delta x(t)^2=\\sigma^2+(\\hbar t/2m\\sigma)^2",
+  "perche":"scomposizione della larghezza totale nei due contributi (iniziale + allargamento): notazione generale, il caso numerico specifico (sigma^2=hbar t/2m) e' nell'asserzione successiva"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Meccanica Quantistica · voci Q.3 e Q.4 · una sola domanda letta nei due versi · la disuguaglianza dedotta e il pacchetto calcolato',
+  blocchi:[
+  {t:'prosa', title:'Una domanda, e il commutatore come risposta', tag:'architettura', html:R`
+  <p>Il movimento precedente ha chiuso la statistica di <i>una</i> misura: dato uno stato e un&rsquo;osservabile, quali esiti sono possibili, con quale probabilità, e che cosa resta dello stato dopo. Tutto quel lavoro riguardava una grandezza per volta. Questo movimento fa la domanda successiva, che è la prima domanda genuinamente quantistica della teoria: <b>date due osservabili, che cosa si può sapere di entrambe nello stesso stato?</b></p>
+  <p>La risposta sta in un oggetto solo, e si scrive in una riga: il <span class="str" data-str="commutatore">commutatore</span> $[A,B]=AB-BA$. Se è nullo esiste una base di stati in cui <i>entrambe</i> le osservabili hanno valore certo, e allora si può parlare di una misura congiunta senza dire niente di falso. Se non è nullo quella base non esiste, e al suo posto compare un <i>pavimento</i> sotto il prodotto delle due indeterminazioni — un numero sotto il quale nessuno stato può scendere, qualunque apparato si costruisca.</p>
+  <p><b>Perché le due cose stanno in un movimento solo.</b> Il programma di questo corso le elenca in due voci diverse — la Q.3 chiede le relazioni di indeterminazione e la funzione d&rsquo;onda di minimo prodotto, la Q.4 chiede le basi comuni e gli insiemi completi di osservabili che commutano — e quasi tutti i libri le separano di un capitolo. Separarle costa: sono <i>la stessa disuguaglianza</i> letta nei due versi. La relazione di Robertson che si ricava nella tappa 05 dice $\Delta A\,\Delta B\ \ge\ \tfrac12|\langle[A,B]\rangle|$, e il caso delle osservabili compatibili è esattamente quello in cui il secondo membro si annulla: non un argomento diverso, lo stesso argomento con il commutatore messo a zero. Chi le impara separate si ritrova con due regole da ricordare al posto di una da capire.</p>
+  <p>E c&rsquo;è un secondo motivo, operativo. Il <b>pavimento nullo non vuol dire pavimento raggiunto</b>: due osservabili che commutano possono avere, in un certo stato, indeterminazioni entrambe grandi — e nella tappa 05 questo è un numero, $\Delta A\,\Delta B=\tfrac{16}{9}$ per due operatori che commutano esattamente. È l&rsquo;errore più comune che si fa su questo argomento, e si ripara solo tenendo i due versi nella stessa pagina.</p>`},
+  {t:'prosa', title:'Quattro voci, e due deduzioni diverse della stessa formula', tag:'architettura', html:R`
+  <p><b>Heisenberg</b> (1930) non dimostra niente: <i>racconta un esperimento</i>. Nei <i>Principi fisici della teoria dei quanti</i> la relazione nasce due volte, e in due modi che non si somigliano. La prima volta contando lunghezze d&rsquo;onda dentro un pacchetto; la seconda volta guardando dentro un microscopio immaginario in cui un solo quanto di luce, quello che serve per vedere l&rsquo;elettrone, gli cede per effetto Compton un rinculo che non si sa quanto valga. E poi — ed è la parte che si perde nei riassunti — passa quattro pagine a <b>confutare le obiezioni</b>: chi volesse misurare il rinculo del microscopio, chi volesse affinare il massimo della figura di diffrazione. Ogni scappatoia si chiude, e si chiude con un conto.</p>
+  <p><b>Dirac</b> (1930) fa l&rsquo;opposto, e il suo contributo a questo movimento non è la disuguaglianza — che lui ricava in mezza pagina da Fourier, dichiarando che vale «<i>solo nel caso più favorevole</i>» — ma il lato della compatibilità. Dirac è il primo a dire che <b>due osservabili che commutano sono una sola osservabile</b> che restituisce due numeri, e il primo a definire l&rsquo;<i>insieme completo di osservabili che commutano</i>. Lo definisce per un motivo che oggi si è smarrito: non per etichettare stati, ma per <b>costruire una rappresentazione</b>. Nella sua mano il CSCO è uno strumento, non una nomenclatura.</p>
+  <p><b>Picasso</b> (2015) è la voce che dimostra. Nelle <i>Lezioni</i> la compatibilità ha due definizioni fisiche — stessi autovettori, e la seconda misura non perturba — e il lavoro è provare che sono la stessa cosa e che entrambe equivalgono a $[\xi,\eta]=0$. È la via che questo corso ricalca, e porta la frase che decide lo status dell&rsquo;intera faccenda: «<i>in realtà nella teoria quantistica non è un principio, ma un teorema</i>».</p>
+  <p><b>Ballentine</b> (1998) dissente, e dissente su che cosa la formula <i>misuri</i>. Le sue $\Delta Q$ e $\Delta P$ non sono errori di misura, e la verifica sperimentale della disuguaglianza non coinvolge alcuna misura simultanea: si prepara molte volte lo stesso stato, si misura ogni volta <i>una sola</i> delle due grandezze, e si confrontano le larghezze dei due istogrammi. In quella lettura il microscopio di Heisenberg non dimostra la disuguaglianza — dimostra un&rsquo;altra cosa, vera per conto suo. Il disaccordo è dichiarato nella tappa 08 e non viene sciolto, perché le due letture rispondono a due domande diverse.</p>`},
+  {t:'prosa', title:'Come è fatto il movimento', tag:'architettura', html:R`
+  <p><b>La rotta.</b> La tappa 01 costruisce la nozione fisica di compatibilità prima di sapere che c&rsquo;è un commutatore sotto, seguendo Picasso e Dirac, e definisce il sistema a tre livelli che attraversa tutto il movimento. La 02 dimostra il teorema — compatibili se e solo se commutano — con il lemma isolato, il caso degenere trattato per intero, e le tre osservazioni che valgono quanto il teorema. La 03 arriva agli insiemi completi: la definizione di Dirac, i suoi quattro risultati, e i tre CSCO che si incontrano all&rsquo;esame. La 04 è l&rsquo;algebra: le proprietà dei commutatori, il postulato di quantizzazione per analogia con le parentesi di Poisson, le regole di commutazione canoniche, e il punto in cui l&rsquo;analogia <i>fallisce</i>. La 05 deduce la relazione di indeterminazione, per due strade indipendenti, e la collauda. La 06 la rende più forte, svolgendo il problema 8.10 di Ballentine. La 07 calcola la funzione d&rsquo;onda che la satura, e dimostra che uno stato di minima indeterminazione deve essere puro. La 08 dice che cosa $\Delta$ misura e che cosa non misura, e dichiara il disaccordo. La 09 dà la parola a Heisenberg e a Dirac. La 10 chiude sul tempo — un pacchetto che si allarga, e due misure in sequenza il cui ordine conta — e ricompone il filo.</p>
+  <p><b>Che cosa questo movimento non fa.</b> Non costruisce gli operatori posizione e impulso: qui $[q,p]=i\hbar$ arriva da un postulato di quantizzazione che si <i>dichiara</i>, e la sua derivazione dalle simmetrie dello spazio-tempo — che è il cuore di questo corso — è un altro lavoro. Non tratta lo spettro continuo nella sua parte delicata (stati non normalizzabili, autofunzioni della posizione): la gaussiana della tappa 07 è a quadrato sommabile e tutto quello che si fa su di lei è lecito. Non tratta il momento angolare: i commutatori $[L_x,L_y]=i\hbar L_z$ si calcolano nella tappa 04 perché servono come esempio, ma lo spettro che ne segue è un altro movimento. E non tratta l&rsquo;evoluzione temporale, se non nell&rsquo;unico punto in cui serve: la tappa 10 usa $x(t)=x(0)+pt/m$ per la particella libera, che è l&rsquo;equazione di Heisenberg risolta nel caso più semplice di tutti.</p>`}
+]},
+
+/* ---------------- 01 · COMPATIBILITA: LA NOZIONE FISICA, PRIMA DEL COMMUTATORE ---------------- */
+{ num:'01', title:'Compatibilità: la nozione fisica, prima del commutatore', meta:'le due definizioni di Picasso · la tesi di Dirac · la probabilita congiunta come media di un prodotto di indicatori · il sistema a tre livelli',
+  blocchi:[
+  {t:'prosa', title:'Il problema, posto senza algebra', tag:'costruzione', html:R`
+  <p>Si misura $\xi$ su un sistema nello stato $|A\rangle$ e si trova l&rsquo;esito $\xi'$. Subito dopo si misura $\eta$ e si trova $\eta'$. Ora: <b>si può dire che il sistema ha i valori $\xi'$ e $\eta'$?</b> La domanda sembra oziosa e non lo è, perché la misura di $\eta$ ha cambiato lo stato, e il valore $\xi'$ che si era trovato prima potrebbe non essere più vero.</p>
+  <p>Dirac arriva a questo punto nel §13 dei <i>Principi</i> e lo dichiara nel modo più netto possibile, con una frase che vale la pena leggere nella sua forma originale:</p>
+  <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;In generale non si può fare un&rsquo;osservazione su un sistema che si trovi in uno stato definito senza perturbare tale stato, annullando la possibilità di effettuare su di esso una seconda osservazione. Non si può dare allora alcun significato all&rsquo;esecuzione simultanea di due osservazioni.&raquo;</i> &mdash; Dirac, §13, pag. stampata 71</p>
+  <p>«Non si può dare alcun significato» è più forte di «è difficile»: non è un limite sperimentale, è una frase mal formata. E questo è il punto di partenza giusto, perché rende la compatibilità un&rsquo;<b>eccezione da guadagnare</b> e non una proprietà da dare per scontata. In meccanica classica la domanda non esiste: una particella ha posizione e velocità, e misurare l&rsquo;una non tocca l&rsquo;altra. Qui la regola generale è che non si può chiedere, e il lavoro è trovare i casi in cui si può.</p>`},
+  {t:'reveal', title:'Le due definizioni di Picasso, e perché sono due e non una', tag:'costruzione', steps:[
+   {label:'La prima: stessi autovettori', body:R`
+   <p>Picasso, nel §4.10 delle <i>Lezioni</i>, dà la prima definizione in termini di stati a esito certo. Due osservabili $\xi$ ed $\eta$ sono <b>compatibili</b> se hanno un insieme completo di autovettori <i>simultanei</i>: esiste cioè una base dello <span class="str" data-str="spazio-di-hilbert">spazio di Hilbert</span> fatta di stati $|\xi',\eta'\rangle$ ciascuno dei quali dà esito certo $\xi'$ per la prima misura e $\eta'$ per la seconda.</p>
+   <p>È la definizione che si usa per <i>calcolare</i>, e si capisce perché: se la base esiste, lo stato generico si sviluppa su di lei e tutta la statistica congiunta si legge nei moduli quadri dei coefficienti, esattamente come nel caso di una sola osservabile. Ma come definizione <i>fisica</i> è insoddisfacente, perché parla di una base e non di un esperimento.</p>`},
+   {label:'La seconda: la misura di η non perturba', body:R`
+   <p>La seconda definizione è operativa, e Picasso la scrive come un diagramma: si misura $\xi$ e si ottiene $|\xi'\rangle$; si misura $\eta$ e si ottiene $|\xi',\eta'\rangle$; e la richiesta è che <b>se $\xi$ è non degenere allora $|\xi',\eta'\rangle=|\xi'\rangle$</b> — cioè la seconda misura non ha spostato lo stato di un millimetro. In quel caso, e solo in quel caso, l&rsquo;esito $\xi'$ trovato prima è ancora vero dopo.</p>
+   <p>Questa è la definizione che risponde alla frase di Dirac. Dice: due osservazioni si possono chiamare simultanee quando la seconda <i>non interferisce</i> con la prima, e allora la coppia di numeri che se ne ricava descrive il sistema e non il percorso di misura.</p>`},
+   {label:'L’equivalenza, nel caso non degenere', body:R`
+   <p>Picasso prova l&rsquo;equivalenza nei due versi, e nel caso non degenere la prova sta in due righe ciascuna.</p>
+   <p><b>Dalla prima alla seconda.</b> Se $\xi$ ed $\eta$ hanno gli stessi autovettori e sono entrambe non degeneri, la misura di $\eta$ è «<i>una ripetizione della prima misura (cambia solo la scala dello strumento) e quindi non perturba lo stato</i>»: lo strumento che misura $\eta$ legge lo stesso vettore con un&rsquo;etichetta diversa.</p>
+   <p><b>Dalla seconda alla prima.</b> Se la misura di $\eta$ su $|\xi'\rangle$ restituisce $|\xi',\eta'\rangle$ e $\xi$ è non degenere, allora c&rsquo;è <i>un solo</i> autostato con autovalore $\xi'$, quindi $|\xi',\eta'\rangle$ e $|\xi'\rangle$ sono lo stesso vettore: $|\xi'\rangle$ è anche autovettore di $\eta$. Facendolo per ogni $\xi'$ si ottiene la base comune.</p>`},
+   {label:'L’equivalenza nel caso degenere, dove serve il postulato di proiezione', body:R`
+   <p>Il caso degenere Picasso lo propone «<i>solo a titolo di esercizio</i>», e vale la pena seguirlo perché è il punto in cui questo movimento si appoggia al precedente.</p>
+   <p>Supponiamo che esista l&rsquo;insieme completo di autovettori simultanei e che si misuri $\eta$ sullo stato $|\xi'\rangle$. Lo stato che si ottiene è una combinazione $a|\xi'\eta'\rangle+\sum c|\xi''\eta'\rangle$ con autovalori $\xi''\neq\xi'$ possibili a priori. Ma la probabilità di transizione verso $|\xi'\eta'\rangle$ non è nulla, quindi $a\neq0$; e il <b>postulato di von Neumann</b> impone che lo stato finale sia quello di probabilità di transizione <i>massima</i>, cioè che la <span class="str" data-str="proiettore-ortogonale">proiezione sia ortogonale</span>. Da qui $|a|=1$, tutti i $c$ nulli, e lo stato finale è $|\xi'\eta'\rangle$: la seconda misura non ha portato fuori dall&rsquo;autospazio di $\xi'$.</p>
+   <p>Il verso opposto è una dimostrazione per assurdo, ed è elegante. Si considera la varietà lineare chiusa $V$ generata da <i>tutti</i> gli autovettori simultanei e si suppone $V\neq\mathcal H$. Esiste allora un autovettore $|\xi'\rangle$ ortogonale a $V$; ma ogni $|\xi'\eta'\rangle$ sta in $V$, dunque la probabilità di transizione $P(|\xi'\rangle\to|\xi'\eta'\rangle)$ è nulla — e questo contraddice l&rsquo;ipotesi che la misura di $\eta$ su $|\xi'\rangle$ dia un vettore con autovalore $\xi'$. Quindi $V=\mathcal H$ e la base esiste.</p>
+   <p>Si noti che cosa è stato usato: non un&rsquo;identità algebrica, ma il <i>postulato sulla misura</i>. La compatibilità, in questa costruzione, è una proprietà del processo di misura prima di essere una proprietà degli operatori — ed è la tappa 02 a trasformarla in algebra.</p>`}
+  ]},
+  {t:'reveal', title:'La tesi di Dirac: due osservabili che commutano sono una sola', tag:'costruzione', steps:[
+   {label:'La probabilità congiunta, costruita invece che postulata', body:R`
+   <p>Dirac arriva alla compatibilità da una direzione che nessun manuale moderno ripercorre: costruendo la probabilità congiunta a partire dal valor medio. Dato un insieme di osservabili $\xi,\eta,\zeta,\dots$ che commutano fra loro, scrive la funzione che vale $1$ quando $\xi=a$, $\eta=b$, $\zeta=c$ e zero se una qualunque di queste condizioni cade. Nella sua notazione è un prodotto di indicatori,</p>
+   $$\delta_{\xi a}\,\delta_{\eta b}\,\delta_{\zeta c},$$
+   <p>e il suo <b>valor medio in un qualunque stato è la probabilità congiunta</b> $P_{abc}$. Non c&rsquo;è un postulato nuovo: c&rsquo;è il postulato sul valor medio — lo stesso da cui il movimento precedente ha ricavato tutta la statistica di una misura — applicato a una funzione furba.</p>
+   <p>E qui compare la ragione tecnica per cui tutto questo funziona <i>solo</i> per osservabili che commutano, e Dirac la mette in una parentetica: quel prodotto è «<i>indipendente dall&rsquo;ordine dei fattori</i>». Se gli operatori non commutassero, scrivere $\delta_{\xi a}\delta_{\eta b}$ o $\delta_{\eta b}\delta_{\xi a}$ darebbe due oggetti diversi, e quindi due probabilità diverse per la stessa domanda — che è il modo in cui una domanda mal posta si manifesta nel formalismo. La probabilità congiunta <b>non è difficile da calcolare per osservabili incompatibili: non è definita</b>.</p>`},
+   {label:'La tesi, e la frase che la giustifica', body:R`
+   <p>Subito dopo aver costruito $P_{abc}$, Dirac ne trae una conclusione che chiama «<i>un nuovo e importante sviluppo</i>» e che è il contributo di questa pagina:</p>
+   <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><i>&laquo;Dal punto di vista della teoria generale, due o più osservabili che commutino fra loro possono essere considerate come un&rsquo;unica osservabile, la cui misura dia come risultato due o più numeri. Gli stati per cui tali misure portano sicuramente a un particolare risultato sono gli autostati simultanei.&raquo;</i> &mdash; Dirac, §13, pag. stampata 71</p>
+   <p>È una tesi, non una definizione, e cambia il modo di guardare l&rsquo;oggetto. Un CSCO non è una lista di grandezze da misurare una dopo l&rsquo;altra: è <b>un unico strumento</b> che restituisce una $n$-upla, e l&rsquo;insieme dei suoi esiti possibili è l&rsquo;insieme delle $n$-uple di autovalori. Letta così, la frase di apertura di questa tappa — che due osservazioni simultanee sono prive di significato — non viene smentita ma aggirata: non ci sono due osservazioni, c&rsquo;è una sola osservazione con due quadranti.</p>
+   <p>Questa lettura ha una conseguenza che tornerà nella tappa 03: se un CSCO è <i>uno</i> strumento, allora l&rsquo;esito di quello strumento identifica lo stato, e il formalismo è completo nel senso che non resta libertà residua. È per questo che Dirac definisce l&rsquo;insieme completo per costruire una rappresentazione.</p>`}
+  ]},
+  {t:'reveal', title:'Il sistema che attraversa il movimento, e la sua base comune', tag:'esempio', steps:[
+   {label:'Due osservabili su tre livelli', body:R`
+   <p>Serve un esempio concreto che si possa rifare a mano in trenta secondi e che abbia <i>tutti</i> i tratti del caso generale: una degenerazione, una base comune non ovvia, e uno stato su cui calcolare. Prendiamo uno spazio a tre dimensioni con base $|1\rangle,|2\rangle,|3\rangle$ e due osservabili</p>
+   $$A=\begin{pmatrix}1&0&0\\0&1&0\\0&0&3\end{pmatrix},\qquad B=\begin{pmatrix}0&1&0\\1&0&0\\0&0&5\end{pmatrix}.$$
+   <p>$A$ è già diagonale e ha spettro $\{1,1,3\}$: l&rsquo;autovalore $1$ è <b>doppiamente degenerate</b>, con autospazio $\mathcal H_1=\mathrm{span}\{|1\rangle,|2\rangle\}$, e l&rsquo;autovalore $3$ è semplice. $B$ non è diagonale: dentro $\mathcal H_1$ agisce come la prima <span class="str" data-str="matrici-di-pauli">matrice di Pauli</span> $\sigma_x$, e su $|3\rangle$ agisce come il numero $5$.</p>
+   <p>Che commutino si verifica in due prodotti. $AB$ si ottiene moltiplicando la riga $i$ di $B$ per l&rsquo;autovalore $i$-esimo di $A$; $BA$ si ottiene moltiplicando la colonna $j$ di $B$ per l&rsquo;autovalore $j$-esimo. Nelle prime due righe e colonne l&rsquo;autovalore è lo stesso ($1$), quindi i due prodotti coincidono; nella terza riga e colonna gli unici elementi non nulli di $B$ stanno sulla diagonale, e un elemento diagonale non distingue riga da colonna. Dunque $AB=BA$, cioè $[A,B]=0$.</p>`},
+   {label:'La base comune, e l’osservazione che ci si trova dentro', body:R`
+   <p>Per trovare la base comune non c&rsquo;è niente da fare fuori da $\mathcal H_1$: su $|3\rangle$ entrambe le osservabili sono già certe, con valori $3$ e $5$. Dentro $\mathcal H_1$ bisogna diagonalizzare $\sigma_x$, il cui polinomio caratteristico è</p>
+   $$(0-\lambda)(0-\lambda)-1\cdot1=\lambda^{2}-1,$$
+   <p>con radici $\lambda=\pm1$ e autovettori $(|1\rangle\pm|2\rangle)/\sqrt2$, normalizzati perché $\Big(\frac{1}{\sqrt2}\Big)^{2}+\Big(\frac{1}{\sqrt2}\Big)^{2}=1$. La base comune è quindi</p>
+   $$|1,+1\rangle=\frac{|1\rangle+|2\rangle}{\sqrt2},\qquad |1,-1\rangle=\frac{|1\rangle-|2\rangle}{\sqrt2},\qquad |3,5\rangle=|3\rangle,$$
+   <p>dove l&rsquo;etichetta è la coppia di autovalori $(a,b)$, cioè l&rsquo;indice collettivo che Sakurai-Napolitano scrive $|K'\rangle$.</p>
+   <p><b>E ora l&rsquo;osservazione che l&rsquo;esempio esiste per fare.</b> Il vettore $|1\rangle$ è un autovettore di $A$ — con autovalore $1$ — e <i>non</i> è autovettore di $B$: infatti $B|1\rangle=|2\rangle$, che non è multiplo di $|1\rangle$. Quindi: <b>due osservabili che commutano non hanno necessariamente gli stessi autovettori.</b> Hanno una base comune, che è un&rsquo;affermazione di esistenza — e in un autospazio degenere quella base va <i>scelta</i>, perché la maggior parte delle direzioni non va bene. È la prima delle tre osservazioni che Picasso mette in coda al teorema, e qui si vede in una matrice $3\times3$ invece che a parole.</p>`},
+   {label:'Uno stato, e la sua distribuzione congiunta', body:R`
+   <p>Prendiamo lo stato</p>
+   $$|\Psi\rangle=\frac{|1\rangle+|2\rangle+|3\rangle}{\sqrt3}$$
+   <p>e calcoliamone tutto. I due valori medi si leggono direttamente in base canonica, perché entrambe le matrici agiscono in modo semplice:</p>
+   $$\langle A\rangle=\frac{1+1+3}{3}=\frac53,\qquad \langle B\rangle=\frac{1+1+5}{3}=\frac73,$$
+   <p>dove per $B$ si è usato $B|\Psi\rangle=(|2\rangle+|1\rangle+5|3\rangle)/\sqrt3$ e poi il prodotto scalare con $|\Psi\rangle$, che somma $1+1+5$.</p>
+   <p>La <b>distribuzione congiunta</b> si legge invece nella base comune. Le tre ampiezze sono i prodotti scalari di $|\Psi\rangle$ con i tre vettori di base:</p>
+   $$\langle 1,+1|\Psi\rangle=\frac{1}{\sqrt2}\cdot\frac{1+1}{\sqrt3}=\frac{2}{\sqrt6},\qquad \langle 1,-1|\Psi\rangle=\frac{1}{\sqrt2}\cdot\frac{1-1}{\sqrt3}=0,\qquad \langle 3,5|\Psi\rangle=\frac{1}{\sqrt3},$$
+   <p>e quindi</p>
+   $$P(1,+1)=\Big(\frac{2}{\sqrt6}\Big)^{2}=\frac23,\qquad P(1,-1)=0,\qquad P(3,5)=\frac13,$$
+   <p>con il controllo di normalizzazione $\frac23+0+\frac13=1$.</p>
+   <p><b>Il collaudo che conta</b> è che questa unica distribuzione riproduca <i>entrambe</i> le statistiche marginali, perché è esattamente la tesi di Dirac — uno strumento, due quadranti:</p>
+   $$1\cdot\tfrac23+1\cdot0+3\cdot\tfrac13=\tfrac53,\qquad 1\cdot\tfrac23+(-1)\cdot0+5\cdot\tfrac13=\tfrac73.$$
+   <p>I due numeri sono $\langle A\rangle$ e $\langle B\rangle$ di prima: i due valori medi calcolati in base canonica, uno per volta, e quelli calcolati dalla distribuzione congiunta coincidono. Per osservabili che non commutano non esiste alcuna distribuzione congiunta che faccia questo — e non perché sia difficile trovarla, ma perché non c&rsquo;è una base rispetto a cui scriverla.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nello stato $|\Psi\rangle$ la probabilità $P(1,-1)$ è zero. Vuol dire che l&rsquo;esito $(1,-1)$ è impossibile per questa coppia di osservabili?`,
+    a:R`No: vuol dire che è impossibile <i>in questo stato</i>. L&rsquo;esito $(1,-1)$ è una $n$-upla legittima dello spettro congiunto, e c&rsquo;è uno stato in cui ha probabilità uno — il vettore $|1,-1\rangle=(|1\rangle-|2\rangle)/\sqrt2$. Che qui sia zero dipende da una coincidenza di segni: $|\Psi\rangle$ ha componenti uguali su $|1\rangle$ e $|2\rangle$, e l&rsquo;ampiezza verso $|1,-1\rangle$ contiene la <i>differenza</i> di quelle componenti. La distinzione fra «non è nello spettro» e «ha ampiezza nulla in questo stato» è la stessa distinzione fra una proprietà dell&rsquo;osservabile e una proprietà dello stato, e sbagliarla è il modo più rapido di prendere zero a un esercizio di probabilità.`},
+   {q:R`Se la probabilità congiunta per osservabili incompatibili non è definita, che cosa si calcola quando si fanno due misure in sequenza di $S_z$ e poi $S_x$? Quel numero esiste.`,
+    a:R`Esiste, ed è un&rsquo;altra cosa: è la probabilità <b>condizionata</b> moltiplicata per quella del primo esito, cioè la probabilità di una <i>storia</i> di misura e non di una proprietà del sistema. Shankar lo scrive con due avvertenze esplicite (pag. stampata 133): primo, $P(\omega,\lambda)\neq P(\lambda,\omega)$ in generale — e quindi il numero dipende dall&rsquo;ordine, che è ciò che una probabilità congiunta non può fare; secondo, e più importante, $P(\omega,\lambda)$ «<i>non è la probabilità di produrre uno stato finale che abbia valori ben definiti $\omega$ e $\lambda$</i>», perché «<i>un tale stato non esiste per definizione di incompatibilità</i>». Lo stato prodotto dalle due misure è semplicemente l&rsquo;autostato della seconda osservabile. Il conto si fa; la frase che lo accompagna va scelta con cura.`},
+   {q:R`La dimostrazione dell&rsquo;equivalenza nel caso degenere usa il postulato di proiezione. È un difetto?`,
+    a:R`È una dipendenza, e va dichiarata invece che nascosta. La definizione «la seconda misura non perturba» parla di che cosa <i>succede</i> allo stato, quindi non può essere confrontata con la prima senza una regola che dica che cosa succede allo stato — e quella regola è il postulato di proiezione. Nel caso non degenere la dipendenza è innocua, perché l&rsquo;autostato è unico e non c&rsquo;è niente da scegliere; nel caso degenere serve sapere <i>dove</i> dentro l&rsquo;autospazio finisce il vettore, e la risposta «nella proiezione ortogonale, cioè nel punto di minima perturbazione» è esattamente ciò che il postulato di von Neumann afferma. Il teorema della tappa 02 non ha questa dipendenza: è puramente algebrico, e vale anche per chi del postulato di proiezione non vuole sapere nulla.`}
+  ]}
+]},
+
+/* ---------------- 02 · IL TEOREMA: COMPATIBILI SE E SOLO SE COMMUTANO ---------------- */
+{ num:'02', title:'Il teorema: compatibili se e solo se commutano', meta:'il lemma isolato · il caso non degenere in due righe · il caso degenere: autospazi invarianti · tre osservazioni che valgono quanto il teorema',
+  blocchi:[
+  {t:'prosa', title:'Da proprietà del processo a proprietà degli operatori', tag:'architettura', html:R`
+  <p>La tappa 01 ha definito la compatibilità guardando che cosa <i>succede</i> in laboratorio: una base comune, oppure una seconda misura che non sposta lo stato. Questa tappa traduce quella definizione in una condizione sugli <span class="str" data-str="operatore-aggiunto">operatori</span> che si può verificare senza misurare niente — basta moltiplicare due matrici nei due ordini. Il teorema è:</p>
+  <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)">$\xi$ ed $\eta$ sono compatibili $\iff$ $[\xi,\eta]=0$.</p>
+  <p>È il risultato più usato di tutto il corso dopo lo spettro, e vale la pena vederlo dimostrato per intero — con il passo dove la dimostrazione <i>deve</i> complicarsi, perché è lì che si capisce perché i libri lo saltano.</p>`},
+  {t:'reveal', title:'Il lemma isolato: che cosa succede a un autovettore quando il commutatore è nullo', tag:'costruzione', steps:[
+   {label:'L’enunciato del lemma', body:R`
+   <p>Picasso isola un passo tecnico prima del teorema, e lo isola apposta perché è l&rsquo;unico punto in cui serve davvero l&rsquo;algebra degli operatori:</p>
+   <p style="padding-left:1.2em;border-left:3px solid rgba(120,160,255,.45)"><b>Lemma.</b> Se $[\xi,\eta]=0$ e $|\xi'\rangle$ è autovettore di $\xi$ con autovalore $\xi'$, allora $\eta|\xi'\rangle$ è <i>ancora</i> autovettore di $\xi$, con lo <i>stesso</i> autovalore $\xi'$.</p>
+   <p>La dimostrazione è tre righe: $\xi(\eta|\xi'\rangle)=\eta\xi|\xi'\rangle=\eta\,\xi'|\xi'\rangle=\xi'(\eta|\xi'\rangle)$, dove il primo passo usa $[\xi,\eta]=0$ per scambiare l&rsquo;ordine e il secondo usa che $|\xi'\rangle$ è autovettore. Il punto da fissare è che cosa il lemma <i>non</i> dice: non dice che $\eta|\xi'\rangle$ sia proporzionale a $|\xi'\rangle$ — dice solo che resta dentro l&rsquo;<b>autospazio</b> di $\xi'$. Se quell&rsquo;autospazio ha dimensione uno le due cose coincidono; se ha dimensione maggiore di uno, no. È esattamente questa biforcazione a separare il caso facile dal caso che richiede lavoro.</p>`},
+   {label:'Il caso non degenere, dove il lemma basta da solo', body:R`
+   <p>Se $\xi'$ è non degenere, l&rsquo;autospazio è la retta generata da $|\xi'\rangle$ e il lemma dice che $\eta|\xi'\rangle$ ci sta dentro: dunque $\eta|\xi'\rangle=\eta'|\xi'\rangle$ per qualche numero $\eta'$. Ma questo è precisamente l&rsquo;affermazione che $|\xi'\rangle$ è <i>anche</i> autovettore di $\eta$. Ripetendo per ogni autovalore non degenere di $\xi$ si ottiene la base comune, senza mai dover scegliere niente: la base era già fissata da $\xi$, e $\eta$ si limita a rispettarla.</p>`},
+   {label:'Il caso degenere, dove serve costruire e non solo verificare', body:R`
+   <p>Se $\xi'$ è degenere, con autospazio $\mathcal H_{\xi'}$ di dimensione $d>1$, il lemma dice che $\eta$ manda $\mathcal H_{\xi'}$ <b>in se stesso</b> — è un autospazio <i>invariante</i> per $\eta$ — ma non dice quale base di $\mathcal H_{\xi'}$ diagonalizzi $\eta$. Qui il teorema richiede un passo in più: la restrizione di $\eta$ a $\mathcal H_{\xi'}$ è ancora un operatore autoaggiunto (perché $\eta$ lo è su tutto $\mathcal H$ e $\mathcal H_{\xi'}$ è invariante), quindi per il teorema spettrale della tappa 03 ha una base ortonormale di autovettori <i>dentro</i> $\mathcal H_{\xi'}$. Diagonalizzando $\eta$ separatamente in ciascun autospazio di $\xi$ — e ce ne possono essere molti, uno per ogni autovalore distinto — si ottiene la base comune sull&rsquo;intero $\mathcal H$.</p>
+   <p>Il verso opposto — se esiste la base comune allora $[\xi,\eta]=0$ — è immediato una volta scritti i due operatori nella base: entrambi sono diagonali, e due matrici diagonali commutano sempre, in qualunque dimensione.</p>`}
+  ]},
+  {t:'reveal', title:'Il caso degenere sul sistema a tre livelli, verificato in due modi', tag:'esempio', steps:[
+   {label:'Il lemma applicato per esteso: lo spettro di $A$ ricalcolato, non letto', body:R`
+   <p>Il teorema va applicato, non solo enunciato, e il primo passo è onesto: verificare lo <span class="str" data-str="spettro">spettro</span> di $A=\mathrm{diag}(1,1,3)$ <i>senza</i> usare il fatto che la matrice è già diagonale, cioè espandendo il suo polinomio caratteristico come se non si sapesse nulla:</p>
+   $$\det(A-\lambda\mathbb 1)=(1-\lambda)^{2}(3-\lambda)=3-7\lambda+5\lambda^{2}-\lambda^{3},$$
+   <p>che si annulla per $\lambda=1$ (doppia) e $\lambda=3$ — lo spettro dichiarato in tappa 01, ora ottenuto dal polinomio e non dalla semplice lettura della diagonale. Per il lemma, l&rsquo;autospazio $\mathcal H_1=\mathrm{span}\{|1\rangle,|2\rangle\}$ di $\lambda=1$ è invariante per qualunque operatore che commuti con $A$, e la restrizione di $B$ a $\mathcal H_1$ — il blocco $\sigma_x$ già scritto in tappa 01 — ha polinomio caratteristico</p>
+   $$(0-\lambda)(0-\lambda)-1\cdot1=\lambda^{2}-1,$$
+   <p>radici $\pm1$: è esattamente il passo che il teorema prescrive nel caso degenere, diagonalizzare la restrizione <i>dentro</i> l&rsquo;autospazio invariante, non supporre a priori quale base vada bene.</p>`},
+   {label:'Un secondo partner per $A$, costruito da $\\sigma_y$: stesso autospazio, base diversa', body:R`
+   <p>Per vedere che la base trovata non è l&rsquo;unica <i>a priori possibile</i> — solo l&rsquo;unica comune a $B$ — serve un secondo operatore autoaggiunto che viva anche lui dentro $\mathcal H_1$ (e quindi commuti automaticamente con $A$, per lo stesso argomento banale per cui ogni operatore confinato in un autospazio di $A$ lo commuta) ma che <b>non</b> sia un multiplo di $B$. Prendiamo, con $\sigma_y=\begin{pmatrix}0&-i\\i&0\end{pmatrix}$,</p>
+   $$G=\mathbb 1-2\,\sigma_y=\begin{pmatrix}1&2i\\-2i&1\end{pmatrix}\quad\text{su }\mathcal H_1,$$
+   <p>costruito dalla <span class="str" data-str="matrici-di-pauli">matrice di Pauli</span> $\sigma_y$ invece che da $\sigma_x$. Il suo polinomio caratteristico è</p>
+   $$(1-\lambda)^{2}-(2i)(-2i)=(1-\lambda)^{2}-4=(\lambda-3)(\lambda+1),$$
+   <p>spettro $\{3,-1\}$ — diverso da quello di $B$ ($\{\pm1\}$ su $\mathcal H_1$, $5$ su $|3\rangle$), ma $G$ è perfettamente autoaggiunto e compatibile con $A$ allo stesso modo di $B$: entrambi sono costanti sugli autospazi di $A$ fuori da $\mathcal H_1$ e diagonalizzabili dentro.</p>`},
+   {label:'Gli autovettori di $G$, e perché non sono quelli di $B$', body:R`
+   <p>Per $\lambda=-1$: $(G+\mathbb 1)=\begin{pmatrix}2&2i\\-2i&2\end{pmatrix}$. La riga 1 dà $2v_1+2iv_2=0\Rightarrow v_1=-iv_2$. La riga 2 deve dare lo stesso vincolo: $-2iv_1+2v_2=-2i(-iv_2)+2v_2$, e il prodotto che decide il segno è</p>
+   $$-2i\cdot(-i)=-2,$$
+   <p>quindi $-2iv_1+2v_2=-2v_2+2v_2=0$ ✓. L&rsquo;autovettore è $|{-}1\rangle_G=(-i,1)/\sqrt2$ (a meno di fase, normalizzato come in tappa 01 con $|{-}i|^2+|1|^2=2$).</p>
+   <p>Per $\lambda=3$: $(G-3\mathbb 1)=\begin{pmatrix}-2&2i\\-2i&-2\end{pmatrix}$. La riga 1 dà $-2v_1+2iv_2=0\Rightarrow v_1=iv_2$. La riga 2: $-2iv_1-2v_2=-2i(iv_2)-2v_2$, e qui il prodotto è</p>
+   $$-2i\cdot(+i)=+2,$$
+   <p>quindi $-2iv_1-2v_2=2v_2-2v_2=0$ ✓. L&rsquo;autovettore è $|3\rangle_G=(i,1)/\sqrt2$.</p>
+   <p>Nessuno dei due, $(-i,1)/\sqrt2$ o $(i,1)/\sqrt2$, è proporzionale agli autovettori di $B$ trovati in tappa 01, $(|1\rangle\pm|2\rangle)/\sqrt2$. $G$ e $B$ commutano entrambi con $A$ — sono entrambi «compatibili con $A$» nel senso del teorema — eppure selezionano due basi <i>diverse</i> di $\mathcal H_1$. Compatibilità con $A$ non basta a fissare quale base; serve l&rsquo;operatore <i>specifico</i> con cui si misura davvero, e questa è la ragione fisica per cui il teorema parla sempre di una coppia di osservabili, non di una proprietà di una sola.</p>`},
+   {label:'La direzione non degenere, scritta in componenti alla Sakurai', body:R`
+   <p>Picasso dimostra il verso «stessi autovettori $\Rightarrow$ commutano» a parole; Sakurai-Napolitano lo scrive in componenti, ed è la forma più comoda per un calcolo esplicito. Se $A|a'\rangle=a'|a'\rangle$ per ogni autovalore non degenere e $[A,B]=0$, allora</p>
+   $$\langle a''|[A,B]|a'\rangle=(a''-a')\langle a''|B|a'\rangle=0.$$
+   <p>Il membro sinistro è zero perché il commutatore è nullo per ipotesi; il membro di destra viene da far agire $A$ a sinistra su $\langle a''|$ e a destra su $|a'\rangle$. Se $a''\neq a'$ (autovalori non degeneri e distinti), l&rsquo;unica possibilità è $\langle a''|B|a'\rangle=0$: cioè $B$ non collega autospazi diversi di $A$, e dentro ciascuno dei due agisce come un numero — $B$ è diagonale nella stessa base che diagonalizza $A$. È lo stesso contenuto della dimostrazione di Picasso, letto come algebra di matrici invece che come proprietà degli stati.</p>`},
+   {label:'Il caso $\\ell=0$: il sottospazio dove osservabili incompatibili coincidono comunque', body:R`
+   <p>Sakurai-Napolitano osserva un fatto che il teorema da solo non prevede, e che vale la pena mettere a fianco: $L_x$ e $L_z$ non commutano in generale — $[L_x,L_z]=-i\hbar L_y$ — eppure sul sottospazio $\ell=0$, dove $L^2=0$ e quindi ogni componente del momento angolare è zero, si ha</p>
+   $$L_x|\ell=0\rangle=L_z|\ell=0\rangle=0,$$
+   <p>e lo stato $|\ell=0\rangle$ è autostato simultaneo di <i>entrambi</i>, con autovalore zero per ciascuno. Non è un&rsquo;eccezione al teorema: il teorema parla di basi comuni su <i>tutto</i> $\mathcal H$, e qui si ha un singolo vettore comune a due operatori incompatibili, non un&rsquo;intera base. È il contenuto della terza osservazione di Picasso — $[\xi,\eta]\neq0$ non vieta che <i>qualche</i> autovettore sia comune — letta su un caso fisico reale invece che come possibilità abstratta.</p>`}
+  ]},
+  {t:'prosa', title:'Tre osservazioni che valgono quanto il teorema', tag:'architettura', html:R`
+  <p>Picasso le mette in coda alla dimostrazione, e sono tre trappole, non tre corollari decorativi.</p>
+  <p><b>Prima.</b> Due osservabili che commutano <i>non hanno necessariamente gli stessi autovettori</i> — ne hanno in comune <i>una base</i>, che in presenza di degenerazione è una fra tante possibili per il solo $\xi$. La tappa 01 lo ha già visto in un caso concreto: $|1\rangle$ è autovettore di $A$ e non di $B$, pur commutando $A$ con $B$.</p>
+  <p><b>Seconda.</b> L&rsquo;identità commuta con qualunque operatore, quindi è compatibile con tutto — ma questo non aggiunge nessuna informazione fisica: dire che una grandezza è compatibile con l&rsquo;identità è vuoto, perché l&rsquo;identità non misura niente.</p>
+  <p><b>Terza</b>, già vista sopra sul sottospazio $\ell=0$: $[\xi,\eta]\neq0$ non impedisce che esista <i>qualche</i> autovettore comune — impedisce che ne esista una <i>base intera</i>. Confondere le due cose è l&rsquo;errore più comune in un esame orale su questo teorema.</p>`}
+]},
+
+/* ---------------- 03 · INSIEMI COMPLETI DI OSSERVABILI CHE COMMUTANO ---------------- */
+{ num:'03', title:'Insiemi completi di osservabili che commutano (CSCO)', meta:'la definizione di Dirac, costruita per fare una rappresentazione · i suoi quattro risultati · i tre CSCO dell’esame',
+  blocchi:[
+  {t:'prosa', title:'Il problema che il CSCO risolve: quando una sola osservabile non basta', tag:'architettura', html:R`
+  <p>La tappa 02 ha mostrato che l&rsquo;autospazio $\mathcal H_1$ di $A$ ha dimensione due, e che dentro c&rsquo;è spazio per infiniti operatori diversi ($B$, $G$, chiunque altro) ciascuno con la propria base. Il problema fisico sottostante è questo: <b>una sola osservabile, quando è degenere, non etichetta completamente lo stato</b>. Serve aggiungerne altre, che commutino con la prima e fra loro, finché la degenerazione residua non sparisce. Un <b>insieme completo di osservabili che commutano</b> (CSCO) è esattamente il risultato di questo processo: la definizione di Picasso lo dice in una riga — un insieme di osservabili compatibili la cui $n$-upla di autovalori è <b>globalmente non degenere</b>, cioè individua un unico stato a meno di fase.</p>
+  <p>L&rsquo;esempio più istruttivo è il più fisico di tutti: l&rsquo;atomo isolato. Gli stati stazionari con energia fissata $E_n$ non sono uno solo — sono degeneri, e la degenerazione <i>si conta</i>. Il numero di stati con <span class="str" data-str="armoniche-sferiche">momento angolare orbitale</span> $\ell$ fissato è $2\ell+1$ (le proiezioni $m=-\ell,\dots,\ell$), e sommando su tutti gli $\ell$ permessi a un dato livello $n$,</p>
+  $$\sum_{\ell=0}^{n-1}(2\ell+1)=n^{2}.$$
+  <p>Per $n=3$ questo dà $1+3+5=3^{2}=9$: nove stati degeneri alla stessa energia, e $H$ da sola ne distingue uno solo — il numero $E_3$. Serve dell&rsquo;altro, e il resto di questa tappa è dire cosa.</p>`},
+  {t:'reveal', title:'La costruzione di Dirac, e i suoi quattro risultati', tag:'costruzione', steps:[
+   {label:'Non una lista di etichette: uno strumento per fare la rappresentazione', body:R`
+   <p>La tappa 01 ha già mostrato la tesi di Dirac — un CSCO è un&rsquo;unica osservabile a più quadranti. Il §14 dei <i>Principi</i> ne fa un uso tecnico preciso: costruire una <b>rappresentazione</b>, cioè una base dello spazio di Hilbert etichettata da numeri invece che da vettori abstract. Dirac procede per passi, e ciascuno è un risultato separato che vale la pena isolare.</p>`},
+   {label:'Primo risultato: un CSCO produce una base ortogonale', body:R`
+   <p>Se $\xi,\eta,\zeta,\dots$ formano un CSCO, i loro autobra simultanei $\langle\xi'\eta'\zeta'\dots|$ sono ortogonali a due a due — perché differiscono nell&rsquo;autovalore di <i>almeno</i> un&rsquo;osservabile, e autovettori di un operatore autoaggiunto con autovalori diversi sono ortogonali — e sono <i>non degeneri</i> per definizione: la $n$-upla basta a distinguerli tutti. È la base pronta all&rsquo;uso, la stessa che ha etichettato $|1,+1\rangle,|1,-1\rangle,|3,5\rangle$ nella tappa 01.</p>`},
+   {label:'Secondo risultato, il converso: ogni rappresentazione ortogonale viene da un CSCO', body:R`
+   <p>Dirac fa anche il passo opposto, che è quello meno citato: data una qualunque base ortogonale «fondamentale» dello spazio (nel senso tecnico che usa per costruire rappresentazioni), esiste <i>sempre</i> un insieme di osservabili che commutano di cui quella base è l&rsquo;insieme degli autobra simultanei. Non è un fatto ovvio: dice che scegliere una rappresentazione e scegliere un CSCO sono <i>la stessa scelta</i>, vista da due lati.</p>`},
+   {label:'Terzo risultato: un insieme che commuta si completa sempre', body:R`
+   <p>Se $\xi,\eta$ commutano ma la coppia $(\xi',\eta')$ non basta a distinguere ogni stato — cioè l&rsquo;insieme non è ancora globalmente non degenere — si può sempre trovare un&rsquo;altra osservabile $\zeta$ che commuti con entrambe e che tolga la degenerazione residua, aggiungendola all&rsquo;insieme. Il processo termina, perché la dimensione dello spazio (o il numero di numeri quantici indipendenti, nel caso continuo) è finito ad ogni passo: non si può completare all&rsquo;infinito.</p>`},
+   {label:'Quarto risultato, il criterio operativo di Picasso: la non degenerazione globale', body:R`
+   <p>Il terzo risultato dice che il completamento esiste; non dice <i>quando fermarsi</i>. Il criterio è quello con cui questa tappa è iniziata: l&rsquo;insieme è completo quando la $n$-upla di autovalori $(\xi',\eta',\zeta',\dots)$ individua uno stato unico a meno di fase — non più, non meno. È il test che si applica in pratica: dato un insieme di osservabili compatibili, si conta quanti stati distinti condividono la stessa $n$-upla di autovalori, e se sono di più di uno l&rsquo;insieme non è ancora completo.</p>`}
+  ]},
+  {t:'reveal', title:'I tre CSCO che si incontrano all’esame', tag:'esempio', steps:[
+   {label:'L’atomo isolato: energia, momento angolare, proiezione, parità', body:R`
+   <p>Tornando all&rsquo;esempio di apertura: i nove stati degeneri a $n=3$ si separano aggiungendo $L^{2}$ (che fissa $\ell$, e con esso la dimensione $2\ell+1$ del sottospazio residuo) e $L_z$ (che fissa $m$ dentro quel sottospazio). Per un atomo isolato — simmetria sferica, nessun campo esterno — queste tre osservabili insieme a $H$ non bastano ancora del tutto: resta la parità sotto inversione spaziale, che Picasso include come quarta etichetta. Lo stato si scrive</p>
+   $$|E,L,M,w\rangle,$$
+   <p>con $w$ l&rsquo;autovalore di parità. Questo è il CSCO «di struttura»: quattro osservabili, quattro numeri quantici, nessuna degenerazione residua per un atomo senza altre simmetrie rotte.</p>`},
+   {label:'Il potenziale centrale: perché $H,L^2,L_z$ bastano quando $V=V(r)$', body:R`
+   <p>Il caso più comune all&rsquo;esame è più semplice: un singolo corpo in un potenziale centrale $V=V(r)$, senza bisogno della parità come etichetta indipendente perché la simmetria sferica da sola fissa la struttura angolare. Qui il CSCO è $\{H,L^2,L_z\}$, e il fatto che commutino a vicenda non è un&rsquo;ipotesi aggiunta: è una conseguenza diretta della forma del potenziale,</p>
+   $$[H,L^{2}]=[H,L_z]=0\quad\text{se }V=V(r).$$
+   <p>La ragione fisica è che $L^2$ e $L_z$ generano rotazioni, e un potenziale che dipende solo da $r=|\vec r|$ è invariante per rotazioni — quindi commuta con i loro generatori. È lo stesso principio di simmetria che la tappa 07 di questo corso promette come cuore del programma, visto qui in anticipo su un caso particolare invece che nella sua forma generale.</p>`},
+   {label:'Orbitale più spin: quando si aggiunge $s_z$', body:R`
+   <p>Il terzo caso è quello in cui $\{H,L^2,L_z\}$ smette di bastare: appena si introduce lo spin dell&rsquo;elettrone, ogni livello orbitale raddoppia — due stati di spin per ogni $(n,\ell,m)$ — e $\{H,L^2,L_z\}$ torna a essere degenere, questa volta per un fattore due invece che per un fattore $2\ell+1$. Il completamento prescritto dal terzo risultato di Dirac è immediato: si aggiunge $S_z$, l&rsquo;operatore di proiezione dello spin, che commuta con tutti e tre perché agisce su un fattore diverso dello spazio di Hilbert (orbitale $\otimes$ spin) e non si mescola con nessuno di loro. Il CSCO diventa $\{H,L^2,L_z,S_z\}$, e questo è il punto in cui il formalismo prepara — senza ancora dimostrarlo — il terreno per l&rsquo;accoppiamento spin-orbita di un corso successivo.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché l’atomo isolato ha bisogno della parità in più rispetto al caso del potenziale centrale generico?`,
+    a:R`Perché «isolato» significa anche invariante per inversione spaziale $\vec r\to-\vec r$, una simmetria che il generico $V(r)$ possiede comunque (dipende solo dal modulo), ma che Picasso tiene come etichetta <i>indipendente</i> perché $w=\pm1$ non si deduce da $(E,L,M)$ — due stati con la stessa energia e lo stesso momento angolare possono avere parità opposta se il potenziale lo permette. Nel caso coulombiano puro la parità è in realtà fissata da $\ell$ (vale $(-1)^\ell$), quindi è ridondante; Picasso la mantiene nella lista perché per un potenziale centrale generico non coulombiano quella relazione non vale più, ed è un esempio di quanto sia delicato stabilire quando un insieme è davvero completo e quando contiene un&rsquo;etichetta superflua.`},
+   {q:R`Il quarto risultato dice di contare gli stati con la stessa n-upla di autovalori. In pratica, come si accorge qualcuno che un insieme NON è ancora completo?`,
+    a:R`Trovando uno stato degenere che l&rsquo;insieme non distingue — esattamente il conto fatto in apertura, $1+3+5=3^{2}=9$: se l&rsquo;unico numero quantico disponibile fosse $E_3$, ci sarebbero nove stati con quella stessa etichetta, non uno, e nessuna misura ulteriore di $H$ li separerebbe. Il segnale pratico è la degenerazione residua stessa: se dopo aver fissato tutti gli autovalori dell&rsquo;insieme proposto esistono ancora due stati ortogonali con la stessa $n$-upla, l&rsquo;insieme non è completo e serve un&rsquo;osservabile in più.`}
+  ]}
+]},
+
+/* ---------------- 04 · L’ALGEBRA DEI COMMUTATORI, E DOVE L’ANALOGIA CLASSICA FALLISCE ---------------- */
+{ num:'04', title:'L’algebra dei commutatori, e dove l’analogia classica fallisce', meta:'le proprieta di base e Jacobi · il postulato di quantizzazione dalle parentesi di Poisson · le CCR · [q²,p²]: l’ordine dei fattori conta',
+  blocchi:[
+  {t:'prosa', title:'Il commutatore come oggetto algebrico, non solo come test di compatibilità', tag:'architettura', html:R`
+  <p>Le tappe 02 e 03 hanno usato il commutatore come un <i>test</i>: zero o non zero, compatibile o no. Questa tappa lo tratta come un <b>oggetto che si calcola</b>, con proprietà algebriche che valgono per qualunque tripla di operatori, prima ancora di sapere chi sono $A$, $B$, $C$:</p>
+  $$[A,A]=0,\quad[A,B]=-[B,A],\quad[A,B+C]=[A,B]+[A,C],$$
+  $$[A,BC]=[A,B]C+B[A,C],\quad[AB,C]=A[B,C]+[A,C]B,\quad[A,[B,C]]+[B,[C,A]]+[C,[A,B]]=0.$$
+  <p>Le prime tre sono immediate dalla definizione $[A,B]=AB-BA$. Le due regole di Leibniz (quarta e quinta) sono quelle che fanno davvero il lavoro di calcolo — permettono di scomporre il commutatore di un prodotto senza mai disfare l&rsquo;ordine degli operatori che già si conosce — e l&rsquo;ultima, l&rsquo;<b>identità di Jacobi</b>, è la regola che sostituisce l&rsquo;associatività quando non si può semplicemente riordinare. Sono esattamente le due regole di Leibniz, applicate due volte ciascuna, a fare tutto il lavoro di questa tappa.</p>`},
+  {t:'reveal', title:'Il postulato di quantizzazione: dalle parentesi di Poisson al commutatore', tag:'costruzione', steps:[
+   {label:'L’analogia che Dirac propone', body:R`
+   <p>In meccanica classica, due grandezze $f,g$ sullo spazio delle fasi hanno una parentesi di Poisson $\{f,g\}_{\mathrm{PB}}=\partial_q f\,\partial_p g-\partial_p f\,\partial_q g$, e $\{q,p\}_{\mathrm{PB}}=1$. Il postulato di quantizzazione, nella forma che Dirac propone per analogia, è</p>
+   $$[\hat f,\hat g]=i\hbar\,\widehat{\{f,g\}_{\mathrm{PB}}},$$
+   <p>applicato alla coppia fondamentale dà le <b>regole di commutazione canoniche</b> (CCR): $[q,p]=i\hbar$, e per tre dimensioni $[x_i,p_j]=i\hbar\,\delta_{ij}$, $[x_i,x_j]=0$, $[p_i,p_j]=0$. Non è una deduzione: è un <i>postulato</i>, giustificato dal fatto che riproduce correttamente la meccanica classica nel limite $\hbar\to0$ — e dal fatto, verificato qui sotto, che per funzioni <i>semplici</i> dà la risposta attesa.</p>`},
+   {label:'Il caso in cui funziona: $[x^n,p]$', body:R`
+   <p>Applicando due volte la regola di Leibniz $[A,BC]=[A,B]C+B[A,C]$ a $[x,x^{n-1}p]$ e iterando, si ottiene la formula generale $[x^n,p]=i\hbar\,n\,x^{n-1}$ — che è esattamente $i\hbar$ volte la parentesi di Poisson classica $\{x^n,p\}_{\mathrm{PB}}=n x^{n-1}=\tfrac{d}{dx}x^{n}$, calcolata qui per $n=4$:</p>
+   $$\frac{d}{dx}x^{4}=4x^{3},$$
+   <p>e applicata al caso $n=3$ dà il commutatore esplicito</p>
+   $$[x^{3},p]=i\hbar\,\frac{d(x^{3})}{dx}=3i\hbar x^{2}.$$
+   <p>Per qualunque potenza di una sola variabile, l&rsquo;analogia classica-quantistica funziona senza sorprese: il commutatore è $i\hbar$ volte la <span class="str" data-str="derivazione">derivata</span>, punto.</p>`}
+  ]},
+  {t:'reveal', title:'Il caso in cui l’analogia fallisce: $[q^2,p^2]$', tag:'esempio', steps:[
+   {label:'La parentesi di Poisson classica, calcolata come derivata', body:R`
+   <p>Classicamente, $\{q^2,p^2\}_{\mathrm{PB}}=\partial_q(q^2)\,\partial_p(p^2)-\partial_p(q^2)\,\partial_q(p^2)$. Il secondo termine è zero ($q^2$ non dipende da $p$), e il primo è</p>
+   $$[q^{2},p^{2}]_{\mathrm{PB}}=\frac{\partial q^{2}}{\partial q}\frac{\partial p^{2}}{\partial p}-\frac{\partial q^{2}}{\partial p}\frac{\partial p^{2}}{\partial q}=4qp.$$
+   <p>Se il postulato di quantizzazione funzionasse <i>sempre</i> alla lettera, ci aspetteremmo $[\hat q^2,\hat p^2]=i\hbar\cdot4qp=4i\hbar qp$ e nient&rsquo;altro.</p>`},
+   {label:'Il calcolo quantistico vero, passo per passo', body:R`
+   <p>Si calcola con la regola di Leibniz, senza scorciatoie. Prima il pezzo più piccolo, $[q,p^2]$: usando $[A,BC]=A[B,C]+[A,B]C$ con $A=q,B=C=p$,</p>
+   $$p[q,p]+[q,p]p=p(i\hbar)+(i\hbar)p=2i\hbar p.$$
+   <p>Poi si scala: $[q^2,p^2]=q[q,p^2]+[q,p^2]q=q(2i\hbar p)+(2i\hbar p)q=2i\hbar(qp+pq)$. Ora, dalla CCR, $pq=qp-i\hbar$, quindi $qp+pq=2qp-i\hbar$, e</p>
+   $$2i\hbar\,(2qp-i\hbar)=4i\hbar\,qp+2\hbar^{2}.$$`},
+   {label:'Il verdetto: un termine che la parentesi di Poisson non prevede', body:R`
+   <p>Il risultato vero è $[q^2,p^2]=4i\hbar qp+2\hbar^2$, non $4i\hbar qp$. C&rsquo;è un termine <b>extra, di ordine $\hbar^2$</b>, che la parentesi di Poisson classica — un oggetto che non sa nulla di $\hbar$ — non può in nessun modo prevedere: nasce esclusivamente dal fatto che $q$ e $p$ non commutano, cioè dalla stessa CCR che il postulato usa per <i>costruire</i> il commutatore al primo ordine. L&rsquo;analogia classica-quantistica è quindi <b>affidabile al primo ordine in $\hbar$ e cieca agli ordini successivi</b>: funziona esattamente per $[x^n,p]$ (dove non c&rsquo;è nessun ordine superiore a trattare, perché $p$ compare una volta sola), e smette di bastare appena l&rsquo;osservabile coinvolge $p$ più di una volta insieme a $q$ più di una volta. È la stessa cautela che il §4.12 di Picasso mette per iscritto, e che nessun libro di meccanica classica potrebbe mai insegnare da solo.</p>`}
+  ]},
+  {t:'reveal', title:'Il commutatore del momento angolare, costruito dalla stessa algebra', tag:'esempio', steps:[
+   {label:'$[L_x,L_y]$, espanso senza scorciatoie', body:R`
+   <p>Con $L_x=yp_z-zp_y$ e $L_y=zp_x-xp_z$, il commutatore si espande in quattro pezzi usando $[AB,CD]=A[B,CD]+[A,CD]B$ applicata due volte a ciascuno. Due dei quattro si annullano identicamente — ogni volta che compaiono due coordinate diverse che commutano insieme a due componenti dell&rsquo;impulso che commutano — e i due che sopravvivono sono</p>
+   $$-i\hbar\,yp_x+i\hbar\,xp_y=i\hbar\,(xp_y-yp_x)=i\hbar L_z,$$
+   <p>dove il primo pezzo viene da $[yp_z,zp_x]$ (tramite $[p_z,z]=-i\hbar$) e il secondo da $[zp_y,xp_z]$ (tramite $[z,p_z]=i\hbar$). Il risultato $[L_x,L_y]=i\hbar L_z$ — e le sue permutazioni cicliche — sono le relazioni che generano tutta l&rsquo;algebra del momento angolare, ed è notevole che derivino dalla stessa manciata di regole di Leibniz usate sopra per $[q^2,p^2]$: non c&rsquo;è bisogno di un postulato nuovo.</p>`},
+   {label:'Una conseguenza che si vede in un numero: la scala di uno stato $\\ell=1$', body:R`
+   <p>Gli operatori di innalzamento e abbassamento $L_\pm=L_x\pm iL_y$ non commutano con $L_z$ — $[L_z,L_\pm]=\pm\hbar L_\pm$, dalla stessa algebra — e questo è il motivo per cui, anche se $\{L^2,L_z\}$ è un CSCO (tappa 03), gli stati con lo stesso $\ell$ e $m$ diverso restano collegati da un operatore ben definito. Per $\ell=1$, $m=0$, l&rsquo;elemento di matrice che porta a $m=1$ ha modulo</p>
+   $$\sqrt{\ell(\ell+1)-m(m+1)}=\sqrt{2},$$
+   <p>e questo stesso numero $\sqrt2$ — non casualmente — è il coefficiente di normalizzazione già incontrato nella tappa 01 per l&rsquo;autovettore $(|1\rangle+|2\rangle)/\sqrt2$: la stessa aritmetica delle radici di due compare ogni volta che una base ortonormale deve ripartire la probabilità su due componenti uguali.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se l’analogia classica-quantistica fallisse SEMPRE per prodotti di più di una potenza di $q$ e $p$ insieme, la meccanica quantistica sarebbe inutilizzabile. Perché non è un problema praticamente?`,
+    a:R`Perché il termine extra è sempre di ordine $\hbar^2$ (o più alto) rispetto al termine classico, che è di ordine $\hbar^1$: nel limite in cui le azioni in gioco sono enormi rispetto a $\hbar$ — il limite classico — il termine extra è trascurabile rispetto a quello previsto da Poisson, ed è per questo che la meccanica classica resta una buona approssimazione nel suo dominio. Il punto della tappa non è che l&rsquo;analogia sia inutile, è che va usata per costruire il COMMUTATORE ESATTO con Leibniz — non per leggere il risultato finale direttamente dalla parentesi di Poisson, che è cieca a questi termini.`},
+   {q:R`Il commutatore $[L_x,L_y]=i\hbar L_z$ si poteva ottenere anche sostituendo $q\to x,\,p\to p_x$ eccetera nella parentesi di Poisson classica $\{L_x,L_y\}_{\mathrm{PB}}=L_z$ e moltiplicando per $i\hbar$. Perché qui l’analogia funziona, mentre per $q^2,p^2$ no?`,
+    a:R`Perché $L_x$ e $L_y$, scritti in termini di posizioni e impulsi, sono <i>lineari</i> in ciascuna coppia canonica coinvolta — ogni termine ha al più un fattore di una data componente di posizione e un fattore della componente di impulso coniugata — e l&rsquo;espansione con Leibniz applicata a prodotti lineari non genera mai il termine extra di ordine $\hbar^2$ che compare invece per $q^2p^2$, dove la stessa coppia canonica $(q,p)$ appare due volte. La regola pratica, utile all&rsquo;esame: l&rsquo;analogia classica-quantistica è esatta per qualunque funzione che sia al più bilineare e separata nelle coppie canoniche, e richiede il calcolo con Leibniz non appena una singola coppia compare con potenza maggiore di uno su entrambi i lati.`}
+  ]}
+]},
+
+/* ---------------- 05 · LA RELAZIONE DI INDETERMINAZIONE, DEDOTTA E COLLAUDATA ---------------- */
+{ num:'05', title:'La relazione di indeterminazione, dedotta e collaudata', meta:'il lemma di Schwarz · il discriminante che non può essere positivo · la forma di Robertson · la verifica numerica sul sistema a tre livelli',
+  blocchi:[
+  {t:'prosa', title:'Dove il pavimento sotto il prodotto viene da', tag:'architettura', html:R`
+  <p>La tappa 02 ha mostrato che un commutatore nullo garantisce una base comune. Questa tappa risponde alla domanda complementare: quando il commutatore <i>non</i> è nullo, quanto possono essere piccole insieme le due indeterminazioni $\Delta A,\Delta B$? La risposta non è «dipende dallo stato» in modo arbitrario: c&rsquo;è un numero, fissato dal commutatore, sotto il quale il prodotto $\Delta A\,\Delta B$ non può scendere in <i>nessuno</i> stato. La dimostrazione che segue — quella di Picasso, §4.11 — si fa per intero, perché è corta e perché il programma la chiede esplicitamente (Q.3).</p>`},
+  {t:'reveal', title:'Il lemma di positività, e la sua forma degenere', tag:'costruzione', steps:[
+   {label:'Un fatto generale su qualunque operatore', body:R`
+   <p>Per <i>qualunque</i> operatore $a$ (non necessariamente Hermitiano) e qualunque stato $|s\rangle$, la <span class="str" data-str="disuguaglianza-di-schwarz">disuguaglianza di Schwarz</span> applicata a $|s\rangle$ e $a|s\rangle$ dà</p>
+   $$\langle s|a^{\dagger}a|s\rangle\ \ge\ \langle s|a^{\dagger}|s\rangle\langle s|a|s\rangle.$$
+   <p>È la (4.45) di Picasso, e dice semplicemente che la «larghezza» di $a$ non può essere più piccola del quadrato del suo valor medio — lo stesso fatto, generalizzato a un operatore qualunque, che per un&rsquo;osservabile Hermitiana dà $\Delta A^2\ge0$.</p>`},
+   {label:'Specializzare ad $a=\\xi+i\\omega\\eta$', body:R`
+   <p>Siano $\xi=A-\langle A\rangle$, $\eta=B-\langle B\rangle$ gli operatori di deviazione (a media nulla per costruzione: $\langle\xi\rangle=\langle\eta\rangle=0$), e sia $\omega$ un numero reale arbitrario. Per $a=\xi+i\omega\eta$ si ha $\langle a\rangle=\langle\xi\rangle+i\omega\langle\eta\rangle=0$, quindi il lemma degenera nella forma più semplice $\langle a^\dagger a\rangle\ge0$. Espandendo $a^\dagger a=(\xi-i\omega\eta)(\xi+i\omega\eta)=\xi^2+\omega^2\eta^2+i\omega(\xi\eta-\eta\xi)=\xi^2+\omega^2\eta^2+i\omega[\xi,\eta]$, e usando $[\xi,\eta]=[A,B]$ (il commutatore non vede gli spostamenti costanti),</p>
+   $$\langle a^{\dagger}a\rangle=\Delta A^{2}+\omega^{2}\Delta B^{2}+i\omega\langle[A,B]\rangle\ \ge\ 0\qquad\forall\,\omega\in\mathbb R.$$`}
+  ]},
+  {t:'reveal', title:'Il discriminante, e perché non può essere positivo', tag:'costruzione', steps:[
+   {label:'Rendere reale il termine misto', body:R`
+   <p>$\langle[A,B]\rangle$ è immaginario puro, perché $[A,B]^\dagger=-[A,B]$ per $A,B$ Hermitiani: scriviamo allora $\langle[A,B]\rangle=ic$ con $c$ <i>reale</i>. Moltiplicando per un secondo fattore $i$ si ottiene una quantità reale e positiva:</p>
+   $$\big(i\,(ic)\big)^{2}=c^{2},$$
+   <p>cioè $i\langle[A,B]\rangle=-c$ è reale, come deve essere perché l&rsquo;intera espressione $\langle a^\dagger a\rangle$ sia reale. Con questa sostituzione, $i\omega\langle[A,B]\rangle=i\omega(ic)=-\omega c$, e la disuguaglianza diventa una forma quadratica <i>reale</i> in $\omega$:</p>
+   $$\Delta A^{2}-\omega c+\omega^{2}\Delta B^{2}\ge0\qquad\forall\,\omega.$$`},
+   {label:'Un polinomio di secondo grado sempre non negativo ha discriminante non positivo', body:R`
+   <p>Scrivendo la forma come $a+\omega c'+\omega^2 b$ (con $a=\Delta A^2$, $b=\Delta B^2$, $c'=-c$, e riassorbendo il segno nella definizione di $c$ senza perdita di generalità — è la stessa $c$ della (4.45), a meno della convenzione di segno che l&rsquo;enunciato finale non vede, perché compare solo al quadrato), la condizione che sia $\ge0$ per ogni $\omega$ reale è esattamente che il discriminante non sia positivo:</p>
+   $$c^{2}-4(\Delta\xi)^{2}(\Delta\eta)^{2}\le0.$$
+   <p>È il punto in cui l&rsquo;algebra smette di essere un dettaglio: un trinomio di secondo grado con coefficiente direttivo positivo ($\Delta B^2>0$, a meno del caso degenere) è sempre $\ge0$ se e solo se non ha due radici reali distinte — altrimenti sarebbe negativo fra le due radici. Nessuna proprietà fisica è stata usata in questo passo: è pura algebra applicata a un fatto fisico (la positività di una norma).</p>`},
+   {label:'La stessa soglia, trovata minimizzando', body:R`
+   <p>In alternativa al discriminante, si può minimizzare direttamente $a+\omega c+\omega^2 b$ rispetto a $\omega$: il minimo è a $\omega=-c/(2b)$, e vale</p>
+   $$\Delta A^{2}+\omega\langle C\rangle+\omega^{2}\Delta B^{2}\Big|_{\omega=-\frac{\langle C\rangle}{2\Delta B^{2}}}=\Delta A^{2}-\frac{\langle C\rangle^{2}}{4\Delta B^{2}},$$
+   <p>e la richiesta che anche il minimo sia $\ge0$ dà $\Delta A^2\ge\langle C\rangle^2/4\Delta B^2$, cioè $\Delta A^2\Delta B^2\ge\langle C\rangle^2/4$, con $\langle C\rangle\equiv i\langle[A,B]\rangle$ (reale). Scritta con il commutatore originale,</p>
+   $$\tfrac14\big|\langle[A,B]\rangle\big|^{2}=\tfrac14\langle C\rangle^{2},$$
+   <p>e quindi la <b>relazione di indeterminazione di Robertson</b>:</p>
+   $$\Delta A\,\Delta B\ \ge\ \tfrac12\big|\langle[A,B]\rangle\big|.$$
+   <p>Le due strade — discriminante e minimizzazione — sono la stessa algebra vista da due angoli, e arrivano allo stesso numero: è il collaudo interno più semplice che questa deduzione potesse avere.</p>`}
+  ]},
+  {t:'reveal', title:'La seconda verifica: sul sistema a tre livelli, un numero vero', tag:'esempio', steps:[
+   {label:'$\\Delta A$ sullo stato $|\\Psi\\rangle$', body:R`
+   <p>La deduzione appena fatta è generale; ora si collauda su un caso dove si può controllare tutto a mano — lo stesso $|\Psi\rangle=(|1\rangle+|2\rangle+|3\rangle)/\sqrt3$ e $A=\mathrm{diag}(1,1,3)$ della tappa 01, con $\langle A\rangle=5/3$ già calcolato. Serve $\langle A^2\rangle$: $A^2=\mathrm{diag}(1,1,9)$, quindi $\langle A^2\rangle=(1+1+9)/3=11/3$, e</p>
+   $$\frac{11}{3}-\Big(\frac53\Big)^{2}=\frac89,\qquad \Delta A=\sqrt{\tfrac89}=\frac{2\sqrt2}{3}.$$`},
+   {label:'$\\Delta B$ sullo stesso stato', body:R`
+   <p>Per $B$ (il blocco $\sigma_x$ su $\mathcal H_1$ più $5$ su $|3\rangle$), $B^2=\mathrm{diag}(1,1,25)$ — perché $\sigma_x^2=\mathbb 1$ — quindi $\langle B^2\rangle=(1+1+25)/3=9$, e con $\langle B\rangle=7/3$ già calcolato,</p>
+   $$9-\Big(\frac73\Big)^{2}=\frac{32}{9},\qquad \Delta B=\sqrt{\tfrac{32}{9}}=\frac{4\sqrt2}{3}.$$`},
+   {label:'Il prodotto, e il confronto con il pavimento', body:R`
+   <p>Il prodotto delle due indeterminazioni è</p>
+   $$\Delta A\,\Delta B=\frac{2\sqrt2}{3}\cdot\frac{4\sqrt2}{3}=\frac{16}{9}.$$
+   <p>Ma $A$ e $B$ <b>commutano</b> ($[A,B]=0$, tappa 01): il pavimento di Robertson per questa coppia è $\tfrac12|\langle[A,B]\rangle|=0$, e $16/9\ge0$ è vero ma vuoto — è esattamente l&rsquo;osservazione fatta in apertura di questa tappa 05: <b>un pavimento nullo non vuol dire pavimento raggiunto</b>. Due osservabili compatibili possono avere indeterminazioni grandi quanto si vuole nello stesso stato; la disuguaglianza di Robertson non promette nulla in quel caso, perché il suo membro destro è zero. Il collaudo interessante arriva alla tappa 06, dove una coppia che <i>non</i> commuta rende il pavimento stesso un numero positivo da raggiungere o no.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Il lemma di Schwarz richiede $\langle a\rangle=0$ per degenerare nella forma semplice $\langle a^\dagger a\rangle\ge0$. Se si fosse scelto $a=\xi+i\omega\eta$ SENZA sottrarre le medie — cioè con $\xi=A,\eta=B$ direttamente — cosa sarebbe cambiato?`,
+    a:R`La disuguaglianza finale sarebbe rimasta vera ma più debole: usando $A,B$ al posto delle deviazioni, il termine $\langle a^\dagger a\rangle\ge\langle a^\dagger\rangle\langle a\rangle$ non si riduce più a $\langle a^\dagger a\rangle\ge0$, e bisognerebbe portare attraverso tutto il calcolo un termine $|\langle A\rangle+i\omega\langle B\rangle|^2$ che alla fine si cancella esattamente contro la stessa quantità che appare nel completare il quadrato — il risultato è identico, perché la relazione di Robertson riguarda le <i>indeterminazioni</i> $\Delta A,\Delta B$, non i valori medi. Usare le deviazioni fin dall&rsquo;inizio è una scelta di eleganza, non di necessità: elimina un passaggio algebrico che altrimenti si cancellerebbe comunque.`},
+   {q:R`Il prodotto $\Delta A\,\Delta B=16/9$ sul sistema a tre livelli non viola la relazione di Robertson pur essendo molto più grande di zero. Che senso ha allora chiamarla una relazione di INDETERMINAZIONE se in questo caso non determina niente?`,
+    a:R`Ha il senso di un vincolo a una sola direzione: la relazione dice che il prodotto non può scendere sotto una soglia, non che debba restarci vicino. Quando la soglia è zero (osservabili compatibili) il vincolo è automaticamente soddisfatto da qualunque stato, incluso uno con indeterminazioni enormi — ed è corretto che sia così, perché per osservabili compatibili esistono stati (gli autostati comuni) in cui ENTRAMBE le indeterminazioni sono esattamente zero, e nessuna legge fisica impedisce di prepararne altri in cui non lo sono. La relazione diventa informativa esattamente quando il commutatore non è nullo, perché lì la soglia stessa diventa positiva e nessuno stato può evitarla — è il caso della tappa 06 e seguenti.`}
+  ]}
+]},
+
+/* ---------------- 06 · LA FORMA PIÙ FORTE: SCHRÖDINGER CONTRO ROBERTSON ---------------- */
+{ num:'06', title:'La forma più forte: Schrödinger contro Robertson', meta:'il problema 8.10 di Ballentine · il parametro complesso · il termine di covarianza · lo spin-1/2 che satura la forma forte e azzera la debole',
+  blocchi:[
+  {t:'prosa', title:'Un parametro reale non è il più generale possibile', tag:'architettura', html:R`
+  <p>La tappa 05 ha usato $a=\xi+i\omega\eta$ con $\omega$ <i>reale</i>. È una scelta — non l&rsquo;unica. Il problema 8.10 di Ballentine chiede di ripetere la deduzione con $a=\xi+\lambda\eta$ e $\lambda=u+iv$ <b>complesso</b>, cioè con due parametri reali liberi invece di uno solo. Il risultato è una disuguaglianza <i>più forte</i> — contiene quella di Robertson come caso particolare, mai il contrario — e il motivo è semplice da anticipare: minimizzare su un insieme più grande di parametri non può mai dare un vincolo più debole.</p>`},
+  {t:'reveal', title:'La deduzione con il parametro complesso', tag:'costruzione', steps:[
+   {label:'Il termine in più: l’anticommutatore', body:R`
+   <p>Espandendo $a^\dagger a=(\xi+\bar\lambda\eta)(\xi+\lambda\eta)$ con $\lambda=u+iv$, la parte immaginaria di $\lambda$ riproduce il commutatore già visto in tappa 05, ma la parte <i>reale</i> $u$ moltiplica adesso $\xi\eta+\eta\xi$ — l&rsquo;<b>anticommutatore</b>, che con il commutatore della tappa 05 non ha niente in comune: è un operatore <i>simmetrico</i>, non uno antisimmetrico. Definendo $S\equiv\tfrac12\langle\{\xi,\eta\}\rangle$ (la covarianza di $A$ e $B$, a meno del fattore 2) e $C\equiv i\langle[\xi,\eta]\rangle$ come in tappa 05, la positività $\langle a^\dagger a\rangle\ge0$ diventa una forma quadratica in <i>due</i> variabili reali:</p>
+   $$\Delta A^{2}+(u^{2}+v^{2})\Delta B^{2}+uC-2Sv\ \ge\ 0\qquad\forall\,u,v\in\mathbb R.$$`},
+   {label:'Minimizzare su due variabili invece di una', body:R`
+   <p>La forma si separa: il termine $(u^2+v^2)\Delta B^2+uC-2Sv$ è la somma di due parabole indipendenti, una in $u$ e una in $v$, e si minimizzano separatamente. In $u$: $u^2\Delta B^2+uC$ è minimo a $u=-C/(2\Delta B^2)$. In $v$: $v^2\Delta B^2-2Sv$ è minimo a $v=S/\Delta B^2$. Sostituendo entrambi,</p>
+   $$\Delta A^{2}+(u^{2}+v^{2})\Delta B^{2}+u\langle C\rangle-2Sv\Big|_{\min}=\Delta A^{2}-\frac{\langle C\rangle^{2}}{4\Delta B^{2}}-\frac{S^{2}}{\Delta B^{2}},$$
+   <p>e la condizione che il minimo resti $\ge0$ dà $\Delta A^2\Delta B^2\ge C^2/4+S^2$, cioè la <b>relazione di Schrödinger</b>:</p>
+   $$\Delta A^{2}\Delta B^{2}\ \ge\ \tfrac14\big|\langle[A,B]\rangle\big|^{2}+S^{2},\qquad S=\tfrac12\langle\{A-\langle A\rangle,B-\langle B\rangle\}\rangle.$$
+   <p>Il termine $S^2$ è sempre $\ge0$: la forma di Schrödinger non può mai essere più debole di quella di Robertson, e lo è strettamente ogni volta che $A,B$ sono correlati ($S\neq0$).</p>`}
+  ]},
+  {t:'reveal', title:'Un caso in cui la forma debole è vuota e la forma forte no', tag:'esempio', steps:[
+   {label:'Uno spin-1/2 nel piano equatoriale', body:R`
+   <p>Sia $|\psi(\varphi)\rangle=\tfrac1{\sqrt2}(|\!\uparrow\rangle+e^{i\varphi}|\!\downarrow\rangle)$, l&rsquo;autostato di spin lungo la direzione a angolo azimutale $\varphi$ nel piano $xy$. I valori medi delle matrici di Pauli sono $\langle\sigma_x\rangle=\cos\varphi$, $\langle\sigma_y\rangle=\sin\varphi$, $\langle\sigma_z\rangle=0$, e poiché $\sigma_x^2=\sigma_y^2=\mathbb 1$ si ha $\Delta\sigma_x^2=1-\cos^2\varphi=\sin^2\varphi$ e $\Delta\sigma_y^2=1-\sin^2\varphi=\cos^2\varphi$.</p>
+   <p>Il commutatore è $[\sigma_x,\sigma_y]=2i\sigma_z$, quindi $\langle[\sigma_x,\sigma_y]\rangle=2i\langle\sigma_z\rangle=0$: la forma di <b>Robertson è vuota</b>, qualunque sia $\varphi$. La domanda è se la realtà fisica — due osservabili che per $\varphi\neq0,\pi/2$ sono tutt&rsquo;altro che certe insieme — sia davvero descritta da un vincolo nullo.</p>`},
+   {label:'L’anticommutatore delle deviazioni, e il termine $S$', body:R`
+   <p>Le matrici di Pauli anticommutano esattamente, $\{\sigma_x,\sigma_y\}=0$; ma l&rsquo;anticommutatore delle <i>deviazioni</i> $\sigma_x^0=\sigma_x-\langle\sigma_x\rangle$, $\sigma_y^0=\sigma_y-\langle\sigma_y\rangle$ non eredita questo zero, perché i termini misti con i valori medi non si cancellano:</p>
+   $$\langle\{\sigma_x^{0},\sigma_y^{0}\}\rangle=-2\sin\varphi\cos\varphi=-\sin2\varphi,$$
+   <p>da cui $S=-\tfrac12\sin2\varphi$ e $S^2=\tfrac14\sin^22\varphi$. Il prodotto delle indeterminazioni è</p>
+   $$\Delta\sigma_x^{2}\,\Delta\sigma_y^{2}=\sin^{2}\varphi\cos^{2}\varphi=\tfrac14\sin^{2}2\varphi,$$
+   <p>cioè <b>esattamente uguale a $S^2$</b>, per <i>ogni</i> $\varphi$: la relazione di Schrödinger è satura con il segno di uguale, mentre quella di Robertson — con il suo membro destro identicamente nullo — non diceva nulla su quanto piccolo potesse essere il prodotto.</p>`},
+   {label:'Un numero per fissare le idee: $\\varphi=\\pi/4$', body:R`
+   <p>A $\varphi=\pi/4$,</p>
+   $$\sin^{2}\tfrac\pi4\cos^{2}\tfrac\pi4=\tfrac14,$$
+   <p>e si può controllare a mano: $\sin(\pi/4)=\cos(\pi/4)=1/\sqrt2$, quindi $\Delta\sigma_x^2=\Delta\sigma_y^2=1/2$ e il prodotto è $1/4$ — lo stesso numero, ottenuto per la strada lunga (l&rsquo;identità trigonometrica $\sin^2\varphi\cos^2\varphi=\tfrac14\sin^22\varphi$ valutata a $\varphi=\pi/4$, dove $\sin(\pi/2)=1$) e per la strada corta (il calcolo diretto). Questo stato non è affatto uno stato «di minima indeterminazione» nel senso della tappa 07 — è uno stato di spin, non una gaussiana — ma soddisfa comunque Schrödinger con il segno di uguale: è un secondo tipo di saturazione, specifico di sistemi a due livelli, che vale la pena distinguere da quello della tappa 07 proprio perché le due famiglie di stati saturanti non si sovrappongono.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la relazione di Robertson è vuota per $\sigma_x,\sigma_y$ su QUALUNQUE stato con $\langle\sigma_z\rangle=0$, e non solo su quello scelto qui?`,
+    a:R`Perché $[\sigma_x,\sigma_y]=2i\sigma_z$ è un&rsquo;identità operatoriale, vera indipendentemente dallo stato: il suo valore medio è $2i\langle\sigma_z\rangle$, che si annulla esattamente quando $\langle\sigma_z\rangle=0$, cioè per <i>tutti</i> gli stati nel piano equatoriale della sfera di Bloch, non solo per la famiglia a un parametro scelta qui. È un fatto che riguarda la geometria dello stato (dove sta sulla sfera di Bloch) e non la scelta particolare della fase $\varphi$, ed è esattamente per questo che la forma di Schrödinger — che invece dipende da $\varphi$ attraverso $S$ — porta un&rsquo;informazione che Robertson, su questa fetta di stati, non può portare per costruzione.`},
+   {q:R`Il termine $S^2$ è sempre $\ge0$. Significa che la forma di Schrödinger è SEMPRE strettamente più informativa di Robertson?`,
+    a:R`Quasi sempre, ma non all&rsquo;estremo: quando $S=0$ (nessuna covarianza fra le deviazioni di $A$ e $B$) le due forme coincidono esattamente, e il caso degenere più semplice è proprio uno con $A,B$ compatibili e in più scorrelate — ad esempio gli autostati comuni della tappa 02. Il guadagno di Schrödinger non è garantito ad essere grande: è garantito a non essere mai negativo, e nell&rsquo;esempio di questa tappa è massimale, perché l&rsquo;intero contenuto fisico della disuguaglianza passa da Robertson (zero) a Schrödinger (il quadrato della covarianza).`}
+  ]}
+]},
+
+/* ---------------- 07 · IL PACCHETTO DI MINIMA INDETERMINAZIONE ---------------- */
+{ num:'07', title:'Il pacchetto di minima indeterminazione', meta:'la condizione T†|ψ⟩=0 · l’equazione differenziale e la gaussiana · gli integrali in rappresentazione p · perché deve essere puro: Stoler e Newman',
+  blocchi:[
+  {t:'prosa', title:'Saturare la disuguaglianza: non basta dire «esiste», bisogna calcolare chi è', tag:'architettura', html:R`
+  <p>La tappa 05 ha dedotto $\Delta x\,\Delta p\ge\hbar/2$ dalla positività di $\langle a^\dagger a\rangle$ con $a=\xi+i\omega\eta$. La disuguaglianza diventa un&rsquo;<b>uguaglianza</b> esattamente quando $\langle a^\dagger a\rangle=0$ al valore ottimale di $\omega$ — e per un operatore, avere norma quadra nulla vuol dire essere <i>lo stato nullo</i>: $a|\psi\rangle=0$, cioè $T|\psi\rangle=0$ con $T=\xi+i\omega_0\eta$ e $\omega_0=-\langle[\xi,\eta]\rangle/(2i\Delta\eta^2)$ il valore che minimizza. Questa tappa risolve quell&rsquo;equazione per $\xi=x-\langle x\rangle$, $\eta=p-\langle p\rangle$, trova la funzione d&rsquo;onda esplicita, e poi fa un passo che quasi nessun corso introduttivo fa: chiede se quella funzione d&rsquo;onda possa descrivere uno stato <i>misto</i> invece che puro.</p>`},
+  {t:'reveal', title:'L’equazione differenziale, e la sua unica soluzione', tag:'costruzione', steps:[
+   {label:'Da $T|\\psi\\rangle=0$ a un’equazione sulla funzione d’onda', body:R`
+   <p>In rappresentazione di posizione, $p\to-i\hbar\,d/dx$, e scrivendo $T=(x-\langle x\rangle)+i\omega_0(p-\langle p\rangle)$ con $\langle x\rangle=\langle p\rangle=0$ per semplicità (uno spostamento non cambia nessuna indeterminazione), l&rsquo;equazione $T\psi(x)=0$ diventa $\big(x+\hbar\omega_0\,\tfrac{d}{dx}\big)\psi(x)=0$. Scrivendo $\alpha\equiv\hbar\omega_0>0$ (il segno si fissa richiedendo normalizzabilità), si verifica che la gaussiana $\psi(x)=\mathcal N e^{-x^2/2\alpha}$ risolve esattamente questa equazione:</p>
+   $$\Big(x+\alpha\frac{d}{dx}\Big)e^{-x^{2}/2\alpha}=0.$$
+   <p>È un&rsquo;equazione del primo ordine, quindi la soluzione è unica a meno di normalizzazione: <b>la</b> funzione d&rsquo;onda di minima indeterminazione è una gaussiana, e nessun&rsquo;altra forma funzionale la soddisfa.</p>`},
+   {label:'Normalizzazione e $\\langle x^2\\rangle$', body:R`
+   <p>Scrivendo $\alpha=\sigma^2$ (la scelta che rende $\sigma$ interpretabile come larghezza), la normalizzazione richiede l&rsquo;<span class="str" data-str="integrale-gaussiano">integrale gaussiano</span></p>
+   $$\int_{-\infty}^{+\infty}e^{-x^{2}/2\sigma^{2}}dx=\sigma\sqrt{2\pi},$$
+   <p>da cui $\mathcal N=(\sigma\sqrt{2\pi})^{-1/2}$. Il secondo momento si ottiene con lo stesso integrale gaussiano, pesato da $x^2$ (un passaggio standard di integrazione per parti, o la derivata dell&rsquo;integrale normalizzante rispetto a $1/\sigma^2$):</p>
+   $$\langle x^{2}\rangle=\sigma^{2}.$$
+   <p>Quindi $\Delta x=\sigma$: la larghezza della gaussiana <i>è</i>, per costruzione, l&rsquo;indeterminazione in posizione.</p>`},
+   {label:'$\\langle p^2\\rangle$, calcolato in rappresentazione impulso', body:R`
+   <p>Il modo più diretto di trovare $\Delta p$ non è derivare $\psi(x)$ più volte: è passare alla rappresentazione d&rsquo;impulso, dove la <span class="str" data-str="trasformata-di-fourier">trasformata di Fourier</span> di una gaussiana è un&rsquo;altra gaussiana, di larghezza <i>inversa</i>. La densità di probabilità in $p$ è proporzionale a $e^{-2\sigma^2p^2/\hbar^2}$, e i due integrali che servono sono</p>
+   $$\int_{-\infty}^{+\infty}p^{2}e^{-2\sigma^{2}p^{2}/\hbar^{2}}dp=\frac{\hbar^{3}\sqrt{2\pi}}{8\sigma^{3}},\qquad \int_{-\infty}^{+\infty}e^{-2\sigma^{2}p^{2}/\hbar^{2}}dp=\frac{\hbar\sqrt{2\pi}}{2\sigma},$$
+   <p>il primo per il numeratore di $\langle p^2\rangle$, il secondo per la normalizzazione. Il rapporto è</p>
+   $$\langle p^{2}\rangle=\frac{\hbar^{2}}{4\sigma^{2}},$$
+   <p>quindi $\Delta p=\hbar/(2\sigma)$ — e si vede già qui perché questa famiglia <i>deve</i> saturare: $\Delta x$ e $\Delta p$ sono inversamente proporzionali con la costante di proporzionalità esatta che rende il prodotto indipendente da $\sigma$:</p>
+   $$\Delta x\,\Delta p=\sigma\cdot\frac{\hbar}{2\sigma}=\frac{\hbar}{2}.$$
+   <p>Qualunque $\sigma$ si scelga — pacchetto largo o strettissimo — il prodotto è sempre esattamente $\hbar/2$, il pavimento di Robertson raggiunto con il segno di uguale.</p>`}
+  ]},
+  {t:'reveal', title:'Perché questo stato deve essere puro: l’argomento di Stoler e Newman', tag:'costruzione', steps:[
+   {label:'La domanda che Ballentine pone e che i libri introduttivi saltano', body:R`
+   <p>Tutto il calcolo sopra presuppone che lo stato sia descritto da un vettore $|\psi\rangle$ — uno stato <b>puro</b>. Ma la disuguaglianza di Robertson, dedotta in tappa 05 con il lemma di Schwarz su $\langle s|\dots|s\rangle$, si può ridedurre parola per parola per uno stato <b>misto</b>, con la <span class="str" data-str="traccia">traccia</span> $\mathrm{Tr}(\rho\, T^\dagger T)\ge0$ al posto di $\langle\psi|T^\dagger T|\psi\rangle\ge0$ — ed è esattamente quello che fa Ballentine nel §8.4. La domanda allora è legittima: potrebbe esistere una miscela statistica $\rho$ (non un singolo stato puro) che satura comunque $\Delta x\Delta p=\hbar/2$?</p>`},
+   {label:'Il punto cruciale: due gaussiane diverse non sono mai ortogonali', body:R`
+   <p>La risposta di Stoler e Newman (1972, citata da Ballentine) passa per un fatto quasi invisibile: due pacchetti gaussiani di minima indeterminazione, centrati in punti diversi $0$ e $d$ ma con la stessa larghezza $\sigma$, hanno sovrapposizione</p>
+   $$\langle\psi_{0}|\psi_{d}\rangle=e^{-d^{2}/8\sigma^{2}},$$
+   <p>che non è <i>mai</i> zero, per nessun $d$ finito — decresce, ma non si annulla. Confrontare con una base di autostati di $x$ (che sono ortogonali per $d\neq0$, essendo autostati di un&rsquo;osservabile con autovalori distinti) mostra che la famiglia delle gaussiane di minima indeterminazione è l&rsquo;esatto opposto: <i>nessuna</i> coppia distinta è ortogonale.</p>`},
+   {label:'Perché questo esclude le miscele', body:R`
+   <p>Se $\rho=\sum_k w_k|\phi_k\rangle\langle\phi_k|$ fosse una miscela (pesi $w_k>0$, almeno due termini) che satura Schrödinger con uguaglianza, un teorema generale sulla saturazione delle disuguaglianze convesse richiede che <i>ciascuno</i> dei $|\phi_k\rangle$ nella decomposizione sia esso stesso uno stato di minima indeterminazione — altrimenti la media pesata supererebbe il pavimento. Ma gli stati di minima indeterminazione con la stessa $\sigma$ formano esattamente la famiglia a un parametro (il centro) appena vista, e nessuno di questi stati è ortogonale agli altri: non si può costruire una miscela statistica genuina (che richiede pesi su stati linearmente indipendenti, tipicamente ortogonali per una decomposizione spettrale) usando solo membri di una famiglia dove ogni coppia si sovrappone. L&rsquo;unica via d&rsquo;uscita è $w_k=1$ per un solo $k$: la miscela collassa a un singolo stato puro. È un argomento indiretto — non costruisce la contraddizione esplicitamente, mostra che la via per costruirla è bloccata — ma è esattamente il tipo di argomento che la tappa 08 troverà di nuovo, quando il disaccordo sarà su cosa $\Delta$ misura e non su chi può saturarlo.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la sovrapposizione $\langle\psi_0|\psi_d\rangle=e^{-d^2/8\sigma^2}$ non è mai esattamente zero, mentre due autostati di $x$ con autovalori diversi SONO ortogonali?`,
+    a:R`Perché gli autostati di $x$ sono infinitamente concentrati (<span class="str" data-str="delta-di-dirac">delta di Dirac</span>, non normalizzabili) e due delta centrate in punti diversi non si sovrappongono mai, mentre una gaussiana ha «code» che si estendono su tutta la retta e per quanto $d$ sia grande c&rsquo;è sempre una regione, lontana da entrambi i centri, dove entrambe le funzioni sono (esponenzialmente) piccole ma non nulle — e l&rsquo;integrale del prodotto, benché minuscolo, non è mai esattamente zero. È la stessa ragione fisica per cui una gaussiana è uno stato a quadrato sommabile e un autostato di $x$ non lo è: la tappa 05 di meccanica quantistica ha lasciato fuori apposta lo spettro continuo «nella sua parte delicata», e questa è precisamente quella parte.`},
+   {q:R`L’argomento di Stoler-Newman esclude le miscele di gaussiane DIVERSE. Potrebbe una miscela di stati che NON sono gaussiane comunque saturare la disuguaglianza?`,
+    a:R`No, per una ragione più semplice: l&rsquo;equazione $T|\phi_k\rangle=0$ ha la gaussiana come <b>unica</b> soluzione (è un&rsquo;equazione differenziale del primo ordine, vista sopra), quindi qualunque $|\phi_k\rangle$ che debba essere esso stesso uno stato di minima indeterminazione è automaticamente una gaussiana di quella stessa famiglia — non c&rsquo;è una seconda classe di funzioni non gaussiane che soddisfi la condizione di saturazione. L&rsquo;argomento di Stoler-Newman non sta escludendo un caso esotico: sta chiudendo l&rsquo;unica porta che restava aperta dopo aver già stabilito, nello stesso calcolo, che la forma funzionale è unica.`}
+  ]}
+]},
+
+/* ---------------- 08 · CHE COSA Δ MISURA, E CHE COSA NON MISURA ---------------- */
+{ num:'08', title:'Che cosa Δ misura, e che cosa non misura', meta:'la distinzione di Ballentine fra larghezza statistica e risoluzione strumentale · la lettura di Popper · il confronto con Δt ΔE · disaccordo dichiarato',
+  blocchi:[
+  {t:'prosa', title:'Un simbolo, due storie possibili', tag:'architettura', html:R`
+  <p>Le tappe 05-07 hanno trattato $\Delta A$ come un oggetto puramente statistico: lo scarto quadratico medio di una distribuzione di probabilità, calcolato da $\langle A^2\rangle-\langle A\rangle^2$. Non è l&rsquo;unica lettura possibile, e non è quella con cui Heisenberg ha scoperto la relazione nel 1930 — la tappa 09 darà la parola a lui. Questa tappa isola <i>che cosa</i> $\Delta A$ dice, prima di sentire le due voci, perché altrimenti il disaccordo che segue sembrerebbe un dettaglio filosofico invece di una domanda ben posta sull&rsquo;operazionalità del simbolo.</p>`},
+  {t:'reveal', title:'La posizione di Ballentine: Δ non è un errore di misura', tag:'costruzione', steps:[
+   {label:'La distinzione, e perché serve un secondo simbolo', body:R`
+   <p>Ballentine insiste su una distinzione che il simbolo $\Delta$ da solo non porta: $\Delta Q,\Delta P$ sono <b>larghezze statistiche</b> — quanto è sparsa la distribuzione di probabilità di $Q$ (o $P$) su un <i>insieme</i> di sistemi preparati nello stesso stato — e non hanno niente a che fare con $\delta Q,\delta P$, la <b>risoluzione dello strumento</b> usato per una singola misura. Sono concetti indipendenti: uno strumento perfettissimo ($\delta Q\to0$) misurato su un ensemble con $\Delta Q$ grande dà comunque una distribuzione larga di risultati, e uno strumento grossolano può misurare un ensemble con $\Delta Q$ piccolissimo senza che la relazione di indeterminazione se ne accorga. La relazione lega $\Delta Q$ e $\Delta P$ fra loro, non $\delta Q$ e $\delta P$:</p>
+   $$\Delta Q\,\Delta P\ \ge\ \tfrac12\hbar\quad\text{con}\quad\delta Q,\ \delta P\ \text{indipendenti}.$$`},
+   {label:'Come si verificherebbe sperimentalmente', body:R`
+   <p>La conseguenza operativa è precisa: per controllare la relazione non si misurano $Q$ e $P$ <i>simultaneamente</i> sullo stesso sistema (operazione che la tappa 02 ha già reso problematica per osservabili incompatibili) — si preparano <i>molte copie identiche</i> dello stesso stato, su metà si misura $Q$ e sull&rsquo;altra metà $P$, e si confrontano le larghezze dei due istogrammi. La lettura statistica di questa procedura, per Ballentine, risale a <b>K. R. Popper</b> (1934): la relazione è un&rsquo;affermazione sull&rsquo;ensemble statistico, non sulla perturbazione di un singolo sistema da parte di un singolo apparato.</p>`},
+   {label:'Un esempio dove il limite quantistico è quasi raggiunto', body:R`
+   <p>Ballentine cita un esempio di cristallografia (da Jauch) in cui la larghezza angolare di un fascio diffratto e l&rsquo;incertezza nella posizione del cristallo che lo produce si avvicinano al limite $\hbar/2$ previsto dalla teoria — non per una singola coppia posizione-impulso di un singolo fotone misurata due volte, ma per le distribuzioni statistiche misurate su un ensemble di eventi di diffrazione. È il tipo di evidenza che la lettura statistica prevede e che la lettura «disturbo di misura» non ha bisogno di invocare, perché qui non c&rsquo;è nessuna seconda misura che perturbi la prima.</p>`}
+  ]},
+  {t:'prosa', title:'Il confronto che chiarisce per contrasto: $\\Delta t\\,\\Delta E$', tag:'architettura', html:R`
+  <p>Il programma del corso nomina anche la relazione tempo-energia, e vale la pena vedere perché Ballentine (e Sakurai-Napolitano) la tengono separata dalle altre:</p>
+  $$\Delta t\,\Delta E\gtrsim\hbar.$$
+  <p>Il tempo, in meccanica quantistica non relativistica, <b>non è un&rsquo;osservabile</b> — non c&rsquo;è un operatore autoaggiunto $\hat t$ con cui calcolare $\Delta t=\sqrt{\langle t^2\rangle-\langle t\rangle^2}$ nel senso delle tappe 05-07, perché il tempo è un parametro esterno dell&rsquo;evoluzione, non una grandezza che si misura su un singolo stato nell&rsquo;istante dato. Qui $\Delta t$ significa qualcosa di diverso — tipicamente il tempo caratteristico su cui il sistema cambia apprezzabilmente — e $\Delta E$ resta la larghezza statistica ordinaria dell&rsquo;energia. Sakurai-Napolitano lo scrive esplicitamente: la relazione tempo-energia è «di natura molto diversa» da $\Delta A\Delta B\ge\tfrac12|\langle[A,B]\rangle|$, perché non esiste nessun commutatore $[\hat t,\hat H]$ da cui dedurla con il metodo delle tappe 05-06. È un avvertimento che vale la pena portare fino all&rsquo;esame: scrivere $\Delta t\Delta E\ge\hbar/2$ con lo stesso segno di disuguaglianza rigorosa delle altre relazioni, come se seguisse dallo stesso teorema, è l&rsquo;errore concettuale più comune su questo argomento.</p>`},
+  {t:'prosa', title:'Il disaccordo, dichiarato e non risolto', tag:'architettura', html:R`
+  <p>Questa tappa non sceglie fra le due letture, e la tappa 09 darà a Heisenberg lo spazio per argomentare la sua. Il punto che <i>questa</i> tappa fissa è più modesto ma più solido: $\Delta Q\Delta P\ge\hbar/2$, <b>nella forma in cui questo movimento l&rsquo;ha dedotta</b> (tappe 05-06, da Schwarz e dalla positività di una norma), è un&rsquo;affermazione sulla larghezza di distribuzioni statistiche, punto — nessuna perturbazione, nessun apparato, nessun disturbo sono entrati in nessun passaggio della dimostrazione algebrica. Se Heisenberg ha ragione che la relazione riflette <i>anche</i> un limite fisico sul disturbo introdotto da una misura, quella è un&rsquo;affermazione ulteriore, che la dimostrazione di Picasso e Ballentine non contiene e non contraddice: sono due domande diverse che la stessa disuguaglianza algebrica, da sola, non può distinguere.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se Δt non è lo scarto quadratico medio di un operatore, perché il simbolo Δ si usa comunque per il tempo?`,
+    a:R`Per analogia di ruolo, non di definizione: in entrambi i casi Δ indica «quanto è indeterminata/caratteristica» una grandezza nel contesto del processo in esame, ma la costruzione matematica dietro è diversa. Per $\Delta E$ è lo scarto quadratico medio della distribuzione di energia sullo stato, costruito esattamente come $\Delta Q,\Delta P$ nelle tappe precedenti; per $\Delta t$ non esiste un operatore da cui costruire una distribuzione di probabilità nello stesso senso, e la quantità che compare in $\Delta t\Delta E\gtrsim\hbar$ è tipicamente definita operativamente — per esempio come il tempo su cui il valore medio di un&rsquo;osservabile cambia di una deviazione standard. Usare lo stesso simbolo per due costruzioni diverse è comodo ma rischia di far credere che esista un unico teorema che le copre entrambe: non esiste.`},
+   {q:R`La lettura di Ballentine dice che Δ è una larghezza statistica, non un errore di misura. Significa che un singolo strumento con risoluzione perfetta può in linea di principio «battere» la relazione di indeterminazione?`,
+    a:R`No, e qui la distinzione $\Delta$ contro $\delta$ è decisiva: uno strumento con $\delta Q\to0$ misura il valore di $Q$ su UN sistema con precisione arbitraria — ma il valore che trova varia da copia a copia dell&rsquo;ensemble, con una dispersione pari a $\Delta Q$, che è una proprietà dello STATO e non dello strumento. La relazione $\Delta Q\Delta P\ge\hbar/2$ non pone alcun limite a $\delta Q$ da solo: pone un limite a come $\Delta Q$ e $\Delta P$ possano essere simultaneamente piccoli per uno stesso stato. Uno strumento perfetto rivelerebbe esattamente quella dispersione, non la eliminerebbe.`}
+  ]}
+]},
+
+/* ---------------- 09 · DUE VOCI DEL 1930: HEISENBERG E DIRAC ---------------- */
+{ num:'09', title:'Due voci del 1930: Heisenberg e Dirac', meta:'il microscopio di Heisenberg e le sue confutazioni · Δq come scarto quadratico medio, non solo euristica · Dirac e la funzione di trasformazione',
+  blocchi:[
+  {t:'prosa', title:'Chi ha scoperto la relazione, e come l’ha scoperta', tag:'architettura', html:R`
+  <p>Le tappe 05-08 hanno dedotto $\Delta A\Delta B\ge\tfrac12|\langle[A,B]\rangle|$ da un teorema di algebra degli operatori — Picasso, 1985 anni dopo Heisenberg. Nessuno dei due argomenti di Heisenberg, nei <i>Principi fisici della teoria dei quanti</i> (1930), usa un commutatore: li precede entrambi. Vale la pena leggerli nella forma originale, perché la tappa 08 ha appena mostrato che il disaccordo su cosa $\Delta$ misuri non è un dettaglio da manuale — è la domanda con cui tutto è cominciato.</p>`},
+  {t:'reveal', title:'Il primo argomento di Heisenberg: contare le lunghezze d’onda', tag:'costruzione', steps:[
+   {label:'Un pacchetto, e quante onde ci entrano', body:R`
+   <p>Heisenberg immagina un pacchetto d&rsquo;onda di larghezza $\Delta q$ costruito sovrapponendo onde piane di lunghezza $\lambda$. Perché le onde si <i>cancellino</i> fuori dal pacchetto — perché cioè il pacchetto sia davvero localizzato e non si estenda su tutto lo spazio — serve una banda di lunghezze d&rsquo;onda sufficientemente larga: se il pacchetto contiene circa $n=\Delta q/\lambda$ creste, occorre includere nella sovrapposizione anche le componenti che ne fanno stare $n+1$, altrimenti la cancellazione fuori dal pacchetto è incompleta. Più il pacchetto è stretto (pochi $\lambda$ ci entrano), più la banda di lunghezze d&rsquo;onda necessaria è relativamente larga — ed è un argomento puramente ondulatorio, nessun quanto, nessuna misura, solo l&rsquo;aritmetica delle interferenze.</p>`},
+   {label:'Dalla banda di lunghezze d’onda alla banda d’impulso', body:R`
+   <p>De Broglie lega $\lambda$ a $p$ con $p=h/\lambda$: una banda relativa di $\lambda$ si traduce in una banda relativa di $p$, e il conto di Heisenberg — tenere traccia di quanto deve essere larga la banda per garantire la cancellazione — produce esattamente $\Delta q\,\Delta p\sim h$. È il primo argomento, ed è <i>ondulatorio</i>: non c&rsquo;è ancora nessun apparato di misura in scena, solo la matematica dei pacchetti d&rsquo;onda — la stessa che la tappa 07 ha reso rigorosa con la trasformata di Fourier di una gaussiana.</p>`}
+  ]},
+  {t:'reveal', title:'Il secondo argomento: il microscopio di Heisenberg', tag:'esempio', steps:[
+   {label:'Il quanto che deve diffondersi per essere visto', body:R`
+   <p>Il secondo argomento è quello più citato, e per vederlo serve l&rsquo;apparato: un microscopio, con apertura angolare $\varepsilon$, che osserva un elettrone illuminandolo con luce. La risoluzione ottica dello strumento è $\lambda/\sin\varepsilon$ — questa è la precisione $\delta q$ con cui si localizza l&rsquo;elettrone. Ma per essere <i>visto</i>, almeno un quanto di luce deve diffondersi dall&rsquo;elettrone ed entrare nell&rsquo;obiettivo, e quel quanto, per effetto Compton, cede all&rsquo;elettrone un rinculo — un impulso trasferito la cui direzione <i>dentro il cono di apertura</i> del microscopio non è nota. L&rsquo;incertezza sull&rsquo;impulso trasferito è dell&rsquo;ordine di $(h/\lambda)\sin\varepsilon$, e moltiplicando le due incertezze il $\sin\varepsilon$ si cancella: $\delta q\,\delta p\sim h$.</p>`},
+   {label:'Le due obiezioni, e perché Heisenberg le confuta entrambe con un numero', body:R`
+   <p>Heisenberg stesso immagina due scappatoie, e le chiude per conto proprio. <b>Prima obiezione:</b> se il microscopio fosse montato su un supporto <i>mobile</i>, misurando il rinculo del supporto si potrebbe dedurre il rinculo ceduto all&rsquo;elettrone e sottrarlo — ma questo richiede a sua volta di misurare la posizione e l&rsquo;impulso del supporto, che ha la sua propria relazione di indeterminazione, e il guadagno si perde esattamente allo stesso ordine. <b>Seconda obiezione</b>, più tecnica: raffinando la misura dell&rsquo;impulso trasferito ripetendo l&rsquo;osservazione su $m$ quanti diffusi invece di uno solo e misurando il massimo della figura di diffrazione, la precisione statistica sulla posizione del massimo migliora come $\sqrt m$ — una pratica da ottica standard. Ma lo stesso $m$ peggiora l&rsquo;incertezza sull&rsquo;impulso trasferito complessivo esattamente della stessa radice: per $m=16$ quanti,</p>
+   $$\sqrt{m}=4\ \text{per}\ m=16,$$
+   <p>la risoluzione di posizione migliora di un fattore $\sqrt m=4$ (dividendo $\delta q$ per $\sqrt m$) e l&rsquo;incertezza d&rsquo;impulso peggiora dello stesso fattore (moltiplicando $\delta p$ per $\sqrt m$), e il prodotto non si muove:</p>
+   $$\frac{\Delta x}{\sqrt m}\cdot\sqrt m\,\Delta p_x=\Delta x\,\Delta p_x.$$
+   <p>Nessuna strategia sperimentale immaginabile — cambiare apertura, cambiare lunghezza d&rsquo;onda, ripetere la misura $m$ volte — aggira il limite: ogni guadagno su un fattore è pagato esattamente dalla perdita sull&rsquo;altro.</p>`}
+  ]},
+  {t:'prosa', title:'Heisenberg non ha solo l’argomento euristico: la definizione statistica, a pagina 27', tag:'architettura', html:R`
+  <p>Un luogo comune, anche nei corsi universitari, dice che Heisenberg avesse solo l&rsquo;argomento qualitativo del microscopio e che la lettura statistica rigorosa sia arrivata dopo, con Kennard o con la formalizzazione successiva. Non è esatto: nello stesso capitolo, Heisenberg <b>definisce</b> $\Delta q$ come lo scarto quadratico medio sull&rsquo;ampiezza di probabilità,</p>
+  $$(\Delta q)^{2}=\int (q'-\bar q)^{2}\,|S(q')|^{2}\,dq',$$
+  <p>cita esplicitamente Kennard, e osserva che le relazioni si possono dedurre «senza immediato riferimento al modello ondulatorio» direttamente dallo schema matematico — cioè dalla stessa struttura algebrica che questo movimento ha seguito nelle tappe 05-07. La riga che vale la pena portare all&rsquo;esame è una nota a piè di pagina sull&rsquo;espressione «in realtà»: Heisenberg la usa per segnalare che il significato delle parole «posizione» e «velocità» <i>fuori</i> dai limiti dati dalla relazione di indeterminazione non è semplicemente impreciso — è <b>indefinito</b>, nello stesso senso in cui chiedere il colore di un numero non ha una risposta sbagliata, ne ha nessuna.</p>`},
+  {t:'reveal', title:'Dirac: la stessa relazione, dedotta da Fourier in mezza pagina', tag:'esempio', steps:[
+   {label:'La funzione di trasformazione, e il suo modulo quadro', body:R`
+   <p>Dirac arriva alla stessa disuguaglianza da una direzione completamente diversa, nel §24 dei <i>Principi</i>: la <span class="str" data-str="operatore-unitario">funzione che trasforma</span> dalla rappresentazione $q$ a quella $p$ è $\langle q'|p'\rangle\propto e^{iq'p'/\hbar}$, e il suo modulo quadro è <i>costante</i>, indipendente da $q'$:</p>
+   $$|\langle q'|p'\rangle|^{2}=\frac1h.$$
+   <p>Da questo fatto solo — nessuna misura, nessun apparato — Dirac conclude che se $p$ è conosciuto con esattezza assoluta, ogni valore di $q$ è <i>equiprobabile</i>: l&rsquo;autostato di $p$ non privilegia nessuna posizione. È l&rsquo;estremo opposto rispetto al microscopio di Heisenberg: qui l&rsquo;indeterminazione nasce dalla struttura della trasformata di Fourier, non da un disturbo fisico.</p>`},
+   {label:'Il limite della validità, dichiarato dall’autore stesso', body:R`
+   <p>Dirac ricava $\Delta q\,\Delta p=\hbar$ dalla relazione di Fourier fra i due rappresentativi, ma aggiunge — ed è la riga che rende questa fonte onesta — che il risultato vale «<i>solo nel caso più favorevole</i>» del pacchetto d&rsquo;onde, cioè per la gaussiana di minima indeterminazione che la tappa 07 ha costruito per intero. Per qualunque altra forma della funzione d&rsquo;onda, il prodotto è strettamente più grande — esattamente il contenuto della disuguaglianza di Robertson, qui anticipato senza dimostrazione dal risultato di un caso particolare.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Heisenberg e Dirac arrivano allo stesso numero da strade opposte — disturbo fisico contro struttura di Fourier. Le due derivazioni sono in competizione, o sono compatibili?`,
+    a:R`Sono compatibili, e la tappa 08 ha già preparato il perché: rispondono a due domande diverse che condividono lo stesso vincolo matematico finale. Il microscopio di Heisenberg stima quanto una misura di posizione <i>disturba</i> l&rsquo;impulso di un singolo elettrone; Dirac mostra che, indipendentemente da qualunque misura, la struttura stessa dello spazio degli stati impone che un vettore concentrato in $q$ sia disperso in $p$ (e viceversa) attraverso la trasformata di Fourier. Il fatto che arrivino al medesimo $\hbar$ non è una coincidenza — è il segno che entrambi stanno descrivendo, da angoli diversi, la stessa struttura algebrica che Picasso dimostra in generale nelle tappe 05-06.`},
+   {q:R`La confutazione della «seconda obiezione» mostra che raffinare con $m$ quanti non aiuta. Ma allora perché gli strumenti di misura reali, con molte ripetizioni, SONO più precisi di una singola osservazione?`,
+    a:R`Perché quella maggiore precisione riguarda la stima del valor medio di una grandezza su un ensemble — ad esempio $\langle x\rangle$ — non la larghezza $\Delta x$ della distribuzione sullo stato singolo. Ripetere una misura $m$ volte su $m$ copie identicamente preparate dello stesso stato restringe l&rsquo;errore sulla MEDIA stimata come $1/\sqrt m$ (la legge dei grandi numeri, non la fisica quantistica), ma non restringe la dispersione $\Delta x$ intrinseca allo stato, che è quella che compare nella relazione di indeterminazione. Il conto di Heisenberg con $m$ quanti riguardava invece il TRASFERIMENTO di rinculo su una singola misura di posizione raffinata internamente — un meccanismo diverso, dove il miglioramento di un fattore è pagato esattamente dal peggioramento dell&rsquo;altro, senza scampo.`}
+  ]}
+]},
+
+/* ---------------- 10 · IL FILO RICOMPOSTO: IL TEMPO, E DUE MISURE IN SEQUENZA ---------------- */
+{ num:'10', title:'Il filo ricomposto: il tempo, e due misure in sequenza', meta:'la cascata di Stern-Gerlach, rivista col commutatore · x(t) e x(0) come coppia incompatibile · il pacchetto libero che si allarga · chiusura del movimento',
+  blocchi:[
+  {t:'prosa', title:'Due promesse rimaste aperte, e questa tappa le chiude entrambe', tag:'architettura', html:R`
+  <p>Il movimento è partito dalla stessa domanda letta in due versi — compatibilità e indeterminazione — e ha promesso, in apertura, che le due letture sarebbero rimaste cucite insieme fino alla fine. Due fili erano rimasti scoperti: la cascata di Stern-Gerlach di <code>mq-04</code>, dove la tappa 09 di quel movimento aveva calcolato la probabilità di <i>ritrovare</i> l&rsquo;esito originale dopo un filtro intermedio, ma non la probabilità del suo opposto; e il tempo, nominato nella tappa 08 come il caso in cui l&rsquo;analogia con un commutatore si rompe. Questa tappa chiude entrambi, e con lo stesso strumento: il commutatore come misura di quanto l&rsquo;ordine delle operazioni conta.</p>`},
+  {t:'reveal', title:'Il filtro di Stern-Gerlach, completato: la probabilità del cambio di esito', tag:'esempio', steps:[
+   {label:'La probabilità complementare', body:R`
+   <p>In <code>mq-04</code>, un fascio preparato con $S_z=+\hbar/2$ passa un filtro orientato a un angolo $\vartheta$ e poi viene rimisurato lungo $z$: la probabilità di ritrovare $+\hbar/2$ era $\cos^4(\vartheta/2)+\sin^4(\vartheta/2)$. La probabilità <i>complementare</i> — che l&rsquo;esito sia cambiato, cioè che il filtro intermedio abbia effettivamente fatto qualcosa di irreversibile — è $1$ meno quella, ed è la somma incrociata dei due contributi:</p>
+   $$\cos^{2}\tfrac\vartheta2\sin^{2}\tfrac\vartheta2+\sin^{2}\tfrac\vartheta2\cos^{2}\tfrac\vartheta2=\tfrac12\sin^{2}\vartheta.$$
+   <p>È la stessa identità trigonometrica della tappa 06 ($2\sin\varphi\cos\varphi=\sin2\varphi$, qui al quadrato e diviso due), e non è un caso: entrambe misurano quanto due proiettori relativi a basi diverse si «mescolano».</p>`},
+   {label:'Il caso $\\vartheta=\\pi/2$: il filtro che rende l’esito una moneta', body:R`
+   <p>A $\vartheta=\pi/2$ — filtro intermedio orientato <i>ortogonalmente</i> all&rsquo;asse originale —</p>
+   $$\tfrac12\sin^{2}\tfrac\pi2=\tfrac12,$$
+   <p>cioè l&rsquo;esito finale è esattamente il 50% delle volte invertito: il filtro intermedio, misurando un&rsquo;osservabile <i>massimamente</i> incompatibile con $S_z$ (gli operatori di spin lungo $x$ e lungo $z$ sono il caso $\vartheta=\pi/2$ di questa stessa famiglia), ha reso l&rsquo;esito di $S_z$ completamente casuale — ha cancellato ogni informazione che il primo filtro aveva stabilito. È la stessa fisica della tappa 02 (un terzo operatore come $G$ seleziona una base diversa da quella di $B$) scritta come probabilità invece che come autovettori.</p>`}
+  ]},
+  {t:'reveal', title:'Il tempo, chiuso senza bisogno di un commutatore postulato', tag:'costruzione', steps:[
+   {label:'$x(t)$ e $x(0)$: posizione a due istanti come coppia incompatibile', body:R`
+   <p>La tappa 08 ha dichiarato che $\Delta t\Delta E$ non segue dal metodo delle tappe 05-06 perché il tempo non è un&rsquo;osservabile. C&rsquo;è però un modo imparentato, e legittimo, di far rientrare il tempo nel formalismo: non trattarlo come un operatore, ma guardare come la <i>stessa</i> osservabile si comporta a <b>istanti diversi</b>. Per una particella libera, nell&rsquo;immagine di Heisenberg, $x(t)=x(0)+p\,t/m$ (l&rsquo;equazione del moto risolta nel caso più semplice), e quindi</p>
+   $$[x(t),x(0)]=\big[x(0)+\tfrac{pt}{m},\,x(0)\big]=\frac{t}{m}[p,x(0)]=-\frac{i\hbar t}{m}.$$
+   <p>$x(t)$ e $x(0)$ <b>non commutano</b>, per $t\neq0$: sono una coppia di osservabili incompatibili esattamente nel senso della tappa 02, anche se entrambe sono «la stessa» grandezza fisica, solo a istanti diversi. Applicando Robertson (tappa 05) a questa coppia,</p>
+   $$\tfrac12\big|\langle[x(t),x(0)]\rangle\big|=\frac{\hbar t}{2m}.$$`}
+  ]},
+  {t:'reveal', title:'Il pacchetto libero che si allarga, misurato con lo stesso conto', tag:'esempio', steps:[
+   {label:'Quanto si allarga una gaussiana lasciata libera', body:R`
+   <p>La gaussiana di minima indeterminazione della tappa 07, lasciata evolvere liberamente, non resta ferma: $\Delta p$ è conservato ($[H,p]=0$ per una particella libera), ma la posizione si allarga con un meccanismo puramente cinematico — le componenti di impulso diverse, tutte presenti nel pacchetto iniziale, si separano nel tempo. Il contributo di questo allargamento, con $\Delta p=\hbar/2\sigma$ dalla tappa 07, è</p>
+   $$\Big(\frac{t\,\Delta p}{m}\Big)^{2}=\frac{\hbar^{2}t^{2}}{4m^{2}\sigma^{2}}.$$
+   <p>Questo termine <b>cresce</b> con $t$: più tempo passa, più l&rsquo;incertezza iniziale sull&rsquo;impulso si traduce in un ventaglio di posizioni raggiunte.</p>`},
+   {label:'Il punto in cui il contributo iniziale e quello di allargamento si equivalgono', body:R`
+   <p>La larghezza totale a tempo $t$ è $\Delta x(t)^2=\sigma^2+(\hbar t/2m\sigma)^2$ — il termine iniziale più il contributo appena calcolato. Scegliendo $\sigma^2=\hbar t/2m$ — il valore per cui il pavimento dell&rsquo;istante iniziale coincide numericamente con il tempo trascorso — i due contributi diventano uguali, e si sommano:</p>
+   $$\Delta x(t)^{2}\Big|_{\sigma^{2}=\hbar t/2m}=\frac{\hbar t}{2m}+\frac{\hbar t}{2m}=\frac{\hbar t}{m}.$$
+   <p>Non è un caso speciale privo di significato: è esattamente il $\sigma$ per cui il pacchetto, a tempo $t$, ha raddoppiato la sua larghezza quadra rispetto a quella iniziale — il punto naturale per dire che il pacchetto ha smesso di essere «lo stesso» pacchetto di minima indeterminazione con cui si è partiti in tappa 07. Il filo si richiude qui: la relazione dedotta da un&rsquo;algebra atemporale (tappe 05-06), saturata da una forma funzionale specifica (tappa 07), finisce per descrivere anche <i>come il tempo stesso</i> distrugge la saturazione che aveva creato.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Il commutatore $[x(t),x(0)]=-i\hbar t/m$ dipende dal tempo. È compatibile con la tappa 04, dove i commutatori fondamentali ($[x,p]=i\hbar$) erano NUMERI, non funzioni del tempo?`,
+    a:R`Sì, perché $[x(t),x(0)]$ non è un commutatore fondamentale: è un commutatore <i>derivato</i>, calcolato a partire dal commutatore fondamentale $[x,p]=i\hbar$ (costante, come deve essere) applicato all&rsquo;equazione del moto $x(t)=x(0)+pt/m$. Il fattore $t/m$ che compare è un numero c (il tempo trascorso diviso la massa), non un operatore: la dipendenza dal tempo entra attraverso la DINAMICA (come $x$ si evolve), non attraverso un&rsquo;improvvisa dipendenza temporale della struttura algebrica di base, che resta quella fissata in tappa 04.`},
+   {q:R`La probabilità di cambio esito $\tfrac12\sin^2\vartheta$ e la relazione di indeterminazione $\Delta A\Delta B\ge\tfrac12|\langle[A,B]\rangle|$ sembrano argomenti diversi — una probabilità, l’altra un prodotto di scarti. C’è davvero un legame, o è solo un’somiglianza nei conti?`,
+    a:R`C’è un legame reale, non solo una coincidenza algebrica: entrambe le quantità misurano quanto due proiezioni ortogonali relative a basi diverse — gli autostati di $S_z$ e quelli dell&rsquo;osservabile orientata a $\vartheta$ — si «mescolano», e in entrambi i casi il mescolamento è massimo esattamente quando le due basi sono quanto più incompatibili possibile ($\vartheta=\pi/2$, dove il commutatore delle componenti di spin è più «efficace»). La relazione di indeterminazione quantifica il mescolamento con un prodotto di scarti su stati generici; la probabilità di cambio esito lo quantifica con una probabilità su una base specifica — ma la fonte comune, in entrambi i casi, è che due osservabili incompatibili non condividono proiettori, e qualunque modo di misurare «quanto non li condividono» finisce per dipendere dallo stesso $\sin\vartheta$ o dallo stesso commutatore.`}
+  ]}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleomq-05-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo mq-05 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: mq-05-compatibili-e-indeterminazione.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
