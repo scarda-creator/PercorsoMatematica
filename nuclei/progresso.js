@@ -50,13 +50,48 @@
   }
 
   // ---------- identità del nucleo e della tappa ----------
-  var NN = (function () {
-    var m = (location.pathname.split('/').pop() || '').match(/^(\d\d)-/);
-    return m ? m[1] : '??';
-  })();
+  // LA SIGLA SI LEGGE DAL BANNER, NON DAL NOME DEL FILE. (17-10)
+  // Il regex di prima era `^(\d\d)-` sul nome del file, e cadeva su '??' per ogni
+  // nucleo nato dal 16-09, cioe' da quando il nome porta anche il corso
+  // (`em-01-…`, `mq-04-…`, `ms-09-…`, `me-08-…`). Misurato il 17-10: 68 nuclei su
+  // 96 — tutto Elettromagnetismo, Geometria Differenziale, Meccanica Statistica,
+  // Quantistica, Astrofisica, Topologia e cinque di Metodi — scrivevano il proprio
+  // avanzamento e le proprie valutazioni sotto la STESSA chiave '??', cioe' in un
+  // unico mucchio: la coda di ripasso non poteva dire da quale nucleo venisse una
+  // voce, e il cruscotto dell'app li contava come un nucleo solo.
+  // Il banner e' la fonte che dichiara la sigla, la stessa che legge
+  // `indice-nuclei.js` — una fonte sola, o le due divergono.
   var titoloNucleo = (function () {
     var b = document.querySelector('.banner b');
-    return b ? b.textContent.trim() : 'Nucleo ' + NN;
+    return b ? b.textContent.trim() : '';
+  })();
+  var NN = (function () {
+    var m = titoloNucleo.match(/^((?:[a-z]{2}-)?\d\d[a-z]?)\s*[—-]/);
+    if (m) return m[1];
+    var f = (location.pathname.split('/').pop() || '').match(/^((?:[a-z]{2}-)?\d\d[a-z]?)-/);
+    return f ? f[1] : '??';
+  })();
+  if (!titoloNucleo) titoloNucleo = 'Nucleo ' + NN;
+
+  // MIGRAZIONE DELLE CHIAVI, una volta sola e solo dove non c'e' ambiguita'. (17-10)
+  // Gli undici nuclei di Metodi hanno cambiato sigla (11 -> me-01, 12b -> me-03,
+  // 17 -> me-11 …) senza cambiare nome di file: il lavoro di studio gia' registrato
+  // sta sotto la sigla vecchia, e senza questo passo resterebbe orfano — le tappe
+  // viste tornerebbero da vedere e le scadenze del ripasso ripartirebbero da zero.
+  // Si sposta solo se la chiave nuova non esiste ancora: se esistono entrambe, la
+  // decisione di fondere due storie non e' di una migrazione automatica.
+  (function migra() {
+    var f = (location.pathname.split('/').pop() || '').match(/^((?:[a-z]{2}-)?\d\d[a-z]?)-/);
+    var vecchia = f ? f[1] : null;
+    if (!vecchia || vecchia === NN) return;
+    var mosso = false;
+    if (D.nuclei[vecchia] && !D.nuclei[NN]) { D.nuclei[NN] = D.nuclei[vecchia]; delete D.nuclei[vecchia]; mosso = true; }
+    for (var id in D.voci) {
+      if (!D.voci.hasOwnProperty(id) || id.indexOf(vecchia + '#') !== 0) continue;
+      var nuovo = NN + id.slice(vecchia.length);
+      if (!D.voci[nuovo]) { D.voci[nuovo] = D.voci[id]; D.voci[nuovo].nucleo = NN; delete D.voci[id]; mosso = true; }
+    }
+    if (mosso) salva(D);
   })();
   function tappaCorrente() { return (location.hash || '#00').replace('#', '') || '00'; }
 
