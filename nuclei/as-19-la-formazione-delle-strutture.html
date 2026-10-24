@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-19 — La formazione delle strutture: da una parte su centomila alle galassie</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-19 — La formazione delle strutture</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["trasformata-di-fourier"] = {"nome":"Trasformata di Fourier","riga":"L'operazione $\\hat f(k)=\\int f(x)\\,e^{-ikx}\\,dx$, che riscrive una funzione come sovrapposizione di onde piane e manda la derivata in una moltiplicazione per $ik$.","serve":"È lo strumento che rende ALGEBRICA un'equazione differenziale lineare a coefficienti costanti: con $\\partial_x$ che diventa $ik$, un'equazione differenziale in $x$ diventa un'equazione algebrica in $k$, si risolve, e si antitrasforma. Le due cose da non perdere sono la convenzione dei $2\\pi$, che cambia da testo a testo e va dichiarata una volta, e Plancherel, che dice che la trasformata conserva la norma $L^{2}$ — in fisica, l'energia.","esempio":"La gaussiana $f(x)=e^{-x^{2}/2}$ ha trasformata $\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2}e^{-ikx}\\,dx=\\sqrt{2\\pi}\\,e^{-k^{2}/2}$: ancora una gaussiana, tanto più larga quanto l'originale è stretta. È il caso in cui si vede meglio il principio di indeterminazione come fatto puramente matematico.","pieno":{"file":"15-distribuzioni.html","tappa":"02","come":"le proprietà, la derivata che diventa un prodotto e Plancherel, nel nucleo delle distribuzioni"},"qui":{"elettromagnetismo":{"serve":"Serve appena si scrive un'onda generica invece di una monocromatica: ogni soluzione delle equazioni di Maxwell nel vuoto è una sovrapposizione di onde piane $e^{i(\\mathbf k\\cdot\\mathbf x-\\omega t)}$, e la trasformata è il modo di scomporla. Su ciascuna componente l'equazione delle onde si riduce alla relazione di dispersione, e la propagazione diventa un far girare fasi: ogni modo viaggia da solo, e nel vuoto tutti alla stessa velocità — per questo un impulso non si deforma.","esempio":"La sostituzione $\\partial_x\\to ik$ e $\\partial_t\\to-i\\omega$ manda le derivate seconde in $(ik)^{2}=-k^{2}$ e $(-i\\omega)^{2}=-\\omega^{2}$: l'equazione delle onde diventa $\\omega^{2}=c^{2}k^{2}$, cioè un'equazione di secondo grado al posto di una differenziale, e la sua radice positiva $\\omega=ck$ è la relazione di dispersione del vuoto."}},"controllo":[{"tipo":"integrale","espr":"exp(-x**2/2)*exp(-I*k*x)","var":"x","da":"-oo","a":"oo","vale":"sqrt(2*pi)*exp(-k**2/2)","ipotesi":{"k":"real"},"dove":"esempio","appare":"\\sqrt{2\\pi}\\,e^{-k^{2}/2}"},{"tipo":"uguale","sinistra":"(I*k)**2","vale":"-k**2","ipotesi":{"k":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-k^{2}"},{"tipo":"uguale","sinistra":"(-I*w)**2","vale":"-w**2","ipotesi":{"w":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-\\omega^{2}"},{"tipo":"uguale","sinistra":"(c*k)**2","vale":"c**2*k**2","dove":"qui.elettromagnetismo.esempio","appare":"c^{2}k^{2}"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["parsec-e-parallasse"] = {"nome":"Parsec e parallasse","riga":"Il parsec è la distanza da cui il raggio dell'orbita terrestre è visto sotto un secondo d'arco: $1\\ \\mathrm{pc}=1\\,\\mathrm{UA}/1''=3{,}086\\cdot10^{16}$ m, e la distanza di una stella in parsec è l'inverso della sua parallasse in secondi d'arco.","serve":"A non portare mai un fattore di conversione a memoria. La definizione è geometrica e si ricostruisce in due righe: se $p$ è l'angolo sotto cui dalla stella si vede il semiasse maggiore dell'orbita terrestre, per angoli piccoli $p=R_{\\text{UA}}/d$, e scegliendo l'unità di distanza in modo che $p=1''$ corrisponda a $d=1$ si ottiene $d[\\mathrm{pc}]=1/p['']$. Il parsec non è un'unità più «astronomica» dell'anno luce: è l'unità in cui la misura che si fa davvero — un angolo — diventa direttamente una distanza, senza nessun conto intermedio. Nelle prove scritte di Astrofisica il valore $1\\ \\mathrm{pc}=3{,}086\\cdot10^{16}$ m è stampato in calce al foglio fra i dati: ciò che va saputo è l'inversione, non il numero.","esempio":"La stella più vicina, Proxima Centauri, ha parallasse $p=0{,}7687''$. Quindi $d=1/0{,}7687=1{,}301$ pc, e in anni luce $d=3{,}26/0{,}7687=4{,}24$ anni luce. Il controllo di coerenza è immediato: una parallasse inferiore al secondo d'arco vuol dire per forza una distanza superiore al parsec, e se il conto dà il contrario è stata invertita la frazione.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"02","come":"la derivazione del parsec dalla parallasse annua e le conversioni fra unità astronomica, anno luce e parsec, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"riga","appare":"3,086\\cdot10^{16}"},{"tipo":"numero","espr":"1/0.7687","vale":"1.301","dove":"esempio","appare":"1,301"},{"tipo":"numero","espr":"3.26/0.7687","vale":"4.24","dove":"esempio","appare":"4,24"},{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"serve","appare":"3,086\\cdot10^{16}"}]};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-19: La formazione delle strutture: da una parte su centomila alle galassie <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-19 — la formazione delle strutture
+identita:  come si passa da una parte su centomila alle galassie: l'instabilita' di Jeans, la sua
+           generalizzazione all'universo in espansione, la materia oscura che cresce per prima, e il conto che
+           chiude i parametri cosmologici.
+copre:     A.28, A.29
+serve:     as-18 (anisotropie, Sachs-Wolfe, ricombinazione), as-16 (fasi, orizzonte), as-11 (Jeans per le nubi)
+apre:      calcolato da verifica-mappa.py
+profondita: misto, con densita' alta sul poco che cade (9 prove, densita' 4,9). La massa di Jeans svolta con i
+           numeri in due contesti, una nube interstellare e l'universo primordiale, con la stessa formula e dati
+           che cambiano di venti ordini di grandezza. All'orale: la lunghezza di Jeans dal confronto di energie e
+           dalla relazione di dispersione.
+fonti:     lezione22_2016_stampati (pagine 1-3) e lezione23_2017 (pagine 2-16): formazione delle strutture
+           (Delta rho/rho = 1e5 contro 1e-5), evoluzione di una sovradensita' sferica con Friedmann (Birkhoff),
+           delta ~ a^2 in radiazione e ~ a in materia, entrata nell'orizzonte, massa di Jeans nell'universo
+           primordiale (v_s = c/sqrt 3, poi gas, 1e6 M_sun dopo la ricombinazione, andamenti T^-3 e T^3/2),
+           crescita soppressa in radiazione, oscillazioni acustiche, diffusione dei fotoni e massa minima
+           adiabatica 1e13 M_sun, perturbazioni isoterme, entita' delle perturbazioni alla ricombinazione
+           (0,005 e 0,0015), WIMPs.
+           lezione24_2020 (pagine 21-33): formazione delle strutture, Millennium simulation, fluttuazioni
+           adiabatiche e isoterme, lensing gravitazionale e massa della lente (LRG 3-757, 5e12 M_sun).
+           lezione19_2017 e lezione20_2017: i vincoli dalle supernovae (q0 = Omega_M/2 - Omega_L) e dal fondo
+           (Omega_0 = 1,02), la materia dalle curve di rotazione e dagli ammassi.
+           Prova scritta: esonero 14/12/2009 A, es. 2 (nube di 7 M_sun, n = 1e12 m^-3, 30 K), con la soluzione.
+           DICHIARATO: la mappa non assegna esercizi di lezione a questo movimento; quello svolto e' una prova
+           scritta (esonero 2009), non un esercizio di lezione. L'equazione di crescita delta'' + 2H delta' =
+           4 pi G rho delta e la relazione di dispersione sono standard, non scritte nelle slide estratte (che
+           danno solo i risultati t^2/3 e la massa di Jeans); la stima della diffusione (Silk) con i miei numeri
+           da' 9e13 M_sun contro il 1e13 della slide; la slide da' Delta T/T ~ 0,0015 dove delta/3 con il suo
+           delta = 0,005 da' 0,0018; la soluzione dell'esonero scrive 3,1e31 kg dove il conto da' 3,0e31.
+           Marconi, Cosmologia, cap. 11.4, 12.7, 13-14 (pagine 167-170, 199-207, 218-226), letto per intero dal
+           dossier: la sovradensita' come universo di Friedmann piu' denso, la soluzione generale della crescita
+           e i fattori di crescita per Omega_0 diversi, la definizione M_J = (pi/48) lambda_J^3 rho, la velocita'
+           del suono del fluido fotoni-barioni, la massa di Jeans del modello puramente barionico, il
+           free-streaming della materia oscura calda, i candidati (assioni, neutrini, WIMPs), l'effetto
+           Meszaros, i barioni che cadono nelle buche della materia oscura.
+           DICHIARATO: i fattori di crescita di Marconi (190, 24, 610) sono letti dalle sue figure; il mio
+           integrale da' 194, 25, 591.
+registro:  lezione22_2016_stampati, lezione23_2017, lezione24_2020
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "00", "appare": "\\frac{\\Delta\\rho}{\\rho}\\sim10^{5}", "perche": "dato della lezione23_2017 p. 2"},
+ {"tipo": "simbolico", "dove": "01", "appare": "2K+U=0", "perche": "teorema del viriale"},
+ {"tipo": "uguale", "sinistra": "solve(Rational(3,5)*G*M/R-3*k*T/(mu*m),M)[0]", "vale": "5*k*T*R/(G*mu*m)", "dove": "01", "appare": "M\\gt \\frac{5kTR}{G\\mu m_H}", "ipotesi": {"G": "positive", "M": "positive", "R": "positive", "k": "positive", "T": "positive", "mu": "positive", "m": "positive"}},
+ {"tipo": "uguale", "sinistra": "solve(M**Rational(2,3)-5*k*T/(G*mu*m)*(3/(4*pi*rho))**Rational(1,3),M)[0]", "vale": "(5*k*T/(G*mu*m))**Rational(3,2)*(3/(4*pi*rho))**Rational(1,2)", "dove": "01", "appare": "M_J=\\left(\\frac{5kT}{G\\mu m_H}\\right)^{3/2}\\left(\\frac{3}{4\\pi\\rho}\\right)^{1/2}", "ipotesi": {"G": "positive", "M": "positive", "k": "positive", "T": "positive", "mu": "positive", "m": "positive", "rho": "positive"}},
+ {"tipo": "simbolico", "dove": "01", "appare": "v_s^2=\\gamma kT/\\mu m_H", "perche": "velocita' del suono adiabatica"},
+ {"tipo": "simbolico", "dove": "01", "appare": "5kT/\\mu m_H=3v_s^2", "perche": "gamma = 5/3"},
+ {"tipo": "uguale", "sinistra": "(3*v**2/G)**Rational(3,2)*(3/(4*pi*rho))**Rational(1,2)", "vale": "3**Rational(3,2)*(3/(4*pi))**Rational(1,2)*v**3/(G**Rational(3,2)*rho**Rational(1,2))", "dove": "01", "appare": "=3^{3/2}\\left(\\frac{3}{4\\pi}\\right)^{1/2}\\frac{v_s^3}{G^{3/2}\\rho^{1/2}}", "ipotesi": {"v": "positive", "G": "positive", "rho": "positive"}},
+ {"tipo": "numero", "espr": "3**1.5*sqrt(3/(4*pi))", "vale": "2.54", "dove": "01", "appare": "=2{,}54"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\ddot\\delta=c_s^2\\nabla^2\\delta+4\\pi G\\rho_0\\,\\delta", "perche": "continuita', Eulero e Poisson linearizzate"},
+ {"tipo": "uguale", "sinistra": "simplify((diff(exp(I*(kk*x-w*t)),t,2)-cs**2*diff(exp(I*(kk*x-w*t)),x,2)-4*pi*G*rho*exp(I*(kk*x-w*t)))/exp(I*(kk*x-w*t)))", "vale": "-w**2+cs**2*kk**2-4*pi*G*rho", "dove": "01", "appare": "\\omega^2=c_s^2k^2-4\\pi G\\rho_0", "ipotesi": {"kk": "positive", "w": "real", "x": "real", "t": "real", "cs": "positive", "G": "positive", "rho": "positive"}},
+ {"tipo": "uguale", "sinistra": "solve(cs**2*kk**2-4*pi*G*rho,kk)[0]", "vale": "2*sqrt(pi*G*rho)/cs", "dove": "01", "appare": "k_J^2=4\\pi G\\rho_0/c_s^2", "ipotesi": {"cs": "positive", "kk": "positive", "G": "positive", "rho": "positive"}},
+ {"tipo": "uguale", "sinistra": "2*pi/(2*sqrt(pi*G*rho)/cs)", "vale": "cs*sqrt(pi/(G*rho))", "dove": "01", "appare": "\\lambda_J=\\frac{2\\pi}{k_J}=c_s\\sqrt{\\frac{\\pi}{G\\rho_0}}", "ipotesi": {"cs": "positive", "G": "positive", "rho": "positive"}},
+ {"tipo": "numero", "espr": "1e12*1.6726e-27*1e15", "vale": "1.67", "dove": "02", "appare": "=1{,}67\\cdot10^{-15}"},
+ {"tipo": "numero", "espr": "5*1.381e-23*30/(6.674e-11*1.673e-27)/1e16", "vale": "1.86", "dove": "02", "appare": "=1{,}86\\cdot10^{16}"},
+ {"tipo": "numero", "espr": "(5*1.381e-23*30/(6.674e-11*1.6726e-27))**1.5*(3/(4*pi*1.6726e-15))**0.5/1e31", "vale": "3.0", "dove": "02", "appare": "=3{,}0\\cdot10^{31}"},
+ {"tipo": "numero", "espr": "(5*1.381e-23*30/(6.674e-11*1.6726e-27))**1.5*(3/(4*pi*1.6726e-15))**0.5/1.989e30", "vale": "15.2", "dove": "02", "appare": "=15{,}2\\,M_\\odot"},
+ {"tipo": "numero", "espr": "7*1.989e30/1e31", "vale": "1.39", "dove": "02", "appare": "=1{,}39\\cdot10^{31}"},
+ {"tipo": "numero", "espr": "2**1.5*2**0.5", "vale": "4", "dove": "02", "appare": "2^{3/2}\\cdot2^{1/2}=4"},
+ {"tipo": "numero", "espr": "(5*1.381e-23*30/(6.674e-11*2*1.6726e-27))**1.5*(3/(4*pi*2*1.6726e-15))**0.5/1e30", "vale": "7.55", "dove": "02", "appare": "M_J=7{,}55\\cdot10^{30}"},
+ {"tipo": "numero", "espr": "(5*1.381e-23*30/(6.674e-11*2*1.6726e-27))**1.5*(3/(4*pi*2*1.6726e-15))**0.5/1.989e30", "vale": "3.8", "dove": "02", "appare": "=3{,}8\\,M_\\odot"},
+ {"tipo": "numero", "espr": "sqrt(5*1.381e-23*30/(3*2*1.6726e-27))", "vale": "454", "dove": "02", "appare": "=454"},
+ {"tipo": "numero", "espr": "454.33*sqrt(pi/(6.674e-11*3.345e-15))/3.0857e16", "vale": "0.055", "dove": "02", "appare": "=0{,}055"},
+ {"tipo": "numero", "espr": "sqrt(3*pi/(32*6.674e-11*3.345e-15))/3.156e7/1e4", "vale": "3.6", "dove": "02", "appare": "=3{,}6\\cdot10^4"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{8\\pi G}{3}\\rho'-\\frac{kc^2}{a^2}", "perche": "Friedmann per la sfera sovradensa, teorema di Birkhoff"},
+ {"tipo": "uguale", "sinistra": "solve(8*pi*G/3*rho-(8*pi*G/3*rp-k*c**2/a**2),rp)[0]/rho-1", "vale": "3*k*c**2/(8*pi*G*rho*a**2)", "dove": "03", "appare": "\\delta=\\frac{\\rho'-\\rho}{\\rho}=\\frac{3kc^2}{8\\pi G\\rho a^2}", "ipotesi": {"G": "positive", "rho": "positive", "k": "positive", "c": "positive", "a": "positive", "rp": "positive"}},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\ddot\\delta+2H\\dot\\delta=4\\pi G\\rho\\,\\delta", "perche": "equazione di crescita lineare standard in coordinate comoventi"},
+ {"tipo": "uguale", "sinistra": "Rational(3,2)*(2/(3*t))**2", "vale": "2/(3*t**2)", "dove": "03", "appare": "=2/(3t^2)", "ipotesi": {"t": "positive"}},
+ {"tipo": "uguale", "sinistra": "simplify((diff(t**n,t,2)+2*(2/(3*t))*diff(t**n,t)-2/(3*t**2)*t**n)*t**2/t**n)", "vale": "n*(n-1)+Rational(4,3)*n-Rational(2,3)", "dove": "03", "appare": "n(n-1)+\\frac43n-\\frac23=0", "ipotesi": {"t": "positive"}},
+ {"tipo": "uguale", "sinistra": "Min(*solve(n**2+n/3-Rational(2,3),n))", "vale": "-1", "dove": "03", "appare": "n=-1"},
+ {"tipo": "uguale", "sinistra": "Max(*solve(n**2+n/3-Rational(2,3),n))", "vale": "Rational(2,3)", "dove": "03", "appare": "n=\\frac23"},
+ {"tipo": "numero", "espr": "10**(2/3.)", "vale": "4.6", "dove": "03", "appare": "4,6"},
+ {"tipo": "numero", "espr": "0.04*9.2e-27*1101**3*1e19", "vale": "4.9", "dove": "04", "appare": "=4{,}9\\cdot10^{-19}"},
+ {"tipo": "numero", "espr": "2.998e8/sqrt(3)/1e8", "vale": "1.73", "dove": "04", "appare": "=1{,}73\\cdot10^8"},
+ {"tipo": "numero", "espr": "2.5389*(2.998e8/sqrt(3))**3/(6.674e-11**1.5*sqrt(4.9136e-19))/1e49", "vale": "3.4", "dove": "04", "appare": "=3{,}4\\cdot10^{49}"},
+ {"tipo": "numero", "espr": "2.5389*(2.998e8/sqrt(3))**3/(6.674e-11**1.5*sqrt(4.9136e-19))/1.989e30/1e19", "vale": "1.7", "dove": "04", "appare": "=1{,}7\\cdot10^{19}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "sqrt(5*1.381e-23*3000/(3*1.6726e-27))/1e3", "vale": "6.4", "dove": "04", "appare": "=6{,}4"},
+ {"tipo": "numero", "espr": "2.998e8/sqrt(3)/6425/1e3", "vale": "27", "dove": "04", "appare": "ventisettemila"},
+ {"tipo": "numero", "espr": "2.5389*6425.19**3/(6.674e-11**1.5*sqrt(4.9136e-19))/1.989e30/1e5", "vale": "8.9", "dove": "04", "appare": "=8{,}9\\cdot10^{5}"},
+ {"tipo": "numero", "espr": "(1.73e8/454)**3*sqrt(3.3e-15/4.9e-19)/1e18", "vale": "4.5", "dove": "04", "appare": "=4{,}5\\cdot10^{18}"},
+ {"tipo": "uguale", "sinistra": "l*sqrt(c*t/l)", "vale": "sqrt(l*c*t)", "dove": "05", "appare": "d=\\lambda\\sqrt N=\\sqrt{\\lambda\\,c\\,t_{\\rm dec}}", "ipotesi": {"l": "positive", "c": "positive", "t": "positive"}},
+ {"tipo": "numero", "espr": "1/(2.74e8*6.65e-29)/1e19", "vale": "5.5", "dove": "05", "appare": "=5{,}5\\cdot10^{19}"},
+ {"tipo": "numero", "espr": "1/(2.74e8*6.65e-29)/3.0857e19", "vale": "1.8", "dove": "05", "appare": "1,8 kpc"},
+ {"tipo": "numero", "espr": "2.998e8*380000*3.156e7/1e21", "vale": "3.6", "dove": "05", "appare": "3{,}6\\cdot10^{21}"},
+ {"tipo": "numero", "espr": "2.998e8*380000*3.156e7*2.74e8*6.65e-29", "vale": "66", "dove": "05", "appare": "N=66"},
+ {"tipo": "numero", "espr": "sqrt(2.998e8*380000*3.156e7/(2.74e8*6.65e-29))/1e20", "vale": "4.4", "dove": "05", "appare": "d=4{,}4\\cdot10^{20}"},
+ {"tipo": "numero", "espr": "sqrt(2.998e8*380000*3.156e7/(2.74e8*6.65e-29))/3.0857e19", "vale": "14", "dove": "05", "appare": "circa 14 kpc"},
+ {"tipo": "numero", "espr": "4/3.*pi*(sqrt(2.998e8*380000*3.156e7/(2.74e8*6.65e-29)))**3*4.9136e-19/1.989e30/1e13", "vale": "9", "dove": "05", "appare": "=9\\cdot10^{13}"},
+ {"tipo": "numero", "espr": "6/1101", "vale": "0.0054", "dove": "06", "appare": "=0{,}0054"},
+ {"tipo": "numero", "espr": "6/1101/3", "vale": "0.0018", "dove": "06", "appare": "=0{,}0018"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\delta\\rho_b/\\rho_b=3\\,\\delta T/T", "perche": "perturbazioni adiabatiche, n proporzionale a T^3"},
+ {"tipo": "numero", "espr": "3500/1100", "vale": "3.2", "dove": "06", "appare": "3500/1100=3{,}2"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\Delta T/T=\\Phi/3c^2", "perche": "effetto Sachs-Wolfe"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\theta_E^2=\\frac{4GM}{c^2}\\frac{d_{LS}}{d_Ld_S}", "perche": "raggio di Einstein (lezione24_2020 p. 33)"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\Omega_\\Lambda=\\frac{\\Omega_{M0}}{2}+0{,}55", "perche": "q0 = Omega_M/2 - Omega_L con q0 = -0,55"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\frac{\\Omega_{M0}}{2}+0{,}55\\quad", "perche": "uguaglianza dei due vincoli"},
+ {"tipo": "uguale", "sinistra": "solve(1-x-(x/2+Rational(55,100)),x)[0]", "vale": "Rational(3,10)", "dove": "07", "appare": "\\Omega_{M0}=0{,}30"},
+ {"tipo": "numero", "espr": "1-0.30", "vale": "0.70", "dove": "07", "appare": "\\Omega_\\Lambda=0{,}70"},
+ {"tipo": "numero", "espr": "0.020/0.49", "vale": "0.041", "dove": "07", "appare": "\\Omega_B=0{,}041"},
+ {"tipo": "numero", "espr": "2/(3*sqrt(0.7))*asinh(sqrt(0.7/0.3))*13.97", "vale": "13.5", "dove": "07", "appare": "=13{,}5"},
+ {"tipo": "simbolico", "dove": "01", "appare": "K=\\frac32NkT=\\frac32\\frac{M}{\\mu m_H}kT", "perche": "energia termica con N = M/(mu m_H)"},
+ {"tipo": "simbolico", "dove": "03", "appare": "1+z=1100", "perche": "redshift della ricombinazione"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\Omega_Bh^2=0{,}020\\pm0{,}002", "perche": "dato della nucleosintesi (lezione24_2020 p. 10)"},
+ {"tipo": "uguale", "sinistra": "pi/48*(v*sqrt(pi/(G*rho)))**3*rho", "vale": "pi**Rational(5,2)/48*v**3/(G**Rational(3,2)*rho**Rational(1,2))", "dove": "01", "appare": "=\\frac{\\pi^{5/2}}{48}\\frac{v_s^3}{G^{3/2}\\rho^{1/2}}", "ipotesi": {"v": "positive", "G": "positive", "rho": "positive"}},
+ {"tipo": "numero", "espr": "pi**2.5/48", "vale": "0.364", "dove": "01", "appare": "=0{,}364\\,\\frac{v_s^3}{G^{3/2}\\rho^{1/2}}"},
+ {"tipo": "numero", "espr": "pi**2.5/6", "vale": "2.92", "dove": "01", "appare": "\\pi^{5/2}/6=2{,}92"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\lambda_J=c_s(3\\pi/8G\\rho)^{1/2}", "perche": "versione relativistica di Marconi (cap. 13)"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta=\\frac35\\frac{\\Omega_0-1}{\\Omega_0}\\Omega_0^{1/3}a", "perche": "sviluppo al primo ordine delle soluzioni parametriche (Marconi 11.24)"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta=3c^2k/(8\\pi G\\rho_0a^2)", "perche": "Marconi p. 200, identica alla slide di lezione22_2016"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\delta(a)=\\frac{5\\Omega_0}{2}\\frac{\\dot a}{a}\\int_0^a\\frac{da'}{\\dot a'^3}", "perche": "soluzione generale (Marconi cap. 11.4.2)"},
+ {"tipo": "uguale", "sinistra": "Rational(5,2)*a**Rational(-3,2)*integrate(x**Rational(3,2),(x,0,a))", "vale": "a", "dove": "03", "appare": "\\frac52a^{-3/2}\\int_0^ax^{3/2}dx=a", "ipotesi": {"a": "positive", "x": "positive"}},
+ {"tipo": "numero", "espr": "(sqrt(0.1/1**3+0+0.9/1**2)*Integral(1/(x*sqrt(0.1/x**3+0+0.9/x**2))**3,(x,0,1)))/(sqrt(0.1/0.001**3+0+0.9/0.001**2)*Integral(1/(x*sqrt(0.1/x**3+0+0.9/x**2))**3,(x,0,0.001)))", "vale": "194", "dove": "03", "appare": "=194\\ (\\Omega_0=0{,}1)"},
+ {"tipo": "numero", "espr": "(sqrt(0.01/1**3+0+0.99/1**2)*Integral(1/(x*sqrt(0.01/x**3+0+0.99/x**2))**3,(x,0,1)))/(sqrt(0.01/0.001**3+0+0.99/0.001**2)*Integral(1/(x*sqrt(0.01/x**3+0+0.99/x**2))**3,(x,0,0.001)))", "vale": "25", "dove": "03", "appare": "=25\\ (\\Omega_0=0{,}01)"},
+ {"tipo": "numero", "espr": "(sqrt(0.1/1**3+0.9+0.0/1**2)*Integral(1/(x*sqrt(0.1/x**3+0.9+0.0/x**2))**3,(x,0,1)))/(sqrt(0.1/0.001**3+0.9+0.0/0.001**2)*Integral(1/(x*sqrt(0.1/x**3+0.9+0.0/x**2))**3,(x,0,0.001)))", "vale": "591", "dove": "03", "appare": "l&rsquo;integrale dà 591"},
+ {"tipo": "simbolico", "dove": "04", "appare": "c_s^2=\\frac{c^2}{3}\\frac{4\\rho_r}{4\\rho_r+3\\rho_m}", "perche": "velocita' del suono del fluido accoppiato (Marconi 13.2)"},
+ {"tipo": "uguale", "sinistra": "simplify(c**2/3*4*rr/(4*rr+3*rm)-c**2/(3*(1+3*rm/(4*rr))))", "vale": "0", "dove": "04", "appare": "=\\frac{c^2}{3(1+R)}", "ipotesi": {"c": "positive", "rr": "positive", "rm": "positive"}},
+ {"tipo": "numero", "espr": "3*0.04/(4*5.04e-5*1101)", "vale": "0.54", "dove": "04", "appare": "=0{,}54"},
+ {"tipo": "numero", "espr": "1/sqrt(3*(1+0.5406))", "vale": "0.465", "dove": "04", "appare": "=0{,}465\\,c"},
+ {"tipo": "numero", "espr": "(0.4651*sqrt(3))**3", "vale": "0.52", "dove": "04", "appare": "(0{,}465\\sqrt3)^3=0{,}52"},
+ {"tipo": "numero", "espr": "1.73e19*0.5229/1e18", "vale": "9.0", "dove": "04", "appare": "=9{,}0\\cdot10^{18}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "pi/(2*sqrt(3))", "vale": "0.91", "dove": "04", "appare": "=\\frac{\\pi}{2\\sqrt3}=0{,}91"},
+ {"tipo": "numero", "espr": "0.364/2.54", "vale": "0.143", "dove": "04", "appare": "0{,}364/2{,}54=0{,}143"},
+ {"tipo": "numero", "espr": "(0.29/0.5774)**3", "vale": "0.127", "dove": "04", "appare": "(0{,}29/0{,}577)^3=0{,}127"},
+ {"tipo": "numero", "espr": "sqrt(0.04/0.3)", "vale": "0.365", "dove": "04", "appare": "\\sqrt{0{,}04/0{,}3}=0{,}365"},
+ {"tipo": "numero", "espr": "0.143*0.127*0.365", "vale": "0.0066", "dove": "04", "appare": "0{,}143\\cdot0{,}127\\cdot0{,}365=0{,}0066"},
+ {"tipo": "numero", "espr": "1.7e19*0.0066/1e17", "vale": "1.1", "dove": "04", "appare": "1{,}1\\cdot10^{17}"},
+ {"tipo": "numero", "espr": "2*(1+1.5*(1-sqrt(1/4.)))", "vale": "3.5", "dove": "05", "appare": "=\\frac72\\frac{ct_{NR}}{a_{NR}}"},
+ {"tipo": "numero", "espr": "0.1/10", "vale": "0.01", "dove": "05", "appare": "\\Omega_\\nu=0{,}1/10=0{,}01"},
+ {"tipo": "uguale", "sinistra": "simplify(diff(1+3*y/2,y,2)+(2+3*y)/(2*y*(1+y))*diff(1+3*y/2,y)-3*(1+3*y/2)/(2*y*(1+y)))", "vale": "0", "dove": "06", "appare": "\\Delta\\propto1+\\frac32y", "ipotesi": {"y": "positive"}},
+ {"tipo": "numero", "espr": "(1+1.5)/1", "vale": "2.5", "dove": "06", "appare": "\\Delta(1)/\\Delta(0)=\\frac52"},
+ {"tipo": "uguale", "sinistra": "simplify(a**Rational(3,2)*diff(a**Rational(-1,2)*diff(B*(a-ar),a),a)+2*diff(B*(a-ar),a))", "vale": "3*B/2", "dove": "06", "appare": "\\Delta_b=B(a-a_{\\rm rec})", "ipotesi": {"a": "positive", "B": "positive", "ar": "positive"}},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\Delta_b=\\Delta_{DM}\\left(1-\\frac{a_{\\rm rec}}{a}\\right)\\simeq\\Delta_{DM}\\left(1-\\frac{z}{z_{\\rm rec}}\\right)", "perche": "Marconi (14.2), con Delta_DM = B a"},
+ {"tipo": "numero", "espr": "1500/6000.", "vale": "0.25", "dove": "06", "appare": "1500/6000=0{,}25"},
+ {"tipo": "numero", "espr": "1100/3500.", "vale": "0.31", "dove": "06", "appare": "$0{,}31"},
+ {"tipo": "numero", "espr": "(sqrt(0.3/1**3+0.7+0.0/1**2)*Integral(1/(x*sqrt(0.3/x**3+0.7+0.0/x**2))**3,(x,0,1)))/(sqrt(0.3/0.001**3+0.7+0.0/0.001**2)*Integral(1/(x*sqrt(0.3/x**3+0.7+0.0/x**2))**3,(x,0,0.001)))", "vale": "779", "dove": "07", "appare": "\\frac{\\delta(1)}{\\delta(10^{-3})}=779"},
+ {"tipo": "numero", "espr": "(sqrt(0.3/1**3+0+0.7/1**2)*Integral(1/(x*sqrt(0.3/x**3+0+0.7/x**2))**3,(x,0,1)))/(sqrt(0.3/0.001**3+0+0.7/0.001**2)*Integral(1/(x*sqrt(0.3/x**3+0+0.7/x**2))**3,(x,0,0.001)))", "vale": "457", "dove": "07", "appare": "solo di 457"},
+ {"tipo": "simbolico", "dove": "05", "appare": "a_{eq}/a_{rec}=1/4", "perche": "z_rec/z_eq = 1500/6000 nei numeri di Marconi"},
+ {"tipo": "simbolico", "dove": "06", "appare": "a_{eq}/a_{rec}=z_{\\rm rec}/z_{eq}", "perche": "a = 1/(1+z) con z grande"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché questo movimento: dieci ordini di grandezza da colmare', meta:'10⁻⁵ alla ricombinazione · 10⁵ in una galassia · la gravità come amplificatore',
+  blocchi:[
+  {t:'prosa', title:'Il problema', tag:'architettura', html:R`
+  <p>Il modello cosmologico dei movimenti precedenti è omogeneo e isotropo, e su scale maggiori di un centinaio di Mpc l&rsquo;universo lo è davvero. Ma <i>«a scale inferiori ai 10 Mpc vediamo significative disomogeneità: superammassi e ammassi di galassie, galassie, stelle»</i>. De Bernardis, nella lezione 23 del 2017, dà il numero che pone il problema: una galassia ha una densità media centomila volte maggiore della densità media dell&rsquo;universo,</p>
+  <p>$$\frac{\Delta\rho}{\rho}\sim10^{5},$$</p>
+  <p>mentre l&rsquo;universo primordiale che vediamo nell&rsquo;anisotropia del fondo cosmico era omogeneo a $\Delta\rho/\rho\sim10^{-5}$. Dieci ordini di grandezza da colmare, e <i>«si pensa che le disomogeneità siano cresciute a causa della gravità»</i>. Ma <i>«qui la situazione è diversa da quella studiata da Jeans, perché l&rsquo;universo si sta espandendo e c&rsquo;è una forte pressione di radiazione: è quindi più difficile far crescere le fluttuazioni di densità»</i>.</p>
+  <p>Il movimento segue questa frase. Prima l&rsquo;instabilità di Jeans in un mezzo statico, derivata in due modi: dal confronto di energie, che la fa capire, e dalla relazione di dispersione, che la fa dire. Poi il primo contesto numerico, una nube interstellare. Poi la generalizzazione all&rsquo;universo in espansione, dove la crescita esponenziale diventa una legge di potenza. Poi il secondo contesto: la massa di Jeans dell&rsquo;universo primordiale, che crolla di tredici ordini di grandezza alla ricombinazione. Poi i due ostacoli, la diffusione dei fotoni e il poco tempo, e la soluzione della materia oscura. Infine il quadro dei parametri cosmologici che tutte le misure, messe insieme, determinano. Gli strumenti: la <span class="str" data-str="trasformata-di-fourier">decomposizione in onde piane</span> delle perturbazioni, gli <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span>, il <span class="str" data-str="parsec-e-parallasse">parsec</span> e l&rsquo;<span class="str" data-str="angolo-piccolo">angolo piccolo</span> per le lenti gravitazionali.</p>`}
+]},
+
+/* ---------------- 01 · JEANS IN DUE MODI ---------------- */
+{ num:'01', title:'L’instabilità di Jeans in due modi: energie e dispersione', meta:'|U| > 2K · M_J = (5kT/Gμm_H)^{3/2}(3/4πρ)^{1/2} · ω² = c_s²k² − 4πGρ · λ_J',
+  blocchi:[
+  {t:'prosa', title:'Il confronto di energie, in tre righe', tag:'per capirla', html:R`
+  <p>Una nube sferica di massa $M$, raggio $R$, temperatura $T$, fatta di particelle di massa $\mu m_H$, ha energia cinetica termica $K=\frac32NkT=\frac32\frac{M}{\mu m_H}kT$ ed energia gravitazionale $U=-\frac35\frac{GM^2}{R}$. Per il teorema del viriale un sistema in equilibrio ha $2K+U=0$; se $|U|\gt 2K$ la gravità vince e la nube collassa:</p>
+  <p>$$\frac35\frac{GM^2}{R}\gt \frac{3MkT}{\mu m_H}\quad\Longleftrightarrow\quad M\gt \frac{5kTR}{G\mu m_H} .$$</p>
+  <p>Eliminando il raggio con $R=(3M/4\pi\rho)^{1/3}$, la condizione $M^{2/3}\gt \frac{5kT}{G\mu m_H}\left(\frac{3}{4\pi\rho}\right)^{1/3}$ dà la massa critica, la <b>massa di Jeans</b>:</p>
+  <p>$$M_J=\left(\frac{5kT}{G\mu m_H}\right)^{3/2}\left(\frac{3}{4\pi\rho}\right)^{1/2},$$</p>
+  <p>la formula che de Bernardis richiama nella lezione 23 da quella sulle nubi protostellari. Più calda è la nube, più massa serve; più densa, meno. Con la velocità del suono adiabatica di un gas monoatomico, $v_s^2=\gamma kT/\mu m_H$ con $\gamma=5/3$, cioè $5kT/\mu m_H=3v_s^2$, la stessa formula diventa</p>
+  <p>$$M_J=\left(\frac{3v_s^2}{G}\right)^{3/2}\left(\frac{3}{4\pi\rho}\right)^{1/2}=3^{3/2}\left(\frac{3}{4\pi}\right)^{1/2}\frac{v_s^3}{G^{3/2}\rho^{1/2}},$$</p>
+  <p>con il coefficiente numerico $3^{3/2}(3/4\pi)^{1/2}=2{,}54$. È la forma che serve per l&rsquo;universo primordiale, dove la pressione non è quella di un gas ideale e conviene parlare di velocità del suono invece che di temperatura.</p>`},
+  {t:'prosa', title:'La relazione di dispersione', tag:'per dirla', html:R`
+  <p>La derivazione dinamica, che le slide non scrivono e che è quella standard, parte dalle tre equazioni di un fluido autogravitante: continuità, Eulero e Poisson. Su un fondo uniforme di densità $\rho_0$ (con la famosa «truffa di Jeans», che ignora il potenziale del fondo) si aggiunge una piccola perturbazione $\rho=\rho_0(1+\delta)$, si linearizza, e si ottiene un&rsquo;unica equazione per il contrasto $\delta$:</p>
+  <p>$$\ddot\delta=c_s^2\nabla^2\delta+4\pi G\rho_0\,\delta .$$</p>
+  <p>Il primo termine è la pressione, che spinge a uniformare; il secondo la gravità, che amplifica. Si scompone la perturbazione in <span class="str" data-str="trasformata-di-fourier">onde piane</span>, $\delta\propto e^{i(kx-\omega t)}$; allora $\nabla^2\to-k^2$, $\ddot\delta\to-\omega^2\delta$, e</p>
+  <p>$$\omega^2=c_s^2k^2-4\pi G\rho_0 .$$</p>
+  <p>Per $k$ grande, cioè lunghezze d&rsquo;onda piccole, $\omega^2\gt 0$: la perturbazione oscilla, è un&rsquo;onda sonora. Per $k$ piccolo $\omega^2\lt 0$, $\omega$ è immaginario, e la perturbazione cresce esponenzialmente con tempo caratteristico $1/\sqrt{4\pi G\rho_0}$. Il confine è dove $\omega^2$ cambia segno, $k_J^2=4\pi G\rho_0/c_s^2$, cioè la <b>lunghezza di Jeans</b></p>
+  <p>$$\lambda_J=\frac{2\pi}{k_J}=c_s\sqrt{\frac{\pi}{G\rho_0}} .$$</p>
+  <p>Sotto $\lambda_J$ vince la pressione e la perturbazione oscilla, sopra vince la gravità e collassa. Il confronto di energie e la dispersione danno la stessa fisica, $M\sim\rho\lambda_J^3$, con coefficienti numerici diversi di un fattore dell&rsquo;ordine dell&rsquo;unità: la prima è la versione da capire, la seconda quella da dire.</p>`},
+  {t:'plot', title:'La relazione di dispersione di Jeans',
+   intro:R`ω²/(4πGρ₀) contro k/k_J: la curva è (k/k_J)² − 1. Sopra lo zero le perturbazioni oscillano (onde sonore), sotto crescono (instabilità gravitazionale). Il punto è la soglia k = k_J.`,
+   plots:[
+    {kind:'func2d', xr:[0,2.5], yr:[-1.2,5], height:260, equal:false,
+     title:'k / k_J      ω² / 4πGρ₀',
+     curves:[{f:'x*x-1', col:'#5eead4', label:'ω² = c_s²k² − 4πGρ₀'},
+             {f:'0', col:'#94a3b8', label:'ω² = 0', dash:true}],
+     marks:[{x:1, y:0, label:'k = k_J: λ = λ_J', col:'#d8a13a', up:true},
+            {x:0.3, y:-0.91, label:'instabile', col:'#f87171', up:true},
+            {x:2, y:3, label:'oscilla', col:'#5eead4', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> a k = 0 il tasso di crescita è massimo, ω² = −4πGρ₀; man mano che k sale la pressione si oppone, fino ad annullare la crescita a k_J.</p>
+   <p><b>Che cosa impararne:</b> la scala di Jeans è una soglia, non una dimensione preferita: tutte le perturbazioni più grandi crescono, e le più grandi crescono più in fretta.</p>`},
+  {t:'prosa', title:'Quale massa di Jeans? Tre definizioni e un fattore otto', tag:'Marconi, cap. 13.1, p. 202', html:R`
+  <p>«La» massa di Jeans non è una sola, e le fonti del corso lo mostrano senza dirlo. De Bernardis la ricava dal viriale, con il coefficiente 2,54 visto sopra. Marconi, nel capitolo sulle fluttuazioni barioniche, la definisce come la massa che si raccoglie nella metà sovradensa di un&rsquo;onda di lunghezza $\lambda_J$, cioè in una sfera di diametro $\lambda_J/2$:</p>
+  <p>$$M_J^{(48)}=\frac{\pi}{48}\lambda_J^3\rho=\frac{\pi^{5/2}}{48}\frac{v_s^3}{G^{3/2}\rho^{1/2}}=0{,}364\,\frac{v_s^3}{G^{3/2}\rho^{1/2}},$$</p>
+  <p>e avverte che <i>«l&rsquo;espressione comunemente utilizzata»</i> è quella della sfera di diametro $\lambda_J$, $\frac{\pi}{6}\lambda_J^3\rho$, che dà il coefficiente $\pi^{5/2}/6=2{,}92$. Tra le due c&rsquo;è un fattore 8, e la definizione del viriale sta in mezzo, vicina alla seconda. Nessuna è sbagliata: la soglia di instabilità è una scala, non un numero, e chi riporta una massa di Jeans deve dire quale definizione usa. In questo movimento si usa quella del viriale, coerente con de Bernardis; Marconi dà anche la versione relativistica, per un fluido in cui la pressione gravita, $\lambda_J=c_s(3\pi/8G\rho)^{1/2}$.</p>`}
+]},
+
+/* ---------------- 02 · PRIMO CONTESTO: UNA NUBE ---------------- */
+{ num:'02', title:'Primo contesto: una nube interstellare (esonero del 14/12/2009)', meta:'7 M☉, 10¹² particelle/m³, 30 K · idrogeno atomico o molecolare · un fattore 4',
+  blocchi:[
+  {t:'reveal', title:'Esonero del 14/12/2009 (A), esercizio 2', tag:'svolto per intero', steps:[
+   {label:'Il testo', body:R`<p>Una nube sferica di gas ha una massa totale di 7 masse solari, densità uniforme di $10^{12}$ particelle per metro cubo e temperatura di 30 K. a) Determinare se la nube tende a collassare, assumendo che sia di idrogeno atomico. b) Lo stesso, assumendo che sia tutta di idrogeno molecolare.</p>`},
+   {label:'a) Idrogeno atomico', body:R`<p>$\mu=1$, $\rho_0=nm_H=10^{12}\cdot1{,}67\cdot10^{-27}=1{,}67\cdot10^{-15}$ kg/m$^3$. Allora $5kT/(G\mu m_H)=5\cdot1{,}381\cdot10^{-23}\cdot30/(6{,}674\cdot10^{-11}\cdot1{,}673\cdot10^{-27})=1{,}86\cdot10^{16}$ kg/m, e</p><p>$$M_J=\left(1{,}86\cdot10^{16}\right)^{3/2}\left(\frac{3}{4\pi\cdot1{,}67\cdot10^{-15}}\right)^{1/2}=3{,}0\cdot10^{31}\ \mathrm{kg}=15{,}2\,M_\odot .$$</p><p>La soluzione scrive $3{,}1\cdot10^{31}$ kg. La nube ha $7\,M_\odot=1{,}39\cdot10^{31}$ kg, meno della massa di Jeans: non collassa.</p>`},
+   {label:'b) Idrogeno molecolare', body:R`<p>Con $10^{12}$ molecole per metro cubo, sia $\mu$ sia $\rho_0$ raddoppiano. $M_J\propto\mu^{-3/2}\rho_0^{-1/2}$, quindi cala di $2^{3/2}\cdot2^{1/2}=4$: <i>«la massa di Jeans diminuisce di un fattore 4»</i>, $M_J=7{,}55\cdot10^{30}$ kg $=3{,}8\,M_\odot$, inferiore alla massa della nube: la nube collassa.</p>`},
+   {label:'Le altre grandezze', body:R`<p>Per la nube molecolare la velocità del suono è $v_s=\sqrt{5kT/(3\cdot2m_H)}=454$ m/s, la lunghezza di Jeans $\lambda_J=v_s\sqrt{\pi/(G\rho_0)}=0{,}055$ pc, circa undicimila unità astronomiche, e il tempo di caduta libera $t_{ff}=\sqrt{3\pi/(32G\rho_0)}=3{,}6\cdot10^4$ anni: in termini astronomici, un istante.</p>`},
+   {label:'La morale', body:R`<p>La chimica decide la dinamica: la formazione di molecole, raddoppiando la massa per particella a parità di numero, rende instabile una nube che prima era stabile. È uno dei motivi per cui le stelle si formano nelle nubi molecolari e non nel gas atomico.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · L'UNIVERSO CHE SI ESPANDE ---------------- */
+{ num:'03', title:'Jeans in un universo che si espande: la crescita diventa una potenza', meta:'una sovradensità come mini-universo chiuso · δ ∝ a² e δ ∝ a · δ̈ + 2Hδ̇ = 4πGρδ · t^{2/3}',
+  blocchi:[
+  {t:'prosa', title:'La sovradensità come universo a sé', tag:'l’argomento della lezione', html:R`
+  <p>De Bernardis, nella lezione 22 (stampati 2016), prende il caso più semplice: una sovradensità sferica di densità $\rho'(t)$ immersa in un universo piatto di densità critica $\rho(t)$, con $\rho'\gt \rho$. Per il teorema di Birkhoff la dinamica della sfera dipende solo dalla massa che contiene: la sovradensità evolve come un mini-universo a densità maggiore della critica, cioè chiuso, con un suo $k\gt 0$. Scrivendo Friedmann nei due casi con lo stesso tasso di espansione $H$ (la perturbazione all&rsquo;inizio si espande con il resto),</p>
+  <p>$$H^2=\frac{8\pi G}{3}\rho,\qquad H^2=\frac{8\pi G}{3}\rho'-\frac{kc^2}{a^2},$$</p>
+  <p>e sottraendo:</p>
+  <p>$$\delta=\frac{\rho'-\rho}{\rho}=\frac{3kc^2}{8\pi G\rho a^2}\propto\frac{1}{\rho a^2} .$$</p>
+  <p>Il contrasto cresce perché $\rho a^2$ cala. Nell&rsquo;epoca della radiazione $\rho\propto a^{-4}$ e quindi $\delta\propto a^2\propto t$; nell&rsquo;epoca della materia $\rho\propto a^{-3}$ e quindi $\delta\propto a\propto t^{2/3}$. Leggi di potenza, non esponenziali: l&rsquo;espansione tira via la materia mentre la gravità la raccoglie, e la crescita è lenta. Questo vale finché la perturbazione è più grande dell&rsquo;orizzonte, dove la pressione non può agire. <i>«La perturbazione quindi cresce fino al momento in cui l&rsquo;orizzonte supera le sue dimensioni. Si dice che la perturbazione entra nell&rsquo;orizzonte. E diventa connessa causalmente. Da qui in poi la sua evoluzione dipende dalla sua massa e da come questa si confronta con la massa di Jeans»</i>.</p>`},
+  {t:'prosa', title:'L’equazione di crescita', tag:'la generalizzazione di Jeans', html:R`
+  <p>Dentro l&rsquo;orizzonte la generalizzazione dell&rsquo;equazione di Jeans alla metrica in espansione, scritta nelle coordinate comoventi, aggiunge un termine di attrito dovuto all&rsquo;espansione. Per perturbazioni di materia senza pressione (su scale molto maggiori di $\lambda_J$), l&rsquo;equazione standard, che le slide non scrivono, è</p>
+  <p>$$\ddot\delta+2H\dot\delta=4\pi G\rho\,\delta .$$</p>
+  <p>Senza il termine $2H\dot\delta$ si ritrova la crescita esponenziale di Jeans. In un universo di Einstein-de Sitter $a\propto t^{2/3}$, $H=2/(3t)$ e $4\pi G\rho=\frac32H^2=2/(3t^2)$. Cercando soluzioni $\delta\propto t^n$:</p>
+  <p>$$n(n-1)+\frac43n-\frac23=0\quad\Longrightarrow\quad n^2+\frac{n}{3}-\frac23=0\quad\Longrightarrow\quad n=\frac23\ \text{oppure}\ n=-1 .$$</p>
+  <p>Il modo crescente va come $t^{2/3}\propto a$, esattamente come la sovradensità sferica della lezione, e il modo decrescente come $t^{-1}$ si spegne. De Bernardis lo scrive come $\delta=\delta_{\rm in}(t/t_{\rm in})^{2/3}$. È il risultato centrale: <b>nella fase di materia il contrasto di densità cresce come il fattore di scala</b>. Dalla ricombinazione, $1+z=1100$, a oggi, la crescita lineare è al più un fattore 1100.</p>`},
+  {t:'plot', title:'Crescita di Jeans in un mezzo statico e in un universo in espansione',
+   intro:R`Contrasto δ contro t/t₀ per una perturbazione che parte da δ = 10⁻³ a t/t₀ = 0,1. In oro la crescita esponenziale di Jeans in un mezzo statico con la stessa densità iniziale (tempo caratteristico 1/√(4πGρ) = t/√(2/3) a quell'istante); in ciano la crescita t^{2/3} in Einstein-de Sitter. Scala logaritmica in δ: si grafica log₁₀ δ.`,
+   plots:[
+    {kind:'func2d', xr:[0.1,1], yr:[-3.2,3], height:270, equal:false,
+     title:'t/t₀      log₁₀ δ',
+     curves:[{f:'-3+(2/3)*log(x/0.1)/log(10)', col:'#5eead4', label:'universo in espansione: δ ∝ t^{2/3}'},
+             {f:'-3+((x-0.1)*sqrt(2/3)/0.1)/log(10)', col:'#d8a13a', label:'mezzo statico: δ ∝ exp(t√(4πGρ))'}],
+     marks:[{x:1, y:-2.333, label:'×4,6 in t^{2/3}', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> in un intervallo di tempo pari a nove volte l'istante iniziale, la crescita in espansione è di un fattore 4,6; quella statica, con il tasso iniziale tenuto fisso, di più di tre ordini di grandezza, e il divario cresce esponenzialmente con il tempo.</p>
+   <p><b>Che cosa impararne:</b> l'espansione è un freno enorme. È per questo che le perturbazioni del fondo cosmico, 10⁻⁵, sono un problema: con una crescita proporzionale ad a non c'è tempo per arrivare alle galassie se i barioni partono da lì.</p>`},
+  {t:'prosa', title:'Che cosa aggiunge Marconi: la sfera come due universi, e quanto si cresce davvero', tag:'Marconi, cap. 11.4 e 12.7, pp. 167-170, 199-200', html:R`
+  <p>Marconi fa lo stesso ragionamento di de Bernardis con la sovradensità sferica, ma lo porta fino in fondo: la perturbazione è un universo di Friedmann con $\Omega_0\gt 1$, il fondo è Einstein-de Sitter, e sviluppando le due soluzioni parametriche al primo ordine il contrasto viene $\Delta=\frac35\frac{\Omega_0-1}{\Omega_0}\Omega_0^{1/3}a$, proporzionale al fattore di scala. Per le scale oltre l&rsquo;orizzonte ritrova esattamente la formula delle slide, $\Delta=3c^2k/(8\pi G\rho_0a^2)$, con $\Delta\propto a$ in materia e $\Delta\propto a^2$ in radiazione: le due fonti concordano parola per parola. La ragione fisica per cui la crescita è una potenza la dice in una riga: nell&rsquo;universo in espansione $G\rho\propto t^{-2}$, <i>«la forza gravitazionale diminuisce con l&rsquo;espansione dell&rsquo;universo per la decrescita di $\rho$ e si ha solo una crescita algebrica di $\delta$»</i>.</p>
+  <p>Il libro aggiunge la soluzione generale per un universo qualunque, $\delta(a)=\frac{5\Omega_0}{2}\frac{\dot a}{a}\int_0^a\frac{da'}{\dot a'^3}$. In Einstein-de Sitter, con $\dot a=H_0a^{-1/2}$, l&rsquo;integrale dà $\frac52a^{-3/2}\int_0^ax^{3/2}dx=a$, e da $a=10^{-3}$ (la ricombinazione) a oggi il contrasto cresce di 1000. Ma per universi meno densi la crescita si ferma quando la curvatura prende il sopravvento e l&rsquo;espansione diventa libera, come nel modello vuoto di Milne. Marconi legge dalle sue figure 190 per $\Omega_0=0{,}1$ e 24 per $\Omega_0=0{,}01$; il mio integrale dà</p>
+  <p>$$\frac{\delta(1)}{\delta(10^{-3})}=194\ (\Omega_0=0{,}1),\qquad\frac{\delta(1)}{\delta(10^{-3})}=25\ (\Omega_0=0{,}01) .$$</p>
+  <p>Con la costante cosmologica, a parità di $\Omega_0=0{,}1$ ma con universo piatto, la crescita è molto maggiore, perché il termine di curvatura è nullo e il regime $\delta\propto a$ dura più a lungo: Marconi legge 610, l&rsquo;integrale dà 591. È un fatto che conterà alla tappa 07.</p>`}
+]},
+
+/* ---------------- 04 · SECONDO CONTESTO: L'UNIVERSO PRIMORDIALE ---------------- */
+{ num:'04', title:'Secondo contesto: la massa di Jeans dell’universo primordiale', meta:'v_s = c/√3 prima della ricombinazione · 10¹⁹ M☉ · dopo, 10⁶ M☉ · la stessa formula, venti ordini di grandezza più in là',
+  blocchi:[
+  {t:'prosa', title:'Prima della ricombinazione: la pressione dei fotoni', tag:'un suono velocissimo', html:R`
+  <p>Si usa la stessa formula, quella con la velocità del suono. <i>«Nell&rsquo;epoca prima della ricombinazione, la pressione è fornita dai fotoni ed è molto alta: la velocità del suono risultante è indipendente da T e pari a $c/\sqrt3$»</i>; la densità dei barioni va come $T^3$. Alla vigilia della ricombinazione, $z=1100$, la densità dei barioni è</p>
+  <p>$$\rho_B=\Omega_B\rho_{c,0}(1+z)^3=0{,}04\cdot9{,}2\cdot10^{-27}\cdot1101^3=4{,}9\cdot10^{-19}\ \mathrm{kg/m^3},$$</p>
+  <p>e con $v_s=c/\sqrt3=1{,}73\cdot10^8$ m/s la massa di Jeans dei barioni è</p>
+  <p>$$M_J=2{,}54\,\frac{(1{,}73\cdot10^8)^3}{G^{3/2}(4{,}9\cdot10^{-19})^{1/2}}=3{,}4\cdot10^{49}\ \mathrm{kg}=1{,}7\cdot10^{19}\,M_\odot,$$</p>
+  <p>il massimo intorno a $10^{18}$-$10^{19}$ masse solari del grafico della slide. È molto più di qualunque struttura dell&rsquo;universo, e più della massa di barioni contenuta nell&rsquo;orizzonte di allora. Conseguenza: <i>«durante l&rsquo;epoca dominata dalla radiazione la crescita delle perturbazioni entrate nell&rsquo;orizzonte è soppressa e $\delta$ rimane costante. Nella successiva epoca dominata dalla materia la perturbazione oscilla sotto l&rsquo;effetto di gravità e pressione dei fotoni (oscillazioni acustiche) fino alla ricombinazione»</i>. Sono le oscillazioni i cui picchi si vedono nello spettro delle anisotropie del fondo.</p>`},
+  {t:'prosa', title:'Dopo la ricombinazione: il crollo', tag:'tredici ordini di grandezza', html:R`
+  <p><i>«Dopo la ricombinazione cessa la pressione dei fotoni perché non interagiscono più bene con la materia»</i>. La pressione è quella del gas di idrogeno neutro a 3000 K, con $v_s=\sqrt{5kT/(3m_H)}=6{,}4$ km/s, ventisettemila volte meno di prima. La massa di Jeans va come $v_s^3$:</p>
+  <p>$$M_J=2{,}54\,\frac{(6{,}4\cdot10^3)^3}{G^{3/2}(4{,}9\cdot10^{-19})^{1/2}}=8{,}9\cdot10^{5}\,M_\odot,$$</p>
+  <p>il <i>«circa $10^6$ M$_\odot$»</i> della slide: la massa di un ammasso globulare. In un istante cosmologico la soglia di instabilità crolla di tredici ordini di grandezza, da $10^{19}$ a $10^6$ masse solari, e da quel momento tutte le perturbazioni barioniche con masse da quelle degli ammassi globulari in su possono crescere.</p>
+  <p>Ed ecco i due contesti affiancati, come la mappa chiede: la nube molecolare dell&rsquo;esonero, $\rho=3{,}3\cdot10^{-15}$ kg/m$^3$ e $v_s=454$ m/s, ha $M_J=3{,}8\,M_\odot$; l&rsquo;universo prima della ricombinazione, $\rho=4{,}9\cdot10^{-19}$ kg/m$^3$ e $v_s=1{,}7\cdot10^8$ m/s, ha $M_J=1{,}7\cdot10^{19}\,M_\odot$. Un rapporto</p>
+  <p>$$\frac{M_{J,\rm univ}}{M_{J,\rm nube}}=\left(\frac{1{,}73\cdot10^8}{454}\right)^3\left(\frac{3{,}3\cdot10^{-15}}{4{,}9\cdot10^{-19}}\right)^{1/2}=4{,}5\cdot10^{18},$$</p>
+  <p>con la stessa formula: diciannove ordini di grandezza, quasi tutti dal cubo della velocità del suono.</p>`},
+  {t:'plot', title:'La massa di Jeans dei barioni attraverso la ricombinazione (schema)',
+   intro:R`log₁₀(M_J/M☉) contro log₁₀ T (K), costruito con gli andamenti della slide e normalizzato ai due valori calcolati sopra: T⁻³ in fase di radiazione (sopra l'equivalenza, T ≳ 9600 K), T^{-3/2} tra equivalenza e ricombinazione, poi il crollo a 3000 K e T^{3/2} dopo. È uno schema, non un calcolo.`,
+   plots:[
+    {kind:'func2d', xr:[1,5], yr:[0,22], height:290, equal:false,
+     title:'log₁₀ T (K)      log₁₀ M_J (M☉)',
+     curves:[{f:'x>3.983 ? 19.24-1.5*0.506-3*(x-3.983) : (x>3.477 ? 19.24-1.5*(x-3.477) : 5.95+1.5*(x-3.477))', col:'#5eead4', label:'M_J (schema)'}],
+     marks:[{x:3.477, y:19.24, label:'prima: 1,7·10¹⁹', col:'#d8a13a', up:true},
+            {x:3.477, y:5.95, label:'dopo: 8,9·10⁵', col:'#d8a13a', up:false},
+            {x:3.983, y:18.48, label:'equivalenza', col:'#b98cff', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la massa di Jeans cresce mentre l'universo si raffredda, fino alla ricombinazione (a sinistra il tempo scorre, perché T scende), e lì precipita.</p>
+   <p><b>Che cosa impararne:</b> prima della ricombinazione le perturbazioni barioniche non possono crescere a nessuna scala interessante; dopo, possono crescere tutte quelle sopra 10⁶ M☉. La ricombinazione è l'interruttore della formazione delle strutture barioniche.</p>`},
+  {t:'prosa', title:'Il suono rallentato dai barioni, e la massa di Jeans di Marconi', tag:'Marconi, cap. 13.2-13.4, pp. 202-207', html:R`
+  <p>Il valore $c/\sqrt3$ della slide vale per un fluido in cui la radiazione domina sia la pressione sia l&rsquo;inerzia. Marconi scrive la velocità del suono del fluido accoppiato in generale:</p>
+  <p>$$c_s^2=\frac{c^2}{3}\frac{4\rho_r}{4\rho_r+3\rho_m}=\frac{c^2}{3(1+R)},\qquad R=\frac{3\rho_b}{4\rho_\gamma},$$</p>
+  <p>perché la pressione la danno i fotoni, ma all&rsquo;inerzia contribuiscono anche i barioni. Alla ricombinazione, con $\Omega_b=0{,}04$, $R=3\cdot0{,}04/(4\cdot5{,}04\cdot10^{-5}\cdot1101)=0{,}54$, e $c_s=c/\sqrt{3\cdot1{,}54}=0{,}465\,c$ invece di $0{,}577\,c$. Siccome $M_J\propto v_s^3$, la massa di Jeans cala di $(0{,}465\sqrt3)^3=0{,}52$: $1{,}7\cdot10^{19}\cdot0{,}52=9{,}0\cdot10^{18}\,M_\odot$. Lo stesso ordine di grandezza; è il carico barionico che sposta i picchi acustici del fondo.</p>
+  <p>Il libro sviluppa il modello <i>puramente barionico</i>, con $\Omega_b=\Omega_0=0{,}3$, che storicamente fu il primo e che fallisce. Nella fase di radiazione $M_J\propto a^3$, con $10^{11}\,M_\odot$ a $z\approx2{,}5\cdot10^5$, e $\lambda_J/2$ è quasi uguale al raggio dell&rsquo;orizzonte, $\frac{\lambda_J/2}{R_H}=\frac{\pi}{2\sqrt3}=0{,}91$: tutto ciò che entra nell&rsquo;orizzonte diventa onda sonora. Tra l&rsquo;equivalenza e la ricombinazione $M_J\approx2{,}5\cdot10^{17}\,M_\odot$, costante. Il mio $1{,}7\cdot10^{19}$ è settanta volte più grande, e la differenza si scompone in tre fattori: la definizione ($\pi/48$ contro il viriale, $0{,}364/2{,}54=0{,}143$); la velocità del suono con $\Omega_b=0{,}3$, circa $0{,}29\,c$ secondo la formula di Marconi, che pesa $(0{,}29/0{,}577)^3=0{,}127$; e la densità barionica, che entra come $\rho^{-1/2}$, $\sqrt{0{,}04/0{,}3}=0{,}365$. Il prodotto è $0{,}143\cdot0{,}127\cdot0{,}365=0{,}0066$, che porta $1{,}7\cdot10^{19}$ a $1{,}1\cdot10^{17}$, entro un fattore 2 dal valore del libro. Sono ordini di grandezza alla buona, e va detto all&rsquo;esame.</p>
+  <p>Dopo la ricombinazione, Marconi segue la temperatura del gas: resta agganciata a quella dei fotoni fino a $z\approx382$, dove è di circa 1000 K; poi il gas si raffredda come $(1+z)^2$ e, <i>«se non fosse accaduto altro»</i>, oggi sarebbe circa 375 volte più freddo della radiazione. Il gas intergalattico è invece molto più caldo, riscaldato proprio dalla formazione delle galassie.</p>`}
+]},
+
+/* ---------------- 05 · LA DIFFUSIONE DEI FOTONI ---------------- */
+{ num:'05', title:'Il primo ostacolo: i fotoni cancellano le perturbazioni piccole', meta:'random walk fino alla ricombinazione · λ = 1/(n_eσ_T) · d = λ√N · M_min ≈ 10¹³ M☉',
+  blocchi:[
+  {t:'prosa', title:'Il cammino aleatorio dei fotoni', tag:'smorzamento per diffusione', html:R`
+  <p>Durante la fase delle oscillazioni c&rsquo;è un secondo fenomeno. <i>«Le perturbazioni adiabatiche di dimensioni più piccole non sopravvivono alla fase oscillatoria. Infatti i fotoni possono diffondere via dalle onde sovradense con lunghezza d&rsquo;onda breve»</i>, portandosi dietro la pressione e trascinando i barioni. Una perturbazione sopravvive solo se è più grande del tratto che i fotoni riescono a percorrere con le loro diffusioni fino alla ricombinazione. Il cammino libero medio è $\lambda=1/(n_e\sigma_T)$; in un tempo $t_{\rm dec}$ un fotone subisce $N=ct_{\rm dec}/\lambda$ diffusioni, e con un cammino aleatorio si allontana di</p>
+  <p>$$d=\lambda\sqrt N=\sqrt{\lambda\,c\,t_{\rm dec}} .$$</p>
+  <p>Il conto con i miei numeri, alla ricombinazione: $n_e\approx n_b=2{,}74\cdot10^8$ m$^{-3}$ (gas ancora tutto ionizzato), $\lambda=1/(2{,}74\cdot10^8\cdot6{,}65\cdot10^{-29})=5{,}5\cdot10^{19}$ m, cioè 1,8 kpc; $ct_{\rm dec}$ con $t_{\rm dec}=380000$ anni è $3{,}6\cdot10^{21}$ m, quindi $N=66$ e $d=4{,}4\cdot10^{20}$ m, circa 14 kpc. La massa di barioni in una sfera di raggio $d$ è</p>
+  <p>$$M_{\rm min,ad}=\frac43\pi d^3\rho_B=9\cdot10^{13}\,M_\odot,$$</p>
+  <p>dove de Bernardis scrive $10^{13}\,M_\odot$, lo stesso ordine (la differenza viene da $t_{\rm dec}$ e dalla frazione ionizzata, che qui ho preso al massimo). È lo smorzamento per diffusione, o di Silk.</p>
+  <p>La conseguenza è drastica. <i>«Dalle perturbazioni adiabatiche inizialmente si formano solo strutture con la massa di piccoli ammassi di galassie, o superiore. Strutture più piccole possono formarsi solo dalle eventuali perturbazioni isoterme “congelate” durante la fase delle oscillazioni acustiche»</i>, che dopo la ricombinazione crescono se superano la massa di Jeans di $10^6\,M_\odot$. In un universo di soli barioni con perturbazioni adiabatiche la formazione delle strutture procederebbe dall&rsquo;alto in basso: prima gli ammassi, poi la loro frammentazione in galassie.</p>`},
+  {t:'prosa', title:'Il gemello oscuro del damping di Silk: il free-streaming', tag:'Marconi, cap. 14.1-14.3, pp. 218-222', html:R`
+  <p>La diffusione dei fotoni cancella le perturbazioni barioniche piccole; Marconi mostra che la materia oscura «calda» fa lo stesso con un meccanismo diverso. Se le particelle di materia oscura si disaccoppiano quando sono ancora relativistiche, come i neutrini, continuano a muoversi in linea retta a velocità vicine a $c$ e <i>«rimescolano tutto su scale $\simeq r_{FS}$»</i>. La distanza comovente percorsa fino alla ricombinazione è, nel conto del libro, $r_{FS}\simeq2\frac{ct_{NR}}{a_{NR}}\left[1+\frac32\left(1-\sqrt{a_{eq}/a_{rec}}\right)\right]=\frac72\frac{ct_{NR}}{a_{NR}}$ con $a_{eq}/a_{rec}=1/4$, e la massa corrispondente è $M_{FS}\simeq2\cdot10^{15}\,M_\odot$, quella degli ammassi più massicci. Una materia oscura calda produrrebbe quindi una formazione dall&rsquo;alto in basso, come il modello barionico adiabatico; la materia oscura fredda no, perché è già lenta quando le strutture entrano nell&rsquo;orizzonte.</p>
+  <p>I candidati che il libro passa in rassegna: gli assioni, con masse tra $10^{-5}$ e $10^{-2}$ eV, freddi nonostante la massa minuscola perché mai termalizzati; i neutrini, che con 10 eV ciascuno chiuderebbero l&rsquo;universo, ma che i limiti sperimentali (2-3 eV) e le oscillazioni (circa 0,1 eV) riducono a $\Omega_\nu=0{,}1/10=0{,}01$, <i>«dello stesso ordine dei barioni»</i>; e le WIMPs, con masse dal GeV in su, disaccoppiate quando erano già non relativistiche, con una sezione d&rsquo;urto che per dare $\Omega=0{,}3$ deve essere $\sigma_X\approx5\cdot10^{-36}$ cm$^2$, indipendentemente dalla massa. Sono le «WIMPs» delle slide di de Bernardis, con il loro identikit.</p>`}
+]},
+
+/* ---------------- 06 · IL SECONDO OSTACOLO E LA MATERIA OSCURA ---------------- */
+{ num:'06', title:'Il secondo ostacolo: il poco tempo, e la materia oscura che cresce per prima', meta:'δ > 1 a z = 5 · δ_rec = 0,005 · ΔT/T = δ/3 · un fattore cento di troppo · WIMPs',
+  blocchi:[
+  {t:'prosa', title:'Quanto dovevano essere grandi le perturbazioni barioniche', tag:'il conto della lezione', html:R`
+  <p><i>«Dall&rsquo;esistenza di strutture con $\delta\gt 1$ a $z=5$»</i> si può risalire al contrasto che dovevano avere alla ricombinazione, se sono cresciute come $\delta\propto t^{2/3}\propto a$ nella fase di materia:</p>
+  <p>$$\delta_{\rm rec}=\delta_{z=5}\left(\frac{t_{\rm rec}}{t_{z=5}}\right)^{2/3}=\frac{1+z_5}{1+z_{\rm rec}}=\frac{6}{1101}=0{,}0054 .$$</p>
+  <p>Per perturbazioni adiabatiche $\delta\rho_b/\rho_b=3\,\delta T/T$, e la densità della materia va come $T^3$: le fluttuazioni di temperatura del fondo dovrebbero essere</p>
+  <p>$$\frac{\Delta T}{T}=\frac13\delta_{\rm rec}=0{,}0018 .$$</p>
+  <p>De Bernardis scrive $0{,}0015$, la stessa cosa al livello di precisione dell&rsquo;argomento. <i>«Invece le anisotropie di T della CMB sono almeno 10 volte inferiori, quindi la densità di barioni deve essere molto più omogenea di quanto stimato sopra»</i>. In realtà sono un centinaio di volte inferiori, qualche $10^{-5}$. Con i soli barioni non c&rsquo;è tempo: perturbazioni di $10^{-5}$ alla ricombinazione crescono di un fattore 1100 fino a oggi e arrivano a $10^{-2}$, non a $10^5$.</p>`},
+  {t:'prosa', title:'La soluzione: una materia che non sente i fotoni', tag:'WIMPs', html:R`
+  <p><i>«Si pensa che la maggior parte della materia sia oscura e debolmente interagente: Weakly Interactive Massive Particles. Queste ipotetiche particelle interagiscono solo gravitazionalmente, e non interagiscono direttamente con la luce»</i>, previste dalle estensioni supersimmetriche del modello standard. <i>«La differenza tra perturbazioni barioniche e non barioniche è il loro comportamento prima della ricombinazione»</i>. Per i barioni, accoppiati ai fotoni, la massa di Jeans prima della ricombinazione è enorme e le perturbazioni sono congelate. Per i WIMPs, che non sentono la pressione dei fotoni, la massa di Jeans è molto più bassa, e le loro perturbazioni crescono come $t^{2/3}$ già dall&rsquo;equivalenza, a $z\approx3500$: alla ricombinazione hanno guadagnato un fattore $3500/1100=3{,}2$, e possono arrivare tra $0{,}001$ e $0{,}01$.</p>
+  <p>Le anisotropie del fondo misurano i barioni e il potenziale, non la densità dei WIMPs, che può essere più grande senza violare il limite di $10^{-5}$. <i>«Su queste buche di potenziale, dopo la ricombinazione, convergono i barioni, e si possono così formare le strutture barioniche che osserviamo»</i>. I barioni, liberati dai fotoni, cadono nelle buche già scavate dalla materia oscura e raggiungono in poco tempo il contrasto dei WIMPs. E le perturbazioni di WIMPs, pur interagendo solo gravitazionalmente, lasciano un&rsquo;impronta nel fondo attraverso il potenziale: è l&rsquo;effetto Sachs-Wolfe, $\Delta T/T=\Phi/3c^2$.</p>
+  <p>La simulazione Millennium della lezione 24 di de Bernardis mostra il risultato: partendo da fluttuazioni gaussiane di $10^{-5}$ e con materia oscura fredda e costante cosmologica, la gravità costruisce una rete di filamenti e nodi, la «spugna» delle survey di galassie. <i>«L&rsquo;universo favorito da queste simulazioni contiene sia energia oscura che materia oscura, fatta di wimps»</i>.</p>`},
+  {t:'prosa', title:'Pesare la materia oscura con la luce piegata', tag:'lenti gravitazionali', html:R`
+  <p>Se la materia oscura agisce solo con la gravità, la si può pesare con la deflessione della luce. De Bernardis, nella lezione 24, ricava la deflessione dal principio di equivalenza con l&rsquo;ascensore: un fascio orizzontale in un ascensore in caduta libera è rettilineo per chi è dentro, quindi per chi è fuori cade come un sasso, $\frac12gt^2$ in un tempo $t=\ell/c$, con un angolo $\sim g\ell/c^2$. In un ascensore terrestre di qualche metro è dell&rsquo;ordine di $10^{-15}$ rad, <i>«decisamente un esperimento concettuale!»</i>; vicino a una galassia diventa visibile. Per una lente di massa $M$, sorgente e lente allineate, l&rsquo;immagine è un anello di raggio angolare (raggio di Einstein)</p>
+  <p>$$\theta_E^2=\frac{4GM}{c^2}\frac{d_{LS}}{d_Ld_S},$$</p>
+  <p>con le tre distanze di diametro angolare tra osservatore, lente e sorgente, stimate dai redshift misurati. Invertendo, dall&rsquo;<span class="str" data-str="angolo-piccolo">angolo</span> misurato si ricava $M$: per l&rsquo;anello LRG 3-757 della slide, $M_L=5\cdot10^{12}\,M_\odot$, molto più di quanto la luce della galassia rossa che fa da lente giustifichi.</p>`},
+  {t:'prosa', title:'L’effetto Mészáros, e i barioni che inseguono', tag:'Marconi, cap. 14.4-14.5, pp. 223-226', html:R`
+  <p>De Bernardis dice che le perturbazioni di materia oscura crescono «dall&rsquo;equivalenza». Marconi spiega perché non prima: durante la fase di radiazione la materia oscura dentro l&rsquo;orizzonte sente la propria gravità, ma l&rsquo;universo si espande al ritmo imposto dalla radiazione, molto più in fretta del tempo di caduta libera della perturbazione. Con $y=a/a_{eq}$ l&rsquo;equazione di crescita ha la soluzione crescente</p>
+  <p>$$\Delta\propto1+\frac32y,$$</p>
+  <p>che dall&rsquo;inizio fino all&rsquo;equivalenza cresce solo di $\Delta(1)/\Delta(0)=\frac52$: è l&rsquo;effetto Mészáros, la crescita congelata dalla radiazione. Dopo l&rsquo;equivalenza si torna a $\Delta\propto a$.</p>
+  <p>Il libro chiude anche il conto dei barioni. Dopo la ricombinazione, sentendo solo la gravità della materia oscura che cresce come $\Delta_{DM}=Ba$, i barioni seguono $\Delta_b=B(a-a_{\rm rec})$, cioè</p>
+  <p>$$\Delta_b=\Delta_{DM}\left(1-\frac{a_{\rm rec}}{a}\right)\simeq\Delta_{DM}\left(1-\frac{z}{z_{\rm rec}}\right):$$</p>
+  <p><i>«i barioni “cadono” nelle perturbazioni della DM e, entro un fattore 2 in redshift, sono già cresciuti in ampiezza a metà di quella delle perturbazioni in DM»</i>. Alla ricombinazione il rapporto tra le due ampiezze è circa $a_{eq}/a_{rec}=z_{\rm rec}/z_{eq}$, che Marconi valuta $1500/6000=0{,}25$ e che con i numeri di questo corso, $1100/3500$, è $0{,}31$. È la versione quantitativa della frase delle slide sulle buche di potenziale.</p>`}
+]},
+
+/* ---------------- 07 · LA CONCORDANZA ---------------- */
+{ num:'07', title:'Il conto che chiude i parametri cosmologici: la concordanza', meta:'supernovae · fondo cosmico · ammassi · nucleosintesi · un solo punto nel piano Ω_M, Ω_Λ',
+  blocchi:[
+  {t:'prosa', title:'Tre vincoli indipendenti', tag:'il triangolo', html:R`
+  <p>La formazione delle strutture è l&rsquo;ultimo tassello di un quadro in cui ogni misura vincola una combinazione diversa dei parametri. Il diagramma di Hubble delle supernovae Ia misura il parametro di decelerazione, $q_0=\Omega_{M0}/2-\Omega_\Lambda\approx-0{,}55$, cioè una retta nel piano $(\Omega_{M0},\Omega_\Lambda)$:</p>
+  <p>$$\Omega_\Lambda=\frac{\Omega_{M0}}{2}+0{,}55 .$$</p>
+  <p>La scala angolare dei picchi del fondo cosmico misura la curvatura, $\Omega_0=1{,}02\pm0{,}02$: un&rsquo;altra retta, $\Omega_\Lambda=1-\Omega_{M0}$, quasi perpendicolare alla prima. Le due si incrociano dove</p>
+  <p>$$1-\Omega_{M0}=\frac{\Omega_{M0}}{2}+0{,}55\quad\Longrightarrow\quad\Omega_{M0}=0{,}30,\qquad\Omega_\Lambda=0{,}70 .$$</p>
+  <p>Il terzo vincolo è la materia pesata con la dinamica: curve di rotazione, viriale e lenti negli ammassi, e la formazione delle strutture stessa, che richiede materia oscura in quantità $\Omega_{M0}\approx0{,}3$. Tre misure con fisica completamente diversa (esplosioni di nane bianche, acustica del plasma primordiale, dinamica di galassie) si incontrano nello stesso punto. È la concordanza.</p>`},
+  {t:'plot', title:'Il piano Ω_M, Ω_Λ: due rette e un punto',
+   intro:R`Ω_Λ contro Ω_M0. In ciano il vincolo del fondo cosmico, universo piatto: Ω_Λ = 1 − Ω_M0. In oro il vincolo delle supernovae Ia con q₀ = −0,55: Ω_Λ = Ω_M0/2 + 0,55. In viola tratteggiato la retta q₀ = 0 (né accelerazione né decelerazione), Ω_Λ = Ω_M0/2. Il punto è l'incrocio, il modello di concordanza.`,
+   plots:[
+    {kind:'func2d', xr:[0,1], yr:[0,1.2], height:290, equal:false,
+     title:'Ω_M0      Ω_Λ',
+     curves:[{f:'1-x', col:'#5eead4', label:'fondo cosmico: Ω₀ = 1'},
+             {f:'x/2+0.55', col:'#d8a13a', label:'supernovae: q₀ = −0,55'},
+             {f:'x/2', col:'#b98cff', label:'q₀ = 0', dash:true}],
+     marks:[{x:0.3, y:0.7, label:'concordanza: 0,3 / 0,7', col:'#f87171', up:true},
+            {x:1, y:0, label:'Einstein-de Sitter', col:'#94a3b8', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> l'universo di Einstein-de Sitter, (1, 0), sta sulla retta del fondo ma lontanissimo da quella delle supernovae; tutti i punti sopra la retta viola accelerano.</p>
+   <p><b>Che cosa impararne:</b> nessuna delle due misure da sola determina i parametri; insieme sì, e il punto che danno coincide con la materia pesata dinamicamente. È per questo che si parla di modello «di concordanza».</p>`},
+  {t:'prosa', title:'Il resto del quadro', tag:'i numeri che tornano', html:R`
+  <p>Gli altri parametri si incastrano nello stesso quadro. La nucleosintesi dà $\Omega_Bh^2=0{,}020\pm0{,}002$, cioè con $h=0{,}7$ $\Omega_B=0{,}041$: i barioni sono un settimo della materia, e il resto è materia oscura non barionica, la stessa che serve alle strutture. La costante di Hubble dalle Cefeidi e dalle supernovae vicine è intorno a 70 km/s/Mpc. Con questi valori l&rsquo;età è $t_0=\frac{2}{3H_0\sqrt{\Omega_\Lambda}}\,\mathrm{arcsinh}\sqrt{\Omega_\Lambda/\Omega_{M0}}=13{,}5$ miliardi di anni, più delle stelle più antiche degli ammassi globulari. La radiazione è $\Omega_{R0}=8{,}5\cdot10^{-5}$. Le anisotropie del fondo, fittate con un modello a sei parametri, li determinano tutti insieme con precisione del percento, e lo stesso modello, messo in una simulazione, produce la struttura a grande scala che le survey misurano. Le domande che restano aperte sono quelle sulla natura dei due ingredienti dominanti, la materia oscura e l&rsquo;energia oscura, che il modello usa senza spiegarli.</p>`},
+  {t:'prosa', title:'Anche la crescita vuole Λ', tag:'Marconi, cap. 11.4, figure 11.2-11.3', html:R`
+  <p>Il conto della tappa 03 dà un quarto argomento, indipendente dagli altri tre. Dalla ricombinazione a oggi, con lo stesso $\Omega_{M0}=0{,}3$, un universo piatto con costante cosmologica fa crescere le perturbazioni di un fattore</p>
+  <p>$$\frac{\delta(1)}{\delta(10^{-3})}=779,$$</p>
+  <p>un universo aperto senza $\Lambda$ solo di 457. Einstein-de Sitter, con 1000, crescerebbe di più, ma è escluso dalle supernovae e dall&rsquo;età. Partendo dalle fluttuazioni del fondo, il modello di concordanza ha abbastanza crescita per arrivare alle strutture che vediamo, se la materia oscura parte in vantaggio; un universo di bassa densità senza $\Lambda$ ne ha poco più della metà. È il senso in cui Marconi, nei suoi grafici, mostra che <i>«la crescita delle perturbazioni è molto maggiore che per $\Omega_0\lt 1$ e $\Omega_\Lambda=0$»</i>.</p>`}
+]},
+
+/* ---------------- 08 · COLLAUDO ---------------- */
+{ num:'08', title:'Collaudo', meta:'domande brevi con risposta',
+  blocchi:[
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una nube di idrogeno atomico a 30 K con 10¹² particelle/m³ e 7 M☉ è stabile; la stessa come H₂ collassa. Perché un fattore 4?`,
+    a:R`$M_J\propto\mu^{-3/2}\rho^{-1/2}$; passando a H$_2$ con lo stesso numero di particelle per m$^3$ raddoppiano sia $\mu$ sia $\rho$: $2^{-3/2}\cdot2^{-1/2}=1/4$. Da $15{,}2$ a $3{,}8\,M_\odot$.`},
+   {q:R`Perché in un universo in espansione la crescita di Jeans non è esponenziale?`,
+    a:R`Perché l&rsquo;espansione introduce il termine di attrito $2H\dot\delta$ e diluisce la densità di fondo: con $4\pi G\rho=\frac32H^2$ in Einstein-de Sitter le soluzioni sono potenze, $\delta\propto t^{2/3}\propto a$ e $\delta\propto t^{-1}$.`},
+   {q:R`Che cosa succede alla massa di Jeans dei barioni alla ricombinazione, e perché?`,
+    a:R`Crolla da circa $10^{19}$ a circa $10^6\,M_\odot$, perché la velocità del suono passa da $c/\sqrt3$ (pressione dei fotoni) a qualche km/s (gas neutro a 3000 K), e $M_J\propto v_s^3$.`},
+   {q:R`Perché le perturbazioni adiabatiche sotto 10¹³ M☉ non sopravvivono?`,
+    a:R`Per lo smorzamento di Silk: i fotoni, con un cammino aleatorio di passo $1/(n_e\sigma_T)$, diffondono di $d=\sqrt{\lambda ct_{\rm dec}}\approx14$ kpc prima della ricombinazione e cancellano le perturbazioni più piccole, portando via la pressione che le sostiene.`},
+   {q:R`Che cosa vuol dire che le perturbazioni barioniche non hanno avuto «abbastanza tempo»?`,
+    a:R`Che in fase di materia $\delta\propto a$: da $z=1100$ a $z=5$ il contrasto cresce solo di $1101/6\approx180$. Per avere $\delta\gt 1$ a $z=5$ servirebbe $\delta_{\rm rec}\approx0{,}005$, cioè $\Delta T/T\approx0{,}002$ nel fondo, cento volte più del misurato. La materia oscura, che cresce dall&rsquo;equivalenza, risolve il problema.`},
+   {q:R`Perché basta che q₀ < 0 e Ω₀ = 1 per fissare Ω_M e Ω_Λ?`,
+    a:R`Perché sono due rette quasi ortogonali nel piano $(\Omega_{M0},\Omega_\Lambda)$: $\Omega_\Lambda=\Omega_{M0}/2-q_0$ e $\Omega_\Lambda=1-\Omega_{M0}$. Con $q_0=-0{,}55$ si incrociano in $(0{,}3;0{,}7)$.`}
+  ]}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-19-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-19 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-19-la-formazione-delle-strutture.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

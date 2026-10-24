@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-18 — Il fondo cosmico a microonde: il corpo nero più perfetto e le sue increspature</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-18 — Il fondo cosmico a microonde</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["funzione-zeta-di-riemann"] = {"nome":"Funzione zeta di Riemann","riga":"$\\zeta(s)=\\sum_{n\\ge1} n^{-s}$, convergente per $s>1$; i valori che servono sono $\\zeta(3/2)\\simeq 2{,}612$, $\\zeta(2)=\\pi^{2}/6\\simeq1{,}645$, $\\zeta(3)\\simeq1{,}202$, $\\zeta(4)=\\pi^{4}/90$.","serve":"Compare tutte le volte che una somma su stati discreti viene approssimata con un integrale e si sviluppa l'integrando in serie geometrica: si scambiano somma e integrale e resta una zeta moltiplicata per una gamma. Non e' un abbellimento — il valore NUMERICO di $\\zeta(3/2)$ decide se una transizione di fase esiste.","esempio":"$\\displaystyle\\int_{0}^{\\infty}\\frac{x^{s-1}}{e^{x}-1}dx=\\Gamma(s)\\zeta(s)$, che si ottiene scrivendo $\\frac{1}{e^{x}-1}=\\sum_{n\\ge1}e^{-nx}$ e integrando termine a termine. Per $s=4$ da' $\\pi^{4}/15$, che e' la costante che compare nella legge di Stefan-Boltzmann.","pieno":null,"qui":{"meccanica-statistica":{"serve":"E' cio' che rende la condensazione di Bose-Einstein un fatto e non una possibilita'. Il numero di particelle negli stati eccitati e' limitato superiormente da un integrale che vale $\\zeta(3/2)$: siccome quel numero e' FINITO, oltre una certa densita' le particelle in eccesso non hanno dove stare se non nello stato fondamentale.","esempio":"La condizione critica e' $n\\lambda^{3}=\\zeta(3/2)\\simeq2{,}612$, che definisce $T_{c}$. In due dimensioni lo stesso conto porta a $\\zeta(1)$, che DIVERGE: gli stati eccitati accolgono qualunque numero di particelle e la condensazione non avviene. La dimensionalita' entra nel risultato attraverso l'argomento della zeta, e il confine e' esattamente $s=1$."}}};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+STRUM["trasformata-di-fourier"] = {"nome":"Trasformata di Fourier","riga":"L'operazione $\\hat f(k)=\\int f(x)\\,e^{-ikx}\\,dx$, che riscrive una funzione come sovrapposizione di onde piane e manda la derivata in una moltiplicazione per $ik$.","serve":"È lo strumento che rende ALGEBRICA un'equazione differenziale lineare a coefficienti costanti: con $\\partial_x$ che diventa $ik$, un'equazione differenziale in $x$ diventa un'equazione algebrica in $k$, si risolve, e si antitrasforma. Le due cose da non perdere sono la convenzione dei $2\\pi$, che cambia da testo a testo e va dichiarata una volta, e Plancherel, che dice che la trasformata conserva la norma $L^{2}$ — in fisica, l'energia.","esempio":"La gaussiana $f(x)=e^{-x^{2}/2}$ ha trasformata $\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2}e^{-ikx}\\,dx=\\sqrt{2\\pi}\\,e^{-k^{2}/2}$: ancora una gaussiana, tanto più larga quanto l'originale è stretta. È il caso in cui si vede meglio il principio di indeterminazione come fatto puramente matematico.","pieno":{"file":"15-distribuzioni.html","tappa":"02","come":"le proprietà, la derivata che diventa un prodotto e Plancherel, nel nucleo delle distribuzioni"},"qui":{"elettromagnetismo":{"serve":"Serve appena si scrive un'onda generica invece di una monocromatica: ogni soluzione delle equazioni di Maxwell nel vuoto è una sovrapposizione di onde piane $e^{i(\\mathbf k\\cdot\\mathbf x-\\omega t)}$, e la trasformata è il modo di scomporla. Su ciascuna componente l'equazione delle onde si riduce alla relazione di dispersione, e la propagazione diventa un far girare fasi: ogni modo viaggia da solo, e nel vuoto tutti alla stessa velocità — per questo un impulso non si deforma.","esempio":"La sostituzione $\\partial_x\\to ik$ e $\\partial_t\\to-i\\omega$ manda le derivate seconde in $(ik)^{2}=-k^{2}$ e $(-i\\omega)^{2}=-\\omega^{2}$: l'equazione delle onde diventa $\\omega^{2}=c^{2}k^{2}$, cioè un'equazione di secondo grado al posto di una differenziale, e la sua radice positiva $\\omega=ck$ è la relazione di dispersione del vuoto."}},"controllo":[{"tipo":"integrale","espr":"exp(-x**2/2)*exp(-I*k*x)","var":"x","da":"-oo","a":"oo","vale":"sqrt(2*pi)*exp(-k**2/2)","ipotesi":{"k":"real"},"dove":"esempio","appare":"\\sqrt{2\\pi}\\,e^{-k^{2}/2}"},{"tipo":"uguale","sinistra":"(I*k)**2","vale":"-k**2","ipotesi":{"k":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-k^{2}"},{"tipo":"uguale","sinistra":"(-I*w)**2","vale":"-w**2","ipotesi":{"w":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-\\omega^{2}"},{"tipo":"uguale","sinistra":"(c*k)**2","vale":"c**2*k**2","dove":"qui.elettromagnetismo.esempio","appare":"c^{2}k^{2}"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["serie-geometrica"] = {"nome":"Serie geometrica","riga":"La somma $\\sum_{n\\ge 0} q^{n}$ vale $\\dfrac{1}{1-q}$ se $|q|\\lt 1$, e non esiste se $|q|\\ge 1$.","serve":"È l'unica serie di cui si conosce la somma in forma chiusa senza fatica, e per questo diventa il metro di tutte le altre: una serie si studia maggiorandola con una geometrica (criterio del rapporto, criterio della radice) o riconoscendola come geometrica travestita.","esempio":"Con $q=\\tfrac12$: $1+\\tfrac12+\\tfrac14+\\cdots=\\dfrac{1}{1-\\tfrac12}=2$. Con $q=-\\tfrac13$: $\\dfrac{1}{1+\\tfrac13}=\\tfrac34$. Con $q=1$ le somme parziali sono $N+1$ e se ne vanno: la formula $1/(1-q)$ non è una scorciatoia da usare fuori dal suo raggio.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio $R=1$, il grafico delle somme parziali e la cassetta dei trucchi che parte da qui, nella tappa sulle serie di potenze"},"qui":{"metodi-e-modelli":{"serve":"È il motore della serie di Laurent: lo sviluppo di $\\dfrac{1}{z-a}$ in potenze di $z$ o di $1/z$ è una geometrica, e quale delle due si sceglie decide in quale corona si sta sviluppando. Tutta la parte principale di Laurent nasce da qui.","esempio":"Per $\\dfrac{1}{z-2}$ con $|z|\\lt 2$ si scrive $-\\tfrac12\\cdot\\dfrac{1}{1-z/2}=-\\sum_{n\\ge0}\\dfrac{z^{n}}{2^{n+1}}$; in $z=1$ entrambi i membri valgono $-1$. Per $|z|\\gt 2$ si raccoglie invece $z$ e viene $\\sum_{n\\ge0}\\dfrac{2^{n}}{z^{n+1}}$, cioè solo potenze negative; in $z=4$ entrambi i membri valgono $\\tfrac12$."},"elettromagnetismo":{"serve":"Compare ogni volta che una configurazione si ripete con un fattore costante — catene di cariche immagine fra due piani conduttori, riflessioni multiple in una cavità — e la somma chiusa è ciò che rende il conto finito invece che infinito.","esempio":"Una carica fra due piani paralleli genera immagini a distanze crescenti, e il contributo al potenziale è una somma del tipo $\\sum_{n\\ge0} r^{n}$ con $r\\lt 1$ fissato dalla geometria. Con una riflettività $r=\\tfrac14$ la serie vale $\\tfrac43$: la catena è infinita, il potenziale no."}},"controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"0","a":"oo","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"somma","espr":"(-1/3)**n","var":"n","da":"0","a":"oo","vale":"3/4","dove":"esempio","appare":"\\tfrac34"},{"tipo":"somma","espr":"-1**n/2**(n+1)","var":"n","da":"0","a":"oo","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"somma","espr":"2**n/4**(n+1)","var":"n","da":"0","a":"oo","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"},{"tipo":"somma","espr":"(1/4)**n","var":"n","da":"0","a":"oo","vale":"4/3","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac43"},{"tipo":"uguale","sinistra":"1/(1-2)","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"uguale","sinistra":"1/(4-2)","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-18: Il fondo cosmico a microonde: il corpo nero più perfetto e le sue increspature <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-18 — il fondo cosmico a microonde
+identita:  il corpo nero piu' perfetto mai misurato, e le sue increspature a una parte su centomila: il
+           dipolo del nostro moto, le anisotropie primordiali con la loro scala angolare, l'effetto
+           Sunyaev-Zel'dovich, e i paradossi che chiedono l'inflazione.
+copre:     A.27
+serve:     as-17 (ricombinazione, z = 1100), as-04 (corpo nero, legge di Planck)
+apre:      calcolato da verifica-mappa.py
+profondita: misto (13 prove, densita' 2,5). Il conto ricorrente e' il redshift del disaccoppiamento e la
+           temperatura di allora, e il dipolo; le anisotropie e lo spettro di potenza si capiscono, non si
+           calcolano. All'orale: perche' un corpo nero che si espande resta un corpo nero; poi il dipolo e la
+           scala dei picchi come orizzonte sonoro alla ricombinazione.
+fonti:     de Bernardis, dispense di Laboratorio di Astrofisica 1993/94, par. 1.6.3 (pagine 38-41): COBE-FIRAS,
+           misura di zero con il corpo nero di riferimento, 2,735 K, deviazioni sotto lo 0,03%, il cono di
+           Eccosorb con 7 riflessioni e (0,25)^7.
+           lezione19_2017 e lezione19_2020 (pagine 37-44 e 28-42): CMB a 2,725 K e 411/cm^3, il cielo a 150
+           GHz, corpo nero in espansione, perche' la CMB pervade l'universo (isotropia, trasparenza, SZ fino a
+           z = 0,8, T(z)), Planck, ALMA su RX J1347, Noterdaeme 2011, Omega_gamma = 5,06e-5.
+           lezione23_2020 (pagine 9-19): esercizio 13/02/2009 sul dipolo (sviluppo, D/Q, 12 mK -> 1320 km/s),
+           le componenti del nostro moto, la brillanza del dipolo come derivata di Planck, i dipoli di fondi
+           non termici (3 - alfa) beta, COBE e WMAP (3,346 mK, apice l = 263,85, b = 48,25), aberrazione con Planck.
+           lezione24_2020 (pagine 26-45): fluttuazioni adiabatiche e isoterme, redshift gravitazionale, effetto
+           Sachs-Wolfe Delta T/T = Phi/3c^2, la mappa WMAP, sette picchi, il modello a 6 parametri.
+           lezione21_2017 (pagine 22-38) e lezione18_2016_stampati (pagine 5-6): osservare gli orizzonti, il
+           grado, Omega e la scala angolare, BOOMERanG, il paradosso degli orizzonti e l'inflazione a 1e-36 s.
+           lezione20_2017 (pagine 17-20): lensing della CMB (2,5'), effetto sulla polarizzazione.
+           Esercizi_Astrofisica(2005-2017) p. 80-83: prova 13/02/2009 A es. 3.
+           DICHIARATO: la slide scrive che lo spettro del dipolo ha il massimo a 271 GHz; la brillanza
+           Delta I_nu ha il massimo a 217 GHz e nu Delta I_nu a 280 GHz. Riconciliazione PROBABILE (R2, non
+           confermata da fonti): 271 ~ c T / (0,30 cm K) = 272 GHz, il massimo in lambda del corpo nero medio con
+           la costante di Wien arrotondata; la
+           dispensa da' la cavita' regolabile da 2 a 25 K nel testo e da 2 a 14 K nella didascalia; i numeri
+           dell'esempio Sunyaev-Zel'dovich (n_e, kT, L), la stima dell'orizzonte sonoro in Einstein-de Sitter e
+           i 60 e-fold dell'inflazione sono miei o standard, non dalle slide.
+           Marconi, Cosmologia, cap. 2.1 (p. 7), cap. 12.5-12.6 (pp. 191-198) e cap. 16.3-16.5 (pp. 265-279),
+           letti per intero dal dossier in R2: la scoperta di Penzias e Wilson, il problema dell'orizzonte a 1 grado,
+           la piattezza (Omega(z) a z = 1000), l'inflazione di Guth (N_I > 63, rho a 1e28 K), la varianza cosmica,
+           l'effetto Sachs-Wolfe come redshift gravitazionale piu' dilatazione dei tempi, i picchi acustici
+           equispaziati, le onde gravitazionali. Le pp. 197-198 sulla teoria delle perturbazioni in gauge sono
+           oltre il livello del corso e qui non usate.
+           DICHIARATO (Marconi): a T = 1e28 K scrive rho_rad = 3e76 g/cm^3, mentre a T^4/c^2 da' 8,4e76; il primo
+           picco «a l ~ 250», contro i 220 osservati; Omega(z=1000) = 0,9978 dove la formula da' 0,9977.
+registro:  lezione19_2017, lezione19_2020, lezione23_2020, lezione24_2020, lezione21_2017, lezione20_2017
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "00", "appare": "T(z)=T_0(1+z)", "perche": "enunciato, ricavato alla tappa 01"},
+ {"tipo": "simbolico", "dove": "01", "appare": "u_\\lambda=\\frac{8\\pi hc}{\\lambda^5}\\frac{1}{e^{hc/\\lambda kT}-1}", "perche": "legge di Planck per unita' di lunghezza d'onda"},
+ {"tipo": "simbolico", "dove": "01", "appare": "u_\\lambda d\\lambda=(a_0/a)^4u_{\\lambda_0}d\\lambda_0", "perche": "diluizione a^-3 piu' redshift a^-1"},
+ {"tipo": "uguale", "sinistra": "(a0/a)**4*8*pi*h*c/l**5*(a/a0)**5*(a0/a)", "vale": "8*pi*h*c/l**5", "dove": "01", "appare": "=\\frac{8\\pi hc}{\\lambda^5}\\frac{d\\lambda}{e^{hc/\\lambda kT}-1}", "ipotesi": {"a0": "positive", "a": "positive", "h": "positive", "c": "positive", "l": "positive"}},
+ {"tipo": "uguale", "sinistra": "h*c*a/(l*a0*k*T0)", "vale": "h*c/(l*k*(T0*a0/a))", "dove": "01", "appare": "T=T_0\\frac{a_0}{a}", "ipotesi": {"a0": "positive", "a": "positive", "h": "positive", "c": "positive", "l": "positive", "k": "positive", "T0": "positive"}},
+ {"tipo": "numero", "espr": "4+1-5", "vale": "0", "dove": "01", "appare": "4+1-5=0"},
+ {"tipo": "numero", "espr": "3*(1-exp(-2.821))", "vale": "2.821", "dove": "01", "appare": "x=2{,}821"},
+ {"tipo": "numero", "espr": "1.381e-23*2.725/6.626e-34/1e9", "vale": "56.79", "dove": "01", "appare": "kT_0/h=56{,}79"},
+ {"tipo": "numero", "espr": "2.821*56.79", "vale": "160", "dove": "01", "appare": "=160\\ \\mathrm{GHz}"},
+ {"tipo": "numero", "espr": "2*6.626e-34*(160.2e9)**3/8.988e16/(exp(2.821)-1)*1e18", "vale": "3.84", "dove": "01", "appare": "B_\\nu=3{,}84\\cdot10^{-18}"},
+ {"tipo": "numero", "espr": "2.898/2.725", "vale": "1.063", "dove": "01", "appare": "=1{,}063"},
+ {"tipo": "numero", "espr": "2*zeta(3)/pi**2*(1.381e-23*2.725/(1.0546e-34*2.998e8))**3/1e6", "vale": "411", "dove": "01", "appare": "=411"},
+ {"tipo": "numero", "espr": "7.566e-16*2.725**4*1e14", "vale": "4.17", "dove": "01", "appare": "aT_0^4=4{,}17\\cdot10^{-14}"},
+ {"tipo": "numero", "espr": "7.566e-16*2.725**4/1.602e-19/1e6", "vale": "0.26", "dove": "01", "appare": "0{,}26"},
+ {"tipo": "numero", "espr": "7.566e-16*2.725**4/(3*(70/3.0857e19)**2/(8*pi*6.674e-11)*2.998e8**2)*1e5", "vale": "5.04", "dove": "01", "appare": "\\Omega_\\gamma=5{,}04\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "7.566e-16*2.725**4/(3*(70/3.0857e19)**2/(8*pi*6.674e-11)*(72/70.)**2*2.998e8**2)*1e5", "vale": "4.77", "dove": "01", "appare": "4{,}77\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "0.25**7*1e5", "vale": "6.1", "dove": "02", "appare": "=6{,}1\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "2.725*3.34", "vale": "9.1", "dove": "03", "appare": "=9{,}1"},
+ {"tipo": "simbolico", "dove": "03", "appare": "T_{\\rm CMB}(z)=(2{,}725\\pm0{,}002)", "perche": "risultato di Noterdaeme et al. 2011 riportato in lezione19_2020 p. 40"},
+ {"tipo": "simbolico", "dove": "04", "appare": "T(\\theta)=T_0\\frac{\\sqrt{1-\\beta^2}}{1-\\beta\\cos\\theta}", "perche": "Doppler relativistico di un corpo nero (testo della prova)"},
+ {"tipo": "uguale", "sinistra": "series(sqrt(1-b**2)/(1-b*cos(t)),b,0,3).removeO()", "vale": "1-b**2/2+b*cos(t)+b**2*cos(t)**2", "dove": "04", "appare": "\\frac{T(\\theta)}{T_0}\\approx1-\\frac{\\beta^2}{2}+\\beta\\cos\\theta+\\beta^2\\cos^2\\theta"},
+ {"tipo": "uguale", "sinistra": "(T*b**2)/(T*b)", "vale": "b", "dove": "04", "appare": "\\frac{Q}{D}=\\beta", "ipotesi": {"T": "positive", "b": "positive"}},
+ {"tipo": "numero", "espr": "299792*0.012/2.725", "vale": "1320", "dove": "04", "appare": "=1320"},
+ {"tipo": "numero", "espr": "3.346e-3/2.725*1e3", "vale": "1.23", "dove": "04", "appare": "\\beta=1{,}23\\cdot10^{-3}"},
+ {"tipo": "numero", "espr": "3.346e-3/2.725*299792", "vale": "368", "dove": "04", "appare": "v=368"},
+ {"tipo": "numero", "espr": "2.725*30/299792*1e3", "vale": "0.27", "dove": "04", "appare": "=0{,}27\\ \\mathrm{mK}"},
+ {"tipo": "uguale", "sinistra": "simplify(T*diff(2*h*nu**3/c**2/(exp(h*nu/(k*T))-1),T)/(2*h*nu**3/c**2/(exp(h*nu/(k*T))-1)))", "vale": "(h*nu/(k*T))*exp(h*nu/(k*T))/(exp(h*nu/(k*T))-1)", "dove": "04", "appare": "=B_\\nu\\,\\frac{xe^x}{e^x-1}\\,\\frac{\\Delta T}{T}", "ipotesi": {"T": "positive", "h": "positive", "nu": "positive", "c": "positive", "k": "positive"}},
+ {"tipo": "numero", "espr": "4/3.83+1-2*exp(3.83)/(exp(3.83)-1)", "vale": "0.000", "dove": "04", "appare": "x=3{,}83"},
+ {"tipo": "numero", "espr": "3.83*56.79", "vale": "217.5", "dove": "04", "appare": "=217{,}5\\ \\mathrm{GHz}"},
+ {"tipo": "numero", "espr": "5/4.928+1-2*exp(4.928)/(exp(4.928)-1)", "vale": "0.000", "dove": "04", "appare": "x=4{,}93"},
+ {"tipo": "numero", "espr": "4.928*56.79", "vale": "280", "dove": "04", "appare": "280 GHz"},
+ {"tipo": "simbolico", "dove": "04", "appare": "I(\\theta)=I_0\\left[1+(3-\\alpha)\\beta\\cos\\theta+\\dots\\right]", "perche": "formula della lezione23_2020 p. 14"},
+ {"tipo": "uguale", "sinistra": "series((1+b*cs)**3*(1/(1+b*cs))**al,b,0,2).removeO()", "vale": "1+(3-al)*b*cs", "dove": "04", "appare": "(3-\\alpha)\\beta\\cos\\theta"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\Delta I/I=\\beta\\cos\\theta=\\Delta T/T", "perche": "Rayleigh-Jeans: I proporzionale a T"},
+ {"tipo": "numero", "espr": "3.4*1.228e-3*1e3", "vale": "4.2", "dove": "04", "appare": "=4{,}2\\cdot10^{-3}"},
+ {"tipo": "uguale", "sinistra": "T*diff(T**3,T)/T**3", "vale": "3", "dove": "05", "appare": "=3\\frac{\\delta T}{T}", "ipotesi": {"T": "positive"}},
+ {"tipo": "uguale", "sinistra": "Rational(3,4)*T*diff(T**4,T)/T**4", "vale": "3", "dove": "05", "appare": "=\\frac34\\frac{\\delta\\rho_\\gamma}{\\rho_\\gamma}", "ipotesi": {"T": "positive"}},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{\\Delta\\nu}{\\nu_0}=-\\frac{gh}{c^2}", "perche": "principio di equivalenza, ascensore in caduta libera (lezione24_2020 p. 34)"},
+ {"tipo": "numero", "espr": "9.81*22.6/(3e8)**2*1e15", "vale": "2.5", "dove": "05", "appare": "=2{,}5\\cdot10^{-15}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\Delta\\nu/\\nu=\\Delta\\Phi/c^2", "perche": "g h = Delta Phi"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\Delta T/T=\\Phi/c^2", "perche": "redshift gravitazionale dei fotoni del fondo"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\Delta t/t=\\Phi/c^2", "perche": "dilatazione gravitazionale del tempo"},
+ {"tipo": "uguale", "sinistra": "-(t*diff(t**Rational(2,3),t)/t**Rational(2,3))*P", "vale": "-Rational(2,3)*P", "dove": "05", "appare": "=-\\frac23\\frac{\\Phi}{c^2}", "ipotesi": {"t": "positive"}},
+ {"tipo": "uguale", "sinistra": "P-Rational(2,3)*P", "vale": "P/3", "dove": "05", "appare": "=\\frac13\\frac{\\Phi}{c^2}"},
+ {"tipo": "numero", "espr": "1.327e20/(6.96e8*8.988e16)*1e6", "vale": "2.1", "dove": "05", "appare": "=2{,}1\\cdot10^{-6}"},
+ {"tipo": "numero", "espr": "3e-5/2.12e-6", "vale": "14", "dove": "05", "appare": "quattordici"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\Delta T/T(\\theta,\\phi)=\\sum_{\\ell m}a_{\\ell m}Y_{\\ell m}(\\theta,\\phi)", "perche": "sviluppo in armoniche sferiche"},
+ {"tipo": "simbolico", "dove": "06", "appare": "c_s^2=dp/d\\rho", "perche": "definizione della velocita' del suono"},
+ {"tipo": "numero", "espr": "2*4282.75/sqrt(1101)", "vale": "258", "dove": "06", "appare": "=258"},
+ {"tipo": "numero", "espr": "2*4282.75*(1-1/sqrt(1101))", "vale": "8307", "dove": "06", "appare": "=8307"},
+ {"tipo": "numero", "espr": "258/8307.", "vale": "0.0311", "dove": "06", "appare": "=0{,}0311"},
+ {"tipo": "numero", "espr": "258/8307.*180/pi", "vale": "1.78", "dove": "06", "appare": "1{,}78^\\circ"},
+ {"tipo": "numero", "espr": "258/8307.*180/pi/sqrt(3)", "vale": "1.03", "dove": "06", "appare": "=1{,}03^\\circ"},
+ {"tipo": "numero", "espr": "pi/(258/8307./sqrt(3))", "vale": "175", "dove": "06", "appare": "=175"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\Delta T/T=-2y", "perche": "limite di Rayleigh-Jeans della distorsione SZ"},
+ {"tipo": "numero", "espr": "3.83*coth(3.83/2)-4", "vale": "0.000", "dove": "07", "appare": "x=3{,}83"},
+ {"tipo": "numero", "espr": "1e3*6.65e-29*3.086e22*8/511*1e5", "vale": "3.2", "dove": "07", "appare": "=3{,}2\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "-2*3.212e-5*2.725e6", "vale": "-175", "dove": "07", "appare": "-175"},
+ {"tipo": "numero", "espr": "41253/1.78**2/1e3", "vale": "13", "dove": "08", "appare": "=13\\,000"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\Omega-1=kc^2/(a^2H^2)", "perche": "Friedmann divisa per H^2"},
+ {"tipo": "numero", "espr": "-120/log(10)", "vale": "-52", "dove": "08", "appare": "10^{-52}"},
+ {"tipo": "numero", "espr": "2.998e10*2.725/0.30/1e9", "vale": "272", "dove": "04", "appare": "=272"},
+ {"tipo": "numero", "espr": "2.998e10*2.725/0.2898/1e9", "vale": "282", "dove": "04", "appare": "verrebbe 282"},
+ {"tipo": "uguale", "sinistra": "p-Rational(2,3)*p", "vale": "p/3", "dove": "05", "appare": "=\\frac{\\delta\\phi}{3c^2}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\delta T/T=\\delta\\phi/c^2", "perche": "redshift gravitazionale nel limite newtoniano"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\delta t/t=\\delta\\phi/c^2", "perche": "dilatazione dei tempi gravitazionale nel limite newtoniano"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\delta T/T=-\\frac23\\,\\delta t/t", "perche": "da T ~ t^(-2/3) in Einstein-de Sitter"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\delta\\phi\\sim G\\,\\delta M/d", "perche": "potenziale di una perturbazione di massa delta M e scala d"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\delta M\\sim\\delta\\rho\\,d^3", "perche": "massa della perturbazione"},
+ {"tipo": "uguale", "sinistra": "(D0*a)*(r0*a**(-3))", "vale": "D0*r0*a**(-2)", "ipotesi": {"a": "positive"}, "dove": "05", "appare": "\\delta\\rho=\\Delta_0a\\cdot\\rho_0a^{-3}"},
+ {"tipo": "uguale", "sinistra": "(a**(-2)*a**3)/a", "vale": "1", "ipotesi": {"a": "positive"}, "dove": "05", "appare": "\\delta\\phi\\propto a^{-2}a^{2}="},
+ {"tipo": "numero", "espr": "14000*10*pi/180", "vale": "2443", "dove": "05", "appare": "10\\pi/180=2400"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{\\Delta C_\\ell}{C_\\ell}=\\sqrt{\\frac{2}{2\\ell+1}}", "perche": "varianza cosmica: 2l+1 stime indipendenti di C_l"},
+ {"tipo": "numero", "espr": "sqrt(2/5.)", "vale": "0.63", "dove": "05", "appare": "0,63 per il quadrupolo"},
+ {"tipo": "numero", "espr": "sqrt(2/801.)", "vale": "0.050", "dove": "05", "appare": "0,050 per"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\omega t_{\\rm rec}=kc_st_{\\rm rec}=k\\lambda_s", "perche": "fase accumulata dall'entrata nell'orizzonte alla ricombinazione"},
+ {"tipo": "simbolico", "dove": "06", "appare": "k_n\\lambda_s=n\\pi", "perche": "condizione di estremo alla ricombinazione"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\Delta k=\\pi/\\lambda_s", "perche": "differenza fra due k_n successivi"},
+ {"tipo": "simbolico", "dove": "06", "appare": "R=3\\rho_b/(4\\rho_\\gamma)", "perche": "definizione del carico barionico"},
+ {"tipo": "simbolico", "dove": "06", "appare": "c_s=c/\\sqrt{3(1+R)}", "perche": "velocita' del suono del plasma fotoni-barioni"},
+ {"tipo": "numero", "espr": "1/sqrt(3)", "vale": "0.577", "dove": "06", "appare": "=0{,}577\\,c"},
+ {"tipo": "simbolico", "dove": "08", "appare": "1-\\Omega(z)=(1-\\Omega_0)/(1+\\Omega_0z)", "perche": "Friedmann senza Lambda: (1/Omega - 1) ~ 1/(1+z) per materia, nella forma di Marconi"},
+ {"tipo": "numero", "espr": "1-0.7/301", "vale": "0.9977", "dove": "08", "appare": "=0{,}9977"},
+ {"tipo": "numero", "espr": "1-0.7/3001", "vale": "0.99977", "dove": "08", "appare": "=0{,}99977"},
+ {"tipo": "numero", "espr": "63*2e-38*1e36", "vale": "1.3", "dove": "08", "appare": "=1{,}3\\cdot10^{-36}"},
+ {"tipo": "numero", "espr": "7.566e-15*1e112/2.998e10**2/1e76", "vale": "8.4", "dove": "08", "appare": "=8{,}4\\cdot10^{76}"},
+ {"tipo": "numero", "espr": "sqrt(3/(8*pi*6.674e-8*8.4e76))*1e36", "vale": "4.6", "dove": "08", "appare": "=4{,}6\\cdot10^{-36}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\tau=(3/(8\\pi G\\rho))^{1/2}", "perche": "tempo di e-folding in un universo dominato da energia del vuoto"},
+ {"tipo": "numero", "espr": "sqrt(3/(8*pi*6.674e-8*3e76))*1e36", "vale": "7.7", "dove": "08", "appare": "$7{,}7\\cdot10^{-36}$ s con il suo valore"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché questo movimento: una fotografia dell’universo a 380000 anni', meta:'un corpo nero a 2,725 K · un dipolo di 3 mK · increspature di 10⁻⁵',
+  blocchi:[
+  {t:'prosa', title:'Tre livelli di precisione', tag:'architettura', html:R`
+  <p>Il cielo alle lunghezze d&rsquo;onda millimetriche è dominato da una radiazione che arriva da tutte le direzioni con la stessa intensità. È il fondo cosmico a microonde, il residuo del bagno termico in cui l&rsquo;universo era immerso prima della ricombinazione: i fotoni che a $z\approx1100$ hanno subito l&rsquo;ultimo scattering con gli elettroni e da allora viaggiano liberi, con la temperatura che cala come</p>
+  <p>$$T(z)=T_0(1+z),\qquad T_0=2{,}725\ \mathrm K .$$</p>
+  <p>Il fondo si studia a tre livelli di precisione, e ognuno racconta una cosa diversa. Al primo livello è un corpo nero perfetto: lo spettro misurato da COBE si discosta da quello di Planck per meno di una parte su diecimila, ed è la prova che l&rsquo;universo è passato da una fase densa, calda e in equilibrio termico. Al secondo livello, una parte su mille, compare un dipolo: il cielo è più caldo in una direzione e più freddo nell&rsquo;opposta, per effetto Doppler del nostro moto rispetto al fondo. Al terzo livello, una parte su centomila, compaiono le anisotropie primordiali: le increspature della densità della materia all&rsquo;epoca della ricombinazione, i semi delle galassie, con una scala angolare caratteristica di circa un grado che misura la geometria dell&rsquo;universo.</p>
+  <p>È il campo di ricerca di de Bernardis, e l&rsquo;esame lo riflette, dice la mappa: le prove chiedono il redshift del disaccoppiamento e la temperatura di allora, lo sviluppo del dipolo, l&rsquo;angolo sotteso dall&rsquo;orizzonte; lo spettro di potenza delle anisotropie si deve capire, non calcolare. L&rsquo;ordine del movimento segue i tre livelli, poi l&rsquo;effetto Sunyaev-Zel&rsquo;dovich, che usa il fondo come retroilluminazione per vedere gli ammassi, e infine i paradossi che le anisotropie rendono acuti e che l&rsquo;inflazione risolve. Gli strumenti: la <span class="str" data-str="funzione-zeta-di-riemann">funzione zeta</span> per contare i fotoni, l&rsquo;<span class="str" data-str="angolo-piccolo">angolo piccolo</span> per le scale angolari, la <span class="str" data-str="trasformata-di-fourier">decomposizione in armoniche</span> per lo spettro di potenza, gli <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span>.</p>`}
+]},
+
+/* ---------------- 01 · UN CORPO NERO CHE SI ESPANDE ---------------- */
+{ num:'01', title:'Perché un corpo nero che si espande resta un corpo nero', meta:'il numero di occupazione · ν ∝ 1/a · T ∝ 1/a · che cosa non lo farebbe',
+  blocchi:[
+  {t:'prosa', title:'La derivazione', tag:'la domanda d’orale', html:R`
+  <p>De Bernardis, nella lezione 19, parte dalla densità di energia di un corpo nero per unità di lunghezza d&rsquo;onda,</p>
+  <p>$$u_\lambda=\frac{8\pi hc}{\lambda^5}\frac{1}{e^{hc/\lambda kT}-1},$$</p>
+  <p>e dalle due leggi dell&rsquo;espansione: ogni lunghezza d&rsquo;onda si allunga come $a$, $\lambda=\lambda_0a/a_0$, e la densità di energia in ogni intervallo di lunghezza d&rsquo;onda scala come $a^{-4}$, tre potenze dalla diluizione del volume e una dall&rsquo;energia di ciascun fotone, $u_\lambda d\lambda=(a_0/a)^4u_{\lambda_0}d\lambda_0$. Sostituendo $\lambda_0=\lambda a_0/a$ e $d\lambda_0=d\lambda\,a_0/a$ nella legge di Planck di oggi:</p>
+  <p>$$u_\lambda d\lambda=\left(\frac{a_0}{a}\right)^4\frac{8\pi hc}{\lambda^5}\left(\frac{a}{a_0}\right)^5\frac{1}{e^{hc\,a/(\lambda a_0kT_0)}-1}\,d\lambda\,\frac{a_0}{a}=\frac{8\pi hc}{\lambda^5}\frac{d\lambda}{e^{hc/\lambda kT}-1},$$</p>
+  <p>con</p>
+  <p>$$T=T_0\frac{a_0}{a} .$$</p>
+  <p>Le potenze di $a$ davanti si cancellano esattamente ($4+1-5=0$), e nell&rsquo;esponente resta la forma di Planck con una temperatura nuova. <i>«Uno spettro di corpo nero rimane uno spettro di corpo nero, ma varia la sua temperatura come l&rsquo;inverso del fattore di scala»</i>.</p>
+  <p>La ragione profonda si dice in una frase: il corpo nero è definito dal <i>numero di occupazione</i> dei modi, $\bar n(\nu)=1/(e^{h\nu/kT}-1)$, fotoni per modo. L&rsquo;espansione sposta ogni modo da $\nu$ a $\nu a/a'$ senza crearne né distruggerne fotoni, quindi il numero di occupazione di ogni modo resta lo stesso, e la funzione $\bar n$ si legge con la variabile $h\nu/kT$ dove $\nu$ e $T$ sono scalati dello stesso fattore. Il redshift sposta ogni frequenza dello stesso fattore e la diluizione dei fotoni compensa esattamente il cambio della densità dei modi.</p>`},
+  {t:'prosa', title:'Che cosa non resterebbe un corpo nero, e perché è una prova', tag:'il contrasto', html:R`
+  <p>Il risultato non è banale: non vale per tutti gli spettri termici. Un gas di particelle con massa, ad esempio, non conserva la forma di Maxwell-Boltzmann con una sola temperatura quando passa da relativistico a non relativistico, perché l&rsquo;impulso scala come $1/a$ ma l&rsquo;energia no. E non vale per uno spettro che sia la somma di corpi neri a temperature diverse: ognuno resterebbe un corpo nero, ma la somma no. Che il fondo sia un corpo nero perfetto dice dunque due cose. La prima: in passato la radiazione era in equilibrio termico con la materia, il che richiede un universo opaco, denso e caldo, con processi capaci di creare e distruggere fotoni. La seconda: dopo il disaccoppiamento nessun processo ha aggiunto energia ai fotoni in modo apprezzabile, perché qualunque iniezione tardiva avrebbe lasciato una distorsione. È la ragione per cui lo spettro del fondo è stato chiamato <i>«una delle prove più convincenti della teoria del Big Bang»</i> nelle dispense di de Bernardis: un universo stazionario non ha un modo naturale di produrre un corpo nero isotropo a 2,7 K.</p>`},
+  {t:'prosa', title:'I numeri del corpo nero cosmico', tag:'quanti, dove', html:R`
+  <p>Il massimo della brillanza per unità di frequenza, $B_\nu=\frac{2h\nu^3}{c^2}\frac{1}{e^{h\nu/kT}-1}$, cade dove $x=h\nu/kT$ soddisfa $3(1-e^{-x})=x$, cioè $x=2{,}821$: con $kT_0/h=56{,}79$ GHz,</p>
+  <p>$$\nu_{\max}=2{,}821\cdot56{,}79\ \mathrm{GHz}=160\ \mathrm{GHz},$$</p>
+  <p>e la brillanza al massimo è $B_\nu=3{,}84\cdot10^{-18}$ W m$^{-2}$ Hz$^{-1}$ sr$^{-1}$, cioè 384 MJy/sr. Per unità di lunghezza d&rsquo;onda la legge di Wien dà $\lambda_{\max}=2{,}898\ \mathrm{mm\,K}/2{,}725\ \mathrm K=1{,}063$ mm: il fondo è una sorgente millimetrica, da cui il nome. Il numero di fotoni, con l&rsquo;integrale che porta la <span class="str" data-str="funzione-zeta-di-riemann">zeta di Riemann</span>, è $n_\gamma=\frac{2\zeta(3)}{\pi^2}(kT_0/\hbar c)^3=411$ cm$^{-3}$; la densità di energia $aT_0^4=4{,}17\cdot10^{-14}$ J/m$^3$, cioè $0{,}26$ eV/cm$^3$. In unità critiche, con $H_0=70$, $\Omega_\gamma=5{,}04\cdot10^{-5}$; la slide di de Bernardis scrive $5{,}06\cdot10^{-5}$ dichiarando $H_0=72$, valore con cui verrebbe invece $4{,}77\cdot10^{-5}$: il $5{,}06$ è quello per $H_0\approx70$. <i>«Il CMB è di gran lunga il fondo di fotoni dominante: la sua densità di energia è molto maggiore di quella della radiazione emessa dalle stelle»</i>.</p>`},
+  {t:'plot', title:'Lo spettro del fondo cosmico',
+   intro:R`Brillanza B_ν (MJy/sr) del corpo nero a T₀ = 2,725 K contro la frequenza in GHz, dalla legge di Planck. Il punto è il massimo a 160 GHz.`,
+   plots:[
+    {kind:'func2d', xr:[5,700], yr:[0,420], height:280, equal:false,
+     title:'ν (GHz)      B_ν (MJy/sr)',
+     curves:[{f:'2*6.626e-34*pow(x*1e9,3)/8.988e16/(exp(6.626e-34*x*1e9/(1.381e-23*2.725))-1)/1e-20', col:'#5eead4', label:'Planck, 2,725 K'},
+             {f:'2*1.381e-23*2.725*pow(x*1e9,2)/8.988e16/1e-20', col:'#94a3b8', label:'Rayleigh-Jeans', dash:true}],
+     marks:[{x:160, y:384, label:'160 GHz: 384 MJy/sr', col:'#d8a13a', up:true},
+            {x:150, y:381, label:'150 GHz', col:'#94a3b8', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> fino a qualche decina di GHz lo spettro segue la parabola di Rayleigh-Jeans, B ∝ ν²; il massimo è a 160 GHz, cioè 1,9 mm; sopra i 400 GHz l'esponenziale di Wien taglia tutto.</p>
+   <p><b>Che cosa impararne:</b> i punti di FIRAS stanno su questa curva con errori più piccoli dello spessore della linea. Il cielo a 150 GHz della slide di de Bernardis è dominato dal fondo per la stessa ragione: siamo vicino al massimo.</p>`}
+]},
+
+/* ---------------- 02 · LA MISURA ---------------- */
+{ num:'02', title:'Come si misura un corpo nero perfetto: COBE-FIRAS', meta:'una misura di zero · il corpo nero di riferimento · il cono di Eccosorb · 0,03%',
+  blocchi:[
+  {t:'prosa', title:'Una misura di zero', tag:'lo strumento', html:R`
+  <p>Le dispense di laboratorio di de Bernardis descrivono la misura dal punto di vista di chi costruisce strumenti. Sul satellite COBE l&rsquo;esperimento FIRAS (Far Infrared Absolute Spectrometer) portava un corpo nero di precisione con temperatura regolabile, <i>«da 2 a 25 K»</i> nel testo e <i>«tra 2 e 14 K»</i> nella didascalia della figura (le due versioni non coincidono; la discrepanza non tocca il risultato). Uno spettrometro interferometrico a polarizzatori misurava la <i>differenza</i> tra lo spettro del cielo, raccolto da un&rsquo;antenna a tromba, e quello della cavità, per lunghezze d&rsquo;onda tra 1 cm e 100 $\mu$m, con bolometri raffreddati a 1,6 K e tutto lo strumento a circa 4 K per limitarne l&rsquo;emissione.</p>
+  <p><i>«È quindi un esempio di misura di zero, che permette misure molto sensibili nel caso si abbia una valutazione teorica precisa dell&rsquo;osservabile»</i>. Invece di misurare lo spettro del cielo in valore assoluto, cosa che richiederebbe di calibrare l&rsquo;intero strumento a una parte su diecimila, si varia la temperatura del riferimento finché la differenza si annulla a tutte le lunghezze d&rsquo;onda insieme. Lo zero si è ottenuto per 2,735 K: <i>«questo implica che lo spettro emesso dal cielo è anch&rsquo;esso un corpo nero con temperatura uguale a quella del corpo nero interno»</i>. Le deviazioni da un corpo nero perfetto sono <i>«inferiori allo 0,03% del valore massimo della brillanza»</i>, con un rumore del rivelatore dell&rsquo;ordine di $10^{-14}$ W cm$^{-2}$ sr$^{-1}$/cm$^{-1}$. (Il valore moderno, 2,725 K, viene dalla ricalibrazione successiva; la differenza è un terzo di per cento.)</p>`},
+  {t:'prosa', title:'Il corpo nero di riferimento', tag:'il dettaglio che decide', html:R`
+  <p>Tutto si regge sulla qualità del riferimento. Alle lunghezze d&rsquo;onda millimetriche un buon assorbitore è un materiale con permeabilità magnetica uguale alla costante dielettrica: l&rsquo;Eccosorb CR-110, grani di ferro di circa 5 $\mu$m in resina epossidica, circa $10^8$ grani per cm$^3$, con impedenza $Z=\sqrt{\mu/\epsilon}\approx1$, quella del vuoto, così che le microonde entrano senza riflettersi e vengono assorbite: 0,5 mm ne assorbono l&rsquo;80%. La forma è un cono rientrante con angolo di 25°, in cui ogni raggio subisce almeno 7 riflessioni prima di uscire. Anche con una riflettività del 25% a riflessione, la riflettività totale sarebbe</p>
+  <p>$$R_{\rm tot}=(0{,}25)^7=6{,}1\cdot10^{-5}\lt 10^{-4},$$</p>
+  <p>una <span class="str" data-str="serie-geometrica">progressione geometrica</span> che fa di un materiale imperfetto un corpo nero a una parte su diecimila. Il limite reale, dice la dispensa, viene dalla diffrazione e dalla rugosità del cono, sempre dell&rsquo;ordine di $10^{-4}$.</p>`}
+]},
+
+/* ---------------- 03 · IL FONDO È COSMOLOGICO ---------------- */
+{ num:'03', title:'Perché il fondo viene davvero da lontano', meta:'isotropia · trasparenza · SZ fino a z = 0,8 · T(z) misurata',
+  blocchi:[
+  {t:'prosa', title:'Quattro argomenti', tag:'non è un fenomeno locale', html:R`
+  <p>Un fondo isotropo potrebbe in principio essere prodotto vicino a noi, ad esempio da polvere fredda nella Galassia o nel sistema solare. De Bernardis, nella lezione 19, elenca i motivi per cui <i>«si pensa che i fotoni della CMB pervadano tutto l&rsquo;universo»</i>. Il primo è l&rsquo;isotropia, incredibile per qualunque sorgente galattica, che sarebbe concentrata nel piano della Galassia. Il secondo: l&rsquo;universo è trasparente alle microonde, quindi fotoni prodotti lontano arrivano. Il terzo: si misura l&rsquo;effetto Sunyaev-Zel&rsquo;dovich, l&rsquo;impronta che il gas caldo degli ammassi di galassie lascia sui fotoni del fondo che lo attraversano, e lo si vede in ammassi <i>«fino a circa z = 0,8. Quindi la CMB proviene da un redshift maggiore: non può essere un fenomeno locale»</i>. Il quarto è il più diretto: si misura la temperatura del fondo a redshift diversi, ed essa segue $T_0(1+z)$.</p>
+  <p>Le misure di $T(z)$ sono di due tipi. La prima usa le molecole e gli atomi delle nubi assorbenti davanti ai quasar: in nubi dove l&rsquo;interazione dominante è quella con i fotoni del fondo, i livelli rotazionali o di struttura fine sono popolati secondo la temperatura della radiazione, e i rapporti di popolazione la misurano (Srianand e collaboratori, Nature 2000). A $z=2{,}34$ ci si aspetta $T=2{,}725\cdot3{,}34=9{,}1$ K. La seconda usa la frequenza dello zero dell&rsquo;effetto SZ negli ammassi ad alto redshift (Battistelli e collaboratori, 2003), che dipende dalla temperatura del fondo. Il risultato riassunto da de Bernardis (Noterdaeme e collaboratori, 2011) è</p>
+  <p>$$T_{\rm CMB}(z)=(2{,}725\pm0{,}002)\,(1+z)^{1-\beta}\ \mathrm K,\qquad\beta=-0{,}007\pm0{,}027,$$</p>
+  <p>compatibile con $\beta=0$, cioè con la legge adiabatica esatta.</p>`}
+]},
+
+/* ---------------- 04 · IL DIPOLO ---------------- */
+{ num:'04', title:'Il dipolo: il nostro moto rispetto al fondo', meta:'T(θ) = T₀√(1−β²)/(1−β cosθ) · D = βT₀ · Q/D = β · 368 km/s · la brillanza del dipolo',
+  blocchi:[
+  {t:'reveal', title:'Prova del 13/02/2009, esercizio 3: lo sviluppo del dipolo', tag:'svolto per intero', steps:[
+   {label:'Il testo', body:R`<p>Un osservatore si muove con velocità $v$ in una cavità di corpo nero a temperatura $T_0$. Per effetto Doppler osserva dalle diverse direzioni radiazione di corpo nero con temperatura</p><p>$$T(\theta)=T_0\frac{\sqrt{1-\beta^2}}{1-\beta\cos\theta},$$</p><p>con $\beta=v/c$ e $\theta$ l&rsquo;angolo tra la direzione di osservazione e la velocità. 3.1) Sviluppare per $\beta\ll1$ fino al termine in $\beta^2$. 3.2) Confrontare le ampiezze del dipolo (coefficiente di $\cos\theta$) e del quadrupolo (coefficiente di $\cos^2\theta$). 3.3) Un osservatore misura un dipolo di 12 mK: con che velocità si muove rispetto alla materia che ha prodotto il fondo?</p>`},
+   {label:'Perché resta un corpo nero', body:R`<p>In ogni direzione l&rsquo;osservatore vede uno spettro di corpo nero, perché il Doppler moltiplica tutte le frequenze di quella direzione per lo stesso fattore $\sqrt{1-\beta^2}/(1-\beta\cos\theta)$, e un corpo nero con le frequenze scalate è un corpo nero con la temperatura scalata: è lo stesso argomento del numero di occupazione della tappa 01.</p>`},
+   {label:'3.1 Lo sviluppo', body:R`<p>$\sqrt{1-\beta^2}\approx1-\frac12\beta^2$ e $1/(1-\beta\cos\theta)\approx1+\beta\cos\theta+\beta^2\cos^2\theta$. Moltiplicando e tenendo i termini fino a $\beta^2$:</p><p>$$\frac{T(\theta)}{T_0}\approx1-\frac{\beta^2}{2}+\beta\cos\theta+\beta^2\cos^2\theta .$$</p>`},
+   {label:'3.2 Dipolo e quadrupolo', body:R`<p>Il coefficiente di $\cos\theta$ è $D=T_0\beta$, quello di $\cos^2\theta$ è $Q=T_0\beta^2$, quindi</p><p>$$\frac{Q}{D}=\beta .$$</p><p>Il quadrupolo cinematico è più piccolo del dipolo dello stesso fattore $\beta$ con cui il dipolo è più piccolo del monopolo.</p>`},
+   {label:'3.3 La velocità', body:R`<p>$v=cD/T_0=299\,792\cdot0{,}012/2{,}725=1320$ km/s, come nella soluzione. Il valore reale, che de Bernardis cita dalle misure di WMAP, è $D=3{,}346\pm0{,}017$ mK, da cui $\beta=1{,}23\cdot10^{-3}$ e $v=368$ km/s: il valore della prova è inventato e quattro volte troppo grande, ma il conto è lo stesso.</p>`}
+  ]},
+  {t:'prosa', title:'Di che cosa è fatto il nostro moto', tag:'le componenti', html:R`
+  <p>Il moto della Terra rispetto al fondo è la somma di quattro moti: la Terra intorno al Sole, ben noto; il Sole nella Galassia, ben noto; la Galassia nel Gruppo Locale, noto; e il moto d&rsquo;insieme del Gruppo Locale, <i>«not well known»</i>, dovuto all&rsquo;attrazione gravitazionale di tutte le grandi masse dell&rsquo;universo. L&rsquo;apice del moto misurato da WMAP è in coordinate galattiche $l=263{,}85^\circ$, $b=48{,}25^\circ$, vicino all&rsquo;eclittica. La rivoluzione della Terra, con $v\approx30$ km/s, produce una modulazione annuale del dipolo di ampiezza</p>
+  <p>$$\Delta T=T_0\frac{v_\oplus}{c}=2{,}725\cdot\frac{30}{299\,792}=0{,}27\ \mathrm{mK},$$</p>
+  <p>ed è il segnale usato da COBE, WMAP e Planck per calibrare gli strumenti: la velocità orbitale della Terra è nota dall&rsquo;astrometria molto meglio di qualunque calibrazione di laboratorio. Con Planck, a $\beta=10^{-3}$, si vedono addirittura gli effetti di aberrazione, la deformazione delle posizioni apparenti delle macchie del fondo (Planck 2013, XXVII: <i>«Eppur si muove?»</i>).</p>`},
+  {t:'plot', title:'Il dipolo cinematico sul cielo',
+   intro:R`T(θ) − T₀ in mK contro θ (gradi) per β = 1,228·10⁻³ (368 km/s), dalla formula esatta (ciano) e dal solo termine di dipolo T₀β cos θ (oro tratteggiato). La differenza è il quadrupolo, T₀β² ≈ 4,1 μK, invisibile su questa scala.`,
+   plots:[
+    {kind:'func2d', xr:[0,180], yr:[-3.6,3.6], height:260, equal:false,
+     title:'θ (gradi)      ΔT (mK)',
+     curves:[{f:'(2.725*sqrt(1-pow(1.228e-3,2))/(1-1.228e-3*cos(x*PI/180))-2.725)*1e3', col:'#5eead4', label:'formula esatta'},
+             {f:'2.725*1.228e-3*cos(x*PI/180)*1e3', col:'#d8a13a', label:'dipolo T₀β cos θ', dash:true}],
+     marks:[{x:0, y:3.346, label:'apice: +3,346 mK', col:'#f87171', up:false},
+            {x:180, y:-3.346, label:'antiapice', col:'#b98cff', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> una cosinusoide di ampiezza 3,35 mK, cento volte più grande delle anisotropie primordiali.</p>
+   <p><b>Che cosa impararne:</b> prima di guardare le anisotropie bisogna togliere il dipolo, ed è per questo che le mappe del fondo si presentano «a dipolo sottratto». Il dipolo non è cosmologico: è la nostra velocità.</p>`},
+  {t:'prosa', title:'Lo spettro del dipolo, e il dipolo di fondi non termici', tag:'la brillanza', html:R`
+  <p>Una fluttuazione di temperatura del fondo corrisponde a una fluttuazione di brillanza, che si trova derivando la legge di Planck rispetto a $T$:</p>
+  <p>$$\Delta I(\nu)=\frac{\partial B_\nu}{\partial T}\Delta T=B_\nu\,\frac{xe^x}{e^x-1}\,\frac{\Delta T}{T},\qquad x=\frac{h\nu}{kT_{\rm CMB}} .$$</p>
+  <p><i>«Questa conversione da temperatura a brillanza è la stessa per il dipolo e per qualunque anisotropia di temperatura o di polarizzazione a scala più piccola»</i>: lo spettro del dipolo è lo spettro delle anisotropie, ed è la firma che le distingue dalle sorgenti galattiche in primo piano. Come funzione di $x$, $\Delta I\propto x^4e^x/(e^x-1)^2$, che ha il massimo per $x=3{,}83$, cioè a</p>
+  <p>$$\nu=3{,}83\cdot56{,}79\ \mathrm{GHz}=217{,}5\ \mathrm{GHz}.$$</p>
+  <p>La slide di de Bernardis scrive che il massimo è a 271 GHz. Nessuna delle grandezze naturali del dipolo ci arriva: $\Delta I_\nu$ ha il massimo a 217 GHz, $\nu\Delta I_\nu$ a $x=4{,}93$, cioè 280 GHz. Una spiegazione probabile c&rsquo;è, ma resta una congettura: 271 GHz è quasi esattamente la frequenza $c/\lambda_{\max}$ del massimo in lunghezza d&rsquo;onda del corpo nero stesso, non del dipolo, calcolato con la costante di Wien arrotondata a 0,30 cm K, come la scrivono i testi più vecchi: $c\,T/(0{,}30\ \mathrm{cm\,K})=2{,}998\cdot10^{10}\cdot2{,}725/0{,}30=272$ GHz (con il valore esatto 0,2898 cm K verrebbe 282). Se è così, il 271 descrive dove il fondo è più brillante per unità di lunghezza d&rsquo;onda, e il dipolo è stato confuso con lo spettro medio. Non ho una fonte che lo confermi, e lo dichiaro.</p>
+  <p>Se il fondo isotropo non è un corpo nero, la formula del dipolo cambia. De Bernardis prende l&rsquo;esempio del fondo X, la cui brillanza è una legge di potenza: con $\alpha=d\ln I/d\ln\nu$, il dipolo indotto dalla nostra velocità rispetto alla materia che lo emette è</p>
+  <p>$$I(\theta)=I_0\left[1+(3-\alpha)\beta\cos\theta+\dots\right].$$</p>
+  <p>Per il fondo a microonde nella regione di Rayleigh-Jeans, $I\propto\nu^2$, $\alpha=2$ e si ritrova $\Delta I/I=\beta\cos\theta=\Delta T/T$. Per il fondo X, con $\alpha\approx-0{,}4$, l&rsquo;ampiezza è $3{,}4\beta=4{,}2\cdot10^{-3}$ per la nostra velocità. <i>«Questo è molto sensibile a caratteristiche ripide dello spettro ($\alpha$ grande), che possono compensare la piccolezza di $\beta$»</i>.</p>`}
+]},
+
+/* ---------------- 05 · LE ANISOTROPIE PRIMORDIALI ---------------- */
+{ num:'05', title:'Le anisotropie primordiali: una mappa del potenziale gravitazionale', meta:'adiabatiche e isoterme · redshift gravitazionale · Sachs-Wolfe ΔT/T = Φ/3c² · lo spettro di potenza',
+  blocchi:[
+  {t:'prosa', title:'Due tipi di fluttuazioni', tag:'le condizioni iniziali', html:R`
+  <p>Tolto il dipolo, restano fluttuazioni di qualche decina di microkelvin: <i>«fluttuazioni di brillanza dell&rsquo;ordine di 1 parte su 100000, misurate nel CMB dall&rsquo;esperimento BOOMERanG»</i>, e poi su tutto il cielo da WMAP e Planck. Che cosa sono? De Bernardis, nella lezione 24 del 2020, distingue due tipi di fluttuazioni di densità in un fluido di fotoni e materia. Nelle fluttuazioni <b>adiabatiche</b> variano sia la densità dei barioni sia quella dei fotoni, ma il rapporto $n_\gamma/n_b$ resta il valore medio; siccome $n_\gamma\propto T^3$ e $\rho_\gamma\propto T^4$,</p>
+  <p>$$\frac{\delta\rho_b}{\rho_b}=\frac{\delta n_b}{n_b}=\frac{\delta n_\gamma}{n_\gamma}=3\frac{\delta T}{T}=\frac34\frac{\delta\rho_\gamma}{\rho_\gamma} .$$</p>
+  <p>Nelle fluttuazioni <b>isoterme</b> (di isocurvatura) varia il rapporto $n_\gamma/n_b$ a densità totale costante. Le osservazioni favoriscono le prime, e sono quelle che produce l&rsquo;inflazione.</p>`},
+  {t:'prosa', title:'L’effetto Sachs-Wolfe', tag:'la derivazione di lezione', html:R`
+  <p>Su scale più grandi dell&rsquo;orizzonte alla ricombinazione, la fluttuazione di temperatura osservata è dominata dalla gravità. La materia oscura, che non interagisce con la luce, agisce sui fotoni solo con la sua gravità, e de Bernardis ricava l&rsquo;effetto dal principio di equivalenza, con l&rsquo;esperimento concettuale dell&rsquo;ascensore in caduta libera. Un fotone emesso dal pavimento verso il soffitto arriva, per un osservatore esterno, a un rivelatore che nel frattempo ha acquistato una velocità $v=gh/c$; per il principio di equivalenza il rivelatore misura la frequenza emessa, quindi l&rsquo;osservatore fermo deve vedere uno spostamento</p>
+  <p>$$\frac{\Delta\nu}{\nu_0}=-\frac{gh}{c^2},$$</p>
+  <p>misurato davvero da Pound e Rebka nel 1960 sulla torre di Harvard, $h=22{,}6$ m, con l&rsquo;effetto Mössbauer: $gh/c^2=9{,}81\cdot22{,}6/(3\cdot10^8)^2=2{,}5\cdot10^{-15}$. In termini di potenziale, $\Delta\nu/\nu=\Delta\Phi/c^2$. Per i fotoni del fondo che escono da una buca di potenziale $\Phi$ ($\lt 0$ in una sovradensità), il redshift gravitazionale li fa apparire più freddi: $\Delta T/T=\Phi/c^2$. Ma c&rsquo;è un secondo effetto: nel campo gravitazionale il tempo scorre più lentamente, $\Delta t/t=\Phi/c^2$, quindi nelle sovradensità vediamo un&rsquo;epoca più primordiale, e più calda. Durante la fase di materia $a\propto t^{2/3}$ e $T\propto1/a$, quindi</p>
+  <p>$$\frac{\Delta T}{T}=-\frac{\Delta a}{a}=-\frac23\frac{\Delta t}{t}=-\frac23\frac{\Phi}{c^2} .$$</p>
+  <p>Sommando i due effetti:</p>
+  <p>$$\frac{\Delta T}{T}=\frac{\Phi}{c^2}-\frac23\frac{\Phi}{c^2}=\frac13\frac{\Phi}{c^2} .$$</p>
+  <p>È l&rsquo;effetto Sachs-Wolfe: le sovradensità appaiono come macchie fredde, con un terzo dell&rsquo;effetto del solo redshift. <i>«Una mappa dell&rsquo;anisotropia del fondo a microonde rappresenta una mappa delle fluttuazioni di potenziale gravitazionale generate dalla materia oscura all&rsquo;epoca della ricombinazione»</i>. Con $\Delta T/T\approx10^{-5}$ i potenziali sono $|\Phi|/c^2\approx3\cdot10^{-5}$, quattordici volte il potenziale del Sole alla sua superficie ($GM_\odot/R_\odot c^2=2{,}1\cdot10^{-6}$) ma piccolissimi rispetto a 1: è la ragione per cui la cosmologia lineare funziona.</p>`},
+  {t:'prosa', title:'Lo spettro di potenza angolare', tag:'come si legge una mappa', html:R`
+  <p>Una mappa di fluttuazioni sulla sfera si descrive con la sua <span class="str" data-str="trasformata-di-fourier">decomposizione in armoniche</span>, l&rsquo;analogo sferico della serie di Fourier: $\Delta T/T(\theta,\phi)=\sum_{\ell m}a_{\ell m}Y_{\ell m}(\theta,\phi)$. Il multipolo $\ell$ corrisponde a una scala angolare</p>
+  <p>$$\theta\approx\frac{180^\circ}{\ell},$$</p>
+  <p>e lo spettro di potenza $C_\ell=\langle|a_{\ell m}|^2\rangle$ dice quanta fluttuazione c&rsquo;è a ogni scala. Il dipolo è $\ell=1$, il quadrupolo $\ell=2$; le macchie di un grado sono $\ell\approx200$. Si rappresenta di solito $\ell(\ell+1)C_\ell/2\pi$, che per fluttuazioni di Sachs-Wolfe con spettro invariante di scala è piatto. La mappa di de Bernardis nella lezione 24 distingue a occhio <i>«perturbazioni “fredde” di grandi dimensioni»</i> e <i>«perturbazioni “calde” di piccole dimensioni»</i>; lo spettro misurato da WMAP <i>«con lo stesso strumento su tre decadi in angolo»</i> mostra un plateau a grande scala e poi una serie di picchi: <i>«si vedono sette picchi a occhio»</i>, e l&rsquo;intero spettro è descritto da un modello Lambda-CDM con sei parametri.</p>`},
+  {t:'prosa', title:'Sachs-Wolfe in due pezzi, e il limite che nessun telescopio supera', tag:'Marconi, cap. 16.3-16.5, pp. 265-270', html:R`
+  <p>Marconi scompone l&rsquo;effetto Sachs-Wolfe nelle sue due parti, che hanno segno opposto. Un fotone che esce da una buca di potenziale $\delta\phi\lt0$ perde energia, redshift gravitazionale: $\delta T/T=\delta\phi/c^2$. Ma nella buca gli orologi vanno più lenti, $\delta t/t=\delta\phi/c^2$, e quindi la regione si vede com&rsquo;era un po&rsquo; prima, più calda; con $T\propto1/a\propto t^{-2/3}$ questo dà $\delta T/T=-\frac23\,\delta t/t$. La somma è</p>
+  <p>$$\frac{\delta T}{T}=\frac{\delta\phi}{c^2}-\frac23\frac{\delta\phi}{c^2}=\frac{\delta\phi}{3c^2},$$</p>
+  <p>negativa: vince il redshift, e le zone più dense appaiono più fredde. Il potenziale della perturbazione è $\delta\phi\sim G\,\delta M/d$ con $\delta M\sim\delta\rho\,d^3$; siccome nell&rsquo;epoca della materia $\delta\rho=\Delta_0a\cdot\rho_0a^{-3}\propto a^{-2}$ e $d\propto a$, risulta $\delta\phi\propto a^{-2}a^{2}=$ costante: <i>«la perturbazione del potenziale gravitazionale è indipendente dall&rsquo;epoca cosmica fintanto che $\Delta$ cresce come $a$»</i>. Per questo le grandi scale, oltre i 2° e quindi fuori dall&rsquo;orizzonte alla ricombinazione, conservano lo spettro iniziale, e lì si misura $\ell(\ell+1)C_\ell$ costante, la firma di uno spettro di Harrison-Zel&rsquo;dovich. Dieci gradi corrispondono sulla superficie di ultimo scattering a circa $14\,000\ \mathrm{Mpc}\cdot10\pi/180=2400$ Mpc comoventi, dieci volte i vuoti più grandi delle survey di galassie. Quando a basso $z$ la costante cosmologica ferma la crescita, il potenziale cambia mentre il fotone lo attraversa e il conto si fa lungo il cammino: è il Sachs-Wolfe integrato.</p>
+  <p>Marconi insiste su un limite che non è strumentale. Ogni $C_\ell$ si stima dai $2\ell+1$ coefficienti $a_{\ell m}$ di un solo cielo, e quindi ha un&rsquo;incertezza relativa intrinseca, la <i>varianza cosmica</i>,</p>
+  <p>$$\frac{\Delta C_\ell}{C_\ell}=\sqrt{\frac{2}{2\ell+1}},$$</p>
+  <p>che vale 0,63 per il quadrupolo, $\ell=2$, e 0,050 per $\ell=400$. Le misure di WMAP sono <i>«cosmic variance limited fino a $\ell\sim400$»</i>: sotto quel valore misurare meglio non serve, perché l&rsquo;universo ne offre solo un esemplare.</p>`}
+]},
+
+/* ---------------- 06 · LA SCALA DEI PICCHI ---------------- */
+{ num:'06', title:'La scala dei picchi: un righello alla ricombinazione', meta:'orizzonte e orizzonte sonoro · c_s = c/√3 · un grado se Ω = 1 · BOOMERanG e Ω₀ = 1,02',
+  blocchi:[
+  {t:'prosa', title:'Perché c’è una scala', tag:'le oscillazioni acustiche', html:R`
+  <p>Prima della ricombinazione fotoni e barioni sono un unico fluido, tenuto insieme dallo scattering Thomson. Una sovradensità di materia oscura attira il fluido, la pressione dei fotoni lo respinge, e il fluido oscilla: sono onde sonore nel plasma primordiale. Ma un&rsquo;onda può oscillare solo dentro l&rsquo;orizzonte, e la distanza che il suono ha percorso dal Big Bang alla ricombinazione, l&rsquo;<i>orizzonte sonoro</i>, è la scala massima a cui le oscillazioni sono avvenute. Alla ricombinazione le oscillazioni si congelano nella fase in cui si trovano: le scale che hanno fatto esattamente mezza oscillazione sono alla massima compressione, ed è il primo picco; quelle che ne hanno fatta una intera, il secondo; e così via. I picchi sono il fotogramma di un concerto interrotto.</p>
+  <p>In un fluido dominato dai fotoni, la velocità del suono è $c_s=c/\sqrt3$ (perché $p=\rho c^2/3$ e $c_s^2=dp/d\rho$), e l&rsquo;orizzonte sonoro è l&rsquo;orizzonte diviso $\sqrt3$. Una stima che faccio in Einstein-de Sitter, con $H_0=70$ km/s/Mpc: l&rsquo;orizzonte comovente alla ricombinazione è $2c/(H_0\sqrt{1+z})=2\cdot4283/33{,}18=258$ Mpc, la distanza comovente della superficie di ultimo scattering è $(2c/H_0)(1-1/\sqrt{1101})=8307$ Mpc, e l&rsquo;orizzonte sottende</p>
+  <p>$$\theta_H=\frac{258}{8307}=0{,}0311\ \mathrm{rad}=1{,}78^\circ,$$</p>
+  <p>l&rsquo;orizzonte sonoro $\theta_s=\theta_H/\sqrt3=1{,}03^\circ$. Corrisponde a $\ell\approx\pi/\theta_s=175$. Il primo picco osservato è a $\ell\approx220$: la stima è grossolana (trascura i barioni, che rallentano il suono, la radiazione, e la costante cosmologica, che cambia la distanza), ma dà l&rsquo;ordine giusto. È il grado di de Bernardis nella lezione 21: <i>«In media le macchie presenti nel CMB hanno davvero un diametro dell&rsquo;ordine del grado. È proprio quanto ci aspettavamo in un universo euclideo»</i>.</p>`},
+  {t:'prosa', title:'Il righello misura la geometria', tag:'Ω₀', html:R`
+  <p>Il valore dell&rsquo;orizzonte sonoro in Mpc dipende da fisica ben nota, la fase di radiazione e materia prima della ricombinazione; l&rsquo;angolo sotto cui lo vediamo dipende dalla geometria dello spazio tra noi e la superficie di ultimo scattering. In uno spazio a curvatura positiva i raggi di luce convergono e la stessa lunghezza appare più grande; in uno a curvatura negativa divergono e appare più piccola. Le figure di de Bernardis nelle lezioni 20 e 21 lo mostrano con tre universi simulati: per $\Omega\gt 1$ le macchie tipiche sono di 2°, per $\Omega=1$ di 1°, per $\Omega\lt 1$ di 0,5°. BOOMERanG nel 2000, e poi WMAP, hanno misurato lo spettro di potenza con il primo picco al grado, e gli stampati della lezione 20 riportano</p>
+  <p>$$\Omega_0=1{,}02\pm0{,}02 .$$</p>
+  <p>L&rsquo;universo è piatto. È la misura che, insieme al diagramma di Hubble delle supernovae, ha fissato la costante cosmologica: la somma delle densità è 1, la materia è 0,3, quindi manca 0,7.</p>
+  <p>Alle scale più piccole lo spessore della superficie di ultimo scattering conta. La prova del 14/09/2007 lo calcola: tra $z=1200$ e $z=1000$ la distanza comovente è di circa 42 Mpc, la distanza fisica allora 38 kpc, che con $D_A=12{,}0$ Mpc sottende 11&prime;. Per strutture che sottendono angoli più piccoli <i>«si sovrappongono molte strutture lungo la linea di vista»</i>, e le anisotropie si smorzano: è la coda decrescente dello spettro dopo i picchi.</p>`},
+  {t:'prosa', title:'La lente sul fondo, e la polarizzazione', tag:'ciò che succede dopo', html:R`
+  <p>I fotoni che lasciano la superficie di ultimo scattering attraversano tutta la struttura dell&rsquo;universo prima di arrivare a noi, e le masse lungo il cammino li deflettono. De Bernardis, nella lezione 20 del 2017, mostra la mappa del fondo prima e dopo il lensing: la deflessione tipica è di 2,5&prime;. <i>«Noi possiamo misurare solo la distribuzione lensed e non quella originale»</i>, e il lensing modifica lo spettro di potenza delle anisotropie, introduce non gaussianità, e modifica lo spettro della polarizzazione introducendo una componente rotazionale. Il fondo è infatti anche debolmente polarizzato, perché lo scattering Thomson di una radiazione con un quadrupolo locale polarizza linearmente la luce; la componente rotazionale (i «modi B») è prodotta dal lensing e, se esistono, dalle onde gravitazionali dell&rsquo;inflazione, ed è la frontiera attuale degli esperimenti.</p>`},
+  {t:'prosa', title:'Perché i picchi sono equispaziati, e perché i dispari sono più alti', tag:'Marconi, cap. 16.5, pp. 273-278', html:R`
+  <p>Marconi ricava la posizione dei picchi dall&rsquo;idea che ogni perturbazione cominci a oscillare quando entra nell&rsquo;orizzonte, con ampiezza massima, e sia fotografata alla ricombinazione in una fase che dipende dalla sua scala: la fase accumulata è $\omega t_{\rm rec}=kc_st_{\rm rec}=k\lambda_s$, con $\lambda_s$ l&rsquo;orizzonte sonoro. I massimi dello spettro sono le onde fotografate in un estremo, $k_n\lambda_s=n\pi$: per $n$ dispari la massima compressione, per $n$ pari la massima rarefazione, e in mezzo, per $k\lambda_s=(n+\frac12)\pi$, le onde che passano per zero e danno i minimi. La separazione fra due picchi successivi è quindi costante, $\Delta k=\pi/\lambda_s$, e fornisce una seconda misura della stessa lunghezza. Marconi colloca il primo picco <i>«a $\ell\approx250$»</i>; quello osservato è a 220, e lo dichiaro come una stima d&rsquo;ordine.</p>
+  <p>Le oscillazioni non sono simmetriche. I barioni aggiungono inerzia al plasma di fotoni, e il rapporto $R=3\rho_b/(4\rho_\gamma)$ abbassa la velocità del suono, $c_s=c/\sqrt{3(1+R)}$, che per $R\to0$ torna a $c/\sqrt3=0{,}577\,c$. Nell&rsquo;equazione dell&rsquo;oscillatore il potenziale della materia oscura entra come termine forzante, $-(1+R)\Delta\phi/c^2$, che sposta il punto di equilibrio: le compressioni, che vanno nel verso della forza, diventano più ampie delle rarefazioni. Per questo il primo e il terzo picco sono più alti del secondo, e il rapporto fra picchi dispari e pari misura la densità dei barioni. Alla massima compressione l&rsquo;ampiezza osservata è, nella trattazione di Marconi, $(1+6R)$ volte quella del Sachs-Wolfe.</p>`}
+]},
+
+/* ---------------- 07 · SUNYAEV-ZEL'DOVICH ---------------- */
+{ num:'07', title:'L’effetto Sunyaev-Zel’dovich: gli ammassi visti in controluce', meta:'Compton inverso · decremento sotto 217 GHz, incremento sopra · indipendente da z · un esempio con i numeri',
+  blocchi:[
+  {t:'prosa', title:'Il meccanismo', tag:'Compton inverso', html:R`
+  <p>Negli ammassi di galassie c&rsquo;è gas a temperature di $10^7$-$10^8$ K, $kT$ di qualche keV. Un fotone del fondo che attraversa l&rsquo;ammasso ha una probabilità $\tau=\int n_e\sigma_T\,dl$, dell&rsquo;ordine di $10^{-2}$, di essere diffuso da un elettrone; e siccome l&rsquo;elettrone è molto più energetico del fotone ($kT_e\sim$ keV contro $h\nu\sim$ meV), la diffusione è Compton inverso e il fotone guadagna energia, in media una frazione $4kT_e/m_ec^2$. Il numero di fotoni si conserva, quindi lo spettro del fondo visto attraverso l&rsquo;ammasso si sposta verso frequenze più alte: meno fotoni a bassa frequenza, più ad alta. De Bernardis lo mostra con due mappe a 150 e 220 GHz: a 150 GHz l&rsquo;ammasso è un buco nel fondo, a 220 GHz una sorgente.</p>
+  <p>L&rsquo;intensità dell&rsquo;effetto è il parametro di Comptonizzazione</p>
+  <p>$$y=\int n_e\sigma_T\frac{kT_e}{m_ec^2}\,dl,$$</p>
+  <p>e nella regione di Rayleigh-Jeans il fondo appare più freddo di $\Delta T/T=-2y$. Lo spettro della distorsione è $\Delta I\propto x^4e^x/(e^x-1)^2\,[x\coth(x/2)-4]$: si annulla per $x=3{,}83$, cioè a 217 GHz, la stessa $x$ a cui lo spettro delle anisotropie ha il massimo (non per caso: entrambe le curve vengono dalla derivata di Planck). Sotto 217 GHz si ha un decremento, sopra un incremento.</p>
+  <p>Un esempio con numeri miei, tipici di un ammasso ricco: $n_e=10^{-3}$ cm$^{-3}$, $kT_e=8$ keV, spessore 1 Mpc. Allora</p>
+  <p>$$y=n_e\sigma_TL\frac{kT_e}{m_ec^2}=10^3\cdot6{,}65\cdot10^{-29}\cdot3{,}086\cdot10^{22}\cdot\frac{8}{511}=3{,}2\cdot10^{-5},$$</p>
+  <p>e il decremento in Rayleigh-Jeans è $\Delta T=-2yT_0=-175\ \mu$K: tre volte le anisotropie primordiali, facilmente misurabile.</p>`},
+  {t:'plot', title:'Le due firme spettrali: anisotropie e Sunyaev-Zel’dovich',
+   intro:R`Brillanza relativa contro ν (GHz) per T₀ = 2,725 K. In ciano lo spettro di una fluttuazione di temperatura (anisotropie, dipolo), ∝ x⁴eˣ/(eˣ−1)², normalizzato al massimo; in oro la distorsione Sunyaev-Zel'dovich, ∝ x⁴eˣ/(eˣ−1)² [x coth(x/2) − 4], normalizzata allo stesso fattore e divisa per 3. Le due curve si incrociano con lo zero dello SZ a 217 GHz.`,
+   plots:[
+    {kind:'func2d', xr:[20,600], yr:[-1,1.1], height:280, equal:false,
+     title:'ν (GHz)      ΔI (unità arbitrarie)',
+     curves:[{f:'(function(n){var x=n/56.79;return pow(x,4)*exp(x)/pow(exp(x)-1,2)/4.887;})(x)', col:'#5eead4', label:'anisotropie ∝ ∂B/∂T'},
+             {f:'(function(n){var x=n/56.79;var c=(exp(x)+1)/(exp(x)-1);return pow(x,4)*exp(x)/pow(exp(x)-1,2)*(x*c-4)/4.887/3;})(x)', col:'#d8a13a', label:'Sunyaev-Zel’dovich (÷3)'},
+             {f:'0', col:'#94a3b8', label:'zero', dash:true}],
+     marks:[{x:217.5, y:1, label:'massimo e zero SZ: 217 GHz', col:'#f87171', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> le anisotropie hanno sempre lo stesso segno a tutte le frequenze, con il massimo a 217 GHz; lo SZ cambia segno proprio lì.</p>
+   <p><b>Che cosa impararne:</b> misurando a più frequenze, sotto e sopra 217 GHz, si separano le due cose; Planck, con sette bande, è per de Bernardis «a great S-Z machine».</p>`},
+  {t:'prosa', title:'Perché è indipendente dal redshift', tag:'la proprietà notevole', html:R`
+  <p>La distorsione è una variazione relativa della brillanza del fondo, $\Delta I/I$, che dipende solo da $y$, cioè dalle proprietà dell&rsquo;ammasso, e non dalla sua distanza: un ammasso a $z=1$ produce lo stesso decremento di uno identico a $z=0{,}1$, mentre la sua emissione X cala come $(1+z)^{-4}$ in brillanza superficiale. Per questo l&rsquo;effetto SZ è il modo migliore di trovare ammassi lontani; de Bernardis mostra le osservazioni di Planck (A2319) e di ALMA di RX J1347.5-1145 a $D=1{,}7$ Gpc, con una risoluzione di 1,5&prime;. Ed è, come si è visto alla tappa 03, la prova che il fondo viene da più lontano di $z=0{,}8$.</p>`}
+]},
+
+/* ---------------- 08 · I PARADOSSI E L'INFLAZIONE ---------------- */
+{ num:'08', title:'Che cosa le anisotropie rendono inevitabile: orizzonte, piattezza, inflazione', meta:'13000 regioni mai in contatto · Ω − 1 a 10⁻¹⁷ · un’espansione esponenziale a 10⁻³⁶ s',
+  blocchi:[
+  {t:'prosa', title:'Il paradosso degli orizzonti, visto sulla mappa', tag:'il problema', html:R`
+  <p>Il conto dell&rsquo;orizzonte alla ricombinazione dà una scala angolare di circa $1{,}8^\circ$ in un universo piatto (prova del 13/02/2009, es. 4). Due punti del cielo separati da più di due gradi non erano mai stati in contatto causale quando il fondo è stato emesso. Quante regioni così ci sono sul cielo? L&rsquo;intera sfera ha $41\,253$ gradi quadrati, e una regione causale ne occupa circa $1{,}78^2$:</p>
+  <p>$$N\approx\frac{41\,253}{1{,}78^2}=13\,000 .$$</p>
+  <p>Tredicimila regioni che non si sono mai scambiate un segnale, e che hanno la stessa temperatura a una parte su centomila. <i>«Come hanno fatto a omogeneizzarsi così bene se non sono mai state in contatto causale prima?»</i>. Il paradosso della piattezza è il gemello: perché oggi $\Omega_0$ sia entro l&rsquo;1% da 1, a $z=10^{10}$ doveva essere entro $10^{-17}$, e nessuna ragione nella dinamica di Friedmann lo spiega.</p>`},
+  {t:'prosa', title:'L’inflazione', tag:'la soluzione proposta', html:R`
+  <p>La risposta di de Bernardis è la teoria inflazionaria, un&rsquo;<i>«estensione del modello cosmologico standard»</i>. Verso $10^{-36}$ s l&rsquo;universo sarebbe stato dominato per un breve periodo da una componente con pressione negativa, simile a una costante cosmologica molto grande, e si sarebbe espanso esponenzialmente, $a\propto e^{Ht}$ con $H$ circa costante. In quella fase l&rsquo;orizzonte di Hubble $c/H$ resta fisso mentre le distanze crescono di un fattore enorme: <i>«una regione grande quanto l&rsquo;orizzonte all&rsquo;epoca del rilascio del fondo di microonde era stata in contatto causale con le regioni circostanti prima dell&rsquo;inflazione»</i>, e <i>«qui l&rsquo;orizzonte contiene tutto l&rsquo;universo osservabile oggi»</i>. Il paradosso degli orizzonti si scioglie perché le tredicimila regioni erano, prima dell&rsquo;inflazione, una sola regione in equilibrio.</p>
+  <p>La piattezza segue dallo stesso meccanismo. $\Omega-1=kc^2/(a^2H^2)$; con $H$ costante e $a$ che cresce come $e^{Ht}$, $|\Omega-1|$ cala come $e^{-2Ht}$. Un numero di e-fold $N=Ht\approx60$, valore standard che non è nelle slide di de Bernardis (Marconi chiede $N_I\gtrsim63$), riduce $|\Omega-1|$ di $e^{-120}\approx10^{-52}$: qualunque curvatura iniziale ragionevole viene stirata fino a diventare invisibile, come la superficie di un pallone gonfiato a dismisura.</p>
+  <p>Le predizioni dell&rsquo;inflazione si leggono proprio nel fondo: un universo piatto ($\Omega_0=1{,}02\pm0{,}02$), fluttuazioni adiabatiche, gaussiane, con spettro quasi invariante di scala (il plateau di Sachs-Wolfe a grande scala), e correlate anche su scale più grandi dell&rsquo;orizzonte alla ricombinazione. Tutte verificate. La predizione ancora aperta è il fondo di onde gravitazionali, che lascerebbe i modi B della polarizzazione a grande scala.</p>`},
+  {t:'prosa', title:'I numeri dell&rsquo;inflazione nel Marconi', tag:'Marconi, cap. 12.6, pp. 192-197', html:R`
+  <p>Marconi dà al problema dell&rsquo;orizzonte la sua misura: nel modello di riferimento, con $z=1000$, le regioni della superficie di ultimo scattering separate da più di circa 1° non potevano essere in contatto causale, eppure il fondo è uniforme a meglio di una parte su mille. E alla piattezza la sua: con $\Omega_0=0{,}3$ e senza costante cosmologica, $1-\Omega(z)=(1-\Omega_0)/(1+\Omega_0z)$, cioè $\Omega=1-0{,}7/301=0{,}9977$ a $z=1000$ (Marconi scrive 0,9978) e $1-0{,}7/3001=0{,}99977$ a $z=10\,000$. Più indietro si va, più vicino a 1 deve essere stato.</p>
+  <p>La proposta di Alan Guth, nel 1981, è una fase dominata da un&rsquo;energia del vuoto con pressione negativa, in cui $a\propto e^{t/\tau}$, come per l&rsquo;energia oscura di oggi. Se l&rsquo;inflazione dura $N_I$ tempi $\tau$, l&rsquo;orizzonte cresce di $e^{N_I}$ invece che di un fattore $2N_I$ come in un universo di radiazione, e la regione causalmente connessa, stirata fino a oggi, vale $5{,}1\cdot10^{25}e^{N_I-63}$ cm: copre l&rsquo;universo osservabile se $N_I\gtrsim63$, cioè se con $\tau\simeq2\cdot10^{-38}$ s l&rsquo;inflazione dura almeno $63\cdot2\cdot10^{-38}=1{,}3\cdot10^{-36}$ s (Marconi scrive $1{,}2\cdot10^{-36}$). Nel modello della sua figura l&rsquo;inflazione avviene a $T\simeq10^{28}$ K: la densità di radiazione corrispondente, $aT^4/c^2=7{,}566\cdot10^{-15}\cdot10^{112}/(2{,}998\cdot10^{10})^2=8{,}4\cdot10^{76}$ g/cm$^3$, è circa il triplo del $3\cdot10^{76}$ che scrive Marconi, e dà $\tau=(3/(8\pi G\rho))^{1/2}=4{,}6\cdot10^{-36}$ s ($7{,}7\cdot10^{-36}$ s con il suo valore), cioè il suo «circa $10^{-35}$ s» come ordine di grandezza. Durante l&rsquo;inflazione $H$ è costante, e quindi $|\Omega-1|\propto1/(aH)^2$ cala come $e^{-2N_I}$: qualunque fosse il valore iniziale, alla fine $\Omega$ è 1. E le fluttuazioni quantistiche del campo, stirate a scale macroscopiche, danno uno spettro indipendente dalla scala, che è proprio Harrison-Zel&rsquo;dovich; lo stesso campo produce onde gravitazionali, che lascerebbero il loro segno nei modi B della polarizzazione.</p>`}
+]},
+
+/* ---------------- 09 · COLLAUDO ---------------- */
+{ num:'09', title:'Collaudo', meta:'domande brevi con risposta',
+  blocchi:[
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Che temperatura aveva il fondo alla ricombinazione, e a che lunghezza d’onda aveva il massimo?`,
+    a:R`$T=2{,}725\cdot1101=3000$ K; $\lambda_{\max}=2{,}898\ \mathrm{mm\,K}/3000\ \mathrm K=0{,}97\ \mu$m, nel vicino infrarosso. Oggi lo stesso spettro, stirato di 1101 volte, ha il massimo a 1,06 mm.`},
+   {q:R`Perché il dipolo del fondo non si usa per misurare la cosmologia?`,
+    a:R`Perché è dovuto al nostro moto, 368 km/s, non a proprietà dell&rsquo;universo primordiale: è un effetto Doppler locale, e la sua ampiezza $T_0\beta$ dà la velocità. Lo si sottrae, e lo si usa per calibrare, attraverso la modulazione annuale da 0,27 mK dovuta all&rsquo;orbita della Terra.`},
+   {q:R`Una sovradensità alla ricombinazione appare come macchia calda o fredda, a grande scala?`,
+    a:R`Fredda: per l&rsquo;effetto Sachs-Wolfe $\Delta T/T=\Phi/3c^2$ e $\Phi\lt 0$ in una sovradensità. Il redshift gravitazionale raffredda di $\Phi/c^2$, la dilatazione del tempo riscalda di $2\Phi/3c^2$ in valore assoluto, e vince il primo.`},
+   {q:R`Che cosa misura la posizione del primo picco dello spettro di potenza?`,
+    a:R`L&rsquo;angolo sotto cui vediamo l&rsquo;orizzonte sonoro alla ricombinazione: una lunghezza nota, circa $1/\sqrt3$ dell&rsquo;orizzonte, vista da una distanza nota attraverso una geometria incognita. Un grado vuol dire universo piatto.`},
+   {q:R`Perché l’effetto SZ di un ammasso non dipende dalla sua distanza?`,
+    a:R`Perché è una variazione relativa della brillanza del fondo, $\Delta I/I$, che dipende solo da $y=\int n_e\sigma_T(kT_e/m_ec^2)dl$; la brillanza del fondo stesso dietro l&rsquo;ammasso è la stessa in ogni direzione, qualunque sia il suo redshift.`},
+   {q:R`A quale frequenza conviene osservare per separare SZ e anisotropie primordiali?`,
+    a:R`Intorno a 217 GHz, dove lo SZ si annulla e le anisotropie sono massime, e poi sotto (150 GHz) e sopra (270 GHz) per misurare lo SZ con i due segni.`}
+  ]}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-18-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-18 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-18-il-fondo-cosmico-a-microonde.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

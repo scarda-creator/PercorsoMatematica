@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-05 — Spettroscopia e formazione delle righe: dove ci si mette decide se la riga è scura o brillante</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-05 — Spettroscopia e formazione delle righe: dove ci si mette decide se la riga è scura o brillante</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["serie-geometrica"] = {"nome":"Serie geometrica","riga":"La somma $\\sum_{n\\ge 0} q^{n}$ vale $\\dfrac{1}{1-q}$ se $|q|\\lt 1$, e non esiste se $|q|\\ge 1$.","serve":"È l'unica serie di cui si conosce la somma in forma chiusa senza fatica, e per questo diventa il metro di tutte le altre: una serie si studia maggiorandola con una geometrica (criterio del rapporto, criterio della radice) o riconoscendola come geometrica travestita.","esempio":"Con $q=\\tfrac12$: $1+\\tfrac12+\\tfrac14+\\cdots=\\dfrac{1}{1-\\tfrac12}=2$. Con $q=-\\tfrac13$: $\\dfrac{1}{1+\\tfrac13}=\\tfrac34$. Con $q=1$ le somme parziali sono $N+1$ e se ne vanno: la formula $1/(1-q)$ non è una scorciatoia da usare fuori dal suo raggio.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio $R=1$, il grafico delle somme parziali e la cassetta dei trucchi che parte da qui, nella tappa sulle serie di potenze"},"qui":{"metodi-e-modelli":{"serve":"È il motore della serie di Laurent: lo sviluppo di $\\dfrac{1}{z-a}$ in potenze di $z$ o di $1/z$ è una geometrica, e quale delle due si sceglie decide in quale corona si sta sviluppando. Tutta la parte principale di Laurent nasce da qui.","esempio":"Per $\\dfrac{1}{z-2}$ con $|z|\\lt 2$ si scrive $-\\tfrac12\\cdot\\dfrac{1}{1-z/2}=-\\sum_{n\\ge0}\\dfrac{z^{n}}{2^{n+1}}$; in $z=1$ entrambi i membri valgono $-1$. Per $|z|\\gt 2$ si raccoglie invece $z$ e viene $\\sum_{n\\ge0}\\dfrac{2^{n}}{z^{n+1}}$, cioè solo potenze negative; in $z=4$ entrambi i membri valgono $\\tfrac12$."},"elettromagnetismo":{"serve":"Compare ogni volta che una configurazione si ripete con un fattore costante — catene di cariche immagine fra due piani conduttori, riflessioni multiple in una cavità — e la somma chiusa è ciò che rende il conto finito invece che infinito.","esempio":"Una carica fra due piani paralleli genera immagini a distanze crescenti, e il contributo al potenziale è una somma del tipo $\\sum_{n\\ge0} r^{n}$ con $r\\lt 1$ fissato dalla geometria. Con una riflettività $r=\\tfrac14$ la serie vale $\\tfrac43$: la catena è infinita, il potenziale no."}},"controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"0","a":"oo","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"somma","espr":"(-1/3)**n","var":"n","da":"0","a":"oo","vale":"3/4","dove":"esempio","appare":"\\tfrac34"},{"tipo":"somma","espr":"-1**n/2**(n+1)","var":"n","da":"0","a":"oo","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"somma","espr":"2**n/4**(n+1)","var":"n","da":"0","a":"oo","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"},{"tipo":"somma","espr":"(1/4)**n","var":"n","da":"0","a":"oo","vale":"4/3","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac43"},{"tipo":"uguale","sinistra":"1/(1-2)","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"uguale","sinistra":"1/(4-2)","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"}]};
+STRUM["trasformata-di-fourier"] = {"nome":"Trasformata di Fourier","riga":"L'operazione $\\hat f(k)=\\int f(x)\\,e^{-ikx}\\,dx$, che riscrive una funzione come sovrapposizione di onde piane e manda la derivata in una moltiplicazione per $ik$.","serve":"È lo strumento che rende ALGEBRICA un'equazione differenziale lineare a coefficienti costanti: con $\\partial_x$ che diventa $ik$, un'equazione differenziale in $x$ diventa un'equazione algebrica in $k$, si risolve, e si antitrasforma. Le due cose da non perdere sono la convenzione dei $2\\pi$, che cambia da testo a testo e va dichiarata una volta, e Plancherel, che dice che la trasformata conserva la norma $L^{2}$ — in fisica, l'energia.","esempio":"La gaussiana $f(x)=e^{-x^{2}/2}$ ha trasformata $\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2}e^{-ikx}\\,dx=\\sqrt{2\\pi}\\,e^{-k^{2}/2}$: ancora una gaussiana, tanto più larga quanto l'originale è stretta. È il caso in cui si vede meglio il principio di indeterminazione come fatto puramente matematico.","pieno":{"file":"15-distribuzioni.html","tappa":"02","come":"le proprietà, la derivata che diventa un prodotto e Plancherel, nel nucleo delle distribuzioni"},"qui":{"elettromagnetismo":{"serve":"Serve appena si scrive un'onda generica invece di una monocromatica: ogni soluzione delle equazioni di Maxwell nel vuoto è una sovrapposizione di onde piane $e^{i(\\mathbf k\\cdot\\mathbf x-\\omega t)}$, e la trasformata è il modo di scomporla. Su ciascuna componente l'equazione delle onde si riduce alla relazione di dispersione, e la propagazione diventa un far girare fasi: ogni modo viaggia da solo, e nel vuoto tutti alla stessa velocità — per questo un impulso non si deforma.","esempio":"La sostituzione $\\partial_x\\to ik$ e $\\partial_t\\to-i\\omega$ manda le derivate seconde in $(ik)^{2}=-k^{2}$ e $(-i\\omega)^{2}=-\\omega^{2}$: l'equazione delle onde diventa $\\omega^{2}=c^{2}k^{2}$, cioè un'equazione di secondo grado al posto di una differenziale, e la sua radice positiva $\\omega=ck$ è la relazione di dispersione del vuoto."}},"controllo":[{"tipo":"integrale","espr":"exp(-x**2/2)*exp(-I*k*x)","var":"x","da":"-oo","a":"oo","vale":"sqrt(2*pi)*exp(-k**2/2)","ipotesi":{"k":"real"},"dove":"esempio","appare":"\\sqrt{2\\pi}\\,e^{-k^{2}/2}"},{"tipo":"uguale","sinistra":"(I*k)**2","vale":"-k**2","ipotesi":{"k":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-k^{2}"},{"tipo":"uguale","sinistra":"(-I*w)**2","vale":"-w**2","ipotesi":{"w":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-\\omega^{2}"},{"tipo":"uguale","sinistra":"(c*k)**2","vale":"c**2*k**2","dove":"qui.elettromagnetismo.esempio","appare":"c^{2}k^{2}"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["integrale-gaussiano"] = {"nome":"Integrale gaussiano","riga":"$\\displaystyle\\int_{-\\infty}^{+\\infty} e^{-ax^{2}}\\,dx=\\sqrt{\\pi/a}$ per $a>0$, e $\\displaystyle\\int_{-\\infty}^{+\\infty} x^{2}e^{-ax^{2}}\\,dx=\\tfrac12\\sqrt{\\pi/a^{3}}$.","serve":"E' l'unico integrale che serve davvero sapere a memoria in meccanica statistica, perche' l'energia cinetica e' quadratica nell'impulso e quindi ogni integrazione sugli impulsi e' una gaussiana. Il trucco della dimostrazione — elevare al quadrato e passare in coordinate polari — vale la pena di vederlo una volta: e' il motivo per cui compare un $\\pi$ in una formula che di cerchi non parla.","esempio":"Da $I^{2}=\\iint e^{-a(x^{2}+y^{2})}dx\\,dy=2\\pi\\int_{0}^{\\infty}re^{-ar^{2}}dr=\\pi/a$ segue $I=\\sqrt{\\pi/a}$. I momenti superiori si ottengono derivando rispetto ad $a$ sotto il segno: $-\\partial_a I=\\int x^{2}e^{-ax^{2}}dx=\\tfrac12\\sqrt{\\pi}\\,a^{-3/2}$. Derivare rispetto a un parametro e' piu' rapido che integrare per parti, e funziona per tutti i momenti pari.","pieno":null,"qui":{"meccanica-statistica":{"serve":"La funzione di partizione di una particella libera e' un prodotto di tre gaussiane negli impulsi, e da li' esce la lunghezza d'onda termica $\\lambda=h/\\sqrt{2\\pi m k T}$ — che e' la grandezza con cui si misura quando un gas smette di essere classico.","esempio":"$\\int e^{-\\beta p^{2}/2m}dp=\\sqrt{2\\pi m/\\beta}$, quindi $Z_{1}=\\dfrac{V}{h^{3}}(2\\pi mkT)^{3/2}=V/\\lambda^{3}$. Lo stesso integrale col peso $p^{2}$ da' $\\langle p^{2}/2m\\rangle=\\tfrac12 kT$ per grado di liberta': l'equipartizione non e' un principio a parte, e' questo integrale."}}};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-05: Spettroscopia e formazione delle righe: dove ci si mette decide se la riga è scura o brillante <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-05 — spettroscopia e formazione delle righe
+identita:  come si fabbrica uno spettro e perche' lo stesso gas puo' dare righe scure o righe brillanti a
+           seconda di dove ci si mette; con quale strumento lo si scompone, e che cosa si legge nella
+           profondita' di una riga.
+copre:     A.6, A.7
+serve:     as-04 (funzione di Planck, brillanza di corpo nero)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento (7 prove, densita' 3,9). Righe in emissione e in assorbimento, potere risolutivo
+           del reticolo, larghezza equivalente, curva di crescita. Serve il conto, non la meccanica
+           quantistica della transizione.
+fonti:     lezione5_2017 (pagine 1-11): Fraunhofer 1814, le tre leggi empiriche di Kirchhoff, la
+           fotosfera come gas freddo davanti a un corpo nero, Secchi e la classificazione in quattro tipi
+           con la sua citazione del 1863, Cannon e Payne.
+           lezione6_2017 (pagine 1-5 e 19-39): la fenditura e il compromesso fra risoluzione e luce, la
+           larghezza equivalente come rettangolo, la curva di crescita e l'esempio del sodio solare
+           (W=0,088 e 0,730 A, f=0,0214 e 0,645). Stessi contenuti in lezione6_2017_stampati e lezione7_2020.
+           Choudhuri, Astrophysics for Physicists, §2.7 (eq. 2.88-2.91 e fig. 2.9): definizione della
+           larghezza equivalente, il limite otticamente sottile W/lambda = e^2 N f lambda/(4 eps0 me c^2),
+           la curva di crescita e i suoi tre tratti.
+           Carroll-Ostlie, MANUALE DELLE SOLUZIONI (non il testo): problema 5.2 (reticolo da 300 righe/mm
+           sul doppietto del sodio, N=494), e problema 9.26, che fissa la convenzione dell'asse della
+           curva di crescita generale del Sole (fig. 9.22 del testo): log10[f N_a (lambda/500 nm)].
+           Prova scritta 20060109_compito_03, esercizio 3 (Sirio B vista da HST a 2 A di risoluzione).
+           DICHIARATO: la teoria del reticolo (condizione d sin theta = m lambda, R = mN) NON sta nelle
+           slide del corso, che nominano il reticolo solo come «elemento dispersore»: e' qui derivata da
+           ottica ondulatoria standard, con la verifica numerica del problema 5.2 del Carroll-Ostlie.
+           DICHIARATO: nell'esempio del sodio la diapositiva applica il fattore lambda/5000 A a una riga e
+           non all'altra (tappa 08).
+           de Bernardis, slide 2016 del corso (PDF 23-39, dal dossier, lette per intero): Fraunhofer e le
+           oltre 600 righe, Bunsen e Kirchhoff, l'elio del 1868, Bohr e la formula di Balmer, il cammino dei
+           fotoni fino alla fotosfera, lo spettrometro di Keeler (1898), la fame di fotoni della spettroscopia,
+           l'esempio numerico CaII contro Balmer nel Sole (400 a 1). Le pagine 23-25 parlano dei neutrini
+           solari e la 37 delle magnitudini: altro argomento, qui non usate. Le pagine 33-35 su Boltzmann e
+           Saha sono usate solo per l'esempio del calcio; la loro teoria non e' di questo movimento.
+registro:  lezione5_2017 e lezione6_2017
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "diff(I0*exp(-t)+B*(1-exp(-t)),t)+(I0*exp(-t)+B*(1-exp(-t)))", "vale": "B", "ipotesi": {"I0": "positive", "B": "positive", "t": "positive"}, "dove": "02", "appare": "\\frac{dI}{d\\tau}=B-I"},
+ {"tipo": "simbolico", "dove": "02", "appare": "I(\\tau)=I_0\\,e^{-\\tau}+B(T)\\big(1-e^{-\\tau}\\big)", "perche": "e' la soluzione dell'equazione dI/dtau=B-I per uno strato uniforme: la verifica che la risolve e' l'asserzione 'uguale' precedente."},
+ {"tipo": "uguale", "sinistra": "(I0*exp(-t)+B*(1-exp(-t)))-I0", "vale": "(B-I0)*(1-exp(-t))", "ipotesi": {"I0": "positive", "B": "positive", "t": "positive"}, "dove": "02", "appare": "I-I_0=\\big(B(T)-I_0\\big)\\big(1-e^{-\\tau}\\big)"},
+ {"tipo": "limite", "espr": "I0*exp(-t)+B*(1-exp(-t))", "var": "t", "a": "oo", "vale": "B", "ipotesi": {"I0": "positive", "B": "positive", "t": "positive"}, "dove": "02", "appare": "I\\to B(T)"},
+ {"tipo": "numero", "espr": "(exp(1.4388e-2/(500e-9*6400))-1)/(exp(1.4388e-2/(500e-9*4500))-1)", "vale": "0.148", "dove": "02", "appare": "0{,}148"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\tau=0", "perche": "e' la condizione di bordo (strato vuoto), non un conto."},
+ {"tipo": "simbolico", "dove": "03", "appare": "d\\sin\\theta=m\\lambda", "perche": "e' la condizione di interferenza costruttiva fra fenditure adiacenti (differenza di cammino = numero intero di lunghezze d'onda): la definizione dei massimi principali, non un conto."},
+ {"tipo": "uguale", "sinistra": "diff(asin(m*l/d),l)", "vale": "m/(d*sqrt(1-(m*l/d)**2))", "ipotesi": {"m": "positive", "l": "positive", "d": "positive"}, "dove": "03", "appare": "\\frac{d\\theta}{d\\lambda}=\\frac{m}{d\\cos\\theta}"},
+ {"tipo": "uguale", "sinistra": "solve(m*(l+x)-(m*l+l/N),x)[0]", "vale": "l/(m*N)", "ipotesi": {"m": "positive", "l": "positive", "N": "positive"}, "dove": "03", "appare": "\\Delta\\lambda=\\frac{\\lambda}{mN}"},
+ {"tipo": "uguale", "sinistra": "l/(l/(m*N))", "vale": "m*N", "ipotesi": {"m": "positive", "l": "positive", "N": "positive"}, "dove": "03", "appare": "R=\\frac{\\lambda}{\\Delta\\lambda}=mN"},
+ {"tipo": "limite", "espr": "(sin(N*p/2)/sin(p/2))**2", "var": "p", "a": "0", "vale": "N**2", "ipotesi": {"N": "positive", "p": "positive"}, "dove": "03", "appare": "N^{2}"},
+ {"tipo": "simbolico", "dove": "03", "appare": "I(\\varphi)\\propto\\left[\\frac{\\sin(N\\varphi/2)}{\\sin(\\varphi/2)}\\right]^{2}", "perche": "e' la somma di N fasori di fase crescente phi, una serie geometrica finita in modulo quadro: il risultato standard dell'interferenza a N fenditure, il cui valore al massimo e' asserito come limite."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\varphi=2\\pi d\\sin\\theta/\\lambda", "perche": "e' la definizione della differenza di fase fra fenditure adiacenti."},
+ {"tipo": "simbolico", "dove": "03", "appare": "d\\sin\\theta=m\\lambda+\\lambda/N", "perche": "e' la posizione del primo zero accanto al massimo principale, dove N phi/2 = pi(mN+1): conseguenza della formula di I(phi)."},
+ {"tipo": "simbolico", "dove": "03", "appare": "d\\sin\\theta=m(\\lambda+\\Delta\\lambda)", "perche": "e' la condizione di massimo per la seconda riga, che il criterio di Rayleigh fa coincidere con il primo zero della prima: l'equazione risolta dall'asserzione su Delta lambda."},
+ {"tipo": "numero", "espr": "5000/0.1", "vale": "50000", "dove": "03", "appare": "50\\,000"},
+ {"tipo": "numero", "espr": "2.998e5/1", "vale": "299800", "dove": "03", "appare": "3\\cdot10^{5}"},
+ {"tipo": "uguale", "sinistra": "c/(c*dv/c)", "vale": "c/dv", "ipotesi": {"c": "positive", "dv": "positive"}, "dove": "03", "appare": "R=\\frac{\\lambda}{\\Delta\\lambda}=\\frac{c}{\\Delta v}"},
+ {"tipo": "numero", "espr": "1e-3/300*1e6", "vale": "3.333", "dove": "04", "appare": "3{,}333\\ \\mu\\mathrm{m}"},
+ {"tipo": "numero", "espr": "asin(2*588.997e-9/(1e-3/300))*180/pi", "vale": "20.695", "dove": "04", "appare": "20{,}695°"},
+ {"tipo": "numero", "espr": "asin(2*589.594e-9/(1e-3/300))*180/pi", "vale": "20.717", "dove": "04", "appare": "20{,}717°"},
+ {"tipo": "numero", "espr": "(asin(2*589.594e-9/(1e-3/300))-asin(2*588.997e-9/(1e-3/300)))*180/pi*3600", "vale": "79.0", "dove": "04", "appare": "79{,}0''"},
+ {"tipo": "numero", "espr": "589.2955/(2*(589.594-588.997))", "vale": "494", "dove": "04", "appare": "N=\\frac{\\bar\\lambda}{m\\,\\Delta\\lambda}=494"},
+ {"tipo": "numero", "espr": "589.2955/(589.594-588.997)", "vale": "987", "dove": "04", "appare": "987"},
+ {"tipo": "numero", "espr": "2/((1e-3/300)*cos(asin(2*588.997e-9/(1e-3/300))))*1e-9*180/pi*3600", "vale": "132", "dove": "04", "appare": "132''"},
+ {"tipo": "numero", "espr": "(589.594-588.997)/589.2955*2.998e5", "vale": "304", "dove": "04", "appare": "304\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "6.674e-11*1.95e30/(6e6*(2.998e8)**2)*1e4", "vale": "2.41", "dove": "05", "appare": "2{,}41\\cdot10^{-4}"},
+ {"tipo": "numero", "espr": "6.674e-11*1.95e30/(6e6*(2.998e8)**2)*4300", "vale": "1.04", "dove": "05", "appare": "1{,}04\\ \\text{Å}"},
+ {"tipo": "numero", "espr": "2/sqrt(50*4)", "vale": "0.14", "dove": "05", "appare": "\\frac{2\\ \\text{Å}}{\\sqrt{50\\times4}}=0{,}14\\ \\text{Å}"},
+ {"tipo": "numero", "espr": "4300/2", "vale": "2150", "dove": "05", "appare": "2150"},
+ {"tipo": "numero", "espr": "2.998e5/2150", "vale": "139", "dove": "05", "appare": "139\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "6.674e-11*1.95e30/(6e6*2.998e8)/1e3", "vale": "72.3", "dove": "05", "appare": "72\\ \\mathrm{km/s}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{\\Delta\\lambda}{\\lambda}=\\frac{GM}{Rc^{2}}", "perche": "e' il redshift gravitazionale debole al primo ordine, risultato di relativita' generale enunciato qui con la sua ipotesi (campo debole, GM/Rc^2<<1); i numeri sono asseriti a parte."},
+ {"tipo": "simbolico", "dove": "06", "appare": "W_\\lambda=\\int\\frac{I_c-I_\\lambda}{I_c}\\,d\\lambda", "perche": "e' la definizione della larghezza equivalente (Choudhuri 2.89), non un conto."},
+ {"tipo": "limite", "espr": "(1-exp(-t))/t", "var": "t", "a": "0", "vale": "1", "ipotesi": {"t": "positive"}, "dove": "06", "appare": "1-e^{-\\tau}\\simeq\\tau"},
+ {"tipo": "numero", "espr": "pi*2.8179403e-15*1e15", "vale": "8.853", "dove": "06", "appare": "8{,}853\\cdot10^{-15}\\ \\mathrm{m}"},
+ {"tipo": "uguale", "sinistra": "e**2/(4*eps*me*c**2)", "vale": "pi*(e**2/(4*pi*eps*me*c**2))", "ipotesi": {"e": "positive", "eps": "positive", "me": "positive", "c": "positive"}, "dove": "06", "appare": "\\frac{e^{2}}{4\\epsilon_0m_ec^{2}}=\\pi r_e"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\frac{W_\\lambda}{\\lambda}=\\frac{e^{2}}{4\\epsilon_0m_ec^{2}}\\,Nf\\lambda", "perche": "e' la (2.91) di Choudhuri: l'integrale di tau sul profilo normalizzato, con tau proporzionale alla sezione d'urto integrata della transizione (pi e^2 f/(4 pi eps0 me c) in frequenza). Risultato di fisica atomica citato; il coefficiente pi r_e e' asserito."},
+ {"tipo": "simbolico", "dove": "06", "appare": "W_\\lambda=\\frac{\\lambda^{2}}{c}\\int\\big(1-e^{-\\tau_\\nu}\\big)\\,d\\nu", "perche": "e' il cambio di variabile da lambda a nu nella definizione (|d lambda| = lambda^2 d nu / c, con lambda costante sulla riga): Choudhuri 2.90."},
+ {"tipo": "simbolico", "dove": "06", "appare": "I_\\lambda=I_c\\,e^{-\\tau_\\lambda}", "perche": "e' il caso B=0 (nessuna emissione nello strato) della soluzione asserita nella tappa 02: Choudhuri 2.88."},
+ {"tipo": "numero", "espr": "Integral(exp(-u**2),(u,-oo,oo))/sqrt(pi)", "vale": "1.0000", "dove": "07", "appare": "\\int e^{-u^{2}}du=\\sqrt\\pi"},
+ {"tipo": "simbolico", "dove": "07", "appare": "W=\\Delta\\lambda_D\\int_{-\\infty}^{\\infty}\\big(1-e^{-\\tau_0e^{-u^{2}}}\\big)du", "perche": "e' la definizione della larghezza equivalente applicata a un profilo di opacita' gaussiano tau=tau0 exp(-u^2), u=(lambda-lambda0)/Delta lambda_D: una sostituzione nella definizione."},
+ {"tipo": "simbolico", "dove": "07", "appare": "W\\simeq\\sqrt\\pi\\,\\tau_0\\,\\Delta\\lambda_D", "perche": "e' il limite tau0<<1, in cui 1-e^{-x} si riduce a x e resta l'integrale gaussiano asserito nella riga prima."},
+ {"tipo": "simbolico", "dove": "07", "appare": "W\\simeq2\\,\\Delta\\lambda_D\\sqrt{\\ln\\tau_0}", "perche": "e' la stima del regime saturo: la riga e' nera dove tau>1, cioe' per |u|<sqrt(ln tau0), e trasparente fuori; la larghezza di quella zona e' 2 sqrt(ln tau0). Stima asintotica, verificata numericamente nella riga seguente."},
+ {"tipo": "numero", "espr": "Integral(1-exp(-1e6*exp(-u**2)),(u,-10,10))/(2*sqrt(log(1e6)))", "vale": "1.0", "dove": "07", "appare": "1{,}0"},
+ {"tipo": "numero", "espr": "Integral(1-exp(-1/x**2),(x,-oo,oo))/(2*sqrt(pi))", "vale": "1.0000", "ipotesi": {"x": "real"}, "dove": "07", "appare": "\\int_{-\\infty}^{\\infty}\\big(1-e^{-a/x^{2}}\\big)dx=2\\sqrt{\\pi a}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\tau\\simeq a/x^{2}", "perche": "e' l'andamento delle ali di un profilo di Lorentz lontano dal centro, con a proporzionale a tau0 per il quadrato della larghezza di smorzamento: una forma asintotica, non un conto."},
+ {"tipo": "simbolico", "dove": "07", "appare": "W\\propto\\sqrt{N}", "perche": "conseguenza dell'integrale 2 sqrt(pi a) asserito, con a proporzionale a N."},
+ {"tipo": "numero", "espr": "log(0.088/3302.38,10)", "vale": "-4.574", "dove": "08", "appare": "-4{,}574"},
+ {"tipo": "numero", "espr": "log(0.730/5889.97,10)", "vale": "-3.907", "dove": "08", "appare": "-3{,}907"},
+ {"tipo": "numero", "espr": "13.2-log(0.0214,10)-log(3302.38/5000,10)", "vale": "15.05", "dove": "08", "appare": "15{,}05"},
+ {"tipo": "numero", "espr": "14.8-log(0.645,10)-log(5889.97/5000,10)", "vale": "14.92", "dove": "08", "appare": "14{,}92"},
+ {"tipo": "numero", "espr": "14.8-log(0.645,10)", "vale": "14.99", "dove": "08", "appare": "14{,}99"},
+ {"tipo": "numero", "espr": "13.2-log(0.0214,10)", "vale": "14.87", "dove": "08", "appare": "14{,}87"},
+ {"tipo": "numero", "espr": "(10**15.05*1e4)/1e19", "vale": "1.12", "dove": "08", "appare": "1{,}12\\cdot10^{19}\\ \\mathrm{m^{-2}}"},
+ {"tipo": "numero", "espr": "log(pi*2.8179403e-15*10**15.05*1e4*0.0214*3302.38e-10,10)", "vale": "-3.15", "dove": "08", "appare": "-3{,}15"},
+ {"tipo": "numero", "espr": "pi*2.8179403e-15*10**15.05*1e4*0.0214*3302.38e-10/(0.088/3302.38)", "vale": "26", "dove": "08", "appare": "26"},
+ {"tipo": "numero", "espr": "pi*2.8179403e-15*10**15.05*1e4*0.645*5889.97e-10/(0.730/5889.97)", "vale": "304", "dove": "08", "appare": "304"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\log\\big[fN_a(\\lambda/5000\\ \\text{Å})\\big]", "perche": "e' la definizione dell'ascissa della curva di crescita generale del Sole, nella convenzione del Carroll-Ostlie (soluzione 9.26), qui con N_a in cm^-2."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\log N_a=\\log\\big[fN_a(\\lambda/5000\\ \\text{Å})\\big]-\\log f-\\log(\\lambda/5000\\ \\text{Å})", "perche": "e' l'inversione algebrica della definizione dell'ascissa: i valori numerici che ne seguono sono asseriti uno per uno."},
+ {"tipo": "simbolico", "dove": "09", "appare": "R=\\lambda/\\Delta\\lambda=mN", "perche": "restituzione del risultato asserito nella tappa 03."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\Delta\\lambda=\\lambda/(mN)", "perche": "restituzione del risultato asserito nella tappa 03."},
+ {"tipo": "simbolico", "dove": "09", "appare": "W/\\lambda=\\pi r_e\\,Nf\\lambda", "perche": "restituzione del limite otticamente sottile della tappa 06."},
+ {"tipo": "simbolico", "dove": "10", "appare": "R=mN", "perche": "restituzione del risultato della tappa 03."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\pi r_e=8{,}85\\cdot10^{-15}\\ \\mathrm{m}", "perche": "restituzione arrotondata del coefficiente asserito nella tappa 06."},
+ {"tipo": "uguale", "sinistra": "sqrt(a)*2*sqrt(pi)", "vale": "2*sqrt(pi*a)", "ipotesi": {"a": "positive"}, "dove": "07", "appare": "2\\sqrt{\\pi a}"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta\\lambda/\\lambda=\\Delta v/c", "perche": "e' l'effetto Doppler non relativistico, la definizione che lega spostamento in lunghezza d'onda e velocita' radiale."},
+ {"tipo": "simbolico", "dove": "03", "appare": "m/(d\\cos\\theta)", "perche": "restituzione della dispersione angolare asserita come derivata nella stessa tappa."},
+ {"tipo": "simbolico", "dove": "07", "appare": "W/\\lambda=\\pi r_eNf\\lambda", "perche": "restituzione del limite otticamente sottile asserito (coefficiente pi r_e) nella tappa 06."},
+ {"tipo": "simbolico", "dove": "08", "appare": "W/\\lambda=\\pi r_eNf\\lambda", "perche": "restituzione del limite otticamente sottile asserito (coefficiente pi r_e) nella tappa 06."},
+ {"tipo": "simbolico", "dove": "10", "appare": "W/\\lambda=\\pi r_eNf\\lambda", "perche": "restituzione del limite otticamente sottile della tappa 06."},
+ {"tipo": "simbolico", "dove": "10", "appare": "I-I_0=(B(T)-I_0)(1-e^{-\\tau})", "perche": "restituzione dell'identita' asserita nella tappa 02."},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\lambda_n=364{,}6\\ \\mathrm{nm}\\,\\frac{n^2}{n^2-4}", "perche": "formula di Balmer, 1/lambda = R_H (1/4 - 1/n^2) con 4/R_H = 364,6 nm"},
+ {"tipo": "numero", "espr": "1/(1.0968e7*(1/4-1/9))*1e9", "vale": "656.5", "dove": "01", "appare": "656,5 nm, che"},
+ {"tipo": "numero", "espr": "364.6*9/5", "vale": "656.3", "dove": "01", "appare": "=656{,}3\\ \\mathrm{nm}"},
+ {"tipo": "numero", "espr": "4/1.0968e7*1e9", "vale": "364.7", "dove": "01", "appare": "364,7 nm e"},
+ {"tipo": "numero", "espr": "1/2.02e8*1e9", "vale": "4.95", "dove": "01", "appare": "=4{,}95\\cdot10^{-9}"},
+ {"tipo": "numero", "espr": "10.2/(8.617e-5*log(4))/100", "vale": "854", "dove": "01", "appare": "=85\\,400"},
+ {"tipo": "numero", "espr": "1/(500000*4.96e-9)", "vale": "403", "dove": "01", "appare": "=403"},
+ {"tipo": "simbolico", "dove": "03", "appare": "R=\\lambda/\\Delta\\lambda", "perche": "definizione del potere risolutivo"},
+ {"tipo": "numero", "espr": "1895-1868", "vale": "27", "dove": "01", "appare": "ventisette anni prima"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché lo spettro, dopo il corpo nero', meta:'il continuo dice la temperatura, le righe dicono tutto il resto · che cosa si costruisce qui e che cosa no',
+  blocchi:[
+  {t:'prosa', title:'Il continuo e le righe', tag:'architettura', html:R`
+  <p>Il corpo nero ha dato un termometro: dalla forma del continuo si legge una temperatura. Ma uno spettro stellare non è una curva di Planck liscia. È una curva di Planck solcata da centinaia di righe scure, e ogni riga porta un&rsquo;informazione che il continuo non ha: di quale elemento si tratta, in che stato di ionizzazione è, quanti atomi ci sono lungo la linea di vista, a che velocità si muovono. Padre Angelo Secchi, che dal Collegio Romano classificò per primo in modo sistematico gli spettri stellari, lo scriveva nel 1863 con una lista che è ancora il programma dell&rsquo;astrofisica osservativa: <i>«lo studio degli spettri prismatici dei corpi celesti non è uno studio di mera curiosità, ma da esso dipende la soluzione di molte ed importantissime questioni cosmiche. La prima e più importante è quella di stabilire la natura delle sostanze che trovansi nell&rsquo;atmosfera de&rsquo; corpi celesti […] vi è ancora un altro problema […] ed è quello che riguarda il moto proprio delle diverse stelle […] fissare i colori proprii delle stelle e la loro intensità relativa […] Finalmente lo studio spettrale può servire anche di mezzo fotometrico»</i> (citato da de Bernardis, lezione 5).</p>
+  <p>Il movimento ha tre parti. La prima spiega <b>perché esistono righe</b> e perché lo stesso gas può darle scure o brillanti, con una formula di una riga che contiene le tre leggi empiriche di Kirchhoff. La seconda costruisce lo <b>strumento</b>: la fenditura, il reticolo, il potere risolutivo, e che cosa si può misurare anche sotto la risoluzione. La terza legge la <b>profondità</b> di una riga: la larghezza equivalente, la curva di crescita, e il conto del sodio solare con cui de Bernardis chiude la lezione 6. La statistica che decide quanti atomi stanno in ciascun livello (Boltzmann e Saha) e la forma esatta dei profili (naturale, Doppler, collisionale) qui si usano solo dove servono per capire la curva di crescita.</p>`}
+]},
+
+/* ---------------- 01 · FRAUNHOFER E LA CLASSIFICAZIONE ---------------- */
+{ num:'01', title:'Le righe di Fraunhofer, e chi capì che cosa fossero', meta:'1814, le lettere dalla A alla K · Secchi e i quattro tipi · Cannon, Payne e la composizione uguale per tutte le stelle',
+  blocchi:[
+  {t:'prosa', title:'Righe scure nel Sole', tag:'1814', html:R`
+  <p>Nel 1814 Joseph von Fraunhofer misura lo spettro del Sole e indica con le lettere dalla A alla K le righe scure più evidenti. De Bernardis lo dice in una riga: <i>«oggi sappiamo che sono associate a transizioni elettroniche di diversi elementi chimici presenti nella fotosfera solare»</i>. Le identificazioni moderne delle lettere più usate sono queste. C è H-alfa dell&rsquo;idrogeno a 656,3 nm, F è H-beta a 486,1 nm. D è il doppietto del sodio neutro a 589,0 e 589,6 nm, che tornerà nella tappa 04 come banco di prova di un reticolo. H e K sono il calcio ionizzato una volta (CaII) a 396,8 e 393,4 nm. A e B non sono solari: sono bande dell&rsquo;ossigeno molecolare dell&rsquo;atmosfera terrestre, righe «telluriche» che ogni osservazione da terra porta con sé.</p>
+  <p>Il fatto che una riga abbia sempre la stessa lunghezza d&rsquo;onda, in laboratorio e nel Sole, è ciò che rende la spettroscopia chimica a distanza. Il fatto che la lunghezza d&rsquo;onda si sposti di poco quando la sorgente si muove (effetto Doppler) è ciò che la rende anche dinamica, il «moto proprio» di Secchi.</p>`},
+  {t:'prosa', title:'Dalla morfologia alla fisica', tag:'Secchi, Cannon, Payne', html:R`
+  <p>Secchi, con un telescopio da 24 cm sopra la chiesa di Sant&rsquo;Ignazio, divise le stelle in quattro tipi: blu-bianche come Sirio, gialle come il Sole, Capella, Procione, Arturo e Aldebaran, stelle come Betelgeuse con bande larghe, e rosso scure con bande del carbonio. La classificazione matura a Harvard sotto Pickering, intorno al 1910, con il lavoro delle «calcolatrici». Annie Cannon introduce la sequenza O-B-A-F-G-K-M ancora in uso e classifica 225 300 spettri fra il 1911 e il 1915, trenta all&rsquo;ora, guardandone la morfologia. La fisica arriva solo nel 1925. Cecilia Payne mostra che tutte le stelle hanno più o meno la stessa composizione, e che le diverse intensità delle righe dipendono da temperatura e densità attraverso l&rsquo;equazione di Saha dell&rsquo;equilibrio di ionizzazione.</p>
+  <p>È il punto concettuale che regge tutto il resto. <b>Una riga debole non vuol dire un elemento raro.</b> Vuol dire pochi atomi nello stato capace di produrre quella riga, il che dipende dalla temperatura almeno quanto dall&rsquo;abbondanza. Le righe di Balmer dell&rsquo;idrogeno, l&rsquo;elemento più abbondante di tutti, sono deboli nel Sole e massime nelle stelle A0 a circa 9500 K. Le righe H e K del calcio, un milionesimo dell&rsquo;idrogeno, sono le più forti dello spettro solare. Per leggere una riga bisogna dunque sapere come si forma, e da quanta materia.</p>`},
+  {t:'prosa', title:'Da 600 righe a un milione, e un elemento trovato nel Sole', tag:'de Bernardis, slide 2016, PDF 26-27', html:R`
+  <p>De Bernardis racconta il seguito della scoperta. Fraunhofer aveva rifatto l&rsquo;esperimento del prisma di Newton ingrandendo moltissimo lo spettro, e lo aveva trovato interrotto da <i>«più di 600 righe scure»</i>; oggi se ne conoscono circa un milione. Cinquant&rsquo;anni dopo il chimico Robert Bunsen costruì un bruciatore con una fiamma senza colore propria, e il suo giovane collega Gustav Kirchhoff propose di guardare attraverso un prisma le fiamme in cui si bruciavano le sostanze: comparvero serie di righe brillanti su fondo scuro, diverse per ogni elemento, e la sequenza delle righe permetteva di identificare univocamente le sostanze. Catalogati gli spettri degli elementi noti, cominciarono a comparire spettri che non corrispondevano a nessuno, e nel 1868 nello spettro del Sole si trovò un elemento nuovo, che venne chiamato elio, dal nome greco del Sole, ventisette anni prima che lo si isolasse sulla Terra.</p>
+  <p>Restava la domanda che le leggi empiriche non toccavano: perché gli atomi scambiano con la luce solo energie ben precise? Nel modello di Rutherford un elettrone in orbita poteva avere qualunque energia. Bohr, collaboratore di Rutherford dal 1911, ammise orbite permesse e salti fra di esse con un fotone di energia $E=hc/\lambda$, e ritrovò la formula empirica di Balmer. Nella forma moderna, per i salti verso $n=2$,</p>
+  <p>$$\lambda_n=364{,}6\ \mathrm{nm}\,\frac{n^2}{n^2-4},\qquad \lambda_3=364{,}6\cdot\frac{9}{5}=656{,}3\ \mathrm{nm},$$</p>
+  <p>che è H-alfa (i valori 364,6 e 656,3 nm sono misurati in aria; con la costante di Rydberg dell&rsquo;idrogeno si ottengono il limite a 364,7 nm e H-alfa a 656,5 nm, che sono le lunghezze d&rsquo;onda nel vuoto); le righe si infittiscono verso 364,6 nm, il limite della serie. De Bernardis aggiunge subito che <i>«oggi sappiamo che il modello di Bohr è sbagliato»</i>: l&rsquo;elettrone non percorre orbite ma ha una densità di probabilità $|\psi|^2$, e $n$ è uno solo dei quattro numeri quantici; ma la formula di Bohr dà i livelli giusti quando l&rsquo;atomo è isolato, ed è quella che serve per le righe.</p>`},
+  {t:'prosa', title:'Il calcio batte l&rsquo;idrogeno 400 a 1, nel Sole', tag:'de Bernardis, slide 2016, PDF 33-36', html:R`
+  <p>Che una riga forte non voglia dire un elemento abbondante, de Bernardis lo mostra con un conto che conviene avere sotto gli occhi. Nella fotosfera solare, a 5700 K e con pressione elettronica di 15 dyne/cm$^2$, c&rsquo;è un atomo di calcio ogni 500 000 di idrogeno. Eppure le righe H e K del calcio ionizzato una volta sono molto più intense delle righe di Balmer. L&rsquo;idrogeno ha bisogno di 13,6 eV per ionizzarsi ed è quasi tutto neutro, ma per produrre una riga di Balmer deve stare nel livello $n=2$, 10,2 eV sopra il fondamentale: Boltzmann ne mette lì solo uno su 202 milioni, cioè una frazione $1/(2{,}02\cdot10^8)=4{,}95\cdot10^{-9}$ (de Bernardis scrive $4{,}96\cdot10^{-9}$). Per avere tanti atomi in $n=2$ quanti in $n=1$, con i pesi statistici $g_2/g_1=4$, servirebbe $T=10{,}2\ \mathrm{eV}/(k\ln4)=85\,400$ K. Il calcio invece si ionizza con 6,11 eV: a 5700 K è quasi tutto Ca II, e quasi tutto nello stato fondamentale da cui partono H e K. Il rapporto fra gli atomi che fanno le due righe è quindi $1/(500\,000\cdot4{,}96\cdot10^{-9})=403$: <i>«circa 400 atomi di calcio ionizzato una volta producono righe H e K per ogni atomo di idrogeno che produce righe di Balmer»</i>.</p>`}
+]},
+
+/* ---------------- 02 · KIRCHHOFF E LO STRATO ---------------- */
+{ num:'02', title:'Le tre leggi di Kirchhoff, contenute in una formula sola', meta:'continuo, righe brillanti, righe scure · lo strato uniforme che assorbe ed emette · perché la fotosfera dà righe scure',
+  blocchi:[
+  {t:'prosa', title:'Le tre leggi empiriche', tag:'1860', html:R`
+  <p>Nel 1860 erano note tre regole empiriche dell&rsquo;analisi spettrale, che de Bernardis elenca così nella lezione 5. <b>(1)</b> Un oggetto caldo, o un gas denso e caldo, produce uno spettro continuo, di tipo corpo nero. <b>(2)</b> Un gas caldo e rarefatto produce uno spettro di righe brillanti e nessun continuo. <b>(3)</b> Un gas freddo davanti a una sorgente di continuo produce uno spettro continuo solcato da righe scure di assorbimento, come quello del Sole. Dette così sembrano tre fatti indipendenti, ma sono tre casi di una sola equazione. La formula costa poco e vale la pena scriverla qui, perché è esattamente la «dipendenza da dove ci si mette» che dà l&rsquo;identità a questo movimento.</p>`},
+  {t:'prosa', title:'Uno strato di gas davanti a una sorgente', tag:'la formula che le contiene', html:R`
+  <p>Si prenda uno strato di gas uniforme a temperatura $T$, in equilibrio termodinamico locale, attraversato da una brillanza $I_0$ che viene da dietro. A ogni frequenza lo strato ha una <b>profondità ottica</b> $\tau$: la radiazione che lo attraversa viene attenuata di $e^{-\tau}$. Per la legge di Kirchhoff, uno strato che assorbe a una frequenza emette anche a quella frequenza, con funzione sorgente $B(T)$, la brillanza di corpo nero alla sua temperatura. Misurando la profondità ottica lungo il percorso, la brillanza obbedisce a $\frac{dI}{d\tau}=B-I$: perde la frazione $d\tau$ di sé stessa e guadagna $B\,d\tau$. Per uno strato uniforme la soluzione è
+  $$I(\tau)=I_0\,e^{-\tau}+B(T)\big(1-e^{-\tau}\big).$$
+  Il primo termine è la sorgente di fondo attenuata, il secondo l&rsquo;emissione propria dello strato. La forma che rende leggibile tutto è la differenza rispetto al fondo:
+  $$I-I_0=\big(B(T)-I_0\big)\big(1-e^{-\tau}\big).$$</p>
+  <p>Ora le tre leggi escono da sole. Se lo strato è <b>otticamente spesso</b> a tutte le frequenze, $\tau\gg1$ ovunque, allora $I\to B(T)$: si vede un continuo di corpo nero alla temperatura dello strato, ed è la legge (1), il gas denso e caldo. Se non c&rsquo;è sorgente dietro, $I_0=0$, e il gas è rarefatto, con $\tau$ grande solo alle frequenze delle sue transizioni e quasi nullo altrove: si vede $B(T)(1-e^{-\tau})$, cioè luce solo alle frequenze delle righe. È la legge (2), righe brillanti su un fondo buio. Se dietro c&rsquo;è una sorgente più calda dello strato, $I_0>B(T)$, il fattore $B(T)-I_0$ è negativo: alle frequenze delle righe, dove $\tau$ è grande, la brillanza scende sotto il fondo. È la legge (3), righe scure. E se la sorgente dietro fosse più fredda dello strato, lo stesso gas darebbe righe brillanti sopra il continuo. <b>Il gas è lo stesso: è il segno di $B(T)-I_0$ a decidere</b>, cioè se dietro il gas, lungo la linea di vista, c&rsquo;è qualcosa di più caldo o di più freddo.</p>`},
+  {t:'plot', title:'La brillanza che esce dallo strato, al crescere della profondità ottica',
+   intro:'Sorgente di fondo $I_0=1$. In ciano uno strato più freddo ($B=0{,}3$): la brillanza cala verso $B$ e la riga è scura. In oro uno strato più caldo ($B=2$): la brillanza sale verso $B$ e la riga è brillante. In viola nessuna sorgente dietro ($I_0=0$, $B=1$).',
+   plots:[
+    {kind:'func2d', xr:[0,5], yr:[0,2.2], height:300, equal:false,
+     title:'tau (profondita ottica alla frequenza considerata)      I',
+     curves:[{f:'1*exp(-x)+0.3*(1-exp(-x))', col:'#5eead4', label:'strato freddo: riga scura'},
+             {f:'1*exp(-x)+2*(1-exp(-x))', col:'#d8a13a', label:'strato caldo: riga brillante'},
+             {f:'1*(1-exp(-x))', col:'#b98cff', label:'niente dietro: riga in emissione', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> tutte le curve partono dal valore del fondo a $\tau=0$ (strato vuoto) e finiscono su $B(T)$ dello strato per $\tau\gg1$. In mezzo l&rsquo;andamento è esponenziale, con scala $\tau\sim1$.</p>
+   <p><b>Che cosa impararne:</b> al centro di una riga $\tau$ è grande, nel continuo accanto è piccolo. Il contrasto fra riga e continuo è quindi il contrasto fra due punti della stessa curva, uno a destra e uno a sinistra. Un gas otticamente spesso a tutte le frequenze non mostra righe: è la legge (1).</p>`},
+  {t:'prosa', title:'Perché il Sole ha righe scure', tag:'la fotosfera', html:R`
+  <p>De Bernardis, nella lezione 5, traduce la terza legge nella struttura di una stella: <i>«si può pensare che il corpo nero sia prodotto dalle regioni più interne della stella, più calde e opache, e il gas dello strato più esterno (la fotosfera), più freddo e semitrasparente, assorba solo le lunghezze d&rsquo;onda caratteristiche degli elementi di cui è fatto»</i>. La temperatura scende verso l&rsquo;esterno, e alle frequenze di una riga, dove l&rsquo;opacità è grande, si vede soltanto fino a uno strato più alto e più freddo che nel continuo. Un esempio con numeri scelti per illustrare, non presi da una fonte: se nel continuo a 500 nm si vede fino a uno strato a 6400 K e al centro di una riga fino a uno a 4500 K, il rapporto delle due funzioni di Planck dà per il centro della riga $0{,}148$ del continuo. È una riga profonda, ma non nera. L&rsquo;intensità residua al centro di una riga stellare misura il gradiente di temperatura dell&rsquo;atmosfera, non la mancanza di luce.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una nebulosa di idrogeno ionizzato dà righe brillanti; la fotosfera del Sole dà righe scure di idrogeno. Che cosa le distingue fisicamente?`,
+    a:R`Non la composizione e non necessariamente la temperatura: quello che c&rsquo;è dietro lungo la linea di vista. La nebulosa non ha una sorgente di continuo più calda alle spalle ($I_0\approx0$), quindi alle frequenze delle righe vede solo l&rsquo;emissione propria $B(T)(1-e^{-\tau})$. Nella fotosfera, alle frequenze delle righe si vede uno strato più freddo di quello visibile nel continuo, e $B(T)-I_0<0$.`},
+   {q:R`Perché l’interno di una stella, che è un gas, non mostra righe?`,
+    a:R`Perché è otticamente spesso a tutte le frequenze: con $\tau\gg1$ ovunque la soluzione dà $I\to B(T)$ indipendentemente dalla frequenza, cioè un continuo di corpo nero. Le righe nascono solo dove la profondità ottica dipende dalla frequenza su un tratto in cui la temperatura cambia.`}
+  ]},
+  {t:'prosa', title:'Perché lo spettro viene solo dalla superficie', tag:'de Bernardis, slide 2016, PDF 25 e 30', html:R`
+  <p>De Bernardis fonda la terza legge sul cammino dei fotoni. All&rsquo;interno della stella i fotoni interagiscono di continuo con gli elettroni del gas ionizzato, percorrono tratti brevi e cambiano direzione a ogni urto; l&rsquo;ultima diffusione avviene vicino alla superficie, e a noi arrivano i fotoni che in quell&rsquo;ultimo urto sono stati deflessi verso di noi. Lo spettro descrive quindi le condizioni fisiche e la composizione degli strati più superficiali, non dell&rsquo;interno: il corpo nero è prodotto dalle regioni più profonde, più calde e opache, e il gas più esterno, più freddo e semitrasparente, <i>«assorbe solo le lunghezze d&rsquo;onda caratteristiche degli elementi di cui è fatto»</i>.</p>`}
+]},
+
+/* ---------------- 03 · LO STRUMENTO ---------------- */
+{ num:'03', title:'Lo strumento: fenditura, reticolo e potere risolutivo', meta:'la fenditura e il compromesso con la luce · d sin theta = m lambda · la dispersione angolare · R = mN derivato con il criterio di Rayleigh',
+  blocchi:[
+  {t:'prosa', title:'La fenditura: risoluzione contro luce', tag:'il problema sperimentale', html:R`
+  <p>Lo schema di de Bernardis nella lezione 6 è un telescopio, una fenditura $F$ nel piano focale, un elemento dispersore (prisma o reticolo) e un rivelatore nel piano focale dello spettrografo. Lo spettro è una sequenza di immagini della fenditura, una per lunghezza d&rsquo;onda, affiancate. Di qui il compromesso che de Bernardis enuncia in tre righe: <i>«più stretta è la fenditura, migliore è la risoluzione spettrale; più stretta è la fenditura, meno luce passa; non si possono avere contemporaneamente alta risoluzione e alta luminosità dello strumento»</i>. Due lunghezze d&rsquo;onda le cui immagini della fenditura si sovrappongono non si separano più. Se la dispersione dello strumento è $d\lambda/dx$ (lunghezza d&rsquo;onda per unità di lunghezza sul rivelatore) e l&rsquo;immagine della fenditura è larga $w$, la risoluzione limitata dalla fenditura è $\Delta\lambda\simeq w\,d\lambda/dx$. Stringerla migliora $\Delta\lambda$ e butta via fotoni, per questo <i>«la spettroscopia richiede moltissimi fotoni, quindi grande area del telescopio e lungo tempo di integrazione»</i>. Lo spettro di una stella si ottiene con molti meno fotoni per elemento spettrale di quelli che la stessa stella dà nel suo flusso integrato.</p>
+  <p>Oltre la fenditura c&rsquo;è un limite che nessuna fenditura può migliorare, quello dell&rsquo;elemento dispersore. Le slide di de Bernardis nominano il reticolo solo come «elemento dispersore», e la sua teoria qui sotto è ottica ondulatoria standard. La sua prova numerica è il problema 5.2 del Carroll-Ostlie, nella tappa seguente.</p>`},
+  {t:'prosa', title:'Il reticolo: interferenza di N fenditure', tag:'la condizione dei massimi', html:R`
+  <p>Un reticolo è una serie di $N$ fenditure (o righe riflettenti) equispaziate a passo $d$. Un&rsquo;onda piana di lunghezza d&rsquo;onda $\lambda$ incide perpendicolarmente. Nella direzione $\theta$ i contributi di due fenditure adiacenti differiscono in cammino di $d\sin\theta$, cioè in fase di $\varphi=2\pi d\sin\theta/\lambda$. Si sommano in fase, dando un <b>massimo principale</b>, quando la differenza di cammino è un numero intero di lunghezze d&rsquo;onda:
+  $$d\sin\theta=m\lambda,\qquad m=0,\pm1,\pm2,\dots$$
+  L&rsquo;intero $m$ è l&rsquo;<b>ordine</b>. All&rsquo;ordine zero tutte le lunghezze d&rsquo;onda vanno nella stessa direzione e non c&rsquo;è dispersione. A ogni altro ordine la direzione dipende da $\lambda$, e il reticolo separa i colori. Quanto li separa è la <b>dispersione angolare</b>, che si ottiene differenziando la condizione a $m$ fisso:
+  $$\frac{d\theta}{d\lambda}=\frac{m}{d\cos\theta}.$$
+  Cresce con l&rsquo;ordine e con la densità delle righe (cioè con $1/d$). Un reticolo fitto, usato in ordine alto, allarga lo spettro.</p>`},
+  {t:'prosa', title:'Il potere risolutivo: R = mN', tag:'la derivazione dell’orale', html:R`
+  <p>Allargare lo spettro non basta: bisogna che ogni riga resti stretta. La somma delle $N$ onde di fase crescente $\varphi$ è una <span class="str" data-str="serie-geometrica">serie geometrica</span> finita di fasori, e la sua intensità è
+  $$I(\varphi)\propto\left[\frac{\sin(N\varphi/2)}{\sin(\varphi/2)}\right]^{2},$$
+  che nei massimi principali ($\varphi=2\pi m$) vale $N^{2}$, mentre fra un massimo e l&rsquo;altro si annulla $N-1$ volte. Lo si vede nella figura sotto. Il primo zero accanto al massimo di ordine $m$ cade dove $N\varphi/2$ è avanzato di $\pi$, cioè dove $d\sin\theta=m\lambda+\lambda/N$. Più fenditure ci sono, più il massimo è stretto. È la stessa relazione di reciprocità che lega la larghezza di una funzione a quella della sua <span class="str" data-str="trasformata-di-fourier">trasformata di Fourier</span>: il reticolo è un campionamento lungo $Nd$, e la sua figura di diffrazione è larga $1/N$ in unità di ordine.</p>
+  <p>Due righe a $\lambda$ e $\lambda+\Delta\lambda$ si dicono risolte, con il <b>criterio di Rayleigh</b>, quando il massimo della seconda cade sul primo zero della prima. Il massimo della seconda è a $d\sin\theta=m(\lambda+\Delta\lambda)$, e uguagliandolo a $m\lambda+\lambda/N$ si ha $\Delta\lambda=\frac{\lambda}{mN}$, cioè
+  $$R=\frac{\lambda}{\Delta\lambda}=mN.$$
+  Il passo $d$ è sparito, e con lui la dispersione. <b>Il potere risolutivo dipende solo dall&rsquo;ordine e dal numero di righe illuminate</b>, cioè dalla differenza di cammino massima fra le onde che interferiscono, $Nd\sin\theta=mN\lambda$, misurata in lunghezze d&rsquo;onda. È per questo che uno spettrografo ad alta risoluzione è <i>grande</i>: per avere molte righe illuminate serve un fascio largo, e con lui collimatori e camere lunghe. Per separare a 500 nm due righe a 0,01 nm serve $R=50\,000$, cioè 50 000 righe illuminate al primo ordine o 25 000 al secondo. In termini di velocità, per effetto Doppler $\Delta\lambda/\lambda=\Delta v/c$, e
+  $$R=\frac{\lambda}{\Delta\lambda}=\frac{c}{\Delta v}.$$
+  Misurare velocità di 1 km/s, come nella ricerca di pianeti attorno ad altre stelle, chiede $R\sim3\cdot10^{5}$, e chiede di saper misurare il centro di una riga molto meglio della sua larghezza, che è il tema della tappa 05.</p>`},
+  {t:'plot', title:'La figura di un reticolo, con 5 e con 20 fenditure',
+   intro:R`Intensità normalizzata al massimo, $[\sin(N\varphi/2)/(N\sin(\varphi/2))]^2$, in funzione della fase $\varphi$ fra fenditure adiacenti, in unità di $2\pi$: i massimi principali cadono agli interi, che sono gli ordini.`,
+   plots:[
+    {kind:'func2d', xr:[-0.3,2.3], yr:[0,1.05], height:300, equal:false,
+     title:'phi / 2pi  (ordine)      I / I_max',
+     curves:[{f:'pow(sin(5*PI*x)/(5*sin(PI*x)+1e-12),2)', col:'#d8a13a', label:'N = 5'},
+             {f:'pow(sin(20*PI*x)/(20*sin(PI*x)+1e-12),2)', col:'#5eead4', label:'N = 20'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> i massimi principali stanno negli stessi punti (gli ordini $m=0,1,2$) per entrambi i reticoli, perché lì li fissa la sola condizione $d\sin\theta=m\lambda$. Ma con 20 fenditure ogni massimo è quattro volte più stretto che con 5: la semilarghezza, fino al primo zero, è $1/N$ in unità di ordine.</p>
+   <p><b>Che cosa impararne:</b> la posizione dei massimi dipende da $d$, la loro larghezza da $N$. La dispersione e il potere risolutivo sono due proprietà diverse dello strumento. La prima allarga lo spettro sul rivelatore, la seconda decide quanto sottili restano le righe.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Si dimezza il passo di un reticolo lasciando invariata la sua larghezza totale. Che cosa succede alla dispersione e al potere risolutivo al primo ordine?`,
+    a:R`La dispersione $d\theta/d\lambda=m/(d\cos\theta)$ circa raddoppia (le righe sono più fitte). Il numero di righe illuminate $N$ raddoppia anch&rsquo;esso, a larghezza fissa, quindi raddoppia $R=mN$. Le due cose vanno insieme qui solo perché si è tenuta fissa la larghezza $Nd$. Ciò che conta per $R$ è la differenza di cammino massima, $mN\lambda=Nd\sin\theta$.`},
+   {q:R`Perché all’ordine zero un reticolo non separa i colori?`,
+    a:R`Perché la condizione $d\sin\theta=0\cdot\lambda$ dà $\theta=0$ per ogni $\lambda$: tutte le lunghezze d&rsquo;onda interferiscono costruttivamente nella direzione speculare (o di trasmissione diretta). La dispersione $m/(d\cos\theta)$ è nulla per $m=0$, e così il potere risolutivo $mN$.`}
+  ]},
+  {t:'prosa', title:'La spettroscopia ha fame di fotoni', tag:'de Bernardis, slide 2016, PDF 30 e 37', html:R`
+  <p>De Bernardis insiste sull&rsquo;aspetto sperimentale: <i>«la spettroscopia richiede moltissimi fotoni, quindi grande area del telescopio e lungo tempo di integrazione»</i>. Il motivo è nel compromesso della fenditura: un fotometro raccoglie tutta la luce di una banda in un solo canale, uno spettrografo la divide in migliaia di elementi spettrali e ne butta una parte alla fenditura. Con un potere risolutivo $R=\lambda/\Delta\lambda$ i fotoni per elemento sono, a parità di tutto il resto, circa $R$ volte di meno che in una banda larga quanto $\lambda$: a $R=10\,000$ servono diecimila volte più fotoni per lo stesso rapporto segnale-rumore per canale. È la ragione per cui la storia della spettroscopia stellare è una storia di telescopi grandi: Secchi lavorava con 24 cm, lo spettrometro stellare che de Bernardis mostra in una foto del 1898, progettato da James Keeler e costruito da John Brashear, era già uno strumento da grande rifrattore.</p>`}
+]},
+
+/* ---------------- 04 · L'ESERCIZIO DEL DOPPIETTO ---------------- */
+{ num:'04', title:'Il doppietto del sodio separato da un reticolo', meta:'300 righe al millimetro al secondo ordine · gli angoli, la loro differenza · quante righe devono essere illuminate',
+  blocchi:[
+  {t:'prosa', title:'Il problema', tag:'Carroll-Ostlie, problema 5.2', html:R`
+  <p>Il problema 5.2 del Carroll-Ostlie (del testo abbiamo solo il manuale delle soluzioni, che però riporta i dati e il percorso) prende un reticolo da 300 righe al millimetro e lo usa al secondo ordine per separare le due righe D del sodio, a 588,997 nm e 589,594 nm. Chiede (a) l&rsquo;angolo fra le due righe nello spettro di secondo ordine, (b) quante righe del reticolo devono essere illuminate perché le due righe siano risolte.</p>
+  <p>Il passo è $d=1\ \mathrm{mm}/300=3{,}333\ \mu\mathrm{m}$. Con $d\sin\theta=2\lambda$ gli angoli sono $20{,}695°$ per la prima riga e $20{,}717°$ per la seconda. La differenza è $0{,}0219°$, cioè $79{,}0''$. La dispersione angolare al secondo ordine, $2/(d\cos\theta)$, vale circa $132''$ per nanometro. Moltiplicata per la separazione di 0,597 nm del doppietto ritrova la stessa differenza: due modi di dire lo stesso conto. Per il punto (b), il criterio di Rayleigh dà
+  $$N=\frac{\bar\lambda}{m\,\Delta\lambda}=494,$$
+  con $\bar\lambda=589{,}296$ nm. Bastano 494 righe, cioè una zona del reticolo larga circa 1,6 mm. Al primo ordine ne servirebbero $987$. Il doppietto del sodio è separato da un $R$ di appena mille, e a occhio con un buon spettroscopio da banco. Quella separazione corrisponde a $304\ \mathrm{km/s}$ in velocità: chi deve misurare velocità di qualche km/s ha bisogno di poteri risolutivi cento volte più grandi.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel problema, raddoppiare la distanza fra reticolo e rivelatore aiuta a risolvere il doppietto?`,
+    a:R`Separa di più le due immagini sul rivelatore (la dispersione lineare cresce con la focale), ma allarga nello stesso rapporto ciascuna riga: la risoluzione resta $R=mN$. Aiuta solo se il limite era il pixel del rivelatore e non il reticolo.`}
+  ]}
+]},
+
+/* ---------------- 05 · SOTTO LA RISOLUZIONE ---------------- */
+{ num:'05', title:'Misurare sotto la risoluzione: il redshift gravitazionale di Sirio B', meta:'una prova scritta del 2006 · la risoluzione non è la precisione · quanti elementi spettrali indipendenti ci sono in una riga larga',
+  blocchi:[
+  {t:'prosa', title:'Il testo', tag:'compito 03 del 9 gennaio 2006, esercizio 3', html:R`
+  <p><i>Lo spettro della nana bianca Sirio B è stato ottenuto con uno spettrometro a bordo del telescopio spaziale Hubble, a una risoluzione di circa 2 Å. Che righe si vedono? Sapendo che la stella ha massa 0,98 masse solari e raggio 6000 km, si determini il redshift gravitazionale delle righe. Questo redshift è misurabile dai dati?</i> Le righe sono quelle di Balmer dell&rsquo;idrogeno, larghissime per la pressione enorme dell&rsquo;atmosfera di una nana bianca. Il redshift gravitazionale debole, al primo ordine, è $\frac{\Delta\lambda}{\lambda}=\frac{GM}{Rc^{2}}$, risultato di relatività generale valido finché $GM/Rc^2\ll1$. Con questi dati vale $2{,}41\cdot10^{-4}$: a 4300 Å sono $1{,}04\ \text{Å}$, che la soluzione arrotonda a 1,1 Å. In velocità equivalente è $GM/Rc$, circa $72\ \mathrm{km/s}$.</p>`},
+  {t:'prosa', title:'Più piccolo della risoluzione, eppure misurabile', tag:'precisione contro risoluzione', html:R`
+  <p>Lo spostamento di 1 Å è <b>metà della risoluzione</b>. La risposta ingenua è «non si vede», e la soluzione d&rsquo;esame la smonta in tre righe. La risoluzione dice quanto devono distare due righe per essere viste come due. Ma qui non si deve separare niente: si deve misurare di quanto si è spostata, tutta insieme, una riga sola, e larghissima. Le righe si estendono su circa 100 Å, quindi ciascuna occupa circa 50 elementi spettrali indipendenti da 2 Å. Lo spostamento comune di quattro righe si misura con l&rsquo;informazione di tutti questi elementi, e l&rsquo;errore scende come la radice del numero di misure indipendenti:
+  $$\sigma\simeq\frac{2\ \text{Å}}{\sqrt{50\times4}}=0{,}14\ \text{Å}.$$
+  Lo spostamento di 1,04 Å è dunque misurato a circa sette deviazioni standard. La stima suppone che il rumore di ogni elemento sia confrontabile con la sua larghezza e che i profili siano noti. È un <span class="str" data-str="ordini-di-grandezza">ordine di grandezza</span>, e la soluzione la presenta così. Il principio però è generale, ed è il motivo per cui la tappa 03 parlava di saper misurare il centro di una riga meglio della sua larghezza. Lo strumento ha qui $R=4300/2$, cioè $2150$, pari a $139\ \mathrm{km/s}$ in velocità, eppure con quelle righe misura uno spostamento di 72 km/s.</p>`}
+]},
+
+/* ---------------- 06 · LA LARGHEZZA EQUIVALENTE ---------------- */
+{ num:'06', title:'La larghezza equivalente: quanto è forte una riga, misurato sul grafico', meta:'il rettangolo con la stessa area · perché non dipende dalla risoluzione · il limite otticamente sottile e il raggio classico dell’elettrone',
+  blocchi:[
+  {t:'prosa', title:'La definizione operativa', tag:'il rettangolo', html:R`
+  <p>De Bernardis, nella lezione 6, descrive una riga con due numeri. La <b>FWHM</b>, larghezza a metà altezza, dice quanto è larga. La <b>larghezza equivalente</b> $W$ dice quanto è forte: <i>«W è la larghezza (in lunghezza d&rsquo;onda) di un rettangolo che ha la stessa area della riga spettrale, e che è alto quanto il continuo nell&rsquo;intorno della riga»</i>. In simboli, con $I_c$ il continuo e $I_\lambda$ lo spettro dentro la riga (Choudhuri, eq. 2.89),
+  $$W_\lambda=\int\frac{I_c-I_\lambda}{I_c}\,d\lambda.$$
+  È la frazione di luce mancante, integrata sulla riga. Una riga che toglie completamente la luce per 1 Å ha $W=1$ Å; una che ne toglie metà su 2 Å, anche. Va detta all&rsquo;orale come <b>definizione operativa</b>: si misura sul grafico, normalizzando lo spettro al continuo e calcolando l&rsquo;area della depressione.</p>
+  <p>La sua virtù è che <b>non dipende dalla risoluzione dello strumento</b>. Uno spettrografo a bassa risoluzione allarga la riga e la rende meno profonda, ma conserva la luce mancante: l&rsquo;area resta quella. Due osservatori con strumenti diversi misurano FWHM diverse e la stessa $W$. Ed è per questo che la larghezza equivalente, e non la profondità, è la quantità che si collega al numero di atomi.</p>`},
+  {t:'prosa', title:'Dalla larghezza equivalente agli atomi: il caso sottile', tag:'Choudhuri §2.7', html:R`
+  <p>Se lo strato assorbente non emette alle frequenze della riga, il caso $B=0$ della soluzione della tappa 02, lo spettro dentro la riga è $I_\lambda=I_c\,e^{-\tau_\lambda}$ (Choudhuri, 2.88). Passando dalla lunghezza d&rsquo;onda alla frequenza, con $\lambda$ praticamente costante su una riga stretta,
+  $$W_\lambda=\frac{\lambda^{2}}{c}\int\big(1-e^{-\tau_\nu}\big)\,d\nu.$$
+  Per una riga <b>debole</b>, $\tau\ll1$, si sviluppa $1-e^{-\tau}\simeq\tau$, e l&rsquo;integrale di $\tau$ sulla riga è il numero di atomi per unità di superficie lungo la linea di vista, la <b>densità colonnare</b> $N$, per la sezione d&rsquo;urto integrata della transizione. Quest&rsquo;ultima la fisica atomica scrive come la sezione classica di un elettrone oscillante moltiplicata per un numero puro, l&rsquo;<b>intensità di oscillatore</b> $f$. Il risultato (Choudhuri, 2.91) è
+  $$\frac{W_\lambda}{\lambda}=\frac{e^{2}}{4\epsilon_0m_ec^{2}}\,Nf\lambda,$$
+  e il coefficiente ha un nome: $\frac{e^{2}}{4\epsilon_0m_ec^{2}}=\pi r_e$, con $r_e$ il raggio classico dell&rsquo;elettrone, quindi $\pi r_e=8{,}853\cdot10^{-15}\ \mathrm{m}$. La forma del profilo è sparita: nel regime sottile $W$ conta gli atomi e basta, qualunque sia il meccanismo che allarga la riga. È una relazione <b>lineare</b> fra ciò che si misura, $W/\lambda$, e ciò che si vuole, $N$. Se tutte le righe fossero deboli, l&rsquo;analisi delle abbondanze sarebbe una divisione. Non lo sono, e la tappa seguente spiega che cosa succede quando la riga diventa nera al centro.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Uno spettro a bassa risoluzione e uno ad alta risoluzione della stessa riga danno FWHM 3 Å e 0,5 Å. Che cosa ci si aspetta per le larghezze equivalenti?`,
+    a:R`Che siano uguali entro gli errori. La convoluzione con la risposta dello strumento ridistribuisce la luce mancante su un intervallo più largo ma non la cambia: l&rsquo;area della depressione, normalizzata al continuo, è conservata. La FWHM osservata invece è dominata dallo strumento nel primo caso.`},
+   {q:R`Perché nel regime sottile la forma del profilo non conta?`,
+    a:R`Perché $W$ diventa l&rsquo;integrale di $\tau$, e l&rsquo;integrale del profilo di opacità su tutte le frequenze è fissato dalla sezione d&rsquo;urto integrata della transizione per il numero di atomi: il profilo è normalizzato. Allargare la riga la rende meno profonda nella stessa misura, finché resta ovunque $\tau\ll1$.`}
+  ]}
+]},
+
+/* ---------------- 07 · LA CURVA DI CRESCITA ---------------- */
+{ num:'07', title:'La curva di crescita: lineare, satura, smorzata', meta:'quando la riga diventa nera al centro · la radice del logaritmo · le ali di Lorentz e la radice di N',
+  blocchi:[
+  {t:'prosa', title:'Che cosa cerca la curva', tag:'de Bernardis, lezione 6', html:R`
+  <p>De Bernardis pone la domanda così: <i>«se misuriamo la profondità delle righe (ad esempio dalla larghezza equivalente W), possiamo stabilire qual è la densità colonnare di atomi di quella specie. […] Ci deve essere una relazione (non necessariamente lineare) tra le larghezze di riga misurate, W, e le densità colonnari, N. […] La curva che descrive l&rsquo;aumento di W con N si chiama curva di crescita»</i>. Choudhuri aggiunge l&rsquo;osservazione che ne spiega la forma: la frazione di luce mancante $(I_c-I_\nu)/I_c$ <i>non può mai superare 1</i>, per quanto forte sia la riga. La curva ha tre tratti, e ognuno si ricava con un integrale.</p>`},
+  {t:'prosa', title:'I tre tratti, derivati', tag:'tre integrali', html:R`
+  <p>Si prenda il profilo di opacità del cuore della riga come gaussiano, l&rsquo;allargamento Doppler dei moti termici: $\tau=\tau_0e^{-u^{2}}$, con $u=(\lambda-\lambda_0)/\Delta\lambda_D$ e $\tau_0\propto N$ la profondità ottica al centro. La definizione dà
+  $$W=\Delta\lambda_D\int_{-\infty}^{\infty}\big(1-e^{-\tau_0e^{-u^{2}}}\big)du.$$
+  <b>Tratto lineare</b>, $\tau_0\ll1$: $1-e^{-x}\simeq x$ e resta l&rsquo;<span class="str" data-str="integrale-gaussiano">integrale gaussiano</span>, $\int e^{-u^{2}}du=\sqrt\pi$, quindi $W\simeq\sqrt\pi\,\tau_0\,\Delta\lambda_D$, proporzionale a $N$. È il caso della tappa 06.</p>
+  <p><b>Tratto saturo</b>, $\tau_0\gg1$: la riga è nera, $1-e^{-\tau}\simeq1$, dovunque $\tau>1$, cioè per $|u|<\sqrt{\ln\tau_0}$, e trasparente fuori. La larghezza equivalente è la larghezza della zona nera, $W\simeq2\,\Delta\lambda_D\sqrt{\ln\tau_0}$. Aumentare $N$ di un fattore 10 allarga la riga di pochissimo, perché ne cambia solo il logaritmo sotto radice. È il <i>plateau</i> di Choudhuri. A $\tau_0=10^6$ la stima e l&rsquo;integrale esatto stanno nel rapporto $1{,}0$, e il regime saturo è già pienamente raggiunto. Su questo tratto $W$ dice molto poco su $N$: un errore del 10% su $W$ diventa un errore di un fattore grande su $N$.</p>
+  <p><b>Tratto smorzato</b>, $\tau_0$ enorme: lontano dal centro il profilo vero non è gaussiano. Gli allargamenti naturale e collisionale danno ali di Lorentz, che decrescono come una potenza e non come un esponenziale. Nelle ali $\tau\simeq a/x^{2}$, con $x$ la distanza dal centro e $a\propto N$. Quando $N$ è così grande che anche le ali diventano spesse, l&rsquo;integrale è dominato da loro:
+  $$\int_{-\infty}^{\infty}\big(1-e^{-a/x^{2}}\big)dx=2\sqrt{\pi a},$$
+  e quindi $W\propto\sqrt{N}$. È il risalire della curva per righe fortissime, che Choudhuri attribuisce a <i>«some absorption in the wings»</i>.</p>`},
+  {t:'plot', title:'La curva di crescita di un profilo gaussiano, calcolata',
+   intro:R`Ascissa $\log_{10}\tau_0$, ordinata $\log_{10}(W/\Delta\lambda_D)$. In ciano l’integrale esatto (fatto numericamente nella figura), in oro tratteggiato il tratto lineare $\sqrt\pi\,\tau_0$, in viola tratteggiato il tratto saturo $2\sqrt{\ln\tau_0}$.`,
+   plots:[
+    {kind:'func2d', xr:[-2,6], yr:[-2,1], height:300, equal:false,
+     title:'log10 tau0      log10 (W / Delta lambda_D)',
+     curves:[{f:'(function(){var s=0;for(var i=-400;i<=400;i++){var u=i/50;s+=1-exp(-pow(10,x)*exp(-u*u));}return log(s/50)/log(10);})()', col:'#5eead4', label:'gaussiano esatto'},
+             {f:'log(sqrt(PI)*pow(10,x))/log(10)', col:'#d8a13a', label:'lineare: W = sqrt(pi) tau0', dash:true},
+             {f:'x>0.2?log(2*sqrt(x*log(10)))/log(10):NaN', col:'#b98cff', label:'saturo: W = 2 sqrt(ln tau0)', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> fino a $\tau_0\sim0{,}3$ la curva esatta coincide con la retta di pendenza 1, il tratto lineare in cui $W$ conta gli atomi. Poi si piega, e da $\tau_0\sim10$ in su è quasi orizzontale: tre decadi di $\tau_0$, cioè di $N$, fanno meno di un fattore 2 in $W$.</p>
+   <p><b>Che cosa impararne:</b> sulla parte piatta la larghezza equivalente misura male la densità colonnare, ma misura bene la larghezza Doppler $\Delta\lambda_D$, che fissa l&rsquo;altezza del plateau. Il risalire di pendenza 1/2 per $\tau_0$ enormi non è in figura, perché un profilo puramente gaussiano non ha ali: lo danno le ali di Lorentz.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Due righe dello stesso atomo dallo stesso livello hanno $f$ diversi di un fattore 30. Se entrambe sono sul tratto lineare, quanto stanno le loro larghezze equivalenti (a parità di lambda)?`,
+    a:R`Nel rapporto 30, perché $W/\lambda=\pi r_eNf\lambda$ è lineare in $f$ a parità di $N$. Se il rapporto misurato è molto minore di 30, la riga più forte è satura: è proprio questo il modo in cui si capisce, da due righe, su quale tratto della curva si sta.`},
+   {q:R`Perché su una curva di crescita si mette in ascissa $Nf\lambda$ e non $N$?`,
+    a:R`Perché nel tratto lineare $W/\lambda$ dipende da $N$ solo attraverso il prodotto $Nf\lambda$: righe diverse dello stesso elemento (diversi $f$ e $\lambda$) cadono allora sulla stessa curva universale, e una volta letta l&rsquo;ascissa per ciascuna si ricava lo stesso $N$ dividendo per il suo $f\lambda$.`}
+  ]}
+]},
+
+/* ---------------- 08 · IL SODIO SOLARE ---------------- */
+{ num:'08', title:'Quanti atomi di sodio ci sono sopra la fotosfera', meta:'l’esempio della lezione 6, rifatto · la convenzione dell’asse e un fattore applicato a metà · le due righe sono sature, ed è per questo che serve la curva',
+  blocchi:[
+  {t:'prosa', title:'Il problema e la lettura della curva', tag:'lezione 6, diapositive 35-37', html:R`
+  <p><i>Trovare la densità colonnare di atomi di sodio al di sopra della fotosfera solare dalla intensità delle righe a 3302,38 Å ($W_1=0{,}088$ Å) e a 5889,97 Å ($W_2=0{,}730$ Å), con $f_1=0{,}0214$ e $f_2=0{,}645$.</i> Le due righe partono entrambe dallo stato fondamentale del sodio neutro, quindi misurano lo stesso $N_a$, la densità colonnare di NaI nello stato fondamentale. Si calcola $\log(W/\lambda)$ per ciascuna, $-4{,}574$ e $-3{,}907$, e si legge sulla curva di crescita generale del Sole l&rsquo;ascissa corrispondente. La diapositiva di de Bernardis legge 13,2 per la prima riga e 14,8 per la seconda.</p>
+  <p>Per tornare da quell&rsquo;ascissa a $N_a$ bisogna sapere che cosa c&rsquo;è sull&rsquo;asse. La soluzione 9.26 del Carroll-Ostlie, che usa la stessa figura, la dichiara: è $\log\big[fN_a(\lambda/5000\ \text{Å})\big]$. Quindi
+  $$\log N_a=\log\big[fN_a(\lambda/5000\ \text{Å})\big]-\log f-\log(\lambda/5000\ \text{Å}).$$
+  Per la prima riga viene $15{,}05$, il valore della diapositiva. Per la seconda viene $14{,}92$. La diapositiva scrive invece $14{,}99$, che è ciò che si ottiene <b>dimenticando</b> il fattore $\lambda/5000$ Å per quella riga sola. Lo stesso errore, fatto sulla prima riga, darebbe $14{,}87$. Lo dichiaro: il fattore è applicato a una riga e non all&rsquo;altra. La conclusione della diapositiva non cambia. I due valori coerenti, 15,05 e 14,92, concordano entro 0,13 in logaritmo, che è la precisione di lettura di un grafico, e la diapositiva dice <i>«da ambedue le righe viene giustamente lo stesso risultato: ci sono $10^{15}$ atomi per cm² di NaI, neutro e nello stato fondamentale, tra il fondo della fotosfera solare e noi»</i>. In SI, $10^{15{,}05}$ cm⁻² sono $1{,}12\cdot10^{19}\ \mathrm{m^{-2}}$, e il Carroll-Ostlie trova $1{,}10\cdot10^{19}$ m⁻² con altre due righe dello stesso atomo.</p>`},
+  {t:'prosa', title:'Perché non bastava la formula lineare', tag:'il controllo che dice dove si è sulla curva', html:R`
+  <p>Ora che $N_a$ è noto si può chiedere che cosa avrebbe previsto per la prima riga la relazione lineare della tappa 06, $W/\lambda=\pi r_eNf\lambda$. Il conto dà $\log(W/\lambda)=-3{,}15$, contro il $-4{,}574$ misurato: la formula lineare sovrastima $W$ di un fattore $26$. Per la seconda riga, cinquanta volte più forte in $f\lambda$, il fattore è $304$. Il significato è netto. <b>Entrambe le righe del sodio solare sono sature</b>, ben oltre il ginocchio della curva di crescita. Chi avesse usato la formula lineare per ricavare $N$ dalla $W$ misurata avrebbe trovato 26 e 304 volte meno atomi, e due valori in disaccordo fra loro di un fattore 12. È esattamente il disaccordo che la curva di crescita rimuove, e il motivo per cui de Bernardis la costruisce invece di fermarsi al caso sottile. Il passo successivo della diapositiva, da NaI nello stato fondamentale al sodio totale, richiede di sapere quanti atomi sono eccitati e quanti ionizzati. La diapositiva trova che il NaI è praticamente tutto nello stato fondamentale e che la maggior parte del sodio è ionizzata una volta, con circa $2{,}4\cdot10^{18}$ atomi per cm². È la statistica di Boltzmann e Saha, che qui non ricalcolo.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Che cosa si sarebbe dovuto sospettare, prima ancora di aprire la curva di crescita, confrontando i due rapporti W/λ?`,
+    a:R`Che le righe non fossero sul tratto lineare. Sul tratto lineare $W/\lambda\propto f\lambda$, e il rapporto fra le due righe sarebbe $f_2\lambda_2/(f_1\lambda_1)\simeq54$. Il rapporto misurato dei $W/\lambda$ è $10^{-3{,}907+4{,}574}\simeq4{,}6$, dodici volte meno: la riga più forte è molto più satura della più debole.`}
+  ]}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: il potere risolutivo di un reticolo, e la larghezza equivalente', meta:'la domanda teorica della mappa · due copioni brevi · le frasi che dicono che la formula è capita',
+  blocchi:[
+  {t:'reveal', title:'Il potere risolutivo, in cinque mosse', tag:'copione', steps:[
+   {label:'Mossa 1: la condizione', body:R`<p>«Un reticolo di $N$ righe a passo $d$ dà massimi principali dove le onde di fenditure adiacenti sono in fase: $d\sin\theta=m\lambda$, con $m$ l&rsquo;ordine.»</p>`},
+   {label:'Mossa 2: la larghezza del massimo', body:R`<p>«L&rsquo;intensità è $[\sin(N\varphi/2)/\sin(\varphi/2)]^2$. Il primo zero accanto al massimo di ordine $m$ è dove la differenza di cammino è avanzata di $\lambda/N$: $d\sin\theta=m\lambda+\lambda/N$. Più righe, massimo più stretto.»</p>`},
+   {label:'Mossa 3: Rayleigh', body:R`<p>«Due righe sono risolte se il massimo della seconda, $m(\lambda+\Delta\lambda)$, cade sul primo zero della prima: $m\Delta\lambda=\lambda/N$, cioè $\Delta\lambda=\lambda/(mN)$.»</p>`},
+   {label:'Mossa 4: il risultato, e che cosa manca', body:R`<p>«$R=\lambda/\Delta\lambda=mN$. Il passo $d$ non c&rsquo;è: $R$ è la differenza di cammino massima $Nd\sin\theta$ in lunghezze d&rsquo;onda. Per questo uno spettrografo ad alta risoluzione è grande: servono molte righe illuminate, quindi un fascio largo.»</p>`},
+   {label:'Mossa 5: un numero', body:R`<p>«Il doppietto del sodio, 0,6 nm a 589 nm, chiede $R\simeq1000$: al secondo ordine 494 righe. Una velocità di 1 km/s chiede $R=c/\Delta v\simeq3\cdot10^5$.»</p>`}
+  ]},
+  {t:'reveal', title:'La larghezza equivalente, in quattro mosse', tag:'copione', steps:[
+   {label:'Mossa 1: la definizione operativa', body:R`<p>«È la larghezza di un rettangolo alto quanto il continuo e con la stessa area della riga: $W=\int(I_c-I_\lambda)/I_c\,d\lambda$. Si misura sul grafico normalizzato al continuo.»</p>`},
+   {label:'Mossa 2: perché è quella giusta', body:R`<p>«Non dipende dalla risoluzione dello strumento, che allarga la riga ma conserva la luce mancante.»</p>`},
+   {label:'Mossa 3: il caso sottile', body:R`<p>«Se $\tau\ll1$, $W$ conta gli atomi: $W/\lambda=\pi r_e\,Nf\lambda$, indipendentemente dalla forma del profilo.»</p>`},
+   {label:'Mossa 4: la curva di crescita', body:R`<p>«Quando la riga diventa nera al centro, $W$ cresce come $\sqrt{\ln N}$ (saturazione), poi come $\sqrt N$ per le ali di smorzamento. La curva di crescita è la relazione $W(N)$ completa. Le righe D del sodio solare sono sature, e la formula lineare sbaglierebbe di centinaia di volte.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove gli spettri tornano', meta:'otto voci · dalla fotosfera alle galassie lontane',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Lo strato:</b> $I-I_0=(B(T)-I_0)(1-e^{-\tau})$; riga scura se dietro c&rsquo;è qualcosa di più caldo, brillante se più freddo o niente.</li>
+  <li><b>Le righe da riconoscere:</b> H-alfa 656,3 nm, H-beta 486,1 nm, Na D 589,0/589,6 nm, CaII K e H 393,4/396,8 nm.</li>
+  <li><b>Reticolo:</b> $d\sin\theta=m\lambda$; dispersione $m/(d\cos\theta)$; potere risolutivo $R=mN$.</li>
+  <li><b>Risoluzione in velocità:</b> $R=c/\Delta v$: 300 km/s chiedono $R\simeq10^3$, 1 km/s chiede $3\cdot10^5$.</li>
+  <li><b>Precisione sotto la risoluzione:</b> $\sigma\simeq\Delta\lambda/\sqrt{n}$ con $n$ elementi spettrali indipendenti.</li>
+  <li><b>Larghezza equivalente:</b> area della riga normalizzata al continuo; indipendente dalla risoluzione.</li>
+  <li><b>Caso sottile:</b> $W/\lambda=\pi r_eNf\lambda$, con $\pi r_e=8{,}85\cdot10^{-15}\ \mathrm{m}$.</li>
+  <li><b>Curva di crescita:</b> $W\propto N$, poi $\sqrt{\ln N}$, poi $\sqrt N$; nel Sole $N(\mathrm{NaI})\simeq10^{15}$ cm⁻².</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>La stessa formula dello strato spiega le righe del mezzo interstellare. La riga a 21 cm dell&rsquo;idrogeno neutro compare in emissione contro il cielo freddo e in assorbimento davanti a una radiosorgente calda, e la temperatura di brillanza dice quale dei due casi si sta guardando. La curva di crescita è lo strumento con cui si misurano le abbondanze nelle stelle, e con le righe interstellari davanti alle stelle, come nella figura di Choudhuri su $\zeta$ Ophiuchi, la composizione del gas fra le stelle. Il potere risolutivo decide che cosa si può chiedere a uno spettro. A $R\sim10^3$ si misurano i redshift delle galassie lontane, che sono spostamenti di tutto lo spettro. A $R\sim10^5$ si misurano le curve di rotazione delle stelle e le oscillazioni di una stella sotto la spinta di un pianeta. Fra i due ci sono le dispersioni di velocità con cui si pesano gli ammassi e le galassie.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-05-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-05 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-05-spettroscopia-e-formazione-delle-righe.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-07 — Profili di riga e righe molecolari: la forma di una riga è un documento</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-07 — Profili di riga e righe molecolari: la forma di una riga è un documento</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["trasformata-di-fourier"] = {"nome":"Trasformata di Fourier","riga":"L'operazione $\\hat f(k)=\\int f(x)\\,e^{-ikx}\\,dx$, che riscrive una funzione come sovrapposizione di onde piane e manda la derivata in una moltiplicazione per $ik$.","serve":"È lo strumento che rende ALGEBRICA un'equazione differenziale lineare a coefficienti costanti: con $\\partial_x$ che diventa $ik$, un'equazione differenziale in $x$ diventa un'equazione algebrica in $k$, si risolve, e si antitrasforma. Le due cose da non perdere sono la convenzione dei $2\\pi$, che cambia da testo a testo e va dichiarata una volta, e Plancherel, che dice che la trasformata conserva la norma $L^{2}$ — in fisica, l'energia.","esempio":"La gaussiana $f(x)=e^{-x^{2}/2}$ ha trasformata $\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2}e^{-ikx}\\,dx=\\sqrt{2\\pi}\\,e^{-k^{2}/2}$: ancora una gaussiana, tanto più larga quanto l'originale è stretta. È il caso in cui si vede meglio il principio di indeterminazione come fatto puramente matematico.","pieno":{"file":"15-distribuzioni.html","tappa":"02","come":"le proprietà, la derivata che diventa un prodotto e Plancherel, nel nucleo delle distribuzioni"},"qui":{"elettromagnetismo":{"serve":"Serve appena si scrive un'onda generica invece di una monocromatica: ogni soluzione delle equazioni di Maxwell nel vuoto è una sovrapposizione di onde piane $e^{i(\\mathbf k\\cdot\\mathbf x-\\omega t)}$, e la trasformata è il modo di scomporla. Su ciascuna componente l'equazione delle onde si riduce alla relazione di dispersione, e la propagazione diventa un far girare fasi: ogni modo viaggia da solo, e nel vuoto tutti alla stessa velocità — per questo un impulso non si deforma.","esempio":"La sostituzione $\\partial_x\\to ik$ e $\\partial_t\\to-i\\omega$ manda le derivate seconde in $(ik)^{2}=-k^{2}$ e $(-i\\omega)^{2}=-\\omega^{2}$: l'equazione delle onde diventa $\\omega^{2}=c^{2}k^{2}$, cioè un'equazione di secondo grado al posto di una differenziale, e la sua radice positiva $\\omega=ck$ è la relazione di dispersione del vuoto."}},"controllo":[{"tipo":"integrale","espr":"exp(-x**2/2)*exp(-I*k*x)","var":"x","da":"-oo","a":"oo","vale":"sqrt(2*pi)*exp(-k**2/2)","ipotesi":{"k":"real"},"dove":"esempio","appare":"\\sqrt{2\\pi}\\,e^{-k^{2}/2}"},{"tipo":"uguale","sinistra":"(I*k)**2","vale":"-k**2","ipotesi":{"k":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-k^{2}"},{"tipo":"uguale","sinistra":"(-I*w)**2","vale":"-w**2","ipotesi":{"w":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-\\omega^{2}"},{"tipo":"uguale","sinistra":"(c*k)**2","vale":"c**2*k**2","dove":"qui.elettromagnetismo.esempio","appare":"c^{2}k^{2}"}]};
+STRUM["integrale-gaussiano"] = {"nome":"Integrale gaussiano","riga":"$\\displaystyle\\int_{-\\infty}^{+\\infty} e^{-ax^{2}}\\,dx=\\sqrt{\\pi/a}$ per $a>0$, e $\\displaystyle\\int_{-\\infty}^{+\\infty} x^{2}e^{-ax^{2}}\\,dx=\\tfrac12\\sqrt{\\pi/a^{3}}$.","serve":"E' l'unico integrale che serve davvero sapere a memoria in meccanica statistica, perche' l'energia cinetica e' quadratica nell'impulso e quindi ogni integrazione sugli impulsi e' una gaussiana. Il trucco della dimostrazione — elevare al quadrato e passare in coordinate polari — vale la pena di vederlo una volta: e' il motivo per cui compare un $\\pi$ in una formula che di cerchi non parla.","esempio":"Da $I^{2}=\\iint e^{-a(x^{2}+y^{2})}dx\\,dy=2\\pi\\int_{0}^{\\infty}re^{-ar^{2}}dr=\\pi/a$ segue $I=\\sqrt{\\pi/a}$. I momenti superiori si ottengono derivando rispetto ad $a$ sotto il segno: $-\\partial_a I=\\int x^{2}e^{-ax^{2}}dx=\\tfrac12\\sqrt{\\pi}\\,a^{-3/2}$. Derivare rispetto a un parametro e' piu' rapido che integrare per parti, e funziona per tutti i momenti pari.","pieno":null,"qui":{"meccanica-statistica":{"serve":"La funzione di partizione di una particella libera e' un prodotto di tre gaussiane negli impulsi, e da li' esce la lunghezza d'onda termica $\\lambda=h/\\sqrt{2\\pi m k T}$ — che e' la grandezza con cui si misura quando un gas smette di essere classico.","esempio":"$\\int e^{-\\beta p^{2}/2m}dp=\\sqrt{2\\pi m/\\beta}$, quindi $Z_{1}=\\dfrac{V}{h^{3}}(2\\pi mkT)^{3/2}=V/\\lambda^{3}$. Lo stesso integrale col peso $p^{2}$ da' $\\langle p^{2}/2m\\rangle=\\tfrac12 kT$ per grado di liberta': l'equipartizione non e' un principio a parte, e' questo integrale."}}};
+STRUM["raggio-di-bohr"] = {"nome":"Raggio di Bohr","riga":"$a_0=4\\pi\\varepsilon_0\\hbar^{2}/(m_ee^{2})\\simeq0{,}529\\times10^{-10}$ m, con energia associata $E_1\\simeq-13{,}6$ eV.","serve":"E' la scala di lunghezza dell'atomo, e si ottiene senza risolvere niente: si minimizza la somma fra il costo cinetico dell'indeterminazione, che va come l'inverso del quadrato del raggio, e l'attrazione coulombiana, che va come l'inverso del raggio. Serve come controllo d'ordine di grandezza su ogni risultato atomico: se un conto da' una lunghezza mille volte diversa, il conto e' sbagliato.","esempio":"I livelli vanno come l'inverso del quadrato del numero quantico principale, quindi il secondo vale $-3{,}4$ eV e la prima riga di Lyman ha energia $10{,}2$ eV. Il raggio medio cresce col quadrato: lo stato con numero quantico dieci e' $10^{2}=100$ volte piu' grande del fondamentale, ed e' la ragione fisica per cui gli atomi di Rydberg sono enormi.","debito":"la derivazione completa dall'equazione radiale sta nel movimento sull'idrogeno; qui ci sono la stima variazionale e i numeri da ricordare.","controllo":[{"tipo":"numero","espr":"-13.6/4","vale":"-3.4","dove":"esempio","appare":"-3{,}4"},{"tipo":"numero","espr":"-13.6/4 - (-13.6)","vale":"10.2","dove":"esempio","appare":"10{,}2"},{"tipo":"uguale","sinistra":"10**2","vale":"100","dove":"esempio","appare":"10^{2}=100"}],"qui":{},"pieno":null};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-07: Profili di riga e righe molecolari: la forma di una riga è un documento <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-07 — righe molecolari e profili di riga
+identita:  la forma di una riga e' un documento: larghezza, ali e asimmetria dicono temperatura, densita' e
+           moto della materia che l'ha prodotta; e le molecole, con i loro livelli rotazionali, fanno da
+           termometro dove gli atomi non arrivano.
+copre:     A.9
+serve:     as-06 (Boltzmann, popolazione dei livelli)
+apre:      calcolato da verifica-mappa.py
+profondita: ZERO prove su 60: comprensione pura, da scrivere corta e concettuale ma senza tagliare, perche'
+           spiega da dove viene la curva di crescita. All'orale: l'allargamento Doppler termico.
+fonti:     lezione4_D_2020 (pagine 1-9) e lezione6_2017 (pagine 20-27): FWHM, larghezza naturale con il
+           principio di indeterminazione (Delta t = 1e-8 s per n=3->2, Delta lambda = 5e-5 nm), effetto
+           Doppler, allargamento Doppler dalla maxwelliana, turbolenza sommata in quadratura, il valore per
+           H-alfa nel Sole, l'allargamento collisionale con il suo esempio numerico (v = 980 000 cm/s,
+           2,36e-4 A), il profilo di Voigt e la funzione H(a,u).
+           Carroll-Ostlie, MANUALE DELLE SOLUZIONI, problema 9.25: la larghezza naturale con le vite medie
+           di entrambi i livelli, Delta lambda = (lambda^2/2 pi c)(1/Delta t_i + 1/Delta t_f).
+           lezione10_2020_B, diapositiva 2: l'esercizio di lezione sulla nana bianca che ruota in 13 s
+           (punti 1 e 2: distacco della materia e allargamento Doppler).
+           Prova scritta 20091214_esoneroA, esercizio 1: la riga J=1->0 del CO a 115 GHz e la J=2->1 a
+           230 GHz, con la soluzione (rotore rigido E_J = hbar^2 J(J+1)/2I, popolazioni di Boltzmann).
+           DICHIARATO (tappa 03): il valore 0,427 A delle slide per la FWHM Doppler di H-alfa omette il
+           fattore sqrt(ln 2) che la formula scritta sulla stessa slide contiene; con la formula viene
+           0,356 A. DICHIARATO (tappa 08): il momento d'inerzia del CO usato nella soluzione dell'esonero
+           (1,64e-46 kg m2) non e' compatibile con la frequenza osservata di 115 GHz (darebbe 102 GHz).
+           NON TRATTATO DALLE FONTI DEL CORSO: le transizioni rotovibrazionali per esteso; qui solo la
+           scala delle energie, dichiarata.
+           de Bernardis, slide 2016 del corso (PDF 38-43, dal dossier, lette per intero): il massimo delle
+           righe di Balmer a 9500 K, l'effetto della densita' sulla larghezza delle righe (giganti contro
+           sequenza principale), le righe dei metalli e le bande molecolari sotto 3500 K, l'esempio numerico
+           della curva di crescita del sodio solare. Le pagine 43 sulla struttura stellare sono d'altro
+           argomento (equilibrio idrostatico, viriale) e qui non si usano.
+registro:  lezione4_D_2020 e lezione7_2020 (profili di riga)
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "01", "appare": "(\\Delta\\lambda)_{1/2}", "perche": "e' il simbolo della FWHM, definita a parole nella stessa frase."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\Delta E\\simeq\\frac{h}{2\\pi\\Delta t}", "perche": "e' il principio di indeterminazione energia-tempo nella forma delle slide: un principio, non un conto."},
+ {"tipo": "uguale", "sinistra": "integrate(exp(-G*t/2)*exp(I*2*pi*(n0-n)*t),(t,0,oo),conds='none')", "vale": "1/(G/2-I*2*pi*(n0-n))", "ipotesi": {"G": "positive", "t": "positive", "n0": "real", "n": "real"}, "dove": "02", "appare": "\\int_0^\\infty e^{-\\Gamma t/2}e^{2\\pi i(\\nu_0-\\nu)t}dt=\\frac{1}{\\Gamma/2-2\\pi i(\\nu_0-\\nu)}"},
+ {"tipo": "uguale", "sinistra": "1/((G/2)**2+(2*pi*x)**2)", "vale": "(1/(4*pi**2))/(x**2+(G/(4*pi))**2)", "ipotesi": {"G": "positive", "x": "real"}, "dove": "02", "appare": "\\phi(\\nu)\\propto\\frac{1}{(\\nu-\\nu_0)^{2}+(\\Gamma/4\\pi)^{2}}"},
+ {"tipo": "uguale", "sinistra": "solve(1/(x**2+(G/(4*pi))**2)-1/(2*(G/(4*pi))**2),x)[0]*2", "vale": "G/(2*pi)", "ipotesi": {"G": "positive", "x": "positive"}, "dove": "02", "appare": "\\Delta\\nu_{1/2}=\\frac{\\Gamma}{2\\pi}"},
+ {"tipo": "uguale", "sinistra": "(l**2/c)*(1/(2*pi))*(1/ti+1/tf)", "vale": "l**2/(2*pi*c)*(1/ti+1/tf)", "ipotesi": {"l": "positive", "c": "positive", "ti": "positive", "tf": "positive"}, "dove": "02", "appare": "\\Delta\\lambda=\\frac{\\lambda^{2}}{2\\pi c}\\left(\\frac{1}{\\Delta t_i}+\\frac{1}{\\Delta t_f}\\right)"},
+ {"tipo": "numero", "espr": "(656.5e-9)**2/(2*pi*2.998e8)*(2/1e-8)*1e9*1e5", "vale": "4.6", "dove": "02", "appare": "4{,}6\\cdot10^{-5}\\ \\mathrm{nm}"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\Gamma=1/\\Delta t_i+1/\\Delta t_f", "perche": "e' la definizione della larghezza totale quando entrambi i livelli hanno vita finita (Carroll-Ostlie, soluzione 9.25): le larghezze in energia dei due livelli si sommano."},
+ {"tipo": "simbolico", "dove": "02", "appare": "|\\phi|^{2}", "perche": "e' il passaggio da ampiezza a intensita' (modulo quadro), non un conto."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\nu=\\nu_0\\left(1-\\frac{v_z}{c}\\right)", "perche": "e' l'effetto Doppler non relativistico per una sorgente che si allontana con velocita' v_z lungo la linea di vista: la relazione delle slide, non un conto."},
+ {"tipo": "simbolico", "dove": "03", "appare": "dN\\propto\\exp\\left(-\\frac{m v_z^{2}}{2kT}\\right)dv_z", "perche": "e' la distribuzione maxwelliana di una componente della velocita': un risultato di meccanica statistica citato."},
+ {"tipo": "uguale", "sinistra": "exp(-m*(c*(n0-n)/n0)**2/(2*k*T))", "vale": "exp(-((n-n0)/(n0/c*sqrt(2*k*T/m)))**2)", "ipotesi": {"m": "positive", "c": "positive", "n0": "positive", "n": "real", "k": "positive", "T": "positive"}, "dove": "03", "appare": "\\phi(\\nu)\\propto\\exp\\left[-\\left(\\frac{\\nu-\\nu_0}{\\Delta\\nu_D}\\right)^{2}\\right]"},
+ {"tipo": "uguale", "sinistra": "exp(-(D*sqrt(log(2))/D)**2)", "vale": "Rational(1,2)", "ipotesi": {"D": "positive", "x": "positive"}, "dove": "03", "appare": "(\\Delta\\lambda)_{1/2}=2\\sqrt{\\ln2}\\,\\Delta\\lambda_D"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta\\lambda_D=\\frac{\\lambda}{c}\\sqrt{\\frac{2kT}{m}}", "perche": "e' la definizione della larghezza Doppler come lambda per la velocita' piu' probabile su c, letta dall'esponente del profilo asserito."},
+ {"tipo": "simbolico", "dove": "03", "appare": "(\\Delta\\lambda)_{1/2}=\\frac{2\\lambda}{c}\\sqrt{\\frac{2kT\\ln2}{m}}", "perche": "e' la stessa FWHM della riga precedente, riscritta portando sqrt(ln2) dentro la radice: la forma delle slide."},
+ {"tipo": "numero", "espr": "656.5e-9/2.998e8*sqrt(2*1.380649e-23*5770/1.6735e-27)*1e10", "vale": "0.214", "dove": "03", "appare": "0{,}214\\ \\text{Å}"},
+ {"tipo": "numero", "espr": "2*sqrt(log(2))*0.21367", "vale": "0.356", "dove": "03", "appare": "0{,}356\\ \\text{Å}"},
+ {"tipo": "numero", "espr": "2*656.5e-9/2.998e8*sqrt(2*1.380649e-23*5770/1.6735e-27)*1e10", "vale": "0.427", "dove": "03", "appare": "0{,}427"},
+ {"tipo": "numero", "espr": "0.0356/4.576e-5", "vale": "778", "dove": "03", "appare": "778"},
+ {"tipo": "numero", "espr": "(656.5/0.0356)/1e4", "vale": "1.844", "dove": "03", "appare": "18\\,440"},
+ {"tipo": "numero", "espr": "2*500e-9/2.998e8*sqrt(2*1.380649e-23*5770*log(2)/(55.845*1.6605e-27))*1e10", "vale": "0.036", "dove": "03", "appare": "0{,}036\\ \\text{Å}"},
+ {"tipo": "numero", "espr": "2*656.5e-9/2.998e8*sqrt((2*1.380649e-23*5770/1.6735e-27+(2e3)**2)*log(2))*1e10", "vale": "0.363", "dove": "03", "appare": "0{,}363\\ \\text{Å}"},
+ {"tipo": "simbolico", "dove": "03", "appare": "(\\Delta\\lambda)_{1/2}=\\frac{2\\lambda}{c}\\sqrt{\\left(\\frac{2kT}{m}+v_{\\mathrm{turb}}^{2}\\right)\\ln2}", "perche": "e' la somma in quadratura di due dispersioni gaussiane indipendenti (la convoluzione di due gaussiane e' una gaussiana con varianze sommate), come la scrivono le slide; il caso numerico e' asserito."},
+ {"tipo": "numero", "espr": "sqrt(2*1.380649e-16*5770/(1800*9.109e-28))/1e5", "vale": "9.86", "dove": "04", "appare": "9{,}86\\cdot10^{5}\\ \\mathrm{cm/s}"},
+ {"tipo": "numero", "espr": "pi*(2*0.529e-8)**2*1e16", "vale": "3.52", "dove": "04", "appare": "3{,}5\\cdot10^{-16}"},
+ {"tipo": "numero", "espr": "(6.565e-5)**2/(pi*2.997e10)*1.5e17*3.5e-16*9.858e5*1e8*1e4", "vale": "2.37", "dove": "04", "appare": "2{,}37\\cdot10^{-4}\\ \\text{Å}"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\Delta t_0=\\frac{1}{n\\sigma v}", "perche": "e' la definizione del tempo libero medio fra collisioni: densita' per sezione d'urto per velocita' danno la frequenza degli urti."},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\Delta\\lambda=\\frac{\\lambda^{2}}{\\pi c}\\,\\frac{1}{\\Delta t_0}", "perche": "e' la larghezza lorentziana della tappa 02 con il tempo fra due urti al posto della vita media, nella forma delle slide; il numero e' asserito."},
+ {"tipo": "simbolico", "dove": "04", "appare": "v=\\sqrt{2kT/m}", "perche": "e' la velocita' piu' probabile della maxwelliana, usata dalle slide come velocita' tipica degli urti."},
+ {"tipo": "numero", "espr": "(0.356/2.37e-4)/1e3", "vale": "1.50", "dove": "04", "appare": "1500"},
+ {"tipo": "simbolico", "dove": "05", "appare": "H(a,u)=\\frac{a}{\\pi}\\int_{-\\infty}^{\\infty}\\frac{e^{-y^{2}}}{(u-y)^{2}+a^{2}}\\,dy", "perche": "e' la definizione della funzione di Voigt come convoluzione di gaussiana e lorentziana, nelle variabili adimensionali delle slide."},
+ {"tipo": "simbolico", "dove": "05", "appare": "u=\\frac{\\nu-\\nu_0}{\\Delta\\nu_D}", "perche": "definizione della variabile adimensionale."},
+ {"tipo": "simbolico", "dove": "05", "appare": "a=\\frac{\\Gamma}{4\\pi\\Delta\\nu_D}", "perche": "definizione del parametro di Voigt: semilarghezza lorentziana su larghezza Doppler."},
+ {"tipo": "limite", "espr": "(a/pi)*(sqrt(pi))/(u**2+a**2)*u**2", "var": "u", "a": "oo", "vale": "a/sqrt(pi)", "ipotesi": {"a": "positive", "u": "positive"}, "dove": "05", "appare": "H(a,u)\\simeq\\frac{a}{\\sqrt\\pi\\,u^{2}}"},
+ {"tipo": "numero", "espr": "Integral(exp(-y**2)/((0-y)**2+1e-2**2),(y,-oo,oo))*1e-2/pi/exp(0)", "vale": "0.989", "dove": "05", "appare": "0{,}989"},
+ {"tipo": "numero", "espr": "exp(-25)/(1e-2/(sqrt(pi)*25))", "vale": "2.5e-9", "dove": "05", "appare": "2{,}5\\cdot10^{-9}"},
+ {"tipo": "numero", "espr": "2*pi*3.5e6/13/1e3", "vale": "1692", "dove": "06", "appare": "1692\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "sqrt(6.674e-11*1.2*1.989e30/3.5e6)/1e3", "vale": "6746", "dove": "06", "appare": "6746\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "2*2*pi*3.5e6/13/2.998e8", "vale": "0.0113", "dove": "06", "appare": "0{,}0113"},
+ {"tipo": "numero", "espr": "2*2*pi*3.5e6/13/2.998e8*4861", "vale": "55", "dove": "06", "appare": "55\\ \\text{Å}"},
+ {"tipo": "numero", "espr": "(1692/6746)**2", "vale": "0.063", "dove": "06", "appare": "0{,}063"},
+ {"tipo": "simbolico", "dove": "06", "appare": "v_{\\mathrm{rot}}=\\frac{2\\pi R}{P}", "perche": "e' la definizione della velocita' equatoriale di rotazione."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\frac{\\Delta\\lambda}{\\lambda}=\\frac{2v_{\\mathrm{rot}}}{c}", "perche": "e' la larghezza totale da bordo a bordo: un lembo si avvicina e uno si allontana a v_rot, Doppler non relativistico."},
+ {"tipo": "uguale", "sinistra": "hb**2*((J)*(J+1)-(J-1)*J)/(2*Ib)", "vale": "hb**2*J/Ib", "ipotesi": {"hb": "positive", "J": "positive", "Ib": "positive"}, "dove": "07", "appare": "E_J-E_{J-1}=\\frac{\\hbar^{2}J}{I}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "E_J=\\frac{\\hbar^{2}}{2I}J(J+1)", "perche": "e' il livello del rotore rigido quantistico (momento angolare L^2 = hbar^2 J(J+1)), come lo scrive la soluzione dell'esonero 2009."},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\nu_{J\\to J-1}=2BJ", "perche": "e' la riga precedente divisa per h, con la costante rotazionale B = hbar/(4 pi I): una ridefinizione."},
+ {"tipo": "simbolico", "dove": "07", "appare": "B=\\frac{\\hbar}{4\\pi I}", "perche": "definizione della costante rotazionale in frequenza."},
+ {"tipo": "numero", "espr": "1.0546e-34/(2*pi*115.27e9)*1e46", "vale": "1.456", "dove": "07", "appare": "1{,}456\\cdot10^{-46}\\ \\mathrm{kg\\,m^{2}}"},
+ {"tipo": "numero", "espr": "(12*15.995/(12+15.995))*1.6605e-27*(1.128e-10)**2*1e46", "vale": "1.449", "dove": "07", "appare": "1{,}449\\cdot10^{-46}"},
+ {"tipo": "numero", "espr": "6.62607e-34*115.27e9/1.380649e-23", "vale": "5.53", "dove": "07", "appare": "5{,}53\\ \\mathrm{K}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\frac{n_J}{n_0}=(2J+1)\\,e^{-E_J/kT}", "perche": "e' la distribuzione di Boltzmann con peso statistico 2J+1 (le orientazioni del momento angolare)."},
+ {"tipo": "numero", "espr": "3*exp(-5.53/10)", "vale": "1.73", "dove": "07", "appare": "1{,}73"},
+ {"tipo": "numero", "espr": "1.22*(2.998e8/115.27e9)/(24/206265)", "vale": "27.3", "dove": "08", "appare": "27{,}3\\ \\mathrm{m}"},
+ {"tipo": "numero", "espr": "2*1.380649e-23*0.150*(115.27e9)**2/(2.998e8)**2*pi*(24/206265)**2/4/1e-26", "vale": "0.65", "dove": "08", "appare": "0{,}65\\ \\mathrm{Jy}"},
+ {"tipo": "numero", "espr": "0.11/0.150", "vale": "0.733", "dove": "08", "appare": "0{,}733"},
+ {"tipo": "numero", "espr": "2*(1.0546e-34)**2/1.64e-46/1.380649e-23", "vale": "9.82", "dove": "08", "appare": "9{,}82\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "9.823/log((5/3.)/0.73333)", "vale": "12.0", "dove": "08", "appare": "12{,}0\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "1.0546e-34/(2*pi*1.64e-46)/1e9", "vale": "102", "dove": "08", "appare": "102\\ \\mathrm{GHz}"},
+ {"tipo": "numero", "espr": "2*6.62607e-34*115.27e9/1.380649e-23", "vale": "11.06", "dove": "08", "appare": "11{,}06\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "11.064/log((5/3.)/0.73333)", "vale": "13.5", "dove": "08", "appare": "13{,}5\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "11.064/log((5/3.)/(0.09/0.152))", "vale": "10.7", "dove": "08", "appare": "10{,}7"},
+ {"tipo": "numero", "espr": "11.064/log((5/3.)/(0.13/0.148))", "vale": "17.3", "dove": "08", "appare": "17{,}3\\ \\mathrm{K}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\frac{T_{2\\to1}}{T_{1\\to0}}=\\frac{5}{3}\\,e^{-(E_2-E_1)/kT}", "perche": "e' l'ipotesi della soluzione d'esame: righe otticamente sottili, temperatura d'antenna proporzionale alla popolazione del livello di partenza, con i pesi 2J+1. Un modello dichiarato, i cui numeri sono asseriti."},
+ {"tipo": "simbolico", "dove": "08", "appare": "E_2-E_1=\\frac{2\\hbar^{2}}{I}", "perche": "e' la differenza dei livelli del rotore per J=2 e J=1, caso particolare dell'identita' asserita nella tappa 07."},
+ {"tipo": "simbolico", "dove": "08", "appare": "E_2-E_1=2h\\nu_{10}", "perche": "e' la stessa differenza scritta con la frequenza osservata: nu_10 = 2B e E_2 - E_1 = 4hB."},
+ {"tipo": "simbolico", "dove": "08", "appare": "F=\\frac{2k\\nu^{2}}{c^{2}}T_a\\,\\Omega", "perche": "e' la brillanza di Rayleigh-Jeans per l'angolo solido del disco, come nella soluzione d'esame: la definizione di temperatura d'antenna applicata."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\Omega=\\pi\\theta^{2}/4", "perche": "angolo solido di un disco di diametro angolare theta piccolo."},
+ {"tipo": "simbolico", "dove": "09", "appare": "(\\Delta\\lambda)_{1/2}=\\frac{2\\lambda}{c}\\sqrt{\\frac{2kT\\ln2}{m}}", "perche": "restituzione della FWHM Doppler asserita nella tappa 03."},
+ {"tipo": "simbolico", "dove": "09", "appare": "T=\\frac{mc^{2}}{8k\\ln2}\\left(\\frac{(\\Delta\\lambda)_{1/2}}{\\lambda}\\right)^{2}", "perche": "e' l'inversione algebrica della FWHM Doppler: il termometro, conseguenza diretta della formula asserita."},
+ {"tipo": "uguale", "sinistra": "m*c**2/(8*k*log(2))*((2/c)*sqrt(2*k*T*log(2)/m))**2", "vale": "T", "ipotesi": {"m": "positive", "c": "positive", "k": "positive", "T": "positive"}, "dove": "09", "appare": "T=\\frac{mc^{2}}{8k\\ln2}"},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\Delta\\lambda=\\frac{\\lambda^{2}}{2\\pi c}\\left(\\frac{1}{\\Delta t_i}+\\frac{1}{\\Delta t_f}\\right)", "perche": "restituzione della larghezza naturale della tappa 02."},
+ {"tipo": "simbolico", "dove": "10", "appare": "E_J=\\hbar^{2}J(J+1)/2I", "perche": "restituzione del rotore rigido della tappa 07."},
+ {"tipo": "numero", "espr": "sqrt(log(2))", "vale": "0.833", "dove": "03", "appare": "\\sqrt{\\ln2}=0{,}833"},
+ {"tipo": "uguale", "sinistra": "(hb**2/(2*Ib))*(2*3-1*2)", "vale": "4*(2*pi*hb)*(hb/(4*pi*Ib))", "ipotesi": {"hb": "positive", "Ib": "positive"}, "dove": "08", "appare": "E_2-E_1=4hB"},
+ {"tipo": "simbolico", "dove": "07", "appare": "L^2=\\hbar^2J(J+1)", "perche": "e' la quantizzazione del momento angolare, un risultato di meccanica quantistica citato."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\Delta\\lambda/\\lambda=2v_{\\mathrm{rot}}/c", "perche": "restituzione della larghezza per rotazione della tappa 06."},
+ {"tipo": "simbolico", "dove": "10", "appare": "E_1/k=5{,}5", "perche": "restituzione arrotondata del valore asserito nella tappa 07."},
+ {"tipo": "numero", "espr": "(pi*4.8032e-10**2/(9.1094e-28*2.9979e10**2))*1e13", "vale": "8.85", "dove": "01", "appare": "=8{,}85\\cdot10^{-13}"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac{W}{\\lambda}=\\frac{\\pi e^2}{m_ec^2}\\,Nf\\lambda", "perche": "limite otticamente sottile della curva di crescita: sezione d'urto integrata pi e^2 f/(m_e c)"},
+ {"tipo": "numero", "espr": "(0.088/3302.38)/((pi*4.8032e-10**2/(9.1094e-28*2.9979e10**2))*0.0214*3302.38e-8)/1e13", "vale": "4.3", "dove": "01", "appare": "N=4{,}3\\cdot10^{13}"},
+ {"tipo": "numero", "espr": "(0.730/5889.97)/((pi*4.8032e-10**2/(9.1094e-28*2.9979e10**2))*0.645*5889.97e-8)/1e12", "vale": "3.7", "dove": "01", "appare": "N=3{,}7\\cdot10^{12}"},
+ {"tipo": "numero", "espr": "0.645/0.0214", "vale": "30", "dove": "01", "appare": "fattore 30"},
+ {"tipo": "numero", "espr": "2.3e18*22.98*1.67e-24*1e5", "vale": "8.8", "dove": "01", "appare": "=8{,}8\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "0.29/9500*1e7", "vale": "305", "dove": "04", "appare": "=305"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché la forma di una riga', meta:'una riga non è una linea · tre meccanismi, tre profili · le molecole, che sono il termometro del freddo',
+  blocchi:[
+  {t:'prosa', title:'Che cosa resta da leggere in una riga', tag:'architettura', html:R`
+  <p>La lunghezza d&rsquo;onda di una riga dice quale atomo l&rsquo;ha prodotta. La sua larghezza equivalente, attraverso la curva di crescita, dice quanti atomi c&rsquo;erano. Resta la <b>forma</b>, e de Bernardis, nella lezione 6, la introduce con una domanda: <i>«che informazioni ci può dare la forma delle righe?»</i>. La risposta è che una riga non è mai infinitamente sottile, e ogni causa che la allarga le dà un profilo con una firma riconoscibile. La vita media finita dei livelli dà un profilo di Lorentz, stretto e con ali lunghe. I moti termici degli atomi danno un profilo di Gauss, più largo e con ali che cadono a precipizio. Gli urti con le particelle vicine danno di nuovo un profilo di Lorentz, più largo quanto più denso è il gas. Il profilo osservato è la combinazione di tutti e tre, la funzione di Voigt. Leggerla vuol dire separare temperatura, densità e moti della materia che ha prodotto la riga.</p>
+  <p>La mappa del corso registra che su questo argomento non c&rsquo;è nessuna delle sessanta prove scritte, e chiede comunque di non tagliarlo. Senza i profili la curva di crescita è una formula da applicare a memoria: il suo plateau è fissato dalla larghezza Doppler, il suo risalire finale dalle ali di Lorentz. Per l&rsquo;orale la domanda è l&rsquo;allargamento Doppler termico, cioè il motivo per cui una riga è un <b>termometro</b>. La seconda parte del movimento passa alle molecole. I loro livelli rotazionali sono così vicini che bastano pochi kelvin a popolarli, e sono quindi il termometro delle nubi fredde, dove gli atomi sono tutti nello stato fondamentale e non dicono nulla.</p>`}
+]},
+
+/* ---------------- 01 · FWHM E LARGHEZZA EQUIVALENTE ---------------- */
+{ num:'01', title:'Due numeri per una riga: FWHM e larghezza equivalente', meta:'larghezza contro forza · il profilo normalizzato · perché servono tutti e due',
+  blocchi:[
+  {t:'prosa', title:'Larghezza e forza', tag:'le definizioni', html:R`
+  <p>De Bernardis (lezione4_D_2020) dà i due numeri insieme, sulla stessa figura. La <b>FWHM</b>, $(\Delta\lambda)_{1/2}$, è la larghezza totale della riga a metà della sua profondità: quanto è <i>larga</i>. La <b>larghezza equivalente</b> $W$ è la larghezza di un rettangolo alto quanto il continuo e con la stessa area della riga: quanto è <i>forte</i>. Sono indipendenti. Una riga debole può essere larghissima, se gli atomi che la producono si muovono velocissimi, e una riga forte può essere stretta, se il gas è freddo e calmo. Il profilo, cioè la forma della riga normalizzata, porta l&rsquo;informazione che separa queste situazioni.</p>
+  <p>Per parlarne con precisione conviene separare l&rsquo;<b>opacità</b> della riga in due fattori. Il numero di atomi capaci di assorbire per la loro sezione d&rsquo;urto integrata decide la forza. Una funzione $\phi(\nu)$ normalizzata a 1, il <b>profilo</b>, dice come quella sezione d&rsquo;urto si distribuisce in frequenza. Gli allargamenti di cui parla questo movimento agiscono tutti su $\phi$. Nessuno cambia l&rsquo;area, nessuno cambia il numero di atomi: cambiano dove, nello spettro, quell&rsquo;assorbimento va a cadere. È per questo che nel regime otticamente sottile la larghezza equivalente non dipende dal profilo, mentre nel regime saturo sì. Quando il centro è nero, la larghezza equivalente dipende da quanto il profilo si estende verso le ali.</p>`},
+  {t:'prosa', title:'Un esempio di de Bernardis: quanti atomi di sodio ci sono sopra la fotosfera', tag:'de Bernardis, slide 2016, PDF 41-43', html:R`
+  <p>Nelle slide del 2016 de Bernardis usa la larghezza equivalente per contare gli atomi. Due righe del sodio neutro, a 3302,38 Å e a 5889,97 Å, hanno nel Sole $W_1=0{,}088$ Å e $W_2=0{,}730$ Å; le forze d&rsquo;oscillatore della fisica atomica sono $f_1=0{,}0214$ e $f_2=0{,}645$. Entrambe le righe partono dallo stato fondamentale di Na I, quindi devono contare la stessa colonna di atomi $N$. Se la riga fosse otticamente sottile, ogni atomo toglierebbe dal continuo la stessa area, e varrebbe la relazione lineare</p>
+  <p>$$\frac{W}{\lambda}=\frac{\pi e^2}{m_ec^2}\,Nf\lambda,\qquad \frac{\pi e^2}{m_ec^2}=8{,}85\cdot10^{-13}\ \mathrm{cm}.$$</p>
+  <p>Applicata alle due righe, darebbe $N=4{,}3\cdot10^{13}$ cm$^{-2}$ dalla prima e $N=3{,}7\cdot10^{12}$ cm$^{-2}$ dalla seconda: due numeri che non si accordano fra loro e che sono entrambi troppo piccoli. È il segno che le righe sono già sature: il centro è nero, aggiungere atomi allarga la riga solo di poco, e la larghezza cresce più lentamente di $N$. Per questo de Bernardis non usa la formula lineare ma legge $Nf$ sulla curva di crescita del Sole, e allora da entrambe le righe viene lo stesso risultato, <i>«$10^{15}$ atomi per cm$^2$ di Na I, neutro e nello stato fondamentale, tra il fondo della fotosfera solare e noi»</i>. Che la curva metta d&rsquo;accordo due righe con $f$ diverso di un fattore 30 è proprio la verifica che la forma del suo plateau, cioè la larghezza Doppler, è giusta.</p>
+  <p>Poi intervengono le due leggi della popolazione. Boltzmann dice che quasi tutto Na I sta nello stato fondamentale; Saha che quasi tutto il sodio è ionizzato una volta, perché il suo potenziale di ionizzazione è basso. Sommando gli stati di ionizzazione de Bernardis arriva a $2{,}3\cdot10^{18}$ atomi/cm$^2$ di sodio in tutto, cioè $2{,}3\cdot10^{18}\cdot22{,}98\cdot1{,}67\cdot10^{-24}=8{,}8\cdot10^{-5}$ g/cm$^2$ (lui arrotonda a $9\cdot10^{-5}$). Rifacendo lo stesso lavoro con le righe di ogni elemento si ottengono le abbondanze solari.</p>`}
+]},
+
+/* ---------------- 02 · LARGHEZZA NATURALE ---------------- */
+{ num:'02', title:'La larghezza naturale: il principio di indeterminazione e il profilo di Lorentz', meta:'vita media e incertezza in energia · dal decadimento esponenziale alla lorentziana con una trasformata di Fourier · 5·10⁻⁵ nm per H-alfa',
+  blocchi:[
+  {t:'prosa', title:'Un livello che non dura per sempre', tag:'l’argomento di de Bernardis', html:R`
+  <p><i>«Le energie dei diversi livelli atomici non possono essere definite esattamente. L&rsquo;elettrone occupa un orbitale eccitato per un tempo breve $\Delta t$ e poi ricade “naturalmente” al livello fondamentale»</i>. Per il principio di indeterminazione, un livello che dura in media $\Delta t$ ha un&rsquo;energia definita solo entro $\Delta E\simeq\frac{h}{2\pi\Delta t}$. Il livello fondamentale dura per sempre e ha $\Delta E=0$. Se una transizione collega due livelli entrambi eccitati, le due incertezze si sommano. La soluzione 9.25 del Carroll-Ostlie lo scrive derivando $E=hc/\lambda$ rispetto a ciascun livello e sommando i contributi:
+  $$\Delta\lambda=\frac{\lambda^{2}}{2\pi c}\left(\frac{1}{\Delta t_i}+\frac{1}{\Delta t_f}\right).$$
+  Per H-alfa, la transizione da $n=3$ a $n=2$, de Bernardis dà $\Delta t_0=10^{-8}$ s, e con entrambi i livelli a quella vita media il conto dà $4{,}6\cdot10^{-5}\ \mathrm{nm}$: de Bernardis scrive $5\cdot10^{-5}$ nm, <i>«estremamente stretta!»</i>. È una parte su dieci milioni della lunghezza d&rsquo;onda.</p>`},
+  {t:'prosa', title:'Perché il profilo è una lorentziana', tag:'la forma, non solo la larghezza', html:R`
+  <p>De Bernardis dice che <i>«la distribuzione delle durate produce un profilo lorentziano»</i>. Il motivo si vede in tre righe. Un atomo eccitato che decade irradia un&rsquo;onda la cui ampiezza oscilla alla frequenza $\nu_0$ e si smorza come $e^{-\Gamma t/2}$, perché l&rsquo;<i>intensità</i>, che è il modulo quadro, decade come $e^{-\Gamma t}$ con $\Gamma$ la probabilità di decadimento per unità di tempo. Lo spettro di un segnale è la sua <span class="str" data-str="trasformata-di-fourier">trasformata di Fourier</span>:
+  $$\int_0^\infty e^{-\Gamma t/2}e^{2\pi i(\nu_0-\nu)t}dt=\frac{1}{\Gamma/2-2\pi i(\nu_0-\nu)},$$
+  e il suo modulo quadro $|\phi|^{2}$ dà il profilo in intensità,
+  $$\phi(\nu)\propto\frac{1}{(\nu-\nu_0)^{2}+(\Gamma/4\pi)^{2}}.$$
+  È una <b>lorentziana</b>, con larghezza a metà altezza $\Delta\nu_{1/2}=\frac{\Gamma}{2\pi}$. In lunghezza d&rsquo;onda $\Delta\lambda=\lambda^2\Delta\nu/c$, e con $\Gamma=1/\Delta t_i+1/\Delta t_f$ si ritrova la formula di sopra. La forma è il punto: la lorentziana scende come $1/(\nu-\nu_0)^{2}$, cioè lentamente. Lontano dal centro una lorentziana stretta può superare una gaussiana larga, e lo si vedrà nella tappa 05.</p>`}
+]},
+
+/* ---------------- 03 · ALLARGAMENTO DOPPLER ---------------- */
+{ num:'03', title:'L’allargamento Doppler: la riga come termometro', meta:'la maxwelliana proiettata sulla linea di vista · il profilo gaussiano e la sua FWHM · H-alfa nel Sole, e un fattore dimenticato · la massa dell’atomo e la turbolenza',
+  blocchi:[
+  {t:'prosa', title:'Dalla maxwelliana alla gaussiana', tag:'la derivazione dell’orale', html:R`
+  <p>Un atomo che si muove lungo la linea di vista con velocità $v_z$, positiva se si allontana, emette la frequenza naturale $\nu_0$ ma l&rsquo;osservatore riceve, per effetto Doppler, $\nu=\nu_0\left(1-\frac{v_z}{c}\right)$. In un gas in equilibrio termico la componente della velocità lungo un asse ha la distribuzione di Maxwell, $dN\propto\exp\left(-\frac{m v_z^{2}}{2kT}\right)dv_z$. Ogni atomo contribuisce a una frequenza diversa, e il profilo della riga è la distribuzione delle velocità ricopiata nello spazio delle frequenze. Sostituendo $v_z=c(\nu_0-\nu)/\nu_0$:
+  $$\phi(\nu)\propto\exp\left[-\left(\frac{\nu-\nu_0}{\Delta\nu_D}\right)^{2}\right],$$
+  una <b>gaussiana</b> di larghezza $\Delta\nu_D=\frac{\nu_0}{c}\sqrt{2kT/m}$, cioè, in lunghezza d&rsquo;onda, $\Delta\lambda_D=\frac{\lambda}{c}\sqrt{\frac{2kT}{m}}$. La larghezza Doppler è la lunghezza d&rsquo;onda moltiplicata per il rapporto fra la velocità più probabile e quella della luce. La gaussiana scende a metà quando $(x/\Delta\lambda_D)^2=\ln2$, quindi
+  $$(\Delta\lambda)_{1/2}=2\sqrt{\ln2}\,\Delta\lambda_D,$$
+  che è la forma di de Bernardis, $(\Delta\lambda)_{1/2}=\frac{2\lambda}{c}\sqrt{\frac{2kT\ln2}{m}}$. La larghezza misura direttamente $T/m$. Misurata la FWHM di una riga di un atomo di massa nota, si ha la temperatura del gas: <b>il profilo di riga è un termometro</b>, e non ha bisogno di conoscere né la distanza né la luminosità della sorgente.</p>`},
+  {t:'prosa', title:'H-alfa nel Sole, e un fattore che manca nella slide di de Bernardis', tag:'i numeri', html:R`
+  <p>Per l&rsquo;idrogeno della fotosfera solare, $T=5770$ K e H-alfa a 656,5 nm, la larghezza Doppler è $\Delta\lambda_D=0{,}214\ \text{Å}$, e la FWHM è $2\sqrt{\ln2}$ volte tanto, $0{,}356\ \text{Å}$. De Bernardis scrive $0{,}427$ Å, che è il valore di $2\lambda/c\cdot\sqrt{2kT/m}$, cioè della stessa formula <b>senza</b> il fattore $\sqrt{\ln2}=0{,}833$ che la diapositiva stessa scrive nella formula. Lo dichiaro: il numero corretto per la FWHM è 0,356 Å. Le conclusioni della slide reggono comunque. La riga Doppler è $778$ volte più larga della larghezza naturale (de Bernardis: «1000 volte di più»), e $18\,440$ volte più stretta della sua lunghezza d&rsquo;onda, <i>«quindi riga ancora visivamente molto sottile»</i>.</p>
+  <p>La massa al denominatore è ciò che rende il termometro preciso. A parità di temperatura un atomo di ferro, 56 volte più pesante dell&rsquo;idrogeno, si muove $\sqrt{56}$ volte più piano. Una riga del ferro a 500 nm nel Sole ha una FWHM termica di soli $0{,}036\ \text{Å}$. Ma c&rsquo;è un secondo contributo alle velocità. Le slide: <i>«se oltre alle velocità termiche ci sono turbolenze nell&rsquo;atmosfera della stella, anche esse gaussiane con dispersione $v_{turb}$, la formula […] si può modificare sommando in quadratura le due dispersioni»</i>:
+  $$(\Delta\lambda)_{1/2}=\frac{2\lambda}{c}\sqrt{\left(\frac{2kT}{m}+v_{\mathrm{turb}}^{2}\right)\ln2}.$$
+  Con 2 km/s di turbolenza la FWHM di H-alfa diventa $0{,}363\ \text{Å}$, appena di più, perché il termine termico dell&rsquo;idrogeno, circa 9,8 km/s, domina. Per il ferro, il cui termine termico è 1,3 km/s, la turbolenza domina. Il trucco per separarle è questo: la turbolenza non dipende dalla massa, la parte termica sì. Righe di atomi di massa diversa nella stessa atmosfera danno due equazioni in due incognite, $T$ e $v_{\mathrm{turb}}$.</p>
+  <p>Perché le dispersioni si sommano proprio in quadratura? Perché la velocità osservata di un atomo è la somma di due contributi indipendenti, quello termico e quello del vortice turbolento in cui si trova, e la distribuzione della somma di due variabili indipendenti è la convoluzione delle due distribuzioni. La convoluzione di due gaussiane è ancora una gaussiana, con le varianze sommate: è un conto che si riduce a un <span class="str" data-str="integrale-gaussiano">integrale gaussiano</span> completando il quadrato all&rsquo;esponente. La stessa regola vale per il profilo strumentale. Uno spettrografo che da solo allargherebbe una riga infinitamente sottile in una gaussiana di FWHM $w$ si somma in quadratura alla riga vera, e prima di trasformare una larghezza misurata in temperatura bisogna toglierlo, sottraendo i quadrati. Quando la larghezza strumentale è molto maggiore di quella della riga, la sottrazione diventa la differenza di due numeri quasi uguali, e la temperatura non si misura più. È il motivo per cui un termometro Doppler chiede alta risoluzione spettrale.</p>`},
+  {t:'plot', title:'Il profilo Doppler a tre temperature',
+   intro:'Profilo gaussiano normalizzato al picco per H-alfa, in funzione della distanza dal centro in Å. Ciano: 5770 K (il Sole); oro: 20 000 K; viola: 1000 K.',
+   plots:[
+    {kind:'func2d', xr:[-1,1], yr:[0,1.05], height:280, equal:false,
+     title:'lambda - lambda0 (A)      phi / phi(0)',
+     curves:[{f:'exp(-pow(x/0.2137,2))', col:'#5eead4', label:'5770 K'},
+             {f:'exp(-pow(x/(0.2137*sqrt(20000/5770)),2))', col:'#d8a13a', label:'20000 K'},
+             {f:'exp(-pow(x/(0.2137*sqrt(1000/5770)),2))', col:'#b98cff', label:'1000 K'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la forma è sempre la stessa campana, e cambia solo la scala, che cresce come $\sqrt T$. Quadruplicare la temperatura raddoppia la larghezza.</p>
+   <p><b>Che cosa impararne:</b> la dipendenza da $\sqrt{T}$ è debole. Per misurare una temperatura al 10% serve la larghezza al 5%, e serve aver tolto il contributo strumentale e quello turbolento, che si sommano in quadratura e non si distinguono dalla forma.</p>`}
+]},
+
+/* ---------------- 04 · ALLARGAMENTO COLLISIONALE ---------------- */
+{ num:'04', title:'L’allargamento collisionale: la densità nella forma della riga', meta:'gli urti interrompono l’emissione · tempo libero medio · il conto delle slide per il Sole · perché conta nelle ali',
+  blocchi:[
+  {t:'prosa', title:'Urti come decadimenti anticipati', tag:'pressione', html:R`
+  <p><i>«Gli orbitali di un atomo vengono perturbati in presenza del campo elettrico di uno ione che ci passa vicino. Il risultato è che i livelli energetici e quindi le frequenze dei fotoni emessi sono anch&rsquo;esse perturbate»</i>. Un urto interrompe il treno d&rsquo;onda emesso dall&rsquo;atomo come lo interromperebbe un decadimento. Il risultato è dunque di nuovo una lorentziana, con il tempo medio fra due urti al posto della vita media. Quel tempo dipende dalla densità $n$ dei perturbatori, dalla sezione d&rsquo;urto $\sigma$ e dalla velocità $v$: $\Delta t_0=\frac{1}{n\sigma v}$, con $v=\sqrt{2kT/m}$. De Bernardis scrive la larghezza come
+  $$\Delta\lambda=\frac{\lambda^{2}}{\pi c}\,\frac{1}{\Delta t_0},$$
+  che cresce con la densità, cioè con la pressione: di qui il nome «allargamento da pressione».</p>
+  <p>Il conto numerico di de Bernardis per la fotosfera solare usa $T=5770$ K e la massa dell&rsquo;idrogeno, circa 1800 masse elettroniche, che danno $v=9{,}86\cdot10^{5}\ \mathrm{cm/s}$ (de Bernardis: 980 000 cm/s). Poi $n=1{,}5\cdot10^{17}$ cm⁻³ e una sezione d&rsquo;urto di $3{,}5\cdot10^{-16}$ cm². Quest&rsquo;ultima è il valore di $\pi(2a_0)^2$, l&rsquo;area di un cerchio di raggio pari a due <span class="str" data-str="raggio-di-bohr">raggi di Bohr</span>, anche se le slide non lo dicono. Il risultato è $2{,}37\cdot10^{-4}\ \text{Å}$ (slide: 2,36·10⁻⁴), <i>«confrontabile con il valore della larghezza naturale»</i> e circa $1500$ volte meno della FWHM Doppler.</p>`},
+  {t:'prosa', title:'Trascurabile al centro, dominante nelle ali', tag:'il punto delle slide', html:R`
+  <p>A prima vista allargamento naturale e collisionale sono irrilevanti, mille volte più piccoli del Doppler. De Bernardis corregge subito: <i>«in realtà l&rsquo;allargamento collisionale aumenta (anche un fattore 10) per pressioni maggiori di quella dell&rsquo;esempio; il profilo di Lorentz decresce lentamente lontano dal centro della riga, mentre quello Doppler decresce esponenzialmente. Quindi lontano dal centro della riga domina comunque il profilo lorentziano»</i>. È il fatto da cui dipende tutto il tratto finale della curva di crescita. Per righe fortissime il centro è nero comunque e la larghezza equivalente la fanno le ali, che sono lorentziane. Ed è anche ciò che rende la densità leggibile in uno spettro. Le stelle di sequenza principale, dense, hanno righe con ali larghe. Le giganti, rarefatte, hanno righe strette. Le nane bianche, densissime, hanno righe di Balmer larghe decine di ångström.</p>`},
+  {t:'prosa', title:'La densità si vede a occhio: giganti e nane della stessa temperatura', tag:'de Bernardis, slide 2016, PDF 38-39', html:R`
+  <p>L&rsquo;allargamento collisionale ha una conseguenza che de Bernardis mostra sugli spettri veri prima di farne il conto. <i>«La temperatura è il principale fattore che definisce lo spettro stellare. Ma anche la densità degli strati più esterni della stella ha un effetto»</i>: le giganti e le supergiganti hanno atmosfere molto rarefatte, gli urti sono rari, e le righe dell&rsquo;idrogeno sono strette; nelle stelle di sequenza principale gli urti sono frequenti e le righe larghe. Una gigante rossa fredda somiglia a una nana della stessa temperatura, ma con righe più sottili e con il tripletto del calcio a 8500 Å molto più profondo. Così, a parità di temperatura, la forma delle righe dice se la stella è di sequenza principale, gigante, supergigante o nana bianca: è la base fisica delle classi di luminosità. Una gigante blu che lascia la sequenza principale mostra lo stesso effetto, con righe dell&rsquo;idrogeno strette e deboli, perché a 30 000 K la ionizzazione toglie gli atomi neutri.</p>
+  <p>La profondità delle righe di Balmer segue invece la temperatura: è massima intorno a 9500 K, nelle stelle A0, perché lì è massima la frazione di atomi neutri con l&rsquo;elettrone in $n=2$; sopra, la ionizzazione li toglie; sotto, gli urti non bastano a eccitare il livello. A 9500 K il continuo, che de Bernardis legge con la legge di Wien $\lambda_{\max}T=0{,}29$ cm K, ha il massimo a $0{,}29/9500\ \mathrm{cm}=305$ nm, già nell&rsquo;ultravioletto. Da 7000 K (F7) a 4000 K (K5) l&rsquo;idrogeno si indebolisce e compaiono i metalli: le righe H e K del calcio ionizzato intorno a 3900 Å, il magnesio neutro a 5150 Å, il doppietto D del sodio a 5890 Å, e la <i>banda G</i>, un ammasso di righe intorno a 4100 Å.</p>`}
+]},
+
+/* ---------------- 05 · IL PROFILO DI VOIGT ---------------- */
+{ num:'05', title:'Il profilo di Voigt: Gauss al centro, Lorentz nelle ali', meta:'la convoluzione dei due profili · la funzione H(a,u) · dove la gaussiana perde',
+  blocchi:[
+  {t:'prosa', title:'Una media di lorentziane pesata da Maxwell', tag:'la convoluzione', html:R`
+  <p>Ogni atomo, fermo, emetterebbe una lorentziana, per la sua vita media e per gli urti che subisce. Muovendosi, sposta la sua lorentziana per effetto Doppler. De Bernardis scrive quindi il profilo complessivo <i>«come una media di profili lorentziani mediati sulle diverse velocità degli atomi, con pesi pari alla probabilità maxwelliana che gli atomi abbiano quella velocità»</i>. Matematicamente è la <b>convoluzione</b> di una gaussiana con una lorentziana. Nelle variabili adimensionali $u=\frac{\nu-\nu_0}{\Delta\nu_D}$ (distanza dal centro in larghezze Doppler) e $a=\frac{\Gamma}{4\pi\Delta\nu_D}$ (semilarghezza lorentziana in larghezze Doppler) si definisce la <b>funzione di Voigt</b>
+  $$H(a,u)=\frac{a}{\pi}\int_{-\infty}^{\infty}\frac{e^{-y^{2}}}{(u-y)^{2}+a^{2}}\,dy,$$
+  e il profilo normalizzato è $H(a,u)/(\sqrt\pi\Delta\nu_D)$. Nelle stelle $a$ è piccolo, $10^{-3}$-$10^{-2}$. Al centro la funzione è quasi una gaussiana: con $a=0{,}01$, $H(a,0)=0{,}989$ contro 1 della gaussiana pura. Lontano dal centro la gaussiana muore come $e^{-u^2}$ mentre la lorentziana resiste, e per $u\gg1$
+  $$H(a,u)\simeq\frac{a}{\sqrt\pi\,u^{2}}.$$
+  Il confine è sorprendentemente vicino. A cinque larghezze Doppler, con $a=0{,}01$, il termine gaussiano $e^{-25}$ vale appena $2{,}5\cdot10^{-9}$ della coda lorentziana. Già a tre larghezze Doppler le ali sono lorentziane.</p>`},
+  {t:'plot', title:'Gaussiana, lorentziana e Voigt in scala logaritmica',
+   intro:R`Ascissa $u$ in larghezze Doppler; ordinata $\log_{10}$ del profilo (Voigt normalizzata come $H(a,u)$, con $a=0{,}01$). Ciano: gaussiana $e^{-u^2}$; viola tratteggiata: coda lorentziana $a/(\sqrt\pi u^2)$; oro: Voigt calcolata numericamente.`,
+   plots:[
+    {kind:'func2d', xr:[0,8], yr:[-6,0.3], height:300, equal:false,
+     title:'u = (nu - nu0) / Delta nu_D      log10 H(a,u)',
+     curves:[{f:'log(exp(-x*x))/log(10)', col:'#5eead4', label:'gaussiana'},
+             {f:'x>0.5?log(0.01/(sqrt(PI)*x*x))/log(10):NaN', col:'#b98cff', label:'coda lorentziana', dash:true},
+             {f:'(function(){var a=0.01,s=0,h=0.01;for(var y=-8;y<=8;y+=h){s+=exp(-y*y)/((x-y)*(x-y)+a*a);}return log(a/PI*s*h)/log(10);})()', col:'#d8a13a', label:'Voigt, a = 0,01'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> fino a $u\approx2{,}5$ la Voigt (oro) segue la gaussiana (ciano); poi se ne stacca e si appoggia sulla coda lorentziana (viola), che scende di soli due ordini di grandezza fra $u=3$ e $u=8$, mentre la gaussiana ne perde ventisei.</p>
+   <p><b>Che cosa impararne:</b> il nucleo della riga dice la temperatura (Doppler), le ali dicono la densità e le vite medie (Lorentz). Il punto in cui le une prendono il posto dell&rsquo;altro dipende da $a$, quindi dal rapporto fra urti e moti termici. È lo stesso parametro che decide dove la curva di crescita, dopo il plateau, ricomincia a salire.</p>`}
+]},
+
+/* ---------------- 06 · ROTAZIONE ---------------- */
+{ num:'06', title:'Un esercizio di lezione: la nana bianca che ruota in tredici secondi', meta:'velocità equatoriale e velocità orbitale alla superficie · l’allargamento per rotazione · righe larghe cinquanta ångström',
+  blocchi:[
+  {t:'prosa', title:'Il testo', tag:'lezione10_2020_B, diapositiva 2', html:R`
+  <p><i>È stata scoperta recentemente una nana bianca in un sistema binario, a 650 parsec da noi; ha un raggio di 3500 km, una massa di 1,2 masse solari, e ruota su se stessa con un periodo di 13 secondi. (1) Stabilire se con una rotazione così veloce la materia più esterna della stella può staccarsi dalla stella. (2) Calcolare approssimativamente l&rsquo;allargamento Doppler delle righe prodotte alla superficie della stella.</i> L&rsquo;esercizio ha altri due punti, sull&rsquo;accrescimento e sul flusso, che appartengono alla fisica delle stelle compatte e qui non servono.</p>
+  <p>(1) La velocità equatoriale è $v_{\mathrm{rot}}=\frac{2\pi R}{P}$, cioè $1692\ \mathrm{km/s}$. La materia si staccherebbe se questa velocità superasse quella di un&rsquo;orbita circolare radente, $\sqrt{GM/R}$, che vale $6746\ \mathrm{km/s}$. Il rapporto fra accelerazione centrifuga e gravità all&rsquo;equatore è $(v_{\mathrm{rot}}/v_{\mathrm{orb}})^2=0{,}063$. La stella è lontana dal limite di distacco, per merito della sua compattezza: la stessa rotazione distruggerebbe qualunque stella normale.</p>
+  <p>(2) Un lembo della stella si avvicina a $v_{\mathrm{rot}}$, l&rsquo;altro si allontana alla stessa velocità, e le righe sono allargate da bordo a bordo di $\frac{\Delta\lambda}{\lambda}=\frac{2v_{\mathrm{rot}}}{c}$, cioè $0{,}0113$. Per H-beta sono circa $55\ \text{Å}$. È un allargamento di natura diversa dai tre di prima. Non viene dalla fisica dell&rsquo;atomo né dall&rsquo;agitazione termica, ma da un moto ordinato e macroscopico della superficie. Il profilo non è né gaussiano né lorentziano: è un profilo «a scodella», ottenuto sommando le righe di tutti gli elementi del disco, ciascuno spostato della sua velocità lungo la linea di vista. Qui serve solo l&rsquo;<span class="str" data-str="ordini-di-grandezza">ordine di grandezza</span>, ed è enorme. La riga Doppler termica di una nana bianca, anche a decine di migliaia di kelvin, è larga meno di un ångström.</p>`}
+]},
+
+/* ---------------- 07 · RIGHE MOLECOLARI ---------------- */
+{ num:'07', title:'Le molecole: livelli rotazionali e il termometro del freddo', meta:'il rotore rigido · righe equispaziate in frequenza · CO a 115 e 230 GHz · bande molecolari nelle stelle fredde',
+  blocchi:[
+  {t:'prosa', title:'Perché le molecole', tag:'dove gli atomi tacciono', html:R`
+  <p>Nel mezzo interstellare freddo, a qualche decina di kelvin, gli atomi sono tutti nello stato fondamentale. La lezione sul gas interstellare lo dice per l&rsquo;idrogeno: le transizioni verso gli stati eccitati richiedono fotoni ultravioletti che, lontano dalle stelle O e B, non ci sono. Una molecola invece ha, oltre ai livelli elettronici, livelli di <b>vibrazione</b> dei nuclei e livelli di <b>rotazione</b> della molecola intera. Questi ultimi sono così vicini fra loro che bastano pochi kelvin a popolarli. Le stelle più fredde mostrano lo stesso fenomeno dall&rsquo;altra parte della scala. Sotto i 3500 K, dice de Bernardis nella lezione 6, <i>«l&rsquo;eccitazione è così bassa che si possono formare delle molecole. Il grande numero di livelli rotazionali e vibrazionali forma delle bande di assorbimento profonde, larghe fino a 300 Å»</i>. Una banda molecolare è un treno di centinaia di righe rotazionali, tanto fitte da fondersi, sopra ciascuna transizione elettronica o vibrazionale.</p>`},
+  {t:'prosa', title:'Il rotore rigido', tag:'la soluzione dell’esonero 2009', html:R`
+  <p>Una molecola biatomica che ruota attorno al suo centro di massa ha momento d&rsquo;inerzia $I=\mu r^2$, con $\mu$ la massa ridotta dei due nuclei e $r$ la loro distanza. Il quadrato del momento angolare è quantizzato, $L^2=\hbar^2J(J+1)$, e l&rsquo;energia di rotazione è
+  $$E_J=\frac{\hbar^{2}}{2I}J(J+1),\qquad J=0,1,2,\dots$$
+  Le transizioni permesse per una molecola con momento di dipolo cambiano $J$ di una unità, e
+  $$E_J-E_{J-1}=\frac{\hbar^{2}J}{I}.$$
+  Le righe di un rotore sono quindi <b>equispaziate in frequenza</b>, $\nu_{J\to J-1}=2BJ$, con la costante rotazionale $B=\frac{\hbar}{4\pi I}$. Per il monossido di carbonio, la molecola con cui si mappa il gas molecolare delle galassie, la prima riga $J=1\to0$ è a 115,27 GHz (2,6 mm) e la seconda, $J=2\to1$, al doppio, 230,5 GHz. Dalla prima si ricava $I=1{,}456\cdot10^{-46}\ \mathrm{kg\,m^{2}}$. Con la massa ridotta di $^{12}$C e $^{16}$O e una distanza di legame di 1,128 Å viene $1{,}449\cdot10^{-46}$: il modello del rotore rigido regge a mezzo percento. L&rsquo;energia del livello $J=1$ corrisponde a $5{,}53\ \mathrm{K}$. È questo che rende il CO un termometro per il gas a 10-50 K, dove $kT$ è dell&rsquo;ordine delle spaziature rotazionali.</p>`},
+  {t:'prosa', title:'Popolazioni rotazionali', tag:'Boltzmann con il peso 2J+1', html:R`
+  <p>Il livello $J$ contiene $2J+1$ stati, le orientazioni del momento angolare, e all&rsquo;equilibrio
+  $$\frac{n_J}{n_0}=(2J+1)\,e^{-E_J/kT}.$$
+  A 10 K il livello $J=1$ del CO ha $1{,}73$ volte la popolazione del fondamentale. Il peso statistico vince sull&rsquo;esponenziale perché $E_1/k$ è solo 5,5 K. Il rapporto fra le intensità di due righe rotazionali, se sono otticamente sottili, dipende allora solo dalla temperatura, ed è l&rsquo;esercizio della tappa seguente. Le energie di vibrazione sono cento volte più grandi: per il CO il primo livello vibrazionale corrisponde a circa 3000 K, con righe intorno a 4,7 µm. Le slide del corso non le trattano per esteso, e qui ne do solo la scala, dichiarata. Popolarle termicamente richiede le temperature delle atmosfere stellari fredde, non quelle delle nubi.</p>`},
+  {t:'prosa', title:'Le bande molecolari nelle giganti più fredde', tag:'de Bernardis, slide 2016, PDF 39', html:R`
+  <p>De Bernardis mostra dove le molecole compaiono negli spettri stellari. <i>«Per T &lt; 3500 K l&rsquo;eccitazione è così bassa che si possono formare delle molecole. Il grande numero di livelli rotazionali e vibrazionali forma delle bande di assorbimento profonde, larghe fino a 300 Å»</i>. Una banda è una riga sola vista con la risoluzione dei livelli rotazionali: ogni transizione vibrazionale si accompagna a decine di salti rotazionali, ognuno con la sua riga, e le righe, allargate dal Doppler, si fondono. Nelle giganti più fredde conosciute la struttura a bande diventa evidentissima oltre 7000 Å, e lo spettro mostra anche dei buchi che non sono della stella: a certe frequenze l&rsquo;atmosfera terrestre assorbe, e quando il flusso stellare è basso quei tratti si perdono.</p>`}
+]},
+
+/* ---------------- 08 · L'ESERCIZIO DEL CO ---------------- */
+{ num:'08', title:'La temperatura di una galassia dalle sue righe del CO', meta:'esonero A del 14 dicembre 2009 · il diametro del radiotelescopio · il flusso in jansky · due righe, una temperatura, e un momento d’inerzia che non torna',
+  blocchi:[
+  {t:'prosa', title:'Il testo', tag:'prova scritta, non esercizio di lezione', html:R`
+  <p><i>Puntando un grande radiotelescopio verso una galassia con diametro angolare (24 ± 1)″ si osserva la riga J=1→0 del CO a 115 GHz. La temperatura d&rsquo;antenna, cioè la temperatura che deve avere un corpo nero nella regione di Rayleigh-Jeans per produrre la stessa brillanza, è (0,150 ± 0,002) K. (a) Che diametro deve avere lo specchio per risolvere la galassia? (b) Il flusso in jansky, con la galassia a disco uniforme vista di faccia. (c) A 230 GHz si ottiene (0,11 ± 0,02) K: qual è la temperatura fisica delle molecole di CO?</i> Nell&rsquo;estrazione del testo i «±» sono diventati «+», e la soluzione conferma la lettura con il segno ±.</p>
+  <p>(a) Il limite di diffrazione $\theta=1{,}22\lambda/D$ con $\lambda=2{,}6$ mm e $\theta=24''$ dà $D=27{,}3\ \mathrm{m}$. (b) La brillanza di Rayleigh-Jeans per l&rsquo;angolo solido del disco: $F=\frac{2k\nu^{2}}{c^{2}}T_a\,\Omega$ con $\Omega=\pi\theta^{2}/4$, che dà $0{,}65\ \mathrm{Jy}$, il numero della soluzione.</p>`},
+  {t:'prosa', title:'La temperatura delle molecole', tag:'il punto (c)', html:R`
+  <p>La soluzione assume righe otticamente sottili, con la temperatura d&rsquo;antenna di ciascuna proporzionale alla popolazione del livello di partenza, e quindi
+  $$\frac{T_{2\to1}}{T_{1\to0}}=\frac{5}{3}\,e^{-(E_2-E_1)/kT}.$$
+  Il rapporto misurato è $0{,}733$. Per la differenza di energia la soluzione usa il rotore rigido, $E_2-E_1=\frac{2\hbar^{2}}{I}$, con $I=1{,}64\cdot10^{-46}$ kg m², che dà $9{,}82\ \mathrm{K}$ e una temperatura di $12{,}0\ \mathrm{K}$. Ma quel momento d&rsquo;inerzia non è compatibile con la riga che l&rsquo;esercizio stesso osserva: con $I=1{,}64\cdot10^{-46}$ la riga $J=1\to0$ cadrebbe a $102\ \mathrm{GHz}$, non a 115. Lo dichiaro e uso il dato osservato. Poiché $\nu_{10}=2B$ e $E_2-E_1=4hB$, si ha $E_2-E_1=2h\nu_{10}$, cioè $11{,}06\ \mathrm{K}$, e la temperatura diventa $13{,}5\ \mathrm{K}$. La differenza fra i due risultati, 12 contro 13,5 K, è comunque minore dell&rsquo;incertezza che l&rsquo;esercizio stesso porta. Con le barre d&rsquo;errore dichiarate il rapporto varia fra 0,59 e 0,88, e la temperatura fra $10{,}7$ e $17{,}3\ \mathrm{K}$. È una nube molecolare fredda, e la misura dice anche che i livelli rotazionali del CO sono popolati termicamente, cioè che la densità è abbastanza alta perché le collisioni li tengano all&rsquo;equilibrio.</p>`}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: l’allargamento Doppler termico', meta:'la domanda teorica della mappa · il copione in cinque mosse · il confronto con la larghezza naturale e la Voigt',
+  blocchi:[
+  {t:'reveal', title:'Il copione', tag:'cinque mosse', steps:[
+   {label:'Mossa 1: il Doppler di un atomo', body:R`<p>«Un atomo con velocità $v_z$ lungo la linea di vista emette $\nu_0$ e io ricevo $\nu=\nu_0(1-v_z/c)$. In un gas termico le $v_z$ sono distribuite come una maxwelliana, $\exp(-mv_z^2/2kT)$.»</p>`},
+   {label:'Mossa 2: la gaussiana', body:R`<p>«Il profilo è la distribuzione delle velocità riscritta in frequenza: una gaussiana di larghezza $\Delta\lambda_D=(\lambda/c)\sqrt{2kT/m}$, e FWHM $(\Delta\lambda)_{1/2}=\frac{2\lambda}{c}\sqrt{\frac{2kT\ln2}{m}}$.»</p>`},
+   {label:'Mossa 3: il termometro', body:R`<p>«Rovesciata, la formula dà $T=\frac{mc^{2}}{8k\ln2}\left(\frac{(\Delta\lambda)_{1/2}}{\lambda}\right)^{2}$: la larghezza di una riga misura la temperatura senza bisogno di distanza o luminosità. Per H-alfa nel Sole la FWHM è circa 0,36 Å.»</p>`},
+   {label:'Mossa 4: la turbolenza e la massa', body:R`<p>«Moti turbolenti gaussiani si sommano in quadratura, $2kT/m+v_{turb}^2$. Si separano usando atomi di massa diversa: la parte termica scala come $1/m$, la turbolenza no.»</p>`},
+   {label:'Mossa 5: il confronto con il naturale e la Voigt', body:R`<p>«L&rsquo;allargamento naturale viene dalla vita media, per il principio di indeterminazione, ed è una lorentziana, mille volte più stretta per H-alfa. La collisionale è anch&rsquo;essa lorentziana. Il profilo vero è la convoluzione, la Voigt: gaussiana al centro, lorentziana nelle ali, perché la lorentziana scende come $1/\Delta\nu^2$ e la gaussiana come $e^{-\Delta\nu^2}$.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove i profili tornano', meta:'otto voci · dalle atmosfere stellari alle galassie',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Naturale:</b> $\Delta\lambda=\frac{\lambda^{2}}{2\pi c}\left(\frac{1}{\Delta t_i}+\frac{1}{\Delta t_f}\right)$; per H-alfa circa $5\cdot10^{-5}$ nm. Lorentziana.</li>
+  <li><b>Doppler:</b> FWHM $\frac{2\lambda}{c}\sqrt{2kT\ln2/m}$; H-alfa nel Sole 0,36 Å; gaussiana.</li>
+  <li><b>Velocità termica dell’idrogeno a 5800 K:</b> circa 10 km/s; del ferro circa 1,3 km/s.</li>
+  <li><b>Collisionale:</b> $\Delta t_0=1/n\sigma v$; nel Sole circa $2\cdot10^{-4}$ Å; lorentziana, domina nelle ali.</li>
+  <li><b>Voigt:</b> parametro $a=\Gamma/4\pi\Delta\nu_D\sim10^{-2}$; ali lorentziane oltre circa 3 larghezze Doppler.</li>
+  <li><b>Rotazione:</b> $\Delta\lambda/\lambda=2v_{\mathrm{rot}}/c$; una nana bianca che ruota in 13 s ha righe larghe circa 50 Å.</li>
+  <li><b>Rotore rigido:</b> $E_J=\hbar^{2}J(J+1)/2I$; righe a $2BJ$; CO 115 e 230 GHz.</li>
+  <li><b>CO:</b> $E_1/k=5{,}5$ K: termometro delle nubi a 10-50 K.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>Lo stesso effetto Doppler che allarga una riga termica la sposta, quando il moto è ordinato. Le curve di rotazione delle galassie sono spostamenti della riga a 21 cm o delle righe del CO misurati punto per punto lungo il disco, e da esse si ricava la massa, compresa quella che non si vede. Le dispersioni di velocità di un ammasso o del nucleo di una galassia sono larghezze di riga: la stessa somma in quadratura di questa tappa, applicata a stelle invece che ad atomi, e trasformata in massa dal teorema del viriale. I profili di Voigt sono lo strumento con cui si misurano le gravità superficiali delle stelle, attraverso le ali da pressione, e le colonne di idrogeno davanti ai quasar lontani, nelle cui righe di Lyman-alfa più forti si vedono ali di smorzamento perfette.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-07-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-07 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-07-righe-molecolari-e-profili-di-riga.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

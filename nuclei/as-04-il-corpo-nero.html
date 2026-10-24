@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-04 — Il corpo nero: la sorgente che dipende da un solo numero</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-04 — Il corpo nero: la sorgente che dipende da un solo numero</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["serie-geometrica"] = {"nome":"Serie geometrica","riga":"La somma $\\sum_{n\\ge 0} q^{n}$ vale $\\dfrac{1}{1-q}$ se $|q|\\lt 1$, e non esiste se $|q|\\ge 1$.","serve":"È l'unica serie di cui si conosce la somma in forma chiusa senza fatica, e per questo diventa il metro di tutte le altre: una serie si studia maggiorandola con una geometrica (criterio del rapporto, criterio della radice) o riconoscendola come geometrica travestita.","esempio":"Con $q=\\tfrac12$: $1+\\tfrac12+\\tfrac14+\\cdots=\\dfrac{1}{1-\\tfrac12}=2$. Con $q=-\\tfrac13$: $\\dfrac{1}{1+\\tfrac13}=\\tfrac34$. Con $q=1$ le somme parziali sono $N+1$ e se ne vanno: la formula $1/(1-q)$ non è una scorciatoia da usare fuori dal suo raggio.","pieno":{"file":"07-serie-funzioni.html","tappa":"04","come":"il raggio $R=1$, il grafico delle somme parziali e la cassetta dei trucchi che parte da qui, nella tappa sulle serie di potenze"},"qui":{"metodi-e-modelli":{"serve":"È il motore della serie di Laurent: lo sviluppo di $\\dfrac{1}{z-a}$ in potenze di $z$ o di $1/z$ è una geometrica, e quale delle due si sceglie decide in quale corona si sta sviluppando. Tutta la parte principale di Laurent nasce da qui.","esempio":"Per $\\dfrac{1}{z-2}$ con $|z|\\lt 2$ si scrive $-\\tfrac12\\cdot\\dfrac{1}{1-z/2}=-\\sum_{n\\ge0}\\dfrac{z^{n}}{2^{n+1}}$; in $z=1$ entrambi i membri valgono $-1$. Per $|z|\\gt 2$ si raccoglie invece $z$ e viene $\\sum_{n\\ge0}\\dfrac{2^{n}}{z^{n+1}}$, cioè solo potenze negative; in $z=4$ entrambi i membri valgono $\\tfrac12$."},"elettromagnetismo":{"serve":"Compare ogni volta che una configurazione si ripete con un fattore costante — catene di cariche immagine fra due piani conduttori, riflessioni multiple in una cavità — e la somma chiusa è ciò che rende il conto finito invece che infinito.","esempio":"Una carica fra due piani paralleli genera immagini a distanze crescenti, e il contributo al potenziale è una somma del tipo $\\sum_{n\\ge0} r^{n}$ con $r\\lt 1$ fissato dalla geometria. Con una riflettività $r=\\tfrac14$ la serie vale $\\tfrac43$: la catena è infinita, il potenziale no."}},"controllo":[{"tipo":"somma","espr":"(1/2)**n","var":"n","da":"0","a":"oo","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"somma","espr":"(-1/3)**n","var":"n","da":"0","a":"oo","vale":"3/4","dove":"esempio","appare":"\\tfrac34"},{"tipo":"somma","espr":"-1**n/2**(n+1)","var":"n","da":"0","a":"oo","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"somma","espr":"2**n/4**(n+1)","var":"n","da":"0","a":"oo","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"},{"tipo":"somma","espr":"(1/4)**n","var":"n","da":"0","a":"oo","vale":"4/3","dove":"qui.elettromagnetismo.esempio","appare":"\\tfrac43"},{"tipo":"uguale","sinistra":"1/(1-2)","vale":"-1","dove":"qui.metodi-e-modelli.esempio","appare":"-1"},{"tipo":"uguale","sinistra":"1/(4-2)","vale":"1/2","dove":"qui.metodi-e-modelli.esempio","appare":"\\tfrac12"}]};
+STRUM["funzione-zeta-di-riemann"] = {"nome":"Funzione zeta di Riemann","riga":"$\\zeta(s)=\\sum_{n\\ge1} n^{-s}$, convergente per $s>1$; i valori che servono sono $\\zeta(3/2)\\simeq 2{,}612$, $\\zeta(2)=\\pi^{2}/6\\simeq1{,}645$, $\\zeta(3)\\simeq1{,}202$, $\\zeta(4)=\\pi^{4}/90$.","serve":"Compare tutte le volte che una somma su stati discreti viene approssimata con un integrale e si sviluppa l'integrando in serie geometrica: si scambiano somma e integrale e resta una zeta moltiplicata per una gamma. Non e' un abbellimento — il valore NUMERICO di $\\zeta(3/2)$ decide se una transizione di fase esiste.","esempio":"$\\displaystyle\\int_{0}^{\\infty}\\frac{x^{s-1}}{e^{x}-1}dx=\\Gamma(s)\\zeta(s)$, che si ottiene scrivendo $\\frac{1}{e^{x}-1}=\\sum_{n\\ge1}e^{-nx}$ e integrando termine a termine. Per $s=4$ da' $\\pi^{4}/15$, che e' la costante che compare nella legge di Stefan-Boltzmann.","pieno":null,"qui":{"meccanica-statistica":{"serve":"E' cio' che rende la condensazione di Bose-Einstein un fatto e non una possibilita'. Il numero di particelle negli stati eccitati e' limitato superiormente da un integrale che vale $\\zeta(3/2)$: siccome quel numero e' FINITO, oltre una certa densita' le particelle in eccesso non hanno dove stare se non nello stato fondamentale.","esempio":"La condizione critica e' $n\\lambda^{3}=\\zeta(3/2)\\simeq2{,}612$, che definisce $T_{c}$. In due dimensioni lo stesso conto porta a $\\zeta(1)$, che DIVERGE: gli stati eccitati accolgono qualunque numero di particelle e la condensazione non avviene. La dimensionalita' entra nel risultato attraverso l'argomento della zeta, e il confine e' esattamente $s=1$."}}};
+STRUM["funzione-gamma"] = {"nome":"Funzione Gamma","riga":"$\\Gamma(z)=\\displaystyle\\int_0^{\\infty}t^{z-1}e^{-t}\\,dt$, e da questa $\\displaystyle\\int_0^{\\infty}t^{k}e^{-at}\\,dt=\\dfrac{\\Gamma(k+1)}{a^{k+1}}$ per $a>0$.","serve":"E' il fattoriale esteso ai numeri non interi — $\\Gamma(n+1)=n!$ — e soprattutto e' la forma chiusa di TUTTI gli integrali del tipo «potenza per esponenziale». Sapere questa sola formula sostituisce una decina di integrazioni per parti, e permette di leggere a vista il risultato di un integrale appena si riconosce l'esponente della potenza.","esempio":"Da $\\Gamma(z+1)=z\\,\\Gamma(z)$, che si ottiene integrando per parti una volta, discende $\\Gamma(n+1)=n!$ per $n$ intero: $\\Gamma(1)=1$, $\\Gamma(2)=1$, $\\Gamma(3)=2$, $\\Gamma(4)=6$. Sui semi-interi il capostipite e' $\\Gamma(\\tfrac12)=\\sqrt\\pi$ — che e' l'integrale gaussiano travestito — e da li' $\\Gamma(\\tfrac32)=\\tfrac12\\sqrt\\pi$, $\\Gamma(\\tfrac52)=\\tfrac34\\sqrt\\pi$. Un integrale come $\\int_0^\\infty t^{2}e^{-at}dt$ vale dunque $\\Gamma(3)/a^{3}=2/a^{3}$, senza fare nessun conto.","pieno":null,"qui":{"meccanica-statistica":{"serve":"E' l'inventario degli integrali del canonico ridotto a una riga. Ogni funzione di partizione di singola particella e' un integrale di potenza per esponenziale — cambia solo l'esponente, e con esso la fisica: $t^{1/2}$ per il gas classico, $t^{2}$ per l'ultrarelativistico, $t^{3/n}$ per un potenziale $\\alpha r^{n}$. Riconoscere quale $\\Gamma$ si sta calcolando e' cio' che distingue chi risolve lo scritto in dieci minuti da chi lo risolve in un'ora.","esempio":"Per una particella relativistica con $\\varepsilon=cp$ la partizione porta $\\int_0^\\infty p^{2}e^{-\\beta cp}dp=\\Gamma(3)/(\\beta c)^{3}=2/(\\beta c)^{3}$, da cui $\\langle\\varepsilon\\rangle=3T$ invece dei $\\tfrac32T$ del caso non relativistico. Il fattore 3 contro $3/2$ viene per intero dall'esponente della potenza, cioe' dall'argomento della Gamma: la dipendenza dell'energia dalla quantita' di moto decide da sola quanto calore serve a scaldare il gas."}}};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-04: Il corpo nero: la sorgente che dipende da un solo numero <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-04 — il corpo nero
+identita:  l'unica sorgente il cui spettro dipende da un solo numero, la temperatura — e per questo il
+           termometro con cui si misura tutto il resto e il calibratore con cui si tarano gli strumenti.
+copre:     A.7
+serve:     as-03 (flusso, brillanza, brillanza specifica, magnitudini e indici di colore)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento leggero ma obbligato (9 prove, densita' 1,6). Planck, Wien e Stefan-Boltzmann
+           si usano come formule con le loro costanti; all'orale la domanda teorica e' Wien e
+           Stefan-Boltzmann DERIVATE da Planck. Qui la derivazione di Planck c'e' comunque, perche' la
+           porta la fonte primaria (dispense §1.5) e il metro e' che non serva riaprirla.
+fonti:     de Bernardis, Dispense di Laboratorio di Astrofisica 1993/94, §1.5 Radiazione termica - Corpo
+           Nero, §1.6 Corpi neri per calibrazione assoluta, §1.7 Altre sorgenti di radiazione termica
+           (pagine stampate 21-42, PDF 22-43): fonte portante. Kirchhoff, la derivazione di Planck con la
+           media di Boltzmann e il conteggio dei modi, le quattro forme della funzione di Planck, Wien
+           (x_m=4,96), Stefan-Boltzmann, Rayleigh-Jeans e la temperatura di brillanza, la densita' di
+           fotoni (20,3 T^3 cm^-3), le esperienze di Quinn-Martin, Tug (Vega) e COBE-FIRAS, il colore
+           B-V da Planck (1.53) e la sua versione empirica (1.54), corpo grigio e polvere.
+           LEZIONE3_B_2020 / LEZIONE3_C_2020 (pagine 1-5): le diapositive del docente — la formula di
+           Planck con le costanti, il luogo dei massimi lambda_max T = 0,0029 m K, il legame fra
+           luminosita' e brillanza superficiale L = 4 pi^2 r^2 B, e il Sole descritto da un corpo nero a
+           5782 K.
+           Prove scritte (cartella esami): 20080505_compito_B esercizio 2 (Marte), 20070402_compito_06A
+           esercizio 3 (SN1970G), 20051207_compito_01 esercizio 2 (temperatura dei grani). Dichiarati come
+           prove scritte e non come esercizi di lezione: la mappa non attribuisce a questo movimento
+           nessun esercizio di lezione.
+           NON APERTO: il Carroll-Ostlie (di cui c'e' solo il manuale delle soluzioni) e la memoria
+           originale di Planck (1900) — la frase sull'ipotesi dei quanti «quasi un artificio
+           matematico» e' di de Bernardis, non di Planck.
+           DUE INCONGRUENZE NELLE DISPENSE, dichiarate in tappa 08: (a) l'angolo solido 3,5e-9 sr
+           attribuito a un diaframma di 1 mm a 300 m non segue dalla geometria (darebbe 8,7e-12 sr), pur
+           essendo coerente con il flusso 2,4e-9 W/cm2/um scritto subito dopo; (b) la (1.51) scrive
+           F = B omega/pi, mentre l'integrale di B cos(theta) sul disco da' F = B omega: il flusso di Vega
+           atteso viene 3,1e-12 e non 1,0e-12 W/cm2/um.
+registro:  LEZIONE3_B_2020 e LEZIONE3_C_2020
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac{e(\\nu,T,x)}{\\epsilon(\\nu,T,x)}=B_B(\\nu,T)", "perche": "e' l'enunciato della legge di Kirchhoff come lo scrive de Bernardis (1.29): un teorema di termodinamica citato e dimostrato a parole nella stessa tappa, non un conto."},
+ {"tipo": "simbolico", "dove": "01", "appare": "e=0{,}9\\,B_B", "perche": "e' l'applicazione della legge di Kirchhoff appena enunciata a epsilon=0,9: un esempio della definizione, non un conto."},
+ {"tipo": "numero", "espr": "(0.25**7)/1e-5", "vale": "6.1", "dove": "01", "appare": "6{,}1\\cdot10^{-5}"},
+ {"tipo": "uguale", "sinistra": "h*nu*exp(-b*h*nu)/(1-exp(-b*h*nu))", "vale": "h*nu/(exp(b*h*nu)-1)", "ipotesi": {"h": "positive", "nu": "positive", "b": "positive"}, "dove": "02", "appare": "\\frac{h\\nu}{e^{h\\nu/kT}-1}"},
+ {"tipo": "uguale", "sinistra": "-diff(log(1/(1-exp(-b*h*nu))),b)", "vale": "h*nu*exp(-b*h*nu)/(1-exp(-b*h*nu))", "ipotesi": {"h": "positive", "nu": "positive", "b": "positive"}, "dove": "02", "appare": "\\frac{h\\nu\\,e^{-\\beta h\\nu}}{1-e^{-\\beta h\\nu}}"},
+ {"tipo": "somma", "espr": "exp(-n*y)", "var": "n", "da": "0", "a": "oo", "vale": "1/(1-exp(-y))", "ipotesi": {"y": "positive", "n": "integer"}, "dove": "02", "appare": "\\frac{1}{1-e^{-\\beta h\\nu}}"},
+ {"tipo": "uguale", "sinistra": "c*(2*nu**2/c**3)*h*nu/(exp(x)-1)", "vale": "2*h*nu**3/(c**2*(exp(x)-1))", "ipotesi": {"c": "positive", "nu": "positive", "h": "positive", "x": "positive"}, "dove": "02", "appare": "B_B(\\nu,T)=c\\,u(\\nu,T)=\\frac{2h\\nu^{3}}{c^{2}}\\,\\frac{1}{e^{h\\nu/kT}-1}"},
+ {"tipo": "simbolico", "dove": "02", "appare": "dm=\\frac{2L^{3}\\nu^{2}d\\nu\\,d\\Omega}{c^{3}}", "perche": "e' il conteggio dei modi in una cavita' cubica come lo enuncia de Bernardis (generalizzazione tridimensionale della corda vibrante): un risultato citato, il cui ingrediente unidimensionale m=2L nu/c e' scritto nella frase prima."},
+ {"tipo": "uguale", "sinistra": "diff(2*L*nu/c,nu)", "vale": "2*L/c", "ipotesi": {"L": "positive", "nu": "positive", "c": "positive"}, "dove": "02", "appare": "dm=2L\\,d\\nu/c"},
+ {"tipo": "simbolico", "dove": "02", "appare": "Z(\\nu)=\\frac{2\\nu^{2}}{c^{3}}", "perche": "e' la densita' dei modi per unita' di volume, frequenza e angolo solido, letta dalla formula dm della riga prima dividendo per L^3: una definizione."},
+ {"tipo": "simbolico", "dove": "02", "appare": "u(\\nu,T)=Z(\\nu)\\,\\langle E\\rangle", "perche": "e' la definizione della densita' di energia spettrale come numero di modi per energia media del modo: il prodotto esplicito e' asserito dall'uguaglianza su B_B=c u."},
+ {"tipo": "simbolico", "dove": "02", "appare": "dE=u\\,c\\,dA\\,dt\\,d\\nu\\,d\\Omega", "perche": "e' il conteggio geometrico dell'energia nel cilindro di lunghezza c dt: la definizione del legame fra densita' di energia e brillanza, non un conto."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\langle n_\\nu\\rangle=\\frac{1}{e^{h\\nu/kT}-1}", "perche": "e' il numero di occupazione ottenuto dividendo l'energia media gia' asserita per l'energia del singolo fotone h nu."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\langle E\\rangle=\\frac{\\sum_{n}E_n e^{-\\beta E_n}}{\\sum_n e^{-\\beta E_n}}=-\\frac{d}{d\\beta}\\ln\\sum_n e^{-\\beta E_n}", "perche": "e' la definizione di media canonica di Boltzmann e la sua riscrittura standard come derivata logaritmica della funzione di partizione; il valore esplicito e' asserito subito dopo."},
+ {"tipo": "uguale", "sinistra": "(c/lam**2)*2*h*(c/lam)**3/(c**2*(exp(h*c/(lam*k*T))-1))", "vale": "2*h*c**2/(lam**5*(exp(h*c/(lam*k*T))-1))", "ipotesi": {"c": "positive", "lam": "positive", "h": "positive", "k": "positive", "T": "positive"}, "dove": "03", "appare": "B_B(\\lambda,T)=\\frac{c}{\\lambda^{2}}B_B(\\nu,T)=\\frac{2hc^{2}}{\\lambda^{5}}\\,\\frac{1}{e^{hc/\\lambda kT}-1}"},
+ {"tipo": "numero", "espr": "2*6.62607015e-34*(2.99792458e8)**2*1e30*1e-6*1e-4/1e4", "vale": "1.191", "dove": "03", "appare": "1{,}191\\cdot10^{4}"},
+ {"tipo": "numero", "espr": "6.62607015e-34*2.99792458e8/1.380649e-23*1e6", "vale": "14388", "dove": "03", "appare": "14\\,388"},
+ {"tipo": "uguale", "sinistra": "(k*T/h)*2*h*(x*k*T/h)**3/(c**2*(exp(x)-1))", "vale": "2*k**4*T**4*x**3/(h**3*c**2*(exp(x)-1))", "ipotesi": {"k": "positive", "T": "positive", "h": "positive", "x": "positive", "c": "positive"}, "dove": "03", "appare": "\\frac{2k^{4}T^{4}}{h^{3}c^{2}}\\,\\frac{x^{3}}{e^{x}-1}"},
+ {"tipo": "numero", "espr": "(1.191e4/(0.5**5*(exp(14388/(0.5*5782))-1)))/1e3", "vale": "2.6", "dove": "03", "appare": "2{,}6\\cdot10^{3}"},
+ {"tipo": "simbolico", "dove": "03", "appare": "|d\\nu|=\\frac{c}{\\lambda^{2}}|d\\lambda|", "perche": "e' il differenziale di nu=c/lambda in valore assoluto: lo Jacobiano usato nell'asserzione 'uguale' su B_B(lambda,T) della stessa tappa."},
+ {"tipo": "simbolico", "dove": "03", "appare": "B_B(\\nu,T)\\,|d\\nu|=B_B(\\lambda,T)\\,|d\\lambda|", "perche": "e' la condizione che definisce la brillanza per unita' di lunghezza d'onda: la stessa energia nello stesso intervallo spettrale, contata in due variabili."},
+ {"tipo": "simbolico", "dove": "03", "appare": "B_B(\\sigma,T)=c\\,B_B(\\nu,T)", "perche": "e' la definizione della brillanza per unita' di numero d'onda sigma=nu/c, con d nu = c d sigma: lo Jacobiano e' costante."},
+ {"tipo": "simbolico", "dove": "03", "appare": "x=\\frac{h\\nu}{kT}", "perche": "e' la definizione della variabile adimensionale di de Bernardis, rapporto fra energia del fotone ed energia termica."},
+ {"tipo": "uguale", "sinistra": "diff(x**5/(exp(x)-1),x)*(exp(x)-1)**2/x**4", "vale": "5*(exp(x)-1)-x*exp(x)", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "5(e^{x}-1)-xe^{x}=0"},
+ {"tipo": "numero", "espr": "nsolve(5*(1-exp(-x))-x,x,5)", "vale": "4.965", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "x_m=4{,}965"},
+ {"tipo": "numero", "espr": "(6.62607015e-34*2.99792458e8/(1.380649e-23*4.96511423))/1e-3", "vale": "2.898", "dove": "04", "appare": "\\lambda_mT=\\frac{hc}{4{,}965\\,k}=2{,}898\\cdot10^{-3}\\ \\mathrm{m\\,K}"},
+ {"tipo": "numero", "espr": "2.8978e-3/5782*1e9", "vale": "501", "dove": "04", "appare": "501\\ \\mathrm{nm}"},
+ {"tipo": "numero", "espr": "2.8978e-3/2.725*1e3", "vale": "1.063", "dove": "04", "appare": "1{,}063\\ \\mathrm{mm}"},
+ {"tipo": "numero", "espr": "2.8978e-3/300*1e6", "vale": "9.66", "dove": "04", "appare": "9{,}66\\ \\mu\\mathrm{m}"},
+ {"tipo": "uguale", "sinistra": "diff(x**3/(exp(x)-1),x)*(exp(x)-1)**2/x**2", "vale": "3*(exp(x)-1)-x*exp(x)", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "3(e^{x}-1)-xe^{x}=0"},
+ {"tipo": "numero", "espr": "nsolve(3*(1-exp(-x))-x,x,3)", "vale": "2.821", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "x_m^{(\\nu)}=2{,}821"},
+ {"tipo": "numero", "espr": "2.82143937*1.380649e-23/6.62607015e-34/1e10", "vale": "5.879", "dove": "04", "appare": "5{,}879\\cdot10^{10}\\ \\mathrm{Hz/K}"},
+ {"tipo": "numero", "espr": "2.99792458e8/(2.82143937*1.380649e-23/6.62607015e-34*5782)*1e9", "vale": "882", "dove": "04", "appare": "882\\ \\mathrm{nm}"},
+ {"tipo": "numero", "espr": "2.82143937*1.380649e-23/6.62607015e-34*2.725/1e9", "vale": "160.2", "dove": "04", "appare": "160{,}2\\ \\mathrm{GHz}"},
+ {"tipo": "simbolico", "dove": "04", "appare": "1-e^{-x_m}=x_m/5", "perche": "e' la stessa equazione trascendente 5(e^x-1)-xe^x=0 asserita sopra, divisa per 5e^x: la forma in cui la scrive de Bernardis."},
+ {"tipo": "simbolico", "dove": "04", "appare": "5(1-e^{-x})=x", "perche": "e' la forma iterabile della stessa equazione trascendente della derivata, gia' asserita: la si itera per il punto fisso 4,965."},
+ {"tipo": "simbolico", "dove": "04", "appare": "x\\simeq5", "perche": "e' il valore iniziale dell'iterazione, non un risultato: la radice esatta e' asserita con nsolve."},
+ {"tipo": "numero", "espr": "5*(1-exp(-5))", "vale": "4.966", "dove": "04", "appare": "5(1-e^{-5})=4{,}966"},
+ {"tipo": "numero", "espr": "Integral(x**3/(exp(x)-1),(x,0,oo))/(pi**4/15)", "vale": "1.00000", "ipotesi": {"x": "positive"}, "dove": "05", "appare": "\\frac{\\pi^{4}}{15}"},
+ {"tipo": "uguale", "sinistra": "gamma(4)*zeta(4)", "vale": "pi**4/15", "dove": "05", "appare": "\\Gamma(4)\\zeta(4)=6\\cdot\\frac{\\pi^{4}}{90}=\\frac{\\pi^{4}}{15}"},
+ {"tipo": "integrale", "espr": "x**3*exp(-n*x)", "var": "x", "da": "0", "a": "oo", "vale": "6/n**4", "ipotesi": {"x": "positive", "n": "positive"}, "dove": "05", "appare": "\\int_0^\\infty x^{3}e^{-nx}dx=\\frac{6}{n^{4}}"},
+ {"tipo": "numero", "espr": "pi**4/15", "vale": "6.494", "dove": "05", "appare": "6{,}494"},
+ {"tipo": "numero", "espr": "2*pi**5*(1.380649e-23)**4/(15*(6.62607015e-34)**3*(2.99792458e8)**2)*1e8", "vale": "5.670", "dove": "05", "appare": "\\sigma=\\frac{2\\pi^{5}k^{4}}{15h^{3}c^{2}}=5{,}670\\cdot10^{-8}"},
+ {"tipo": "uguale", "sinistra": "pi*(2*k**4*T**4/(h**3*c**2))*pi**4/15", "vale": "(2*pi**5*k**4/(15*h**3*c**2))*T**4", "ipotesi": {"k": "positive", "T": "positive", "h": "positive", "c": "positive"}, "dove": "05", "appare": "F=\\pi B=\\sigma T^{4}"},
+ {"tipo": "uguale", "sinistra": "Integral(cos(t)*sin(t),(t,0,pi/2))*2*pi", "vale": "pi", "dove": "05", "appare": "\\int_{2\\pi}\\cos\\theta\\,d\\omega=\\pi"},
+ {"tipo": "numero", "espr": "5.670e-8*300**4", "vale": "459", "dove": "05", "appare": "459\\ \\mathrm{W}"},
+ {"tipo": "numero", "espr": "(3.845e26/(4*pi*(6.957e8)**2*5.670e-8))**0.25", "vale": "5778", "dove": "05", "appare": "5778\\ \\mathrm{K}"},
+ {"tipo": "uguale", "sinistra": "4*pi*r**2*pi*B", "vale": "4*pi**2*r**2*B", "ipotesi": {"r": "positive", "B": "positive"}, "dove": "05", "appare": "L=4\\pi r^{2}\\cdot\\pi B=4\\pi^{2}r^{2}B"},
+ {"tipo": "simbolico", "dove": "05", "appare": "L=4\\pi R^{2}\\sigma T_{\\mathrm{eff}}^{4}", "perche": "e' la definizione della temperatura efficace: la temperatura del corpo nero che, con lo stesso raggio, emetterebbe la stessa luminosita'."},
+ {"tipo": "simbolico", "dove": "05", "appare": "B=\\int_0^\\infty B_B(\\nu,T)\\,d\\nu", "perche": "e' la definizione di brillanza bolometrica come integrale della brillanza specifica: il valore e' asserito dalle righe successive."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{1}{e^{x}-1}=\\sum_{n\\ge1}e^{-nx}", "perche": "e' la serie geometrica di ragione e^{-x}<1, gia' asserita come somma nella tappa 02 (partendo da n=0) e qui riletta da n=1."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{2k^{4}T^{4}}{h^{3}c^{2}}\\int_0^\\infty\\frac{x^{3}}{e^{x}-1}dx", "perche": "e' il cambio di variabile x=h nu/kT applicato all'integrale: lo stesso prodotto gia' asserito nella tappa 03 (forma B_B(x,T)), qui solo integrato."},
+ {"tipo": "limite", "espr": "(2*h*nu**3/c**2/(exp(h*nu/(k*T))-1))/(2*nu**2*k*T/c**2)", "var": "nu", "a": "0", "vale": "1", "ipotesi": {"h": "positive", "nu": "positive", "c": "positive", "k": "positive", "T": "positive"}, "dove": "06", "appare": "B_{RJ}(\\nu,T)=\\frac{2\\nu^{2}}{c^{2}}kT"},
+ {"tipo": "uguale", "sinistra": "(c/lam**2)*2*(c/lam)**2*k*T/c**2", "vale": "2*c*k*T/lam**4", "ipotesi": {"c": "positive", "lam": "positive", "k": "positive", "T": "positive"}, "dove": "06", "appare": "B_{RJ}(\\lambda,T)=\\frac{2c}{\\lambda^{4}}kT"},
+ {"tipo": "uguale", "sinistra": "c**2*(2*nu**2*k*T/c**2)/(2*k*nu**2)", "vale": "T", "ipotesi": {"c": "positive", "nu": "positive", "k": "positive", "T": "positive"}, "dove": "06", "appare": "T_b=\\frac{c^{2}}{2k\\nu^{2}}B_\\nu"},
+ {"tipo": "simbolico", "dove": "06", "appare": "B_{W}(\\nu,T)=\\frac{2h\\nu^{3}}{c^{2}}e^{-h\\nu/kT}", "perche": "e' il limite di Wien, x>>1, in cui il -1 al denominatore si trascura: la frazione d'errore 1-e^{-x} e' asserita numericamente nella stessa tappa."},
+ {"tipo": "simbolico", "dove": "06", "appare": "e^{x}-1\\simeq x", "perche": "e' il primo ordine dello sviluppo di Taylor dell'esponenziale, usato per il limite di Rayleigh-Jeans gia' asserito come limite."},
+ {"tipo": "numero", "espr": "(exp(0.1)-1)/0.1", "vale": "1.052", "dove": "06", "appare": "1{,}052"},
+ {"tipo": "numero", "espr": "exp(1)-1", "vale": "1.718", "dove": "06", "appare": "1{,}718"},
+ {"tipo": "numero", "espr": "1-exp(-1)", "vale": "0.632", "dove": "06", "appare": "0{,}632"},
+ {"tipo": "numero", "espr": "(1-(1-exp(-10)))*100", "vale": "0.0045", "dove": "06", "appare": "0{,}0045\\%"},
+ {"tipo": "numero", "espr": "6.62607015e-34*2.99792458e8/(1e-3*1.380649e-23*2.725)", "vale": "5.28", "dove": "06", "appare": "x=5{,}28"},
+ {"tipo": "numero", "espr": "6.62607015e-34*2.99792458e8/(0.21*1.380649e-23*2.725)", "vale": "0.025", "dove": "06", "appare": "x=0{,}025"},
+ {"tipo": "numero", "espr": "(exp(5.28)-1)/5.28", "vale": "37", "dove": "06", "appare": "37"},
+ {"tipo": "uguale", "sinistra": "4*pi*(2*nu**2/c**3)/(exp(x)-1)", "vale": "8*pi*nu**2/(c**3*(exp(x)-1))", "ipotesi": {"nu": "positive", "c": "positive", "x": "positive"}, "dove": "07", "appare": "n(\\nu,T)=\\frac{4\\pi\\,u(\\nu,T)}{h\\nu}=\\frac{8\\pi\\nu^{2}}{c^{3}}\\,\\frac{1}{e^{h\\nu/kT}-1}"},
+ {"tipo": "numero", "espr": "Integral(x**2/(exp(x)-1),(x,0,oo))/(2*zeta(3))", "vale": "1.00000", "ipotesi": {"x": "positive"}, "dove": "07", "appare": "\\int_0^\\infty\\frac{x^{2}}{e^{x}-1}dx=2\\zeta(3)"},
+ {"tipo": "numero", "espr": "2*zeta(3)", "vale": "2.404", "dove": "07", "appare": "2{,}404"},
+ {"tipo": "numero", "espr": "8*pi*2*zeta(3)*(1.380649e-23/(6.62607015e-34*2.99792458e8))**3*1e-6", "vale": "20.29", "dove": "07", "appare": "20{,}29\\,T^{3}\\ \\mathrm{cm^{-3}}"},
+ {"tipo": "numero", "espr": "20.287*2.725**3", "vale": "411", "dove": "07", "appare": "411\\ \\mathrm{cm^{-3}}"},
+ {"tipo": "numero", "espr": "(pi**4/15)/(2*zeta(3))", "vale": "2.701", "dove": "07", "appare": "\\langle E\\rangle=\\frac{\\pi^{4}/15}{2\\zeta(3)}\\,kT=2{,}701\\,kT"},
+ {"tipo": "numero", "espr": "2.701*8.617333e-5*2.725*1e4", "vale": "6.34", "dove": "07", "appare": "6{,}34\\cdot10^{-4}\\ \\mathrm{eV}"},
+ {"tipo": "numero", "espr": "(4*5.670374e-8/2.99792458e8*2.725**4)/1e-14", "vale": "4.17", "dove": "07", "appare": "4{,}17\\cdot10^{-14}\\ \\mathrm{J/m^{3}}"},
+ {"tipo": "uguale", "sinistra": "(4*pi/c)*(sigma*T**4/pi)", "vale": "4*sigma*T**4/c", "ipotesi": {"c": "positive", "sigma": "positive", "T": "positive"}, "dove": "07", "appare": "\\frac{4\\pi}{c}B=\\frac{4\\sigma}{c}T^{4}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\frac{60{,}4}{3}", "perche": "e' la forma in cui de Bernardis scrive il coefficiente 8 pi x 2 zeta(3) x (k/hc)^3 in cm^-3: 60,4/3=20,1, che arrotonda il 20,29 asserito sopra."},
+ {"tipo": "numero", "espr": "((5.0/300)**4)/1e-8", "vale": "7.7", "dove": "08", "appare": "7{,}7\\cdot10^{-8}"},
+ {"tipo": "numero", "espr": "(0.25**7)/1e-5", "vale": "6.1", "dove": "08", "appare": "(0{,}25)^{7}=6{,}1\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "1.191e4/(0.5556**5*(exp(14388/(0.5556*2040))-1))", "vale": "0.690", "dove": "08", "appare": "0{,}690"},
+ {"tipo": "numero", "espr": "(0.6903*3.5e-9)/1e-9", "vale": "2.4", "dove": "08", "appare": "2{,}4\\cdot10^{-9}"},
+ {"tipo": "numero", "espr": "(pi*(0.5e-3)**2/300**2)/1e-12", "vale": "8.7", "dove": "08", "appare": "8{,}7\\cdot10^{-12}"},
+ {"tipo": "numero", "espr": "(1.191e4/(0.5556**5*(exp(14388/(0.5556*1e4))-1)))/1e4", "vale": "1.8252", "dove": "08", "appare": "1{,}8252\\cdot10^{4}"},
+ {"tipo": "numero", "espr": "(1.8252e4*1.7e-16)/1e-12", "vale": "3.1", "dove": "08", "appare": "3{,}1\\cdot10^{-12}"},
+ {"tipo": "numero", "espr": "(1.8252e4*1.7e-16/pi)/1e-13", "vale": "9.9", "dove": "08", "appare": "9{,}9\\cdot10^{-13}"},
+ {"tipo": "numero", "espr": "2.416e-9/3.103e-12", "vale": "779", "dove": "08", "appare": "779"},
+ {"tipo": "uguale", "sinistra": "2*pi*B*Integral(sin(t)*cos(t),(t,0,a))", "vale": "pi*B*sin(a)**2", "ipotesi": {"B": "positive", "a": "positive"}, "dove": "08", "appare": "F=\\int_{\\mathrm{disco}}B\\cos\\theta\\,d\\omega=\\pi B\\sin^{2}\\alpha"},
+ {"tipo": "numero", "espr": "(pi*(3e-3/206265)**2/4)/1e-16", "vale": "1.66", "dove": "08", "appare": "1{,}66\\cdot10^{-16}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "F_o=\\frac{V_o}{V_{bb}}\\,\\Omega_{bb}B_B(\\nu,T)", "perche": "e' la (1.50) di de Bernardis: il rapporto dei due segnali V_o=RAF_o e V_bb=RA Omega_bb B_B, in cui risposta R e area A si semplificano. Un'eliminazione algebrica, non un conto numerico."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\pi B\\sin^{2}\\alpha\\simeq\\pi B\\alpha^{2}=B\\,\\omega_\\star", "perche": "e' il limite di angolo piccolo dell'integrale asserito nella riga prima, con omega_star = pi alpha^2 angolo solido del disco: definizione e approssimazione."},
+ {"tipo": "simbolico", "dove": "08", "appare": "F=B\\,\\omega_\\star/\\pi", "perche": "e' la (1.51) come la scrivono le dispense, citata per dichiararne il fattore pi di troppo: non e' un conto di questo movimento."},
+ {"tipo": "simbolico", "dove": "08", "appare": "G_B(\\nu,T)=\\epsilon(\\nu,T)\\,\\frac{2h\\nu^{3}}{c^{2}}\\,\\frac{1}{e^{h\\nu/kT}-1}", "perche": "e' la definizione del corpo grigio (1.58): la funzione di Planck moltiplicata per l'emissivita'."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\epsilon(\\sigma)\\sim K\\left(\\frac{\\sigma}{30\\ \\mathrm{cm^{-1}}}\\right)^{1{,}65}", "perche": "e' la legge empirica di emissivita' della polvere interstellare (1.59), un risultato di misura riportato dalle dispense."},
+ {"tipo": "simbolico", "dove": "08", "appare": "B=\\sigma T^{4}\\big[1-\\ldots\\big]/\\pi", "perche": "e' la forma della correzione di Baltes alla legge di Stefan-Boltzmann per una cavita' finita, di cui le dispense danno solo il risultato (2% a 5 K): citata, non ricalcolata."},
+ {"tipo": "uguale", "sinistra": "(2*h*c**2/(lB**5*(exp(a/lB)-1)))/(2*h*c**2/(lV**5*(exp(a/lV)-1)))", "vale": "(lV/lB)**5*(exp(a/lV)-1)/(exp(a/lB)-1)", "ipotesi": {"lV": "positive", "lB": "positive", "a": "positive", "h": "positive", "c": "positive"}, "dove": "09", "appare": "B-V=-2{,}5\\log\\frac{B_B(\\lambda_B,T)}{B_B(\\lambda_V,T)}"},
+ {"tipo": "numero", "espr": "1.25**5", "vale": "3.052", "dove": "09", "appare": "3{,}052"},
+ {"tipo": "numero", "espr": "-2.5*log(1.25**5,10)", "vale": "-1.211", "dove": "09", "appare": "-1{,}211"},
+ {"tipo": "numero", "espr": "2.5*(14388/0.44-14388/0.55)/log(10)", "vale": "7101", "dove": "09", "appare": "\\frac{7101}{T}"},
+ {"tipo": "numero", "espr": "7101/1.211", "vale": "5864", "dove": "09", "appare": "5864\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "-0.865+8540/1e4", "vale": "-0.011", "dove": "09", "appare": "-0{,}011"},
+ {"tipo": "numero", "espr": "-0.865+8540/5782.", "vale": "0.612", "dove": "09", "appare": "0{,}612"},
+ {"tipo": "numero", "espr": "8540/(0.40+0.865)", "vale": "6751", "dove": "09", "appare": "6751\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "-2.5*log(1.25**5*(exp(14388/(0.55*4000))-1)/(exp(14388/(0.44*4000))-1),10)", "vale": "0.565", "dove": "09", "appare": "0{,}565"},
+ {"tipo": "numero", "espr": "-1.211+7101/4000.", "vale": "0.564", "dove": "09", "appare": "0{,}564"},
+ {"tipo": "simbolico", "dove": "09", "appare": "B-V=-0{,}865+\\frac{8540}{T}", "perche": "e' la relazione empirica (1.54) di de Bernardis, un best fit di dati: non si deriva, si usa; le sue applicazioni numeriche sono asserite qui sotto."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\simeq-1{,}211+\\frac{7101}{T}", "perche": "e' il limite di Wien della formula esatta: i due coefficienti sono asseriti separatamente nelle righe numeriche di questa tappa."},
+ {"tipo": "simbolico", "dove": "09", "appare": "=-2{,}5\\log\\left[\\left(\\frac{\\lambda_V}{\\lambda_B}\\right)^{5}\\frac{e^{hc/\\lambda_VkT}-1}{e^{hc/\\lambda_BkT}-1}\\right]", "perche": "e' il rapporto delle due funzioni di Planck in lambda, con 2hc^2 che si semplifica: la forma esplicita del membro precedente, non un conto con un valore."},
+ {"tipo": "numero", "espr": "(4*pi*(3.386e6)**2*5.67e-8*230**4)/1e16", "vale": "2.29", "dove": "10", "appare": "2{,}29\\cdot10^{16}\\ \\mathrm{W}"},
+ {"tipo": "numero", "espr": "2.8978e-3/230*1e6", "vale": "12.6", "dove": "10", "appare": "12{,}6\\ \\mu\\mathrm{m}"},
+ {"tipo": "numero", "espr": "(24*3.0857e16)/1e17", "vale": "7.41", "dove": "10", "appare": "7{,}41\\cdot10^{17}\\ \\mathrm{m}"},
+ {"tipo": "numero", "espr": "(2.286e16/(4*pi*(7.406e17)**2))/1e-21", "vale": "3.3", "dove": "10", "appare": "3{,}3\\cdot10^{-21}\\ \\mathrm{W/m^{2}}"},
+ {"tipo": "numero", "espr": "230e9/7.406e17*206265", "vale": "0.064", "dove": "10", "appare": "0{,}064''"},
+ {"tipo": "numero", "espr": "(4.5e6*61*86400)/1e13", "vale": "2.37", "dove": "10", "appare": "2{,}37\\cdot10^{13}\\ \\mathrm{m}"},
+ {"tipo": "numero", "espr": "(4*pi*(2.3717e13)**2*5.67e-8*5900**4)/1e35", "vale": "4.86", "dove": "10", "appare": "4{,}86\\cdot10^{35}\\ \\mathrm{W}"},
+ {"tipo": "numero", "espr": "(4.857e35/3.845e26)/1e9", "vale": "1.26", "dove": "10", "appare": "1{,}26\\cdot10^{9}\\,L_\\odot"},
+ {"tipo": "numero", "espr": "4.8-2.5*log(1.263e9,10)", "vale": "-17.95", "dove": "10", "appare": "-17{,}95"},
+ {"tipo": "numero", "espr": "10**((12.96+17.95+5)/5)/1e6", "vale": "15.2", "dove": "10", "appare": "15{,}2\\ \\mathrm{Mpc}"},
+ {"tipo": "numero", "espr": "8200*sqrt(1.3e9/(2*1.5e14))", "vale": "17.1", "dove": "10", "appare": "17{,}1\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "2000**0.25", "vale": "6.687", "dove": "10", "appare": "6{,}687"},
+ {"tipo": "numero", "espr": "17.07*2000**0.25", "vale": "114", "dove": "10", "appare": "114\\ \\mathrm{K}"},
+ {"tipo": "uguale", "sinistra": "(T**4*R**2*pi*a**2/d**2/(4*pi*a**2))**(Rational(1,4))", "vale": "T*sqrt(R/(2*d))", "ipotesi": {"T": "positive", "R": "positive", "a": "positive", "d": "positive"}, "dove": "10", "appare": "T_g=T_\\star\\sqrt{\\frac{R_\\star}{2d}}"},
+ {"tipo": "simbolico", "dove": "10", "appare": "m-M=12{,}96-(-17{,}95)=30{,}91", "perche": "e' la sottrazione che entra nella distanza: il risultato finale 15,2 Mpc e' asserito numericamente usando proprio 12,96+17,95."},
+ {"tipo": "numero", "espr": "12.96+17.95", "vale": "30.91", "dove": "10", "appare": "30{,}91"},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\sigma T_\\star^{4}\\left(\\frac{R_\\star}{d}\\right)^{2}\\pi a^{2}=4\\pi a^{2}\\sigma T_g^{4}", "perche": "e' il bilancio di potenza del grano (assorbita = emessa): l'equazione da cui segue T_g, asserita con l'uguaglianza simbolica della stessa tappa."},
+ {"tipo": "simbolico", "dove": "11", "appare": "5(e^{x}-1)=xe^{x}", "perche": "restituzione, nel copione dell'orale, dell'equazione trascendente gia' asserita nella tappa 04."},
+ {"tipo": "simbolico", "dove": "11", "appare": "x_m=4{,}965", "perche": "restituzione del valore gia' asserito con nsolve nella tappa 04."},
+ {"tipo": "simbolico", "dove": "11", "appare": "\\lambda_mT=2{,}898\\cdot10^{-3}\\ \\mathrm{m\\,K}", "perche": "restituzione della legge di Wien gia' asserita numericamente nella tappa 04."},
+ {"tipo": "simbolico", "dove": "11", "appare": "\\Gamma(4)\\zeta(4)=\\pi^{4}/15", "perche": "restituzione dell'integrale gia' asserito nella tappa 05."},
+ {"tipo": "simbolico", "dove": "11", "appare": "\\sigma=2\\pi^{5}k^{4}/15h^{3}c^{2}", "perche": "restituzione della costante gia' asserita numericamente nella tappa 05."},
+ {"tipo": "simbolico", "dove": "11", "appare": "F=\\pi B=\\sigma T^{4}", "perche": "restituzione del passaggio da brillanza a flusso gia' asserito nella tappa 05."},
+ {"tipo": "simbolico", "dove": "12", "appare": "\\lambda_mT=2{,}898\\cdot10^{-3}\\ \\mathrm{m\\,K}", "perche": "restituzione della legge di Wien asserita nella tappa 04."},
+ {"tipo": "simbolico", "dove": "12", "appare": "\\sigma=5{,}670\\cdot10^{-8}", "perche": "restituzione della costante asserita nella tappa 05."},
+ {"tipo": "simbolico", "dove": "12", "appare": "20{,}3\\,T^{3}\\ \\mathrm{cm^{-3}}", "perche": "restituzione della densita' di fotoni asserita nella tappa 07."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\sigma=1/\\lambda=\\nu/c", "perche": "e' la definizione del numero d'onda, non un conto."},
+ {"tipo": "uguale", "sinistra": "diff(x**5/(exp(x)-1),x)", "vale": "x**4*(5*(exp(x)-1)-x*exp(x))/(exp(x)-1)**2", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "\\frac{x^{4}\\big[5(e^{x}-1)-xe^{x}\\big]}{(e^{x}-1)^{2}}"},
+ {"tipo": "numero", "espr": "5*exp(-5)", "vale": "0.034", "dove": "04", "appare": "5e^{-5}=0{,}034"},
+ {"tipo": "simbolico", "dove": "09", "appare": "hc/k=14\\,388", "perche": "e' il valore della costante hc/k in micron per kelvin, gia' asserito numericamente nella tappa 03."},
+ {"tipo": "simbolico", "dove": "09", "appare": "B-V=0{,}40", "perche": "e' il dato dell'esempio, non un risultato: la temperatura che ne segue e' asserita (6751 K)."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\epsilon_{UV}/\\epsilon_{IR}=2000", "perche": "e' il dato del testo d'esame, non un conto."},
+ {"tipo": "simbolico", "dove": "12", "appare": "\\nu_{\\max}/T=5{,}88\\cdot10^{10}", "perche": "restituzione arrotondata del valore 5,879e10 Hz/K asserito nella tappa 04."},
+ {"tipo": "simbolico", "dove": "12", "appare": "\\pi^4/15=6{,}494", "perche": "restituzione dell'integrale asserito numericamente nella tappa 05."},
+ {"tipo": "simbolico", "dove": "12", "appare": "B-V=-0{,}865+8540/T", "perche": "restituzione della relazione empirica (1.54) citata nella tappa 09."}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché il corpo nero, subito dopo il flusso', meta:'una sorgente descritta da un solo numero · termometro e calibratore · che cosa si deriva e che cosa si usa',
+  blocchi:[
+  {t:'prosa', title:'L’unica sorgente che si può prevedere', tag:'architettura', html:R`
+  <p>Il movimento precedente ha costruito l&rsquo;apparato con cui si conta la radiazione che arriva: flusso, brillanza, brillanza specifica, magnitudini. Ma contare non basta. Per dire che cosa significhi un flusso misurato bisogna confrontarlo con qualcosa di cui si sappia <i>a priori</i> quanto deve emettere, e de Bernardis mette la questione in una riga sola: <i>«basta conoscere un unico parametro, la temperatura, ed è univocamente determinata la sua brillanza specifica. Nessuna altra sorgente ha proprietà analoghe»</i>. Per ogni altra sorgente i parametri che servirebbero a predirne lo spettro sono tanti e così incerti che nessuna può fare da riferimento.</p>
+  <p>Da qui il doppio mestiere del corpo nero, ed è l&rsquo;ordine del movimento. È un <b>termometro</b>: se lo spettro di una stella somiglia a una curva di Planck, la sua forma dà la temperatura, e con la temperatura e il flusso si ricava il raggio. Ed è un <b>calibratore</b>: per tarare in assoluto un fotometro, cioè per sapere quanti watt corrispondono a magnitudine zero, si punta lo stesso telescopio su una stella e su un corpo nero di laboratorio di temperatura nota. La prima metà del movimento costruisce la funzione di Planck e ne estrae le tre leggi; la seconda la usa, prima in laboratorio e poi sul cielo.</p>
+  <p>Sulle slide del corso (LEZIONE3_B_2020) il corpo nero occupa poche diapositive fitte: la formula con le costanti, il luogo dei massimi $\lambda_{\max}T=0{,}0029$ m K, il legame fra luminosità e brillanza superficiale di una stella, e il Sole descritto da un corpo nero a 5782 K. Il resto, dalla dimostrazione di Kirchhoff alle esperienze di calibrazione, sta nel capitolo 1 delle dispense di Laboratorio dello stesso docente (§1.5-1.7), che qui è la fonte portante. La mappa del corso dice che la derivazione di Planck «non serve a questo esame». La si fa lo stesso, in una tappa, per due ragioni. La porta la fonte primaria, e il metro di questo percorso è che non si debba riaprirla. E la domanda teorica dell&rsquo;orale, cioè Wien e Stefan-Boltzmann derivate da Planck, si regge meglio se si sa da dove viene la funzione che si deriva.</p>`},
+  {t:'prosa', title:'Che cosa saprai fare, uscendo di qui', tag:'il contratto', html:R`
+  <p>Scrivere la funzione di Planck in frequenza, in lunghezza d&rsquo;onda, in numero d&rsquo;onda e nella variabile adimensionale $x$, sapendo perché i massimi delle quattro forme non coincidono. Ricavarne la legge di Wien con l&rsquo;equazione trascendente da cui nasce il 4,965, e la legge di Stefan-Boltzmann con il cambio di variabile che porta fuori $T^4$ e lascia un numero puro. Dire quando valgono i due limiti, Rayleigh-Jeans e Wien, e con che errore. Usare la temperatura efficace per passare da luminosità e temperatura a raggio. Convertire un colore $B-V$ in temperatura. E fare i conti che le prove scritte chiedono, sul pianeta, sulla supernova e sul granello di polvere della tappa 10.</p>`}
+]},
+
+/* ---------------- 01 · KIRCHHOFF E LA CAVITÀ ---------------- */
+{ num:'01', title:'Che cos’è un corpo nero, e perché la sua brillanza non dipende dal materiale', meta:'gas di fotoni in equilibrio con le pareti · la cavità con il forellino · la legge di Kirchhoff dimostrata con un oggetto dentro la cavità',
+  blocchi:[
+  {t:'prosa', title:'Un gas di fotoni in equilibrio', tag:'la definizione', html:R`
+  <p>De Bernardis parte dall&rsquo;oggetto fisico prima che dalla formula: <i>«un corpo nero è un gas di fotoni in equilibrio termodinamico con un contenitore»</i>. Le pareti emettono e assorbono fotoni e, all&rsquo;equilibrio, in ogni intervallo di frequenza e in ogni direzione i fotoni emessi bilanciano quelli assorbiti. Perché l&rsquo;equilibrio regga, il contenitore deve assorbire per intero qualunque fotone gli arrivi dall&rsquo;esterno. Altrimenti la radiazione dentro dipenderebbe da quella che c&rsquo;è fuori, e non solo dalla temperatura delle pareti. Di qui il nome: un corpo <i>nero</i> è un corpo che assorbe tutta la radiazione che lo colpisce.</p>
+  <p>L&rsquo;oggetto di laboratorio che ci si avvicina di più è una <b>cavità isoterma con un&rsquo;apertura piccola</b> rispetto alle sue dimensioni. Un raggio che entra dal forellino rimbalza molte volte sulle pareti prima di ritrovare l&rsquo;uscita, e a ogni rimbalzo una frazione viene assorbita. Il materiale delle pareti non conta: conta soltanto il numero di rimbalzi. Si può già fare un conto. Se una parete riflette il 25% della radiazione incidente e la geometria impone almeno sette riflessioni prima dell&rsquo;uscita, come nel cono rientrante di COBE che si vedrà nella tappa 08, la frazione che riesce a uscire è $(0{,}25)^7\simeq 6{,}1\cdot10^{-5}$. Sette riflessioni bastano a trasformare un materiale grigio qualunque in un nero migliore di una parte su diecimila.</p>`},
+  {t:'prosa', title:'La legge di Kirchhoff, dimostrata con un oggetto dentro la cavità', tag:'la dimostrazione termodinamica', html:R`
+  <p>Un corpo qualunque a temperatura $T$ irraggia una brillanza specifica $e(\nu,T,x)$, che dipende dalla frequenza, dalla temperatura e dalle caratteristiche fisiche $x$ del corpo. Lo stesso corpo ha un&rsquo;<b>emissività</b> (o potere assorbente) $\epsilon(\nu,T,x)\le1$, il rapporto fra l&rsquo;energia che assorbe e quella che lo colpisce. Per il corpo nero $\epsilon=1$. Kirchhoff dimostrò su basi puramente termodinamiche che
+  $$\frac{e(\nu,T,x)}{\epsilon(\nu,T,x)}=B_B(\nu,T),$$
+  con $B_B$ funzione <b>universale</b>, indipendente dal corpo. La dimostrazione che riporta de Bernardis è un esperimento mentale di due righe. Si mette un corpo qualsiasi, non nero, dentro una cavità di corpo nero alla stessa temperatura. Tutto è in equilibrio alla stessa $T$, quindi l&rsquo;energia che il corpo assorbe deve essere uguale a quella che emette: se assorbisse di più si scalderebbe spontaneamente a spese della cavità alla stessa temperatura, contro il secondo principio. Il corpo riceve la brillanza della cavità $B_B$ e ne assorbe la frazione $\epsilon$, dunque $e=\epsilon B_B$. E siccome lo stesso ragionamento vale con qualunque corpo, $B_B$ non può dipendere da $x$.</p>
+  <p>Il contenuto fisico è più forte dell&rsquo;enunciato. Un corpo che a una certa frequenza assorbe bene, a quella stessa frequenza emette bene, e nella stessa proporzione: un materiale con $\epsilon=0{,}9$ in una banda emette in quella banda $e=0{,}9\,B_B$. De Bernardis lo dice in termini atomici: <i>«se un qualsiasi atomo ha particolari frequenze di assorbimento, a quelle stesse frequenze deve anche emettere efficientemente»</i>. È il principio che rende comprensibili le righe spettrali, in emissione e in assorbimento. E la funzione $B_B$, che vale per tutti i corpi, è proprio la brillanza del corpo nero, il caso $\epsilon=1$.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la brillanza dentro una cavità isoterma non dipende dal materiale delle pareti?`,
+    a:R`Per la legge di Kirchhoff. Se dipendesse dal materiale, due cavità alla stessa temperatura fatte di materiali diversi, messe in comunicazione da un forellino, si scambierebbero una potenza netta a parità di temperatura, e il calore passerebbe spontaneamente da un corpo a un altro alla stessa $T$: è vietato dal secondo principio. Il materiale decide quanto <i>tempo</i> e quante riflessioni servono per arrivare all&rsquo;equilibrio, non il risultato.`},
+   {q:R`Una vernice nera riflette il 25% della radiazione. Come si costruisce, con quella vernice, un corpo nero migliore di una parte su diecimila?`,
+    a:R`Con la geometria, non con la vernice: una cavità (per esempio un cono rientrante) in cui ogni raggio subisca almeno sette riflessioni prima di uscire. La frazione riflessa all&rsquo;esterno è il prodotto delle riflettività, $(0{,}25)^7\simeq6\cdot10^{-5}$.`}
+  ]}
+]},
+
+/* ---------------- 02 · LA DERIVAZIONE DI PLANCK ---------------- */
+{ num:'02', title:'La funzione di Planck, ricavata come la ricava de Bernardis', meta:'l’energia media di un modo con la statistica di Boltzmann · la serie geometrica · il conteggio dei modi come per la corda vibrante · dalla densità di energia alla brillanza',
+  blocchi:[
+  {t:'prosa', title:'L’ipotesi dei quanti e l’energia media di un modo', tag:'il primo fattore', html:R`
+  <p>De Bernardis ricorda che <i>«la derivazione classica di una corretta espressione per $B_B$ è impossibile»</i>: la formula esatta Planck la ottenne nel 1900 introducendo l&rsquo;ipotesi che le energie della radiazione fossero quantizzate, $E_n=nh\nu$, e <i>«nella dimostrazione originale di Planck questa ipotesi fondamentale era quasi un artificio matematico»</i>. La memoria originale non è fra le fonti di questo percorso, e quel giudizio è di de Bernardis. Ammessi i fotoni, la derivazione si divide in due fattori indipendenti: l&rsquo;<b>energia media di un modo</b> del campo elettromagnetico alla temperatura $T$, e il <b>numero di modi</b> per unità di volume, frequenza e angolo solido.</p>
+  <p>Un modo di frequenza $\nu$ può contenere $n=0,1,2,\dots$ fotoni, con energia $E_n=nh\nu$. All&rsquo;equilibrio vale la statistica di Boltzmann: la probabilità dello stato con energia $E_n$ è proporzionale a $e^{-\beta E_n}$, con $\beta=1/kT$. L&rsquo;energia media è
+  $$\langle E\rangle=\frac{\sum_{n}E_n e^{-\beta E_n}}{\sum_n e^{-\beta E_n}}=-\frac{d}{d\beta}\ln\sum_n e^{-\beta E_n}.$$
+  La somma al denominatore è una <span class="str" data-str="serie-geometrica">serie geometrica</span> di ragione $e^{-\beta h\nu}<1$:
+  $$\sum_{n=0}^{\infty}e^{-n\beta h\nu}=\frac{1}{1-e^{-\beta h\nu}},$$
+  e derivando il suo logaritmo rispetto a $\beta$, col segno meno, si trova
+  $$\langle E\rangle=\frac{h\nu\,e^{-\beta h\nu}}{1-e^{-\beta h\nu}}=\frac{h\nu}{e^{h\nu/kT}-1}.$$
+  Diviso per l&rsquo;energia $h\nu$ di un fotone, è il <b>numero medio di fotoni per modo</b>, o numero di occupazione,
+  $$\langle n_\nu\rangle=\frac{1}{e^{h\nu/kT}-1},$$
+  in cui de Bernardis fa riconoscere <i>«l&rsquo;usuale espressione della distribuzione di Bose-Einstein per particelle con potenziale chimico nullo»</i>. Il confronto con il caso classico chiarisce tutto. Classicamente ogni modo avrebbe energia media $kT$, qualunque sia la frequenza. Qui, quando $h\nu\gg kT$, l&rsquo;energia media precipita esponenzialmente: un modo di alta frequenza non riesce a ospitare nemmeno un fotone, perché un solo fotone costa molto più dell&rsquo;energia termica disponibile.</p>`},
+  {t:'prosa', title:'Quanti modi ci sono: la corda vibrante in tre dimensioni', tag:'il secondo fattore', html:R`
+  <p>Il conteggio dei modi, scrive de Bernardis, <i>«è analogo al problema della corda vibrante (unidimensionale) o delle onde sonore stazionarie in una cavità»</i>. Su una corda di lunghezza $L$ un&rsquo;onda stazionaria deve avere un numero intero di mezze lunghezze d&rsquo;onda, $m\lambda/2=L$, quindi $m=2L\nu/c$ e $dm=2L\,d\nu/c$: il numero di modi cresce linearmente con la frequenza. In tre dimensioni i modi sono i punti di un reticolo nello spazio dei numeri d&rsquo;onda, e quelli con frequenza fra $\nu$ e $\nu+d\nu$ occupano un guscio la cui superficie cresce come $\nu^2$. Includendo le due polarizzazioni, la generalizzazione in coordinate sferiche è
+  $$dm=\frac{2L^{3}\nu^{2}d\nu\,d\Omega}{c^{3}},$$
+  e la densità di modi per unità di volume, di frequenza e di angolo solido è
+  $$Z(\nu)=\frac{2\nu^{2}}{c^{3}}.$$
+  Il fattore $\nu^2$ è la <i>catastrofe ultravioletta</i> in attesa di succedere. Moltiplicato per l&rsquo;energia classica $kT$ di ogni modo darebbe una densità di energia che cresce senza limite con la frequenza. Moltiplicato per l&rsquo;energia media quantistica, viene tagliato dall&rsquo;esponenziale.</p>`},
+  {t:'prosa', title:'Dalla densità di energia alla brillanza', tag:'il cilindro lungo c dt', html:R`
+  <p>La densità di energia spettrale per unità di volume, angolo solido e frequenza è il prodotto dei due fattori, $u(\nu,T)=Z(\nu)\,\langle E\rangle$. Per passare alla brillanza, de Bernardis conta i fotoni che attraversano una superficie $dA$ nel tempo $dt$ entro l&rsquo;angolo solido $d\Omega$. Sono quelli contenuti in un cilindro allineato con la direzione considerata, lungo $c\,dt$, di volume $c\,dA\,dt$. L&rsquo;energia che contiene è $dE=u\,c\,dA\,dt\,d\nu\,d\Omega$. Dividendo per $dA\,dt\,d\nu\,d\Omega$, che è la definizione stessa di brillanza specifica, resta $B_\nu=c\,u$, e quindi la <b>funzione di Planck</b>:
+  $$B_B(\nu,T)=c\,u(\nu,T)=\frac{2h\nu^{3}}{c^{2}}\,\frac{1}{e^{h\nu/kT}-1}.$$
+  Le dispense fanno poi un passo che i manuali di solito saltano, e che per un astrofisico è il punto. La funzione è stata ricavata in una cavità chiusa, mentre la radiazione di una stella si propaga nello spazio aperto. Si rifà allora il conteggio dei modi in un <i>fascio</i>. Un singolo modo ha rapidità ottica minima fissata dalla diffrazione, $A\Omega\simeq\lambda^{2}$. Per questo, per avere un fascio molto collimato, serve una sorgente grande, ed è il motivo per cui si costruiscono radiotelescopi di grande diametro. In un fascio di rapidità ottica $A\Omega$ ci sono quindi $M=2A\Omega/\lambda^2$ modi, dove il 2 conta le polarizzazioni. Moltiplicando per l&rsquo;energia media di un modo si ritrova esattamente la potenza $A\Omega\,B_B(\nu,T)\,d\nu$. La funzione di Planck descrive dunque anche un fascio che ha lasciato la cavità, purché la radiazione sia termica, cioè purché ogni modo abbia il numero di occupazione di Bose-Einstein.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Da dove viene, nella formula di Planck, il fattore $\nu^3$?`,
+    a:R`Da due fattori distinti. $\nu^2$ viene dal numero di modi per unità di frequenza (in tre dimensioni il guscio di frequenza fra $\nu$ e $\nu+d\nu$ ha superficie che cresce come $\nu^2$). L&rsquo;altro $\nu$ viene dall&rsquo;energia $h\nu$ del fotone nell&rsquo;energia media del modo. L&rsquo;esponenziale al denominatore è invece il numero di fotoni per modo.`},
+   {q:R`Perché la teoria classica non poteva dare la formula giusta?`,
+    a:R`Perché classicamente ogni modo ha energia media $kT$ indipendentemente dalla frequenza, e il numero di modi cresce come $\nu^2$: la densità di energia cresce senza limite verso le alte frequenze e il suo integrale diverge. La quantizzazione $E_n=nh\nu$ rende «costosi» i modi con $h\nu\gg kT$, che restano praticamente vuoti, e taglia l&rsquo;integrale.`}
+  ]}
+]},
+
+/* ---------------- 03 · LE QUATTRO FORME ---------------- */
+{ num:'03', title:'Le quattro forme della funzione di Planck, e la figura che le contiene tutte', meta:'frequenza, lunghezza d’onda, numero d’onda, variabile adimensionale · lo Jacobiano che sposta il massimo · le curve che non si intersecano mai',
+  blocchi:[
+  {t:'prosa', title:'Lo stesso spettro contato per unità diverse', tag:'perché non è una sola formula', html:R`
+  <p>La brillanza specifica è energia <i>per unità di intervallo spettrale</i>, e l&rsquo;intervallo si può misurare in frequenza, in lunghezza d&rsquo;onda o in numero d&rsquo;onda $\sigma=1/\lambda=\nu/c$, che è l&rsquo;unità degli spettroscopisti dell&rsquo;infrarosso. La quantità fisica è una sola: l&rsquo;energia in un dato pezzo di spettro. Per questo vale $B_B(\nu,T)\,|d\nu|=B_B(\lambda,T)\,|d\lambda|$, e con $\nu=c/\lambda$ si ha $|d\nu|=\frac{c}{\lambda^{2}}|d\lambda|$. Di qui
+  $$B_B(\lambda,T)=\frac{c}{\lambda^{2}}B_B(\nu,T)=\frac{2hc^{2}}{\lambda^{5}}\,\frac{1}{e^{hc/\lambda kT}-1}.$$
+  Analogamente $B_B(\sigma,T)=c\,B_B(\nu,T)$. Le dispense danno le forme pratiche, con costanti numeriche già calcolate. In lunghezza d&rsquo;onda, con $\lambda$ in µm e $T$ in K, il coefficiente $2hc^2$ diventa $1{,}191\cdot10^{4}$ W/cm²/sr/µm, e $hc/k$ diventa $14\,388$ µm K: si scrive allora $B_B(\lambda,T)=1{,}191\cdot10^{4}\big/\lambda^{5}\big(e^{14\,388/\lambda T}-1\big)$. Per esempio, il Sole a 5782 K e $\lambda=0{,}5$ µm dà circa $2{,}6\cdot10^{3}$ W/cm²/sr/µm.</p>
+  <p>La forma più utile per i conti è la quarta. Con la variabile adimensionale $x=\frac{h\nu}{kT}$, rapporto fra l&rsquo;energia del fotone e l&rsquo;energia termica, de Bernardis scrive la brillanza per unità di $x$:
+  $$B_B(x,T)=\frac{kT}{h}B_B(\nu,T)=\frac{2k^{4}T^{4}}{h^{3}c^{2}}\,\frac{x^{3}}{e^{x}-1}.$$
+  Tutta la dipendenza dalla temperatura è uscita in un fattore $T^4$ davanti, e la forma dello spettro è una funzione universale di $x$. È la forma da cui escono Wien e Stefan-Boltzmann senza fatica, e la si vede nella figura qui sotto.</p>`},
+  {t:'plot', title:'La funzione universale, e la stessa radiazione per unità di lunghezza d’onda',
+   intro:R`In ciano $x^3/(e^x-1)$, la forma di $B_\nu$; in oro $x^5/(e^x-1)$ divisa per 5, che ha la forma di $B_\lambda$ espressa in $x$ (a meno di costanti). Il massimo non cade nello stesso punto.`,
+   plots:[
+    {kind:'func2d', xr:[0.01,12], yr:[0,4.6], height:320, equal:false,
+     title:'x = h nu / kT',
+     curves:[{f:'x*x*x/(exp(x)-1)', col:'#5eead4', label:'x^3/(e^x-1)  (forma di B_nu)'},
+             {f:'x*x*x*x*x/(exp(x)-1)/5', col:'#d8a13a', label:'x^5/(e^x-1)/5  (forma di B_lambda)'}],
+     marks:[{x:2.821, y:1.421, label:'x = 2,82', col:'#5eead4', up:true},
+            {x:4.965, y:4.24, label:'x = 4,97', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare: i due massimi, a $x=2{,}82$ e a $x=4{,}97$.</b> Le due curve descrivono la stessa radiazione. Cambia solo l&rsquo;unità con cui si misura l&rsquo;intervallo spettrale, e lo Jacobiano $c/\lambda^2$, che in $x$ è un fattore $x^2$ in più, sposta il massimo verso energie più alte.</p>
+   <p><b>Che cosa impararne: «la lunghezza d’onda di massima emissione» non è una proprietà della sorgente da sola.</b> Dipende anche dalla variabile in cui si disegna lo spettro. De Bernardis lo scrive esplicitamente: usando $B_B(\nu,T)$, $B_B(\sigma,T)$, $B_B(\lambda,T)$ o $B_B(x,T)$ si trovano massimi leggermente diversi. La tappa seguente ne misura la differenza.</p>`},
+  {t:'prosa', title:'Le curve non si incrociano mai', tag:'una proprietà che si vede', html:R`
+  <p>Una proprietà che le dispense sottolineano e che si legge direttamente dalla forma $B_B(\nu,T)$: a frequenza fissata, $1/(e^{h\nu/kT}-1)$ cresce con $T$. Quindi <b>un corpo nero più caldo emette più di uno più freddo a ogni lunghezza d&rsquo;onda</b>, e le curve di Planck a temperature diverse non si intersecano mai. Ha una conseguenza pratica. Se due sorgenti hanno curve che si incrociano, almeno una delle due non è un corpo nero. È il caso di Vega nella tappa 08, i cui dati nel visibile si possono descrivere con corpi neri diversi a seconda della banda. La regione a lunghezze d&rsquo;onda più corte del massimo ($x\gg1$) si chiama <b>regione di Wien</b>, quella a lunghezze d&rsquo;onda più lunghe ($x\ll1$) <b>regione di Rayleigh-Jeans</b>. Le due approssimazioni hanno nomi propri perché in ognuna lo spettro diventa più semplice.</p>`},
+  {t:'plot', title:'Tre stelle in scala logaritmica: il Sole, una stella calda, una stella fredda',
+   intro:R`Sull’asse orizzontale $\log_{10}\lambda$ con $\lambda$ in µm, su quello verticale $\log_{10}B_\lambda$ in W/cm²/sr/µm. Da sinistra a destra lungo i massimi: 20000 K, 5782 K (il Sole delle slide), 3000 K.`,
+   plots:[
+    {kind:'func2d', xr:[-1.2,1.3], yr:[-3,6.5], height:320, equal:false,
+     title:'log10 lambda (um)      log10 B_lambda (W/cm2/sr/um)',
+     curves:[{f:'log(1.191e4/(pow(10,5*x)*(exp(14388/(pow(10,x)*20000))-1)))/log(10)', col:'#4c8dff', label:'20000 K'},
+             {f:'log(1.191e4/(pow(10,5*x)*(exp(14388/(pow(10,x)*5782))-1)))/log(10)', col:'#d8a13a', label:'5782 K'},
+             {f:'log(1.191e4/(pow(10,5*x)*(exp(14388/(pow(10,x)*3000))-1)))/log(10)', col:'#ff6b6b', label:'3000 K'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare: le tre curve sono la stessa curva traslata.</b> In scala bilogaritmica cambiare $T$ sposta il massimo in diagonale: verso sinistra di $\log T$ (Wien) e verso l&rsquo;alto di $5\log T$ (perché $B_\lambda$ al massimo scala come $T^5$). Sul lato destro le tre curve diventano rette parallele di pendenza $-4$: è il regime di Rayleigh-Jeans, $B_\lambda\propto T/\lambda^4$.</p>
+   <p><b>Che cosa impararne:</b> in quella regione la brillanza è proporzionale alla temperatura e non a una sua potenza alta. È il motivo per cui in radioastronomia la brillanza si esprime direttamente in kelvin (tappa 06).</p>`}
+]},
+
+/* ---------------- 04 · LA LEGGE DI WIEN ---------------- */
+{ num:'04', title:'La legge di Wien, derivata dal massimo della funzione di Planck', meta:'la derivata che si annulla · l’equazione trascendente e il 4,965 · il massimo in frequenza non è il massimo in lunghezza d’onda',
+  blocchi:[
+  {t:'prosa', title:'L’equazione trascendente, e dove nasce il 4,965', tag:'la derivazione dell’orale', html:R`
+  <p>Il massimo di $B_B(\lambda,T)$ a $T$ fissata si trova annullando la derivata rispetto a $\lambda$. Conviene scriverla in $x=hc/\lambda kT$: a meno di costanti positive $B_\lambda\propto x^{5}/(e^{x}-1)$, e $\lambda$ e $x$ sono inversamente proporzionali, quindi un massimo in $\lambda$ è un massimo in $x$. Derivando,
+  $$\frac{d}{dx}\frac{x^{5}}{e^{x}-1}=\frac{x^{4}\big[5(e^{x}-1)-xe^{x}\big]}{(e^{x}-1)^{2}},$$
+  e il massimo è dove si annulla la parentesi, $5(e^{x}-1)-xe^{x}=0$. Dividendo per $5e^{x}$ è la forma delle dispense, $1-e^{-x_m}=x_m/5$. L&rsquo;equazione è <b>trascendente</b>: non si risolve in forma chiusa, ma la soluzione si trova in due righe. Per $x$ grande $e^{-x}$ è piccolo, quindi in prima approssimazione $x\simeq5$. Il secondo giro dell&rsquo;iterazione $x\leftarrow5(1-e^{-x})=x$, cioè $5(1-e^{-5})=4{,}966$, dà già la terza cifra. Il punto fisso è
+  $$x_m=4{,}965,$$
+  e il massimo cade un po&rsquo; prima di 5 per il termine $e^{-x}$, che misura quanto quella regione sia lontana dal puro regime di Wien. Tornando a $\lambda$:
+  $$\lambda_mT=\frac{hc}{4{,}965\,k}=2{,}898\cdot10^{-3}\ \mathrm{m\,K}.$$
+  È il «luogo dei massimi» della diapositiva 2 di LEZIONE3_B, $\lambda_{\max}T=0{,}0029$ m K, scritto con tutte le cifre. Le dispense lo danno come $0{,}290$ cm K. Tre numeri da tenere in testa. Il Sole a 5782 K ha massimo a $501\ \mathrm{nm}$, in pieno visibile. Un corpo a temperatura ambiente, 300 K, a $9{,}66\ \mu\mathrm{m}$, nell&rsquo;infrarosso termico, ed è per questo che le termocamere lavorano a 8-14 µm. Il fondo cosmico a 2,725 K a $1{,}063\ \mathrm{mm}$, nelle microonde.</p>`},
+  {t:'plot', title:'L’equazione trascendente, risolta a occhio',
+   intro:R`La retta $y=x$ e la curva $y=5(1-e^{-x})$: il massimo di $B_\lambda$ è nel punto in cui si incontrano, lontano dall’origine. In tratteggio la curva $y=3(1-e^{-x})$, che dà il massimo di $B_\nu$.`,
+   plots:[
+    {kind:'func2d', xr:[0,7], yr:[0,7], height:300, equal:false,
+     title:'x = h nu / kT',
+     curves:[{f:'x', col:'#c9d4e0', label:'y = x'},
+             {f:'5*(1-exp(-x))', col:'#d8a13a', label:'y = 5(1-e^-x)'},
+             {f:'3*(1-exp(-x))', col:'#5eead4', label:'y = 3(1-e^-x)', dash:true}],
+     marks:[{x:4.965, y:4.965, label:'4,965', col:'#d8a13a', up:true},
+            {x:2.821, y:2.821, label:'2,821', col:'#5eead4', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> le curve partono tangenti a $y=5x$ e $y=3x$ e saturano a 5 e a 3. Ognuna incontra la retta $y=x$ due volte: in $x=0$, che è un minimo e non interessa, e poco sotto la sua saturazione. Il punto d&rsquo;incontro non nullo sta tanto più vicino alla saturazione quanto più la saturazione è alta, perché lì $e^{-x}$ è più piccolo.</p>
+   <p><b>Che cosa impararne:</b> l&rsquo;esponente della potenza di $x$ (5 per $B_\lambda$, 3 per $B_\nu$) decide la posizione del massimo. È lo Jacobiano della tappa 03, visto da un&rsquo;altra parte.</p>`},
+  {t:'prosa', title:'Il massimo in frequenza, e un paradosso che non lo è', tag:'la trappola', html:R`
+  <p>Ripetendo il conto su $B_B(\nu,T)\propto x^{3}/(e^{x}-1)$ la condizione diventa $3(e^{x}-1)-xe^{x}=0$, con soluzione
+  $$x_m^{(\nu)}=2{,}821,$$
+  quindi $\nu_{\max}/T=2{,}821\,k/h=5{,}879\cdot10^{10}\ \mathrm{Hz/K}$. Per il Sole questo dà $\nu_{\max}=3{,}40\cdot10^{14}$ Hz, che corrisponde a $c/\nu_{\max}=882\ \mathrm{nm}$: nel vicino infrarosso, non nel verde. Per il fondo cosmico, $\nu_{\max}=160{,}2\ \mathrm{GHz}$, cioè $1{,}87$ mm e non $1{,}06$. <b>Non c&rsquo;è contraddizione</b>: c&rsquo;è un solo spettro, e «dove è massimo» dipende dalla misura dell&rsquo;intervallo. Un intervallo $d\lambda$ fisso corrisponde, a lunghezze d&rsquo;onda corte, a un intervallo di frequenze più largo. Disegnare per unità di $\lambda$ privilegia quindi il blu. Nelle prove scritte la convenzione da usare è quasi sempre $\lambda_mT=2{,}9\cdot10^{-3}$ m K. Quando un esercizio parla di «frequenza di massima emissione», come quello sulle microonde a 22 GHz delle slide di lezione 9, va usata la forma in frequenza, e va detto quale delle due si sta usando.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la soluzione dell’equazione di Wien è un po’ meno di 5, e non 5?`,
+    a:R`Perché l&rsquo;equazione è $x=5(1-e^{-x})$: se il termine $e^{-x}$ fosse nullo la soluzione sarebbe esattamente 5, che è il massimo di $x^5e^{-x}$, cioè della forma di Wien pura. Il termine $e^{-x}\simeq e^{-5}\simeq0{,}0067$ abbassa la soluzione di circa $5e^{-5}=0{,}034$: $x_m=4{,}965$.`},
+   {q:R`Un collega dice che il Sole ha il massimo di emissione a 500 nm, un altro a 880 nm. Chi ha ragione?`,
+    a:R`Tutti e due, se dichiarano la variabile. 501 nm è il massimo di $B_\lambda$ (brillanza per unità di lunghezza d&rsquo;onda), 882 nm è la lunghezza d&rsquo;onda corrispondente al massimo di $B_\nu$ (per unità di frequenza). Lo spettro è uno solo: cambia la misura dell&rsquo;intervallo spettrale, e lo Jacobiano $c/\lambda^2$ sposta il massimo.`}
+  ]}
+]},
+
+/* ---------------- 05 · STEFAN-BOLTZMANN E LA TEMPERATURA EFFICACE ---------------- */
+{ num:'05', title:'La legge di Stefan-Boltzmann, e la temperatura efficace di una stella', meta:'l’integrale su tutte le frequenze · zeta e gamma · da brillanza a flusso con il fattore pi · L = 4 pi R² sigma T⁴',
+  blocchi:[
+  {t:'prosa', title:'Il cambio di variabile che porta fuori T⁴', tag:'la seconda derivazione dell’orale', html:R`
+  <p>La brillanza integrata su tutte le frequenze è $B=\int_0^\infty B_B(\nu,T)\,d\nu$. Con $x=h\nu/kT$, $d\nu=(kT/h)\,dx$, e la forma $B_B(x,T)$ della tappa 03 dà
+  $$B=\frac{2k^{4}T^{4}}{h^{3}c^{2}}\int_0^\infty\frac{x^{3}}{e^{x}-1}dx.$$
+  <b>La dipendenza da $T$ è uscita tutta, come $T^4$, prima di fare l&rsquo;integrale.</b> La legge di Stefan-Boltzmann è dimostrata, a meno di una costante, dal solo cambio di variabile. L&rsquo;integrale che resta è un numero puro. Si calcola sviluppando $\frac{1}{e^{x}-1}=\sum_{n\ge1}e^{-nx}$ in serie geometrica, integrando termine a termine con $\int_0^\infty x^{3}e^{-nx}dx=\frac{6}{n^{4}}$, e sommando: compare la <span class="str" data-str="funzione-zeta-di-riemann">funzione zeta di Riemann</span> moltiplicata per la <span class="str" data-str="funzione-gamma">funzione gamma</span>,
+  $$\int_0^\infty\frac{x^{3}}{e^{x}-1}dx=\Gamma(4)\zeta(4)=6\cdot\frac{\pi^{4}}{90}=\frac{\pi^{4}}{15},$$
+  cioè $6{,}494$. La costante si mette insieme e si definisce $B=\sigma T^4/\pi$, con
+  $$\sigma=\frac{2\pi^{5}k^{4}}{15h^{3}c^{2}}=5{,}670\cdot10^{-8}\ \mathrm{W\,m^{-2}\,K^{-4}},$$
+  che le dispense danno in cgs, $5{,}67\cdot10^{-5}$ erg s⁻¹ cm⁻² K⁻⁴.</p>`},
+  {t:'prosa', title:'Da brillanza a flusso: il fattore pi', tag:'dove nasce il pi', html:R`
+  <p>Perché $\sigma T^4/\pi$ e non $\sigma T^4$? La costante $\sigma$ è definita in modo che $\sigma T^4$ sia il <b>flusso</b> uscente da una superficie di corpo nero, cioè la potenza per unità di area emessa in tutte le direzioni della semisfera esterna. Il flusso è l&rsquo;integrale della brillanza pesata con il coseno dell&rsquo;angolo dalla normale, che è l&rsquo;angolo solido proiettato del movimento precedente. Per una brillanza isotropa l&rsquo;integrale sulla semisfera vale $\int_{2\pi}\cos\theta\,d\omega=\pi$, non $2\pi$, perché le direzioni radenti contano poco. Dunque
+  $$F=\pi B=\sigma T^{4}.$$
+  Un esempio delle dispense: un corpo nero di superficie 1 m² a temperatura ambiente, 300 K, emette $459\ \mathrm{W}$. È una potenza enorme per un oggetto che non sembra emettere niente, perché tutta in infrarosso. Ci si basano i <b>radiatori passivi</b> dei satelliti, superfici nere rivolte allo spazio freddo che smaltiscono il calore in eccesso e possono raffreddare parti dello strumento fino a circa 150 K.</p>`},
+  {t:'prosa', title:'La luminosità di una stella e la sua temperatura efficace', tag:'il conto delle slide', html:R`
+  <p>La diapositiva 4 di LEZIONE3_B scrive il passaggio con cui il corpo nero entra in ogni problema stellare. Se $r$ è il raggio della superficie radiante e $B$ la sua brillanza superficiale, ogni elemento di superficie emette il flusso $\pi B$ e la luminosità totale è
+  $$L=4\pi r^{2}\cdot\pi B=4\pi^{2}r^{2}B.$$
+  Con $B=\sigma T^4/\pi$ diventa la relazione che si usa in tutte le prove, e che <b>definisce</b> la temperatura efficace:
+  $$L=4\pi R^{2}\sigma T_{\mathrm{eff}}^{4}.$$
+  $T_{\mathrm{eff}}$ non è la temperatura di uno strato preciso della stella. È la temperatura del corpo nero che, con lo stesso raggio, emetterebbe la stessa luminosità. Per il Sole, con $L_\odot=3{,}845\cdot10^{26}$ W e $R_\odot=6{,}957\cdot10^8$ m, viene $5778\ \mathrm{K}$, coerente a due parti per mille con i 5782 K con cui la diapositiva 5 adatta una curva di Planck allo spettro solare misurato. Il conto si fa anche nell&rsquo;altro verso, ed è quello che le prove chiedono più spesso: da luminosità e temperatura al raggio, $R=\sqrt{L/4\pi\sigma T^4}$. Il movimento precedente l&rsquo;ha fatto per Sirio A.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la legge di Stefan-Boltzmann dà $T^4$ e non un’altra potenza?`,
+    a:R`Perché nel cambio di variabile $x=h\nu/kT$ escono quattro fattori $T$: tre dal $\nu^3$ della funzione di Planck e uno dal $d\nu=(kT/h)dx$. Il resto è un integrale che non dipende da $T$. In uno spazio a $d$ dimensioni lo stesso argomento darebbe $T^{d+1}$.`},
+   {q:R`Una stella ha la stessa temperatura del Sole e luminosità cento volte maggiore. Quanto è grande?`,
+    a:R`Da $L=4\pi R^2\sigma T^4$ a temperatura fissata $L\propto R^2$: luminosità cento volte maggiore vuol dire raggio dieci volte maggiore, $R=10\,R_\odot$.`}
+  ]}
+]},
+
+/* ---------------- 06 · I DUE LIMITI ---------------- */
+{ num:'06', title:'I due limiti, Rayleigh-Jeans e Wien, e la temperatura di brillanza', meta:'x piccolo e x grande · quanto si sbaglia, misurato · la radioastronomia che conta in kelvin · il fondo cosmico a 1 mm non è Rayleigh-Jeans',
+  blocchi:[
+  {t:'prosa', title:'Rayleigh-Jeans: quando il fotone costa poco', tag:'x molto minore di 1', html:R`
+  <p>Per $x=h\nu/kT\ll1$, lo sviluppo $e^{x}-1\simeq x$ trasforma la funzione di Planck nella legge di Rayleigh-Jeans:
+  $$B_{RJ}(\nu,T)=\frac{2\nu^{2}}{c^{2}}kT,\qquad B_{RJ}(\lambda,T)=\frac{2c}{\lambda^{4}}kT.$$
+  La costante di Planck è sparita: è il risultato classico, ogni modo con energia $kT$. Ed è esatto proprio dove i fotoni sono così poco costosi che ogni modo ne contiene moltissimi, cioè dove la descrizione ondulatoria classica funziona. La brillanza è <b>lineare</b> nella temperatura. Per questo, scrivono le dispense, <i>«questa legge viene usata in radioastronomia per definire la temperatura di brillanza»</i>, invertendo la legge per qualunque sorgente, termica o no:
+  $$T_b=\frac{c^{2}}{2k\nu^{2}}B_\nu.$$
+  $T_b$ è per costruzione proporzionale alla brillanza, ed è quindi in generale funzione della frequenza. Se la sorgente è un corpo nero e il ricevitore lavora nella regione di Rayleigh-Jeans, $T_b$ è costante e coincide con la temperatura fisica della sorgente. Quando invece $T_b$ cambia con la frequenza, la sorgente non è un corpo nero. È il caso delle sorgenti non termiche a 22 GHz dell&rsquo;esercizio di lezione 9, per le quali una «temperatura» dedotta dal flusso dice solo che cosa servirebbe a un corpo nero per produrre quel flusso.</p>`},
+  {t:'prosa', title:'Wien: quando il fotone costa troppo', tag:'x molto maggiore di 1', html:R`
+  <p>Per $x\gg1$ il $-1$ al denominatore si trascura e resta la legge di Wien per lo spettro:
+  $$B_{W}(\nu,T)=\frac{2h\nu^{3}}{c^{2}}e^{-h\nu/kT}.$$
+  È la coda esponenziale di Boltzmann: un modo con $h\nu\gg kT$ ha probabilità $e^{-x}$ di contenere un fotone, e quasi mai ne contiene due. È il regime delle stelle osservate nel blu e nell&rsquo;ultravioletto, e quello in cui la tappa 09 tratterà gli indici di colore.</p>
+  <p>Quanto si sbaglia, in numeri. Il rapporto fra Rayleigh-Jeans e Planck è $(e^{x}-1)/x$. A $x=0{,}1$ vale $1{,}052$, quindi errore del 5%. A $x=1$ vale $e-1=1{,}718$, con Rayleigh-Jeans in eccesso del 72%. Il rapporto fra Wien e Planck è $1-e^{-x}$. A $x=1$ vale $0{,}632$, con Wien in difetto del 37%. A $x=10$ l&rsquo;errore è solo $0{,}0045\%$. Wien funziona molto meglio in avanti di quanto Rayleigh-Jeans funzioni all&rsquo;indietro. Il calcolo da fare prima di usare un limite è sempre lo stesso: stimare $x$. Il fondo cosmico a 2,725 K osservato a 1 mm ha $x=5{,}28$, e lì Rayleigh-Jeans sbaglierebbe di un fattore $37$. Osservato a 21 cm ha $x=0{,}025$, e Rayleigh-Jeans è eccellente. «Microonde» non vuol dire automaticamente Rayleigh-Jeans: a 1 mm il fondo cosmico è sul lato di Wien del suo massimo.</p>`},
+  {t:'plot', title:'Planck e i suoi due limiti, nella forma universale',
+   intro:'In ciano $x^3/(e^x-1)$ (Planck), in oro $x^2$ (Rayleigh-Jeans), in viola $x^3e^{-x}$ (Wien).',
+   plots:[
+    {kind:'func2d', xr:[0.01,8], yr:[0,2.2], height:300, equal:false,
+     title:'x = h nu / kT',
+     curves:[{f:'x*x*x/(exp(x)-1)', col:'#5eead4', label:'Planck'},
+             {f:'x*x', col:'#d8a13a', label:'Rayleigh-Jeans', dash:true},
+             {f:'x*x*x*exp(-x)', col:'#b98cff', label:'Wien', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la parabola di Rayleigh-Jeans segue Planck solo all&rsquo;estrema sinistra e poi sale senza limite. È la catastrofe ultravioletta in figura: integrata su tutte le $x$ darebbe energia infinita. La curva di Wien invece si incolla a Planck già da $x\approx3$ e resta sotto di poco anche intorno al massimo.</p>
+   <p><b>Che cosa impararne:</b> il massimo di Planck sta sul lato di Wien ($x_m=2{,}82$ in frequenza). Per questo la legge di Wien per lo spostamento del massimo ha la forma $\lambda_mT=$ costante con una costante vicina a quella che si otterrebbe dalla sola coda esponenziale.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un radiotelescopio misura a 1,4 GHz e a 5 GHz la stessa temperatura di brillanza di 30 K per una nube. Che cosa se ne conclude?`,
+    a:R`Che lo spettro della nube, in quell&rsquo;intervallo, ha la forma di Rayleigh-Jeans di un corpo nero (o di un corpo grigio otticamente spesso) a 30 K. Una $T_b$ indipendente dalla frequenza è la firma dell&rsquo;emissione termica nella regione $x\ll1$: qui $x=h\nu/kT\simeq0{,}002$ e $0{,}008$, e il limite è eccellente.`},
+   {q:R`Si può usare Rayleigh-Jeans per il fondo cosmico osservato a 1 mm?`,
+    a:R`No. A 1 mm e 2,725 K si ha $x=hc/\lambda kT\simeq5{,}3$, e il rapporto Rayleigh-Jeans/Planck è $(e^x-1)/x\simeq37$. A quella lunghezza d&rsquo;onda va usata la formula di Planck intera (o, se si accetta un errore di mezzo percento, il limite di Wien).`}
+  ]}
+]},
+
+/* ---------------- 07 · FOTONI E DENSITÀ DI ENERGIA ---------------- */
+{ num:'07', title:'Quanti fotoni ci sono in un corpo nero, e quanta energia', meta:'la densità di fotoni con zeta di 3 · 400 fotoni per centimetro cubo nell’universo · l’energia media di un fotone termico',
+  blocchi:[
+  {t:'prosa', title:'Contare i fotoni invece dell’energia', tag:'n = 20,3 T³', html:R`
+  <p>Dividendo la densità di energia per l&rsquo;energia $h\nu$ di un fotone e integrando sull&rsquo;angolo solido ($4\pi$ per radiazione isotropa) si ha il numero di fotoni per unità di volume e di frequenza:
+  $$n(\nu,T)=\frac{4\pi\,u(\nu,T)}{h\nu}=\frac{8\pi\nu^{2}}{c^{3}}\,\frac{1}{e^{h\nu/kT}-1}.$$
+  Integrando su tutte le frequenze, con lo stesso cambio di variabile della tappa 05, esce $T^3$ invece di $T^4$, perché c&rsquo;è un $\nu$ in meno. L&rsquo;integrale numerico diventa
+  $$\int_0^\infty\frac{x^{2}}{e^{x}-1}dx=2\zeta(3),$$
+  con $2\zeta(3)=2{,}404$. Mettendo insieme le costanti,
+  $$n(T)=8\pi\left(\frac{kT}{hc}\right)^{3}2\zeta(3)=20{,}29\,T^{3}\ \mathrm{cm^{-3}}.$$
+  De Bernardis scrive il coefficiente come $\frac{60{,}4}{3}\simeq20{,}3$. Per il fondo cosmico a 2,725 K questo dà $411\ \mathrm{cm^{-3}}$: <i>«l&rsquo;universo è riempito uniformemente di radiazione di corpo nero a 2,7 K: […] sono circa 400 fotoni per cm³»</i>. È un numero da avere in testa. In media ci sono circa un miliardo di fotoni del fondo per ogni barione dell&rsquo;universo.</p>`},
+  {t:'prosa', title:'L’energia media di un fotone termico, e la densità di energia', tag:'due numeri che tornano', html:R`
+  <p>Il rapporto fra densità di energia e densità di fotoni è l&rsquo;energia media di un fotone di corpo nero. Le costanti si semplificano, e restano i due integrali:
+  $$\langle E\rangle=\frac{\pi^{4}/15}{2\zeta(3)}\,kT=2{,}701\,kT.$$
+  Per il fondo cosmico è $6{,}34\cdot10^{-4}\ \mathrm{eV}$. Ricordarlo come «circa $3kT$» basta in quasi ogni stima. La densità di energia totale della radiazione si ottiene dalla brillanza integrata: la radiazione isotropa che attraversa un punto da tutte le $4\pi$ direzioni dà $u=\frac{4\pi}{c}B=\frac{4\sigma}{c}T^{4}$. Per il fondo cosmico vale $4{,}17\cdot10^{-14}\ \mathrm{J/m^{3}}$, circa 0,26 eV per cm³: poca, ma uniforme in tutto l&rsquo;universo.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché il numero di fotoni scala come $T^3$ e l’energia come $T^4$?`,
+    a:R`Perché nel numero di fotoni manca il fattore $h\nu$ dell&rsquo;energia per fotone: l&rsquo;integrando ha $\nu^2$ invece di $\nu^3$, e nel cambio di variabile escono tre fattori $T$ invece di quattro. Il rapporto delle due, energia media per fotone, scala come $T$: è $2{,}70\,kT$.`},
+   {q:R`Se l’universo si espande e la temperatura del fondo si dimezza, di quanto cambia il numero di fotoni per cm³?`,
+    a:R`Diventa un ottavo, $(1/2)^3$. È coerente con un numero di fotoni conservato in un volume che raddoppia le dimensioni lineari, cioè cresce di un fattore 8. È per questo che, espandendosi, lo spettro resta di corpo nero, con temperatura inversamente proporzionale alla scala.`}
+  ]}
+]},
+
+/* ---------------- 08 · CORPI NERI DI LABORATORIO ---------------- */
+{ num:'08', title:'Corpi neri veri: come si calibra in assoluto un fotometro', meta:'Quinn e Martin misurano sigma · Tug punta il telescopio su Vega e su un corpo nero di platino · COBE e il cono di Eccosorb · corpi grigi e polvere',
+  blocchi:[
+  {t:'prosa', title:'Infrarosso termico: la misura radiometrica di sigma', tag:'Quinn e Martin, 1985', html:R`
+  <p>Questa è la parte che nessun manuale porta e che le dispense hanno perché il loro autore misura il cielo. Le prime misure storiche, quelle su cui si basò Planck, furono di Lummer e Pringsheim (1897) e di Rubens e Kurlbaum (1901), con corpi neri di ferro e rame sagomati a cono concavo e scaldati fra 200 e 1250 °C. La misura moderna di precisione è di Quinn e Martin (1985). Due cavità si fronteggiano attraverso aperture calibrate: un emettitore a temperatura ambiente (230-370 K) e un assorbitore a 2-10 K, in debole contatto con un termostato a 2 K. La misura ha due fasi. Prima l&rsquo;assorbitore si scalda sotto la radiazione dell&rsquo;emettitore fino a una temperatura $T_a$. Poi si chiude la zona fredda e lo si riporta a $T_a$ con una resistenza elettrica. La potenza elettrica si misura con altissima precisione, ed è uguale a quella radiativa.</p>
+  <p>Le difficoltà sono quattro, e ognuna insegna qualcosa sulla funzione di Planck. (1) La formula vale solo se le lunghezze d&rsquo;onda sono piccole rispetto alla cavità. A 300 K, cioè intorno a 10 µm, è facile. Nella cavità criogenica, dove le lunghezze d&rsquo;onda vanno da 1 mm a 1 cm, la forma della cavità modifica il numero di modi. Baltes ha calcolato la correzione per un cilindro, $B=\sigma T^{4}\big[1-\ldots\big]/\pi$, che a 5 K vale il 2%. Ma la potenza riemessa dall&rsquo;assorbitore pesa già solo $(5/300)^4\simeq7{,}7\cdot10^{-8}$ di quella assorbita, e il 2% di una correzione così è trascurabile. (2) L&rsquo;angolo solido va conosciuto con precisione: diaframmi circolari con raggi noti meglio di 1 µm, e diffrazione calcolata. (3) Le pareti devono essere molto emissive e la cavità molto profonda: vernice 3M di nerofumo e sferette di vetro, con emissività sopra il 90% in tutto l&rsquo;infrarosso, e un cono rovesciato sul fondo. (4) La cavità deve essere isoterma: 40 kg di rame. Il risultato è $\sigma=(5{,}66967\pm0{,}00076)\cdot10^{-8}$ W m⁻² K⁻⁴, a cento parti per milione. Siccome $\sigma\propto k^4$, la misura dà $k$ a 25 parti per milione, per via radiometrica e senza passare dalle proprietà dei gas.</p>`},
+  {t:'prosa', title:'Visibile: la calibrazione della scala delle magnitudini su Vega', tag:'Tug, il platino e i 300 metri', html:R`
+  <p>La relazione di Pogson lega le magnitudini a un flusso di riferimento $F_o$, che va misurato in assoluto per qualche stella standard. La più usata è Vega. Tug e collaboratori puntano lo stesso telescopio alternativamente su Vega e su un corpo nero alla temperatura di fusione del platino, circa 2040 K, posto a circa 300 m. Il fotometro dà segnali proporzionali alla potenza ricevuta: $V_o=RAF_o$ dalla stella e $V_{bb}=RA\,\Omega_{bb}B_B(\nu,T)$ dal corpo nero, dove $R$ è la risposta dello strumento e $A$ l&rsquo;area del telescopio. Nel rapporto risposta e area si semplificano:
+  $$F_o=\frac{V_o}{V_{bb}}\,\Omega_{bb}B_B(\nu,T).$$
+  Il trucco è tutto qui. Non serve conoscere la risposta del rivelatore, solo la sua linearità sul rapporto dei due segnali. Servono invece la geometria del corpo nero, cioè $\Omega_{bb}$, e la sua temperatura.</p>
+  <p>I numeri delle dispense si possono rifare, e rifarli serve. A $\lambda=0{,}5556$ µm e 2040 K la forma pratica di Planck dà $B_\lambda=0{,}690$ W/cm²/sr/µm. Con l&rsquo;angolo solido $3{,}5\cdot10^{-9}$ sr scritto dalle dispense, il flusso è $2{,}4\cdot10^{-9}$ W/cm²/µm, proprio il numero che riportano. Però quell&rsquo;angolo solido è attribuito a <i>«un diaframma di 1 mm a 300 metri»</i>, e la geometria dà $\pi(0{,}5\ \mathrm{mm})^2/(300\ \mathrm{m})^2=8{,}7\cdot10^{-12}$ sr, quattrocento volte meno. Le due affermazioni non stanno insieme, e da qui non si può decidere quale delle due sia quella sbagliata. Lo dichiaro invece di sceglierne una in silenzio. Per la stella: un disco di brillanza uniforme $B$ e raggio angolare $\alpha$ dà il flusso
+  $$F=\int_{\mathrm{disco}}B\cos\theta\,d\omega=\pi B\sin^{2}\alpha,$$
+  che per angoli piccoli è $\pi B\sin^{2}\alpha\simeq\pi B\alpha^{2}=B\,\omega_\star$, con $\omega_\star$ angolo solido del disco. Per Vega, con diametro angolare $3\cdot10^{-3}$ arcsec misurato per interferometria, $\omega_\star=1{,}66\cdot10^{-16}$ sr (le dispense: $1{,}7\cdot10^{-16}$). A 10 000 K la brillanza è $B_\lambda=1{,}8252\cdot10^{4}$ W/cm²/sr/µm, e il flusso atteso $3{,}1\cdot10^{-12}$ W/cm²/µm. Le dispense scrivono invece la (1.51) come $F=B\,\omega_\star/\pi$ e trovano $1{,}0\cdot10^{-12}$, che è il mio $9{,}9\cdot10^{-13}$: lo stesso conto con un $\pi$ in più al denominatore, che l&rsquo;integrale qui sopra non giustifica. Con il valore corretto il segnale di Vega è circa $779$ volte più debole di quello del corpo nero, non «circa 3000». La conclusione delle dispense non cambia: il rapporto sta comodamente nella dinamica di un rivelatore.</p>
+  <p>Il risultato fisico è più interessante dei numeri. Lo spettro di Vega sopra i 600 nm è quello di un corpo nero a 10 000 K diluito, cioè moltiplicato per un fattore piccolissimo, l&rsquo;angolo solido. Ma fra 400 e 800 nm lo si descrive altrettanto bene con un corpo nero a 16 000 K e una diluizione diversa. Due curve di Planck che descrivono la stessa sorgente in due bande: per la proprietà della tappa 03, la stella <b>non è un corpo nero</b>. I fotoni con energie di transizioni atomiche subiscono l&rsquo;ultimo scattering in alto nell&rsquo;atmosfera, dove è più freddo, mentre quelli liberi da transizioni escono da strati più profondi e più caldi. La discontinuità di Balmer a 365 nm è la firma più visibile di questo fatto.</p>`},
+  {t:'prosa', title:'Millimetrico: COBE-FIRAS e il cono di Eccosorb', tag:'il miglior corpo nero del cielo', html:R`
+  <p>A bordo di COBE l&rsquo;esperimento FIRAS confrontava lo spettro del cielo con quello di una cavità di corpo nero interna, a temperatura regolabile fra 2 e 25 K. Era una <b>misura di zero</b>: si variava la temperatura del riferimento finché lo spettro differenza si annullava entro il rumore, dell&rsquo;ordine di $10^{-14}$ W cm⁻² sr⁻¹/cm⁻¹. Lo zero arrivò a 2,735 K, e le deviazioni da un corpo nero perfetto risultarono inferiori allo 0,03% del massimo. Alle lunghezze d&rsquo;onda millimetriche una vernice non basta, e il nero era fatto di Eccosorb CR-110: grani di ferro di circa 5 µm in resina epossidica, circa $10^{8}$ grani per cm³, con permeabilità magnetica e costante dielettrica quasi uguali. L&rsquo;impedenza del mezzo $\sqrt{\mu/\epsilon}$ è allora vicina a quella del vuoto, l&rsquo;onda incidente quasi non si riflette, entra e viene assorbita: mezzo millimetro assorbe l&rsquo;80%. La forma è un cono rientrante di 25° in cui ogni raggio subisce almeno sette riflessioni. Anche con riflettività del 25%, quella totale sarebbe $(0{,}25)^{7}=6{,}1\cdot10^{-5}$. Il limite reale, circa una parte su diecimila, viene da diffrazione e rugosità del cono.</p>`},
+  {t:'prosa', title:'Il cielo che non è nero: corpi grigi e polvere', tag:'§1.7', html:R`
+  <p><i>«Il fondo cosmico a 3 K è l&rsquo;unica sorgente astrofisica che emetta radiazione esattamente di corpo nero»</i>. Le altre sorgenti termiche lo sono solo in parte. Se gli strati superficiali sono parzialmente trasparenti, lasciano passare radiazione da strati più profondi a temperatura diversa, come per Vega, e lo spettro va calcolato con il trasporto radiativo. Se il corpo è isotermo ma ha emissività minore di 1, emette come un <b>corpo grigio</b>:
+  $$G_B(\nu,T)=\epsilon(\nu,T)\,\frac{2h\nu^{3}}{c^{2}}\,\frac{1}{e^{h\nu/kT}-1}.$$
+  I pianeti emettono così, fra 40 e 400 K, con emissività legata all&rsquo;albedo. La polvere interplanetaria, grani di circa 10 µm sul piano dell&rsquo;eclittica, va da circa 1000 K a 0,1 UA a circa 150 K a 3 UA. Il suo spettro non è una curva di Planck sola ma una sovrapposizione di corpi grigi a temperature diverse, con il massimo intorno a 10 µm, ed è così intenso da rendere impossibile, a quelle lunghezze d&rsquo;onda, l&rsquo;osservazione di sorgenti diffuse fuori dal sistema solare. La polvere interstellare ha grani più piccoli (circa 0,1 µm) e più freddi. FIRAS ne misura lo spettro come un corpo nero a circa 23 K con emissività
+  $$\epsilon(\sigma)\sim K\left(\frac{\sigma}{30\ \mathrm{cm^{-1}}}\right)^{1{,}65},$$
+  dove $K$ dipende dalla direzione e va da $2\cdot10^{-6}$ a $2\cdot10^{-3}$. L&rsquo;emissività che cresce con la frequenza è quella di grani più piccoli della lunghezza d&rsquo;onda, che assorbono, e quindi emettono, male le onde lunghe.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel metodo di Tug, perché non serve conoscere l’efficienza del rivelatore?`,
+    a:R`Perché si misurano con lo stesso strumento due segnali, $V_o=RAF_o$ e $V_{bb}=RA\Omega_{bb}B_B$, e se ne fa il rapporto: $R$ e $A$ si semplificano. Serve solo che il rivelatore sia lineare nell&rsquo;intervallo fra i due segnali, oltre a conoscere $\Omega_{bb}$ e la temperatura del corpo nero.`},
+   {q:R`Perché FIRAS è una «misura di zero», e perché questo la rende più precisa?`,
+    a:R`Perché non misura lo spettro del cielo in assoluto ma la sua differenza rispetto a un corpo nero interno, e cerca la temperatura del riferimento che annulla la differenza a tutte le frequenze. Un rivelatore che deve dire solo «zero o non zero» non ha bisogno di calibrazione assoluta né di linearità su un grande intervallo: la precisione è fissata dal rumore e dalla qualità del corpo nero di riferimento.`}
+  ]}
+]},
+
+/* ---------------- 09 · IL COLORE COME TERMOMETRO ---------------- */
+{ num:'09', title:'Il colore come termometro: B-V dalla funzione di Planck', meta:'il rapporto di due brillanze · il limite di Wien rende B-V lineare in 1/T · la relazione empirica e il suo zero',
+  blocchi:[
+  {t:'prosa', title:'B-V calcolato da Planck', tag:'la (1.53) delle dispense', html:R`
+  <p>L&rsquo;indice di colore è una differenza di <span class="str" data-str="magnitudine">magnitudini</span> in due bande, quindi il logaritmo di un rapporto di flussi. Per la maggior parte delle stelle le bande B e V stanno a lunghezze d&rsquo;onda più lunghe del massimo, dove lo spettro, come per Vega, è approssimativamente di corpo nero. Trattando i filtri come monocromatici a $\lambda_B=0{,}44$ µm e $\lambda_V=0{,}55$ µm, l&rsquo;angolo solido della stella si semplifica nel rapporto, e resta
+  $$B-V=-2{,}5\log\frac{B_B(\lambda_B,T)}{B_B(\lambda_V,T)}=-2{,}5\log\left[\left(\frac{\lambda_V}{\lambda_B}\right)^{5}\frac{e^{hc/\lambda_VkT}-1}{e^{hc/\lambda_BkT}-1}\right].$$
+  Con $hc/k=14\,388$ µm K gli esponenti sono $32\,700/T$ e $26\,160/T$, e $(0{,}55/0{,}44)^5=3{,}052$. Nel limite di Wien i $-1$ si trascurano e il logaritmo di un esponenziale diventa lineare:
+  $$B-V\simeq-1{,}211+\frac{7101}{T}.$$
+  Le dispense scrivono $-1{,}21+7090/T$: la differenza nella terza cifra viene dall&rsquo;arrotondamento dell&rsquo;esponente. Il limite di Wien a 4000 K è già ottimo. La formula esatta dà $0{,}565$, quella lineare $0{,}564$.</p>`},
+  {t:'prosa', title:'Lo zero della scala, e la relazione empirica', tag:'perché A0 ha colore zero', html:R`
+  <p>Secondo la formula teorica $B-V=0$ a $7101/1{,}211=5864\ \mathrm{K}$. Ma la scala delle magnitudini è costruita in modo che le stelle A0, a circa 10 000 K, abbiano tutti i colori nulli. I flussi di riferimento $F_o$ delle varie bande sono scelti apposta. La formula teorica ha quindi uno zero sbagliato per costruzione, e a questo si aggiunge che i filtri non sono monocromatici. Le dispense danno la relazione empirica, best fit dei dati fra 4000 e 10 000 K:
+  $$B-V=-0{,}865+\frac{8540}{T}.$$
+  Controlla lo zero: a 10 000 K dà $-0{,}011$, cioè zero, come deve per una A0. Per il Sole a 5782 K dà $0{,}612$, contro il valore misurato di circa 0,65. Rovesciata, è il termometro che serve nelle prove: una stella con $B-V=0{,}40$ ha $T=8540/(0{,}40+0{,}865)=6751\ \mathrm{K}$.</p>
+  <p>Il colore è un termometro migliore del flusso per una ragione semplice. Non dipende dalla distanza, perché il fattore $1/D^2$ si semplifica nel rapporto, né dal raggio, perché l&rsquo;angolo solido si semplifica anche lui. Dipende però dall&rsquo;assorbimento interstellare, che arrossa: la polvere toglie più blu che rosso, e una stella arrossata sembra più fredda. Le dispense costruiscono un indice libero dall&rsquo;arrossamento, combinando $U-B$ e $B-V$ con il rapporto degli eccessi di colore, $\langle E_{U-B}/E_{B-V}\rangle\simeq0{,}79$. È fisica del mezzo interstellare, e qui basta sapere che esiste.</p>`},
+  {t:'plot', title:'Il colore in funzione della temperatura: teoria e relazione empirica',
+   intro:'In ascissa $10^4/T$ (cioè 1 a 10000 K, 2,5 a 4000 K); in ordinata $B-V$. In ciano la formula esatta da Planck, in oro la relazione empirica (1.54).',
+   plots:[
+    {kind:'func2d', xr:[0.5,2.6], yr:[-1,1.6], height:300, equal:false,
+     title:'10^4 / T      B - V',
+     curves:[{f:'-2.5*log(3.0518*(exp(2.616*x)-1)/(exp(3.270*x)-1))/log(10)', col:'#5eead4', label:'da Planck (filtri monocromatici)'},
+             {f:'-0.865+0.854*x', col:'#d8a13a', label:'empirica: -0,865 + 8540/T'}],
+     marks:[{x:1, y:-0.011, label:'A0, 10000 K', col:'#d8a13a', up:false},
+            {x:1.7295, y:0.612, label:'Sole', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> in funzione di $1/T$ entrambe le relazioni sono quasi rette, e questa è la firma del limite di Wien. Ma le rette non coincidono: hanno pendenza diversa (7101 contro 8540) e uno zero spostato.</p>
+   <p><b>Che cosa impararne:</b> la fisica, cioè che il colore misura $1/T$, la dà Planck. I coefficienti numerici li dà la calibrazione: filtri veri, zero fissato sulle A0, righe che deformano lo spettro. Nei conti si usa la relazione empirica e si dichiara che la si sta usando.</p>`}
+]},
+
+/* ---------------- 10 · GLI ESERCIZI ---------------- */
+{ num:'10', title:'I conti delle prove scritte: un pianeta, una supernova, un granello di polvere', meta:'Marte da 24 parsec · la distanza di SN1970G con il metodo della fotosfera in espansione · la temperatura di equilibrio di un grano',
+  blocchi:[
+  {t:'prosa', title:'Da dove vengono questi esercizi', tag:'dichiarazione', html:R`
+  <p>La mappa non attribuisce a questo movimento nessun esercizio di lezione. Il controllo a mano nel dossier degli esercizi di lezione non ne ha aggiunti. I tre esercizi qui sotto vengono dalle <b>prove scritte</b>: compito B del 5 maggio 2008, esercizio 2; compito 06A del 2 aprile 2007, esercizio 3; compito 01 del 7 dicembre 2005, esercizio 2. Una prova scritta non è un esercizio fatto a lezione, e lo dico perché all&rsquo;orale la differenza conta.</p>`},
+  {t:'prosa', title:'Marte visto da un’altra stella', tag:'compito B, 2008', html:R`
+  <p><i>L&rsquo;emissione di Marte è schematizzabile come quella di un corpo nero a 230 K, raggio medio 3386 km. Si calcoli la luminosità bolometrica. Un telescopio spaziale, operante alla lunghezza d&rsquo;onda di massima emissione di Marte e sensibile a flussi fino a $10^{-21}$ W/m², osserva una stella a 24 pc: vedrebbe un pianeta marziano alla stessa distanza dalla sua stella? Con una risoluzione di 0,1″ separerebbe pianeta e stella?</i></p>
+  <p>La luminosità è la Stefan-Boltzmann su tutta la superficie: $L=4\pi R^2\sigma T^4=4\pi(3{,}386\cdot10^{6})^{2}\cdot5{,}67\cdot10^{-8}\cdot230^{4}$, cioè $2{,}29\cdot10^{16}\ \mathrm{W}$. Il telescopio lavora al massimo di Wien, $2{,}898\cdot10^{-3}/230$, che è $12{,}6\ \mu\mathrm{m}$, nell&rsquo;infrarosso medio, dove la stella è debole e il pianeta al massimo: è il motivo della scelta. A $D=24$ pc, cioè $7{,}41\cdot10^{17}\ \mathrm{m}$, il flusso bolometrico è $L/4\pi D^2$, cioè $3{,}3\cdot10^{-21}\ \mathrm{W/m^{2}}$, sopra la soglia: rivelabile. Va detto che la soluzione ufficiale confronta con la soglia il flusso <i>bolometrico</i>, mentre uno strumento a 12,6 µm vede solo la parte dello spettro nella sua banda. Il confronto vero richiederebbe la larghezza di banda, che il testo non dà. L&rsquo;orbita di Marte, $2{,}3\cdot10^{11}$ m, vista da 24 pc sottende $0{,}064''$, meno della risoluzione di 0,1″: pianeta e stella non si separano. Lo strumento riceverebbe il flusso del pianeta mescolato a quello della stella. La soluzione ufficiale scrive «inferiore alla risoluzione di 1″», ma il testo dice 0,1″. La conclusione è la stessa con entrambi i numeri.</p>`},
+  {t:'prosa', title:'La distanza di una supernova dalla sua fotosfera', tag:'compito 06A, 2007', html:R`
+  <p><i>61 giorni dopo l&rsquo;esplosione la supernova di tipo II SN1970G si espandeva a 4500 km/s, con temperatura superficiale 5900 K e magnitudine apparente 12,96. Si calcoli la distanza assumendo che emetta come un corpo nero ($M_\odot=+4{,}8$).</i></p>
+  <p>È il metodo della fotosfera in espansione. La velocità di espansione per il tempo dà il raggio, il corpo nero dà la luminosità, la luminosità dà la magnitudine assoluta, e il modulo di distanza dà la distanza. Il raggio è $R=vt=4{,}5\cdot10^{6}\ \mathrm{m/s}\times61\times86\,400\ \mathrm{s}$, cioè $2{,}37\cdot10^{13}\ \mathrm{m}$, circa 160 UA. La luminosità: $L=4\pi R^{2}\sigma T^{4}$ dà $4{,}86\cdot10^{35}\ \mathrm{W}$, cioè $1{,}26\cdot10^{9}\,L_\odot$. Un miliardo di Soli, da una sola stella. La magnitudine assoluta, con Pogson rispetto al Sole: $M=4{,}8-2{,}5\log(L/L_\odot)$, che vale $-17{,}95$. Il modulo di distanza è $m-M=12{,}96-(-17{,}95)=30{,}91$, e $D=10^{(m-M+5)/5}$ pc dà $15{,}2\ \mathrm{Mpc}$.</p>
+  <p>Il punto 3.2 chiede di discutere le approssimazioni, ed è la parte che distingue chi ha capito. (a) Il raggio $vt$ suppone espansione libera a velocità costante da un raggio iniziale trascurabile, cosa ragionevole dopo due mesi. (b) La fotosfera di una supernova non è un corpo nero: è un gas in espansione con righe forti e diffusione elettronica, che diluiscono lo spettro rispetto a Planck a parità di temperatura di colore. Il metodo vero usa un fattore di diluizione. Senza, si sovrastima $L$ e quindi la distanza. (c) $L$ è bolometrica, mentre la magnitudine osservata è in una banda: serve una correzione bolometrica. (d) L&rsquo;assorbimento interstellare è stato posto a zero. Se c&rsquo;è, $m$ andrebbe corretta verso valori più piccoli e la distanza scenderebbe.</p>`},
+  {t:'prosa', title:'La temperatura di un granello di polvere vicino a una stella', tag:'compito 01, 2005', html:R`
+  <p><i>Una nube di grani di polvere è a 1000 UA da una stella A5 ($T_e=8200$ K, $R=1{,}3\cdot10^{9}$ m). Assumendo stella e grani corpi neri, si calcoli la temperatura dei grani. Poi la si ricalcoli se il rapporto fra efficienza di assorbimento nell&rsquo;ultravioletto ed efficienza di emissione nel lontano infrarosso è $\epsilon_{UV}/\epsilon_{IR}=2000$.</i></p>
+  <p>È l&rsquo;equilibrio termico fra materia e radiazione, ridotto a un bilancio di potenza. Un grano sferico di raggio $a$ a distanza $d$ intercetta con la sua sezione $\pi a^2$ il flusso della stella, $\sigma T_\star^4(R_\star/d)^2$, ed emette da tutta la sua superficie $4\pi a^2$ come corpo nero a $T_g$. All&rsquo;equilibrio $\sigma T_\star^{4}\left(\frac{R_\star}{d}\right)^{2}\pi a^{2}=4\pi a^{2}\sigma T_g^{4}$, e il raggio del grano sparisce:
+  $$T_g=T_\star\sqrt{\frac{R_\star}{2d}}.$$
+  Con $d=1{,}5\cdot10^{14}$ m viene $17{,}1\ \mathrm{K}$. Se il grano assorbe bene il visibile e l&rsquo;ultravioletto della stella ma emette male nel lontano infrarosso, dove irraggia lui, il bilancio diventa $\epsilon_{UV}\times$ assorbita $=\epsilon_{IR}\times$ emessa, e la temperatura cresce del fattore $(\epsilon_{UV}/\epsilon_{IR})^{1/4}=6{,}687$, fino a $114\ \mathrm{K}$. È la legge di Kirchhoff della tappa 01 al lavoro: un corpo che emette male a una frequenza deve anche assorbire male a quella frequenza, e un grano può essere caldo perché assorbe a frequenze diverse da quelle a cui emette.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel conto della temperatura del grano, perché il raggio del grano non conta?`,
+    a:R`Perché la potenza assorbita è proporzionale alla sezione geometrica $\pi a^2$ e quella emessa alla superficie $4\pi a^2$: entrambe scalano come $a^2$, che si semplifica. Resta un fattore $1/4$ (sezione su superficie), da cui il $2$ dentro la radice: $T_g=T_\star\sqrt{R_\star/2d}$. Il risultato smette di valere quando il grano è più piccolo della lunghezza d&rsquo;onda e le efficienze dipendono da $a$.`},
+   {q:R`Nel metodo della fotosfera in espansione, che cosa succede alla distanza se la temperatura è sovrastimata del 10%?`,
+    a:R`$L\propto T^4$ cresce di $1{,}1^4\simeq1{,}46$; la magnitudine assoluta diventa più brillante di $2{,}5\log1{,}46\simeq0{,}41$ mag; il modulo di distanza cresce di 0,41 e la distanza di un fattore $10^{0{,}41/5}\simeq1{,}21$, cioè $\sqrt{1{,}46}$. Un errore del 10% sulla temperatura diventa un errore del 21% sulla distanza.`}
+  ]}
+]},
+
+/* ---------------- 11 · ALL'ORALE ---------------- */
+{ num:'11', title:'All’orale: Wien e Stefan-Boltzmann derivate da Planck, nell’ordine in cui si dicono', meta:'la domanda teorica della mappa · il copione in sette mosse · le due trappole da nominare prima che le nomini l’esaminatore',
+  blocchi:[
+  {t:'prosa', title:'Che cosa chiede davvero la domanda', tag:'quello che dice la mappa', html:R`
+  <p>La domanda teorica del corpo nero non è «enuncia le tre leggi». È mostrare che due delle tre stanno dentro la prima. Per l&rsquo;estremo di $B_\lambda$ va detto dove nasce il 4,965. Per l&rsquo;integrale di $B_\nu$ va mostrato il cambio di variabile che porta fuori la costante e lascia l&rsquo;integrale numerico. Poi i due limiti, con il regime in cui ciascuno vale. Il copione qui sotto è di sette mosse. Va detto senza foglio, e ogni mossa contiene una frase che fa capire all&rsquo;esaminatore che la formula non è solo ricordata.</p>`},
+  {t:'reveal', title:'Il copione', tag:'sette mosse', steps:[
+   {label:'Mossa 1: la funzione e il suo significato', body:R`<p>«La brillanza di corpo nero è $B_\nu=\frac{2h\nu^3}{c^2}\frac{1}{e^{h\nu/kT}-1}$: numero di modi per unità di volume, frequenza e angolo solido, $2\nu^2/c^3$, per l&rsquo;energia media di un modo, $h\nu$ per il numero di occupazione di Bose-Einstein, per $c$. Dipende solo da $T$: per Kirchhoff è la stessa per qualunque materiale all&rsquo;equilibrio.»</p>`},
+   {label:'Mossa 2: passare alla variabile adimensionale', body:R`<p>«Con $x=h\nu/kT$ la forma dello spettro è universale, $x^3/(e^x-1)$, e la temperatura esce come fattore $T^4$ davanti. Per lo spettro in lunghezza d&rsquo;onda, con lo Jacobiano $c/\lambda^2$, la forma diventa $x^5/(e^x-1)$.»</p>`},
+   {label:'Mossa 3: Wien, la derivata', body:R`<p>«Annullo la derivata di $x^5/(e^x-1)$: viene $5(e^{x}-1)=xe^{x}$, un&rsquo;equazione trascendente. Se trascuro $e^{-x}$ la soluzione è 5. Il termine $e^{-5}$ la abbassa a $x_m=4{,}965$, e quindi $\lambda_mT=hc/4{,}965k$, cioè $\lambda_mT=2{,}898\cdot10^{-3}\ \mathrm{m\,K}$.»</p>`},
+   {label:'Mossa 4: la trappola del massimo', body:R`<p>«In frequenza la potenza è $x^3$ e il massimo è a $x=2{,}82$: per il Sole 501 nm in $\lambda$, ma l&rsquo;equivalente di 882 nm in $\nu$. Non è una contraddizione: lo spettro è uno, cambia la misura dell&rsquo;intervallo.»</p>`},
+   {label:'Mossa 5: Stefan-Boltzmann, il cambio di variabile', body:R`<p>«Integro $B_\nu$ su tutte le frequenze: con $d\nu=(kT/h)dx$ escono quattro fattori $T$, tre dal $\nu^3$ e uno dal differenziale. Resta $\int x^3/(e^x-1)dx$, che sviluppando in serie geometrica è $\Gamma(4)\zeta(4)=\pi^4/15$. Quindi $B=\sigma T^4/\pi$ con $\sigma=2\pi^5k^4/15h^3c^2$.»</p>`},
+   {label:'Mossa 6: da brillanza a flusso', body:R`<p>«Il flusso uscente da una superficie è l&rsquo;integrale di $B\cos\theta$ sulla semisfera, che vale $\pi B$: dunque $F=\pi B=\sigma T^{4}$, e per una stella $L=4\pi R^2\sigma T_{\mathrm{eff}}^4$, che definisce la temperatura efficace.»</p>`},
+   {label:'Mossa 7: i due limiti, con i loro regimi', body:R`<p>«Per $x\ll1$, $e^x-1\simeq x$ e si ha Rayleigh-Jeans, $B=2\nu^2kT/c^2$, senza $h$: è il limite classico, lineare in $T$, e definisce la temperatura di brillanza dei radioastronomi. Per $x\gg1$ si ha Wien, $B=\frac{2h\nu^3}{c^2}e^{-x}$, la coda di Boltzmann. Prima di usarne uno, stimo $x$: il fondo cosmico a 1 mm ha $x\simeq5$ e non è Rayleigh-Jeans.»</p>`}
+  ]}
+]},
+
+/* ---------------- 12 · I NUMERI ---------------- */
+{ num:'12', title:'I numeri di questo movimento, e dove il corpo nero torna', meta:'otto voci senza foglio delle costanti · il termometro, il calibratore e l’universo',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Planck:</b> $B_\nu=\frac{2h\nu^3}{c^2}(e^{h\nu/kT}-1)^{-1}$; in pratica $B_\lambda=1{,}191\cdot10^4/\lambda^5(e^{14388/\lambda T}-1)$ W/cm²/sr/µm, con $\lambda$ in µm.</li>
+  <li><b>Wien:</b> $\lambda_mT=2{,}898\cdot10^{-3}\ \mathrm{m\,K}$ (da $x_m=4{,}965$); in frequenza $\nu_{\max}/T=5{,}88\cdot10^{10}$ Hz/K (da $x_m=2{,}821$).</li>
+  <li><b>Stefan-Boltzmann:</b> $\sigma=5{,}670\cdot10^{-8}$ W m⁻² K⁻⁴; $F=\pi B=\sigma T^4$; $L=4\pi R^2\sigma T_{\mathrm{eff}}^4$.</li>
+  <li><b>L’integrale:</b> $\int_0^\infty x^3/(e^x-1)dx=\pi^4/15=6{,}494$; quello dei fotoni $2\zeta(3)=2{,}404$.</li>
+  <li><b>Fotoni:</b> $n=20{,}3\,T^{3}\ \mathrm{cm^{-3}}$, circa 411 cm⁻³ nel fondo cosmico; energia media $2{,}70\,kT$.</li>
+  <li><b>Il Sole:</b> $T_{\mathrm{eff}}\simeq5780$ K, massimo a 0,50 µm; 300 K emette 459 W/m² con massimo a 9,7 µm.</li>
+  <li><b>I limiti:</b> Rayleigh-Jeans per $x\ll1$ ($T_b=c^2B_\nu/2k\nu^2$), Wien per $x\gg1$; a $x=1$ sbagliano del 72% e del 37%.</li>
+  <li><b>Il colore:</b> $B-V=-0{,}865+8540/T$ fra 4000 e 10 000 K, zero sulle A0.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove il corpo nero riappare', tag:'il senso', html:R`
+  <p>Ogni volta che una stella viene descritta con una temperatura, quella temperatura è definita da un corpo nero: è la temperatura efficace, oppure la temperatura di colore. Nelle atmosfere stellari la funzione di Planck torna come <b>funzione sorgente</b> dell&rsquo;equilibrio termodinamico locale: localmente ogni strato emette come un corpo nero alla sua temperatura, anche se lo spettro che esce non è una curva di Planck, perché mescola strati diversi, come si è visto per Vega. Nelle stelle compatte e nei dischi di accrescimento lo spettro è una somma di corpi neri, come per la polvere interplanetaria. Nel mezzo interstellare la polvere fredda è un corpo grigio a decine di kelvin. In cosmologia il corpo nero è l&rsquo;universo stesso. FIRAS ha misurato che il cielo alle microonde è il miglior corpo nero mai osservato, e il fatto che lo spettro resti di Planck mentre l&rsquo;universo si espande, con $T$ che scala come l&rsquo;inverso della dimensione, è una delle prove che l&rsquo;universo primordiale era un plasma caldo in equilibrio.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-04-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-04 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-04-il-corpo-nero.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

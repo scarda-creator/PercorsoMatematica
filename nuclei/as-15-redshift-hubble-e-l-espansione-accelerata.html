@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-15 — Redshift, Hubble e l’espansione accelerata: il redshift che non è un Doppler</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-15 — Redshift, Hubble e l’espansione accelerata</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["parsec-e-parallasse"] = {"nome":"Parsec e parallasse","riga":"Il parsec è la distanza da cui il raggio dell'orbita terrestre è visto sotto un secondo d'arco: $1\\ \\mathrm{pc}=1\\,\\mathrm{UA}/1''=3{,}086\\cdot10^{16}$ m, e la distanza di una stella in parsec è l'inverso della sua parallasse in secondi d'arco.","serve":"A non portare mai un fattore di conversione a memoria. La definizione è geometrica e si ricostruisce in due righe: se $p$ è l'angolo sotto cui dalla stella si vede il semiasse maggiore dell'orbita terrestre, per angoli piccoli $p=R_{\\text{UA}}/d$, e scegliendo l'unità di distanza in modo che $p=1''$ corrisponda a $d=1$ si ottiene $d[\\mathrm{pc}]=1/p['']$. Il parsec non è un'unità più «astronomica» dell'anno luce: è l'unità in cui la misura che si fa davvero — un angolo — diventa direttamente una distanza, senza nessun conto intermedio. Nelle prove scritte di Astrofisica il valore $1\\ \\mathrm{pc}=3{,}086\\cdot10^{16}$ m è stampato in calce al foglio fra i dati: ciò che va saputo è l'inversione, non il numero.","esempio":"La stella più vicina, Proxima Centauri, ha parallasse $p=0{,}7687''$. Quindi $d=1/0{,}7687=1{,}301$ pc, e in anni luce $d=3{,}26/0{,}7687=4{,}24$ anni luce. Il controllo di coerenza è immediato: una parallasse inferiore al secondo d'arco vuol dire per forza una distanza superiore al parsec, e se il conto dà il contrario è stata invertita la frazione.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"02","come":"la derivazione del parsec dalla parallasse annua e le conversioni fra unità astronomica, anno luce e parsec, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"riga","appare":"3,086\\cdot10^{16}"},{"tipo":"numero","espr":"1/0.7687","vale":"1.301","dove":"esempio","appare":"1,301"},{"tipo":"numero","espr":"3.26/0.7687","vale":"4.24","dove":"esempio","appare":"4,24"},{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"serve","appare":"3,086\\cdot10^{16}"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-15: Redshift, Hubble e l’espansione accelerata: il redshift che non è un Doppler <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-15 — redshift, Hubble e l'espansione accelerata
+identita:  il redshift cosmologico non e' un effetto Doppler: e' il rapporto tra due fattori di scala, ed e'
+           la distinzione da cui dipendono le tre distanze, il diagramma di Hubble e la scoperta
+           dell'accelerazione.
+copre:     A.21, A.22
+serve:     as-14 (metrica RW, legge di Hubble empirica, candele standard)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento pesante (28 prove, densita' 4,3). Le tre distanze scritte insieme, con il conto che
+           le lega e due esempi numerici (Einstein-de Sitter analitico, Lambda-CDM numerico) che mostrano quanto
+           divergono; il minimo apparente della distanza di diametro angolare; il diagramma di Hubble con q0;
+           il redshift nel futuro. All'orale: 1+z = a(t_oss)/a(t_em) dal raggio nullo, d_L = (1+z)^2 d_A.
+fonti:     lezione17_2020 (pagine 2-3, 23-28) e lezione18_2017 (pagine 3-4, 31-36): il problema del redshift,
+           l'origine del redshift dalla metrica, creste emesse a t1 e t1 + lambda1/c.
+           lezione19_2017 (pagine 1-16, 37-44): Friedmann generale, parametro di decelerazione
+           q0 = Omega_M/2 + Omega_R - Omega_L, sviluppo di a(t), diagramma di Hubble, D_L = (1+z) chi_1,
+           D_L(z) con sin/sinh, sviluppo a piccolo z, SN Ia e q0 ~ -0,6; corpo nero e T ~ 1/a.
+           lezione20_stampati (pagine 1-2): distanza di diametro angolare D_A = D_L/(1+z)^2, le quattro
+           distanze (D_L, D_A, D_now, D_ltt) come integrali, i casi particolari.
+           lezione23_2020 (pagine 1-8): esercizi sul redshift: definizione, QSO (H-alfa e H-beta, rapporto
+           1,35), distanza comobile da z, il redshift nel futuro (universo vuoto, accelerato, decelerato).
+           lezione24_2017 (pagine 34-37): esonero 21/01/2015 es. 2, versione A (Lambda) e B (materia), con
+           le soluzioni.
+           Esercizi_Astrofisica(2005-2017) p. 38-39: prova 14/09/2007 es. 2 (spessore della superficie di
+           ultimo scattering: 42,4 Mpc, 38,6 kpc, 11').
+           Marconi, Cosmologia (pagina 24): z come velocita' di recessione e' fuorviante.
+           DICHIARATO: nella prova 2007 la soluzione da' 42,4 Mpc dove il conto con i suoi dati da' 41,8 (e
+           38,0 kpc invece di 38,6), differenza dell'1,4% che non cambia l'angolo di 11'; nell'esonero 2015
+           la soluzione usa l'orizzonte delle particelle, io aggiungo quello degli eventi, che e' la domanda
+           fisica; i valori Lambda-CDM (Omega_M = 0,3, Omega_L = 0,7, H0 = 70) e le curve sono calcolati da
+           me per integrazione numerica, non presi dalle fonti; le pagine di Masani indicate dalla mappa le ho
+           aperte in R2 (sotto).
+           Masani, Astrofisica, pagine stampate 125-128 (PDF 135-138), lette per intero in R2: il rapporto fra
+           carica elettrica e «carica gravitazionale», e l'ipotesi che l'espansione nasca da una differenza di
+           carica protone-elettrone, esclusa dagli esperimenti (King 1960, Hillas e Cranshaw 1960). Le pp. 125 e
+           129 iniziali sono d'altro argomento.
+           Marconi, Cosmologia, cap. 2.2-2.3 (pp. 20-25), cap. 3.3-4.1 (pp. 43-47) e cap. 12 (pp. 180-201): la
+           survey CfA, l'espansione uniforme che da' v ~ r, la metrica RW che vale solo su grande scala, la
+           dilatazione dei tempi, l'orizzonte delle particelle 3ct, il Big Bang che si allontana a 2c, la sfera di
+           Hubble, l'orizzonte degli eventi. Le pp. 169-173 (crescita delle perturbazioni, velocita' peculiari)
+           sono d'altro argomento.
+           de Bernardis, slide 2016 PDF 128-150: Hubble 1930, H0 circa 70, le lunghezze d'onda di riposo per
+           riconoscere un redshift, l'esercizio della riga a 21 cm (W50, Vsys, massa).
+           DICHIARATO (tappa 02): nell'esercizio a 21 cm la galassia a 8,2 Mpc ha Vsys = 21 km/s, mentre il flusso
+           di Hubble a quella distanza sarebbe 574 km/s; o il dato e' idealizzato o la galassia ha un moto
+           peculiare di circa -550 km/s, e la soluzione non lo discute.
+registro:  lezione17_2020, lezione18_2017, lezione19_2017, lezione20_stampati, lezione23_2020, lezione24_2017
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "00", "appare": "1+z=\\frac{a(t_{\\rm oss})}{a(t_{\\rm em})}", "perche": "enunciato, ricavato alla tappa 01"},
+ {"tipo": "simbolico", "dove": "01", "appare": "ds^2=c^2dt^2-a(t)^2", "perche": "metrica di Robertson-Walker"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac{c\\,dt}{a(t)}=\\frac{d\\chi}{\\sqrt{1-k\\chi^2}}", "perche": "raggio nullo radiale ds = 0"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\int_0^{\\chi_1}\\frac{d\\chi}{\\sqrt{1-k\\chi^2}}", "perche": "integrazione del raggio nullo"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\int_{t_1+\\lambda_1/c}^{t_0+\\lambda_0/c}\\frac{c\\,dt}{a(t)}", "perche": "chi_1 costante per le due creste (lezione17_2020 p. 25)"},
+ {"tipo": "simbolico", "dove": "01", "appare": "A+B=B+C\\Rightarrow A=C", "perche": "sottrazione dell'integrale comune"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\int_{t_0}^{t_0+\\lambda_0/c}\\frac{c\\,dt}{a(t)}", "perche": "resto dopo la sottrazione"},
+ {"tipo": "uguale", "sinistra": "integrate(c/a1,(t,t1,t1+l1/c))", "vale": "l1/a1", "dove": "01", "appare": "\\frac{\\lambda_0}{\\lambda_1}=\\frac{a(t_0)}{a(t_1)}=1+z", "ipotesi": {"c": "positive", "a1": "positive", "l1": "positive"}},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\lambda_1/a(t_1)=\\lambda_0/a(t_0)", "perche": "uguaglianza dei due integrali con a costante"},
+ {"tipo": "simbolico", "dove": "01", "appare": "1+z=1/a(t_{\\rm em})", "perche": "a(t_0) = 1"},
+ {"tipo": "numero", "espr": "1/1101*1e4", "vale": "9.08", "dove": "01", "appare": "9{,}08\\cdot10^{-4}"},
+ {"tipo": "simbolico", "dove": "01", "appare": "=\\frac{H_0D}{c}", "perche": "primo ordine in Delta t con D = c Delta t"},
+ {"tipo": "simbolico", "dove": "01", "appare": "cz=H_0D", "perche": "riscrittura della relazione precedente"},
+ {"tipo": "simbolico", "dove": "01", "appare": "dt_0=(1+z)\\,dt_1", "perche": "stesso argomento delle creste applicato a un intervallo qualunque"},
+ {"tipo": "simbolico", "dove": "01", "appare": "u_\\lambda=(8\\pi hc/\\lambda^5)/(e^{hc/\\lambda kT}-1)", "perche": "legge di Planck per unita' di lunghezza d'onda"},
+ {"tipo": "simbolico", "dove": "01", "appare": "=T_0(1+z)", "perche": "lambda T costante nell'esponente (lezione19_2017 p. 40)"},
+ {"tipo": "numero", "espr": "2.725*1101", "vale": "3000", "dove": "01", "appare": "=3000"},
+ {"tipo": "numero", "espr": "910/675", "vale": "1.35", "dove": "01", "appare": "910/675=1{,}35"},
+ {"tipo": "numero", "espr": "656.461/486.268", "vale": "1.35", "dove": "01", "appare": "656{,}461/486{,}268=1{,}35"},
+ {"tipo": "numero", "espr": "910/656.461", "vale": "1.386", "dove": "01", "appare": "910/656{,}461=1{,}386"},
+ {"tipo": "numero", "espr": "910/656.461-1", "vale": "0.386", "dove": "01", "appare": "z=0{,}386"},
+ {"tipo": "numero", "espr": "675/486.268", "vale": "1.388", "dove": "01", "appare": "675/486{,}268=1{,}388"},
+ {"tipo": "numero", "espr": "675/486.268-1", "vale": "0.388", "dove": "01", "appare": "z=0{,}388"},
+ {"tipo": "simbolico", "dove": "02", "appare": "-\\frac12q_0H_0^2(t-t_0)^2", "perche": "sviluppo di Taylor di a(t) con la definizione di q0"},
+ {"tipo": "simbolico", "dove": "02", "appare": "q_0=-\\frac{\\ddot a_0a_0}{\\dot a_0^2}", "perche": "definizione del parametro di decelerazione"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\left(\\frac{\\dot a}{a}\\right)^2=H_0^2\\left[\\frac{\\Omega_{R0}}{a^4}", "perche": "equazione di Friedmann generale (lezione19_2017 p. 6)"},
+ {"tipo": "simbolico", "dove": "02", "appare": "2\\dot a\\ddot a=(du/da)\\dot a", "perche": "regola della catena"},
+ {"tipo": "uguale", "sinistra": "diff(H**2*(R/a**2+M/a+(1-W)+Lm*a**2),a)/2", "vale": "H**2*(-R/a**3-M/(2*a**2)+Lm*a)", "dove": "02", "appare": "=H_0^2\\left[-\\frac{\\Omega_{R0}}{a^3}-\\frac{\\Omega_{M0}}{2a^2}+\\Omega_\\Lambda a\\right]"},
+ {"tipo": "uguale", "sinistra": "-(H**2*(-R-M/2+Lm))/H**2", "vale": "R+M/2-Lm", "dove": "02", "appare": "=\\Omega_{R0}+\\frac{\\Omega_{M0}}{2}-\\Omega_\\Lambda", "ipotesi": {"H": "positive"}},
+ {"tipo": "numero", "espr": "0.3/2-0.7", "vale": "-0.55", "dove": "02", "appare": "=-0{,}55"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\dot D=\\dot a\\chi=HD", "perche": "D = a chi con chi costante"},
+ {"tipo": "numero", "espr": "299792.458/70", "vale": "4283", "dove": "02", "appare": "=4283\\ \\mathrm{Mpc}"},
+ {"tipo": "numero", "espr": "3.0857e19/70/3.156e16", "vale": "13.97", "dove": "02", "appare": "13{,}97"},
+ {"tipo": "simbolico", "dove": "03", "appare": "c\\,dt=a\\,d\\chi", "perche": "raggio nullo in universo piatto"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\int_{1/(1+z)}^{1}\\frac{c\\,da}{a\\dot a}", "perche": "cambio di variabile dt = da/a'"},
+ {"tipo": "uguale", "sinistra": "diff(1/(1+z),z)", "vale": "-1/(1+z)**2", "dove": "03", "appare": "da=-dz/(1+z)^2", "ipotesi": {"z": "positive"}},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\dot a/a=H(z)", "perche": "definizione di H"},
+ {"tipo": "uguale", "sinistra": "-(c/((1/(1+z))**2*Hz))*diff(1/(1+z),z)", "vale": "c/Hz", "dove": "03", "appare": "\\chi(z)=\\int_0^z\\frac{c\\,dz'}{H(z')}", "ipotesi": {"z": "positive", "c": "positive", "Hz": "positive"}},
+ {"tipo": "simbolico", "dove": "03", "appare": "H(z)=H_0\\sqrt{\\Omega_{R0}(1+z)^4", "perche": "Friedmann generale con a = 1/(1+z)"},
+ {"tipo": "simbolico", "dove": "03", "appare": "h\\nu_0=h\\nu_1/(1+z)", "perche": "redshift dell'energia del fotone"},
+ {"tipo": "simbolico", "dove": "03", "appare": "dt_0=(1+z)dt_1", "perche": "dilatazione dei tempi di arrivo"},
+ {"tipo": "uguale", "sinistra": "(h*nu/(1+z))*(dN/((1+z)*dt))/(4*pi*chi**2)", "vale": "(h*nu*dN/dt)/((1+z)**2*4*pi*chi**2)", "dove": "03", "appare": "F=\\frac{L}{(1+z)^2\\,4\\pi\\chi_1^2}", "ipotesi": {"h": "positive", "nu": "positive", "z": "positive", "dN": "positive", "dt": "positive", "chi": "positive"}},
+ {"tipo": "uguale", "sinistra": "solve(Lum/(4*pi*D**2)-Lum/((1+z)**2*4*pi*chi**2),D)[0]", "vale": "chi*(1+z)", "dove": "03", "appare": "D_L=(1+z)\\,\\chi_1", "ipotesi": {"Lum": "positive", "D": "positive", "z": "positive", "chi": "positive"}},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta\\theta=\\Delta S/[\\chi_1(a_1/a_0)]", "perche": "angolo piccolo con la distanza propria all'emissione"},
+ {"tipo": "simbolico", "dove": "03", "appare": "D_A=\\chi_1\\frac{a_1}{a_0}=\\frac{\\chi_1}{1+z}", "perche": "definizione di D_A (lezione20_stampati p. 1)"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta\\theta=\\Delta S/D_A", "perche": "riscrittura"},
+ {"tipo": "uguale", "sinistra": "(chi*(1+z))/(1+z)**2", "vale": "chi/(1+z)", "dove": "03", "appare": "=\\frac{D_L}{(1+z)^2}", "ipotesi": {"chi": "positive", "z": "positive"}},
+ {"tipo": "uguale", "sinistra": "sqrt((chi/(1+z))*(chi*(1+z)))", "vale": "chi", "dove": "03", "appare": "media geometrica", "ipotesi": {"chi": "positive", "z": "positive"}},
+ {"tipo": "simbolico", "dove": "03", "appare": "D_{\\rm ltt}=c(t_0-t_1)=c\\int dt", "perche": "definizione del tempo di volo (lezione20_stampati p. 2)"},
+ {"tipo": "uguale", "sinistra": "integrate((1+x)**Rational(-3,2),(x,0,z))", "vale": "2*(1-1/sqrt(1+z))", "dove": "04", "appare": "=\\frac{2c}{H_0}\\left[1-\\frac{1}{\\sqrt{1+z}}\\right]", "ipotesi": {"z": "positive"}},
+ {"tipo": "uguale", "sinistra": "(1+z)*2*(1-1/sqrt(1+z))", "vale": "2*((1+z)-sqrt(1+z))", "dove": "04", "appare": "D_L=\\frac{2c}{H_0}\\left[(1+z)-\\sqrt{1+z}\\right]", "ipotesi": {"z": "positive"}},
+ {"tipo": "uguale", "sinistra": "2*(1-1/sqrt(1+z))/(1+z)", "vale": "2*(1/(1+z)-(1+z)**Rational(-3,2))", "dove": "04", "appare": "D_A=\\frac{2c}{H_0}\\left[\\frac{1}{1+z}-\\frac{1}{(1+z)^{3/2}}\\right]", "ipotesi": {"z": "positive"}},
+ {"tipo": "uguale", "sinistra": "solve(diff(1/x-x**Rational(-3,2),x),x)[0]", "vale": "Rational(9,4)", "dove": "04", "appare": "1+z=\\frac94", "ipotesi": {"x": "positive"}},
+ {"tipo": "uguale", "sinistra": "2*(Rational(4,9)-Rational(8,27))", "vale": "Rational(8,27)", "dove": "04", "appare": "=\\frac{8}{27}\\frac{c}{H_0}"},
+ {"tipo": "numero", "espr": "8/27*4282.75", "vale": "1269", "dove": "04", "appare": "=1269"},
+ {"tipo": "numero", "espr": "20/1268.96e3*206265", "vale": "3.25", "dove": "04", "appare": "3{,}25''"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1))", "vale": "0.7714", "dove": "04", "appare": "=0{,}7714"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1))*4282.75", "vale": "3304", "dove": "04", "appare": "=3304\\ \\mathrm{Mpc}"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1))*4282.75*2", "vale": "6608", "dove": "04", "appare": "D_L=6608"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1))*4282.75/2", "vale": "1652", "dove": "04", "appare": "D_A=1652"},
+ {"tipo": "numero", "espr": "2/(3*sqrt(0.7))*(asinh(sqrt(7/3.))-asinh(sqrt(7/3.)/2**1.5))*13.968", "vale": "7.72", "dove": "04", "appare": "=7{,}72"},
+ {"tipo": "numero", "espr": "2/(3*sqrt(0.7))*(asinh(sqrt(7/3.))-asinh(sqrt(7/3.)/2**1.5))*13.968*306.6", "vale": "2365", "dove": "04", "appare": "=2365"},
+ {"tipo": "uguale", "sinistra": "simplify(diff(2/(3*sqrt(Lm))*asinh(sqrt(Lm/M)*a**Rational(3,2)),a)-1/(a*sqrt(M/a**3+Lm)))", "vale": "0", "dove": "04", "appare": "\\mathrm{arcsinh}\\left[\\sqrt{\\frac{\\Omega_\\Lambda}{\\Omega_{M0}}}", "ipotesi": {"Lm": "positive", "M": "positive", "a": "positive"}},
+ {"tipo": "numero", "espr": "2/(3*sqrt(0.7))*asinh(sqrt(7/3.))*13.968", "vale": "13.47", "dove": "04", "appare": "t_0=13{,}47"},
+ {"tipo": "numero", "espr": "2/(3*sqrt(0.7))*asinh(sqrt(7/3.)/2**1.5)*13.968", "vale": "5.75", "dove": "04", "appare": "=5{,}75"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,3))*4282.75", "vale": "6356", "dove": "04", "appare": "\\chi=6356"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,3))*4282.75*4", "vale": "25423", "dove": "04", "appare": "D_L=25\\,423"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,3))*4282.75/4", "vale": "1589", "dove": "04", "appare": "D_A=1589"},
+ {"tipo": "numero", "espr": "(1+3)**2", "vale": "16", "dove": "04", "appare": "=(1+z)^2=16"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1.6))*4282.75/2.6", "vale": "1748", "dove": "04", "appare": "1748"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1100))*4.28275", "vale": "13.7", "dove": "04", "appare": "13{,}7"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1100))*4282.75/1101", "vale": "12.4", "dove": "04", "appare": "12{,}4"},
+ {"tipo": "numero", "espr": "1101**2/1e6", "vale": "1.2", "dove": "04", "appare": "1{,}2\\cdot10^6"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1100))*299792.458/72/1101", "vale": "12.08", "dove": "04", "appare": "12{,}08"},
+ {"tipo": "uguale", "sinistra": "integrate(1/sqrt(a),(a,a2,a1))", "vale": "2*(sqrt(a1)-sqrt(a2))", "dove": "05", "appare": "=\\frac{2c}{H_0\\sqrt{\\Omega_{M0}}}\\left[\\frac{1}{\\sqrt{1+z_1}}-\\frac{1}{\\sqrt{1+z_2}}\\right]", "ipotesi": {"a1": "positive", "a2": "positive"}},
+ {"tipo": "numero", "espr": "299792.458/72", "vale": "4164", "dove": "05", "appare": "c/H_0=4164"},
+ {"tipo": "numero", "espr": "2*4164/0.5477", "vale": "15205", "dove": "05", "appare": "=15\\,205"},
+ {"tipo": "numero", "espr": "2*299792.458/72/sqrt(0.3)*(1/sqrt(1001)-1/sqrt(1201))", "vale": "41.8", "dove": "05", "appare": "=41{,}8"},
+ {"tipo": "numero", "espr": "41.8/1101*1e3", "vale": "38.0", "dove": "05", "appare": "=38{,}0"},
+ {"tipo": "numero", "espr": "38.0/12.0e3*1e3", "vale": "3.17", "dove": "05", "appare": "3{,}17\\cdot10^{-3}"},
+ {"tipo": "numero", "espr": "38.0/12.0e3*180/pi*60", "vale": "10.9", "dove": "05", "appare": "10{,}9'"},
+ {"tipo": "numero", "espr": "1101*8.4e-5/0.3", "vale": "0.31", "dove": "05", "appare": "=0{,}31"},
+ {"tipo": "numero", "espr": "sqrt(1+1101*8.4e-5/0.3)-1", "vale": "0.14", "dove": "05", "appare": "14\\%"},
+ {"tipo": "uguale", "sinistra": "series(2*((1+z)-sqrt(1+z)),z,0,3).removeO()", "vale": "z+z**2/4", "dove": "06", "appare": "D_L=\\frac{cz}{H_0}\\left[1+\\frac12(1-q_0)z+\\dots\\right]"},
+ {"tipo": "numero", "espr": "428.27*(1+0.5*1.55*0.1)", "vale": "461.5", "dove": "06", "appare": "=461{,}5\\ \\mathrm{Mpc}"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,0.1))*4282.75*1.1", "vale": "460.3", "dove": "06", "appare": "460{,}3"},
+ {"tipo": "numero", "espr": "461.5/460.3-1", "vale": "0.003", "dove": "06", "appare": "0{,}3\\%"},
+ {"tipo": "numero", "espr": "460.3/428.3-1", "vale": "0.075", "dove": "06", "appare": "7{,}5\\%"},
+ {"tipo": "numero", "espr": "299792.458*0.1/70", "vale": "428.3", "dove": "06", "appare": "=428{,}3"},
+ {"tipo": "numero", "espr": "Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,0.5))*4282.75*1.5", "vale": "2833", "dove": "06", "appare": "D_L=2833"},
+ {"tipo": "numero", "espr": "2*4282.75*(1.5-sqrt(1.5))", "vale": "2358", "dove": "06", "appare": "=2358"},
+ {"tipo": "numero", "espr": "5*log(2833/2358,10)", "vale": "0.40", "dove": "06", "appare": "=0{,}40"},
+ {"tipo": "numero", "espr": "5*log(Integral(1/sqrt(0.3*(1+x)**3+0.7),(x,0,1))*2/(2*(2-sqrt(2))),10)", "vale": "0.60", "dove": "06", "appare": "0{,}60"},
+ {"tipo": "numero", "espr": "10**0.2", "vale": "1.58", "dove": "06", "appare": "=1{,}58"},
+ {"tipo": "numero", "espr": "0.3/2+0.6", "vale": "0.75", "dove": "06", "appare": "0{,}75"},
+ {"tipo": "numero", "espr": "5*log(0.625/(2*(1.5-sqrt(1.5))),10)", "vale": "0.28", "dove": "06", "appare": "0,28"},
+ {"tipo": "uguale", "sinistra": "solve(M/(2*a**2)-Lm*a,a)[0]", "vale": "(M/(2*Lm))**Rational(1,3)", "dove": "06", "appare": "a_{\\rm acc}=\\left(\\frac{\\Omega_{M0}}{2\\Omega_\\Lambda}\\right)^{1/3}", "ipotesi": {"M": "positive", "Lm": "positive", "a": "positive"}},
+ {"tipo": "numero", "espr": "(0.3/1.4)**(1/3.)", "vale": "0.598", "dove": "06", "appare": "=0{,}598"},
+ {"tipo": "numero", "espr": "1/(0.3/1.4)**(1/3.)-1", "vale": "0.67", "dove": "06", "appare": "z_{\\rm acc}=0{,}67"},
+ {"tipo": "numero", "espr": "13.968*2/(3*sqrt(0.7))*(asinh(sqrt(7/3.))-asinh(sqrt(7/3.)*(1.672)**-1.5))", "vale": "6", "dove": "06", "appare": "sei miliardi"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\int_{t_{\\rm em,f}}^{t_f}\\frac{c\\,dt}{a(t)}", "perche": "chi costante tra oggi e t_f (lezione23_2020 p. 8)"},
+ {"tipo": "simbolico", "dove": "07", "appare": "dt_{\\rm em}/dt_0=a(t_{\\rm em})/a(t_0)", "perche": "stesso intervallo comovente, come per le creste"},
+ {"tipo": "uguale", "sinistra": "H0*a0/ae-(a0*He*ae/ae**2)*(ae/a0)", "vale": "(a0/ae)*H0-He", "dove": "07", "appare": "\\frac{dz}{dt_0}=(1+z)H_0-H(z_{\\rm em})", "ipotesi": {"H0": "positive", "a0": "positive", "ae": "positive", "He": "positive"}},
+ {"tipo": "numero", "espr": "sqrt(0.3*8+0.7)", "vale": "1.761", "dove": "07", "appare": "=1{,}761\\,H_0"},
+ {"tipo": "numero", "espr": "2-sqrt(3.1)", "vale": "0.24", "dove": "07", "appare": "dz/dt_0=0{,}24\\,H_0"},
+ {"tipo": "numero", "espr": "(2-sqrt(3.1))*70/3.0857e19*3.156e8*1e10", "vale": "1.7", "dove": "07", "appare": "1{,}7\\cdot10^{-10}"},
+ {"tipo": "numero", "espr": "299792.458e5*(2-sqrt(3.1))*70/3.0857e19*3.156e8/2", "vale": "2.6", "dove": "07", "appare": "2{,}6"},
+ {"tipo": "uguale", "sinistra": "integrate(1/a**2,(a,1/(1+z),1))", "vale": "z", "dove": "07", "appare": "=(c/H_0)z", "ipotesi": {"z": "positive"}},
+ {"tipo": "numero", "espr": "70*3000/299792.458", "vale": "0.700", "dove": "07", "appare": "=0{,}700"},
+ {"tipo": "numero", "espr": "70/3.0857e19*1e18", "vale": "2.27", "dove": "07", "appare": "2{,}27\\cdot10^{-18}"},
+ {"tipo": "numero", "espr": "100e9*3.156e7/1e18", "vale": "3.16", "dove": "07", "appare": "3{,}16\\cdot10^{18}"},
+ {"tipo": "numero", "espr": "70/3.0857e19*100e9*3.156e7", "vale": "7.16", "dove": "07", "appare": "=7{,}16"},
+ {"tipo": "numero", "espr": "exp(70/3.0857e19*100e9*3.156e7)", "vale": "1286", "dove": "07", "appare": "=1286"},
+ {"tipo": "numero", "espr": "3*exp(70/3.0857e19*100e9*3.156e7)", "vale": "3859", "dove": "07", "appare": "=3859"},
+ {"tipo": "uguale", "sinistra": "integrate(exp(-x),(x,0,oo))", "vale": "1", "dove": "07", "appare": "=c/H_0=4{,}28"},
+ {"tipo": "numero", "espr": "299792.458/70/1e3", "vale": "4.28", "dove": "07", "appare": "4{,}28"},
+ {"tipo": "numero", "espr": "2/(3*70/3.0857e19)/3.156e16", "vale": "9.31", "dove": "07", "appare": "=9{,}31"},
+ {"tipo": "numero", "espr": "1-3000*70/(2*299792.458)", "vale": "0.6498", "dove": "07", "appare": "=0{,}6498"},
+ {"tipo": "numero", "espr": "1/(1-3000*70/(2*299792.458))**2-1", "vale": "1.369", "dove": "07", "appare": "z=1{,}369"},
+ {"tipo": "numero", "espr": "((9.31+100)/9.31)**(2/3.)", "vale": "5.17", "dove": "07", "appare": "=5{,}17"},
+ {"tipo": "numero", "espr": "3*5.17", "vale": "15.5", "dove": "07", "appare": "=15{,}5"},
+ {"tipo": "numero", "espr": "3859/15.5/100", "vale": "2.5", "dove": "07", "appare": "fattore 250"},
+ {"tipo": "uguale", "sinistra": "integrate(x**Rational(-2,3),(x,1,oo))", "vale": "oo", "dove": "07", "appare": "diverge"},
+ {"tipo": "numero", "espr": "exp(20/13.97)", "vale": "4.2", "dove": "07", "appare": "4,2"},
+ {"tipo": "numero", "espr": "((9.31+20)/9.31)**(2/3.)", "vale": "2.15", "dove": "07", "appare": "2,15"},
+ {"tipo": "numero", "espr": "299792.458/70", "vale": "4283", "dove": "04", "appare": "c/H_0=4283"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\Omega_{M0}/(2a^2)=\\Omega_\\Lambda a", "perche": "condizione a'' = 0 dall'equazione per l'accelerazione"},
+ {"tipo": "simbolico", "dove": "07", "appare": "1+z=a(t_0)/a(t_{\\rm em})", "perche": "redshift cosmologico ricavato alla tappa 01"},
+ {"tipo": "simbolico", "dove": "07", "appare": "(1+z)H_0=2H_0", "perche": "sostituzione z = 1"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\dot a/a=H_0a^{-3/2}", "perche": "Friedmann con Omega_M0 = 1"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\Delta t_0=\\Delta t_1/a(t_1)", "perche": "dilatazione cosmologica dei tempi (Marconi 4.1)"},
+ {"tipo": "numero", "espr": "1/(1+3)", "vale": "0.25", "dove": "01", "appare": "a(t)=1/4"},
+ {"tipo": "numero", "espr": "432.3/393", "vale": "1.1", "dove": "01", "appare": "=1{,}1"},
+ {"tipo": "numero", "espr": "436.7/397", "vale": "1.1", "dove": "01", "appare": "436,7 nm"},
+ {"tipo": "simbolico", "dove": "02", "appare": "r_n(t_2)/r_n(t_1)=\\alpha", "perche": "definizione di espansione uniforme"},
+ {"tipo": "simbolico", "dove": "02", "appare": "v_n=\\dot r_n=(\\dot\\alpha/\\alpha)\\,r_n", "perche": "derivata di r_n(t) = alpha(t) r_n(t1)"},
+ {"tipo": "numero", "espr": "15000/100", "vale": "150", "dove": "02", "appare": "=150\\,h^{-1}"},
+ {"tipo": "numero", "espr": "6.674e-8*1.6726e-24*9.109e-28/4.803e-10**2*1e40", "vale": "4.4", "dove": "02", "appare": "=4{,}4\\cdot10^{-40}"},
+ {"tipo": "numero", "espr": "6.674e-8*1.6726e-24**2/4.803e-10**2*1e37", "vale": "8.1", "dove": "02", "appare": "=8{,}1\\cdot10^{-37}"},
+ {"tipo": "numero", "espr": "sqrt(6.674e-8)*1.6726e-24/4.803e-10*1e19", "vale": "9.0", "dove": "02", "appare": "=9{,}0\\cdot10^{-19}"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\ddot r=\\frac43\\pi G\\rho\\,(\\mu^2-1)\\,r", "perche": "forza elettrica del mezzo carico (Gauss) meno gravita' (Masani p. 127)"},
+ {"tipo": "simbolico", "dove": "02", "appare": "v^2=2\\ddot r\\,r", "perche": "da v = a t e r = a t^2/2"},
+ {"tipo": "uguale", "sinistra": "sqrt(2*(Rational(4,3)*pi*G*rho*(mu**2-1)*r)*r)", "vale": "r*sqrt(Rational(8,3)*pi*G*rho*(mu**2-1))", "ipotesi": {"G": "positive", "rho": "positive", "r": "positive", "mu": "positive"}, "dove": "02", "appare": "v=r\\sqrt{\\tfrac{8}{3}\\pi G\\rho\\,(\\mu^2-1)}"},
+ {"tipo": "numero", "espr": "347-185", "vale": "162", "dove": "02", "appare": "347-185=162"},
+ {"tipo": "numero", "espr": "2.998e5*1.62/1420.4", "vale": "342", "dove": "02", "appare": "=342"},
+ {"tipo": "numero", "espr": "2.998e5*0.1/1420.4", "vale": "21", "dove": "02", "appare": "V_{sys}=21"},
+ {"tipo": "numero", "espr": "acos(26/38.)*180/pi", "vale": "47", "dove": "02", "appare": "circa 47°"},
+ {"tipo": "numero", "espr": "8.2e3*11/60*pi/180", "vale": "26", "dove": "02", "appare": "26 e 38 kpc"},
+ {"tipo": "numero", "espr": "8.2e3*16/60*pi/180", "vale": "38", "dove": "02", "appare": "e 38 kpc"},
+ {"tipo": "numero", "espr": "2.998e5*1.62/1420.4/2/sin(acos(26.2/38.2))", "vale": "235", "dove": "02", "appare": "=235"},
+ {"tipo": "numero", "espr": "(235e3)**2*19*3.086e19/6.674e-11/1.989e30/1e11", "vale": "2.4", "dove": "02", "appare": "=2{,}4\\cdot10^{11}"},
+ {"tipo": "numero", "espr": "70*8.2", "vale": "574", "dove": "02", "appare": "=574"},
+ {"tipo": "numero", "espr": "21-574", "vale": "-553", "dove": "02", "appare": "circa $-550"},
+ {"tipo": "integrale", "espr": "t**(Rational(2,3))*c*x**(-Rational(2,3))", "var": "x", "da": "0", "a": "t", "vale": "3*c*t", "ipotesi": {"c": "positive", "t": "positive", "x": "positive"}, "dove": "07", "appare": "=3ct"},
+ {"tipo": "simbolico", "dove": "07", "appare": "R_H(t)=a(t)\\int_0^t c\\,dt'/a(t')", "perche": "definizione dell'orizzonte delle particelle in distanza propria"},
+ {"tipo": "numero", "espr": "(2/3.)*3", "vale": "2", "dove": "07", "appare": "=2c"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché questo movimento: l’errore che l’esame cerca', meta:'il redshift non è un Doppler · tre distanze che non coincidono · un universo che accelera',
+  blocchi:[
+  {t:'prosa', title:'Una sola relazione, molte conseguenze', tag:'architettura', html:R`
+  <p>La legge di Hubble empirica, $cz=H_0D$, nasce da misure di galassie vicine, dove $z$ è piccolo e la lettura «velocità di allontanamento» sembra innocua. Ma a $z>1$ quella lettura dà velocità maggiori della luce, e la sua versione relativistica chiede energie cinetiche che non esistono. De Bernardis, nella lezione 17 del 2020, risolve il problema con una frase: <i>«il fenomeno si spiega grazie alla relatività generale, e la soluzione è molto semplice: le lunghezze d&rsquo;onda si allungano perché il nostro universo si espande»</i>. Il Marconi aggiunge la conseguenza: <i>«l&rsquo;interpretazione di z come velocità di recessione è fuorviante. Le galassie non stanno allontanandosi da noi, è l&rsquo;Universo che si sta espandendo!»</i>.</p>
+  <p>Questo movimento trasforma quella frase in una relazione esatta,</p>
+  <p>$$1+z=\frac{a(t_{\rm oss})}{a(t_{\rm em})},$$</p>
+  <p>e ne tira tutte le conseguenze che l&rsquo;esame chiede. La prima è che «la distanza» di una galassia lontana non è una sola: la distanza comovente, quella di luminosità e quella di diametro angolare differiscono per potenze di $1+z$, coincidono a piccolo redshift e divergono di un fattore un milione al fondo cosmico. La mappa del corso lo segnala come il punto dove si sbaglia sempre, perché le prove le mescolano apposta. La seconda è il diagramma di Hubble: a piccolo $z$ è una retta di pendenza $H_0$; la sua curvatura misura il parametro di decelerazione $q_0$, e le supernovae Ia ad alto redshift hanno trovato $q_0\lt 0$, un universo che accelera. La terza è che il redshift di una sorgente data cambia nel tempo, e il segno del cambiamento dice se l&rsquo;espansione accelera o decelera.</p>
+  <p>Gli strumenti di calcolo sono pochi: la <span class="str" data-str="magnitudine">magnitudine</span> e il modulo di distanza, l&rsquo;<span class="str" data-str="angolo-piccolo">approssimazione di angolo piccolo</span> per i diametri angolari, gli <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span> cosmologici ($c/H_0\approx4{,}3$ Gpc, $1/H_0\approx14$ miliardi di anni) e il <span class="str" data-str="parsec-e-parallasse">parsec</span> come unità di base. Il resto sono integrali in $z$, che in un caso si fanno a mano e negli altri si fanno numericamente.</p>`}
+]},
+
+/* ---------------- 01 · IL REDSHIFT DAL FATTORE DI SCALA ---------------- */
+{ num:'01', title:'Il redshift dal fattore di scala: due creste nella metrica', meta:'un raggio nullo · la coordinata comovente non cambia · 1 + z = a₀/a₁ · tempo dilatato e corpo nero che si raffredda',
+  blocchi:[
+  {t:'prosa', title:'La derivazione della lezione', tag:'la catena', html:R`
+  <p>Il punto di partenza è la metrica di Robertson-Walker, con $\chi$ coordinata comovente, $a(t)$ fattore di scala normalizzato ad $a(t_0)=1$ oggi e $k$ costante di curvatura:</p>
+  <p>$$ds^2=c^2dt^2-a(t)^2\left[\frac{d\chi^2}{1-k\chi^2}+\chi^2\left(d\theta^2+\sin^2\theta\,d\phi^2\right)\right].$$</p>
+  <p>Le lezioni di de Bernardis, la 17 del 2020 e la 18 del 2017, seguono la stessa catena. Si consideri una sorgente a coordinata comovente $\chi_1$ e noi nell&rsquo;origine. I fotoni si propagano radialmente verso di noi, $d\theta=d\phi=0$, e la luce viaggia su un raggio nullo, $ds=0$; quindi</p>
+  <p>$$\frac{c\,dt}{a(t)}=\frac{d\chi}{\sqrt{1-k\chi^2}},\qquad\int_{t_1}^{t_0}\frac{c\,dt}{a(t)}=\int_0^{\chi_1}\frac{d\chi}{\sqrt{1-k\chi^2}} .$$</p>
+  <p>Il membro di destra dipende solo dalla posizione comovente della sorgente, che per definizione non cambia. Supponiamo che una cresta dell&rsquo;onda sia emessa a $t_1$ e ricevuta a $t_0$, e la successiva sia emessa a $t_1+\lambda_1/c$ e ricevuta a $t_0+\lambda_0/c$. <i>«A priori non è detto che il periodo dell&rsquo;onda resti uguale»</i>: è proprio quello che si vuole calcolare. Siccome $\chi_1$ è la stessa per le due creste,</p>
+  <p>$$\int_{t_1}^{t_0}\frac{c\,dt}{a(t)}=\int_{t_1+\lambda_1/c}^{t_0+\lambda_0/c}\frac{c\,dt}{a(t)} .$$</p>
+  <p>Togliendo da entrambi i membri l&rsquo;integrale da $t_1+\lambda_1/c$ a $t_0$ (è la regola $A+B=B+C\Rightarrow A=C$ che de Bernardis disegna con tre segmenti), resta</p>
+  <p>$$\int_{t_1}^{t_1+\lambda_1/c}\frac{c\,dt}{a(t)}=\int_{t_0}^{t_0+\lambda_0/c}\frac{c\,dt}{a(t)} .$$</p>
+  <p>I due intervalli sono lunghi un periodo dell&rsquo;onda, $\lambda/c\sim10^{-15}$ s per la luce visibile, contro un tempo di variazione di $a(t)$ dell&rsquo;ordine di $1/H_0\sim10^{17}$ s: dentro ciascun integrale $a$ è costante. Allora $\lambda_1/a(t_1)=\lambda_0/a(t_0)$, cioè</p>
+  <p>$$\frac{\lambda_0}{\lambda_1}=\frac{a(t_0)}{a(t_1)}=1+z .$$</p>
+  <p>È il risultato centrale: <i>«la lunghezza d&rsquo;onda dei fotoni che si propagano in un universo in espansione si allunga nello stesso modo delle distanze cosmologiche»</i>. Non c&rsquo;è velocità nella formula, c&rsquo;è il rapporto tra le dimensioni dell&rsquo;universo all&rsquo;arrivo e alla partenza. Se l&rsquo;osservazione avviene oggi, $1+z=1/a(t_{\rm em})$, come scrivono gli esercizi della lezione 23. Siccome l&rsquo;universo si espande, $a(t_{\rm em})\lt 1$ e il redshift cosmologico è sempre positivo; il fondo cosmico a microonde ha $z=1100$, quindi è stato emesso quando l&rsquo;universo era</p>
+  <p>$$a=\frac{1}{1+1100}=9{,}08\cdot10^{-4}$$</p>
+  <p>volte quello di oggi.</p>`},
+  {t:'prosa', title:'Perché non è un Doppler, e perché a piccolo z sembra esserlo', tag:'la distinzione', html:R`
+  <p>Il Doppler è un effetto locale: dipende dalla velocità relativa di sorgente e osservatore all&rsquo;istante dell&rsquo;emissione, e la luce poi viaggia in uno spazio statico. Il redshift cosmologico è cumulativo: la lunghezza d&rsquo;onda si allunga durante tutto il viaggio, ed è la storia di $a(t)$ tra $t_1$ e $t_0$ che conta. Due sorgenti con la stessa «velocità di recessione» all&rsquo;emissione ma osservate dopo tempi diversi avrebbero redshift diversi. E nessuna galassia si muove rispetto al proprio intorno: tutte stanno ferme nelle loro coordinate comoventi, ed è la metrica a cambiare.</p>
+  <p>A piccolo redshift le due letture coincidono, ed è per questo che la legge di Hubble fu scoperta come legge di velocità. Se $t_0-t_1$ è piccolo, $a(t_1)\approx a(t_0)-\dot a(t_0)(t_0-t_1)$, e con $H_0=\dot a/a$ oggi, $1+z\approx1/(1-H_0\Delta t)\approx1+H_0\Delta t$. La luce ha percorso $D=c\Delta t$, quindi</p>
+  <p>$$z\approx H_0\Delta t=\frac{H_0D}{c},$$</p>
+  <p>cioè $cz=H_0D$: la legge empirica. È la versione al primo ordine; i termini successivi dipendono da come $\dot a$ cambia nel tempo, e sono quelli che il diagramma di Hubble ad alto $z$ misura.</p>`},
+  {t:'prosa', title:'Due conseguenze immediate: orologi lenti e corpi neri freddi', tag:'oltre la lunghezza d’onda', html:R`
+  <p>Lo stesso argomento vale per qualunque intervallo di tempo, non solo per il periodo dell&rsquo;onda: due eventi separati da $dt_1$ alla sorgente arrivano separati da</p>
+  <p>$$dt_0=(1+z)\,dt_1 .$$</p>
+  <p>Una supernova Ia a $z=1$ che alla sorgente cala in venti giorni si vede calare in quaranta: la dilatazione temporale delle curve di luce delle supernovae lontane è stata misurata, ed è una delle prove dirette che il redshift è cosmologico e non un effetto di «luce stanca».</p>
+  <p>La seconda conseguenza è per la radiazione. De Bernardis, nella lezione 19 del 2017, la ricava per un corpo nero: la densità di energia per intervallo di lunghezza d&rsquo;onda è $u_\lambda=(8\pi hc/\lambda^5)/(e^{hc/\lambda kT}-1)$; l&rsquo;espansione diluisce il numero di fotoni come $a^{-3}$ e ne riduce l&rsquo;energia di ciascuno come $a^{-1}$, quindi la densità di energia va come $a^{-4}$, mentre ogni lunghezza d&rsquo;onda va come $a$. Sostituendo $\lambda=\lambda_0 a/a_0$ si trova che lo spettro resta di corpo nero, con temperatura</p>
+  <p>$$T=T_0\frac{a_0}{a}=T_0(1+z),$$</p>
+  <p>perché $\lambda T$ deve restare costante nell&rsquo;esponente. <i>«Uno spettro di corpo nero rimane uno spettro di corpo nero, ma varia la sua temperatura come l&rsquo;inverso del fattore di scala»</i>. Con $T_0=2{,}725$ K oggi, a $z=1100$ il fondo aveva $2{,}725\cdot1101=3000$ K, la temperatura a cui l&rsquo;idrogeno si ricombina.</p>`},
+  {t:'reveal', title:'Esempio 1 della lezione 23: il redshift di un quasar', tag:'svolto', steps:[
+   {label:'Il problema', body:R`<p>Lo spettro di un QSO mostra due righe di emissione intense. Le lunghezze d&rsquo;onda di riposo delle righe più comuni sono: Ly$\alpha$ 1215,67 Å, CIV 1545,86, CIII] 1908,27, MgII 2800,32, H$\gamma$ 4341,68, H$\beta$ 4862,68, H$\alpha$ 6564,61 Å. Si ricavi il redshift.</p>`},
+   {label:'Leggere lo spettro', body:R`<p>Con un righello si trova che 100 nm corrispondono a 21 mm, e le due righe più intense cadono a 910 nm e 675 nm. Il loro rapporto è $910/675=1{,}35$.</p>`},
+   {label:'Perché il rapporto', body:R`<p>Il redshift cosmologico moltiplica tutte le lunghezze d&rsquo;onda della stessa sorgente per lo stesso fattore $1+z$, quindi non cambia i rapporti. Nella tabella, H$\alpha$ e H$\beta$ hanno rapporto $656{,}461/486{,}268=1{,}35$: è la coppia giusta. Nessun&rsquo;altra coppia della tabella dà 1,35.</p>`},
+   {label:'Il redshift', body:R`<p>$1+z=910/656{,}461=1{,}386$, quindi $z=0{,}386$; con H$\beta$: $675/486{,}268=1{,}388$, $z=0{,}388$. Le due stime concordano entro la precisione del righello, e la media $z\approx0{,}39$ è la risposta.</p>`},
+   {label:'La lezione del metodo', body:R`<p>Il riconoscimento delle righe è il vero problema, non il conto: per galassie lontane poche righe cadono nella banda dello spettrometro e il rapporto segnale-rumore è basso. Il criterio che decide è che un solo $z$ deve spiegare tutte le righe viste.</p>`}
+  ]},
+  {t:'prosa', title:'Il redshift misura un fattore di scala, e anche un orologio', tag:'Marconi, cap. 4.1, pp. 45-47', html:R`
+  <p>Marconi ricava $1+z=1/a(t_1)$ con lo stesso argomento delle due creste, applicato all&rsquo;inizio e alla fine di un pacchetto d&rsquo;onda: se il pacchetto parte fra $t_1$ e $t_1+\Delta t_1$ e arriva fra $t_0$ e $t_0+\Delta t_0$, la distanza comovente percorsa è la stessa, e quindi $\Delta t_0=\Delta t_1/a(t_1)$. È <i>«l&rsquo;espressione cosmologica del fenomeno della dilatazione dei tempi»</i>: tutto ciò che accade in una galassia lontana, non solo l&rsquo;oscillazione di un&rsquo;onda, si vede rallentato dello stesso fattore. Il redshift dice quindi che cosa era l&rsquo;universo, non quando: <i>«osservare una galassia a $z=3$ significa osservarla quando l&rsquo;universo aveva $a(t)=1/4$»</i>, e le distanze fra gli osservatori fondamentali erano quattro volte più piccole. Ma, avverte Marconi, la conoscenza di $z$ porta a conoscere $a$ e non il tempo $t$ a cui corrisponde; per quello serve un modello.</p>
+  <p>Nella pratica, il redshift si riconosce da righe note. De Bernardis dà le lunghezze d&rsquo;onda di riposo da cercare: 393 e 397 nm del Ca II, 410, 434, 486 e 656 nm dell&rsquo;idrogeno, 518 nm del Mg I, 589 nm del Na I. Se una galassia mostra le righe H e K del calcio a 432,3 e 436,7 nm, entrambe danno lo stesso $1+z=432{,}3/393=1{,}1$: un solo $z$ deve spostare tutte le righe dello stesso fattore, ed è questo che distingue un redshift da una coincidenza.</p>`}
+]},
+
+/* ---------------- 02 · H(t), q₀ E LA LEGGE DI HUBBLE ---------------- */
+{ num:'02', title:'Dal fattore di scala alla legge di Hubble: H, q₀ e l’equazione di Friedmann', meta:'H = ȧ/a · lo sviluppo di a(t) intorno a oggi · q₀ = Ω_M/2 + Ω_R − Ω_Λ · velocità di recessione e sfera di Hubble',
+  blocchi:[
+  {t:'prosa', title:'Lo sviluppo di a(t)', tag:'cinematica', html:R`
+  <p>Per tradurre un redshift in una distanza serve sapere come è cambiato $a(t)$. De Bernardis comincia la lezione 19 del 2017 dalla cinematica pura, senza dinamica: si sviluppa $a(t)$ in serie intorno a oggi,</p>
+  <p>$$a(t)=a_0\left[1+H_0(t-t_0)-\frac12q_0H_0^2(t-t_0)^2+\dots\right],$$</p>
+  <p>con il tasso di espansione $H_0=(\dot a/a)_0$ e il <b>parametro di decelerazione</b></p>
+  <p>$$q_0=-\frac{\ddot a_0a_0}{\dot a_0^2} .$$</p>
+  <p>Il segno meno è storico: si pensava che l&rsquo;espansione rallentasse, e si voleva un numero positivo. <i>«Quindi $q_0$ descrive le deviazioni dalla linearità nell&rsquo;espansione in funzione del tempo, nell&rsquo;intorno di oggi. Ma è anche un parametro importante nel diagramma di Hubble, che lega due osservabili cosmologiche: distanza e redshift»</i>.</p>`},
+  {t:'prosa', title:'Che cosa determina q₀', tag:'dinamica', html:R`
+  <p>La dinamica entra con l&rsquo;equazione di Friedmann. De Bernardis la scrive nella forma generale, sommando le componenti di massa-energia ciascuna con la sua legge di diluizione, in unità della densità critica di oggi: radiazione come $a^{-4}$, materia non relativistica come $a^{-3}$, costante cosmologica costante, e la curvatura come un termine in $a^{-2}$:</p>
+  <p>$$\left(\frac{\dot a}{a}\right)^2=H_0^2\left[\frac{\Omega_{R0}}{a^4}+\frac{\Omega_{M0}}{a^3}+\frac{1-\Omega_0}{a^2}+\Omega_\Lambda\right],$$</p>
+  <p>con $\Omega_0=\Omega_{R0}+\Omega_{M0}+\Omega_\Lambda$. La lezione la moltiplica per $a^2$ e la deriva rispetto al tempo per avere l&rsquo;accelerazione. Con $u=\dot a^2=H_0^2[\Omega_{R0}a^{-2}+\Omega_{M0}a^{-1}+(1-\Omega_0)+\Omega_\Lambda a^2]$, si ha $2\dot a\ddot a=(du/da)\dot a$, cioè</p>
+  <p>$$\ddot a=\frac12\frac{du}{da}=H_0^2\left[-\frac{\Omega_{R0}}{a^3}-\frac{\Omega_{M0}}{2a^2}+\Omega_\Lambda a\right].$$</p>
+  <p>Materia e radiazione danno contributi negativi, la costante cosmologica positivo: <i>«materia e radiazione tendono a decelerare l&rsquo;espansione, invece la componente di costante cosmologica tende ad accelerarla»</i>. Il termine di curvatura non compare: non accelera né frena. Valutando oggi, con $a_0=1$ e $\dot a_0=H_0$, la definizione di $q_0$ dà</p>
+  <p>$$q_0=-\frac{\ddot a_0}{H_0^2}=\Omega_{R0}+\frac{\Omega_{M0}}{2}-\Omega_\Lambda .$$</p>
+  <p>Per un universo di sola materia critica, $q_0=1/2$; per l&rsquo;universo vuoto, $q_0=0$, espansione a velocità costante; con i valori di oggi, $\Omega_{M0}=0{,}3$, $\Omega_\Lambda=0{,}7$ e la radiazione trascurabile,</p>
+  <p>$$q_0=\frac{0{,}3}{2}-0{,}7=-0{,}55,$$</p>
+  <p>negativo: l&rsquo;espansione oggi accelera.</p>`},
+  {t:'prosa', title:'Velocità di recessione e sfera di Hubble', tag:'una trappola', html:R`
+  <p>La distanza propria oggi di una galassia a coordinata comovente $\chi$ è $D=a\chi$, e cresce con tasso $\dot D=\dot a\chi=HD$: la legge di Hubble vale esattamente per le distanze proprie, a ogni distanza, come diceva l&rsquo;argomento dell&rsquo;espansione uniforme. Questa «velocità di recessione» supera $c$ oltre la <b>sfera di Hubble</b>,</p>
+  <p>$$D_H=\frac{c}{H_0}=\frac{299\,792\ \mathrm{km/s}}{70\ \mathrm{km/s/Mpc}}=4283\ \mathrm{Mpc},$$</p>
+  <p>e non c&rsquo;è contraddizione con la relatività, perché non è il moto di qualcosa attraverso lo spazio e non trasporta segnali. Il Marconi è esplicito: la relazione <i>«deve essere vera anche quando $v\gt c$»</i>. Si vedono galassie la cui distanza propria cresce più veloce della luce: oggi lo fanno tutte quelle con $z\gtrsim1{,}5$ in Lambda-CDM. La loro luce ci raggiunge lo stesso perché la sfera di Hubble si è allargata nel tempo e ha raggiunto i fotoni che inizialmente perdevano terreno. Il tempo di Hubble, $1/H_0=13{,}97$ miliardi di anni, è l&rsquo;età che l&rsquo;universo avrebbe se si fosse sempre espanso alla velocità di oggi.</p>`},
+  {t:'prosa', title:'Perché v ∝ r, e perché la Terra non si allontana dal Sole', tag:'Marconi, cap. 2.3 e 3.3, pp. 22-25 e 43-44', html:R`
+  <p>Hubble scoprì la relazione nel 1929 (de Bernardis scrive 1930), e oggi la sua versione moderna usa le galassie più brillanti degli ammassi, che hanno tutte circa la stessa luminosità. Marconi spiega perché una relazione lineare è l&rsquo;unica compatibile con un universo omogeneo: <i>«espansione uniforme»</i> vuol dire che tutte le distanze crescono dello stesso fattore, $r_n(t_2)/r_n(t_1)=\alpha$ per ogni galassia $n$, e allora $v_n=\dot r_n=(\dot\alpha/\alpha)\,r_n$, la stessa costante per tutte. L&rsquo;argomento non dipende dalla distanza, e quindi vale anche dove $v\gt c$. Con questo strumento la survey del CfA, il primo campione completo di oltre 14 000 galassie brillanti, con velocità di recessione fino a 15 000 km/s, cioè distanze fino a $15\,000/100=150\,h^{-1}$ Mpc, ha mostrato la struttura a spugna dei vuoti e dei filamenti, con vuoti fino a circa $50\,h^{-1}$ Mpc.</p>
+  <p>Marconi aggiunge il limite della legge, che un orale chiede spesso: la metrica dell&rsquo;universo in espansione vale <i>«solo sulle scale su cui la CMB e la distribuzione delle galassie sono uniformi»</i>. Vicino a una stella la metrica è quella di Schwarzschild, e la gravità locale domina: <i>«una galassia è tenuta insieme dalla sua gravità, pertanto non si espande. Allo stesso modo la distanza Terra-Sole non varia, il metro campione non si espande e l&rsquo;atomo non si espande»</i>.</p>`},
+  {t:'prosa', title:'Un&rsquo;espansione elettrica? L&rsquo;ipotesi che gli esperimenti hanno escluso', tag:'Masani, cap. 9, pp. 125-128', html:R`
+  <p>Masani racconta un tentativo di spiegare la legge di Hubble senza relatività generale, che vale la pena conoscere per capire quanto sia stretta la neutralità della materia. La gravità è incomparabilmente più debole dell&rsquo;elettricità: fra un protone e un elettrone il rapporto fra forza gravitazionale ed elettrica è $Gm_pm_e/e^2=4{,}4\cdot10^{-40}$ (Masani scrive l&rsquo;ordine di grandezza, $10^{-39}$), fra due protoni $Gm_p^2/e^2=8{,}1\cdot10^{-37}$. Se la carica del protone e quella dell&rsquo;elettrone differissero di una frazione $y$, ogni atomo di idrogeno avrebbe carica $ye$, e la repulsione elettrica fra due atomi supererebbe l&rsquo;attrazione gravitazionale non appena</p>
+  <p>$$y\gt\frac{\sqrt G\,m_p}{e}=9{,}0\cdot10^{-19}:$$</p>
+  <p>le stelle esistono solo se le due cariche coincidono fino alla diciottesima cifra decimale. L&rsquo;idea (di Lyttleton e Bondi, 1959) era di sfruttare proprio un $y$ di quell&rsquo;ordine. In un mezzo uniforme di densità $\rho$ la densità di carica è $\rho ye/m_p$, e su un atomo a distanza $r$ agisce una forza netta proporzionale a $r$, cioè un&rsquo;accelerazione $\ddot r=\frac43\pi G\rho\,(\mu^2-1)\,r$ con $\mu=ye/(\sqrt Gm_p)$. Partendo da fermo, con $v=at$ e $r=at^2/2$, si ha $v^2=2\ddot r\,r$, e quindi</p>
+  <p>$$v=r\sqrt{\tfrac{8}{3}\pi G\rho\,(\mu^2-1)} :$$</p>
+  <p>una legge di Hubble, con al posto di $H^2$ esattamente la combinazione $\frac83\pi G\rho$ dell&rsquo;equazione di Friedmann. Uguagliando la radice alla costante di Hubble, $\mu$ risulta di qualche unità, cioè $y\sim10^{-18}$. Gli esperimenti di King e di Hillas e Cranshaw (1960) fecero diffondere un gas fra le armature di un condensatore: se gli atomi avessero avuto una carica netta, si sarebbe vista una differenza di potenziale, e non se ne vide nessuna, con il limite $y\lt10^{-20}$. Il fattore cento esclude l&rsquo;ipotesi: <i>«le cariche elettriche elementari positiva e negativa coincidono a tutti gli effetti fisici cosmici almeno entro la ventesima cifra decimale»</i>, e l&rsquo;espansione non è elettrica.</p>`},
+  {t:'prosa', title:'Un esercizio di de Bernardis: la riga a 21 cm di una galassia vicina', tag:'de Bernardis, slide 2016, esercizio', html:R`
+  <p>La legge di Hubble descrive il flusso medio, non ogni galassia. De Bernardis propone il profilo della riga a 21 cm di una galassia a spirale a 8,2 Mpc, misurato con uno spettrometro in cui ogni unità dell&rsquo;asse vale 10 kHz e 1420,4 MHz cade all&rsquo;ascissa 256. La larghezza a metà altezza è di $347-185=162$ unità, cioè 1,62 MHz, e con l&rsquo;effetto Doppler $\Delta v=c\,\Delta\nu/\nu=342$ km/s. Il centro del profilo è all&rsquo;ascissa 266, 100 kHz dallo zero, cioè $V_{sys}=21$ km/s. L&rsquo;immagine della galassia sta in un&rsquo;ellisse di 11′×16′, cioè diametri di 26 e 38 kpc a quella distanza: il disco è inclinato di $\arccos(26/38)$, circa 47°, la velocità di rotazione vera è $(342/2)/\sin i=235$ km/s, e la massa entro il raggio di 19 kpc è $v^2R/G=2{,}4\cdot10^{11}\,M_\odot$.</p>
+  <p>Il numero da guardare è $V_{sys}$. A 8,2 Mpc il flusso di Hubble darebbe $70\cdot8{,}2=574$ km/s; se la galassia si allontana a 21 km/s, il suo moto peculiare è di circa $-550$ km/s, oppure i dati dell&rsquo;esercizio sono idealizzati, e la soluzione non lo discute. Comunque sia, a 8 Mpc i moti peculiari di qualche centinaio di km/s sono dello stesso ordine del flusso di Hubble, ed è per questo che la costante si misura su galassie molto più lontane.</p>`}
+]},
+
+/* ---------------- 03 · LE TRE DISTANZE ---------------- */
+{ num:'03', title:'Le tre distanze: comovente, di luminosità, di diametro angolare', meta:'χ = ∫c dz/H · D_L = (1+z)χ · D_A = χ/(1+z) · D_L = (1+z)² D_A · e la quarta, il tempo di volo',
+  blocchi:[
+  {t:'prosa', title:'La distanza comovente', tag:'la base', html:R`
+  <p>Tutte le distanze cosmologiche si costruiscono sulla stessa quantità, la coordinata comovente della sorgente. Dalla tappa precedente, per un raggio radiale, $c\,dt=a\,d\chi$ in un universo piatto. Gli esercizi della lezione 23 scrivono la trasformazione da tempo a fattore di scala: $dt=da/\dot a$, quindi</p>
+  <p>$$\chi=\int_{t_{\rm em}}^{t_0}\frac{c\,dt}{a(t)}=\int_{1/(1+z)}^{1}\frac{c\,da}{a\dot a} .$$</p>
+  <p>Con $a=1/(1+z)$, $da=-dz/(1+z)^2$ e $\dot a/a=H(z)$, l&rsquo;integrale diventa quello che si usa nei conti,</p>
+  <p>$$\chi(z)=\int_0^z\frac{c\,dz'}{H(z')},\qquad H(z)=H_0\sqrt{\Omega_{R0}(1+z)^4+\Omega_{M0}(1+z)^3+(1-\Omega_0)(1+z)^2+\Omega_\Lambda} .$$</p>
+  <p>La distanza comovente è la distanza propria <i>oggi</i> tra noi e la sorgente, misurata con un righello ideale steso istantaneamente; non è osservabile direttamente, ma è quella che resta costante mentre l&rsquo;universo si espande. Per un universo curvo la geometria aggiunge una trasformazione: la quantità che entra nelle aree e negli angoli è $S_k(\chi)=\sin(\sqrt k\chi)/\sqrt k$ per $k\gt 0$, $\chi$ per $k=0$, $\sinh(\sqrt{|k|}\chi)/\sqrt{|k|}$ per $k\lt 0$, con $k=(H_0/c)^2(\Omega_0-1)$, come nelle slide 11-12 della lezione 19 di de Bernardis. Nel seguito, salvo avviso, $k=0$ e $S_k(\chi)=\chi$.</p>`},
+  {t:'prosa', title:'La distanza di luminosità: due fattori 1+z', tag:'la derivazione', html:R`
+  <p>De Bernardis, nella lezione 19, deriva la distanza di luminosità contando fotoni. Una sorgente in $\chi_1$ ha luminosità $L=h\nu_1\,dN/dt_1$: emette $dN$ fotoni di energia $h\nu_1$ nel tempo $dt_1$. Oggi quei fotoni sono distribuiti su una sfera centrata nella sorgente che passa per noi, di area $A=4\pi\chi_1^2$ (con $a_0=1$). Il flusso che riceviamo è energia per unità di tempo e di area,</p>
+  <p>$$F=\frac{h\nu_0\,dN/dt_0}{4\pi\chi_1^2} .$$</p>
+  <p>Due fattori cambiano rispetto allo spazio statico. Il primo: ogni fotone arriva con energia ridotta, $h\nu_0=h\nu_1/(1+z)$. Il secondo: i fotoni arrivano più radi nel tempo, $dt_0=(1+z)dt_1$. Quindi</p>
+  <p>$$F=\frac{L}{(1+z)^2\,4\pi\chi_1^2},$$</p>
+  <p>e definendo, come nello spazio euclideo, $F=L/4\pi D_L^2$, si trova</p>
+  <p>$$D_L=(1+z)\,\chi_1 .$$</p>
+  <p>Il fattore $(1+z)$ in $D_L$ diventa $(1+z)^2$ nel flusso: <i>un</i> fattore dalla diluizione dell&rsquo;energia dei fotoni, <i>uno</i> dal tempo dilatato. È la frase che la mappa del corso chiede all&rsquo;orale, e va detta così.</p>`},
+  {t:'prosa', title:'La distanza di diametro angolare, e il legame tra le due', tag:'Etherington', html:R`
+  <p>De Bernardis, negli stampati della lezione 20, definisce la terza. Quando oggi guardiamo una sorgente lontana, la vediamo com&rsquo;era all&rsquo;epoca $t_1$ della partenza della luce. Se la sua dimensione fisica allora era $\Delta S$, la distanza propria tra noi e lei <i>in quel momento</i> era $\chi_1a_1/a_0$, e la sua dimensione angolare apparente è $\Delta\theta=\Delta S/[\chi_1(a_1/a_0)]$. Si definisce</p>
+  <p>$$D_A=\chi_1\frac{a_1}{a_0}=\frac{\chi_1}{1+z},$$</p>
+  <p>così che $\Delta\theta=\Delta S/D_A$, come nello spazio euclideo con un&rsquo;<span class="str" data-str="angolo-piccolo">angolo piccolo</span>. La relazione con la distanza di luminosità è immediata:</p>
+  <p>$$D_A=\frac{D_L}{(1+z)}\cdot\frac{a_1}{a_0}=\frac{D_L}{(1+z)^2} .$$</p>
+  <p>È la relazione di dualità delle distanze, o di Etherington: vale in qualunque metrica in cui i fotoni si conservano, indipendentemente da $\Omega$ e da $H_0$. Le tre distanze in ordine, per ogni $z\gt 0$: $D_A\lt \chi\lt D_L$, con $\chi$ media geometrica delle altre due.</p>
+  <p>Gli stampati della lezione 20 aggiungono una quarta grandezza con le dimensioni di una distanza, il <i>tempo di volo</i> per $c$, $D_{\rm ltt}=c(t_0-t_1)=c\int dt$: è quella che i giornali chiamano «la galassia dista 10 miliardi di anni luce». Non è nessuna delle tre: è il tempo di viaggio della luce, senza correzione per l&rsquo;espansione avvenuta durante il viaggio. <i>«Le tre figure sono diverse, quindi si potrebbe pensare di stabilire il modello osservando ad es. le dimensioni angolari di sorgenti a diversi z ma tutte appartenenti a una classe ben precisa»</i>: è il test cosmologico con i righelli standard, analogo a quello con le candele.</p>`}
+]},
+
+/* ---------------- 04 · DUE UNIVERSI, CON I NUMERI ---------------- */
+{ num:'04', title:'Quanto divergono: Einstein-de Sitter a mano, Lambda-CDM al calcolatore', meta:'χ = (2c/H₀)(1 − 1/√(1+z)) · il massimo di D_A a z = 5/4 · Lambda-CDM fino a z = 1100',
+  blocchi:[
+  {t:'prosa', title:'Einstein-de Sitter: tutto analitico', tag:'il caso che si fa all’esame', html:R`
+  <p>Un universo piatto di sola materia, $\Omega_{M0}=1$, ha $H(z)=H_0(1+z)^{3/2}$, e l&rsquo;integrale della distanza comovente si fa a mano:</p>
+  <p>$$\chi(z)=\frac{c}{H_0}\int_0^z\frac{dz'}{(1+z')^{3/2}}=\frac{2c}{H_0}\left[1-\frac{1}{\sqrt{1+z}}\right].$$</p>
+  <p>Da qui le altre due:</p>
+  <p>$$D_L=\frac{2c}{H_0}\left[(1+z)-\sqrt{1+z}\right],\qquad D_A=\frac{2c}{H_0}\left[\frac{1}{1+z}-\frac{1}{(1+z)^{3/2}}\right].$$</p>
+  <p>Per $z\to\infty$ la distanza comovente tende a $2c/H_0$, finita: è l&rsquo;orizzonte delle particelle in questo universo, la regione da cui un segnale può averci raggiunto dal Big Bang. La distanza di luminosità cresce senza limite. La distanza di diametro angolare fa la cosa che <i>sembra un errore e non lo è</i>: sale, raggiunge un massimo e poi scende. Derivando rispetto a $x=1+z$, $dD_A/dx\propto-1/x^2+\frac32x^{-5/2}$, che si annulla per $\sqrt x=3/2$, cioè</p>
+  <p>$$1+z=\frac94,\qquad z=\frac54,\qquad D_{A,\max}=\frac{2c}{H_0}\left(\frac49-\frac{8}{27}\right)=\frac{8}{27}\frac{c}{H_0} .$$</p>
+  <p>Con $c/H_0=4283$ Mpc, $D_{A,\max}=1269$ Mpc. Una galassia di 20 kpc a $z=1{,}25$ sottende $20/1269\cdot10^{-3}$ rad, circa $3{,}25''$; la stessa galassia a $z=5$ appare <i>più grande</i>. La ragione fisica è che la luce di oggetti molto lontani è partita quando l&rsquo;universo era piccolo, e allora l&rsquo;oggetto era vicino a noi in distanza propria: $D_A$ è la distanza propria all&rsquo;emissione, e quella, per sorgenti sempre più remote, torna a scendere.</p>`},
+  {t:'plot', title:'Le tre distanze in un universo Einstein-de Sitter',
+   intro:R`Distanze in unità di c/H₀ contro z per Ω_M = 1. In oro D_L = 2[(1+z) − √(1+z)], in ciano χ = 2[1 − 1/√(1+z)], in viola D_A = χ/(1+z). La linea grigia tratteggiata è l'orizzonte χ → 2.`,
+   plots:[
+    {kind:'func2d', xr:[0,6], yr:[0,4], height:300, equal:false,
+     title:'z      distanza / (c/H₀)',
+     curves:[{f:'2*((1+x)-sqrt(1+x))', col:'#d8a13a', label:'D_L'},
+             {f:'2*(1-1/sqrt(1+x))', col:'#5eead4', label:'χ (comovente)'},
+             {f:'2*(1/(1+x)-pow(1+x,-1.5))', col:'#b98cff', label:'D_A'},
+             {f:'2', col:'#94a3b8', label:'orizzonte 2c/H₀', dash:true}],
+     marks:[{x:1.25, y:0.296, label:'massimo di D_A: z = 1,25', col:'#b98cff', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> fino a z ≈ 0,1 le tre curve sono una sola retta di pendenza 1, la legge di Hubble. Già a z = 1 la distanza di luminosità è quattro volte quella di diametro angolare. D_A ha un massimo a z = 1,25 e poi scende.</p>
+   <p><b>Che cosa impararne:</b> «distanza» senza aggettivo non vuol dire niente a z dell'ordine di 1. All'esame la prima cosa da chiedersi è quale delle tre serve: D_L per un flusso, D_A per un angolo, χ per contare volumi o per l'orizzonte.</p>`},
+  {t:'prosa', title:'Lambda-CDM: numeri veri', tag:'il caso reale', html:R`
+  <p>Per l&rsquo;universo osservato, piatto con $\Omega_{M0}=0{,}3$ e $\Omega_\Lambda=0{,}7$, l&rsquo;integrale non ha forma chiusa elementare e si fa numericamente; i numeri che seguono sono miei, con $H_0=70$ km/s/Mpc. A $z=1$:</p>
+  <p>$$\chi=\frac{c}{H_0}\int_0^1\frac{dz}{\sqrt{0{,}3(1+z)^3+0{,}7}}=0{,}7714\,\frac{c}{H_0}=3304\ \mathrm{Mpc},$$</p>
+  <p>quindi $D_L=6608$ Mpc e $D_A=1652$ Mpc. Il tempo di volo della luce, $t_0-t(z=1)=7{,}72$ miliardi di anni, dà $D_{\rm ltt}=2365$ Mpc: quattro numeri diversi, tutti «la distanza della galassia a $z=1$». Per l&rsquo;età serve un integrale che in questo modello ha forma chiusa,</p>
+  <p>$$t(z)=\frac{2}{3H_0\sqrt{\Omega_\Lambda}}\,\mathrm{arcsinh}\left[\sqrt{\frac{\Omega_\Lambda}{\Omega_{M0}}}\,(1+z)^{-3/2}\right],$$</p>
+  <p>che dà un&rsquo;età di oggi $t_0=13{,}47$ miliardi di anni e $t(z=1)=5{,}75$ miliardi di anni.</p>
+  <p>A $z=3$ le distanze sono $\chi=6356$ Mpc, $D_L=25\,423$ Mpc, $D_A=1589$ Mpc: $D_L/D_A=(1+z)^2=16$. Il massimo di $D_A$ in Lambda-CDM cade a $z\approx1{,}6$, con $D_A\approx1748$ Mpc, più in alto e più lontano che in Einstein-de Sitter, perché l&rsquo;accelerazione recente ha allungato le distanze. E al fondo cosmico, $z=1100$, $\chi\approx13{,}7$ Gpc e $D_A=\chi/1101\approx12{,}4$ Mpc, mentre $D_L\approx15$ milioni di Mpc: il rapporto è $1101^2=1{,}2\cdot10^6$, il fattore un milione annunciato all&rsquo;inizio. La prova del 14/09/2007, con $H_0=72$, dichiara $D_A=12{,}0$ Mpc a $z=1100$; il mio conto con quei parametri dà $12{,}08$ Mpc, in accordo.</p>`},
+  {t:'plot', title:'Distanza di diametro angolare: Einstein-de Sitter contro Lambda-CDM',
+   intro:R`D_A in Gpc contro z, H₀ = 70 km/s/Mpc. In viola Einstein-de Sitter (analitico), in ciano Lambda-CDM con Ω_M = 0,3 e Ω_Λ = 0,7 (integrazione numerica nel grafico, punto medio su 80 intervalli).`,
+   plots:[
+    {kind:'func2d', xr:[0,8], yr:[0,2], height:280, equal:false,
+     title:'z      D_A (Gpc)',
+     curves:[{f:'4.283*2*(1/(1+x)-pow(1+x,-1.5))', col:'#b98cff', label:'Einstein-de Sitter'},
+             {f:'4.283*(function(z){var s=0,n=80;for(var i=0;i<n;i++){var u=(i+0.5)*z/n;s+=1/sqrt(0.3*pow(1+u,3)+0.7);}return s*z/n/(1+z);})(x)', col:'#5eead4', label:'Lambda-CDM'}],
+     marks:[{x:1.25, y:1.269, label:'EdS: 1,27 Gpc a z = 1,25', col:'#b98cff', up:false},
+            {x:1.6, y:1.748, label:'ΛCDM: 1,75 Gpc a z ≈ 1,6', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> entrambe le curve hanno un massimo e poi scendono lentamente; quella di Lambda-CDM sta sempre sopra.</p>
+   <p><b>Che cosa impararne:</b> una classe di oggetti di dimensione fissa ha un diametro angolare minimo, intorno a z ≈ 1,5, e a z più alto riappare più grande. La posizione del minimo dipende dal contenuto dell'universo: è il principio del test dei righelli standard, e in versione raffinata è quello che le oscillazioni acustiche dei barioni misurano oggi.</p>`}
+]},
+
+/* ---------------- 05 · UN ESERCIZIO SULLE DISTANZE ---------------- */
+{ num:'05', title:'Un esercizio che le usa tutte: lo spessore dell’ultima diffusione', meta:'prova del 14/09/2007 · differenza di distanza comovente · distanza fisica · diametro angolare',
+  blocchi:[
+  {t:'reveal', title:'Prova del 14/09/2007, esercizio 2', tag:'svolto per intero', steps:[
+   {label:'Il testo', body:R`<p>Universo con $\Omega=1$, $\Omega_\Lambda=0{,}7$, $\Omega_{M0}=0{,}3$, $H_0=72$ km/s/Mpc. I fotoni del fondo cosmico provengono da redshift tra $z_1=1000$ (fine della ricombinazione) e $z_2=1200$ (inizio). 2.1) La differenza di distanza comovente tra due punti $P_1$ a $z_1$ e $P_2$ a $z_2$ sulla stessa linea di vista. 2.2) La distanza fisica tra i due punti. 2.3) Il diametro angolare sotteso da una sfera di diametro pari a quella distanza, centrata a $z=1100$, sapendo che la distanza di diametro angolare fino a $z=1100$ è 12,0 Mpc. 2.4) Discutere le anisotropie del fondo a scale più piccole.</p>`},
+   {label:'L’approssimazione', body:R`<p>Tra $z=1000$ e $z=1200$ l&rsquo;universo è dominato dalla materia: $(1+z)^3\Omega_{M0}\approx3\cdot10^8$ contro $\Omega_\Lambda=0{,}7$. La radiazione a quell&rsquo;epoca non è del tutto trascurabile (si torna su questo alla fine), ma la soluzione la trascura. Allora $\dot a/a\approx H_0\sqrt{\Omega_{M0}}\,a^{-3/2}$.</p>`},
+   {label:'2.1 La differenza comovente', body:R`<p>$$\Delta\chi=\int\frac{c\,da}{a\dot a}=\frac{c}{H_0\sqrt{\Omega_{M0}}}\int_{a_2}^{a_1}\frac{da}{\sqrt a}=\frac{2c}{H_0\sqrt{\Omega_{M0}}}\left[\frac{1}{\sqrt{1+z_1}}-\frac{1}{\sqrt{1+z_2}}\right].$$</p><p>Con $c/H_0=4164$ Mpc: $2\cdot4164/0{,}5477=15\,205$ Mpc, per $(0{,}031607-0{,}028855)$, dà $\Delta\chi=41{,}8$ Mpc. La soluzione della raccolta scrive 42,4 Mpc: con i dati dichiarati il conto dà 41,8, una differenza dell&rsquo;1,4% che non cambia il seguito.</p>`},
+   {label:'2.2 La distanza fisica', body:R`<p>Allora le distanze proprie erano più piccole di un fattore $1+z\approx1101$: $\Delta D=41{,}8\ \mathrm{Mpc}/1101=38{,}0$ kpc (la soluzione, dal suo 42,4, scrive 38,6 kpc). È lo spessore fisico della superficie di ultimo scattering: meno della metà del diametro della Via Lattea.</p>`},
+   {label:'2.3 L’angolo', body:R`<p>Con $D_A=12{,}0$ Mpc: $\Delta\theta=\Delta D/D_A=38{,}0\ \mathrm{kpc}/12{,}0\ \mathrm{Mpc}=3{,}17\cdot10^{-3}$ rad, cioè $10{,}9'$, gli $11'$ della soluzione.</p>`},
+   {label:'2.4 Il significato', body:R`<p>Strutture che sottendono angoli minori di 11&prime; sono più piccole dello spessore della superficie di ultimo scattering: lungo la linea di vista si sovrappongono molte di esse, con fasi diverse, e le loro anisotropie si mediano. Lo spettro delle anisotropie del fondo viene così smorzato alle piccole scale angolari. Si noti che l&rsquo;esercizio usa due distanze diverse nello stesso conto: $\chi$ per la profondità lungo la linea di vista, $D_A$ per l&rsquo;angolo. Usare $\chi$ anche per l&rsquo;angolo darebbe un angolo mille volte più piccolo.</p>`}
+  ]},
+  {t:'prosa', title:'Che cosa insegna l’esercizio', tag:'il punto', html:R`
+  <p>Il conto tocca in quattro righe i tre modi di misurare una distanza. La differenza di distanza comovente si ottiene con l&rsquo;integrale in $da/(a\dot a)$, con la sola forma di $\dot a$ del regime dominante; la distanza fisica all&rsquo;epoca dell&rsquo;emissione è la comovente divisa per $1+z$; l&rsquo;angolo si calcola con la distanza di diametro angolare, che per l&rsquo;universo piatto è a sua volta $\chi/(1+z)$, ma con $\chi$ calcolato fino a noi in Lambda-CDM. Il fatto che $12{,}0$ Mpc sia così piccolo, meno della distanza dell&rsquo;ammasso della Vergine, è il fatto più controintuitivo della cosmologia osservativa: la superficie da cui viene il fondo cosmico, vista oggi, appare come se fosse a 12 Mpc, perché allora era lì.</p>
+  <p>La correzione per la radiazione, che la soluzione trascura, si stima così: a $z=1100$ il rapporto tra radiazione e materia è $(1+z)\Omega_{R0}/\Omega_{M0}$; con $\Omega_{R0}\approx8{,}4\cdot10^{-5}$ (fotoni e neutrini) e $\Omega_{M0}=0{,}3$ è $1101\cdot8{,}4\cdot10^{-5}/0{,}3=0{,}31$. Non è piccola: $H$ era più grande del $14\%$ circa, e la differenza comovente un po&rsquo; più piccola. Il risultato in minuti d&rsquo;arco cambia di qualche decimo.</p>`}
+]},
+
+/* ---------------- 06 · IL DIAGRAMMA DI HUBBLE E L'ACCELERAZIONE ---------------- */
+{ num:'06', title:'Il diagramma di Hubble ad alto redshift e l’espansione accelerata', meta:'D_L ≈ (cz/H₀)[1 + (1−q₀)z/2] · le SN Ia più deboli del previsto · q₀ ≈ −0,6 · Ω_Λ > 0',
+  blocchi:[
+  {t:'prosa', title:'La deviazione dalla retta', tag:'lo sviluppo', html:R`
+  <p>Per sorgenti relativamente vicine la lezione 19 sviluppa la distanza di luminosità al secondo ordine in $z$:</p>
+  <p>$$D_L=\frac{cz}{H_0}\left[1+\frac12(1-q_0)z+\dots\right].$$</p>
+  <p>Il conto è breve. Al secondo ordine $1/H(z)\approx(1/H_0)[1-(1+q_0)z]$, perché $dH/dz$ oggi vale $H_0(1+q_0)$; integrando, $\chi\approx(c/H_0)[z-(1+q_0)z^2/2]$, e moltiplicando per $1+z$ si ottiene la formula. Il primo termine è la legge di Hubble; il secondo è la deviazione, e il suo segno dice tutto: per $q_0\lt 1$ le sorgenti a dato $z$ sono più lontane, cioè più deboli, che sulla retta. Con $q_0=-0{,}55$ a $z=0{,}1$ lo sviluppo dà</p>
+  <p>$$D_L\approx428{,}3\ \mathrm{Mpc}\left[1+\frac12\cdot1{,}55\cdot0{,}1\right]=461{,}5\ \mathrm{Mpc},$$</p>
+  <p>contro $460{,}3$ Mpc del conto esatto in Lambda-CDM: lo $0{,}3\%$ di differenza, e già il $7{,}5\%$ di deviazione dalla retta di Hubble, $cz/H_0=428{,}3$ Mpc.</p>`},
+  {t:'prosa', title:'Che cosa hanno trovato le supernovae', tag:'la scoperta', html:R`
+  <p><i>«La parte più difficile dell&rsquo;esperimento consiste nella misura delle distanze: si devono trovare delle candele standard delle quali sia nota la luminosità assoluta»</i>. Le SN Ia, con la loro luminosità al massimo di $M\approx-19$ fissata dal limite di Chandrasekhar e corretta con la forma della curva di luce, si vedono fino a $z\sim1$. Negli anni Novanta due gruppi (de Bernardis cita Riess e collaboratori) hanno misurato decine di SN Ia a $z$ tra $0{,}3$ e $1$ e le hanno trovate <i>più deboli</i> di quanto prevedesse un universo di sola materia: <i>«le misure di supernovae di tipo 1a ad alto z hanno evidenziato una tendenza a disporsi più sulla curva con $q_0\lt 1$ che su quella con $q_0\gt 1$, favorendo un valore di $q_0\sim-0{,}6$»</i>.</p>
+  <p>Di quanto più deboli? La differenza di modulo di distanza tra due modelli a dato $z$ è $\Delta m=5\log_{10}(D_{L,1}/D_{L,2})$, indipendente da $H_0$ e da $M$. Tra Lambda-CDM ed Einstein-de Sitter, a $z=0{,}5$, con i miei numeri ($D_L=2833$ Mpc contro $2\cdot4283[1{,}5-\sqrt{1{,}5}]$ Mpc $=2358$ Mpc),</p>
+  <p>$$\Delta m=5\log_{10}\frac{2833}{2358}=0{,}40,$$</p>
+  <p>e a $z=1$ diventa $0{,}60$ magnitudini. Mezza magnitudine è un fattore $10^{0{,}2}=1{,}58$ in flusso: con la dispersione delle SN Ia corrette di $0{,}15$-$0{,}2$ magnitudini e qualche decina di oggetti, un effetto molto significativo.</p>
+  <p>Il vincolo che ne segue è quello della slide: trascurando la radiazione, $q_0=\Omega_{M0}/2-\Omega_\Lambda$, e $q_0\lt 0$ con $\Omega_{M0}\ge0$ <i>implica</i> $\Omega_\Lambda\gt 0$. Con $q_0=-0{,}6$, anche con $\Omega_{M0}=0$ servirebbe $\Omega_\Lambda\ge0{,}6$; con la materia che si misura dinamicamente negli ammassi, $\Omega_{M0}\approx0{,}3$, si ha $\Omega_\Lambda\approx0{,}75$. È la scoperta dell&rsquo;espansione accelerata, premio Nobel 2011.</p>`},
+  {t:'plot', title:'Quanto più deboli: Δm contro z',
+   intro:R`Differenza di modulo di distanza tra due modelli e l'universo Einstein-de Sitter, Δm = 5 log₁₀(D_L/D_L,EdS), in magnitudini. In ciano Lambda-CDM (Ω_M = 0,3, Ω_Λ = 0,7, integrazione numerica nel grafico); in oro l'universo vuoto (Ω = 0, D_L = (c/H₀)(z + z²/2)). Valori positivi: sorgenti più deboli che in Einstein-de Sitter.`,
+   plots:[
+    {kind:'func2d', xr:[0.01,1.5], yr:[-0.1,0.8], height:280, equal:false,
+     title:'z      Δm (mag)',
+     curves:[{f:'5*log(((function(z){var s=0,n=80;for(var i=0;i<n;i++){var u=(i+0.5)*z/n;s+=1/sqrt(0.3*pow(1+u,3)+0.7);}return s*z/n;})(x))/(2*(1-1/sqrt(1+x))))/log(10)', col:'#5eead4', label:'Lambda-CDM'},
+             {f:'5*log((x+x*x/2)/(1+x)/(2*(1-1/sqrt(1+x))))/log(10)', col:'#d8a13a', label:'universo vuoto'},
+             {f:'0', col:'#94a3b8', label:'Einstein-de Sitter', dash:true}],
+     marks:[{x:0.5, y:0.40, label:'z = 0,5: 0,40 mag', col:'#5eead4', up:true},
+            {x:1, y:0.60, label:'z = 1: 0,60 mag', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> l'universo vuoto, che non accelera né decelera, sta già sopra Einstein-de Sitter di 0,28 magnitudini a z = 0,5; Lambda-CDM sta ancora più sopra, a 0,40. Le SN Ia osservate stanno sulla curva ciano.</p>
+   <p><b>Che cosa impararne:</b> essere sopra la curva dell'universo vuoto vuol dire q₀ &lt; 0, cioè accelerazione. Non basta togliere la materia per spiegare le supernovae: serve qualcosa che spinga.</p>`},
+  {t:'prosa', title:'Energia oscura: che cosa si sa e che cosa no', tag:'onestà', html:R`
+  <p>De Bernardis, nella lezione 19, introduce la costante cosmologica come <i>«una forma di densità di energia indipendente dal tempo, che quindi non si diluisce con l&rsquo;espansione. Fu introdotta in modo del tutto empirico da Einstein, ed è stata riesumata per spiegare il comportamento di supernovae ad alto redshift»</i>. Che una densità costante acceleri si vede dall&rsquo;equazione per $\ddot a$: il termine $\Omega_\Lambda a$ è positivo e cresce con $a$, mentre quelli di materia e radiazione si spengono. Ciò significa che l&rsquo;accelerazione è un fenomeno recente: per $\Omega_{M0}=0{,}3$ e $\Omega_\Lambda=0{,}7$, $\ddot a=0$ quando $\Omega_{M0}/(2a^2)=\Omega_\Lambda a$, cioè</p>
+  <p>$$a_{\rm acc}=\left(\frac{\Omega_{M0}}{2\Omega_\Lambda}\right)^{1/3}=0{,}598,\qquad z_{\rm acc}=0{,}67 .$$</p>
+  <p>Prima di $z\approx0{,}67$ l&rsquo;universo decelerava; da circa sei miliardi di anni accelera. Le SN Ia più lontane, a $z\gt 1$, devono quindi tornare verso la curva di Einstein-de Sitter, ed è stato visto: è la prova che l&rsquo;effetto non è un oscuramento da polvere grigia o un&rsquo;evoluzione delle supernovae, che crescerebbero monotonamente con $z$.</p>
+  <p>Che cosa sia questa componente non si sa. Il nome «energia oscura» la descrive per quello che fa, non per quello che è: una densità di energia con pressione negativa, $p=-\rho c^2$ nel caso della costante cosmologica, che domina oggi il bilancio dell&rsquo;universo per il $70\%$. Le fonti del corso si fermano alla costante cosmologica, e anche qui ci si ferma.</p>`}
+]},
+
+/* ---------------- 07 · IL REDSHIFT NEL FUTURO E L'ORIZZONTE ---------------- */
+{ num:'07', title:'Il redshift nel futuro, e una galassia che resta nell’orizzonte', meta:'χ costante, z che cambia · universo vuoto, accelerato, decelerato · l’esonero del 21/01/2015 in due versioni',
+  blocchi:[
+  {t:'prosa', title:'Che cosa resta costante', tag:'lezione 23', html:R`
+  <p>Gli esercizi di de Bernardis nella lezione 23 pongono una domanda che sembra banale: quale sarà il redshift di una certa sorgente nel futuro? <i>«La risposta non è banale. Il fatto che l&rsquo;universo si espanda non garantisce che il redshift aumenti. Infatti il redshift dipende dal rapporto tra i fattori di scala alla ricezione e all&rsquo;emissione. E, selezionata una sorgente, con l&rsquo;espansione dell&rsquo;universo cambiano ambedue»</i>. Quello che resta costante è la distanza comovente della sorgente: oggi e in un tempo futuro $t_f$,</p>
+  <p>$$\chi=\int_{t_{\rm em,0}}^{t_0}\frac{c\,dt}{a(t)}=\int_{t_{\rm em,f}}^{t_f}\frac{c\,dt}{a(t)} .$$</p>
+  <p>Derivando la relazione $1+z=a(t_0)/a(t_{\rm em})$ rispetto al tempo di osservazione, e usando il fatto che lo stesso intervallo comovente impone $dt_{\rm em}/dt_0=a(t_{\rm em})/a(t_0)$, si trova la variazione del redshift per unità di tempo,</p>
+  <p>$$\frac{dz}{dt_0}=(1+z)H_0-H(z_{\rm em}) .$$</p>
+  <p>Il segno dipende dalla storia di $H$. In un universo vuoto, $a\propto t$ e $H(z)=H_0(1+z)$: la derivata è nulla, e <i>«il redshift non cambia col tempo»</i>, come dice de Bernardis. In un universo che decelera, $H(z)\gt H_0(1+z)$ e il redshift diminuisce; in uno che accelera, cresce. Per Lambda-CDM a $z=1$, $H(1)=H_0\sqrt{0{,}3\cdot8+0{,}7}=1{,}761\,H_0$ contro $(1+z)H_0=2H_0$: il redshift di una galassia a $z=1$ sta aumentando, con $dz/dt_0=0{,}24\,H_0$, cioè $\Delta z=1{,}7\cdot10^{-10}$ in dieci anni, $2{,}6$ cm/s per decennio nella velocità apparente $c\,\Delta z/(1+z)$. È il <i>redshift drift</i>, che i telescopi da 40 m cercheranno di misurare.</p>`},
+  {t:'reveal', title:'Esonero del 21/01/2015, esercizio 2, versione A: universo di costante cosmologica', tag:'svolto', steps:[
+   {label:'Il testo', body:R`<p>Una galassia dista da noi 3 Gpc oggi. Si assuma un universo dominato dalla costante cosmologica, con curvatura nulla, e $H_0=70$ km/s/Mpc. Si calcoli il redshift della galassia. Si calcoli quale sarà la sua distanza da noi tra 100 miliardi di anni. Sarà ancora all&rsquo;interno del nostro orizzonte?</p>`},
+   {label:'Il fattore di scala', body:R`<p>Con la sola costante cosmologica, $\dot a/a=H_0$ costante, e $a(t)=e^{H_0(t-t_0)}$: espansione esponenziale.</p>`},
+   {label:'Il redshift', body:R`<p>«Dista 3 Gpc oggi» è la distanza comovente. $\chi=\int c\,da/(a\dot a)=(c/H_0)\int_{1/(1+z)}^1da/a^2=(c/H_0)z$. Quindi $z=H_0\chi/c=70\cdot3000/299\,792=0{,}700$. In questo universo, e solo in questo, la legge di Hubble lineare è esatta per la distanza comovente.</p>`},
+   {label:'Tra 100 miliardi di anni', body:R`<p>$H_0=70/3{,}086\cdot10^{19}=2{,}27\cdot10^{-18}$ s$^{-1}$, $100$ miliardi di anni $=3{,}16\cdot10^{18}$ s, quindi $H_0\Delta t=7{,}16$ e $a=e^{7{,}16}=1286$. La distanza propria sarà $3\ \mathrm{Gpc}\cdot1286=3859$ Gpc. La soluzione arrotonda a $a\approx1300$ e $3800$ Gpc.</p>`},
+   {label:'L’orizzonte', body:R`<p>La soluzione confronta con l&rsquo;orizzonte delle particelle, $a(t)\int_0^tc\,dt/a$, che cresce con il tempo: <i>«se la galassia è all&rsquo;interno dell&rsquo;orizzonte oggi, a maggior ragione lo sarà in futuro»</i>. La domanda fisicamente più interessante è un&rsquo;altra: un segnale che parte da noi oggi la raggiungerà mai? È l&rsquo;orizzonte degli eventi, la distanza comovente che la luce percorrerà da oggi all&rsquo;infinito, $\int_{t_0}^\infty c\,dt/a=c/H_0=4{,}28$ Gpc. La galassia, a 3 Gpc comoventi, è dentro: un segnale inviato oggi la raggiungerà. Una galassia a 5 Gpc comoventi, invece, è già fuori per sempre: la vediamo, perché la sua luce di un tempo ci arriva, ma niente di ciò che facciamo oggi la raggiungerà mai.</p>`}
+  ]},
+  {t:'reveal', title:'Esonero del 21/01/2015, esercizio 2, versione B: universo di materia', tag:'svolto', steps:[
+   {label:'Il fattore di scala', body:R`<p>Con $\Omega_{M0}=1$, $\dot a/a=H_0a^{-3/2}$, e $a(t)=(t/t_0)^{2/3}$, con l&rsquo;età $t_0=2/(3H_0)=9{,}31$ miliardi di anni.</p>`},
+   {label:'Il redshift', body:R`<p>$\chi=(2c/H_0)[1-1/\sqrt{1+z}]=3$ Gpc, quindi $1/\sqrt{1+z}=1-3000\cdot70/(2\cdot299\,792)=0{,}6498$ e $z=1{,}369$, l&rsquo;1,37 della soluzione. La stessa distanza comovente dà un redshift doppio rispetto all&rsquo;universo di costante cosmologica: nella decelerazione, $a$ era più piccolo al momento dell&rsquo;emissione.</p>`},
+   {label:'Tra 100 miliardi di anni', body:R`<p>$a=[(9{,}31+100)/9{,}31]^{2/3}=5{,}17$, e la distanza propria sarà $3\cdot5{,}17=15{,}5$ Gpc: un fattore 250 meno che nell&rsquo;universo esponenziale.</p>`},
+   {label:'Il confronto', body:R`<p>Nella versione B l&rsquo;orizzonte degli eventi non esiste: $\int_{t_0}^\infty c\,dt/a$ con $a\propto t^{2/3}$ diverge, e prima o poi ogni galassia sarà raggiungibile. L&rsquo;accelerazione è ciò che crea un orizzonte degli eventi, e che rende l&rsquo;universo futuro sempre più vuoto per un osservatore.</p>`}
+  ]},
+  {t:'plot', title:'Il fattore di scala nelle due versioni dell’esonero',
+   intro:R`a(t) contro t − t₀ (miliardi di anni) da oggi a 20 miliardi di anni avanti: in ciano a = exp[H₀(t − t₀)], in oro a = (t/t₀)^(2/3) con t₀ = 9,31 miliardi di anni, H₀ = 70 km/s/Mpc in entrambi. Le due curve partono con la stessa pendenza H₀.`,
+   plots:[
+    {kind:'func2d', xr:[0,20], yr:[0,5], height:260, equal:false,
+     title:'t − t₀ (Gyr)      a(t)',
+     curves:[{f:'exp(x/13.97)', col:'#5eead4', label:'costante cosmologica'},
+             {f:'pow((9.31+x)/9.31,2/3)', col:'#d8a13a', label:'materia'}],
+     marks:[{x:0, y:1, label:'oggi: a = 1, pendenza H₀', col:'#94a3b8', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> stessa tangente oggi, poi una curva che si incurva verso l'alto (accelerazione) e una verso il basso (decelerazione). Dopo 20 miliardi di anni a vale già 4,2 contro 2,15.</p>
+   <p><b>Che cosa impararne:</b> H₀ da solo non distingue i due universi: lo fa q₀, la curvatura della funzione oggi, ed è quello che il diagramma di Hubble ad alto z misura.</p>`},
+  {t:'prosa', title:'Gli orizzonti di Marconi: 3ct, e un Big Bang che si allontana a 2c', tag:'Marconi, cap. 12, pp. 180-185', html:R`
+  <p>Marconi definisce l&rsquo;orizzonte di un osservatore al tempo $t$ come la distanza propria percorsa dalla luce partita al Big Bang, $R_H(t)=a(t)\int_0^t c\,dt'/a(t')$. Per Einstein-de Sitter, $a\propto t^{2/3}$, l&rsquo;integrale si fa:</p>
+  <p>$$a(t)\int_0^t\frac{c\,dt'}{a(t')}=t^{2/3}\int_0^t c\,t'^{-2/3}dt'=3ct .$$</p>
+  <p><i>«Perché il raggio dell&rsquo;orizzonte è $3ct$ e non $ct$? Perché gli osservatori fondamentali erano più vicini tra loro a $t$ piccoli»</i>: la luce partita presto ha attraversato distanze che poi l&rsquo;espansione ha stirato. Lo stesso conto dà un risultato che sembra un paradosso: il punto da cui viene la luce del Big Bang si trova oggi a distanza propria $3ct_0$ e si allontana con velocità di recessione $\dot a\,r=\frac{2}{3t_0}\cdot3ct_0=2c$, <i>«indipendentemente dal tempo $t$ a cui lo si osserva»</i>. Un fotone che parte verso di noi da una regione con $v_{rec}\gt c$ all&rsquo;inizio si allontana, perché lo spazio fra noi e lui cresce più in fretta di quanto lui avanzi; arriva solo quando attraversa la sfera di Hubble, dove $v_{rec}=c$.</p>
+  <p>L&rsquo;orizzonte degli eventi è la domanda opposta: la distanza massima da cui un segnale partito oggi potrà mai arrivarci. Marconi mostra che con $\Omega_\Lambda=0$ e $\Omega_0\le1$ l&rsquo;integrale $\int_t^\infty c\,dt/a$ diverge e ogni particella sarà prima o poi visibile; con $\Omega_0=2$ l&rsquo;universo ricollassa e l&rsquo;oggetto più lontano osservabile prima del big crunch ha distanza comovente di circa 20 000 Mpc; con $\Omega_\Lambda\gt0$ dominante l&rsquo;espansione diventa esponenziale e l&rsquo;integrale converge, perché <i>«i fotoni emessi da oggetti sufficientemente distanti non ce la fanno a giungere fino a noi»</i>.</p>`}
+]},
+
+/* ---------------- 08 · COLLAUDO ---------------- */
+{ num:'08', title:'Collaudo: le domande che l’esame mescola apposta', meta:'tre distanze · un Doppler che non c’è · q₀ e i segni',
+  blocchi:[
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una galassia ha z = 3. «A che velocità si allontana?»`,
+    a:R`La domanda è mal posta. Il redshift dice che l&rsquo;universo si è dilatato di un fattore 4 mentre la luce viaggiava. Si può parlare della velocità di crescita della sua distanza propria oggi, $\dot D=H_0\chi$, che in Lambda-CDM è $6356\cdot70$ km/s $\approx1{,}5c$, ma non è un moto e non dà il redshift con nessuna formula Doppler.`},
+   {q:R`Perché D_L = (1+z)χ e non (1+z)²χ, se il flusso ha due fattori 1+z?`,
+    a:R`Perché $D_L$ è definita da $F=L/4\pi D_L^2$: i due fattori del flusso, energia del fotone e ritmo di arrivo, entrano al quadrato in $D_L^2$, cioè come una sola potenza in $D_L$.`},
+   {q:R`Un oggetto a z = 5 può apparire più grande dello stesso oggetto a z = 1?`,
+    a:R`Sì. $D_A$ ha un massimo (a $z=1{,}25$ in Einstein-de Sitter, a $z\approx1{,}6$ in Lambda-CDM) e poi scende: in Einstein-de Sitter $D_A(5)=0{,}197\,c/H_0$ contro $D_A(1)=0{,}293\,c/H_0$. L&rsquo;oggetto a $z=5$ appare 1,5 volte più grande.`},
+   {q:R`Che segno ha q₀ in un universo vuoto, in uno di sola materia critica, e in Lambda-CDM?`,
+    a:R`$0$, $+1/2$, $-0{,}55$. Il vuoto non accelera né decelera, la materia frena, la costante cosmologica spinge.`},
+   {q:R`Le SN Ia lontane appaiono più deboli del previsto. Perché questo vuol dire accelerazione e non solo «meno materia»?`,
+    a:R`Perché sono più deboli anche dell&rsquo;universo vuoto, che è il limite «senza materia» ($q_0=0$). Stare sotto in flusso (sopra in $\Delta m$) rispetto a quella curva richiede $q_0\lt 0$, cioè un termine che accelera.`},
+   {q:R`Il redshift di una galassia a z = 1 cresce o cala nel tempo, oggi?`,
+    a:R`Cresce, perché $dz/dt_0=(1+z)H_0-H(z)=2H_0-1{,}761H_0\gt 0$ in Lambda-CDM. In un universo che decelera calerebbe; nell&rsquo;universo vuoto resterebbe costante.`},
+   {q:R`Il fondo cosmico ha D_A ≈ 12 Mpc. Allora è più vicino dell’ammasso della Vergine?`,
+    a:R`Nel senso della distanza di diametro angolare sì, ed è per questo che una struttura di 38 kpc lì sottende 11&prime;. Ma la sua distanza comovente è circa 14 Gpc e la luce ha viaggiato 13,4 miliardi di anni: $D_A$ è la distanza propria all&rsquo;emissione, quando l&rsquo;universo era 1100 volte più piccolo.`}
+  ]}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-15-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-15 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-15-redshift-hubble-e-l-espansione-accelerata.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

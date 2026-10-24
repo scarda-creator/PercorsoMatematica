@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-13 — Le galassie e la materia oscura: la curva di rotazione che non scende</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-13 — Le galassie e la materia oscura: la curva di rotazione che non scende</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["parsec-e-parallasse"] = {"nome":"Parsec e parallasse","riga":"Il parsec è la distanza da cui il raggio dell'orbita terrestre è visto sotto un secondo d'arco: $1\\ \\mathrm{pc}=1\\,\\mathrm{UA}/1''=3{,}086\\cdot10^{16}$ m, e la distanza di una stella in parsec è l'inverso della sua parallasse in secondi d'arco.","serve":"A non portare mai un fattore di conversione a memoria. La definizione è geometrica e si ricostruisce in due righe: se $p$ è l'angolo sotto cui dalla stella si vede il semiasse maggiore dell'orbita terrestre, per angoli piccoli $p=R_{\\text{UA}}/d$, e scegliendo l'unità di distanza in modo che $p=1''$ corrisponda a $d=1$ si ottiene $d[\\mathrm{pc}]=1/p['']$. Il parsec non è un'unità più «astronomica» dell'anno luce: è l'unità in cui la misura che si fa davvero — un angolo — diventa direttamente una distanza, senza nessun conto intermedio. Nelle prove scritte di Astrofisica il valore $1\\ \\mathrm{pc}=3{,}086\\cdot10^{16}$ m è stampato in calce al foglio fra i dati: ciò che va saputo è l'inversione, non il numero.","esempio":"La stella più vicina, Proxima Centauri, ha parallasse $p=0{,}7687''$. Quindi $d=1/0{,}7687=1{,}301$ pc, e in anni luce $d=3{,}26/0{,}7687=4{,}24$ anni luce. Il controllo di coerenza è immediato: una parallasse inferiore al secondo d'arco vuol dire per forza una distanza superiore al parsec, e se il conto dà il contrario è stata invertita la frazione.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"02","come":"la derivazione del parsec dalla parallasse annua e le conversioni fra unità astronomica, anno luce e parsec, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"riga","appare":"3,086\\cdot10^{16}"},{"tipo":"numero","espr":"1/0.7687","vale":"1.301","dove":"esempio","appare":"1,301"},{"tipo":"numero","espr":"3.26/0.7687","vale":"4.24","dove":"esempio","appare":"4,24"},{"tipo":"numero","espr":"1.496e11/(pi/648000)/1e16","vale":"3.086","dove":"serve","appare":"3,086\\cdot10^{16}"}]};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-13: Le galassie e la materia oscura: la curva di rotazione che non scende <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-13 — le galassie e la materia oscura
+identita:  la curva di rotazione che non scende: la prima evidenza dinamica che la maggior parte della
+           materia non si vede; e il teorema del viriale, che pesa i sistemi che non ruotano.
+copre:     A.17, A.18, A.19, A.20
+serve:     as-03 (flusso, magnitudini, distanze), as-11 (riga a 21 cm)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento pesante (24 prove, densita' 3,0): dato un profilo di velocita', trovare la massa e
+           mostrare che non torna con la luce; il conto svolto piu' volte, su una spirale e su un sistema
+           con il viriale. All'orale: massa dinamica dalla curva di rotazione e viriale.
+fonti:     lezione13_2020 (pagine 27-58): la riga a 21 cm e la rotazione differenziale della Galassia,
+           la velocita' proiettata V = (omega - omega_0) R_0 sin(l), il metodo del punto tangente
+           (R_min = R_0 sin l), R_0 = 8,5 kpc e omega_0 R_0 = 220 km/s, la curva piatta, il moto di una
+           stella di prova (v^2 = GM(r)/r) con i due casi particolari, NGC 3198, le curve di rotazione nel
+           visibile con la fenditura lungo il disco (H-alfa e NII), velocita' di 200-300 km/s.
+           lezione14_2017 e lezione14_A_2020 (pagine 1-9): NGC 3198, la necessita' di materia oscura,
+           l'esercizio del profilo a 21 cm di una galassia (W50 = 162 unita' = 1,62 MHz, 340 km/s, Vsys).
+           lezione15_2017 (pagine 1-20): la Via Lattea (dimensioni e masse: disco di 12 kpc, Sole a 8 kpc,
+           massa stellare 5e10, gas 5e9, alone oscuro 6e11-3e12 masse solari), le Nubi di Magellano, le
+           galassie (1e7-1e13 masse solari, luminosita' media 2e10 L_sun, distanze del Mpc, forme), la
+           distribuzione sul cielo, gli ammassi visti in X, l'esercizio sulla visibilita' delle galassie.
+           Prove scritte: 20080505_compito_B es. 1 (profilo a 21 cm, D = 8,2 Mpc, ellisse 11'x16');
+           20080505_compito_A es. 2 (orbita del Sole, 224 milioni di anni); 20151130 esonero A es. 1 (curva
+           di rotazione v = A theta/(theta^2+theta_c^2)^{3/4}, D = 10,1 Mpc); 20101215 esonero A es. 1
+           (omega Centauri, dispersione di velocita' a tabella); 20060109_compito_02 es. 2 (nucleo di
+           M31, 240 km/s a 0,75 pc).
+           DICHIARATO: il valore piatto della curva di NGC 3198 (circa 150 km/s fino a 30 kpc) e i numeri
+           del Coma di Zwicky (1000 km/s, 1 Mpc) sono letti dalle figure o standard, non da un testo
+           delle fonti; la classificazione di Hubble e i nuclei attivi sono dati solo come quadro, perche'
+           le slide estratte li portano in immagini.
+           Marconi, Cosmologia, cap. 8.4-8.8 e 14.1 (pagine 114-118, 218-220): Omega_0 dalle masse delle
+           galassie e degli ammassi (viriale e lenti), le velocita' peculiari u ~ H0 r Omega_0^0,6 delta, la
+           statistica delle lenti CLASS (13 su 8958), Omega_b = 0,0223 h^-2, la tabella WMAP-7 di Komatsu et al.
+           (Omega_c = 0,226, Omega_b = 0,0455), i candidati alla materia oscura (assioni, neutrini, WIMPs).
+           Le pagine 221-224 del dossier (free-streaming, Meszaros) appartengono alla formazione delle
+           strutture e non sono usate qui.
+registro:  lezione13_2020, lezione14_2017, lezione14_A_2020, lezione15_2017
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "solve(m*v**2/r-G*M*m/r**2,v)[0]", "vale": "sqrt(G*M/r)", "ipotesi": {"m": "positive", "v": "positive", "r": "positive", "G": "positive", "M": "positive"}, "dove": "01", "appare": "v(r)=\\sqrt{\\frac{GM(r)}{r}}"},
+ {"tipo": "uguale", "sinistra": "sqrt(G*(Rational(4,3)*pi*rho*r**3)/r)", "vale": "r*sqrt(Rational(4,3)*pi*G*rho)", "ipotesi": {"G": "positive", "rho": "positive", "r": "positive"}, "dove": "01", "appare": "v\\propto r"},
+ {"tipo": "simbolico", "dove": "01", "appare": "v\\propto r^{-1/2}", "perche": "caso kepleriano, M(r) = M costante nella formula di v asserita."},
+ {"tipo": "uguale", "sinistra": "solve(v0**2-G*M/r,M)[0]", "vale": "v0**2*r/G", "ipotesi": {"v0": "positive", "G": "positive", "M": "positive", "r": "positive"}, "dove": "01", "appare": "M(r)=\\frac{v_0^{2}r}{G}\\propto r"},
+ {"tipo": "uguale", "sinistra": "diff(v0**2*r/G,r)/(4*pi*r**2)", "vale": "v0**2/(4*pi*G*r**2)", "ipotesi": {"v0": "positive", "G": "positive", "r": "positive"}, "dove": "01", "appare": "\\rho(r)=\\frac{v_0^{2}}{4\\pi Gr^{2}}"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac{mv^{2}}{r}=\\frac{GM(r)m}{r^{2}}", "perche": "equilibrio di forza centripeta e gravitazionale per un'orbita circolare, con il teorema di Gauss per la massa interna."},
+ {"tipo": "simbolico", "dove": "02", "appare": "V=(\\omega-\\omega_0)R_0\\sin\\ell", "perche": "e' la velocita' radiale di una nube su orbita circolare vista dal Sole, nella forma delle slide (diapositiva 39), con R sin(delta) = R_0 sin(l)."},
+ {"tipo": "simbolico", "dove": "02", "appare": "R_{\\min}=R_0\\sin\\ell", "perche": "distanza dal centro del punto tangente, geometria della linea di vista."},
+ {"tipo": "simbolico", "dove": "02", "appare": "v(R_{\\min})=V_{\\max}+v_0\\sin\\ell", "perche": "conseguenza del metodo del punto tangente: nel punto tangente tutta la velocita' orbitale e' lungo la linea di vista, e si somma la proiezione del moto del Sole."},
+ {"tipo": "numero", "espr": "8.5*sin(30*pi/180)", "vale": "4.25", "dove": "02", "appare": "4{,}25\\ \\mathrm{kpc}"},
+ {"tipo": "numero", "espr": "220/(8.5*3.086e16)*1e15", "vale": "0.84", "dove": "02", "appare": "0{,}84\\cdot10^{-15}\\ \\mathrm{s^{-1}}"},
+ {"tipo": "numero", "espr": "2*pi*8e3*3.086e16/220e3/3.156e7/1e6", "vale": "223", "dove": "02", "appare": "223"},
+ {"tipo": "numero", "espr": "(220e3)**2*8e3*3.086e16/6.674e-11/1.989e30/1e10", "vale": "9.0", "dove": "02", "appare": "9{,}0\\cdot10^{10}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "4.6e9/224e6", "vale": "20.5", "dove": "02", "appare": "20"},
+ {"tipo": "numero", "espr": "2.998e5*1.62/1420.4", "vale": "342", "dove": "03", "appare": "342\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "2.998e5*0.1/1420.4", "vale": "21", "dove": "03", "appare": "21\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "(347-185)*0.01", "vale": "1.62", "dove": "03", "appare": "1{,}62\\ \\mathrm{MHz}"},
+ {"tipo": "numero", "espr": "8.2e6*8*2.909e-4/1e3", "vale": "19.1", "dove": "03", "appare": "19{,}1\\ \\mathrm{kpc}"},
+ {"tipo": "numero", "espr": "sqrt(1-(11/16.)**2)", "vale": "0.726", "dove": "03", "appare": "0{,}726"},
+ {"tipo": "numero", "espr": "341.93/2/0.72618", "vale": "235", "dove": "03", "appare": "235\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "(235.41e3)**2*19083*3.086e16/6.674e-11/1.989e30/1e11", "vale": "2.5", "dove": "03", "appare": "2{,}5\\cdot10^{11}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "(170.96e3)**2*19083*3.086e16/6.674e-11/1.989e30/1e11", "vale": "1.3", "dove": "03", "appare": "1{,}3\\cdot10^{11}\\,M_\\odot"},
+ {"tipo": "simbolico", "dove": "03", "appare": "v=c\\,\\frac{\\Delta\\nu}{\\nu_0}", "perche": "Doppler non relativistico."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\cos i=\\frac{b}{a}", "perche": "inclinazione di un disco circolare visto di sbieco: rapporto degli assi dell'ellisse proiettata."},
+ {"tipo": "simbolico", "dove": "03", "appare": "v_{\\mathrm{rot}}=\\frac{W_{50}/2}{\\sin i}", "perche": "la meta' della larghezza del profilo e' la velocita' di rotazione proiettata; il seno dell'inclinazione la deproietta."},
+ {"tipo": "uguale", "sinistra": "(A*t/(t**2+tc**2)**Rational(3,4))**2*(D*t)/G", "vale": "A**2*D*t**3/(G*(t**2+tc**2)**Rational(3,2))", "ipotesi": {"A": "positive", "t": "positive", "tc": "positive", "D": "positive", "G": "positive"}, "dove": "04", "appare": "M(\\theta)=\\frac{A^{2}D\\,\\theta^{3}}{G(\\theta^{2}+\\theta_c^{2})^{3/2}}"},
+ {"tipo": "limite", "espr": "A**2*D*t**3/(G*(t**2+tc**2)**Rational(3,2))", "var": "t", "a": "oo", "vale": "A**2*D/G", "ipotesi": {"A": "positive", "t": "positive", "tc": "positive", "D": "positive", "G": "positive"}, "dove": "04", "appare": "M_{\\mathrm{tot}}=\\frac{A^{2}D}{G}"},
+ {"tipo": "numero", "espr": "(200e3)**2*10.1e6*3.086e16*2.909e-4/6.674e-11/1.989e30/1e10", "vale": "2.7", "dove": "04", "appare": "2{,}7\\cdot10^{10}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "10.1e6*0.68*2.909e-4/1e3", "vale": "2.0", "dove": "04", "appare": "2{,}0\\ \\mathrm{kpc}"},
+ {"tipo": "uguale", "sinistra": "diff(M*r**3/(r**2+a**2)**Rational(3,2),r)/(4*pi*r**2)", "vale": "3*M*a**2/(4*pi*(r**2+a**2)**Rational(5,2))", "ipotesi": {"M": "positive", "r": "positive", "a": "positive"}, "dove": "04", "appare": "\\rho(r)=\\frac{3M_{\\mathrm{tot}}}{4\\pi}\\,\\frac{a^{2}}{(r^{2}+a^{2})^{5/2}}"},
+ {"tipo": "simbolico", "dove": "04", "appare": "v(\\theta)=\\frac{A\\,\\theta}{(\\theta^{2}+\\theta_c^{2})^{3/4}}", "perche": "e' la legge empirica del testo d'esame (le unita' di A, arcmin^0,5 km/s, fissano l'esponente 3/4)."},
+ {"tipo": "simbolico", "dove": "04", "appare": "r=D\\theta", "perche": "distanza dal centro in radianti per la distanza della galassia: approssimazione di angolo piccolo."},
+ {"tipo": "simbolico", "dove": "04", "appare": "a=D\\theta_c", "perche": "definizione del raggio di nucleo."},
+ {"tipo": "simbolico", "dove": "05", "appare": "2K+U=0", "perche": "teorema del viriale per un sistema legato e stazionario (media temporale), come nelle slide di struttura stellare."},
+ {"tipo": "simbolico", "dove": "05", "appare": "K=\\frac12M\\langle v^{2}\\rangle", "perche": "definizione dell'energia cinetica totale con la velocita' quadratica media."},
+ {"tipo": "simbolico", "dove": "05", "appare": "U\\simeq-0{,}4\\,\\frac{GM^{2}}{R_{1/2}}", "perche": "stima dell'energia potenziale di un sistema stellare tipico con il raggio di meta' massa (Spitzer): un coefficiente di modello, che riproduce la formula usata nelle soluzioni d'esame."},
+ {"tipo": "uguale", "sinistra": "solve(M*v2-Rational(2,5)*G*M**2/R,M)[0]", "vale": "Rational(5,2)*v2*R/G", "ipotesi": {"M": "positive", "v2": "positive", "G": "positive", "R": "positive"}, "dove": "05", "appare": "M=\\frac{2{,}5\\,\\langle v^{2}\\rangle R_{1/2}}{G}"},
+ {"tipo": "uguale", "sinistra": "Rational(5,2)*3*s**2*R/G", "vale": "Rational(15,2)*s**2*R/G", "ipotesi": {"s": "positive", "R": "positive", "G": "positive"}, "dove": "05", "appare": "M=\\frac{7{,}5\\,\\sigma^{2}R_{1/2}}{G}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\langle v^{2}\\rangle=3\\sigma^{2}", "perche": "isotropia delle velocita': la dispersione lungo la linea di vista e' un terzo della velocita' quadratica media tridimensionale."},
+ {"tipo": "numero", "espr": "sqrt((9*17.20**2+49*16.66**2+79*15.16**2+90*14.32**2+150*13.34**2+556*9.53**2)/938)", "vale": "11.8", "dove": "06", "appare": "11{,}8\\ \\mathrm{km/s}"},
+ {"tipo": "numero", "espr": "4850*3*2.909e-4", "vale": "4.23", "dove": "06", "appare": "4{,}23\\ \\mathrm{pc}"},
+ {"tipo": "numero", "espr": "7.5*(11.775e3)**2*4.2326*3.086e16/6.674e-11/1.989e30/1e6", "vale": "1.0", "dove": "06", "appare": "1{,}0\\cdot10^{6}\\,M_\\odot"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\sigma^{2}=\\frac{\\sum_k(N_k-1)\\sigma_k^{2}}{N-1}", "perche": "e' la combinazione delle dispersioni parziali nella soluzione d'esame, valida se le velocita' medie dei gruppi coincidono: una definizione statistica."},
+ {"tipo": "numero", "espr": "7.5*(240e3)**2*0.75*3.086e16/6.674e-11/1e38", "vale": "1.5", "dove": "06", "appare": "1{,}5\\cdot10^{38}\\ \\mathrm{kg}"},
+ {"tipo": "numero", "espr": "7.5*(240e3)**2*0.75*3.086e16/6.674e-11/1.989e30/1e7", "vale": "7.5", "dove": "06", "appare": "7{,}5\\cdot10^{7}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "770e3*0.75/770e3", "vale": "0.75", "dove": "06", "appare": "0{,}75\\ \\mathrm{pc}"},
+ {"tipo": "numero", "espr": "(150e3)**2*30e3*3.086e16/6.674e-11/1.989e30/1e11", "vale": "1.6", "dove": "07", "appare": "1{,}6\\cdot10^{11}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "7.5*(1e6)**2*1e6*3.086e16/6.674e-11/1.989e30/1e15", "vale": "1.7", "dove": "07", "appare": "1{,}7\\cdot10^{15}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "(6e11)/(5e10+5e9)", "vale": "11", "dove": "07", "appare": "11"},
+ {"tipo": "numero", "espr": "3e12/(5e10+5e9)", "vale": "55", "dove": "07", "appare": "55"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\Upsilon=M/L", "perche": "definizione del rapporto massa-luminosita' in unita' solari."},
+ {"tipo": "numero", "espr": "9.0e10/2e10", "vale": "4.5", "dove": "07", "appare": "4{,}5"},
+ {"tipo": "numero", "espr": "2e10*(10/1e6)**2", "vale": "2", "dove": "08", "appare": "F_{\\mathrm{gal}}/F_\\star=2"},
+ {"tipo": "numero", "espr": "20e3/1e6*206265/60", "vale": "69", "dove": "08", "appare": "69'"},
+ {"tipo": "numero", "espr": "2*(0.5*60/69)**2", "vale": "0.38", "dove": "08", "appare": "0{,}38"},
+ {"tipo": "simbolico", "dove": "08", "appare": "F\\propto\\frac{L}{D^{2}}", "perche": "legge dell'inverso del quadrato."},
+ {"tipo": "simbolico", "dove": "09", "appare": "v^{2}(r)=GM(r)/r", "perche": "restituzione della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "M(r)\\propto r", "perche": "restituzione della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "M=2{,}5\\langle v^2\\rangle R/G", "perche": "restituzione della tappa 05."},
+ {"tipo": "simbolico", "dove": "10", "appare": "=7{,}5\\,\\sigma^{2}R_{1/2}/G", "perche": "restituzione della tappa 05."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\rho\\propto r^{-2}", "perche": "restituzione della tappa 01."},
+ {"tipo": "simbolico", "dove": "01", "appare": "v_{\\mathrm{alone}}^2=v_{\\mathrm{mis}}^2-v_{\\mathrm{vis}}^2", "perche": "conseguenza di v^2 = G M / r con masse che si sommano: la scomposizione del modello illustrativo."},
+ {"tipo": "numero", "espr": "11/16.", "vale": "0.6875", "dove": "03", "appare": "\\cos i=\\frac{b}{a}=11/16"},
+ {"tipo": "simbolico", "dove": "09", "appare": "2K+U=0", "perche": "restituzione del viriale della tappa 05."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\langle v^2\\rangle=3\\sigma^2", "perche": "restituzione dell'isotropia della tappa 05."},
+ {"tipo": "simbolico", "dove": "10", "appare": "v^2=GM(r)/r", "perche": "restituzione della tappa 01."},
+ {"tipo": "numero", "espr": "nsolve(diff(2*x/(x**2+0.4624)**0.75,x),x,1)", "vale": "0.96", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "poco sotto $\\theta=1'$"},
+ {"tipo": "numero", "espr": "nsolve(x**3/(x**2+0.4624)**1.5-0.5,x,1.3)", "vale": "0.89", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "0{,}89'"},
+ {"tipo": "numero", "espr": "nsolve(x**3/(x**2+0.4624)**1.5-0.9,x,3.5)", "vale": "2.5", "ipotesi": {"x": "positive"}, "dove": "04", "appare": "2{,}5'"},
+ {"tipo": "numero", "espr": "1.36e11/1e8", "vale": "1360", "dove": "07", "appare": "=1360\\,\\frac{M_\\odot}{L_\\odot}"},
+ {"tipo": "numero", "espr": "3/1360.", "vale": "0.0022", "dove": "07", "appare": "\\Omega=3/1360=0{,}0022"},
+ {"tipo": "numero", "espr": "30/1360.", "vale": "0.022", "dove": "07", "appare": "$\\Omega=0{,}022"},
+ {"tipo": "numero", "espr": "300/1360.", "vale": "0.22", "dove": "07", "appare": "$\\Omega=0{,}22"},
+ {"tipo": "numero", "espr": "0.3**0.6", "vale": "0.49", "dove": "10", "appare": "0{,}3^{0{,}6}=0{,}49"},
+ {"tipo": "numero", "espr": "8958/13.", "vale": "689", "dove": "10", "appare": "8958/13=689"},
+ {"tipo": "numero", "espr": "0.0223/0.49", "vale": "0.0455", "dove": "10", "appare": "\\Omega_b=0{,}0223/0{,}49=0{,}0455"},
+ {"tipo": "numero", "espr": "0.226/0.0455", "vale": "4.97", "dove": "10", "appare": "0{,}226/0{,}0455=4{,}97"},
+ {"tipo": "numero", "espr": "0.1/10", "vale": "0.01", "dove": "10", "appare": "\\Omega_\\nu=0{,}1/10=0{,}01"},
+ {"tipo": "simbolico", "dove": "07", "appare": "M/L=300", "perche": "valore tipico degli ammassi scelto come esempio"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché le galassie, e perché la massa che non si vede', meta:'i mattoni dell’universo visibile · una velocità che dice una massa · la famiglia di problemi più chiesta dopo le magnitudini',
+  blocchi:[
+  {t:'prosa', title:'I mattoni dell’universo visibile', tag:'architettura', html:R`
+  <p>De Bernardis apre la lezione 15 con la frase che dà la scala: <i>«i mattoni costitutivi dell&rsquo;Universo visibile sono le galassie, agglomerati autogravitanti di centinaia di miliardi di stelle»</i>. Le galassie contengono da $10^7$ a $10^{13}$ masse solari in stelle, gas, polvere e <i>«materia “oscura”, per ora non identificata»</i>, distano in media un megaparsec l&rsquo;una dall&rsquo;altra, e hanno luminosità media di $2\cdot10^{10}\,L_\odot$. Esistono in varie forme, ellittiche, a spirale e irregolari, che sono la classificazione di Hubble, e si raccolgono in ammassi, visibili meglio in raggi X che nel visibile per il gas caldissimo che riempie lo spazio fra le galassie.</p>
+  <p>Il problema che questo movimento risolve è quello che la mappa del corso indica come la seconda famiglia di esercizi più frequente: <b>dato un profilo di velocità, trovare la massa, e mostrare che non torna con la luce</b>. Gli strumenti sono due. Per un disco che ruota, la curva di rotazione: $v^2=GM(r)/r$, una riga. Per un sistema che non ruota ma ha moti disordinati, un ammasso di stelle o di galassie, il teorema del viriale, con la dispersione delle velocità al posto della rotazione. Il movimento li deriva entrambi e li usa su cinque sistemi reali delle prove: la Via Lattea, una spirale a 8 Mpc, una a 10 Mpc, l&rsquo;ammasso globulare ω Centauri, il nucleo di Andromeda. E in tutti, appena la luce finisce, la massa continua.</p>`}
+]},
+
+/* ---------------- 01 · LA CURVA DI ROTAZIONE ---------------- */
+{ num:'01', title:'La massa dalla velocità: la curva di rotazione', meta:'una stellina di prova · i due casi delle slide · la curva piatta e la massa che cresce come r',
+  blocchi:[
+  {t:'prosa', title:'La stellina di prova', tag:'lezione13_2020, diapositive 44-49', html:R`
+  <p>De Bernardis ragiona su <i>«una stellina “di prova” di massa m soggetta all&rsquo;azione della massa di tutte le altre stelle»</i>. In un sistema a simmetria sferica, per il teorema di Gauss, la stella sente solo la massa interna alla sua orbita, come se fosse concentrata al centro. Se l&rsquo;orbita è piccola sente poca massa, se è grande sente quasi tutta la Galassia. L&rsquo;equilibrio fra forza centripeta e gravitazione, $\frac{mv^{2}}{r}=\frac{GM(r)m}{r^{2}}$, dà
+  $$v(r)=\sqrt{\frac{GM(r)}{r}}.$$
+  La velocità di rotazione è una misura diretta della massa interna, $M(r)=v^2r/G$, e non richiede di sapere di che cosa sia fatta. Per un disco, invece che una sfera, i coefficienti cambiano di poco, ma per stime d&rsquo;ordine di grandezza la formula sferica è quella che le prove usano.</p>
+  <p>De Bernardis dà due casi particolari. Se la densità è uniforme, come nella parte centrale di una galassia, $M(r)=\frac43\pi\rho r^3$ e la velocità cresce linearmente, $v\propto r$: rotazione rigida. Se invece tutta la massa è concentrata al centro e fuori non c&rsquo;è niente, $M$ è costante e $v\propto r^{-1/2}$: è il moto kepleriano dei pianeti attorno al Sole. Per una galassia ci si aspetterebbe il primo caso dentro e il secondo fuori, dove la densità di stelle è crollata. La curva dovrebbe salire e poi scendere.</p>`},
+  {t:'prosa', title:'La curva che non scende', tag:'NGC 3198', html:R`
+  <p>Non scende. De Bernardis mostra la curva di NGC 3198, misurata con la riga a 21 cm ben oltre il bordo del disco stellare, e la conclusione è: <i>«si ottiene una curva di rotazione piatta fino a grandi distanze dal centro, dove la densità di stelle è diminuita moltissimo. Questo risultato è un po&rsquo; una sorpresa»</i>. Se la velocità resta costante, $v=v_0$, la massa interna è
+  $$M(r)=\frac{v_0^{2}r}{G}\propto r,$$
+  e cresce linearmente con il raggio proprio dove la luce non cresce più. La densità che la produce si ottiene derivando, $\rho(r)=\frac{1}{4\pi r^2}\frac{dM}{dr}$:
+  $$\rho(r)=\frac{v_0^{2}}{4\pi Gr^{2}},$$
+  una sfera isoterma, un <b>alone</b> di massa che si estende oltre il disco visibile e domina la massa totale. È la «necessità di materia oscura» del titolo della diapositiva di lezione 14, ed è il ragionamento da fare all&rsquo;orale. La luce finisce, la curva resta piatta, quindi $M(r)$ cresce come $r$ dove non c&rsquo;è luminosità.</p>`},
+  {t:'plot', title:'Che cosa ci si aspetta e che cosa si misura',
+   intro:R`Velocità di rotazione (km/s) contro raggio (kpc) per un modello illustrativo, con numeri scelti da me. In oro la curva attesa dalla sola materia luminosa (un disco con massa concentrata nei primi kpc, poi kepleriana); in ciano una curva piatta a 150 km/s come quella misurata per NGC 3198; in viola tratteggiato il contributo che deve aggiungere un alone.`,
+   plots:[
+    {kind:'func2d', xr:[0.1,30], yr:[0,220], height:300, equal:false,
+     title:'r (kpc)      v (km/s)',
+     curves:[{f:'190*sqrt(x*x/pow(x*x+9,1.5)*3)', col:'#d8a13a', label:'solo materia visibile'},
+             {f:'150*(1-exp(-x/1.5))', col:'#5eead4', label:'misurata (piatta)'},
+             {f:'sqrt(max(0,pow(150*(1-exp(-x/1.5)),2)-pow(190*sqrt(x*x/pow(x*x+9,1.5)*3),2)))', col:'#b98cff', label:'alone richiesto', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la curva della materia visibile sale, raggiunge un massimo intorno a qualche kpc e poi scende come $r^{-1/2}$. Quella misurata resta piatta. La differenza dei quadrati, $v_{\mathrm{alone}}^2=v_{\mathrm{mis}}^2-v_{\mathrm{vis}}^2$, è il contributo dell&rsquo;alone, trascurabile al centro e dominante fuori.</p>
+   <p><b>Che cosa impararne:</b> la materia oscura non è distribuita come la luce. Al centro delle spirali domina la materia visibile, all&rsquo;esterno l&rsquo;alone. Le velocità si sommano in quadratura perché le masse si sommano, e $v^2\propto M$.</p>`}
+]},
+
+/* ---------------- 02 · LA VIA LATTEA ---------------- */
+{ num:'02', title:'La rotazione della nostra Galassia, misurata dall’interno', meta:'la velocità proiettata a 21 cm · il punto tangente · R_0 = 8,5 kpc e 220 km/s · 224 milioni di anni per un giro',
+  blocchi:[
+  {t:'prosa', title:'Il metodo del punto tangente', tag:'lezione13_2020, diapositive 27-43', html:R`
+  <p>Siamo dentro la Galassia, quindi la sua curva di rotazione va ricostruita guardando lungo linee di vista diverse. Lungo una linea di vista a longitudine galattica $\ell$ la riga a 21 cm contiene il contributo di tutte le nubi incontrate, ciascuna spostata per effetto Doppler dalla sua velocità relativa al Sole. Se le nubi girano su orbite circolari con velocità angolare $\omega(R)$ e il Sole ha $\omega_0$ a $R_0$, la velocità radiale di una nube è, nella forma delle slide, $V=(\omega-\omega_0)R_0\sin\ell$. Se $\omega$ decresce con la distanza dal centro, la velocità radiale massima lungo la linea di vista è quella della nube nel <b>punto tangente</b>, a distanza $R_{\min}=R_0\sin\ell$ dal centro, dove l&rsquo;orbita è tangente alla linea di vista e tutta la sua velocità è lungo di essa. Misurando il massimo spostamento Doppler a ogni longitudine si ottiene $v(R_{\min})=V_{\max}+v_0\sin\ell$. Una longitudine di 30° esplora $4{,}25\ \mathrm{kpc}$ dal centro. De Bernardis dà per il Sole $R_0=8{,}5$ kpc e $\omega_0R_0=220$ km/s, cioè $\omega_0=0{,}84\cdot10^{-15}\ \mathrm{s^{-1}}$. Il risultato è la curva piatta.</p>`},
+  {t:'prosa', title:'Il Sole in orbita', tag:'prova del 5 maggio 2008, esercizio 2', html:R`
+  <p><i>Dalla curva di rotazione della Galassia si determini quanto tempo impiega il Sole a compiere un&rsquo;orbita, e la massa interna all&rsquo;orbita del Sole.</i> Con $R=8$ kpc e $v=220$ km/s, come nella soluzione, il periodo è $2\pi R/v$, cioè $223$ milioni di anni (la soluzione: 224). Dalla formazione del Sole sono passati circa $20$ giri. La massa interna all&rsquo;orbita è $v^2R/G$, cioè $9{,}0\cdot10^{10}\,M_\odot$. Le slide di lezione 15 danno per la Via Lattea una massa stellare di circa $5\cdot10^{10}\,M_\odot$ e una massa di gas di $5\cdot10^9$, su un disco di 12 kpc di raggio e 400 pc di spessore. Dentro l&rsquo;orbita del Sole visibile e dinamica sono ancora confrontabili. L&rsquo;alone oscuro, che le slide stimano fra $6\cdot10^{11}$ e $3\cdot10^{12}$ masse solari, sta soprattutto fuori.</p>`}
+]},
+
+/* ---------------- 03 · UNA GALASSIA A 21 CM ---------------- */
+{ num:'03', title:'Pesare una galassia lontana con un solo spettro a 21 cm', meta:'prova del 5 maggio 2008, esercizio 1 · la larghezza del profilo · la velocità sistemica · l’inclinazione dall’ellisse',
+  blocchi:[
+  {t:'prosa', title:'Il testo', tag:'esercizio di lezione e di prova', html:R`
+  <p><i>Osservando una galassia a 1420 MHz, più piccola della risoluzione del radiotelescopio, si misura il profilo della riga a 21 cm. Ogni unità sull&rsquo;asse orizzontale corrisponde a 10 kHz, e 1420,4 MHz corrisponde all&rsquo;ascissa 256. (1.1) Calcolare la larghezza a metà altezza $W_{50}$ e convertirla in km/s. (1.2) Calcolare la velocità sistemica. (1.3) Discutere l&rsquo;ipotesi che la forma della riga sia dovuta alla rotazione e stimare la massa, sapendo che la galassia è a spirale, a 8,2 Mpc, e la sua immagine è inscritta in un&rsquo;ellisse di 11′ × 16′.</i> L&rsquo;esercizio è anche nelle slide della lezione 14, che ne riportano la soluzione.</p>`},
+  {t:'prosa', title:'Il conto', tag:'tre passi', html:R`
+  <p>(1.1) Dalla figura $W_{50}$ va dall&rsquo;ascissa 185 alla 347, cioè 162 unità, $1{,}62\ \mathrm{MHz}$. Con $v=c\,\frac{\Delta\nu}{\nu_0}$ sono $342\ \mathrm{km/s}$ (la soluzione: 340). (1.2) Il centro del profilo è all&rsquo;ascissa 266, dieci unità dallo zero, e la velocità sistemica è $21\ \mathrm{km/s}$, cioè circa 20 km/s di allontanamento. (1.3) Un profilo «a doppio corno», largo e con due massimi ai bordi, è la firma di un disco in rotazione. Un lembo si allontana e l&rsquo;altro si avvicina, e la parte piatta della curva di rotazione accumula molto gas alle velocità estreme. La metà della larghezza è la velocità di rotazione <i>proiettata</i>, che va deproiettata con l&rsquo;inclinazione. Un disco circolare visto di sbieco appare come un&rsquo;ellisse con $\cos i=\frac{b}{a}=11/16$, quindi $\sin i=0{,}726$, e $v_{\mathrm{rot}}=\frac{W_{50}/2}{\sin i}$ vale $235\ \mathrm{km/s}$. Il raggio è metà dell&rsquo;asse maggiore, 8′ a 8,2 Mpc (la scala di distanza è quella del <span class="str" data-str="parsec-e-parallasse">parsec</span>), cioè $19{,}1\ \mathrm{kpc}$. La massa entro quel raggio è $v^2r/G$, cioè $2{,}5\cdot10^{11}\,M_\odot$. La soluzione scrive $2{,}7\cdot10^{11}$, con arrotondamenti diversi. Senza correggere per l&rsquo;inclinazione si troverebbe la metà, $1{,}3\cdot10^{11}\,M_\odot$: l&rsquo;inclinazione è il punto in cui questo conto si sbaglia più spesso.</p>`}
+]},
+
+/* ---------------- 04 · UNA CURVA ANALITICA ---------------- */
+{ num:'04', title:'Una curva di rotazione analitica: massa totale e profilo di densità', meta:'esonero del 30 novembre 2015 · dalla velocità alla massa e dalla massa alla densità · la sfera di Plummer',
+  blocchi:[
+  {t:'prosa', title:'Il testo e la massa', tag:'esonero A, esercizio 1', html:R`
+  <p><i>Per una galassia vista di taglio si misura una curva di rotazione ben approssimata da $v(\theta)=\frac{A\,\theta}{(\theta^{2}+\theta_c^{2})^{3/4}}$, con $\theta$ la distanza angolare dal centro in primi d&rsquo;arco, $A=200$ arcmin$^{0,5}$ km/s e $\theta_c=0{,}68'$. La galassia è a 10,1 Mpc. Assumendo simmetria sferica, si determinino la massa totale e la densità in funzione del raggio.</i> L&rsquo;esponente 3/4 non è scritto per intero nel testo estratto, ma è fissato dalle unità di $A$, che sono arcmin$^{0,5}$ km/s: è l&rsquo;unico che dà una velocità.</p>
+  <p>Con $r=D\theta$ (in radianti, nell&rsquo;<span class="str" data-str="angolo-piccolo">approssimazione di angolo piccolo</span>), $M(\theta)=v^2r/G$:
+  $$M(\theta)=\frac{A^{2}D\,\theta^{3}}{G(\theta^{2}+\theta_c^{2})^{3/2}}.$$
+  Per $\theta\gg\theta_c$ la velocità decresce come $\theta^{-1/2}$, kepleriana: questa galassia, a differenza di NGC 3198, ha una massa finita, e il limite dà
+  $$M_{\mathrm{tot}}=\frac{A^{2}D}{G},$$
+  con le unità angolari convertite, cioè $2{,}7\cdot10^{10}\,M_\odot$. Per la densità, con il raggio di nucleo $a=D\theta_c$, che vale $2{,}0\ \mathrm{kpc}$, $M(r)=M_{\mathrm{tot}}r^3/(r^2+a^2)^{3/2}$, e
+  $$\rho(r)=\frac{3M_{\mathrm{tot}}}{4\pi}\,\frac{a^{2}}{(r^{2}+a^{2})^{5/2}}.$$
+  È il profilo di Plummer: costante nel nucleo, $\propto r^{-5}$ fuori. Ha massa finita perché la densità cade molto più in fretta dell&rsquo;alone isotermo $\rho\propto r^{-2}$ della curva piatta. Il confronto fra i due profili è il confronto fra una galassia senza alone esteso e una con.</p>`}
+,
+  {t:'plot', title:'La curva dell’esonero 2015: velocità e massa contenuta',
+   intro:R`Ascissa $\theta$ in primi d’arco (1′ = 2,94 kpc a 10,1 Mpc). In ciano $v(\theta)$ in unità di 100 km/s; in oro $M(\theta)/M_{\mathrm{tot}}$. In viola tratteggiato, per confronto, la curva kepleriana $\propto\theta^{-1/2}$ che la velocità raggiunge all’esterno.`,
+   plots:[
+    {kind:'func2d', xr:[0.02,6], yr:[0,2.6], height:300, equal:false,
+     title:'theta (arcmin)',
+     curves:[{f:'2*x/pow(x*x+0.4624,0.75)', col:'#5eead4', label:'v / (100 km/s)'},
+             {f:'pow(x,3)/pow(x*x+0.4624,1.5)', col:'#d8a13a', label:'M(theta) / Mtot'},
+             {f:'x>0.5?2/sqrt(x):NaN', col:'#b98cff', label:'kepleriana', dash:true}],
+     marks:[{x:0.96, y:2.04, label:'massimo', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la velocità sale nel nucleo, raggiunge un massimo poco sotto $\theta=1'$ e poi scende come $\theta^{-1/2}$, appoggiandosi alla curva kepleriana. La massa contenuta arriva a metà del totale a circa $0{,}89'$, e a nove decimi intorno a $2{,}5'$.</p>
+   <p><b>Che cosa impararne:</b> una curva che scende in modo kepleriano dice che la massa è finita e che si è oltre il suo bordo. È esattamente quello che NGC 3198 <i>non</i> fa, e il confronto fra le due figure di questo movimento è il confronto fra una massa che finisce con la luce e una che continua.</p>`}
+]},
+
+/* ---------------- 05 · IL VIRIALE PER UN SISTEMA STELLARE ---------------- */
+{ num:'05', title:'Il teorema del viriale per i sistemi che non ruotano', meta:'2K + U = 0 · la dispersione di velocità al posto della rotazione · M = 7,5 sigma² R / G',
+  blocchi:[
+  {t:'prosa', title:'Dalla rotazione alla dispersione', tag:'la seconda metà dell’orale', html:R`
+  <p>Un ammasso globulare, una galassia ellittica, un ammasso di galassie non ruotano in modo ordinato: le loro stelle o galassie si muovono in tutte le direzioni, e la misura che si ha è la <b>dispersione delle velocità</b> lungo la linea di vista, $\sigma$, cioè l&rsquo;allargamento Doppler delle righe del sistema. Per pesarli serve il teorema del viriale, lo stesso della struttura stellare. Per un sistema legato e stazionario, mediando nel tempo, $2K+U=0$. L&rsquo;energia cinetica totale è $K=\frac12M\langle v^{2}\rangle$. L&rsquo;energia potenziale dipende da come è distribuita la massa. Per i profili tipici dei sistemi stellari una buona stima è $U\simeq-0{,}4\,\frac{GM^{2}}{R_{1/2}}$, con $R_{1/2}$ il raggio che contiene metà della massa (o della luce, se la luce segue la massa). Allora
+  $$M=\frac{2{,}5\,\langle v^{2}\rangle R_{1/2}}{G}.$$
+  Se le velocità sono isotrope, ogni componente porta un terzo dell&rsquo;energia, $\langle v^{2}\rangle=3\sigma^{2}$, e
+  $$M=\frac{7{,}5\,\sigma^{2}R_{1/2}}{G}.$$
+  È la formula che le soluzioni delle prove usano, e da qui si capisce da dove vengono il 2,5 e il 7,5. Il primo viene dal viriale con il coefficiente di forma 0,4, il secondo dall&rsquo;isotropia.</p>`}
+,
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché nello stimatore del viriale compare il raggio di metà massa e non il raggio esterno del sistema?`,
+    a:R`Perché l&rsquo;energia potenziale dipende da come la massa è distribuita, e il raggio di metà massa la riassume in modo robusto: il coefficiente 0,4 vale con buona approssimazione per profili molto diversi se si usa $R_{1/2}$, mentre con il raggio esterno, mal definito e dominato dalle code, il coefficiente cambierebbe da sistema a sistema. In pratica si usa il raggio di metà luce, supponendo che la luce segua la massa.`},
+   {q:R`Che cosa succede alla massa stimata se le velocità non sono isotrope, ma le orbite sono soprattutto radiali e il sistema è visto di lato?`,
+    a:R`La dispersione lungo la linea di vista non è più un terzo di $\langle v^2
+angle$: con orbite radiali e linea di vista perpendicolare a gran parte di esse si misura una dispersione più piccola, e $3\sigma^2$ sottostima $\langle v^2
+angle$, quindi la massa. L&rsquo;anisotropia delle orbite è la principale incertezza del metodo, ed è il motivo per cui le masse viriali si danno con un fattore 2 di incertezza.`}
+  ]}
+]},
+
+/* ---------------- 06 · OMEGA CEN E M31 ---------------- */
+{ num:'06', title:'Due sistemi pesati con il viriale: ω Centauri e il nucleo di Andromeda', meta:'esonero del 15 dicembre 2010 · compito del 9 gennaio 2006 · un milione di masse solari, e settantacinque milioni in un parsec',
+  blocchi:[
+  {t:'prosa', title:'ω Centauri', tag:'esonero A, 15/12/2010, esercizio 1', html:R`
+  <p><i>L&rsquo;ammasso globulare ω Cen dista 4850 pc. Sono dati il profilo di luminosità in funzione della distanza angolare dal centro e una tabella delle dispersioni di velocità in sei intervalli di distanza: 17,20 km/s con 10 stelle, 16,66 con 50, 15,16 con 80, 14,32 con 91, 13,34 con 151, 9,53 con 557. Si determini la massa.</i> La soluzione combina le dispersioni parziali in una globale, pesando con il numero di stelle, $\sigma^{2}=\frac{\sum_k(N_k-1)\sigma_k^{2}}{N-1}$, il che vale se le velocità medie dei gruppi coincidono. Viene $11{,}8\ \mathrm{km/s}$: dominano le 557 stelle esterne, con la dispersione più bassa. Il raggio di metà luce, letto dal profilo, è 3′, cioè $4{,}23\ \mathrm{pc}$ a quella distanza. Con $M=7{,}5\sigma^2R_{1/2}/G$ la massa è $1{,}0\cdot10^{6}\,M_\odot$, il risultato della soluzione. È il più massiccio degli ammassi globulari della Galassia, e il suo rapporto massa-luminosità è quello di una popolazione stellare vecchia, di qualche unità. Negli ammassi globulari non c&rsquo;è bisogno di materia oscura.</p>`},
+  {t:'prosa', title:'Il nucleo di M31', tag:'compito 02, 9/1/2006, esercizio 2', html:R`
+  <p><i>Dalla dispersione delle velocità radiali delle stelle nel nucleo di M31, a 770 kpc, si determini la massa viriale entro 0,75 pc dal centro.</i> Il raggio di $0{,}75\ \mathrm{pc}$ corrisponde all&rsquo;angolo indicato dalla figura, e la dispersione a quella distanza è di circa 240 km/s. Con lo stesso stimatore la massa è $1{,}5\cdot10^{38}\ \mathrm{kg}$, cioè $7{,}5\cdot10^{7}\,M_\odot$, il valore della soluzione. Settantacinque milioni di masse solari in un parsec e mezzo di diametro sono una densità che nessun ammasso di stelle può avere senza collassare: è un buco nero supermassiccio, come quello della nostra Galassia pesato con l&rsquo;orbita di una stella.</p>`}
+]},
+
+/* ---------------- 07 · MASSA E LUCE ---------------- */
+{ num:'07', title:'Massa e luce: il rapporto massa-luminosità e la materia oscura', meta:'NGC 3198 · la Via Lattea · gli ammassi di galassie e Zwicky · che cosa dice il numero M/L',
+  blocchi:[
+  {t:'prosa', title:'Il rapporto massa-luminosità', tag:'il numero che dice se la massa si vede', html:R`
+  <p>Il modo quantitativo di dire «la massa non torna con la luce» è il <b>rapporto massa-luminosità</b>, $\Upsilon=M/L$ in unità solari. Una popolazione stellare ha $\Upsilon$ fra circa 1 e qualche unità, a seconda dell&rsquo;età. Le stelle massicce, luminose e di vita breve abbassano $\Upsilon$, le nane rosse e le nane bianche lo alzano. Un valore molto più grande vuol dire massa che non emette.</p>
+  <p>Per NGC 3198, letto sulla figura delle slide, la curva resta piatta a circa 150 km/s fino a circa 30 kpc. Sono valori letti da una figura e li dichiaro come tali. La massa entro 30 kpc è $1{,}6\cdot10^{11}\,M_\odot$, mentre la luce di una spirale come questa è di qualche $10^{10}\,L_\odot$, e il rapporto cresce con il raggio fino a decine. Per la Via Lattea, entro l&rsquo;orbita del Sole, la tappa 02 ha dato $9{,}0\cdot10^{10}\,M_\odot$ contro una luminosità dell&rsquo;ordine della media delle galassie, $2\cdot10^{10}\,L_\odot$: $\Upsilon\simeq4{,}5$, ancora compatibile con le stelle. Ma l&rsquo;alone delle slide, da $6\cdot10^{11}$ a $3\cdot10^{12}$ masse solari, è da $11$ a $55$ volte la massa di stelle e gas messi insieme.</p>
+  <p>Negli <b>ammassi di galassie</b> la discrepanza è ancora più grande, ed è lì che fu vista per la prima volta, da Zwicky negli anni &rsquo;30, nell&rsquo;ammasso della Chioma. Con numeri tipici per un ammasso ricco, che uso come illustrazione d&rsquo;<span class="str" data-str="ordini-di-grandezza">ordine di grandezza</span> (dispersione di 1000 km/s su un raggio di 1 Mpc), lo stimatore del viriale dà $1{,}7\cdot10^{15}\,M_\odot$, cento volte più della luce delle galassie. Parte della massa mancante è il gas caldo che riempie l&rsquo;ammasso e brilla in raggi X, quello che le slide mostrano in RXJ1347. Ma anche contando quel gas resta un fattore di molte volte. La materia oscura domina la massa delle galassie e degli ammassi, e non è fatta di stelle, gas o polvere che emettano o assorbano luce.</p>`}
+,
+  {t:'prosa', title:'Il quadro: forme, ammassi, nuclei attivi', tag:'lezione15_2017 e lezione8_2017', html:R`
+  <p>Le slide della lezione 15 di de Bernardis danno il quadro in cui i conti di questo movimento si collocano. Le galassie hanno forme diverse, ed è la <b>classificazione di Hubble</b>. Le <b>ellittiche</b> sono sistemi sferoidali senza disco, sostenuti dalla dispersione delle velocità e pesati con il viriale. Le <b>spirali</b> hanno un disco in rotazione, con bracci ricchi di gas e di stelle giovani, e un rigonfiamento centrale: si pesano con la curva di rotazione. Le <b>irregolari</b>, come le Nubi di Magellano a 50 e 70 kpc, che le slide mostrano mentre perturbano gravitazionalmente la Via Lattea, non hanno una struttura ordinata. Distribuite sul cielo, le galassie appaiono statisticamente isotrope, con conteggi per grado quadrato che seguono una statistica di Poisson. Guardando in tre dimensioni si raccolgono in <b>ammassi</b>, con sovradensità fino al 100% secondo le slide, e lasciano <b>vuoti</b> sottodensi. Gli ammassi si vedono meglio in raggi X che nel visibile, perché fra le galassie c&rsquo;è gas caldissimo. De Bernardis mostra la Vergine, la Chioma e RXJ1347 con l&rsquo;emissione X sovrapposta alle galassie ottiche.</p>
+  <p>Al centro di molte galassie c&rsquo;è un buco nero supermassiccio, come quello pesato nella nostra e quello appena trovato nel nucleo di Andromeda. Quando il buco nero accresce materia, il nucleo diventa <b>attivo</b>: un nucleo galattico attivo (AGN) può superare in luminosità l&rsquo;intera galassia, da una regione più piccola del sistema solare. De Bernardis mostra due casi della famiglia. NGC 4261 ha un disco di polvere attorno al nucleo e due getti radio. Centaurus A è una <b>radiogalassia</b>, i cui lobi radio, estesi centinaia di kpc, brillano per sincrotrone di elettroni relativistici portati dai getti. I <b>quasar</b> (QSO) sono i nuclei attivi più luminosi, visti a distanze cosmologiche: oggetti quasi puntiformi con righe di emissione larghe e fortemente spostate verso il rosso. Gli esercizi sul redshift dei QSO, come quello della lente gravitazionale che sdoppia un quasar dietro una galassia a $z=0{,}09$, appartengono alla misura delle distanze e alla cosmologia. Qui interessa che la massa dei buchi neri centrali, pesata con le velocità come in questo movimento, va da milioni a miliardi di masse solari, e che la loro attività è uno dei modi con cui le galassie si accendono e si spengono.</p>`},
+  {t:'prosa', title:'Dal rapporto massa-luce delle galassie a Ω₀', tag:'Marconi, cap. 8.7, p. 116; de Bernardis, lezione 20', html:R`
+  <p>Il rapporto massa-luminosità è anche lo strumento con cui si passa dalle galassie all&rsquo;universo. Marconi descrive il procedimento: si combina la massa delle galassie, stelle più materia oscura per tipo morfologico, con la funzione di luminosità, e si ottiene la densità di massa media; lo stesso si fa con gli ammassi pesati con il viriale e con le lenti. De Bernardis dà il numero che serve per farlo a mano: la densità di luminosità delle galassie è $j\approx10^8\,L_\odot$ Mpc$^{-3}$. La densità critica, $1{,}36\cdot10^{11}\,M_\odot$ Mpc$^{-3}$, corrisponde allora a un rapporto massa-luce critico</p>
+  <p>$$\left(\frac{M}{L}\right)_c=\frac{1{,}36\cdot10^{11}}{10^8}=1360\,\frac{M_\odot}{L_\odot},$$</p>
+  <p>e ogni misura di $M/L$ diventa un $\Omega$. Con le stelle, $M/L\approx3$, si ottiene $\Omega=3/1360=0{,}0022$; con le curve di rotazione piatte fino ai bordi degli aloni, $M/L\approx30$, $\Omega=0{,}022$; con gli ammassi, dove il viriale dà $M/L$ di qualche centinaio, per $M/L=300$, $\Omega=0{,}22$. Il valore cresce con la scala su cui si pesa, perché più grande è la scala più alone si include, e si stabilizza agli ammassi: è il percorso per cui, scrive Marconi, <i>«tutte queste analisi indicano che $\Omega_0\simeq0{,}2-0{,}3$»</i>.</p>`},
+  {t:'plot', title:'Ω contro il rapporto massa-luce: dalle stelle agli ammassi',
+   intro:R`log₁₀ Ω contro log₁₀(M/L) in unità solari, con Ω = (M/L)/1360 per una densità di luminosità di 10⁸ L☉/Mpc³ (de Bernardis) e la densità critica per H₀ = 70. I punti sono le tre scale del testo: stelle, galassie con alone, ammassi. La retta tratteggiata è Ω = 0,3.`,
+   plots:[
+    {kind:'func2d', xr:[0,3.5], yr:[-3,0.5], height:260, equal:false,
+     title:'log₁₀ M/L      log₁₀ Ω',
+     curves:[{f:'x-log(1360)/log(10)', col:'#5eead4', label:'Ω = (M/L)/1360'},
+             {f:'log(0.3)/log(10)', col:'#94a3b8', label:'Ω = 0,3', dash:true}],
+     marks:[{x:0.477, y:-2.657, label:'stelle: M/L = 3', col:'#d8a13a', up:true},
+            {x:1.477, y:-1.657, label:'galassie: 30', col:'#d8a13a', up:true},
+            {x:2.477, y:-0.657, label:'ammassi: 300', col:'#f87171', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> ogni ordine di grandezza in M/L è un ordine di grandezza in Ω; gli ammassi arrivano a 0,2, e per chiudere l'universo servirebbe M/L = 1360.</p>
+   <p><b>Che cosa impararne:</b> la materia che si pesa aumenta con la scala fino agli ammassi e poi si ferma intorno a Ω ≈ 0,3: non basta per un universo critico, ed è uno dei motivi per cui serve Λ.</p>`}
+]},
+
+/* ---------------- 08 · PERCHÉ LE GALASSIE SI VEDONO POCO ---------------- */
+{ num:'08', title:'Perché è difficile vedere una galassia a occhio nudo', meta:'un esercizio di lezione · flusso totale contro brillanza superficiale · la luce sparsa su un grande angolo',
+  blocchi:[
+  {t:'prosa', title:'Il conto', tag:'lezione15_2017, esercizio', html:R`
+  <p><i>Perché è difficile vedere le galassie a occhio nudo? Confrontare la potenza radiativa ricevuta da una tipica galassia a 1 Mpc con quella ricevuta da una stella simile al Sole a 10 pc.</i> Con $F\propto\frac{L}{D^{2}}$, una galassia di $2\cdot10^{10}\,L_\odot$ a $10^6$ pc contro un Sole a 10 pc dà $F_{\mathrm{gal}}/F_\star=2$: la galassia manda <i>il doppio</i> della luce di una stella di quinta <span class="str" data-str="magnitudine">magnitudine</span>, visibile a occhio nudo. Il punto è che quella luce non viene da un punto. Una galassia di 20 kpc di diametro, a 1 Mpc, sottende un angolo di $69'$, più del doppio della Luna piena. L&rsquo;occhio rivela le sorgenti puntiformi per il loro flusso, ma le sorgenti estese per la loro <b>brillanza superficiale</b>, e la stessa luce distribuita su un disco così grande è debolissima per unità di angolo solido. Confrontata con una sorgente estesa grande come la Luna, mezzo grado, la galassia ha una brillanza superficiale pari a $0{,}38$ volte quella di una sorgente di quel diametro che portasse lo stesso flusso della stella. È poco sopra il fondo del cielo notturno. Andromeda si vede a occhio nudo, ma solo il suo nucleo, dove la brillanza è più alta, e solo sotto un cielo buio. È la distinzione fra flusso e brillanza, che torna a decidere che cosa si vede e che cosa no.</p>`}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: la massa dinamica e il viriale', meta:'la domanda teorica della mappa · il copione in sei mosse',
+  blocchi:[
+  {t:'reveal', title:'Il copione', tag:'sei mosse', steps:[
+   {label:'Mossa 1: la stellina di prova', body:R`<p>«Una stella su un&rsquo;orbita circolare sente, per Gauss, solo la massa interna: $v^{2}(r)=GM(r)/r$. La velocità misura la massa senza sapere di che cosa sia fatta.»</p>`},
+   {label:'Mossa 2: i due casi', body:R`<p>«Densità uniforme: $v\propto r$. Massa concentrata: $v\propto r^{-1/2}$, kepleriano. Per una galassia ci si aspetta di salire e poi scendere, perché la luce si concentra al centro.»</p>`},
+   {label:'Mossa 3: la curva piatta', body:R`<p>«Le curve misurate a 21 cm, come NGC 3198, restano piatte ben oltre il disco: $M(r)\propto r$ dove non c&rsquo;è più luce, cioè un alone con $\rho\propto r^{-2}$. È la materia oscura.»</p>`},
+   {label:'Mossa 4: il viriale', body:R`<p>«Per un sistema legato e stazionario $2K+U=0$. Con $K=\frac12M\langle v^2\rangle$ e $U\simeq-0{,}4GM^2/R_{1/2}$ si ha $M=2{,}5\langle v^2\rangle R/G$.»</p>`},
+   {label:'Mossa 5: la dispersione', body:R`<p>«Si misura la dispersione lungo la linea di vista; con velocità isotrope $\langle v^2\rangle=3\sigma^2$, quindi $M=7{,}5\sigma^2R/G$. ω Cen: 12 km/s su 4 pc, un milione di masse solari.»</p>`},
+   {label:'Mossa 6: la conclusione', body:R`<p>«Il rapporto massa-luminosità delle galassie cresce con il raggio fino a decine, quello degli ammassi di galassie è delle centinaia: la maggior parte della massa non emette.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove la materia oscura torna', meta:'otto voci · dalla Via Lattea alla cosmologia',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Curva di rotazione:</b> $v^2=GM(r)/r$; piatta vuol dire $M\propto r$, $\rho\propto r^{-2}$.</li>
+  <li><b>Via Lattea:</b> $R_0\simeq8$-$8{,}5$ kpc, $v_0=220$ km/s, un giro in circa 224 milioni di anni.</li>
+  <li><b>Masse della Galassia:</b> stelle $5\cdot10^{10}$, gas $5\cdot10^9$, alone $10^{12}$ masse solari circa.</li>
+  <li><b>21 cm:</b> $v=c\Delta\nu/\nu_0$; 1 MHz a 1420 MHz sono 211 km/s; deproiettare con $\sin i$, $\cos i=b/a$.</li>
+  <li><b>Viriale:</b> $M\simeq2{,}5\langle v^2\rangle R_{1/2}/G=7{,}5\,\sigma^{2}R_{1/2}/G$.</li>
+  <li><b>ω Cen:</b> circa $10^6$ masse solari; nucleo di M31: $7{,}5\cdot10^7$ masse solari in 0,75 pc.</li>
+  <li><b>Galassie:</b> da $10^7$ a $10^{13}$ masse solari; luminosità media $2\cdot10^{10}\,L_\odot$; distanze del Mpc.</li>
+  <li><b>M/L:</b> stelle 1-5; spirali fino a decine all&rsquo;esterno; ammassi di galassie centinaia.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>La materia oscura misurata qui con le velocità torna in cosmologia con un altro nome, $\Omega_m$, la densità di materia dell&rsquo;universo. Le misure del fondo cosmico, della nucleosintesi e della struttura a grande scala dicono che la materia ordinaria è circa un sesto della materia totale, lo stesso ordine di grandezza dei rapporti trovati nelle galassie e negli ammassi. E la materia oscura è l&rsquo;ingrediente che permette alle strutture di crescere. Senza di essa le piccole fluttuazioni dell&rsquo;universo primordiale non avrebbero avuto il tempo di diventare galassie. Il viriale, infine, torna in una forma quasi identica nella stima della massa degli ammassi dalla loro emissione X e dalle lenti gravitazionali, che pesano la stessa massa con la luce piegata invece che con le velocità.</p>`},
+  {t:'prosa', title:'Quanta materia oscura, e di che cosa può essere fatta', tag:'Marconi, cap. 8.7-8.8 e 14.1, pp. 116-118, 218-220', html:R`
+  <p>Marconi mette insieme le misure di massa su scale crescenti con due metodi che le slide non usano. Il primo sono le velocità peculiari delle galassie, gli scarti dal flusso di Hubble prodotti dalle sovradensità, che al primo ordine vanno come $u\propto H_0r\,\Omega_0^{0{,}6}\,\delta$: a parità di contrasto di densità, un universo con $\Omega_0=0{,}3$ produce velocità peculiari pari a $0{,}3^{0{,}6}=0{,}49$ volte quelle di un universo critico, e il confronto con le velocità misurate dà $\Omega_0\gt 0{,}1$ e circa 0,2-0,3. Il secondo è la statistica delle lenti gravitazionali: la survey CLASS ha trovato 13 sorgenti radio multiple su 8958, una ogni $8958/13=689$, il che, con un universo piatto, dà $\Omega_0=0{,}31^{+0{,}27}_{-0{,}14}$.</p>
+  <p>La conclusione è quella della tappa 07 in forma cosmologica: <i>«la maggior parte della materia dell&rsquo;universo non può essere barionica»</i>, perché la nucleosintesi dà $\Omega_bh^2=0{,}0223$, cioè $\Omega_b=0{,}0223/0{,}49=0{,}0455$ per $h=0{,}7$. La tabella dei parametri WMAP-7 riportata nel libro (Komatsu e collaboratori, 2011) dà $\Omega_c=0{,}226$ e $\Omega_b=0{,}0455$: c&rsquo;è un rapporto $0{,}226/0{,}0455=4{,}97$ tra materia oscura e barioni. Il numero va confrontato con i rapporti di de Bernardis, dieci volte la massa luminosa nelle galassie e venti negli ammassi: la differenza è che non tutti i barioni sono luminosi, e il gas caldo degli ammassi, visibile solo in X, ne contiene più delle stelle.</p>
+  <p>Che cosa sia la materia oscura, Marconi lo discute per esclusione. I neutrini, se avessero 10 eV ciascuno, chiuderebbero l&rsquo;universo; con le masse suggerite dalle oscillazioni, circa 0,1 eV, contano per $\Omega_\nu=0{,}1/10=0{,}01$, quanto i barioni ma non abbastanza, e soprattutto sono «caldi»: relativistici al disaccoppiamento, cancellano con il loro moto libero le perturbazioni su scale più piccole degli ammassi. Gli assioni, tra $10^{-5}$ e $10^{-2}$ eV, sono freddi perché mai termalizzati. Le WIMPs, particelle con masse dal GeV in su, si disaccoppiano quando sono già non relativistiche, e per dare $\Omega\approx0{,}3$ devono avere una sezione d&rsquo;urto di circa $5\cdot10^{-36}$ cm$^2$: sono la «materia oscura fredda» del modello standard, quella che le curve di rotazione di questo movimento pesano senza poterla vedere.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-13-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-13 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-13-le-galassie-e-la-materia-oscura.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

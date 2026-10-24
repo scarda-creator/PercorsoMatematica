@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-10 — Materia degenere e stelle compatte: la massa oltre la quale nessun equilibrio regge</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-10 — Materia degenere e stelle compatte: la massa oltre la quale nessun equilibrio regge</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+STRUM["elettronvolt"] = {"nome":"Elettronvolt","riga":"L'energia che un elettrone acquista attraversando una differenza di potenziale di un volt: $1\\ \\mathrm{eV}=1{,}602\\cdot10^{-19}$ J; divisa per $c^{2}$ è una massa, $1\\ \\mathrm{eV}/c^{2}=1{,}783\\cdot10^{-36}$ kg.","serve":"A leggere senza conversioni le tabelle in cui la fisica delle particelle e l'astrofisica scrivono le masse a riposo come energie — l'elettrone 0,511 MeV, il protone 938 MeV, il bosone di Higgs 125 GeV. La scelta non è una bizzarria di notazione: in un processo la quantità che si conserva è l'energia, e scrivere la massa già in energia dice a colpo d'occhio quali reazioni sono possibili e quante ne resta per l'energia cinetica o per i fotoni. L'elettronvolt ha anche un secondo mestiere, e in astrofisica è il più usato dei due: convertito in temperatura tramite $k_BT$ dà la scala termica a cui un processo di quella energia diventa frequente, e questo è ciò che permette di dire a che punto della storia dell'universo o a che profondità di una stella un certo processo si accende.","esempio":"Dalla massa del protone espressa come energia, $938{,}3$ MeV, si ricavano i chilogrammi in un passaggio: $m_p=938{,}3\\cdot10^{6}\\cdot1{,}783\\cdot10^{-36}=1{,}673\\cdot10^{-27}$ kg, che è il valore stampato in calce al foglio d'esame. Sul versante termico, $T=\\dfrac{1{,}602\\cdot10^{-19}}{1{,}381\\cdot10^{-23}}=11600$ K: un'energia di un elettronvolt corrisponde a poco più di undicimila kelvin, e siccome ionizzare l'idrogeno costa 13,6 eV si capisce subito perché serva una fotosfera da qualche decina di migliaia di kelvin per trovarlo ionizzato.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"05","come":"le masse delle particelle elementari scritte come energie, con la conversione in chilogrammi e la gerarchia delle masse, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.602177e-19/(2.99792458e8)**2*1e36","vale":"1.783","dove":"riga","appare":"1,783\\cdot10^{-36}"},{"tipo":"numero","espr":"938.3e6*1.783e-36*1e27","vale":"1.673","dove":"esempio","appare":"1,673\\cdot10^{-27}"},{"tipo":"numero","espr":"1.602e-19/1.381e-23","vale":"11600","dove":"esempio","appare":"11600"}]};
+STRUM["raggio-di-schwarzschild"] = {"nome":"Raggio di Schwarzschild","riga":"$r_s=2GM/c^{2}$: il raggio al quale il coefficiente temporale della metrica si annulla, e sotto il quale nessun segnale può più tornare indietro.","serve":"Si ottiene in due modi indipendenti, e vale la pena saperli dire entrambi perché uno è sbagliato e arriva giusto per caso, l'altro è quello vero. Newtonianamente, $r_s$ è il raggio per cui la velocità di fuga $v=\\sqrt{2GM/r}$ eguaglia $c$: il conto è fuori contesto, perché la relatività speciale non ammette velocità di fuga maggiori di $c$ nel senso newtoniano, e un fotone non 'fugge lentamente' per poi fermarsi. Il risultato è però numericamente corretto, e la ragione vera si vede nella metrica in campo debole derivata dal redshift gravitazionale: il coefficiente $g_{00}=1-2GM/(rc^{2})$ si annulla esattamente allo stesso $r$. È lì che il tempo proprio di un osservatore all'infinito smette di avere senso rispetto a un orologio fermo a quel raggio, e la singolarità è quella delle coordinate di Schwarzschild, non necessariamente dello spazio-tempo.","esempio":"Per il Sole, $M_\\odot=1{,}989\\cdot10^{30}$ kg, $r_s=2{,}954\\cdot10^{3}$ m: tre chilometri, contro un raggio reale di $6{,}957\\cdot10^{8}$ m — il Sole dista dal collasso un fattore $2{,}4\\cdot10^{5}$. Per la Terra, $r_s=8{,}866$ mm: comprimere tutta la massa terrestre dentro una sfera di meno di un centimetro di raggio la trasformerebbe in un buco nero.","pieno":{"file":"as-02-lo-spaziotempo-e-la-gravita.html","tappa":"09","come":"le due derivazioni del raggio di Schwarzschild nell'ordine in cui si dicono all'orale — l'argomento newtoniano della velocità di fuga e la singolarità del coefficiente metrico derivato dal redshift gravitazionale"},"controllo":[{"tipo":"uguale","sinistra":"sqrt(2*G*M/(2*G*M/c**2))","vale":"c","ipotesi":{"G":"positive","M":"positive","c":"positive"},"dove":"serve","appare":"v=\\sqrt{2GM/r}"},{"tipo":"numero","espr":"2*6.674e-11*1.989e30/(2.998e8)**2/1e3","vale":"2.954","dove":"esempio","appare":"2{,}954\\cdot10^{3}"},{"tipo":"numero","espr":"2*6.674e-11*5.97e24/(2.998e8)**2*1e3","vale":"8.866","dove":"esempio","appare":"8{,}866"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-10: Materia degenere e stelle compatte: la massa oltre la quale nessun equilibrio regge <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-10 — materia degenere e stelle compatte
+identita:  quando il principio di esclusione sostiene una stella al posto della pressione termica, esiste una
+           massa oltre la quale nessun equilibrio e' possibile; oltre, restano stelle di neutroni e buchi
+           neri.
+copre:     R.2
+serve:     as-09 (equilibrio idrostatico, viriale, politropi)
+apre:      calcolato da verifica-mappa.py
+profondita: comprensione (2 prove), con la stima di Chandrasekhar fatta per intero perche' e' corta e
+           bellissima. All'orale: pressione di degenerazione e limite di Chandrasekhar.
+fonti:     lezione8_2017 (pagine 21-50), con lo stesso contenuto in lezione8_2020 e lezione9_2020 (pagine
+           1-12): la pressione di degenerazione dal principio di indeterminazione e dal principio di
+           esclusione, il caso non relativistico (politropo n=3/2) e ultrarelativistico (n=4/3, cioe'
+           P ~ rho^{4/3}), Landau, le nane bianche (densita' 1e5-1e6 g/cm3, nane nere), la relazione
+           massa-raggio, la massa di Chandrasekhar M_Ch = 5,83/mu_e^2 M_sun = 1,46 M_sun, le supernovae Ia,
+           le stelle di neutroni (8-18 M_sun di progenitore, 1,2-2 M_sun, 10 km, 1e14 g/cm3), le pulsar
+           dalla conservazione del momento angolare (1 mese -> 0,025 s), Jocelyn Bell, la Crab (0,033 s),
+           i buchi neri, il centro galattico (a_proj = 4,4 giorni luce, T = 14,4 anni, meno di 17 ore
+           luce), il raggio di Schwarzschild (2,95 km), GW170817.
+           Choudhuri, Astrophysics for Physicists, §5.4: l'energia di rotazione come sorgente delle
+           pulsar, Pdot ~ 1e-15 s/s, la potenza persa dalla Crab (6e31 W) pari a quella della nebulosa.
+           lezione10_2020_B, diapositiva 2: l'esercizio di lezione sulla nana bianca in accrescimento,
+           punti 3-5 (tempo per arrivare a 1,4 M_sun, flusso con M_V = -19,3, visibilita' a occhio nudo).
+           DICHIARATO (tappa 03): la stima con il bilancio di energie da' 0,46 M_sun, un terzo del valore
+           esatto; il fattore viene dalla struttura del politropo n=3, che le slide danno senza
+           derivazione (5,83/mu_e^2).
+           DICHIARATO (tappa 08): la massa del buco nero centrale calcolata con il semiasse PROIETTATO
+           delle slide e' un limite inferiore (2,1e6 M_sun).
+           Masani, Astrofisica, cap. 3-5 (pagine 37-41) e cap. 16 (pagine 186-196), letto per intero dal dossier:
+           la massa minima dei pianeti, la massa scala alpha_G^-3/2 m_p, la tabella rho_c-R-M delle nane bianche
+           fino a 1,44, la neutronizzazione, il limite di circa 2 M_sun delle stelle di neutroni, le fasce di
+           massa dei destini stellari, il collasso rotante, la Crab (Toktaga, 1054), le supernovae storiche.
+           Marconi, Cosmologia (pagine 47-49 e 114): le curve di luce delle SN Ia dilatate di (1+z) e
+           l'innesco in materia degenere. Le altre pagine di Marconi del dossier (45-46) sono di cosmologia.
+           DICHIARATO (Masani): la neutronizzazione a 1e12 g/cm^3 e' la soglia di neutron drip; per protoni
+           liberi la soglia e' 2,4e7 g/cm^3. La relazione massa-raggio approssimata (Nauenberg) usata per la
+           figura e' standard, non delle fonti.
+registro:  lezione8_2017, lezione8_2020, lezione9_2020
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "01", "appare": "\\Delta x\\,\\Delta p_x\\ge\\hbar", "perche": "e' il principio di indeterminazione nella forma (approssimata) delle slide."},
+ {"tipo": "uguale", "sinistra": "solve(2*(Rational(4,3)*pi*pF**3)*V/h**3-N,pF)[0]", "vale": "h*(3*N/(8*pi*V))**Rational(1,3)", "ipotesi": {"pF": "positive", "V": "positive", "h": "positive", "N": "positive"}, "dove": "01", "appare": "p_F=\\hbar(3\\pi^{2}n)^{1/3}"},
+ {"tipo": "uguale", "sinistra": "(2*pi*hb)*(3*n/(8*pi))**Rational(1,3)", "vale": "hb*(3*pi**2*n)**Rational(1,3)", "ipotesi": {"hb": "positive", "n": "positive"}, "dove": "01", "appare": "\\hbar(3\\pi^{2}n)^{1/3}"},
+ {"tipo": "simbolico", "dove": "01", "appare": "N=2\\cdot\\frac{\\frac43\\pi p_F^{3}V}{h^{3}}", "perche": "e' il conteggio degli stati nella sfera di Fermi: volume nello spazio delle fasi diviso h^3, per le due orientazioni di spin. La soluzione per p_F e' asserita."},
+ {"tipo": "uguale", "sinistra": "integrate(p**2/(2*m)*4*pi*p**2,(p,0,pF))/integrate(4*pi*p**2,(p,0,pF))", "vale": "Rational(3,5)*pF**2/(2*m)", "ipotesi": {"p": "positive", "m": "positive", "pF": "positive"}, "dove": "01", "appare": "\\langle E\\rangle=\\frac35E_F"},
+ {"tipo": "uguale", "sinistra": "Rational(2,3)*n*Rational(3,5)*(hb*(3*pi**2*n)**Rational(1,3))**2/(2*m)", "vale": "(3*pi**2)**Rational(2,3)/5*hb**2*n**Rational(5,3)/m", "ipotesi": {"n": "positive", "hb": "positive", "m": "positive"}, "dove": "01", "appare": "P_{NR}=\\frac{(3\\pi^{2})^{2/3}}{5}\\,\\frac{\\hbar^{2}}{m_e}\\,n^{5/3}"},
+ {"tipo": "uguale", "sinistra": "Rational(1,3)*n*Rational(3,4)*c*hb*(3*pi**2*n)**Rational(1,3)", "vale": "(3*pi**2)**Rational(1,3)/4*hb*c*n**Rational(4,3)", "ipotesi": {"n": "positive", "hb": "positive", "c": "positive"}, "dove": "01", "appare": "P_{UR}=\\frac{(3\\pi^{2})^{1/3}}{4}\\,\\hbar c\\,n^{4/3}"},
+ {"tipo": "uguale", "sinistra": "integrate(c*p*4*pi*p**2,(p,0,pF))/integrate(4*pi*p**2,(p,0,pF))", "vale": "Rational(3,4)*c*pF", "ipotesi": {"p": "positive", "c": "positive", "pF": "positive"}, "dove": "01", "appare": "\\langle E\\rangle=\\frac34p_Fc"},
+ {"tipo": "simbolico", "dove": "01", "appare": "P=\\frac23\\frac{E}{V}", "perche": "e' il legame fra pressione e densita' di energia per un gas non relativistico (lo stesso del viriale): una relazione di teoria cinetica citata."},
+ {"tipo": "simbolico", "dove": "01", "appare": "P=\\frac13\\frac{E}{V}", "perche": "e' il legame fra pressione e densita' di energia per un gas ultrarelativistico (E = pc): relazione di teoria cinetica citata."},
+ {"tipo": "simbolico", "dove": "01", "appare": "E_F=\\frac{p_F^{2}}{2m_e}", "perche": "definizione dell'energia di Fermi non relativistica."},
+ {"tipo": "numero", "espr": "1e9/(2*1.6735e-27)/1e35", "vale": "3.0", "dove": "02", "appare": "3{,}0\\cdot10^{35}\\ \\mathrm{m^{-3}}"},
+ {"tipo": "numero", "espr": "1.0546e-34*(3*pi**2*2.988e35)**(1.0/3)*2.998e8/1.602e-13", "vale": "0.41", "dove": "02", "appare": "0{,}41\\ \\mathrm{MeV}"},
+ {"tipo": "numero", "espr": "(1.0546e-34*(3*pi**2*2.988e35)**(1.0/3))**2/(2*9.109e-31)/1.380649e-23/1e9", "vale": "1.9", "dove": "02", "appare": "1{,}9\\cdot10^{9}\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "0.98*1.989e30/(4*pi/3*(6e6)**3)/1e9", "vale": "2.2", "dove": "02", "appare": "2{,}2\\cdot10^{9}\\ \\mathrm{kg/m^{3}}"},
+ {"tipo": "simbolico", "dove": "02", "appare": "n_e=\\frac{\\rho}{\\mu_em_H}", "perche": "definizione della densita' elettronica con il numero di masse atomiche per elettrone mu_e."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\frac{P_q}{P_{\\mathrm{gas}}}\\propto\\frac{n^{2/3}}{T}", "perche": "rapporto delle due pressioni, n^{5/3}/(nT): conseguenza delle espressioni asserite nella tappa 01."},
+ {"tipo": "numero", "espr": "10**(0.4*(4.83-11.18))*1e3", "vale": "2.9", "dove": "02", "appare": "2{,}9\\cdot10^{-3}"},
+ {"tipo": "uguale", "sinistra": "solve(N**Rational(4,3)*hb*c-G*N**2*(me*mH)**2,N)[0]", "vale": "(hb*c/(G*(me*mH)**2))**Rational(3,2)", "ipotesi": {"N": "positive", "hb": "positive", "c": "positive", "G": "positive", "me": "positive", "mH": "positive"}, "dove": "03", "appare": "N_{\\max}=\\left(\\frac{\\hbar c}{G(\\mu_em_H)^{2}}\\right)^{3/2}"},
+ {"tipo": "uguale", "sinistra": "me*mH*(hb*c/(G*(me*mH)**2))**Rational(3,2)", "vale": "(hb*c/G)**Rational(3,2)/(me*mH)**2", "ipotesi": {"hb": "positive", "c": "positive", "G": "positive", "me": "positive", "mH": "positive"}, "dove": "03", "appare": "M_{\\max}\\sim\\frac{1}{(\\mu_em_H)^{2}}\\left(\\frac{\\hbar c}{G}\\right)^{3/2}"},
+ {"tipo": "numero", "espr": "(1.0546e-34*2.998e8/6.674e-11)**1.5/(2*1.6735e-27)**2/1.989e30", "vale": "0.46", "dove": "03", "appare": "0{,}46\\,M_\\odot"},
+ {"tipo": "numero", "espr": "5.83/2**2", "vale": "1.46", "dove": "03", "appare": "1{,}46\\,M_\\odot"},
+ {"tipo": "numero", "espr": "1.4575/0.4637", "vale": "3.1", "dove": "03", "appare": "3{,}1"},
+ {"tipo": "simbolico", "dove": "03", "appare": "E_F\\sim\\hbar c\\,n^{1/3}\\sim\\frac{\\hbar cN^{1/3}}{R}", "perche": "stima d'ordine di grandezza dell'energia di Fermi ultrarelativistica, p_F c con n ~ N/R^3 (i fattori numerici asseriti nella tappa 01 si lasciano cadere)."},
+ {"tipo": "simbolico", "dove": "03", "appare": "E_{GR}\\sim-\\frac{GM\\mu_em_H}{R}", "perche": "stima dell'energia gravitazionale per elettrone (con il suo barione associato), GM/R per la massa mu_e m_H."},
+ {"tipo": "simbolico", "dove": "03", "appare": "E(R)\\sim\\frac{\\hbar cN^{1/3}-GN\\mu_e^{2}m_H^{2}}{R}", "perche": "somma delle due stime precedenti con M = N mu_e m_H: entrambe vanno come 1/R, che e' il punto."},
+ {"tipo": "simbolico", "dove": "03", "appare": "M_{Ch}=\\frac{5{,}83}{\\mu_e^{2}}\\,M_\\odot", "perche": "e' il valore esatto della massa di Chandrasekhar per il politropo n=3 come lo danno le slide, senza derivazione: un risultato citato, il cui valore numerico per mu_e=2 e' asserito."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\mu_e=2", "perche": "per elio, carbonio e ossigeno completamente ionizzati c'e' un elettrone ogni due masse atomiche: un dato di composizione."},
+ {"tipo": "simbolico", "dove": "04", "appare": "R\\propto M^{-1/3}", "perche": "e' la relazione massa-raggio dei politropi n=3/2 (R ~ M^{(1-n)/(3-n)}) come la scrivono le slide."},
+ {"tipo": "uguale", "sinistra": "(1-Rational(3,2))/(3-Rational(3,2))", "vale": "Rational(-1,3)", "dove": "04", "appare": "\\frac{1-n}{3-n}=-\\frac13"},
+ {"tipo": "simbolico", "dove": "04", "appare": "R\\propto M^{(1-n)/(3-n)}", "perche": "e' la relazione massa-raggio generale dei politropi (lezione 8): conseguenza dell'eliminazione della densita' centrale, citata."},
+ {"tipo": "numero", "espr": "2**(-1.0/3)", "vale": "0.79", "dove": "04", "appare": "0{,}79"},
+ {"tipo": "numero", "espr": "(1.2-1.0)/1e-8/1e7", "vale": "2", "dove": "05", "appare": "2\\cdot10^{7}\\ \\mathrm{anni}"},
+ {"tipo": "numero", "espr": "(1.4-1.2)/1e-8/1e7", "vale": "2", "dove": "05", "appare": "(1{,}4-1{,}2)/10^{-8}"},
+ {"tipo": "numero", "espr": "-19.3+5*log(650,10)-5", "vale": "-10.24", "dove": "05", "appare": "-10{,}24"},
+ {"tipo": "numero", "espr": "10**(0.4*(4.83+19.3))/1e9", "vale": "4.5", "dove": "05", "appare": "4{,}5\\cdot10^{9}"},
+ {"tipo": "numero", "espr": "4.487e9*3.846e26/(4*pi*(650*3.086e16)**2)*1e4", "vale": "3.4", "dove": "05", "appare": "3{,}4\\cdot10^{-4}\\ \\mathrm{W/m^{2}}"},
+ {"tipo": "numero", "espr": "3.41e-4/1361*1e7", "vale": "2.5", "dove": "05", "appare": "2{,}5\\cdot10^{-7}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "m=M+5\\log D-5", "perche": "modulo di distanza senza assorbimento, D in parsec."},
+ {"tipo": "numero", "espr": "1.4*1.989e30/(4*pi/3*(1e4)**3)/1e17", "vale": "6.6", "dove": "06", "appare": "6{,}6\\cdot10^{17}\\ \\mathrm{kg/m^{3}}"},
+ {"tipo": "numero", "espr": "(939.565-938.272-0.511)", "vale": "0.78", "dove": "06", "appare": "0{,}78\\ \\mathrm{MeV}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "e^{-}+p\\to n+\\nu_e", "perche": "cattura elettronica (neutronizzazione), una reazione, non un conto."},
+ {"tipo": "uguale", "sinistra": "solve(D1**2/T1-D2**2/T2,T2)[0]", "vale": "T1*D2**2/D1**2", "ipotesi": {"D1": "positive", "T1": "positive", "D2": "positive", "T2": "positive"}, "dove": "07", "appare": "T_{\\mathrm{nuovo}}=T_{\\mathrm{vecchio}}\\left(\\frac{D_{\\mathrm{nuovo}}}{D_{\\mathrm{vecchio}}}\\right)^{2}"},
+ {"tipo": "numero", "espr": "2592000*(10/1e5)**2", "vale": "0.026", "dove": "07", "appare": "0{,}026\\ \\mathrm{s}"},
+ {"tipo": "numero", "espr": "1/0.02592", "vale": "39", "dove": "07", "appare": "39"},
+ {"tipo": "numero", "espr": "2*pi*sqrt((1e4)**3/(6.674e-11*1.4*1.989e30))*1e4", "vale": "4.6", "dove": "07", "appare": "4{,}6\\cdot10^{-4}\\ \\mathrm{s}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "I\\omega=\\mathrm{costante}", "perche": "conservazione del momento angolare."},
+ {"tipo": "simbolico", "dove": "07", "appare": "I\\propto D^{2}", "perche": "momento d'inerzia di una sfera di massa fissata, proporzionale al quadrato del diametro."},
+ {"tipo": "simbolico", "dove": "07", "appare": "P_{\\min}=2\\pi\\sqrt{R^{3}/GM}", "perche": "e' il periodo dell'orbita radente: l'equatore si staccherebbe se ruotasse piu' in fretta. Definizione dal bilancio centrifuga = gravita'."},
+ {"tipo": "uguale", "sinistra": "solve(v**2/2-G*M/r,r)[0].subs(v,c)", "vale": "2*G*M/c**2", "ipotesi": {"v": "positive", "G": "positive", "M": "positive", "r": "positive", "c": "positive"}, "dove": "08", "appare": "r_s=\\frac{2GM}{c^{2}}"},
+ {"tipo": "numero", "espr": "2*6.674e-11*1.989e30/(2.998e8)**2/1e3", "vale": "2.95", "dove": "08", "appare": "2{,}95\\ \\mathrm{km}"},
+ {"tipo": "numero", "espr": "4.4*86400*2.998e8/1e14", "vale": "1.14", "dove": "08", "appare": "1{,}14\\cdot10^{14}\\ \\mathrm{m}"},
+ {"tipo": "numero", "espr": "4*pi**2*(1.1397e14)**3/(6.674e-11*(14.4*3.156e7)**2)/1.989e30/1e6", "vale": "2.1", "dove": "08", "appare": "2{,}1\\cdot10^{6}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "2*6.674e-11*2.1e6*1.989e30/(2.998e8)**2/2.998e8", "vale": "21", "dove": "08", "appare": "21\\ \\mathrm{s}"},
+ {"tipo": "numero", "espr": "17*3600/20.7/1e3", "vale": "3.0", "dove": "08", "appare": "3000"},
+ {"tipo": "simbolico", "dove": "08", "appare": "M=\\frac{4\\pi^{2}a^{3}}{GT^{2}}", "perche": "terza legge di Keplero."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\frac12mv_f^{2}=\\frac{GMm}{r}", "perche": "definizione della velocita' di fuga dal bilancio di energia."},
+ {"tipo": "simbolico", "dove": "09", "appare": "p_F=\\hbar(3\\pi^{2}n)^{1/3}", "perche": "restituzione del risultato della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "P\\propto n^{5/3}", "perche": "restituzione della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "P\\propto n^{4/3}", "perche": "restituzione della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "M\\sim(\\hbar c/G)^{3/2}/(\\mu_em_H)^{2}", "perche": "restituzione della stima della tappa 03."},
+ {"tipo": "simbolico", "dove": "10", "appare": "M_{Ch}=1{,}46\\,M_\\odot", "perche": "restituzione del valore della tappa 03."},
+ {"tipo": "simbolico", "dove": "10", "appare": "r_s=2{,}95\\ \\mathrm{km}\\,(M/M_\\odot)", "perche": "restituzione del valore della tappa 08."},
+ {"tipo": "numero", "espr": "(1.46-1.2)/1e-8/1e7", "vale": "2.6", "dove": "05", "appare": "2{,}6\\cdot10^7"},
+ {"tipo": "numero", "espr": "(9.109e-31*2.998e8/1.0546e-34)**3/(3*pi**2)/1e35", "vale": "5.9", "dove": "01", "appare": "6\\cdot10^{35}"},
+ {"tipo": "numero", "espr": "5.87e35*2*1.6735e-27/1e9", "vale": "2.0", "dove": "01", "appare": "2\\cdot10^{9}"},
+ {"tipo": "numero", "espr": "(1.2/0.98)**(-1.0/3)", "vale": "0.935", "dove": "04", "appare": "(1{,}2/0{,}98)^{-1/3}=0{,}935"},
+ {"tipo": "numero", "espr": "6000*(1.2/0.98)**(-1.0/3)/100", "vale": "56", "dove": "04", "appare": "5600\\ \\mathrm{km}"},
+ {"tipo": "numero", "espr": "0.4*1.4*1.989e30*(1e4)**2/1e38", "vale": "1.1", "dove": "07", "appare": "1{,}1\\cdot10^{38}"},
+ {"tipo": "numero", "espr": "0.5*1.114e38*(2*pi/0.033)**2/1e42", "vale": "2.0", "dove": "07", "appare": "2{,}0\\cdot10^{42}"},
+ {"tipo": "numero", "espr": "2.02e42/6e31/3.156e7/1e3", "vale": "1.07", "dove": "07", "appare": "1000"},
+ {"tipo": "simbolico", "dove": "07", "appare": "E_{\\mathrm{rot}}=\\frac12I\\omega^{2}", "perche": "definizione dell'energia cinetica di rotazione."},
+ {"tipo": "simbolico", "dove": "07", "appare": "I=\\frac25MR^2", "perche": "momento d'inerzia di una sfera omogenea, un'approssimazione dichiarata."},
+ {"tipo": "numero", "espr": "6.674e-11*1.6726e-27**2/(1.0546e-34*2.998e8)*1e39", "vale": "5.9", "dove": "03", "appare": "=5{,}9\\cdot10^{-39}"},
+ {"tipo": "numero", "espr": "(6.674e-11*1.6726e-27**2/(1.0546e-34*2.998e8))**-1.5*1.6726e-27/1.989e30", "vale": "1.85", "dove": "03", "appare": "=1{,}85\\,M_\\odot"},
+ {"tipo": "simbolico", "dove": "04", "appare": "R(M)=7{,}8\\cdot10^8\\ \\mathrm{cm}\\left[\\left(\\frac{M}{M_{Ch}}\\right)^{-2/3}-\\left(\\frac{M}{M_{Ch}}\\right)^{2/3}\\right]^{1/2}", "perche": "approssimazione di Nauenberg (1972), standard"},
+ {"tipo": "numero", "espr": "7.8e8*sqrt((0.2/1.44)**(-2/3.)-(0.2/1.44)**(2/3.))/1e9", "vale": "1.45", "dove": "04", "appare": "1{,}45\\cdot10^9"},
+ {"tipo": "numero", "espr": "7.8e8*sqrt((0.6/1.44)**(-2/3.)-(0.6/1.44)**(2/3.))/1e8", "vale": "8.7", "dove": "04", "appare": "$0{,}6$ dà $8{,}7\\cdot10^8"},
+ {"tipo": "numero", "espr": "7.8e8*sqrt((1.1/1.44)**(-2/3.)-(1.1/1.44)**(2/3.))/1e8", "vale": "4.7", "dove": "04", "appare": "4{,}7\\cdot10^8"},
+ {"tipo": "numero", "espr": "7.8e8*sqrt((1.43/1.44)**(-2/3.)-(1.43/1.44)**(2/3.))/1e7", "vale": "7.5", "dove": "04", "appare": "7{,}5\\cdot10^7"},
+ {"tipo": "simbolico", "dove": "05", "appare": "w_{\\rm oss}=w(1+z)", "perche": "dilatazione temporale cosmologica (Marconi fig. 4.2)"},
+ {"tipo": "numero", "espr": "20*1.5", "vale": "30", "dove": "05", "appare": "20\\cdot1{,}5=30"},
+ {"tipo": "numero", "espr": "sqrt(1.293**2-0.511**2)", "vale": "1.19", "dove": "06", "appare": "=1{,}19"},
+ {"tipo": "simbolico", "dove": "06", "appare": "n_e=(p_F/\\hbar)^3/(3\\pi^2)", "perche": "densita' di un gas di Fermi completamente degenere"},
+ {"tipo": "numero", "espr": "(sqrt(1.293**2-0.511**2)/197.327)**3/(3*pi**2)*1e39*2*1.6605e-24/1e7", "vale": "2.4", "dove": "06", "appare": "\\rho=2{,}4\\cdot10^7"},
+ {"tipo": "numero", "espr": "sqrt(2*6.674e-11*1.4*1.989e30/1e4)/2.998e8", "vale": "0.64", "dove": "06", "appare": "0{,}64\\,c"},
+ {"tipo": "numero", "espr": "3e49/(1.989e33*(2e6)**2)/1e3", "vale": "3.8", "dove": "07", "appare": "=3{,}8\\cdot10^3"},
+ {"tipo": "numero", "espr": "2*pi/(3e49/(1.989e33*(2e6)**2))*1e3", "vale": "1.7", "dove": "07", "appare": "=1{,}7"},
+ {"tipo": "numero", "espr": "0.5*1.989e33*(2e6)**2*(3e49/(1.989e33*(2e6)**2))**2/1e52", "vale": "5.7", "dove": "07", "appare": "=5{,}7\\cdot10^{52}"},
+ {"tipo": "numero", "espr": "(6.96e10/2e6)**2/1e9", "vale": "1.2", "dove": "07", "appare": "=1{,}2\\cdot10^9"},
+ {"tipo": "numero", "espr": "2.998e10*0.0332/(2*pi)/1e5/10", "vale": "158", "dove": "07", "appare": "=1580"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché la materia degenere', meta:'quando il combustibile finisce · una pressione che non dipende dalla temperatura · un limite di massa',
+  blocchi:[
+  {t:'prosa', title:'Che cosa regge una stella spenta', tag:'architettura', html:R`
+  <p>Una stella in sequenza principale sta in piedi perché il gas è caldo, e il gas resta caldo perché il nucleo brucia. Quando il combustibile finisce la pressione termica non ha più chi la rifornisca: la stella irraggia, si contrae, e per il viriale si scalda, finché un nuovo combustibile non si accende. Ma la catena ha un fondo. Prima o poi non resta niente che si possa fondere a temperature raggiungibili, e la contrazione dovrebbe continuare per sempre. Non continua, perché a densità abbastanza alte entra in gioco una pressione di natura diversa, che non viene dall&rsquo;agitazione termica ma dalla meccanica quantistica: la <b>pressione di degenerazione</b>. De Bernardis (lezione 8) la presenta così: <i>«in casi di altissima densità, prevale un tipo diverso di pressione, generata da effetti quantistici, ed esistono classi di stelle sostenute da questo tipo di pressione»</i>.</p>
+  <p>Il risultato più bello di tutta la fisica stellare sta qui, ed è la ragione d&rsquo;essere del movimento. Quando gli elettroni degeneri diventano relativistici, la pressione di degenerazione e la gravità dipendono dal raggio della stella <i>nello stesso modo</i>. Il raggio esce dall&rsquo;equazione, e resta una massa, quella di Chandrasekhar, oltre la quale nessun equilibrio è possibile. Il movimento costruisce la pressione di degenerazione, fa la stima di Chandrasekhar per intero, e poi segue che cosa succede oltre il limite: nane bianche e supernovae Ia, stelle di neutroni e pulsar, buchi neri.</p>`}
+]},
+
+/* ---------------- 01 · LA PRESSIONE DI DEGENERAZIONE ---------------- */
+{ num:'01', title:'La pressione di degenerazione: riempire la sfera di Fermi', meta:'indeterminazione ed esclusione · l’impulso di Fermi · n alla cinque terzi e alla quattro terzi',
+  blocchi:[
+  {t:'prosa', title:'L’argomento delle slide', tag:'indeterminazione ed esclusione', html:R`
+  <p>De Bernardis parte dal principio di esclusione di Pauli: <i>«due fermioni tanto vicini che le loro posizioni non siano distinguibili, non possono occupare lo stesso stato quantico. Se le particelle vengono avvicinate tanto da risentire del principio di esclusione, non possono fare altro che occupare stati quantici di energia sempre maggiore»</i>. Poi il principio di indeterminazione, $\Delta x\,\Delta p_x\ge\hbar$. Un elettrone confinato nel volume che gli spetta, $V/(N/2)$ tenendo conto dei due stati di spin, ha un impulso quantistico minimo dell&rsquo;ordine di $\hbar$ diviso il lato di quel volume. Questo impulso si aggiunge a quello termico e non scompare quando il gas si raffredda. La pressione che ne viene è la pressione di degenerazione.</p>`},
+  {t:'prosa', title:'Il conto esatto: la sfera di Fermi', tag:'per intero', html:R`
+  <p>Il modo esatto di dire la stessa cosa è contare gli stati. In un volume $V$ gli stati di impulso con modulo minore di $p$ occupano nello spazio delle fasi il volume $\frac43\pi p^{3}V$, e ce n&rsquo;è uno ogni $h^3$, per ciascuna delle due orientazioni di spin. A temperatura zero gli $N$ elettroni riempiono tutti gli stati fino a un impulso massimo $p_F$, l&rsquo;<b>impulso di Fermi</b>: $N=2\cdot\frac{\frac43\pi p_F^{3}V}{h^{3}}$, cioè, con $n=N/V$,
+  $$p_F=\hbar(3\pi^{2}n)^{1/3}.$$
+  Più denso il gas, più alto l&rsquo;impulso degli ultimi elettroni arrivati. Nel caso <b>non relativistico</b>, con energia $p^2/2m_e$ ed energia di Fermi $E_F=\frac{p_F^{2}}{2m_e}$, la media sulla sfera dà $\langle E\rangle=\frac35E_F$. La pressione è $P=\frac23\frac{E}{V}$, la stessa relazione del viriale, e si ottiene
+  $$P_{NR}=\frac{(3\pi^{2})^{2/3}}{5}\,\frac{\hbar^{2}}{m_e}\,n^{5/3}.$$
+  Nel caso <b>ultrarelativistico</b>, energia $pc$, la media è $\langle E\rangle=\frac34p_Fc$ e la pressione è $P=\frac13\frac{E}{V}$:
+  $$P_{UR}=\frac{(3\pi^{2})^{1/3}}{4}\,\hbar c\,n^{4/3}.$$
+  De Bernardis arriva alle stesse potenze con l&rsquo;argomento di indeterminazione, $P\propto\rho^{5/3}$ e $P\propto\rho^{4/3}$. <b>La temperatura non compare.</b> Sono due politropi, di indice $n=3/2$ e $n=3$, e le slide osservano: <i>«questi stessi risultati possono essere ritrovati in modo rigoroso usando la distribuzione di Fermi-Dirac»</i>, che è il conto della sfera appena fatto.</p>
+  <p>Perché la massa al denominatore conta: $P_{NR}\propto1/m$. A parità di densità numerica, gli elettroni, 1836 volte più leggeri dei protoni, danno una pressione di degenerazione 1836 volte maggiore. Per questo in una nana bianca degenerano gli elettroni e non i nuclei. Le slide notano: <i>«gli elettroni degeneri forniscono la pressione necessaria all&rsquo;autosostentamento, e non possono perdere energia per il principio di Pauli. Ma i nuclei non sono degeneri e quindi si raffreddano lentamente»</i>.</p>`},
+  {t:'plot', title:'Pressione di degenerazione contro densità: le due potenze',
+   intro:R`In ascissa $\log_{10}(n/n_*)$, dove $n_*$ è la densità a cui $p_F=m_ec$ (circa $6\cdot10^{35}$ elettroni per m³, cioè $2\cdot10^{9}$ kg/m³ con $\mu_e=2$); in ordinata $\log_{10}$ della pressione in unità di $P_{UR}(n_*)$. Ciano: non relativistica, pendenza 5/3. Oro: ultrarelativistica, pendenza 4/3.`,
+   plots:[
+    {kind:'func2d', xr:[-3,3], yr:[-5,4.5], height:300, equal:false,
+     title:'log10 (n / n*)      log10 P',
+     curves:[{f:'(5/3)*x+log(0.8)/log(10)', col:'#5eead4', label:'P_NR ~ n^(5/3)'},
+             {f:'(4/3)*x', col:'#d8a13a', label:'P_UR ~ n^(4/3)'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> a bassa densità vale la retta ciano, ad alta densità quella oro. La pressione vera passa dalla prima alla seconda intorno a $n_*$, e oltre cresce più lentamente di quanto farebbe se gli elettroni restassero non relativistici.</p>
+   <p><b>Che cosa impararne:</b> la gravità di una stella in equilibrio chiede, comprimendo, una pressione che cresca almeno come $n^{4/3}$ (la stessa potenza della tappa 03). La pendenza 5/3 basta e avanza, la pendenza 4/3 è esattamente al limite. Le nane bianche vicine a $M_{Ch}$ vivono sulla retta oro.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la pressione di degenerazione non dipende dalla temperatura?`,
+    a:R`Perché viene dall&rsquo;occupazione obbligata di stati di impulso sempre più alto, imposta dal principio di esclusione: anche a temperatura zero gli elettroni riempiono la sfera di Fermi fino a $p_F=\hbar(3\pi^2n)^{1/3}$, che dipende solo dalla densità. La temperatura aggiunge un piccolo «sfumato» al bordo della sfera finché $kT\ll E_F$.`},
+   {q:R`Perché nel caso ultrarelativistico la pressione cresce più lentamente con la densità?`,
+    a:R`Perché l&rsquo;energia di un elettrone cresce come $p$ e non come $p^2$: comprimere aumenta $p_F$ come $n^{1/3}$, e l&rsquo;energia per elettrone come $n^{1/3}$ invece che come $n^{2/3}$. La pressione passa da $n^{5/3}$ a $n^{4/3}$, e questo «ammorbidimento» è ciò che rende possibile un limite di massa.`}
+  ]}
+]},
+
+/* ---------------- 02 · QUANDO LA MATERIA DEGENERA ---------------- */
+{ num:'02', title:'Quando la materia degenera: densità alte, o temperature basse', meta:'il confronto con la pressione del gas · le nane bianche nel diagramma HR · Sirio B',
+  blocchi:[
+  {t:'prosa', title:'Il criterio', tag:'diapositiva 24', html:R`
+  <p>Confrontando la pressione quantistica con quella del gas perfetto, $nkT$, il rapporto va come $\frac{P_q}{P_{\mathrm{gas}}}\propto\frac{n^{2/3}}{T}$. De Bernardis ne trae la regola: <i>«la materia diventa degenere ad alte densità, ma anche a basse temperature»</i>. Quantitativamente, il gas è degenere quando l&rsquo;energia di Fermi supera di molto l&rsquo;energia termica. Si prenda materia a $10^9$ kg/m³, cioè $10^6$ g/cm³. Con un elettrone ogni due masse atomiche, $n_e=\frac{\rho}{\mu_em_H}$ con $\mu_e=2$, si ha $n_e=3{,}0\cdot10^{35}\ \mathrm{m^{-3}}$. L&rsquo;impulso di Fermi corrisponde a $p_Fc=0{,}41\ \mathrm{MeV}$, quasi l&rsquo;energia di riposo dell&rsquo;elettrone, 0,511 MeV: gli elettroni sono già mezzo relativistici. La temperatura di Fermi non relativistica, $E_F/k$, è $1{,}9\cdot10^{9}\ \mathrm{K}$, cento volte la temperatura interna di una nana bianca. Il gas è completamente degenere.</p>`},
+  {t:'prosa', title:'Le nane bianche', tag:'Landau, e i numeri delle slide', html:R`
+  <p><i>«Lev Landau fu il primo a chiedersi se potessero esistere stelle sostenute solo dalla pressione di origine quantistica»</i>. De Bernardis ricostruisce l&rsquo;argomento osservativo. Nel diagramma HR c&rsquo;è una zona di stelle poco luminose, le <b>nane bianche</b>. A parità di temperatura la loro luminosità è almeno 10 000 volte inferiore a quella di una stella di sequenza principale, quindi, per $L=4\pi R^2\sigma T^4$, il raggio è almeno 100 volte più piccolo. La massa, misurata nei sistemi binari, è dell&rsquo;ordine di quella solare. La densità deve allora essere elevatissima, $10^{5}$-$10^{6}$ g/cm³. Sirio B, con 0,98 masse solari in 6000 km, i dati della prova d&rsquo;esame sul redshift gravitazionale, ha densità media $2{,}2\cdot10^{9}\ \mathrm{kg/m^{3}}$: la massa del Sole nel volume della Terra. Con una magnitudine assoluta visuale di circa 11,2, Sirio B ha una luminosità visuale di $2{,}9\cdot10^{-3}$ volte quella del Sole.</p>
+  <p>Una nana bianca è il nucleo di elio, carbonio e ossigeno che resta quando una stella di tipo solare, dopo la fase di gigante rossa, ha espulso l&rsquo;inviluppo in una nebulosa planetaria. Non vi avvengono reazioni nucleari: brilla della sua temperatura, raffreddandosi lentamente. <i>«Alla fine resterà una oscura stella spenta, una nana nera»</i>.</p>`}
+]},
+
+/* ---------------- 03 · CHANDRASEKHAR ---------------- */
+{ num:'03', title:'Il limite di Chandrasekhar, stimato in quattro righe', meta:'energia di Fermi ed energia gravitazionale vanno entrambe come 1/R · il raggio esce dall’equazione · resta una massa',
+  blocchi:[
+  {t:'prosa', title:'La stima', tag:'la derivazione dell’orale', html:R`
+  <p>Si prenda una stella di raggio $R$ con $N$ elettroni, ciascuno accompagnato da $\mu_e$ masse atomiche, quindi con massa $M=N\mu_em_H$. Si confrontino due energie per elettrone. Se gli elettroni sono ultrarelativistici, l&rsquo;energia di Fermi è $E_F\sim\hbar c\,n^{1/3}\sim\frac{\hbar cN^{1/3}}{R}$, con $n\sim N/R^3$. L&rsquo;energia gravitazionale per elettrone, insieme al suo barione, è $E_{GR}\sim-\frac{GM\mu_em_H}{R}$. La somma è
+  $$E(R)\sim\frac{\hbar cN^{1/3}-GN\mu_e^{2}m_H^{2}}{R}.$$
+  <b>Entrambi i termini vanno come $1/R$.</b> È qui che sta tutta la fisica. Se il numeratore è positivo, l&rsquo;energia diminuisce espandendo la stella: la stella si espande finché gli elettroni non tornano non relativistici, e lì la loro energia va come $1/R^2$ e trova un equilibrio. Se il numeratore è negativo, l&rsquo;energia diminuisce senza limite comprimendo: nessun raggio è di equilibrio e la stella collassa. Il confine è dove il numeratore si annulla:
+  $$N_{\max}=\left(\frac{\hbar c}{G(\mu_em_H)^{2}}\right)^{3/2},$$
+  e quindi
+  $$M_{\max}\sim\frac{1}{(\mu_em_H)^{2}}\left(\frac{\hbar c}{G}\right)^{3/2}.$$
+  Una massa fatta solo di costanti fondamentali: la costante di Planck, la velocità della luce, la costante di gravitazione e la massa del protone. Con $\mu_e=2$ la stima dà $0{,}46\,M_\odot$. È una stima di <span class="str" data-str="ordini-di-grandezza">ordine di grandezza</span>, e come tale va detta.</p>`},
+  {t:'prosa', title:'Il valore esatto, e da dove viene il fattore', tag:'1,46 masse solari', html:R`
+  <p>De Bernardis dà il valore esatto per il politropo $n=3$, il caso degenere relativistico: $M_{Ch}=\frac{5{,}83}{\mu_e^{2}}\,M_\odot$. Per una nana bianca di elio, o di carbonio e ossigeno, si ha $\mu_e=2$ e $M_{Ch}=1{,}46\,M_\odot$, cioè la stima per un fattore $3{,}1$. Il fattore viene dalla struttura della stella, che la stima ignora: una nana bianca vicina al limite è molto concentrata al centro, e i numeri esatti escono dalla soluzione numerica dell&rsquo;equazione di Lane-Emden per $n=3$. De Bernardis dà il risultato senza la derivazione, e qui non la rifaccio. La stima dice <i>perché</i> esiste un limite, il conto esatto dice <i>dove</i> sta. De Bernardis ricorda anche il fatto strutturale che regge tutto: per un politropo $n=3$ <i>«la massa non dipende dalla densità centrale»</i>. È lo stesso fatto della stima, visto dall&rsquo;equazione di Lane-Emden invece che da un bilancio di energie.</p>`},
+  {t:'plot', title:'L’energia per elettrone in funzione del raggio, sopra e sotto il limite',
+   intro:R`Energia in unità arbitrarie contro $R$. Gli elettroni sono relativistici a piccolo raggio ($\propto1/R$) e non relativistici a grande raggio ($\propto1/R^2$): si usa $E_F\propto\sqrt{1+1/R^{2}}-1$ in unità di $m_ec^2$. In ciano una massa sotto il limite (minimo a $R$ finito); in oro una massa sopra il limite (nessun minimo: collasso).`,
+   plots:[
+    {kind:'func2d', xr:[0.05,4], yr:[-6,3], height:300, equal:false,
+     title:'R (unita arbitrarie)      E per elettrone',
+     curves:[{f:'(sqrt(1+1/(x*x))-1)-0.7/x', col:'#5eead4', label:'M < M_Ch'},
+             {f:'(sqrt(1+1/(x*x))-1)-1.3/x', col:'#d8a13a', label:'M > M_Ch'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> per la massa piccola la curva ciano scende, tocca un minimo e risale: è la nana bianca in equilibrio, al raggio del minimo. Per la massa grande la curva oro scende senza fine verso $R\to0$: il termine gravitazionale vince a ogni raggio piccolo, perché lì sia lui sia l&rsquo;energia di Fermi vanno come $1/R$ e il coefficiente gravitazionale è più grande.</p>
+   <p><b>Che cosa impararne:</b> il limite non nasce dal fatto che la pressione di degenerazione «finisce», ma dal fatto che, diventando relativistica, cresce con la compressione allo stesso ritmo della gravità e non più in fretta. Oltre una massa, comprimere conviene sempre.</p>`},
+  {t:'prosa', title:'La stessa massa in una costante: α_G nel Masani', tag:'Masani, cap. 3, pp. 37-38', html:R`
+  <p>Masani fa la stessa stima uguagliando la pressione degli elettroni relativistici, $P\propto\hbar c\,n_e^{4/3}$, alla pressione gravitazionale $GM^2/(4\pi R^4)$, e nota che il raggio si cancella e resta una massa, che si può scrivere con una sola combinazione di costanti, l&rsquo;<i>analogo gravitazionale della costante di struttura fine</i>:</p>
+  <p>$$\alpha_G=\frac{Gm_p^2}{\hbar c}=5{,}9\cdot10^{-39},\qquad M\sim\alpha_G^{-3/2}m_p=1{,}85\,M_\odot .$$</p>
+  <p>Dove la costante di struttura fine elettromagnetica vale 1/137, quella gravitazionale vale $10^{-38}$: è la debolezza della gravità che rende le stelle così grandi, e la potenza $-3/2$ che porta la massa critica proprio alla scala del Sole, <i>«dell&rsquo;ordine di $10^{33}$ g»</i>. Il libro parte più in basso, dai pianeti: sotto circa $10^{25}$ g, poco meno della Luna ($7{,}4\cdot10^{25}$ g), un corpo non ha abbastanza energia per particella da rompere i legami dello stato solido, e può avere una forma qualunque; sopra, la gravità lo arrotonda, e salendo ancora rompe atomi e molecole e libera elettroni degeneri.</p>`}
+]},
+
+/* ---------------- 04 · MASSA E RAGGIO ---------------- */
+{ num:'04', title:'Più massa, meno raggio: la relazione massa-raggio delle nane bianche', meta:'il politropo 3/2 · R proporzionale a M alla meno un terzo · perché il limite arriva',
+  blocchi:[
+  {t:'prosa', title:'La relazione', tag:'lezione 8, diapositiva 27', html:R`
+  <p>Per un politropo le slide ricavano, eliminando la densità centrale fra le espressioni della massa e del raggio, la relazione $R\propto M^{(1-n)/(3-n)}$. Per una nana bianca di massa piccola gli elettroni non sono relativistici, $n=3/2$, e $\frac{1-n}{3-n}=-\frac13$, cioè $R\propto M^{-1/3}$. <b>Una nana bianca più massiccia è più piccola</b>: raddoppiando la massa il raggio si riduce al $0{,}79$. <i>«Più aumenta la massa, più piccolo è il raggio della nana bianca: la materia degenere assume una densità sempre maggiore all&rsquo;aumentare della massa totale. Gli elettroni dovranno aumentare sempre più la loro energia e diventeranno relativistici»</i>. Ed è così che il limite arriva. Avvicinandosi a $M_{Ch}$ gli elettroni diventano relativistici, il politropo tende a $n=3$, l&rsquo;esponente $(1-n)/(3-n)$ diverge, e il raggio crolla verso zero alla massa di Chandrasekhar.</p>
+  <p>Due nane bianche di questo corso permettono un controllo. Sirio B ha 0,98 masse solari e 6000 km di raggio. La nana bianca dell&rsquo;esercizio di lezione 10 ha 1,2 masse solari e 3500 km. Se valesse la sola relazione non relativistica, la seconda dovrebbe avere un raggio $(1{,}2/0{,}98)^{-1/3}=0{,}935$ volte quello di Sirio B, cioè circa $5600\ \mathrm{km}$. Il raggio dichiarato è molto più piccolo, e la differenza va nella direzione giusta. A 1,2 masse solari gli elettroni centrali sono già relativistici, la pressione cresce più lentamente con la densità, e la stella deve contrarsi più di quanto la legge $M^{-1/3}$ preveda per trovare l&rsquo;equilibrio. Il confronto è indicativo, perché i due raggi vengono da due testi d&rsquo;esame e non da un catalogo. Ma mostra in due numeri che cosa vuol dire «avvicinarsi al limite»: il raggio non scende con dolcezza, precipita.</p>`},
+  {t:'prosa', title:'La tabella di Masani, e una formula che la riproduce', tag:'Masani, cap. 4, p. 39', html:R`
+  <p>Masani dà la relazione massa-raggio come una tabella di modelli, ciascuno fissato da un solo parametro, la densità centrale: a $\rho_c=2{,}5\cdot10^5$, $3{,}6\cdot10^6$, $5{,}3\cdot10^7$, $2\cdot10^9$, $6\cdot10^{10}$, $2\cdot10^{12}$ g/cm$^3$ corrispondono raggi di $1{,}4\cdot10^9$, $8{,}6\cdot10^8$, $5\cdot10^8$, $2\cdot10^8$, $7{,}6\cdot10^7$, $2{,}6\cdot10^7$ cm e masse di 0,2, 0,6, 1,1, 1,4, 1,43, 1,438 masse solari, verso il limite di 1,44. <i>«Se la massa rimane costante esse non possono evolvere geometricamente, in quanto hanno una struttura che non ammette alternative per il raggio»</i>. Una formula approssimata della letteratura (Nauenberg, non nelle fonti) riassume tutta la tabella:</p>
+  <p>$$R(M)=7{,}8\cdot10^8\ \mathrm{cm}\left[\left(\frac{M}{M_{Ch}}\right)^{-2/3}-\left(\frac{M}{M_{Ch}}\right)^{2/3}\right]^{1/2},\qquad M_{Ch}=1{,}44\,M_\odot .$$</p>
+  <p>Per $M=0{,}2\,M_\odot$ dà $1{,}45\cdot10^9$ cm, per $0{,}6$ dà $8{,}7\cdot10^8$, per $1{,}1$ dà $4{,}7\cdot10^8$, per $1{,}43$ dà $7{,}5\cdot10^7$ cm: i valori del libro entro pochi percento. A piccola massa il primo termine domina e si ritrova $R\propto M^{-1/3}$; vicino al limite il raggio crolla a zero.</p>`},
+  {t:'plot', title:'La relazione massa-raggio delle nane bianche: la tabella di Masani',
+   intro:R`Raggio (10⁸ cm) contro massa (M☉). La curva è la formula approssimata R = 7,8·10⁸ cm [(M/1,44)^{−2/3} − (M/1,44)^{2/3}]^{1/2}; i punti sono i modelli della tabella di Masani. La Terra ha raggio 6,4·10⁸ cm, per confronto.`,
+   plots:[
+    {kind:'func2d', xr:[0.1,1.44], yr:[0,22], height:280, equal:false,
+     title:'M (M☉)      R (10⁸ cm)',
+     curves:[{f:'7.8*sqrt(pow(x/1.44,-2/3)-pow(x/1.44,2/3))', col:'#5eead4', label:'formula approssimata'},
+             {f:'6.378', col:'#94a3b8', label:'raggio della Terra', dash:true}],
+     marks:[{x:0.2, y:14, label:'0,2: 1,4·10⁹', col:'#d8a13a', up:true},
+            {x:0.6, y:8.6, label:'0,6: 8,6·10⁸', col:'#d8a13a', up:true},
+            {x:1.1, y:5, label:'1,1: 5·10⁸', col:'#d8a13a', up:true},
+            {x:1.4, y:2, label:'1,4: 2·10⁸', col:'#d8a13a', up:true},
+            {x:1.43, y:0.76, label:'1,43', col:'#d8a13a', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> una nana bianca di 0,6 M☉, la più comune, è grande quanto la Terra; aggiungendo massa si restringe, e a 1,4 M☉ ha già perso tre quarti del raggio.</p>
+   <p><b>Che cosa impararne:</b> una stella che si restringe aggiungendo massa non ha un punto di equilibrio oltre il limite; è il motivo per cui una nana bianca che accresce materia vicino a 1,4 M☉ finisce in modo violento.</p>`}
+]},
+
+/* ---------------- 05 · SUPERNOVAE Ia E L'ESERCIZIO ---------------- */
+{ num:'05', title:'Oltre il limite per accrescimento: le supernovae Ia, e un esercizio di lezione', meta:'una nana bianca che ruba massa · il collasso e la combustione del carbonio · il tempo, il flusso, l’occhio nudo',
+  blocchi:[
+  {t:'prosa', title:'Che cosa succede', tag:'diapositiva 29', html:R`
+  <p><i>«Se si aggiunge massa ad una nana bianca, ad esempio strappata dall&rsquo;altra stella di un sistema binario, la nana bianca può superare la massa di Chandrasekhar. Al di sopra della massa di Chandrasekhar la pressione degli elettroni degeneri non è più sufficiente a contrastare la gravità. La stella collassa. A densità sufficienti bruciano carbonio e ossigeno, e poi nuclei più pesanti fino a formare Fe e Ni. Alla fine la stella esplode formando una supernova di tipo Ia […] Non rimane un residuo centrale»</i>. Le slide aggiungono che il ferro che abbiamo sulla Terra si è formato così. Siccome esplodono tutte vicino alla stessa massa, le supernovae Ia hanno quasi la stessa luminosità al picco, e sono le candele standard con cui si misurano le distanze cosmologiche.</p>`},
+  {t:'prosa', title:'L’esercizio della nana bianca vicina', tag:'lezione10_2020_B, punti 3-5', html:R`
+  <p><i>Una nana bianca in un sistema binario a 650 pc, raggio 3500 km, massa 1,2 masse solari. (3) Se acquisisce massa dalla compagna a $10^{-8}$ masse solari all&rsquo;anno, fra quanto tempo potrebbe superare il limite di 1,4 masse solari ed esplodere? (4) Che flusso verrà registrato a terra, sapendo che la magnitudine visuale assoluta di una supernova di questo tipo è −19,3? (5) L&rsquo;esplosione sarà visibile a occhio nudo?</i> I punti 1 e 2, rotazione e allargamento Doppler, stanno con i profili di riga.</p>
+  <p>(3) Mancano 0,2 masse solari, cioè $(1{,}4-1{,}2)/10^{-8}$ anni, $2\cdot10^{7}\ \mathrm{anni}$. Il testo usa 1,4 come limite, e con il valore delle slide, 1,46, il tempo sale a $2{,}6\cdot10^7$ anni. (4) La <span class="str" data-str="magnitudine">magnitudine</span> apparente, con il modulo di distanza $m=M+5\log D-5$, è $-10{,}24$. Per il flusso serve un riferimento, e l&rsquo;esercizio non lo dà. Uso il Sole, con magnitudine assoluta visuale 4,83: la supernova è $10^{0{,}4(4{,}83+19{,}3)}=4{,}5\cdot10^{9}$ volte più luminosa del Sole nel visuale, e trattando questo rapporto come se valesse per la luminosità totale (cioè trascurando la correzione bolometrica, che va dichiarata) il flusso a 650 pc è $3{,}4\cdot10^{-4}\ \mathrm{W/m^{2}}$, $2{,}5\cdot10^{-7}$ volte la costante solare. (5) Una magnitudine di −10 è più brillante di qualunque stella e di Venere, e meno della Luna piena. Sarebbe visibile a occhio nudo anche di giorno, come le supernovae storiche del 1006 e del 1054.</p>`},
+  {t:'prosa', title:'Perché una nana bianca esplode invece di espandersi', tag:'Masani, cap. 16, pp. 187-188 e 191-192; Marconi, cap. 4.1 e 8.4, pp. 47-48 e 114', html:R`
+  <p>Masani spiega il meccanismo che rende esplosivo l&rsquo;innesco nucleare in materia degenere. In una stella normale, se la temperatura cresce la pressione cresce, la stella si espande e si raffredda: è un termostato. In un nucleo degenere la pressione è quella degli elettroni e <i>«la struttura stellare resta indifferente alla nuova T»</i>: la temperatura degli ioni può crescere senza che la stella reagisca, finché innesca la fusione di carbonio e ossigeno, che la fa crescere ancora. Il processo si autoalimenta fino a $T\approx3\cdot10^9$ K e $\rho\approx10^9$ g/cm$^3$, quando $kT$ raggiunge l&rsquo;energia di Fermi e la degenerazione si toglie, ma ormai in un tempo più breve di quello che la stella impiegherebbe a riassestarsi: esplode. Marconi lo dice con la stessa ragione, <i>«l&rsquo;innesco delle reazioni nucleari in un ambiente in cui la pressione non dipende dalla temperatura»</i>. Masani descrive anche una via lenta verso il limite: la cattura elettronica sul magnesio-24, quasi proibita, che a $1{,}6\cdot10^9$ g/cm$^3$ richiede $10^{10}$ anni, ma abbassa la pressione e fa contrarre la stella fino a $2\cdot10^9$ g/cm$^3$, dove la cattura diventa rapida e il nucleo collassa.</p>
+  <p>Marconi aggiunge un&rsquo;osservazione che rende le SN Ia anche un test di cosmologia: le loro curve di luce, viste da lontano, durano di più, $w_{\rm oss}=w(1+z)$, perché il tempo arriva dilatato dall&rsquo;espansione. Una supernova che sale e scende in 20 giorni a $z=0{,}5$ si vede durare $20\cdot1{,}5=30$ giorni: misurato, è una delle prove che il redshift è cosmologico. Sulla frequenza, Masani riporta circa una supernova ogni 200 anni per galassia (con un&rsquo;incertezza di un fattore cinque), quelle di tipo I nelle popolazioni vecchie e quelle di tipo II nelle giovani, e la lista di quelle storiche nella nostra Galassia: 185, 393, 1006, 1054, 1181, 1572 (Tycho), 1604 (Keplero).</p>`}
+]},
+
+/* ---------------- 06 · STELLE DI NEUTRONI ---------------- */
+{ num:'06', title:'Le stelle di neutroni: la degenerazione dei neutroni', meta:'progenitori fra 8 e 18 masse solari · protoni ed elettroni che diventano neutroni · dieci chilometri, la densità di un nucleo',
+  blocchi:[
+  {t:'prosa', title:'Che cosa sono', tag:'diapositiva 32', html:R`
+  <p>De Bernardis le descrive così. <i>«Sono i residui di stelle massive, con 8 M_sun \lt  M \lt  18 M_sun, che hanno terminato il combustibile nucleare. Sono i residui di esplosioni di supernova di tipo diverso dalla SNIa, detti core-bounce supernovae. Sono tenute insieme dalla pressione di degenerazione dei neutroni»</i>, con massa fra 1,2 e 2 masse solari in un raggio di 10 km. Una stella di 1,4 masse solari in 10 km ha densità media $6{,}6\cdot10^{17}\ \mathrm{kg/m^{3}}$, la densità di un nucleo atomico (le slide: $10^{14}$ g/cm³). <i>«A queste densità protoni ed elettroni si fondono in neutroni»</i>, per cattura elettronica, $e^{-}+p\to n+\nu_e$. La reazione è possibile quando l&rsquo;energia di Fermi degli elettroni supera la differenza di massa, $m_n-m_p-m_e$, cioè $0{,}78\ \mathrm{MeV}$ (in <span class="str" data-str="elettronvolt">elettronvolt</span>, la scala naturale di queste energie). A densità di nana bianca, dove $p_Fc\sim0{,}4$ MeV, non succede, mentre nel nucleo collassante di una stella massiccia sì. Il nucleo diventa un gas di neutroni degeneri, che regge per lo stesso principio di esclusione degli elettroni, con un impulso di Fermi più alto e una massa 1839 volte più grande. Esiste anche per loro un limite di massa, intorno a 2-3 masse solari, meno noto di quello di Chandrasekhar perché a quelle densità la forza nucleare conta e l&rsquo;equazione di stato è incerta.</p>
+  <p><i>«Esistono davvero?»</i>, chiedono le slide, e la risposta viene da una proprietà che le nane bianche non hanno in modo così estremo: la rotazione.</p>`},
+  {t:'prosa', title:'Neutronizzazione, il limite delle stelle di neutroni e la massa che cade', tag:'Masani, cap. 4-5, pp. 39-41 e 196', html:R`
+  <p>Masani segue la nana bianca che, aggiungendo massa, si restringe: gli elettroni acquistano energie sempre più alte finché avviene $p+e^-\to n+\nu$, quando l&rsquo;energia dell&rsquo;elettrone uguaglia la differenza di massa neutrone-protone, e il neutrone, che libero decade in circa dieci minuti, diventa stabile. Il libro mette la soglia a $10^{12}$ g/cm$^3$. Per protoni liberi il conto è diretto: serve un&rsquo;energia totale dell&rsquo;elettrone di 1,293 MeV, cioè un impulso di Fermi $p_Fc=\sqrt{1{,}293^2-0{,}511^2}=1{,}19$ MeV, e quindi $n_e=(p_F/\hbar)^3/(3\pi^2)$, che con due nucleoni per elettrone dà $\rho=2{,}4\cdot10^7$ g/cm$^3$. La soglia di Masani è quella in cui, nei nuclei pesanti già arricchiti di neutroni, i neutroni cominciano a uscire dai nuclei (il <i>neutron drip</i>, circa $4\cdot10^{11}$ g/cm$^3$): sono due tappe della stessa trasformazione, e lo dichiaro.</p>
+  <p>Per le stelle di neutroni Masani dà una massa limite di circa 2 $M_\odot$ e spiega perché il collasso oltre quel limite non si ferma: nell&rsquo;equazione dell&rsquo;equilibrio relativistica la pressione compare anche come massa, $P/c^2$ per unità di volume, <i>«la quale si comporta come tale anche dal punto di vista gravitazionale»</i>: più la stella resiste comprimendosi, più la sua resistenza pesa, e <i>«gli effetti relativistici aumentano col collasso stesso»</i>. Il libro aggiunge la ragione per cui le stelle di neutroni sono sorgenti X: un granello che cade sulla superficie arriva con $v=\sqrt{2GM/R}$, che per 1,4 $M_\odot$ e 10 km vale $0{,}64\,c$, e deposita un&rsquo;energia paragonabile alla sua massa a riposo.</p>`}
+]},
+
+/* ---------------- 07 · PULSAR ---------------- */
+{ num:'07', title:'Le pulsar: il momento angolare di una stella compressa a dieci chilometri', meta:'da un mese a un quarantesimo di secondo · Jocelyn Bell, 1967 · la Crab · il periodo minimo',
+  blocchi:[
+  {t:'prosa', title:'La conservazione del momento angolare', tag:'diapositive 35-36', html:R`
+  <p>Una stella ruota, e collassando conserva il momento angolare: $I\omega=\mathrm{costante}$. Il momento d&rsquo;inerzia di una sfera di massa data va come il quadrato del diametro, $I\propto D^{2}$, e $\omega\propto1/T$. Quindi $D^2/T$ resta costante, e
+  $$T_{\mathrm{nuovo}}=T_{\mathrm{vecchio}}\left(\frac{D_{\mathrm{nuovo}}}{D_{\mathrm{vecchio}}}\right)^{2}.$$
+  Con il conto delle slide, un nucleo stellare di 100 000 km che ruota in un mese, compresso a 10 km, ruota in $0{,}026\ \mathrm{s}$: circa $39$ giri al secondo. <i>«Devono quindi esistere piccole stelle ruotanti molto velocemente»</i>. E il limite che la stella stessa impone è il periodo dell&rsquo;orbita radente, $P_{\min}=2\pi\sqrt{R^{3}/GM}$, sotto il quale l&rsquo;equatore si staccherebbe: per 1,4 masse solari in 10 km sono $4{,}6\cdot10^{-4}\ \mathrm{s}$. Solo una stella così compatta può ruotare centinaia di volte al secondo senza disintegrarsi. Una nana bianca, con un raggio mille volte più grande, ha un periodo minimo di qualche secondo.</p>`},
+  {t:'prosa', title:'La scoperta', tag:'Cambridge, 1967', html:R`
+  <p>De Bernardis racconta la scoperta con il suo dettaglio umano. Tony Hewish fa costruire da cinque studenti, in due anni e con circa 15 000 euro, un radiointerferometro di 2000 antenne a dipolo per studiare i quasar. Jocelyn Bell Burnell ha il compito di registrare e analizzare i segnali, a occhio, su un registratore a carta. Nel 1967 trova una sorgente che pulsa con regolarità perfetta. La sua frase, che le slide riportano: <i>«here was I trying to get a Ph.D. out of a new technique, and some silly lot of little green men had to choose my aerial and my frequency to communicate with us»</i>. Erano invece stelle di neutroni rotanti, con un fascio di radiazione che spazza la Terra a ogni giro come un faro. La pulsar al centro della nebulosa del Granchio, residuo della supernova del 1054, ha periodo 0,033 s. Le pulsar binarie, come la doppia pulsar PSR J0737-3039 citata dalle slide, sono oggi alcuni dei laboratori più precisi della relatività generale.</p>
+  <p>Da dove viene l&rsquo;energia che una pulsar irraggia? Choudhuri (§5.4) risponde con un bilancio. La sorgente è l&rsquo;energia cinetica di rotazione, $E_{\mathrm{rot}}=\frac12I\omega^{2}$, e man mano che la si consuma la rotazione rallenta: i periodi crescono tipicamente di $10^{-15}$ secondi al secondo, il che dà alle pulsar una vita attiva di circa $10^7$ anni. Per la Crab, con $I=\frac25MR^2$, 1,4 masse solari e 10 km, si ha $I=1{,}1\cdot10^{38}\ \mathrm{kg\,m^{2}}$, e con $\omega=2\pi/0{,}033$ s l&rsquo;energia di rotazione è $2{,}0\cdot10^{42}\ \mathrm{J}$. Choudhuri dà per la potenza persa dalla Crab, dedotta dal rallentamento, circa $6\cdot10^{31}$ W, <i>«approximately the same as the rate of total energy emission from the whole Crab Nebula»</i>, migliaia di volte più dell&rsquo;energia negli impulsi radio. A quel ritmo la riserva durerebbe $E_{\mathrm{rot}}/\dot E$, circa $1000$ anni, dell&rsquo;ordine dell&rsquo;età della nebulosa, nata con la supernova del 1054. È il segno che la pulsar è giovane e che sta ancora spendendo il capitale iniziale.</p>`},
+  {t:'prosa', title:'Il Sole compresso a 20 km, e la Crab', tag:'Masani, cap. 16, pp. 192-194', html:R`
+  <p>Masani fa lo stesso conto di conservazione con i dati del Sole. Il suo momento angolare è $J\approx3\cdot10^{49}$ erg s; compresso a $R_*=20$ km con la massa solare, la velocità angolare diventa $\omega_*=J/(MR_*^2)=3{,}8\cdot10^3$ rad/s, cioè un periodo $2\pi/\omega_*=1{,}7$ ms, e l&rsquo;energia di rotazione $\frac12MR_*^2\omega_*^2=5{,}7\cdot10^{52}$ erg, <i>«maggiore addirittura di quella termonucleare»</i> di cui la stella dispone. Il flusso magnetico conservato moltiplica il campo per $(R/R_*)^2$: un gauss alla superficie del Sole diventa $(6{,}96\cdot10^{10}/2\cdot10^6)^2=1{,}2\cdot10^9$ gauss. Le pulsar hanno campi di $10^{10}$-$10^{12}$ gauss, che richiedono progenitori con campi più forti del Sole.</p>
+  <p>Il prototipo è la Crab, che Masani introduce con il resoconto di Toktaga nella cronaca della dinastia Sung: una «stella ospite» apparsa il 4 luglio 1054 presso $\zeta$ Tauri, visibile per più di un anno. Oggi lì c&rsquo;è una nebulosa in espansione a circa 1500 km/s, con al centro una stella che pulsa con periodo 0,0332 s dalla radio ai raggi gamma. Le particelle restano legate al campo magnetico, che corota con la stella, fino alla distanza in cui la corotazione raggiungerebbe la velocità della luce, $r=c/\omega=cP/2\pi=1580$ km, il <i>cilindro di luce</i>, dove il campo è sceso a $10^3$-$10^4$ gauss.</p>`}
+]},
+
+/* ---------------- 08 · BUCHI NERI ---------------- */
+{ num:'08', title:'Quando niente regge: i buchi neri', meta:'oltre due o tre masse solari · la velocità di fuga uguale a c · il buco nero al centro della Galassia, pesato con un’orbita',
+  blocchi:[
+  {t:'prosa', title:'Il raggio di Schwarzschild, come ordine di grandezza', tag:'diapositiva 46', html:R`
+  <p><i>«Che succede se la massa del core residuo è più di 2-3 M_sun (massa della stella originale \gt  18 M_sun)? In teoria nulla può più contrastare il collasso, che arriva a raggio zero e densità infinita»</i>. Un buco nero, nella definizione d&rsquo;ordine di grandezza delle slide, è un oggetto così denso che la velocità di fuga dalla sua superficie è uguale o maggiore della velocità della luce. Con il bilancio di energia $\frac12mv_f^{2}=\frac{GMm}{r}$ e $v_f=c$ si ha il raggio
+  $$r_s=\frac{2GM}{c^{2}},$$
+  il <span class="str" data-str="raggio-di-schwarzschild">raggio di Schwarzschild</span>, $2{,}95\ \mathrm{km}$ per massa solare. Le slide avvertono che lo studio rigoroso è la relatività generale. Che l&rsquo;argomento newtoniano dia esattamente il raggio giusto è una coincidenza, ma come ordine di grandezza è quello che serve.</p>`},
+  {t:'prosa', title:'Il buco nero al centro della nostra Galassia', tag:'un’orbita, una massa', html:R`
+  <p>De Bernardis mostra l&rsquo;orbita di una stella vicina al centro galattico, osservata nel vicino infrarosso, dove l&rsquo;assorbimento della polvere è debole: semiasse proiettato di 4,4 giorni luce e periodo di 14,4 anni. La terza legge di Keplero, $M=\frac{4\pi^{2}a^{3}}{GT^{2}}$, con $a=1{,}14\cdot10^{14}\ \mathrm{m}$, dà $2{,}1\cdot10^{6}\,M_\odot$. Due avvertenze. Il semiasse proiettato è più corto di quello vero se l&rsquo;orbita è inclinata, quindi questa massa è un <b>limite inferiore</b>: i valori moderni sono circa il doppio. E la massa è concentrata entro il pericentro dell&rsquo;orbita, <i>«l&rsquo;oggetto deve essere più piccolo di 17 ore luce»</i>. Due milioni di masse solari in meno di 17 ore luce, senza emissione propria: le slide concludono che è un buco nero molto massivo. Il suo raggio di Schwarzschild è di soli $21\ \mathrm{s}$ luce, circa $3000$ volte meno del limite che l&rsquo;orbita impone. Agli antipodi della scala, gli AGN ospitano buchi neri da miliardi di masse solari, e le onde gravitazionali di LIGO e Virgo hanno reso osservabili le coalescenze di buchi neri di decine di masse solari. Nel 2017, con GW170817, è arrivata la prima coalescenza di due stelle di neutroni vista insieme in onde gravitazionali e in luce.</p>`}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: la pressione di degenerazione e il limite di Chandrasekhar', meta:'la domanda teorica della mappa · il copione in cinque mosse · la frase che dice tutto: le due dipendenze da R sono la stessa',
+  blocchi:[
+  {t:'reveal', title:'Il copione', tag:'cinque mosse', steps:[
+   {label:'Mossa 1: la sfera di Fermi', body:R`<p>«Per il principio di esclusione gli elettroni riempiono gli stati di impulso fino a $p_F$: $N=2\cdot\frac43\pi p_F^3V/h^3$, quindi $p_F=\hbar(3\pi^{2}n)^{1/3}$. Anche a temperatura zero.»</p>`},
+   {label:'Mossa 2: la pressione', body:R`<p>«La pressione è circa $n\,p_F\,v$. Non relativistico: $v=p_F/m$, quindi $P\propto n^{5/3}$, politropo $n=3/2$. Relativistico: $v=c$, quindi $P\propto n^{4/3}$, politropo $n=3$. Non c&rsquo;è la temperatura.»</p>`},
+   {label:'Mossa 3: il confronto con la gravità', body:R`<p>«Per elettrone, l&rsquo;energia di Fermi relativistica è $\hbar cN^{1/3}/R$ e la gravitazionale $-GM\mu_em_H/R$. Le due dipendenze da $R$ sono la stessa: il raggio esce dall&rsquo;equazione.»</p>`},
+   {label:'Mossa 4: la massa', body:R`<p>«L&rsquo;equilibrio è possibile solo se il termine di Fermi vince, cioè per $N<(\hbar c/G\mu_e^2m_H^2)^{3/2}$: $M\sim(\hbar c/G)^{3/2}/(\mu_em_H)^{2}$, circa mezza massa solare come stima. Il conto esatto sul politropo $n=3$ dà $5{,}83/\mu_e^2$, cioè 1,46 masse solari per $\mu_e=2$.»</p>`},
+   {label:'Mossa 5: le conseguenze', body:R`<p>«Sotto il limite: nane bianche, con $R\propto M^{-1/3}$. Una nana bianca che lo supera per accrescimento esplode come supernova Ia. I nuclei di stelle più massicce collassano a stelle di neutroni o a buchi neri.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove la degenerazione torna', meta:'otto voci · dalle nane bianche alle onde gravitazionali',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Fermi:</b> $p_F=\hbar(3\pi^2n)^{1/3}$; degenere se $E_F\gg kT$, cioè ad alta densità o bassa temperatura.</li>
+  <li><b>Pressioni:</b> $P_{NR}\propto\hbar^2n^{5/3}/m_e$ ($n=3/2$), $P_{UR}\propto\hbar c\,n^{4/3}$ ($n=3$).</li>
+  <li><b>Nane bianche:</b> circa una massa solare nel volume della Terra, $10^{9}$ kg/m³; $R\propto M^{-1/3}$.</li>
+  <li><b>Chandrasekhar:</b> $M_{Ch}=5{,}83/\mu_e^{2}\,M_\odot$, cioè $M_{Ch}=1{,}46\,M_\odot$ per $\mu_e=2$; stima $(\hbar c/G)^{3/2}/(\mu_em_H)^2\simeq0{,}5\,M_\odot$.</li>
+  <li><b>Supernovae Ia:</b> nane bianche oltre il limite, $M_V\simeq-19{,}3$, nessun residuo.</li>
+  <li><b>Stelle di neutroni:</b> 1,2-2 masse solari in 10 km; densità nucleare; neutronizzazione sopra 0,78 MeV.</li>
+  <li><b>Pulsar:</b> $D^2/T$ conservato; periodi da millisecondi a secondi; Crab 0,033 s.</li>
+  <li><b>Buchi neri:</b> $r_s=2{,}95\ \mathrm{km}\,(M/M_\odot)$; Sgr A* circa $2$-$4\cdot10^6\,M_\odot$.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>Il limite di Chandrasekhar è il motivo per cui le supernovae Ia sono candele standard, e quindi uno dei fondamenti della misura dell&rsquo;espansione accelerata dell&rsquo;universo. La stessa fisica della degenerazione, con altre particelle, torna nell&rsquo;universo primordiale, dove la statistica di Fermi-Dirac dei neutrini e degli elettroni entra nel conto della nucleosintesi. Le stelle di neutroni e i buchi neri sono i laboratori estremi della gravità: le pulsar binarie hanno dato la prima prova indiretta delle onde gravitazionali, e LIGO e Virgo la prima diretta. E i buchi neri supermassicci al centro delle galassie, pesati come quello della nostra con le orbite delle stelle vicine, alimentano i nuclei galattici attivi e i quasar, gli oggetti più luminosi dell&rsquo;universo.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-10-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-10 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-10-materia-degenere-e-stelle-compatte.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

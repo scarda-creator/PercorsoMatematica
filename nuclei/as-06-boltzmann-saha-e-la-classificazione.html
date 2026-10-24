@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-06 — Boltzmann, Saha e la classificazione delle stelle: perché le stelle calde hanno poco idrogeno visibile</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-06 — Boltzmann, Saha e la classificazione delle stelle: perché le stelle calde hanno poco idrogeno visibile</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["raggio-di-bohr"] = {"nome":"Raggio di Bohr","riga":"$a_0=4\\pi\\varepsilon_0\\hbar^{2}/(m_ee^{2})\\simeq0{,}529\\times10^{-10}$ m, con energia associata $E_1\\simeq-13{,}6$ eV.","serve":"E' la scala di lunghezza dell'atomo, e si ottiene senza risolvere niente: si minimizza la somma fra il costo cinetico dell'indeterminazione, che va come l'inverso del quadrato del raggio, e l'attrazione coulombiana, che va come l'inverso del raggio. Serve come controllo d'ordine di grandezza su ogni risultato atomico: se un conto da' una lunghezza mille volte diversa, il conto e' sbagliato.","esempio":"I livelli vanno come l'inverso del quadrato del numero quantico principale, quindi il secondo vale $-3{,}4$ eV e la prima riga di Lyman ha energia $10{,}2$ eV. Il raggio medio cresce col quadrato: lo stato con numero quantico dieci e' $10^{2}=100$ volte piu' grande del fondamentale, ed e' la ragione fisica per cui gli atomi di Rydberg sono enormi.","debito":"la derivazione completa dall'equazione radiale sta nel movimento sull'idrogeno; qui ci sono la stima variazionale e i numeri da ricordare.","controllo":[{"tipo":"numero","espr":"-13.6/4","vale":"-3.4","dove":"esempio","appare":"-3{,}4"},{"tipo":"numero","espr":"-13.6/4 - (-13.6)","vale":"10.2","dove":"esempio","appare":"10{,}2"},{"tipo":"uguale","sinistra":"10**2","vale":"100","dove":"esempio","appare":"10^{2}=100"}],"qui":{},"pieno":null};
+STRUM["elettronvolt"] = {"nome":"Elettronvolt","riga":"L'energia che un elettrone acquista attraversando una differenza di potenziale di un volt: $1\\ \\mathrm{eV}=1{,}602\\cdot10^{-19}$ J; divisa per $c^{2}$ è una massa, $1\\ \\mathrm{eV}/c^{2}=1{,}783\\cdot10^{-36}$ kg.","serve":"A leggere senza conversioni le tabelle in cui la fisica delle particelle e l'astrofisica scrivono le masse a riposo come energie — l'elettrone 0,511 MeV, il protone 938 MeV, il bosone di Higgs 125 GeV. La scelta non è una bizzarria di notazione: in un processo la quantità che si conserva è l'energia, e scrivere la massa già in energia dice a colpo d'occhio quali reazioni sono possibili e quante ne resta per l'energia cinetica o per i fotoni. L'elettronvolt ha anche un secondo mestiere, e in astrofisica è il più usato dei due: convertito in temperatura tramite $k_BT$ dà la scala termica a cui un processo di quella energia diventa frequente, e questo è ciò che permette di dire a che punto della storia dell'universo o a che profondità di una stella un certo processo si accende.","esempio":"Dalla massa del protone espressa come energia, $938{,}3$ MeV, si ricavano i chilogrammi in un passaggio: $m_p=938{,}3\\cdot10^{6}\\cdot1{,}783\\cdot10^{-36}=1{,}673\\cdot10^{-27}$ kg, che è il valore stampato in calce al foglio d'esame. Sul versante termico, $T=\\dfrac{1{,}602\\cdot10^{-19}}{1{,}381\\cdot10^{-23}}=11600$ K: un'energia di un elettronvolt corrisponde a poco più di undicimila kelvin, e siccome ionizzare l'idrogeno costa 13,6 eV si capisce subito perché serva una fotosfera da qualche decina di migliaia di kelvin per trovarlo ionizzato.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"05","come":"le masse delle particelle elementari scritte come energie, con la conversione in chilogrammi e la gerarchia delle masse, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.602177e-19/(2.99792458e8)**2*1e36","vale":"1.783","dove":"riga","appare":"1,783\\cdot10^{-36}"},{"tipo":"numero","espr":"938.3e6*1.783e-36*1e27","vale":"1.673","dove":"esempio","appare":"1,673\\cdot10^{-27}"},{"tipo":"numero","espr":"1.602e-19/1.381e-23","vale":"11600","dove":"esempio","appare":"11600"}]};
+STRUM["integrale-gaussiano"] = {"nome":"Integrale gaussiano","riga":"$\\displaystyle\\int_{-\\infty}^{+\\infty} e^{-ax^{2}}\\,dx=\\sqrt{\\pi/a}$ per $a>0$, e $\\displaystyle\\int_{-\\infty}^{+\\infty} x^{2}e^{-ax^{2}}\\,dx=\\tfrac12\\sqrt{\\pi/a^{3}}$.","serve":"E' l'unico integrale che serve davvero sapere a memoria in meccanica statistica, perche' l'energia cinetica e' quadratica nell'impulso e quindi ogni integrazione sugli impulsi e' una gaussiana. Il trucco della dimostrazione — elevare al quadrato e passare in coordinate polari — vale la pena di vederlo una volta: e' il motivo per cui compare un $\\pi$ in una formula che di cerchi non parla.","esempio":"Da $I^{2}=\\iint e^{-a(x^{2}+y^{2})}dx\\,dy=2\\pi\\int_{0}^{\\infty}re^{-ar^{2}}dr=\\pi/a$ segue $I=\\sqrt{\\pi/a}$. I momenti superiori si ottengono derivando rispetto ad $a$ sotto il segno: $-\\partial_a I=\\int x^{2}e^{-ax^{2}}dx=\\tfrac12\\sqrt{\\pi}\\,a^{-3/2}$. Derivare rispetto a un parametro e' piu' rapido che integrare per parti, e funziona per tutti i momenti pari.","pieno":null,"qui":{"meccanica-statistica":{"serve":"La funzione di partizione di una particella libera e' un prodotto di tre gaussiane negli impulsi, e da li' esce la lunghezza d'onda termica $\\lambda=h/\\sqrt{2\\pi m k T}$ — che e' la grandezza con cui si misura quando un gas smette di essere classico.","esempio":"$\\int e^{-\\beta p^{2}/2m}dp=\\sqrt{2\\pi m/\\beta}$, quindi $Z_{1}=\\dfrac{V}{h^{3}}(2\\pi mkT)^{3/2}=V/\\lambda^{3}$. Lo stesso integrale col peso $p^{2}$ da' $\\langle p^{2}/2m\\rangle=\\tfrac12 kT$ per grado di liberta': l'equipartizione non e' un principio a parte, e' questo integrale."}}};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-06: Boltzmann, Saha e la classificazione delle stelle: perché le stelle calde hanno poco idrogeno visibile <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-06 — Boltzmann, Saha e la classificazione delle stelle
+identita:  due formule di meccanica statistica spiegano perche' le stelle calde hanno righe dell'idrogeno
+           DEBOLI — il fatto che rese necessaria la sequenza OBAFGKM — e il diagramma HR mette in ordine
+           cio' che quelle formule permettono di misurare.
+copre:     A.8, A.10, A.11
+serve:     as-05 (righe spettrali, larghezza equivalente)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento mirato (5 prove, densita' 3,2). Dati temperatura e densita' (o pressione
+           elettronica), trovare il grado di ionizzazione: procedura eseguibile, con l'idrogeno svolto
+           fino ai numeri.
+fonti:     lezione4_B_2020 (pagine 19-38) e lezione4_C_2020, con gli stessi contenuti di lezione5_2017:
+           il paradosso delle righe di Balmer massime a 9500 K, la tabella della sequenza spettrale, i
+           livelli dell'idrogeno e la tabella delle serie (Lyman, Balmer, Paschen), Boltzmann con i pesi
+           statistici e il 85 400 K, Saha con la pressione elettronica, la zona di ionizzazione parziale
+           a Pe=200 dyne/cm2, l'esercizio H contro CaII nel Sole (dati: 13,6 e 6,11 eV, Ca/H=1/500000,
+           5700-5770 K, Pe=15 dyne/cm2, Z_II=2,30 e Z_I=1,32 da Aller 1963).
+           lezione6_2017 pagina 10: l'effetto della densita' sulle righe (giganti con righe strette).
+           Masani, Astrofisica, §1.1-1.2 (pagine stampate 24-25, PDF 34-35): la funzione di partizione e
+           perche' non diverge, la tabella di log U per l'idrogeno, la variabile theta=5040/T, la formula
+           di Saha-Fowler in forma logaritmica con la costante -0,48 e la sua versione per l'idrogeno
+           (8,78). Masani, cap. VIII §3 (pagina stampata 210, PDF 220): Huggins 1900, Hertzsprung 1905,
+           Russell 1914, giganti e nane.
+           Prova scritta 20150723 (23 luglio 2015), esercizio 1: Betelgeuse.
+           DICHIARATO: il massimo delle righe di Balmer col modello a due livelli e Pe=20 Pa cade a circa
+           9900 K, non ai 9500 K che la slide attribuisce alle A0 (tappa 06). Il manuale delle soluzioni
+           del Carroll-Ostlie non e' stato usato qui.
+registro:  lezione4_B_2020, lezione4_C_2020, lezione5_2017
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "numero", "espr": "1e7/(109677.58*(Rational(1,4)-Rational(1,9)))", "vale": "656.47", "dove": "02", "appare": "656{,}47\\ \\mathrm{nm}"},
+ {"tipo": "numero", "espr": "1e7/(109677.58*(Rational(1,4)-Rational(1,16)))", "vale": "486.27", "dove": "02", "appare": "486{,}27"},
+ {"tipo": "numero", "espr": "1e7/(109677.58*(1-Rational(1,4)))", "vale": "121.57", "dove": "02", "appare": "121{,}57\\ \\mathrm{nm}"},
+ {"tipo": "numero", "espr": "1e7/(109677.58*Rational(1,4))", "vale": "364.7", "dove": "02", "appare": "364{,}7\\ \\mathrm{nm}"},
+ {"tipo": "numero", "espr": "13.6*(1-Rational(1,4))", "vale": "10.2", "dove": "02", "appare": "10{,}2\\ \\mathrm{eV}"},
+ {"tipo": "uguale", "sinistra": "Sum(2*l+1,(l,0,n-1))*2", "vale": "2*n**2", "ipotesi": {"n": "positive", "l": "integer"}, "dove": "02", "appare": "g_n=2\\sum_{l=0}^{n-1}(2l+1)=2n^{2}"},
+ {"tipo": "numero", "espr": "109737.316/(1+9.10938e-31/1.67262e-27)", "vale": "109677.6", "dove": "02", "appare": "109\\,677{,}6"},
+ {"tipo": "simbolico", "dove": "02", "appare": "E_n=-\\frac{13{,}6\\ \\mathrm{eV}}{n^{2}}", "perche": "e' il risultato del modello di Bohr (e dell'equazione di Schrodinger per l'atomo isolato), citato dalle slide: non si deriva qui."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\frac{1}{\\lambda}=R_H\\left(\\frac{1}{n_a^{2}}-\\frac{1}{n_b^{2}}\\right)", "perche": "e' la formula di Rydberg, conseguenza di E=hc/lambda applicata alla differenza dei livelli di Bohr; i suoi valori numerici sono asseriti riga per riga."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{N_b}{N_a}=\\frac{g_b}{g_a}\\,e^{-(E_b-E_a)/kT}", "perche": "e' la distribuzione di Boltzmann fra due livelli con i loro pesi statistici, come la scrivono le slide e Masani: un risultato di meccanica statistica, non un conto."},
+ {"tipo": "numero", "espr": "(10.2/(8.617333e-5*log(4)))/1e3", "vale": "85.4", "dove": "03", "appare": "85\\,400\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "8.617333e-5*5770", "vale": "0.4972", "dove": "03", "appare": "0{,}4972\\ \\mathrm{eV}"},
+ {"tipo": "numero", "espr": "4*exp(-10.2/(8.617333e-5*5770))*1e9", "vale": "4.93", "dove": "03", "appare": "4{,}93\\cdot10^{-9}"},
+ {"tipo": "numero", "espr": "1/(4*exp(-10.2/(8.617333e-5*5770)))/1e6", "vale": "203", "dove": "03", "appare": "203"},
+ {"tipo": "numero", "espr": "9*exp(-12.09/(8.617333e-5*5770))/(4*exp(-10.2/(8.617333e-5*5770)))*1e2", "vale": "5.0", "dove": "03", "appare": "5{,}0\\%"},
+ {"tipo": "simbolico", "dove": "03", "appare": "Z=\\sum_n g_n\\,e^{-(E_n-E_1)/kT}", "perche": "e' la definizione della funzione di partizione di un atomo (Masani §1.1)."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{N_n}{N}=\\frac{g_n\\,e^{-(E_n-E_1)/kT}}{Z}", "perche": "e' la definizione della frazione di atomi nel livello n, normalizzata dalla funzione di partizione."},
+ {"tipo": "simbolico", "dove": "03", "appare": "Z\\simeq g_1=2", "perche": "e' l'approssimazione in cui il solo livello fondamentale conta, giustificata dal numero 4,93e-9 asserito nella stessa tappa e dalla tabella di Masani (log U=0,30)."},
+ {"tipo": "numero", "espr": "10**0.30", "vale": "2.0", "dove": "03", "appare": "\\log U=0{,}30"},
+ {"tipo": "uguale", "sinistra": "integrate(4*pi*p**2*exp(-p**2/(2*m*k*T)),(p,0,oo))", "vale": "(2*pi*m*k*T)**Rational(3,2)", "ipotesi": {"p": "positive", "m": "positive", "k": "positive", "T": "positive"}, "dove": "04", "appare": "\\int_0^\\infty4\\pi p^{2}e^{-p^{2}/2m_ekT}dp=(2\\pi m_ekT)^{3/2}"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\frac{N_{i+1}}{N_i}=\\frac{2Z_{i+1}}{n_eZ_i}\\left(\\frac{2\\pi m_ekT}{h^{2}}\\right)^{3/2}e^{-\\chi_i/kT}", "perche": "e' l'equazione di Saha (1920) come la scrivono le slide: il suo fattore di volume di fase e' asserito dall'integrale gaussiano della stessa tappa, il resto e' la costruzione esposta nel testo (Boltzmann fra stato legato e continuo)."},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\frac{2\\cdot4\\pi p^{2}dp}{h^{3}}\\,\\frac{1}{n_e}", "perche": "e' il numero di stati accessibili all'elettrone libero (due polarizzazioni di spin, volume di fase 4 pi p^2 dp d^3x/h^3, con il volume per elettrone 1/n_e): un conteggio, non un conto."},
+ {"tipo": "numero", "espr": "(2*pi*9.1093837e-31*1.380649e-23*5770/(6.62607015e-34)**2)**1.5/1e27", "vale": "1.06", "dove": "04", "appare": "1{,}06\\cdot10^{27}\\ \\mathrm{m^{-3}}"},
+ {"tipo": "simbolico", "dove": "04", "appare": "P_e=n_ekT", "perche": "e' la definizione della pressione elettronica (gas perfetto di elettroni)."},
+ {"tipo": "numero", "espr": "log((2*pi*9.1093837e-28)**1.5*(1.380649e-16)**2.5/(6.62607015e-27)**3,10)", "vale": "-0.477", "dove": "04", "appare": "-0{,}477"},
+ {"tipo": "numero", "espr": "-0.4771+2.5*log(5040,10)", "vale": "8.78", "dove": "04", "appare": "8{,}78"},
+ {"tipo": "numero", "espr": "1/(8.617333e-5*log(10))", "vale": "5040", "dove": "04", "appare": "\\theta=5040/T"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\log\\frac{N_{r+1}}{N_r}=-\\theta\\chi_r+\\frac52\\log T-0{,}48-\\log P_e+\\log\\frac{2U_{r+1}}{U_r}", "perche": "e' la formula di Saha-Fowler in forma logaritmica (Masani §1.2), con Pe in dyne/cm2 e chi in eV: la sua costante -0,48 e' asserita numericamente."},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\log\\frac{X}{1-X}=8{,}78-13{,}59\\,\\theta-2{,}5\\log\\theta-\\log P_e", "perche": "e' la forma di Saha-Fowler per l'idrogeno (U+=1, U0=2) scritta da Masani, con 2,5 log T riscritto tramite theta=5040/T: la costante 8,78 e' asserita."},
+ {"tipo": "numero", "espr": "1.5/(1.380649e-23*5770)/1e19", "vale": "1.88", "dove": "05", "appare": "1{,}88\\cdot10^{19}\\ \\mathrm{m^{-3}}"},
+ {"tipo": "numero", "espr": "(2*1/(1.5/(1.380649e-23*5770)*2))*(2*pi*9.1093837e-31*1.380649e-23*5770/(6.62607015e-34)**2)**1.5*exp(-13.6/(8.617333e-5*5770))*1e5", "vale": "7.43", "dove": "05", "appare": "7{,}43\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "8.78-13.59*5040/5770-2.5*log(5040/5770,10)-log(15,10)", "vale": "-4.12", "dove": "05", "appare": "-4{,}12"},
+ {"tipo": "numero", "espr": "log(7.429e-5,10)", "vale": "-4.13", "dove": "05", "appare": "-4{,}13"},
+ {"tipo": "numero", "espr": "nsolve((1/(20/(1.380649e-23*T)))*(2*pi*9.1093837e-31*1.380649e-23*T/(6.62607015e-34)**2)**1.5*exp(-13.6/(8.617333e-5*T))-1,T,9500)", "vale": "9556", "ipotesi": {"T": "positive"}, "dove": "05", "appare": "9556\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "(1/(1+1/((1/(20/(1.380649e-23*6000)))*(2*pi*9.1093837e-31*1.380649e-23*6000/(6.62607015e-34)**2)**1.5*exp(-13.6/(8.617333e-5*6000)))))*1e5", "vale": "1.75", "dove": "05", "appare": "1{,}75\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "(1/(1+1/((1/(20/(1.380649e-23*12000)))*(2*pi*9.1093837e-31*1.380649e-23*12000/(6.62607015e-34)**2)**1.5*exp(-13.6/(8.617333e-5*12000)))))", "vale": "0.98", "dove": "05", "appare": "0{,}98"},
+ {"tipo": "uguale", "sinistra": "s/(1+s)", "vale": "1/(1+1/s)", "ipotesi": {"s": "positive"}, "dove": "05", "appare": "X=\\frac{N_+}{N_0+N_+}=\\frac{N_+/N_0}{1+N_+/N_0}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\frac{N_2}{N_{\\mathrm{tot}}}=\\frac{N_2}{N_1+N_2}\\cdot\\frac{N_0}{N_0+N_+}", "perche": "e' la scomposizione della frazione utile come prodotto di due frazioni (eccitazione dentro il neutro, neutro sul totale), nell'approssimazione a due livelli: la definizione del modello."},
+ {"tipo": "uguale", "sinistra": "(b/(1+b))*(1/(1+s))", "vale": "b/((1+b)*(1+s))", "ipotesi": {"b": "positive", "s": "positive"}, "dove": "06", "appare": "\\frac{N_2/N_1}{1+N_2/N_1}\\cdot\\frac{1}{1+N_+/N_0}"},
+ {"tipo": "numero", "espr": "nsolve(diff((4*exp(-10.2/(8.617333e-5*T))/(1+4*exp(-10.2/(8.617333e-5*T))))/(1+(1/(20/(1.380649e-23*T)))*(2*pi*9.1093837e-31*1.380649e-23*T/(6.62607015e-34)**2)**1.5*exp(-13.6/(8.617333e-5*T))),T),T,9500)", "vale": "9873", "ipotesi": {"T": "positive"}, "dove": "06", "appare": "9873\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "((4*exp(-10.2/(8.617333e-5*T))/(1+4*exp(-10.2/(8.617333e-5*T))))/(1+(1/(20/(1.380649e-23*T)))*(2*pi*9.1093837e-31*1.380649e-23*T/(6.62607015e-34)**2)**1.5*exp(-13.6/(8.617333e-5*T)))).subs(T,9873)*1e6", "vale": "8.7", "dove": "06", "appare": "8{,}7\\cdot10^{-6}"},
+ {"tipo": "numero", "espr": "(2*2.30/(1.5/(1.380649e-23*5770)*1.32))*(2*pi*9.1093837e-31*1.380649e-23*5770/(6.62607015e-34)**2)**1.5*exp(-6.11/(8.617333e-5*5770))", "vale": "902", "dove": "07", "appare": "902"},
+ {"tipo": "numero", "espr": "3*exp(-3.12/(8.617333e-5*5770))*1e3", "vale": "5.6", "dove": "07", "appare": "5{,}6\\cdot10^{-3}"},
+ {"tipo": "numero", "espr": "(902.04/903.04)/(1+0.005649)", "vale": "0.993", "dove": "07", "appare": "0{,}993"},
+ {"tipo": "numero", "espr": "(4.9308e-9/(1+4.9308e-9))/(1+7.429e-5)*1e9", "vale": "4.93", "dove": "07", "appare": "4{,}93\\cdot10^{-9}"},
+ {"tipo": "numero", "espr": "0.99328/(500000*4.9305e-9)", "vale": "403", "dove": "07", "appare": "403"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\frac{N_{\\mathrm{CaII},1}}{N_{\\mathrm{HI},2}}=\\frac{N_{\\mathrm{Ca}}}{N_{\\mathrm{H}}}\\cdot\\frac{f_{\\mathrm{Ca}}}{f_{\\mathrm{H}}}", "perche": "e' la scomposizione del rapporto cercato nel prodotto dell'abbondanza relativa per il rapporto delle due frazioni utili, ciascuna asserita a parte."},
+ {"tipo": "numero", "espr": "(120000/1100**2)**0.25*5772", "vale": "3239", "dove": "09", "appare": "3239\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "(120000*3.846e26/(4*pi*(1100*6.96e8)**2*5.670e-8))**0.25", "vale": "3242", "dove": "09", "appare": "3242\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "2.8978e-3/3242*1e6", "vale": "0.894", "dove": "09", "appare": "0{,}894\\ \\mu\\mathrm{m}"},
+ {"tipo": "numero", "espr": "(2*6.62607e-34*(2.998e8)**2/(0.8938e-6)**5/(exp(6.62607e-34*2.998e8/(0.8938e-6*1.380649e-23*3242))-1))/1e12", "vale": "1.47", "dove": "09", "appare": "1{,}47\\cdot10^{12}"},
+ {"tipo": "numero", "espr": "pi*1.4674e12*(1100*6.96e8/(640*9.46e15))**2", "vale": "0.074", "dove": "09", "appare": "0{,}074\\ \\mathrm{W\\,m^{-2}\\,m^{-1}}"},
+ {"tipo": "uguale", "sinistra": "log(4*pi*R**2*s*T**4,10)", "vale": "2*log(R,10)+4*log(T,10)+log(4*pi*s,10)", "ipotesi": {"R": "positive", "s": "positive", "T": "positive"}, "dove": "09", "appare": "\\log L=2\\log R+4\\log T+\\log(4\\pi\\sigma)"},
+ {"tipo": "uguale", "sinistra": "(L/R**2)**Rational(1,4)", "vale": "L**Rational(1,4)/sqrt(R)", "ipotesi": {"L": "positive", "R": "positive"}, "dove": "09", "appare": "T=T_\\odot\\left(\\frac{L/L_\\odot}{(R/R_\\odot)^{2}}\\right)^{1/4}"},
+ {"tipo": "numero", "espr": "120000/1100**2", "vale": "0.0992", "dove": "09", "appare": "0{,}0992"},
+ {"tipo": "simbolico", "dove": "10", "appare": "N_b/N_a=(g_b/g_a)e^{-\\Delta E/kT}", "perche": "restituzione della distribuzione di Boltzmann della tappa 03."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\int4\\pi p^{2}e^{-p^{2}/2m_ekT}dp\\,/h^{3}=(2\\pi m_ekT/h^{2})^{3/2}", "perche": "restituzione dell'integrale gaussiano asserito nella tappa 04."},
+ {"tipo": "simbolico", "dove": "10", "appare": "N_+/N_0=7{,}4\\cdot10^{-5}", "perche": "restituzione arrotondata del valore asserito nella tappa 05."},
+ {"tipo": "simbolico", "dove": "11", "appare": "N_2/N_1=4{,}9\\cdot10^{-9}", "perche": "restituzione arrotondata del valore asserito nella tappa 03."},
+ {"tipo": "simbolico", "dove": "11", "appare": "\\theta=5040/T", "perche": "restituzione della definizione della tappa 04."},
+ {"tipo": "simbolico", "dove": "11", "appare": "L=4\\pi R^{2}\\sigma T^{4}", "perche": "restituzione della definizione di temperatura efficace usata nella tappa 09."},
+ {"tipo": "simbolico", "dove": "02", "appare": "E_{n_b}-E_{n_a}=hc/\\lambda", "perche": "e' la condizione di Bohr sull'energia del fotone emesso o assorbito: una definizione del legame fra salto di livello e lunghezza d'onda."},
+ {"tipo": "numero", "espr": "-13.6/4+13.6", "vale": "10.2", "dove": "03", "appare": "E_2-E_1=10{,}2"},
+ {"tipo": "uguale", "sinistra": "solve(4*y-1,y)[0]", "vale": "Rational(1,4)", "ipotesi": {"y": "positive"}, "dove": "03", "appare": "e^{-\\Delta E/kT}=1/4"},
+ {"tipo": "simbolico", "dove": "07", "appare": "N_+/N_0=7{,}43\\cdot10^{-5}", "perche": "restituzione del valore asserito nella tappa 05."}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché due formule di meccanica statistica', meta:'un paradosso delle righe di Balmer · la sequenza OBAFGKM spiegata invece che descritta · il diagramma HR come conseguenza',
+  blocchi:[
+  {t:'prosa', title:'Un paradosso da risolvere', tag:'architettura', html:R`
+  <p>Lo spettro di una stella ha due ingredienti: un continuo che, approssimativamente, è una curva di Planck e dice la temperatura, e righe di assorbimento che dicono quali atomi ci sono. Le diapositive del corso (lezione4_B_2020) mettono subito in tavola il fatto che non torna. Le righe della serie di Balmer dell&rsquo;idrogeno, l&rsquo;elemento più abbondante di ogni stella, <i>«hanno massima intensità per temperature superficiali di circa 9500 K (stelle A0). Perché?»</i>. Sopra quella temperatura indeboliscono, e nelle stelle più calde quasi scompaiono. Il Sole, a 5770 K, ha righe di Balmer deboli e righe del calcio ionizzato fortissime, pur avendo un atomo di calcio ogni 500 000 di idrogeno.</p>
+  <p>La risposta sta in due formule. La <b>distribuzione di Boltzmann</b> dice come gli elettroni di un atomo si distribuiscono fra i livelli a una data temperatura. L&rsquo;<b>equazione di Saha</b> dice quanti atomi hanno perso un elettrone. Insieme danno il numero di atomi nello stato capace di produrre una certa riga, ed è quello che decide l&rsquo;intensità della riga, molto più dell&rsquo;abbondanza dell&rsquo;elemento. Fu questo, nel 1925, il lavoro di Cecilia Payne, che mostrò come tutte le stelle avessero più o meno la stessa composizione. La sequenza spettrale O-B-A-F-G-K-M di Annie Cannon smise allora di essere una classificazione morfologica e diventò una <b>scala di temperatura</b>. Il movimento costruisce le due formule, fa i conti dell&rsquo;idrogeno e del calcio fino ai numeri, e chiude con il diagramma di Hertzsprung-Russell, che ordina le stelle con la temperatura così misurata.</p>`}
+]},
+
+/* ---------------- 01 · LA SEQUENZA SPETTRALE ---------------- */
+{ num:'01', title:'La sequenza spettrale, prima di spiegarla', meta:'sette classi e le loro temperature · che cosa domina lo spettro in ciascuna · le due domande della lezione',
+  blocchi:[
+  {t:'prosa', title:'La tabella delle slide', tag:'O-B-A-F-G-K-M', html:R`
+  <p>La diapositiva «La sequenza spettrale» dà, classe per classe, le caratteristiche dello spettro e l&rsquo;intervallo di temperatura. <b>O</b>, sopra 31 000 K: elio neutro e ionizzato, idrogeno debole. <b>B</b>, 9750-31 000 K, blu-bianche: elio neutro, idrogeno più forte. <b>A</b>, 7100-9750 K, bianche: idrogeno forte, metalli ionizzati. <b>F</b>, 5950-7100 K, giallo-bianche: idrogeno debole, metalli ionizzati. <b>G</b>, 5250-5950 K, gialle (il Sole): idrogeno più debole, metalli ionizzati e neutri. <b>K</b>, 3950-5250 K, arancio: idrogeno debole, metalli neutri. <b>M</b>, 2000-3950 K, rossicce: poco o nessun idrogeno, metalli neutri, molecole. La diapositiva prosegue con le classi oltre la M (1500-2000 K con metalli idrati, e le bande del metano intorno a 1000 K), che sono le nane brune.</p>
+  <p>Letta dall&rsquo;alto in basso, la tabella dice una cosa sola: <b>scendendo in temperatura, gli atomi passano da ionizzati a neutri, e poi si legano in molecole</b>. Le righe dell&rsquo;idrogeno seguono una curva a campana, deboli in alto e in basso e massime nelle A. Le diapositive formulano le due domande che spiegano la campana: <i>«nell&rsquo;atmosfera della stella in questione, in quali orbitali è più probabile che si trovino gli elettroni? In che rapporto stanno le densità dei diversi elementi nei loro diversi stati di ionizzazione?»</i>. La prima ha come risposta Boltzmann, la seconda Saha. Ma prima servono i livelli dell&rsquo;idrogeno.</p>`}
+]},
+
+/* ---------------- 02 · I LIVELLI DELL'IDROGENO ---------------- */
+{ num:'02', title:'I livelli dell’idrogeno e le serie di righe', meta:'Bohr, la costante di Rydberg e la massa ridotta · Lyman, Balmer, Paschen · il peso statistico 2n²',
+  blocchi:[
+  {t:'prosa', title:'Livelli quantizzati e righe', tag:'Bohr, per ora basta', html:R`
+  <p>Le slide ricostruiscono la strada storica. Il modello di Rutherford non poteva spiegare righe a energie fisse, perché un elettrone in orbita classica può avere qualunque energia. Bohr impone la quantizzazione del momento angolare e trova livelli
+  $$E_n=-\frac{13{,}6\ \mathrm{eV}}{n^{2}}.$$
+  Un elettrone che salta dal livello $n_b$ al livello $n_a<n_b$ emette un fotone di energia $E_{n_b}-E_{n_a}=hc/\lambda$. Viceversa, un fotone della stessa lunghezza d&rsquo;onda può essere assorbito e far salire l&rsquo;elettrone. Di qui la formula di Rydberg:
+  $$\frac{1}{\lambda}=R_H\left(\frac{1}{n_a^{2}}-\frac{1}{n_b^{2}}\right).$$
+  La costante per l&rsquo;idrogeno tiene conto del moto del nucleo attraverso la massa ridotta: $R_H=R_\infty/(1+m_e/m_p)=109\,677{,}6$ cm⁻¹, contro i 109 737 cm⁻¹ di un nucleo infinitamente pesante. La diapositiva chiude onestamente: <i>«oggi sappiamo che il modello di Bohr è sbagliato»</i>. L&rsquo;elettrone non percorre orbite, è descritto da un orbitale, ma <i>«la formula di Bohr prevede correttamente i livelli energetici quando l&rsquo;atomo è isolato. Per ora ci basta»</i>. La scala dei livelli è fissata dal <span class="str" data-str="raggio-di-bohr">raggio di Bohr</span>, e la loro energia si misura naturalmente in <span class="str" data-str="elettronvolt">elettronvolt</span>.</p>`},
+  {t:'prosa', title:'Le serie, e quella che conta nel visibile', tag:'la tabella delle slide', html:R`
+  <p>Fissato il livello di arrivo $n_a$, le righe formano una <b>serie</b>. La <b>Lyman</b> ($n_a=1$) è tutta nell&rsquo;ultravioletto: Lyman-alfa a $121{,}57\ \mathrm{nm}$, poi 102,57, 97,25, …, fino al limite di 91,2 nm. La <b>Balmer</b> ($n_a=2$) è nel visibile: H-alfa a $656{,}47\ \mathrm{nm}$ (nel vuoto), H-beta a $486{,}27$, poi 434,17, 410,29, 397,12, 389,02, …, fitte verso il limite di $364{,}7\ \mathrm{nm}$, che è la discontinuità di Balmer di Vega. La <b>Paschen</b> ($n_a=3$) è nell&rsquo;infrarosso: 1875,6, 1282,2, 1094,1 nm, … Sono i numeri della tabella delle diapositive, e la formula di Rydberg li riproduce.</p>
+  <p>Un fatto decide tutto quello che segue. Le righe di Balmer partono da $n=2$, e un atomo può assorbirle solo se il suo elettrone è già nel primo livello eccitato, $10{,}2\ \mathrm{eV}$ sopra il fondamentale. Quanti atomi stiano lì lo dice la temperatura. Il secondo ingrediente è il <b>peso statistico</b>. Il livello $n$ dell&rsquo;idrogeno raccoglie tutti gli stati con numeri quantici $l=0,\dots,n-1$, $m_l=-l,\dots,l$ e due orientazioni di spin, quindi
+  $$g_n=2\sum_{l=0}^{n-1}(2l+1)=2n^{2}:$$
+  2 stati per $n=1$, 8 per $n=2$, 18 per $n=3$.</p>`}
+]},
+
+/* ---------------- 03 · BOLTZMANN ---------------- */
+{ num:'03', title:'Boltzmann: quanti atomi sono eccitati', meta:'il rapporto di popolazione con i pesi statistici · 85 400 K · nel Sole un atomo su 203 milioni · la funzione di partizione',
+  blocchi:[
+  {t:'prosa', title:'Il rapporto fra due livelli', tag:'la prima formula', html:R`
+  <p>Nell&rsquo;atmosfera di una stella gli atomi collidono di continuo e si scambiano energia. Si arriva così, dicono le slide, a <i>«una situazione di equilibrio con una ben definita distribuzione degli elettroni nei diversi possibili orbitali»</i>. All&rsquo;equilibrio la probabilità di uno stato di energia $E$ è proporzionale a $e^{-E/kT}$. Se il livello $a$ contiene $g_a$ stati e il livello $b$ ne contiene $g_b$, il rapporto fra il numero di atomi nei due livelli è
+  $$\frac{N_b}{N_a}=\frac{g_b}{g_a}\,e^{-(E_b-E_a)/kT}.$$
+  Due fattori in competizione. Il peso statistico favorisce i livelli alti, che hanno più stati. L&rsquo;esponenziale li penalizza, perché costano energia.</p>
+  <p>Per l&rsquo;idrogeno, livelli 1 e 2: $g_2/g_1=4$ e $E_2-E_1=10{,}2$ eV. I due livelli sarebbero ugualmente popolati, $N_2=N_1$, quando $4e^{-10{,}2\,\mathrm{eV}/kT}=1$, cioè a $85\,400\ \mathrm{K}$. È la cifra delle slide, ed è una temperatura che nessuna fotosfera raggiunge. Nel Sole, a 5770 K, $kT=0{,}4972\ \mathrm{eV}$, e il rapporto è $4{,}93\cdot10^{-9}$: <i>«solo un atomo su 202 milioni è nel primo stato eccitato»</i>, scrivono le slide. Il conto con queste costanti dà $203$ milioni. Il livello 3 è ancora meno popolato, circa il $5{,}0\%$ del livello 2. Masani fa la stessa stima in una riga: con un&rsquo;energia di eccitazione di circa 10 eV, il secondo livello si popola come il primo solo verso $5\cdot10^4$ K.</p>
+  <p>La conclusione delle slide va presa alla lettera: <i>«a temperature ragionevoli, il numero di atomi di H eccitati è una frazione piccola del totale. La frazione cresce monotonamente all&rsquo;aumentare della temperatura»</i>. Allora la domanda torna più acuta: se gli atomi eccitati crescono sempre con $T$, perché le righe di Balmer calano sopra i 9500 K?</p>`},
+  {t:'prosa', title:'La funzione di partizione, e perché non diverge', tag:'Masani §1.1', html:R`
+  <p>Per passare dai rapporti alle frazioni si normalizza su tutti i livelli. La <b>funzione di partizione</b> dell&rsquo;atomo è
+  $$Z=\sum_n g_n\,e^{-(E_n-E_1)/kT},$$
+  e la frazione di atomi nel livello $n$ è $\frac{N_n}{N}=\frac{g_n\,e^{-(E_n-E_1)/kT}}{Z}$. Per l&rsquo;idrogeno a temperature stellari il primo termine domina, quindi $Z\simeq g_1=2$. Masani segnala un&rsquo;obiezione che sembra fatale: per l&rsquo;idrogeno i livelli sono infiniti, con $g_n=2n^2$ che cresce e un esponenziale che tende a una costante perché $E_n\to0$, e la somma diverge. In realtà, scrive, <i>«ciò non accade perché, per n elevato, viene a mancare la condizione della indipendenza e della non perturbazione da parte di atomi vicini»</i>. Un orbitale di $n$ grande ha raggio proporzionale a $n^2$, e quando diventa confrontabile con la distanza fra atomi il livello non esiste più: la somma va troncata. La tabella di Masani dà $\log U=0{,}30$, cioè $U=2$, per quasi tutte le combinazioni di temperatura e pressione elettronica delle fotosfere. Si discosta solo alle temperature più alte e alle pressioni più basse.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché a 85 400 K, e non a 10,2 eV/k = 118 000 K, i livelli 1 e 2 dell’idrogeno sono ugualmente popolati?`,
+    a:R`Perché il peso statistico del livello 2 è quattro volte quello del livello 1 ($g_2=8$, $g_1=2$): l&rsquo;uguaglianza chiede $e^{-\Delta E/kT}=1/4$, cioè $kT=\Delta E/\ln4$. Il fattore $\ln 4\simeq1{,}39$ abbassa la temperatura da 118 000 a 85 400 K.`},
+   {q:R`Il numero di atomi di idrogeno nel livello 2 cresce sempre con la temperatura?`,
+    a:R`Fra gli atomi <i>neutri</i>, sì: il rapporto $N_2/N_1$ di Boltzmann è monotono crescente in $T$. Ma il numero assoluto di atomi neutri a un certo punto crolla, perché l&rsquo;idrogeno si ionizza. Il conto di Boltzmann da solo non vede la ionizzazione: serve Saha.`}
+  ]}
+]},
+
+/* ---------------- 04 · SAHA ---------------- */
+{ num:'04', title:'Saha: quanti atomi sono ionizzati, e perché compare la densità degli elettroni', meta:'Boltzmann fra uno stato legato e il continuo · il volume di fase dell’elettrone libero · la forma pratica di Masani con theta = 5040/T',
+  blocchi:[
+  {t:'prosa', title:'Lo stesso conto, fra un livello e il continuo', tag:'la domanda dell’orale', html:R`
+  <p>La mappa del corso indica come va detta all&rsquo;orale: Saha è <i>«lo stesso conto fatto fra uno stato legato e il continuo, dove il fattore in più è il volume di fase disponibile all&rsquo;elettrone libero»</i>. Lo si costruisce in tre passi. Lo stato di partenza è l&rsquo;atomo neutro nel fondamentale. Lo stato di arrivo è lo ione nel fondamentale <i>più</i> un elettrone libero con impulso $\vec p$. L&rsquo;energia di arrivo supera quella di partenza dell&rsquo;energia di ionizzazione $\chi$ più l&rsquo;energia cinetica dell&rsquo;elettrone, $p^2/2m_e$. Per Boltzmann il rapporto di popolazione è il rapporto dei pesi statistici per $e^{-(\chi+p^2/2m_e)/kT}$.</p>
+  <p>Il peso statistico dello stato di arrivo è quello che fa la differenza. Lo ione porta il suo $g$. L&rsquo;elettrone libero porta il numero di stati quantistici in cui può stare: per ogni cella di volume $h^3$ nello spazio delle fasi c&rsquo;è uno stato, per ciascuna delle due orientazioni di spin. In un guscio di impulsi fra $p$ e $p+dp$ e in un volume $V$ ci sono $2\cdot4\pi p^{2}dp\,V/h^{3}$ stati. Il volume a disposizione di <i>un</i> elettrone è quello che gli lasciano gli altri, $V=1/n_e$, quindi il peso è $\frac{2\cdot4\pi p^{2}dp}{h^{3}}\,\frac{1}{n_e}$. Sommando su tutti gli impulsi resta un <span class="str" data-str="integrale-gaussiano">integrale gaussiano</span>:
+  $$\int_0^\infty4\pi p^{2}e^{-p^{2}/2m_ekT}dp=(2\pi m_ekT)^{3/2}.$$
+  Mettendo insieme, e scrivendo le funzioni di partizione $Z_i$ e $Z_{i+1}$ al posto dei pesi dei soli fondamentali, si ha l&rsquo;<b>equazione di Saha</b> (1920):
+  $$\frac{N_{i+1}}{N_i}=\frac{2Z_{i+1}}{n_eZ_i}\left(\frac{2\pi m_ekT}{h^{2}}\right)^{3/2}e^{-\chi_i/kT}.$$</p>`},
+  {t:'prosa', title:'Che cosa dice ciascun fattore', tag:'le tre frecce della slide', html:R`
+  <p>La diapositiva annota la formula con tre frecce, e sono le tre frasi da dire. Il rapporto è <b>inversamente proporzionale al numero di elettroni liberi</b>, <i>«che favoriscono la ricombinazione degli ioni»</i>. Statisticamente, più elettroni ci sono, meno spazio delle fasi ha ciascuno, e meno peso ha lo stato ionizzato. È la risposta alla domanda tipica d&rsquo;esame, «perché compare $n_e$»: la ionizzazione produce una particella libera, e la probabilità di trovarla libera dipende da quanto spazio ha. Il rapporto <b>aumenta con $T$</b>, per il fattore $T^{3/2}$ del volume di fase e soprattutto per l&rsquo;esponenziale. E <b>diminuisce fortemente all&rsquo;aumentare dell&rsquo;energia di ionizzazione</b>, perché $\chi$ sta nell&rsquo;esponente. Il fattore di volume di fase è enorme. Già alla temperatura del Sole $(2\pi m_ekT/h^2)^{3/2}=1{,}06\cdot10^{27}\ \mathrm{m^{-3}}$, molto più delle densità elettroniche delle fotosfere. Per questo la ionizzazione comincia a temperature in cui $kT$ è ancora molto minore di $\chi$: l&rsquo;esponenziale piccolo è compensato da un prefattore grandissimo.</p>
+  <p>Con la pressione elettronica $P_e=n_ekT$ al posto di $n_e$, Masani scrive la formula di Saha-Fowler in forma logaritmica, usando la variabile $\theta=5040/T$, in cui $5040$ è $1/(k\ln10)$ in eV:
+  $$\log\frac{N_{r+1}}{N_r}=-\theta\chi_r+\frac52\log T-0{,}48-\log P_e+\log\frac{2U_{r+1}}{U_r},$$
+  con $\chi$ in eV e $P_e$ in dyne/cm². La costante viene dal logaritmo di $(2\pi m_e)^{3/2}k^{5/2}/h^3$ in cgs, che vale $-0{,}477$. Per l&rsquo;idrogeno, con $U_+=1$ (un protone non ha livelli) e $U_0=2$, e indicando con $X$ la frazione ionizzata, Masani riscrive $\frac52\log T$ con $\theta$ e ottiene
+  $$\log\frac{X}{1-X}=8{,}78-13{,}59\,\theta-2{,}5\log\theta-\log P_e,$$
+  dove $8{,}78$ è $-0{,}477+2{,}5\log5040$. È la forma comoda per i conti a mano: una sottrazione di logaritmi.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché nell’equazione di Saha compare n_e e nella distribuzione di Boltzmann no?`,
+    a:R`Perché la ionizzazione crea una particella libera in più, l&rsquo;elettrone, e il peso statistico dello stato finale contiene il numero di stati quantistici disponibili all&rsquo;elettrone, che è proporzionale al volume che ha a disposizione, $1/n_e$. Un&rsquo;eccitazione fra due livelli legati non crea particelle e non ha fattore di volume.`},
+   {q:R`Due stelle hanno la stessa temperatura fotosferica; una è una gigante con pressione elettronica cento volte minore. Quale ha l’idrogeno più ionizzato?`,
+    a:R`La gigante: a parità di $T$ il rapporto $N_+/N_0$ è inversamente proporzionale a $P_e$, quindi cento volte maggiore. È il motivo per cui la stessa classe spettrale corrisponde a temperature un po&rsquo; diverse per giganti e nane, e per cui certe righe di ioni sono indicatori di luminosità.`}
+  ]}
+]},
+
+/* ---------------- 05 · LA ZONA DI IONIZZAZIONE PARZIALE ---------------- */
+{ num:'05', title:'L’idrogeno nelle fotosfere: tutto neutro, tutto ionizzato, e la buccia in mezzo', meta:'il Sole a 1,5 Pa · la frazione ionizzata a 20 Pa · metà ionizzato a 9556 K',
+  blocchi:[
+  {t:'prosa', title:'Il Sole', tag:'la procedura eseguibile', html:R`
+  <p>La procedura che le prove chiedono ha quattro passi: (1) dalla pressione elettronica e dalla temperatura la densità degli elettroni, $n_e=P_e/kT$; (2) le funzioni di partizione, qui $Z_0=2$ e $Z_+=1$; (3) il prefattore e l&rsquo;esponenziale di Saha; (4) la frazione $X$. Per la fotosfera solare l&rsquo;esercizio di lezione dà $T=5770$ K e $P_e=15$ dyne/cm², cioè 1,5 Pa. Quindi $n_e=1{,}88\cdot10^{19}\ \mathrm{m^{-3}}$, e
+  $$\frac{N_+}{N_0}=\frac{2\cdot1}{n_e\cdot2}\left(\frac{2\pi m_ekT}{h^{2}}\right)^{3/2}e^{-13{,}6\,\mathrm{eV}/kT}=7{,}43\cdot10^{-5}.$$
+  L&rsquo;idrogeno del Sole è sostanzialmente tutto neutro: uno ionizzato su tredicimila. Con la forma di Masani, $\theta=5040/5770$ e $\log P_e=\log15$, si trova $\log(X/(1-X))=-4{,}12$, contro $-4{,}13$ del conto diretto. La piccola differenza viene da 13,59 contro 13,6 eV e dall&rsquo;arrotondamento della costante.</p>`},
+  {t:'prosa', title:'La buccia di ionizzazione parziale', tag:'Pe = 200 dyne/cm²', html:R`
+  <p>Le slide ripetono il conto per una pressione elettronica tipica di 200 dyne/cm² (20 Pa) al variare della temperatura. La frazione ionizzata è $X=\frac{N_+}{N_0+N_+}=\frac{N_+/N_0}{1+N_+/N_0}$. A 6000 K vale $1{,}75\cdot10^{-5}$. L&rsquo;idrogeno è per metà ionizzato a $9556\ \mathrm{K}$, e a 12 000 K la frazione è già $0{,}98$. Le slide riassumono: <i>«sotto 5000 K l&rsquo;H è tutto neutro, e sopra 10000 K è praticamente tutto ionizzato! Nelle stelle c&rsquo;è solo una piccola buccia in cui l&rsquo;idrogeno è parzialmente ionizzato (zona di ionizzazione parziale), con una T dell&rsquo;ordine di 10000 K per una grande varietà di parametri stellari»</i>. La transizione è rapida perché l&rsquo;esponenziale di $\chi/kT$ con $\chi=13{,}6$ eV cambia di molti ordini di grandezza per pochi kelvin. E non dipende molto dalla pressione, perché $P_e$ entra solo sotto logaritmo.</p>`},
+  {t:'plot', title:'La frazione di idrogeno ionizzato in funzione della temperatura',
+   intro:'Equazione di Saha per l’idrogeno con $Z_0=2$, $Z_+=1$. In ciano $P_e=20$ Pa (200 dyne/cm², il caso delle slide), in oro $P_e=1{,}5$ Pa (la fotosfera solare dell’esercizio), in viola $P_e=200$ Pa.',
+   plots:[
+    {kind:'func2d', xr:[4000,16000], yr:[0,1.05], height:300, equal:false,
+     title:'T (K)      X = N+ / (N0 + N+)',
+     curves:[{f:'(function(P){var s=(1.380649e-23*x/P)*pow(2*PI*9.1093837e-31*1.380649e-23*x/pow(6.62607015e-34,2),1.5)*exp(-13.6/(8.617333e-5*x));return s/(1+s);})(20)', col:'#5eead4', label:'Pe = 20 Pa'},
+             {f:'(function(P){var s=(1.380649e-23*x/P)*pow(2*PI*9.1093837e-31*1.380649e-23*x/pow(6.62607015e-34,2),1.5)*exp(-13.6/(8.617333e-5*x));return s/(1+s);})(1.5)', col:'#d8a13a', label:'Pe = 1,5 Pa'},
+             {f:'(function(P){var s=(1.380649e-23*x/P)*pow(2*PI*9.1093837e-31*1.380649e-23*x/pow(6.62607015e-34,2),1.5)*exp(-13.6/(8.617333e-5*x));return s/(1+s);})(200)', col:'#b98cff', label:'Pe = 200 Pa'}],
+     marks:[{x:9556, y:0.5, label:'9556 K', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> le tre curve sono quasi scalini, e un fattore cento in pressione sposta lo scalino di soli 2000 K circa. L&rsquo;intera transizione da neutro a ionizzato si consuma in un intervallo di temperatura di qualche migliaio di kelvin.</p>
+   <p><b>Che cosa impararne:</b> per l&rsquo;idrogeno «tutto o niente» è una buona prima approssimazione, e la temperatura della transizione, intorno ai 10 000 K, è quasi una costante stellare. La densità decide i dettagli: a parità di temperatura un gas più rarefatto è più ionizzato.</p>`}
+]},
+
+/* ---------------- 06 · BOLTZMANN PER SAHA ---------------- */
+{ num:'06', title:'Perché le righe di Balmer sono massime vicino ai 10 000 K', meta:'il prodotto di due frazioni · la campana · il massimo del modello e quello delle slide',
+  blocchi:[
+  {t:'prosa', title:'Due frazioni moltiplicate', tag:'la soluzione del paradosso', html:R`
+  <p>Le righe di Balmer le fanno gli atomi di idrogeno che sono <i>neutri</i> e nel livello 2. La frazione utile di tutto l&rsquo;idrogeno, ionizzato compreso, è il prodotto di una frazione di Boltzmann per una frazione di Saha. Nell&rsquo;approssimazione a due livelli,
+  $$\frac{N_2}{N_{\mathrm{tot}}}=\frac{N_2}{N_1+N_2}\cdot\frac{N_0}{N_0+N_+},$$
+  cioè $\frac{N_2/N_1}{1+N_2/N_1}\cdot\frac{1}{1+N_+/N_0}$. Il primo fattore cresce sempre con $T$, il secondo crolla nella zona di ionizzazione. Le slide lo dicono così: <i>«per temperature basse, il numero di atomi eccitati è basso, e quindi le righe sono poco intense. Per temperature alte, il numero di atomi eccitati potrebbe essere alto, ma la maggior parte di essi sono già ionizzati e quindi non possono produrre righe. Ecco perché c&rsquo;è una T ottimale»</i>.</p>
+  <p>Con $P_e=20$ Pa il massimo cade a $9873\ \mathrm{K}$, dove la frazione utile vale $8{,}7\cdot10^{-6}$. È meno di un atomo su centomila, eppure basta a dare le righe più forti dello spettro. Le slide scrivono che il massimo è <i>«proprio a 9500 K»</i>, la temperatura delle A0 in cui le righe di Balmer sono osservate più intense. Il modello a due livelli con questa pressione lo mette 370 K più in alto. Non è una contraddizione da nascondere. Il modello ignora i livelli più alti nella funzione di partizione, il contributo dell&rsquo;elio agli elettroni liberi e il fatto che la forza di una riga osservata non è semplicemente proporzionale al numero di atomi (la curva di crescita). Il risultato robusto è che il massimo sta poco sotto i 10 000 K, e lì sta.</p>`},
+  {t:'plot', title:'La campana delle righe di Balmer',
+   intro:'Frazione di tutto l’idrogeno che è neutra e nel livello 2, moltiplicata per $10^6$, con $P_e=20$ Pa. In tratteggio i due fattori separati, scalati per stare nella figura: Boltzmann (crescente) e la frazione neutra di Saha (decrescente).',
+   plots:[
+    {kind:'func2d', xr:[5000,20000], yr:[0,10], height:300, equal:false,
+     title:'T (K)      frazione utile x 10^6',
+     curves:[{f:'1e6*(4*exp(-10.2/(8.617333e-5*x))/(1+4*exp(-10.2/(8.617333e-5*x))))/(1+(1.380649e-23*x/20)*pow(2*PI*9.1093837e-31*1.380649e-23*x/pow(6.62607015e-34,2),1.5)*exp(-13.6/(8.617333e-5*x)))', col:'#5eead4', label:'neutri nel livello 2 (x 1e6)'},
+             {f:'1e4*4*exp(-10.2/(8.617333e-5*x))', col:'#d8a13a', label:'Boltzmann N2/N1 (x 1e4)', dash:true},
+             {f:'10/(1+(1.380649e-23*x/20)*pow(2*PI*9.1093837e-31*1.380649e-23*x/pow(6.62607015e-34,2),1.5)*exp(-13.6/(8.617333e-5*x)))', col:'#b98cff', label:'frazione neutra (x 10)', dash:true}],
+     marks:[{x:9873, y:8.74, label:'9873 K', col:'#5eead4', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la curva oro (Boltzmann) sale per tutta la figura, quella viola (frazione neutra) cade a precipizio fra 8000 e 12 000 K. Il prodotto in ciano è una campana con il massimo dove la caduta della seconda comincia a battere la salita della prima.</p>
+   <p><b>Che cosa impararne:</b> «più caldo» non vuol dire «righe più forti». Ogni riga di ogni ione ha la sua campana, con il massimo a una temperatura fissata dalle sue due energie: quella del livello di partenza (Boltzmann) e quella di ionizzazione (Saha). La sequenza O-B-A-F-G-K-M è la sovrapposizione di tutte queste campane.</p>`}
+]},
+
+/* ---------------- 07 · L'ESERCIZIO H CONTRO CaII ---------------- */
+{ num:'07', title:'L’esercizio della lezione: perché il calcio vince sull’idrogeno nel Sole', meta:'Saha e Boltzmann per H e per CaII · le funzioni di partizione di Aller · quattrocento a uno',
+  blocchi:[
+  {t:'prosa', title:'Il testo e i dati', tag:'lezione4_C_2020 e lezione5_2017', html:R`
+  <p><i>Calcolare quantitativamente, per il Sole, il rapporto tra il numero di atomi di H disponibili per produrre righe di Balmer e quello di atomi di Ca ionizzato una volta (CaII) disponibili per produrre le righe H e K di Fraunhofer.</i> Dati: energie di ionizzazione 13,6 eV per H e 6,11 eV per Ca; abbondanza numerica Ca/H = 1/500 000; temperatura della fotosfera 5700 K (le slide svolgono il conto a 5770 K, e qui lo seguo); pressione elettronica 15 dyne/cm². Le slide sottolineano anche che <i>«nonostante la densità numerica del Ca sia circa 1 milionesimo di quella dell&rsquo;H»</i>, le righe H e K sono <i>«molto più»</i> intense di quelle di Balmer. L&rsquo;esercizio chiede di quantificarlo. Il rapporto cercato è il prodotto dell&rsquo;abbondanza per il rapporto delle due frazioni utili:
+  $$\frac{N_{\mathrm{CaII},1}}{N_{\mathrm{HI},2}}=\frac{N_{\mathrm{Ca}}}{N_{\mathrm{H}}}\cdot\frac{f_{\mathrm{Ca}}}{f_{\mathrm{H}}}.$$</p>`},
+  {t:'prosa', title:'L’idrogeno', tag:'due passi', html:R`
+  <p>Saha per l&rsquo;idrogeno è già fatta: $N_+/N_0=7{,}43\cdot10^{-5}$, l&rsquo;idrogeno è tutto neutro. La slide nota che $Z_{II}=1$ <i>«perché un protone singolo può avere qualsiasi energia e quindi non c&rsquo;è degenerazione»</i>. Boltzmann per il livello 2 dà $4{,}93\cdot10^{-9}$. La frazione utile dell&rsquo;idrogeno, neutro e nel livello 2, è quindi $f_{\mathrm{H}}=4{,}93\cdot10^{-9}$. La slide dà $4{,}96\cdot10^{-9}$, con costanti arrotondate in modo leggermente diverso.</p>`},
+  {t:'prosa', title:'Il calcio', tag:'altri due passi', html:R`
+  <p>Saha per il calcio, dal neutro CaI allo ionizzato una volta CaII, con le funzioni di partizione $Z_{II}=2{,}30$ e $Z_I=1{,}32$. La slide avverte che sono <i>«lunghi da calcolare ma esistono tabelle (es. Aller 1963)»</i>. Con $\chi=6{,}11$ eV, meno della metà dell&rsquo;idrogeno, il rapporto è $N_{II}/N_I=902$: il calcio è quasi tutto ionizzato una volta. Poi Boltzmann <i>dentro</i> il CaII. Le righe H e K partono dal fondamentale dello ione, e il primo livello eccitato sta circa 3,12 eV sopra, con peso statistico tre volte maggiore: la frazione eccitata è $3e^{-3{,}12\,\mathrm{eV}/kT}=5{,}6\cdot10^{-3}$. Questo valore dell&rsquo;energia e del rapporto dei pesi non è nei dati del testo: è l&rsquo;energia del fotone della riga K a 393,4 nm, e il rapporto 6/2 fra i pesi dei livelli 4p e 4s. Lo dichiaro, perché la conclusione non ne dipende. La frazione utile del calcio, ionizzato una volta e nel fondamentale, è dunque $f_{\mathrm{Ca}}=\frac{902}{903}\cdot\frac{1}{1+0{,}0056}=0{,}993$.</p>`},
+  {t:'prosa', title:'Il rapporto', tag:'quattrocento a uno', html:R`
+  <p>Mettendo insieme, $\frac{1}{500\,000}\times\frac{0{,}993}{4{,}93\cdot10^{-9}}$ dà $403$. Le slide: <i>«ci sono circa 400 atomi di calcio (ionizzato una volta) che producono righe H e K per ogni atomo di idrogeno che produce righe di Balmer. Le profondità delle righe quindi scalano di conseguenza. Tutto a causa della forte dipendenza dell&rsquo;equazione di Saha dall&rsquo;energia di ionizzazione»</i>. Più precisamente, la causa sono due esponenziali. Per l&rsquo;idrogeno pesa Boltzmann, perché il livello di partenza della riga sta a 10,2 eV dal fondamentale. Per il calcio pesa Saha, ma a favore, perché la sua energia di ionizzazione è bassa e il fondamentale dello ione è esattamente il livello da cui partono H e K. L&rsquo;abbondanza dice il contrario, cinquecentomila a uno per l&rsquo;idrogeno, e perde per un fattore 400.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In una stella a 9500 K il rapporto fra atomi «utili» di CaII e di HI sarebbe maggiore o minore di 400?`,
+    a:R`Molto minore. L&rsquo;idrogeno nel livello 2 cresce di più di tre ordini di grandezza (siamo vicini al massimo della campana di Balmer), mentre il calcio a quella temperatura viene ionizzato una seconda volta (CaIII), e il CaII si svuota. Le righe H e K si indeboliscono e quelle di Balmer dominano: è lo spettro di una A0.`}
+  ]}
+]},
+
+/* ---------------- 08 · DENSITÀ E LUMINOSITÀ ---------------- */
+{ num:'08', title:'Non solo la temperatura: la densità, e le classi di luminosità', meta:'giganti con righe strette · la pressione elettronica nella formula di Saha · lo stesso tipo spettrale, due stelle diverse',
+  blocchi:[
+  {t:'prosa', title:'L’effetto della densità', tag:'lezione 6, diapositiva 10', html:R`
+  <p><i>«La temperatura è il principale fattore che definisce lo spettro stellare. Ma anche la densità degli strati più esterni della stella ha un effetto sullo spettro»</i>. Lo fa in due modi, e il movimento ne ha appena costruito il secondo. Il primo è la larghezza delle righe. Le giganti e le supergiganti hanno atmosfere molto rarefatte, gli urti fra atomi sono rari e le righe dell&rsquo;idrogeno sono strette. Nelle stelle di sequenza principale gli urti sono frequenti e allargano le righe. Il secondo modo è lo stato di ionizzazione. A parità di temperatura, una pressione elettronica minore significa per Saha più ionizzazione, e quindi rapporti fra righe di ioni e righe di neutri diversi. Le slide ne traggono la conseguenza pratica: <i>«dallo spettro si può capire non solo la T, ma anche, a parità di temperatura, se una stella è di sequenza principale, o gigante, o supergigante, o una nana bianca»</i>. È il fondamento delle <b>classi di luminosità</b> (I supergiganti, III giganti, V nane di sequenza principale) che accompagnano il tipo spettrale, come in «G2 V» per il Sole.</p>
+  <p>Le diapositive di lezione 6 mostrano lo stesso effetto con gli spettri. Le giganti blu hanno assorbimento dell&rsquo;idrogeno con righe più strette. Le giganti rosse fredde somigliano alle stelle di sequenza principale della stessa temperatura, ma con righe più strette e un tripletto del calcio a 8500 Å molto più profondo. Sotto i 3500 K <i>«l&rsquo;eccitazione è così bassa che si possono formare delle molecole»</i>, con bande larghe fino a 300 Å. È l&rsquo;altro estremo della tabella della tappa 01.</p>`}
+]},
+
+/* ---------------- 09 · IL DIAGRAMMA HR ---------------- */
+{ num:'09', title:'Il diagramma di Hertzsprung-Russell', meta:'luminosità contro temperatura · le rette di raggio costante · giganti e nane · Betelgeuse in una prova del 2015',
+  blocchi:[
+  {t:'prosa', title:'Due famiglie di stelle', tag:'Hertzsprung 1905, Russell 1914', html:R`
+  <p>Con la temperatura letta dallo spettro e la luminosità ottenuta dal flusso e dalla distanza, ogni stella diventa un punto in un piano. Masani racconta che cosa si scoprì mettendole lì. Intorno al 1900 si credeva che le stelle nascessero calde e si raffreddassero, evolvendo dai tipi «primi» B e A verso i tipi «avanzati» K e M. Huggins pubblicò nel 1900 una lista per età, da Vega a Betelgeuse. Ma <i>«con i lavori di Hertzsprung iniziati nel 1905 e completati negli anni successivi e con quelli di Russell del 1914 che portarono a costruire quello che va sotto il nome di diagramma H-R, fu scoperta l&rsquo;esistenza di due famiglie stellari ben individuate e separate fra loro: le giganti e le nane»</i>. La maggior parte delle stelle sta su una fascia diagonale, la <b>sequenza principale</b>, che va dalle stelle calde e luminose alle fredde e deboli. Sopra di essa, a parità di temperatura, stanno stelle molto più luminose, le giganti. La lista di Huggins, nota Masani, mescolava stelle del ramo gigante con il Sole, che è una nana.</p>`},
+  {t:'prosa', title:'Che cosa sono le rette del diagramma', tag:'L = 4 pi R² sigma T⁴', html:R`
+  <p>Il diagramma ha una geometria nascosta, e la dà la definizione di temperatura efficace, $L=4\pi R^{2}\sigma T^{4}$. Prendendo il logaritmo,
+  $$\log L=2\log R+4\log T+\log(4\pi\sigma).$$
+  In un piano $\log L$ contro $\log T$ le stelle di uguale raggio stanno su rette di pendenza 4. Due stelle con la stessa temperatura e luminosità diverse di un fattore 100 hanno raggi diversi di un fattore 10. Ecco perché «gigante» è la parola giusta: una stella sopra la sequenza principale alla stessa temperatura è più luminosa perché è più <i>grande</i>, e quindi la sua atmosfera è più rarefatta. Lo spettro lo vede con le righe strette e la ionizzazione diversa della tappa 08. Il diagramma si disegna per tradizione con la temperatura che <i>cresce verso sinistra</i>, e spesso con la <span class="str" data-str="magnitudine">magnitudine</span> assoluta al posto di $\log L$, con le stelle luminose in alto.</p>`},
+  {t:'plot', title:'Le rette di raggio costante nel piano luminosità-temperatura',
+   intro:R`In ascissa $\log_{10}T$ (la temperatura cresce verso destra, al contrario della convenzione degli astronomi), in ordinata $\log_{10}(L/L_\odot)$. Rette da 0,01 a 1000 raggi solari; in giallo il Sole, in rosso Betelgeuse dell’esercizio.`,
+   plots:[
+    {kind:'func2d', xr:[3.4,4.6], yr:[-4,6.5], height:320, equal:false,
+     title:'log10 T (K)      log10 L / Lsun',
+     curves:[{f:'2*log(0.01)/log(10)+4*(x-3.7613)', col:'#4d5a6b', label:'0,01 Rsun (nane bianche)'},
+             {f:'4*(x-3.7613)', col:'#d8a13a', label:'1 Rsun'},
+             {f:'2*2+4*(x-3.7613)', col:'#b98cff', label:'100 Rsun'},
+             {f:'2*3+4*(x-3.7613)', col:'#ff6b6b', label:'1000 Rsun'}],
+     marks:[{x:3.7613, y:0, label:'Sole', col:'#d8a13a', up:true},
+            {x:3.5108, y:5.079, label:'Betelgeuse', col:'#ff6b6b', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> le rette sono parallele e distanziate di 2 in $\log L$ per ogni fattore 10 in raggio. Il Sole sta sulla retta di 1 raggio solare per definizione. Betelgeuse, a 3200 K e 120 000 luminosità solari, sta vicino alla retta di 1000.</p>
+   <p><b>Che cosa impararne:</b> il diagramma HR è anche un diagramma dei raggi. La sequenza principale taglia le rette di raggio costante con pendenza minore di 4, quindi lungo di essa le stelle calde sono anche più grandi. Le giganti e le nane bianche stanno su rette lontane, cento volte più su e cento volte più giù in raggio.</p>`},
+  {t:'prosa', title:'Betelgeuse', tag:'prova scritta del 23 luglio 2015, esercizio 1', html:R`
+  <p><i>Betelgeuse ha un raggio di circa 1100 raggi solari, una luminosità di circa 120 000 luminosità solari e una distanza di circa 640 anni luce. Calcolare approssimativamente la temperatura fotosferica, la lunghezza d&rsquo;onda di massima emissione e il flusso specifico (in W/m²/m) che si riceve a terra a quella lunghezza d&rsquo;onda.</i></p>
+  <p>La via più veloce è il rapporto con il Sole: $T=T_\odot\left(\frac{L/L_\odot}{(R/R_\odot)^{2}}\right)^{1/4}$, con $(L/L_\odot)/(R/R_\odot)^2=120\,000/1100^2=0{,}0992$, e $T_\odot=5772$ K dà $3239\ \mathrm{K}$. Con i dati del testo direttamente ($R_\odot=6{,}96\cdot10^8$ m, $L_\odot=3{,}846\cdot10^{26}$ W) viene $3242\ \mathrm{K}$: una supergigante rossa di tipo M. La legge di Wien dà il massimo di $B_\lambda$ a $0{,}894\ \mu\mathrm{m}$, nel vicino infrarosso. Il flusso specifico a terra è $\pi B_\lambda(R/d)^2$, la brillanza della superficie per l&rsquo;angolo solido del disco. La funzione di Planck a quella lunghezza d&rsquo;onda e temperatura vale $1{,}47\cdot10^{12}$ W m⁻² m⁻¹ sr⁻¹, e con $R=1100R_\odot$ e $d=640$ anni luce il flusso è $0{,}074\ \mathrm{W\,m^{-2}\,m^{-1}}$, cioè $7{,}4\cdot10^{-8}$ W/m² per micron. Nel diagramma HR il punto sta in alto a destra, sulla retta di circa mille raggi solari, lontano dalla sequenza principale.</p>`}
+]},
+
+/* ---------------- 10 · ALL'ORALE ---------------- */
+{ num:'10', title:'All’orale: l’equazione di Saha, e Boltzmann come suo pezzo', meta:'la domanda teorica della mappa · il copione in sei mosse · perché compare n_e',
+  blocchi:[
+  {t:'reveal', title:'Il copione', tag:'sei mosse', steps:[
+   {label:'Mossa 1: Boltzmann', body:R`<p>«All&rsquo;equilibrio termico la probabilità di uno stato è proporzionale a $e^{-E/kT}$; con i pesi statistici $N_b/N_a=(g_b/g_a)e^{-\Delta E/kT}$. Per l&rsquo;idrogeno, $g_n=2n^2$: nel Sole $N_2/N_1$ è circa cinque miliardesimi, e i due livelli si uguaglierebbero solo a 85 000 K.»</p>`},
+   {label:'Mossa 2: la ionizzazione come transizione verso il continuo', body:R`<p>«La ionizzazione è lo stesso conto fra uno stato legato e uno stato con un elettrone libero. L&rsquo;energia dello stato finale è $\chi+p^2/2m_e$, e il suo peso statistico contiene gli stati dell&rsquo;elettrone libero.»</p>`},
+   {label:'Mossa 3: il volume di fase', body:R`<p>«Gli stati dell&rsquo;elettrone sono $2\cdot4\pi p^2dp\,V/h^3$, con $V=1/n_e$ il volume a sua disposizione. Integrando sull&rsquo;impulso con il peso di Boltzmann si ottiene $\int4\pi p^{2}e^{-p^{2}/2m_ekT}dp\,/h^{3}=(2\pi m_ekT/h^{2})^{3/2}$.»</p>`},
+   {label:'Mossa 4: la formula', body:R`<p>«Quindi $\frac{N_{i+1}}{N_i}=\frac{2Z_{i+1}}{n_eZ_i}\left(\frac{2\pi m_ekT}{h^2}\right)^{3/2}e^{-\chi/kT}$. Il 2 è lo spin dell&rsquo;elettrone, le $Z$ le funzioni di partizione dei due ioni.»</p>`},
+   {label:'Mossa 5: perché compare n_e', body:R`<p>«Perché la ionizzazione crea una particella libera, e il numero di stati in cui può stare è proporzionale al volume che ha: più elettroni, meno volume per ciascuno, più ricombinazione. Per questo una gigante, più rarefatta, è più ionizzata di una nana alla stessa temperatura.»</p>`},
+   {label:'Mossa 6: il numero e la conseguenza', body:R`<p>«Nel Sole, a 5770 K e $P_e=1{,}5$ Pa, $N_+/N_0=7{,}4\cdot10^{-5}$ per l&rsquo;idrogeno. A 20 Pa l&rsquo;idrogeno è per metà ionizzato a circa 9600 K. Il prodotto di Boltzmann e Saha dà la campana delle righe di Balmer, massima poco sotto i 10 000 K: le stelle A.»</p>`}
+  ]}
+]},
+
+/* ---------------- 11 · I NUMERI ---------------- */
+{ num:'11', title:'I numeri di questo movimento, e dove tornano Boltzmann e Saha', meta:'otto voci · dalla fotosfera all’universo primordiale',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Idrogeno:</b> $E_n=-13{,}6/n^2$ eV, $g_n=2n^2$; H-alfa 656,5 nm, H-beta 486,3 nm, limite di Balmer 364,7 nm, Lyman-alfa 121,6 nm.</li>
+  <li><b>Eccitazione:</b> $\Delta E_{12}=10{,}2$ eV; $N_2=N_1$ a 85 400 K; nel Sole $N_2/N_1=4{,}9\cdot10^{-9}$.</li>
+  <li><b>Saha:</b> prefattore $(2\pi m_ekT/h^2)^{3/2}\simeq10^{27}$ m⁻³ a 5800 K; $n_e=P_e/kT$.</li>
+  <li><b>Masani:</b> $\theta=5040/T$; costante $-0{,}48$ con $P_e$ in dyne/cm²; per H, $8{,}78$.</li>
+  <li><b>Zona di ionizzazione:</b> idrogeno per metà ionizzato a circa 9600 K (20 Pa), neutro sotto 5000 K, ionizzato sopra 12 000 K.</li>
+  <li><b>Balmer:</b> massimo poco sotto 10 000 K (stelle A); frazione utile al massimo circa $10^{-5}$.</li>
+  <li><b>Sole:</b> CaII utile contro HI utile: circa 400 a 1, con Ca/H = $2\cdot10^{-6}$.</li>
+  <li><b>HR:</b> $L=4\pi R^{2}\sigma T^{4}$; rette di raggio costante di pendenza 4 in $\log L$ contro $\log T$.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappaiono', tag:'il senso', html:R`
+  <p>Boltzmann torna ogni volta che si chiede quanti atomi o molecole sono nel livello di partenza di una riga. Nelle molecole interstellari, per esempio, i livelli rotazionali del CO popolati termicamente fanno da termometro delle nubi fredde. Saha torna con le stesse tre frecce in un posto lontanissimo dalle fotosfere: l&rsquo;universo primordiale. Quando l&rsquo;universo si raffredda, l&rsquo;idrogeno si ricombina in atomi neutri e la radiazione si disaccoppia dalla materia. La temperatura della ricombinazione non è $\chi/k\simeq160\,000$ K, ma circa 3000 K, per lo stesso motivo per cui l&rsquo;idrogeno delle fotosfere si ionizza a 10 000 K e non a 160 000. Lì il ruolo del grande prefattore di volume di fase lo giocano i circa due miliardi di fotoni per barione, che tengono ionizzato l&rsquo;idrogeno anche quando $kT$ è una piccola frazione di 13,6 eV. Negli interni stellari, infine, la ionizzazione è completa, e il gas diventa un plasma di nuclei ed elettroni liberi. È la premessa della fisica delle stelle.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-06-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-06 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-06-boltzmann-saha-e-la-classificazione.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

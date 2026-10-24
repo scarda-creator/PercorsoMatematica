@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-12 — Polvere, scattering e radiazione non termica: la luce che non dipende dalla temperatura</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-12 — Polvere, scattering e radiazione non termica: la luce che non dipende dalla temperatura</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+STRUM["trasformata-di-fourier"] = {"nome":"Trasformata di Fourier","riga":"L'operazione $\\hat f(k)=\\int f(x)\\,e^{-ikx}\\,dx$, che riscrive una funzione come sovrapposizione di onde piane e manda la derivata in una moltiplicazione per $ik$.","serve":"È lo strumento che rende ALGEBRICA un'equazione differenziale lineare a coefficienti costanti: con $\\partial_x$ che diventa $ik$, un'equazione differenziale in $x$ diventa un'equazione algebrica in $k$, si risolve, e si antitrasforma. Le due cose da non perdere sono la convenzione dei $2\\pi$, che cambia da testo a testo e va dichiarata una volta, e Plancherel, che dice che la trasformata conserva la norma $L^{2}$ — in fisica, l'energia.","esempio":"La gaussiana $f(x)=e^{-x^{2}/2}$ ha trasformata $\\int_{-\\infty}^{+\\infty}e^{-x^{2}/2}e^{-ikx}\\,dx=\\sqrt{2\\pi}\\,e^{-k^{2}/2}$: ancora una gaussiana, tanto più larga quanto l'originale è stretta. È il caso in cui si vede meglio il principio di indeterminazione come fatto puramente matematico.","pieno":{"file":"15-distribuzioni.html","tappa":"02","come":"le proprietà, la derivata che diventa un prodotto e Plancherel, nel nucleo delle distribuzioni"},"qui":{"elettromagnetismo":{"serve":"Serve appena si scrive un'onda generica invece di una monocromatica: ogni soluzione delle equazioni di Maxwell nel vuoto è una sovrapposizione di onde piane $e^{i(\\mathbf k\\cdot\\mathbf x-\\omega t)}$, e la trasformata è il modo di scomporla. Su ciascuna componente l'equazione delle onde si riduce alla relazione di dispersione, e la propagazione diventa un far girare fasi: ogni modo viaggia da solo, e nel vuoto tutti alla stessa velocità — per questo un impulso non si deforma.","esempio":"La sostituzione $\\partial_x\\to ik$ e $\\partial_t\\to-i\\omega$ manda le derivate seconde in $(ik)^{2}=-k^{2}$ e $(-i\\omega)^{2}=-\\omega^{2}$: l'equazione delle onde diventa $\\omega^{2}=c^{2}k^{2}$, cioè un'equazione di secondo grado al posto di una differenziale, e la sua radice positiva $\\omega=ck$ è la relazione di dispersione del vuoto."}},"controllo":[{"tipo":"integrale","espr":"exp(-x**2/2)*exp(-I*k*x)","var":"x","da":"-oo","a":"oo","vale":"sqrt(2*pi)*exp(-k**2/2)","ipotesi":{"k":"real"},"dove":"esempio","appare":"\\sqrt{2\\pi}\\,e^{-k^{2}/2}"},{"tipo":"uguale","sinistra":"(I*k)**2","vale":"-k**2","ipotesi":{"k":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-k^{2}"},{"tipo":"uguale","sinistra":"(-I*w)**2","vale":"-w**2","ipotesi":{"w":"real"},"dove":"qui.elettromagnetismo.esempio","appare":"-\\omega^{2}"},{"tipo":"uguale","sinistra":"(c*k)**2","vale":"c**2*k**2","dove":"qui.elettromagnetismo.esempio","appare":"c^{2}k^{2}"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-12: Polvere, scattering e radiazione non termica: la luce che non dipende dalla temperatura <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-12 — polvere, scattering e radiazione non termica
+identita:  i due modi di produrre luce che non hanno niente a che fare con la temperatura — lo scattering e
+           il sincrotrone — e il granello di polvere che arrossa tutto cio' che sta dietro e poi riemette
+           nel lontano infrarosso.
+copre:     A.16, R.4
+serve:     as-11 (mezzo interstellare), as-04 (funzione di Planck, corpo grigio)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento (13 prove, densita' 3,9). Il conto tipico: eccesso di colore e conversione in
+           estinzione totale, con R_V dichiarato. All'orale: l'estinzione in magnitudini e la sezione di
+           Thomson.
+fonti:     lezione11_2017 (pagine 23-38): il ciclo delle stelle nelle nubi di polvere, estinzione ed
+           emissione, la Galassia nel visibile e nel lontano infrarosso, la curva di estinzione (misura con
+           due stelle della stessa classe), il picco a 218 nm e quello a 9,6 um, l'esercizio della stella
+           X estinta vicino al centro galattico (d = 9 kpc, m = 20,2, contro Vega).
+           lezione12_2020 (pagine 1-30): l'emissione infrarossa dei grani (circa 20 K), la teoria di Mie
+           (indice complesso, parametro 2 pi a / lambda, sezioni d'urto ed efficienze, i quattro regimi di
+           Q_ext), la polarizzazione interstellare da grani asimmetrici allineati, il massimo a lambda
+           tale che 2 pi a / lambda circa 2,5 e le dimensioni dei grani (circa 0,2 um), l'esercizio della
+           massa in polvere di una regione HII (RCW38, M = F D^2 / (kappa B)).
+           lezione10_2020_B (pagine 21-27) e lezione11_2020 (pagine 1-9): Thomson (dipolo oscillante,
+           sigma_T = 0,665e-24 cm^2, distribuzione angolare), Compton e Compton inverso, Rayleigh
+           (lambda^-4, cielo blu e tramonto rosso), Mie atmosferico.
+           lezione12_2017 e lezione13_2020: radiazione non termica, sincrotrone (moto a elica, frequenza di
+           girazione relativistica, cono di emissione 1/gamma, compressione del tempo d'arrivo).
+           de Bernardis, Dispense di Laboratorio 1993/94, §1.6.2: legge di estinzione nel visibile (1.55),
+           eccessi di colore, E(U-B)/E(B-V) = 0,79, l'indice Q libero da arrossamento.
+           Prova scritta 20070913_compito_08, esercizio 2 (nube L1246 a 450 e 850 um).
+           DICHIARATO: R_V = 3,1 e lo spettro di sincrotrone di una popolazione di elettroni a legge di
+           potenza (F ~ nu^-(p-1)/2) sono valori e risultati standard, non trovati nelle slide estratte.
+           DICHIARATO (tappa 08): nei dati della L1246 il rapporto dei flussi 450/850 (3,3) non e'
+           compatibile con polvere a 12 K e kappa ~ nu^2 (darebbe 5,6).
+           Marconi, Cosmologia, cap. 9 (pp. 131-137) e cap. 16 (pp. 253-255 e 278-286), dal dossier: lo
+           scattering Thomson cosmico e la superficie di ultimo scattering (z = 1090, Delta z = 195), la
+           polarizzazione per scattering Thomson di un campo di quadrupolo, la reionizzazione (tau = 0,1-0,2),
+           l'effetto Sunyaev-Zel'dovich, la polarizzazione di foreground della polvere e del sincrotrone, BICEP2
+           e Planck. Le pp. 251 e 278-279 sulla struttura a grande scala e sui picchi acustici sono d'altro
+           argomento. de Bernardis, slide 2016 PDF 71-94: i parametri di Stokes, il sincrotrone polarizzato fino
+           all'80%, l'esercizio della nube di grani intorno a una stella A5. DICHIARATO: il raggio della stella A5
+           non e' leggibile nel testo estratto, quindi del punto 1 dell'esercizio do solo la formula; il fattore
+           di smorzamento e^-tau della reionizzazione e il grado di polarizzazione Thomson sin^2/(1+cos^2) sono
+           standard, non scritti per esteso nelle pagine estratte.
+registro:  lezione11_2017, lezione12_2020, lezione11_2020, lezione12_2017, lezione13_2020
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "-5/2*log(exp(-t),10)", "vale": "5*t/(2*log(10))", "ipotesi": {"t": "positive"}, "dove": "01", "appare": "A_\\lambda=-2{,}5\\log\\frac{I}{I_0}=-2{,}5\\log e^{-\\tau}=\\frac{2{,}5}{\\ln10}\\,\\tau"},
+ {"tipo": "numero", "espr": "2.5/log(10)", "vale": "1.086", "dove": "01", "appare": "1{,}086"},
+ {"tipo": "simbolico", "dove": "01", "appare": "m_a-m_b=A_\\lambda+5\\log\\frac{d_a}{d_b}", "perche": "e' il confronto fra due stelle della stessa classe spettrale e di luminosita' (stessa M) a distanze diverse, una dietro la polvere: due moduli di distanza sottratti, come nelle slide."},
+ {"tipo": "simbolico", "dove": "01", "appare": "E(B-V)=(B-V)-(B-V)_0=A_B-A_V", "perche": "definizione dell'eccesso di colore."},
+ {"tipo": "simbolico", "dove": "01", "appare": "R_V=\\frac{A_V}{E(B-V)}\\simeq3{,}1", "perche": "definizione del rapporto fra estinzione totale e selettiva, con il valore medio galattico standard, dichiarato come non preso dalle slide."},
+ {"tipo": "numero", "espr": "3.1*(1.00-0.30)", "vale": "2.17", "dove": "01", "appare": "A_V=3{,}1\\times0{,}70=2{,}17"},
+ {"tipo": "numero", "espr": "10**(-0.4*2.17)", "vale": "0.136", "dove": "01", "appare": "0{,}136"},
+ {"tipo": "simbolico", "dove": "01", "appare": "A_\\lambda=6{,}5\\cdot10^{-10}\\,\\lambda(\\mathrm{m})^{-1}-2{,}0\\cdot10^{-4}", "perche": "e' la legge semiempirica (1.55) delle dispense di de Bernardis, un dato di osservazione in mag/pc."},
+ {"tipo": "numero", "espr": "(6.5e-10/0.55e-6-2.0e-4)*1000", "vale": "0.98", "dove": "01", "appare": "0{,}98"},
+ {"tipo": "numero", "espr": "((6.5e-10/0.44e-6-2.0e-4)-(6.5e-10/0.55e-6-2.0e-4))*1000", "vale": "0.30", "dove": "01", "appare": "0{,}30"},
+ {"tipo": "numero", "espr": "(6.5e-10/0.55e-6-2.0e-4)/((6.5e-10/0.44e-6-2.0e-4)-(6.5e-10/0.55e-6-2.0e-4))", "vale": "3.3", "dove": "01", "appare": "3{,}3"},
+ {"tipo": "numero", "espr": "20.2-0.03-5*log(9000/8,10)-1.0857*6", "vale": "-1.60", "dove": "02", "appare": "-1{,}60"},
+ {"tipo": "numero", "espr": "5*log(9000/8,10)", "vale": "15.26", "dove": "02", "appare": "15{,}26"},
+ {"tipo": "numero", "espr": "10**(0.4*1.5999)", "vale": "4.4", "dove": "02", "appare": "4{,}4"},
+ {"tipo": "numero", "espr": "1.0857*6", "vale": "6.51", "dove": "02", "appare": "6{,}51"},
+ {"tipo": "numero", "espr": "20.2-0.03-5*log(9000/8,10)-6", "vale": "-1.09", "dove": "02", "appare": "-1{,}09"},
+ {"tipo": "simbolico", "dove": "02", "appare": "M_X-M_{\\mathrm{Vega}}=m_X-m_{\\mathrm{Vega}}-5\\log\\frac{d_{GC}}{d_{\\mathrm{Vega}}}-A_X", "perche": "e' la differenza dei due moduli di distanza, con estinzione solo per X: la formula della soluzione, i cui numeri sono asseriti."},
+ {"tipo": "simbolico", "dove": "03", "appare": "C_{\\mathrm{ext}}=C_{\\mathrm{abs}}+C_{\\mathrm{sca}}", "perche": "definizione della sezione d'urto di estinzione."},
+ {"tipo": "simbolico", "dove": "03", "appare": "Q_i=\\frac{C_i}{\\pi a^{2}}", "perche": "definizione dei fattori di efficienza."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{dI_\\lambda}{ds}=-\\pi a^{2}Q_{\\mathrm{ext}}(\\lambda)N_d\\,I_\\lambda", "perche": "e' il coefficiente di estinzione di una nube di N_d grani per unita' di volume (slide 5): l'equazione del trasporto senza emissione."},
+ {"tipo": "simbolico", "dove": "03", "appare": "x=2\\pi a/\\lambda", "perche": "definizione del parametro di dimensione di Mie."},
+ {"tipo": "simbolico", "dove": "03", "appare": "Q_{\\mathrm{ext}}\\to2", "perche": "e' il paradosso dell'estinzione di Mie per lambda << a, un risultato della teoria citato dalle slide."},
+ {"tipo": "simbolico", "dove": "03", "appare": "Q_{\\mathrm{ext}}\\propto\\lambda^{-1}", "perche": "regime intermedio della teoria di Mie, citato dalle slide."},
+ {"tipo": "simbolico", "dove": "03", "appare": "Q_{\\mathrm{ext}}\\propto\\lambda^{-4}", "perche": "regime di Rayleigh della teoria di Mie, citato dalle slide."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\langle\\cos\\Theta\\rangle=\\int p(\\Theta)\\cos\\Theta\\,d\\Omega", "perche": "definizione del parametro di asimmetria g."},
+ {"tipo": "numero", "espr": "2.5*0.55/(2*pi)", "vale": "0.22", "dove": "03", "appare": "0{,}22\\ \\mu\\mathrm{m}"},
+ {"tipo": "numero", "espr": "0.03*2.17*100", "vale": "6.5", "dove": "03", "appare": "6{,}5\\%"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{\\Delta m_p}{A_\\lambda}=f\\,\\frac{C_\\parallel-C_\\perp}{C_\\parallel+C_\\perp}", "perche": "e' la relazione delle slide fra polarizzazione e estinzione per grani allineati con frazione f: rapporto di due misure, entrambe proporzionali alla colonna di grani."},
+ {"tipo": "simbolico", "dove": "04", "appare": "F_\\nu=\\frac{M\\kappa_\\nu B_\\nu(T_d)}{D^{2}}", "perche": "e' l'emissione di una nube otticamente sottile (slide 21): brillanza tau B con tau = kappa M / A, per l'angolo solido A / D^2."},
+ {"tipo": "uguale", "sinistra": "solve(F-M*kap*B/D**2,M)[0]", "vale": "F*D**2/(kap*B)", "ipotesi": {"F": "positive", "M": "positive", "kap": "positive", "B": "positive", "D": "positive"}, "dove": "04", "appare": "M=\\frac{F_\\nu D^{2}}{\\kappa_\\nu B_\\nu(T_d)}"},
+ {"tipo": "uguale", "sinistra": "(kap*M/A)*B*(A/D**2)", "vale": "M*kap*B/D**2", "ipotesi": {"kap": "positive", "M": "positive", "A": "positive", "B": "positive", "D": "positive"}, "dove": "04", "appare": "\\tau_\\nu=\\kappa_\\nu\\frac{M}{A}"},
+ {"tipo": "numero", "espr": "log(13.1/4.0)/log(850/450.)", "vale": "1.87", "dove": "05", "appare": "1{,}87"},
+ {"tipo": "numero", "espr": "4.0e-26*(730*3.086e16)**2/(0.001*2*6.62607e-34*(2.998e8/850e-6)**3/(2.998e8)**2/(exp(6.62607e-34*(2.998e8/850e-6)/(1.380649e-23*12))-1))/1.989e30", "vale": "49", "dove": "05", "appare": "49\\,M_\\odot"},
+ {"tipo": "numero", "espr": "4.0e-26*(730*3.086e16)**2/(0.001*2*6.62607e-34*(2.998e8/850e-6)**3/(2.998e8)**2/(exp(6.62607e-34*(2.998e8/850e-6)/(1.380649e-23*14.4))-1))/1.989e30", "vale": "35", "dove": "05", "appare": "35\\,M_\\odot"},
+ {"tipo": "numero", "espr": "6.62607e-34*(2.998e8/850e-6)/1.380649e-23", "vale": "16.9", "dove": "05", "appare": "16{,}9\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "(850/450.)**2*(exp(16.93/12)-1)/(exp(16.93*850/450/12)-1)*(850/450.)**3", "vale": "5.6", "dove": "05", "appare": "5{,}6"},
+ {"tipo": "numero", "espr": "13.1/4.0", "vale": "3.3", "dove": "05", "appare": "3{,}3"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\kappa\\propto\\nu^2", "perche": "legge di emissivita' data dal testo d'esame."},
+ {"tipo": "simbolico", "dove": "05", "appare": "F_\\nu\\propto\\nu^{\\alpha}", "perche": "definizione dell'indice spettrale."},
+ {"tipo": "simbolico", "dove": "06", "appare": "m\\ddot{\\vec r}=e\\vec E_0\\cos\\omega t", "perche": "equazione del moto di un elettrone libero nel campo dell'onda, con la forza magnetica trascurata (v << c)."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\frac{d\\sigma}{d\\Omega}=\\left(\\frac{e^{2}}{4\\pi\\epsilon_0m_ec^{2}}\\right)^{2}\\sin^{2}\\theta", "perche": "e' la sezione d'urto differenziale di Thomson per radiazione polarizzata, ottenuta come rapporto fra potenza diffusa per angolo solido (dipolo) e flusso incidente (vettore di Poynting): la costruzione delle slide."},
+ {"tipo": "uguale", "sinistra": "integrate(integrate(re**2*sin(t)**2*sin(t),(t,0,pi)),(p,0,2*pi))", "vale": "8*pi/3*re**2", "ipotesi": {"re": "positive", "t": "positive", "p": "positive"}, "dove": "06", "appare": "\\sigma_T=\\frac{8\\pi}{3}r_e^{2}"},
+ {"tipo": "numero", "espr": "8*pi/3*(2.8179403e-15)**2*1e4*1e24", "vale": "0.665", "dove": "06", "appare": "0{,}665\\cdot10^{-24}\\ \\mathrm{cm^{2}}"},
+ {"tipo": "numero", "espr": "1836.15**2/1e6", "vale": "3.37", "dove": "06", "appare": "3{,}37\\cdot10^{6}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "r_e=\\frac{e^{2}}{4\\pi\\epsilon_0m_ec^{2}}", "perche": "definizione del raggio classico dell'elettrone."},
+ {"tipo": "uguale", "sinistra": "integrate(sin(t)*(1+cos(t)**2)/2,(t,0,pi))*2*pi", "vale": "8*pi/3", "ipotesi": {"t": "positive"}, "dove": "06", "appare": "\\frac{d\\sigma}{d\\Omega}\\Big|_{\\mathrm{unp}}=\\frac{r_e^{2}}{2}\\big(1+\\cos^{2}\\Theta\\big)"},
+ {"tipo": "numero", "espr": "6.62607e-34/(9.10938e-31*2.998e8)*1e12", "vale": "2.43", "dove": "06", "appare": "2{,}43\\ \\mathrm{pm}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\lambda'-\\lambda=\\frac{h}{m_ec}(1-\\cos\\Theta)", "perche": "e' lo spostamento Compton, conseguenza di conservazione di energia e impulso (citato dalle slide)."},
+ {"tipo": "simbolico", "dove": "06", "appare": "h\\nu\\ll m_ec^{2}", "perche": "condizione del regime di Thomson."},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\sigma_R=\\sigma_T\\left(\\frac{\\omega}{\\omega_0}\\right)^{4}", "perche": "e' la sezione d'urto per un elettrone legato elasticamente lontano dalla risonanza, omega << omega0 (slide 5-6 di lezione 11): il dipolo oscillante con ampiezza ridotta del fattore (omega/omega0)^2."},
+ {"tipo": "limite", "espr": "(w**2/(w0**2-w**2))**2/(w/w0)**4", "var": "w", "a": "0", "vale": "1", "ipotesi": {"w": "positive", "w0": "positive"}, "dove": "07", "appare": "\\left(\\frac{\\omega^{2}}{\\omega_0^{2}-\\omega^{2}}\\right)^{2}\\to\\left(\\frac{\\omega}{\\omega_0}\\right)^{4}"},
+ {"tipo": "numero", "espr": "(700/400.)**4", "vale": "9.4", "dove": "07", "appare": "9{,}4"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\frac{d(\\gamma m\\vec v)}{dt}=q\\,\\vec v\\times\\vec B", "perche": "equazione relativistica del moto in campo magnetico (forza di Lorentz), come nelle slide."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\omega_s=\\frac{qB}{\\gamma m}", "perche": "frequenza di girazione relativistica: l'equazione e' quella del ciclotrone con m sostituita da gamma m, perche' gamma e' costante (|v| costante)."},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\theta\\simeq\\frac{1}{\\gamma}", "perche": "semiapertura del cono di emissione dalla formula dell'aberrazione con l'angolo di emissione pi/2 nel riferimento della carica (slide 11)."},
+ {"tipo": "uguale", "sinistra": "series(1-sqrt(1-1/g**2),g,oo,3).removeO()", "vale": "1/(2*g**2)", "ipotesi": {"g": "positive"}, "dove": "08", "appare": "1-\\frac{v}{c}\\simeq\\frac{1}{2\\gamma^{2}}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\Delta t'=\\Delta t\\left(1-\\frac{v}{c}\\right)\\simeq\\frac{\\Delta t}{2\\gamma^{2}}", "perche": "e' la compressione dei tempi d'arrivo delle slide (13-14): la sorgente insegue la propria radiazione."},
+ {"tipo": "uguale", "sinistra": "(2/(g*w))/(2*g**2)", "vale": "1/(g**3*w)", "ipotesi": {"g": "positive", "w": "positive"}, "dove": "08", "appare": "\\Delta t'\\sim\\frac{1}{\\gamma^{3}\\omega_s}"},
+ {"tipo": "uguale", "sinistra": "g**3*(q*B/(g*m))", "vale": "g**2*q*B/m", "ipotesi": {"g": "positive", "q": "positive", "B": "positive", "m": "positive"}, "dove": "08", "appare": "\\omega_c\\sim\\gamma^{3}\\omega_s=\\gamma^{2}\\frac{qB}{m}"},
+ {"tipo": "numero", "espr": "(1e4)**2*1.602177e-19*1e-10/(2*pi*9.10938e-31)/1e6", "vale": "280", "dove": "08", "appare": "280\\ \\mathrm{MHz}"},
+ {"tipo": "numero", "espr": "(1e6)**2*1.602177e-19*1e-8/(2*pi*9.10938e-31)/1e14", "vale": "2.8", "dove": "08", "appare": "2{,}8\\cdot10^{14}\\ \\mathrm{Hz}"},
+ {"tipo": "uguale", "sinistra": "-(p-1)/2", "vale": "(1-p)/2", "ipotesi": {"p": "positive"}, "dove": "08", "appare": "F_\\nu\\propto\\nu^{-(p-1)/2}"},
+ {"tipo": "numero", "espr": "-(2.5-1)/2", "vale": "-0.75", "dove": "08", "appare": "-0{,}75"},
+ {"tipo": "simbolico", "dove": "08", "appare": "N(E)\\propto E^{-p}", "perche": "definizione di una popolazione di elettroni a legge di potenza."},
+ {"tipo": "simbolico", "dove": "09", "appare": "A_\\lambda=1{,}086\\,\\tau_\\lambda", "perche": "restituzione della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\sigma_T=\\frac{8\\pi}{3}\\left(\\frac{e^{2}}{4\\pi\\epsilon_0m_ec^{2}}\\right)^{2}", "perche": "restituzione della tappa 06."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\sigma_T=6{,}65\\cdot10^{-29}\\ \\mathrm{m^{2}}", "perche": "restituzione del valore della tappa 06 in SI."},
+ {"tipo": "simbolico", "dove": "10", "appare": "A_V=R_VE(B-V)", "perche": "restituzione della definizione della tappa 01."},
+ {"tipo": "simbolico", "dove": "10", "appare": "M=F_\\nu D^{2}/\\kappa_\\nu B_\\nu(T_d)", "perche": "restituzione della tappa 04."},
+ {"tipo": "simbolico", "dove": "01", "appare": "B-V=1{,}00", "perche": "dato dell'esempio, non un conto."},
+ {"tipo": "simbolico", "dove": "09", "appare": "A=-2{,}5\\log e^{-\\tau}=(2{,}5/\\ln10)\\tau", "perche": "restituzione dell'identita' asserita nella tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "E(B-V)=(B-V)-(B-V)_0=A_B-A_V", "perche": "restituzione della definizione della tappa 01."},
+ {"tipo": "simbolico", "dove": "09", "appare": "d\\sigma/d\\Omega=r_e^2\\sin^2\\theta", "perche": "restituzione della sezione differenziale della tappa 06."},
+ {"tipo": "numero", "espr": "(-0.49+1.49/0.44)/(-0.49+1.49/0.54)", "vale": "1.28", "dove": "01", "appare": "circa il 30%"},
+ {"tipo": "simbolico", "dove": "01", "appare": "A_\\lambda/A(1\\,\\mu\\mathrm{m})=-0{,}49+1{,}49/\\lambda", "perche": "curva di estinzione data dal testo d'esame (un dato), riportata nella didascalia del grafico."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\chi=\\frac12\\arctan(U/Q)", "perche": "definizione dell'angolo di polarizzazione dai parametri di Stokes"},
+ {"tipo": "simbolico", "dove": "04", "appare": "T_g=T_e\\left(\\frac{R_*}{2D}\\right)^{1/2}", "perche": "bilancio pi a^2 sigma Te^4 (R/D)^2 = 4 pi a^2 sigma Tg^4"},
+ {"tipo": "uguale", "sinistra": "Te*(R**2/(4*D**2))**(1/4)", "vale": "Te*(R/(2*D))**(1/2)", "ipotesi": {"Te": "positive", "R": "positive", "D": "positive"}, "dove": "04", "appare": "\\left(\\frac{R_*}{2D}\\right)^{1/2}"},
+ {"tipo": "numero", "espr": "2000**0.25", "vale": "6.69", "dove": "04", "appare": "2000^{1/4}=6{,}69"},
+ {"tipo": "numero", "espr": "(4/3.*pi*(5e-8)**3*200)*1e19", "vale": "1.05", "dove": "04", "appare": "=1{,}05\\cdot10^{-19}"},
+ {"tipo": "numero", "espr": "(10*4/3.*pi*(1.5e13)**3)/1e41", "vale": "1.41", "dove": "04", "appare": "=1{,}41\\cdot10^{41}"},
+ {"tipo": "numero", "espr": "(10*4/3.*pi*(1.5e13)**3)*(4/3.*pi*(5e-8)**3*200)/1e22", "vale": "1.48", "dove": "04", "appare": "M=1{,}48\\cdot10^{22}"},
+ {"tipo": "numero", "espr": "(10*4/3.*pi*(1.5e13)**3)*(4/3.*pi*(5e-8)**3*200)/7.35e22", "vale": "0.20", "dove": "04", "appare": "un quinto della massa della Luna"},
+ {"tipo": "numero", "espr": "6.67e-11*(10*4/3.*pi*(1.5e13)**3)*(4/3.*pi*(5e-8)**3*200)*(4/3.*pi*(5e-8)**3*200)/(5*1.38e-23*1.5e13)", "vale": "100", "dove": "04", "appare": "=100\\ \\mathrm K"},
+ {"tipo": "numero", "espr": "10*pi*(5e-8)**2*2*1.5e13", "vale": "2.36", "dove": "04", "appare": "=2{,}36"},
+ {"tipo": "numero", "espr": "2.5/log(10)*10*pi*(5e-8)**2*2*1.5e13", "vale": "2.56", "dove": "04", "appare": "=2{,}56"},
+ {"tipo": "numero", "espr": "6.67e-11*(10*4/3.*pi*(1.5e13)**3)*1.67e-27**2/(5*1.38e-23*1.5e13)*1e14", "vale": "2.5", "dove": "04", "appare": "2{,}5\\cdot10^{-14}"},
+ {"tipo": "numero", "espr": "1178-983", "vale": "195", "dove": "06", "appare": "=195"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\Pi(\\theta)=\\frac{\\sin^2\\theta}{1+\\cos^2\\theta}", "perche": "grado di polarizzazione dello scattering Thomson di luce non polarizzata: (1-cos^2)/(1+cos^2)"},
+ {"tipo": "numero", "espr": "sin(pi/3)**2/(1+cos(pi/3)**2)", "vale": "0.6", "dove": "06", "appare": "$0{,}6$ a 60°"},
+ {"tipo": "numero", "espr": "exp(-0.1)", "vale": "0.90", "dove": "06", "appare": "$0{,}90"},
+ {"tipo": "numero", "espr": "exp(-0.2)", "vale": "0.82", "dove": "06", "appare": "0{,}82$"},
+ {"tipo": "numero", "espr": "2.7255e6*1e-4", "vale": "273", "dove": "06", "appare": "=273\\ \\mu"},
+ {"tipo": "simbolico", "dove": "04", "appare": "=e_{IR}\\,4\\pi a^2\\sigma T_g^4", "perche": "bilancio di potenza del grano con efficienze di assorbimento e di emissione diverse"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché la polvere, lo scattering e il sincrotrone insieme', meta:'tre interazioni fotone-materia che non sono corpo nero · l’estinzione che l’esame chiede · la sezione di Thomson che l’orale chiede',
+  blocchi:[
+  {t:'prosa', title:'Che cosa manca all’inventario', tag:'architettura', html:R`
+  <p>La diapositiva 30 della lezione 12 di de Bernardis è un inventario delle interazioni fra fotoni e materia di interesse astrofisico: emissione di corpo nero, interazioni con gli atomi, trasporto radiativo, interazioni con elettroni liberi (Thomson, Compton, coppie), diffusione da elettroni legati (Rayleigh), interazioni con particelle solide (estinzione ed emissione termica della polvere), radiazione non termica. Questo movimento copre le voci che restano, e hanno un tratto comune: nessuna è un corpo nero. Lo scattering ridistribuisce la luce senza assorbirla, a qualunque temperatura. Il sincrotrone è prodotto da elettroni relativistici in un campo magnetico, la cui energia non ha niente a che fare con la temperatura del gas. La polvere estingue la luce delle stelle con una dipendenza dalla lunghezza d&rsquo;onda che è geometria e non termodinamica, e poi la riemette come corpo grigio freddo.</p>
+  <p>La mappa del corso dice che cosa serve. All&rsquo;esame si chiede l&rsquo;<b>estinzione</b>, con l&rsquo;eccesso di colore e la conversione in estinzione totale svolti con i numeri e con il rapporto $R_V$ dichiarato, perché lì si sbaglia. All&rsquo;orale si chiede di mostrare che il 1,086 non è una costante da ricordare, e la <b>sezione di Thomson</b> come conto classico dell&rsquo;elettrone che oscilla. Il movimento comincia dall&rsquo;estinzione, passa alla teoria dei grani e alla loro emissione, e chiude con lo scattering da elettroni e con il sincrotrone.</p>`}
+]},
+
+/* ---------------- 01 · ESTINZIONE E ARROSSAMENTO ---------------- */
+{ num:'01', title:'L’estinzione in magnitudini, l’eccesso di colore e R_V', meta:'il 1,086 mostrato · due stelle della stessa classe · arrossamento · la legge delle dispense',
+  blocchi:[
+  {t:'prosa', title:'Il 1,086, mostrato', tag:'la prima domanda dell’orale', html:R`
+  <p>De Bernardis, nella lezione 11, definisce l&rsquo;estinzione come la differenza di magnitudine causata dalla polvere, $A$, e la lega subito alla profondità ottica. Se la polvere attenua l&rsquo;intensità di $e^{-\tau}$, mettendo questa attenuazione dentro la definizione di <span class="str" data-str="magnitudine">magnitudine</span>:
+  $$A_\lambda=-2{,}5\log\frac{I}{I_0}=-2{,}5\log e^{-\tau}=\frac{2{,}5}{\ln10}\,\tau,$$
+  e $2{,}5/\ln10=1{,}086$. Il numero non è una costante da ricordare. È la conversione fra logaritmo naturale, quello della legge esponenziale, e logaritmo decimale, quello di Pogson. Una magnitudine di estinzione è quasi esattamente una profondità ottica unitaria.</p>`},
+  {t:'prosa', title:'Come si misura: due stelle uguali', tag:'lezione11_2017, diapositive 29-30', html:R`
+  <p>Il metodo di de Bernardis confronta una stella $a$ dietro la nube con una stella $b$ della stessa classe spettrale e della stessa classe di luminosità, quindi con la stessa magnitudine assoluta, senza polvere davanti. Sottraendo i due moduli di distanza, $m_a-m_b=A_\lambda+5\log\frac{d_a}{d_b}$. Note le distanze, la differenza di magnitudine a ciascuna lunghezza d&rsquo;onda dà la curva di estinzione $A_\lambda$. Le distanze però spesso non si conoscono, ed è qui che entra il colore. La polvere estingue di più il blu del rosso, quindi una stella dietro la polvere sembra più rossa: è l&rsquo;<b>arrossamento</b>. L&rsquo;<b>eccesso di colore</b> è la differenza fra il colore osservato e quello intrinseco della classe spettrale, $E(B-V)=(B-V)-(B-V)_0=A_B-A_V$, e non dipende dalla distanza. La distanza è sparita perché le due magnitudini si riferiscono alla stessa stella.</p>
+  <p>Per passare dall&rsquo;arrossamento all&rsquo;estinzione totale serve sapere quanto la curva di estinzione è ripida, e lo si dice con il <b>rapporto fra estinzione totale e selettiva</b>, $R_V=\frac{A_V}{E(B-V)}\simeq3{,}1$. È il valore medio della Galassia, standard ma non presente nelle slide estratte, e lo dichiaro come tale. Nelle nubi dense, con grani più grandi, $R_V$ arriva a 5. Una stella B con colore osservato $B-V=1{,}00$ e intrinseco $0{,}30$ ha $E=0{,}70$ e $A_V=3{,}1\times0{,}70=2{,}17$ magnitudini. Ci arriva il $0{,}136$ della sua luce visuale. Sbagliare $R_V$ sbaglia $A_V$ nella stessa proporzione, e con lui la distanza, che entra come $5\log d$.</p>
+  <p>Le dispense di de Bernardis danno una legge semiempirica per il visibile, $A_\lambda=6{,}5\cdot10^{-10}\,\lambda(\mathrm{m})^{-1}-2{,}0\cdot10^{-4}$ magnitudini per parsec. A 550 nm vale $0{,}98$ mag per kpc, e fra 440 e 550 nm dà un arrossamento di $0{,}30$ mag per kpc. Il loro rapporto è $3{,}3$, vicino al $R_V$ standard: due strade, la stessa pendenza. Le dispense costruiscono anche un indice libero dall&rsquo;arrossamento, $Q=(U-B)-0{,}79(B-V)$, che usa il rapporto medio degli eccessi di colore $E(U-B)/E(B-V)\simeq0{,}79$ per cancellare la polvere e lasciare il tipo spettrale.</p>`},
+  {t:'plot', title:'Due leggi di estinzione nel visibile, normalizzate alla banda V',
+   intro:R`$A_\lambda/A_V$ in funzione di $1/\lambda$ (µm⁻¹), fra 0,9 e 2,5 µm⁻¹ (da 1,1 a 0,4 µm). Ciano: la curva dell’esonero della nebulosa planetaria, $A_\lambda/A(1\,\mu\mathrm{m})=-0{,}49+1{,}49/\lambda$. Oro: la legge (1.55) delle dispense, $6{,}5\cdot10^{-10}/\lambda-2\cdot10^{-4}$ mag/pc.`,
+   plots:[
+    {kind:'func2d', xr:[0.9,2.5], yr:[0,2], height:280, equal:false,
+     title:'1 / lambda (um^-1)      A_lambda / A_V',
+     curves:[{f:'(-0.49+1.49*x)/(-0.49+1.49/0.54)', col:'#5eead4', label:'esonero'},
+             {f:'(6.5e-10*x*1e6-2e-4)/(6.5e-10/0.55e-6-2e-4)', col:'#d8a13a', label:'dispense (1.55)'}],
+     marks:[{x:1.818, y:1, label:'V', col:'#c9d4e0', up:true},{x:2.273, y:1.3, label:'B', col:'#c9d4e0', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> entrambe le leggi sono quasi rette in $1/\lambda$, con pendenze vicine. Dalla banda V alla banda B l&rsquo;estinzione cresce di circa il 30%, ed è quell&rsquo;aumento che fa l&rsquo;arrossamento.</p>
+   <p><b>Che cosa impararne:</b> $R_V=A_V/(A_B-A_V)$ è l&rsquo;inverso della pendenza fra V e B, letta su questa figura. Una curva più piatta (grani più grandi) dà un $R_V$ maggiore.</p>`},
+  {t:'prosa', title:'La forma della curva', tag:'diapositive 35-38', html:R`
+  <p>La curva di estinzione interstellare media cresce dall&rsquo;infrarosso all&rsquo;ultravioletto, all&rsquo;incirca come $1/\lambda$ nel visibile. Ha un <b>picco a 218 nm</b> (4,6 µm⁻¹), attribuito a grani carboniosi piccoli, e risale nell&rsquo;ultravioletto lontano. Nell&rsquo;infrarosso, dove è debole, mostra un picco a <b>9,6 µm</b>, la banda dei silicati. È per questo che de Bernardis mostra il centro galattico, invisibile nel visibile dietro decine di magnitudini, osservato nel vicino infrarosso, dove l&rsquo;assorbimento è debole: lì si sono seguite le orbite delle stelle attorno al buco nero centrale.</p>`}
+]},
+
+/* ---------------- 02 · L'ESERCIZIO DELLA STELLA ESTINTA ---------------- */
+{ num:'02', title:'L’esercizio della stella dietro la polvere del centro galattico', meta:'lezione11_2017 · tau = 6 · confronto con Vega',
+  blocchi:[
+  {t:'prosa', title:'Il testo e il conto', tag:'esercizio di lezione', html:R`
+  <p><i>La luce di una stella X vicina al centro galattico è profondamente estinta, con profondità ottica 6 nel visibile. La sua magnitudine apparente è 20,2. Valutare se la stella X ha una luminosità intrinseca maggiore o minore di Vega. Dati: distanza del centro galattico 9 kpc; per Vega $m_V=0{,}03$, $A_V=0$, distanza 8 pc.</i> Nel testo estratto la profondità ottica appare come «V=6», con la lettera greca persa. La soluzione la usa come profondità ottica, moltiplicandola per 1,086, ed è la lettura che seguo.</p>
+  <p>Sottraendo i moduli di distanza,
+  $$M_X-M_{\mathrm{Vega}}=m_X-m_{\mathrm{Vega}}-5\log\frac{d_{GC}}{d_{\mathrm{Vega}}}-A_X.$$
+  Il termine di distanza è $5\log(9000/8)=15{,}26$, l&rsquo;estinzione $1{,}086\cdot6=6{,}51$, e il risultato è $-1{,}60$. La stella X è intrinsecamente più luminosa di Vega di 1,6 magnitudini, cioè $4{,}4$ volte. De Bernardis conclude: <i>«la stella X è intrinsecamente più luminosa di Vega!»</i>. Se si fosse letto 6 come estinzione già in magnitudini, il risultato sarebbe stato $-1{,}09$: la stessa conclusione, con un fattore 2,7 invece di 4,4. È esattamente l&rsquo;errore che la mappa segnala. Il 1,086 sembra un dettaglio, ma su sei unità di profondità ottica pesa mezza magnitudine.</p>`}
+]},
+
+/* ---------------- 03 · I GRANI: MIE E POLARIZZAZIONE ---------------- */
+{ num:'03', title:'Che cosa sono i grani: la teoria di Mie e la polarizzazione', meta:'sezioni d’urto ed efficienze · quattro regimi di Q_ext · grani allungati e allineati dal campo magnetico · 0,2 micron',
+  blocchi:[
+  {t:'prosa', title:'La teoria di Mie', tag:'lezione12_2020, diapositive 2-8', html:R`
+  <p>Gustav Mie risolse nel 1908 le equazioni di Maxwell per un&rsquo;onda che incide su una sferetta omogenea, con condizioni al contorno sulla superficie. I parametri sono l&rsquo;indice di rifrazione complesso del materiale, il raggio $a$ del grano attraverso il parametro adimensionale $x=2\pi a/\lambda$, e la polarizzazione. Il risultato si esprime con le sezioni d&rsquo;urto di assorbimento e di diffusione e con la loro somma, $C_{\mathrm{ext}}=C_{\mathrm{abs}}+C_{\mathrm{sca}}$. Si usano i <b>fattori di efficienza</b>, $Q_i=\frac{C_i}{\pi a^{2}}$, che confrontano la sezione efficace con quella geometrica. Una nube di $N_d$ grani per unità di volume estingue un fascio come $\frac{dI_\lambda}{ds}=-\pi a^{2}Q_{\mathrm{ext}}(\lambda)N_d\,I_\lambda$. È il coefficiente di assorbimento del trasporto, ora con un&rsquo;origine geometrica.</p>
+  <p>De Bernardis riassume i risultati per sfere in quattro regimi. (1) Per $\lambda\ll a$, $Q_{\mathrm{ext}}\to2$: un grano grande toglie al fascio il doppio della sua sezione geometrica, metà per assorbimento e metà per la diffrazione ai bordi. (2) Per $\lambda\sim a$ ci sono risonanze. (3) Per $\lambda\sim2\pi a$, $Q_{\mathrm{ext}}\propto\lambda^{-1}$, ed è l&rsquo;andamento della curva di estinzione nel visibile: i grani tipici hanno dimensioni confrontabili con la luce visibile. (4) Per $\lambda\gg a$, $Q_{\mathrm{ext}}\propto\lambda^{-4}$, il regime di Rayleigh, in cui la polvere diventa trasparente. Una sola dimensione non riproduce la curva osservata, che va spiegata con una distribuzione di dimensioni. La diffusione non è isotropa: il parametro di asimmetria $g=\langle\cos\Theta\rangle=\int p(\Theta)\cos\Theta\,d\Omega$ vale 0 per scattering isotropo ed è positivo per i grani, che diffondono in avanti.</p>`},
+  {t:'prosa', title:'La polarizzazione interstellare', tag:'diapositive 9-17', html:R`
+  <p>Per simmetria, la luce diffusa in avanti da sfere non è polarizzata. Ma la luce delle stelle dietro le nubi di polvere lo è, parzialmente. De Bernardis ne trae due conclusioni: <i>«1) i grani non sono sferici, 2) sono allineati da qualche processo fisico che agisce a grande scala»</i>. Il processo è il campo magnetico della Galassia. I grani ruotano, per agitazione termica, per l&rsquo;espulsione di molecole di H₂ dalla superficie o per la spinta asimmetrica dei fotoni. Essendo paramagnetici si magnetizzano per effetto Barnett, e l&rsquo;asse di rotazione si allinea al campo. Un grano allungato estingue di più la luce polarizzata lungo il suo asse maggiore, quindi la luce che attraversa la nube esce polarizzata parallelamente al campo. L&rsquo;emissione termica degli stessi grani è polarizzata ortogonalmente. Il grado di polarizzazione è legato all&rsquo;estinzione, $\frac{\Delta m_p}{A_\lambda}=f\,\frac{C_\parallel-C_\perp}{C_\parallel+C_\perp}$, con $f$ la frazione di grani allineati, e il rapporto misurato vale in media 0,03. Con $A_V=2{,}17$ dell&rsquo;esempio precedente ci si aspetta una polarizzazione dell&rsquo;ordine del $6{,}5\%$.</p>
+  <p>La dipendenza dalla lunghezza d&rsquo;onda dà la dimensione dei grani. La teoria di Mie prevede il massimo di polarizzazione dove il parametro di dimensione vale circa 2-3. Il massimo osservato è nel visibile, a circa 0,55 µm, e quindi $a\simeq2{,}5\lambda/2\pi=0{,}22\ \mu\mathrm{m}$. De Bernardis: distribuzioni di dimensioni <i>«piccate intorno a 0,2 µm»</i>.</p>`},
+  {t:'prosa', title:'Misurare la polarizzazione, e una polvere che ha ingannato un esperimento', tag:'de Bernardis, slide 2016; Marconi, cap. 16.6, pp. 281-286', html:R`
+  <p>De Bernardis definisce la polarizzazione con le misure che la rivelano: si osserva la stessa sorgente attraverso un polarizzatore in direzioni diverse, e se le immagini non differiscono la radiazione non è polarizzata. I <i>parametri di Stokes</i> sono le differenze fra le intensità misurate in direzioni ortogonali, $Q=I_0-I_{90}$ e $U=I_{45}-I_{135}$, e la direzione di polarizzazione è $\chi=\frac12\arctan(U/Q)$, il grado $p=\sqrt{Q^2+U^2}/I$. La polarizzazione dei grani allineati è di pochi percento; quella del sincrotrone, nota de Bernardis, <i>«può arrivare fino all&rsquo;80%»</i>, ed è tipica dei nuclei galattici attivi.</p>
+  <p>Marconi racconta il caso in cui questa polarizzazione modesta ha deciso una questione cosmologica. Le onde gravitazionali primordiali dell&rsquo;inflazione lascerebbero sulla polarizzazione del fondo cosmico una figura a rotore, i <i>modi B</i>, che le perturbazioni di densità non producono. Nel 2014 l&rsquo;esperimento BICEP2, al Polo Sud, osservò in una piccola regione di cielo un eccesso di modi B e ne ricavò un rapporto tensore-scalare $r=0{,}20^{+0{,}07}_{-0{,}05}$, con $r=0$ escluso a 7σ. Ma, avverte Marconi, <i>«un punto critico di tutta l&rsquo;analisi è la stima del contributo dovuto alla polarizzazione di foreground»</i>: la polvere della Galassia, con i suoi grani allineati dal campo magnetico, emette nel lontano infrarosso luce polarizzata, e lo stesso fa il sincrotrone. I dati di Planck, a più frequenze, mostrarono che il segnale di BICEP2 era <i>«un residuo del segnale di polarizzazione dovuta alla polvere galattica»</i>; l&rsquo;analisi combinata pose il limite $r\lt 0{,}12$ al 95% di confidenza. È la teoria di questa tappa che decide un risultato da premio Nobel: i grani asimmetrici allineati polarizzano anche la loro emissione, e nella banda delle microonde la Galassia non è mai trasparente alla polarizzazione.</p>`}
+]},
+
+/* ---------------- 04 · L'EMISSIONE DELLA POLVERE ---------------- */
+{ num:'04', title:'La polvere che emette: corpo grigio freddo e massa di una nube', meta:'grani a 20 kelvin · il lontano infrarosso · una nube otticamente sottile pesata con il suo flusso millimetrico',
+  blocchi:[
+  {t:'prosa', title:'Estinzione nel visibile, emissione nell’infrarosso', tag:'lezione11_2017 e lezione12_2020', html:R`
+  <p>L&rsquo;energia che i grani assorbono nell&rsquo;ultravioletto e nel visibile li scalda, e la riemettono come radiazione termica. De Bernardis: <i>«ci si aspetta che le zone più buie della Galassia (più estinte dalla polvere) siano anche le più brillanti nel lontano infrarosso»</i>, e le mappe del piano galattico lo mostrano: le bande scure del visibile sono le più brillanti a 60-100 µm, e lo stesso vale per la nebulosa Aquila vista da ISO. I grani più grossi, che assorbono molti fotoni per unità di tempo, raggiungono una temperatura di equilibrio di circa 20 K nel campo di radiazione interstellare medio, e quindi <i>«emettono soprattutto nel lontano IR (λ &gt; 100 µm)»</i>. I grani più piccoli hanno capacità termica piccola: ogni fotone ultravioletto li scalda a un picco di centinaia di kelvin, poi si raffreddano, e la loro emissione è fuori equilibrio. De Bernardis mostra una simulazione di un giorno della temperatura di grani di dimensioni diverse.</p>`},
+  {t:'prosa', title:'La massa in polvere di una regione HII', tag:'esercizio di lezione, diapositive 20-29', html:R`
+  <p>A lunghezze d&rsquo;onda molto maggiori dei grani l&rsquo;efficienza di assorbimento, e quindi di emissione, è bassissima, e una nube di polvere è otticamente sottile. Il conto di de Bernardis è la soluzione dello strato sottile con il corpo grigio, e la nube, vista da lontano, sottende un angolo solido $A/D^2$ (con l&rsquo;<span class="str" data-str="angolo-piccolo">approssimazione di angolo piccolo</span>). Se la nube ha massa di polvere $M$ distribuita su un&rsquo;area $A$ perpendicolare alla linea di vista, e $\kappa_\nu$ è la sezione d&rsquo;urto per unità di massa, la profondità ottica è $\tau_\nu=\kappa_\nu\frac{M}{A}$. La brillanza è $\tau_\nu B_\nu(T_d)$, e moltiplicando per l&rsquo;angolo solido $A/D^2$ si ha il flusso $F_\nu=\frac{M\kappa_\nu B_\nu(T_d)}{D^{2}}$. L&rsquo;area è sparita. Rovesciando,
+  $$M=\frac{F_\nu D^{2}}{\kappa_\nu B_\nu(T_d)}.$$
+  Per RCW38, una grande regione HII del cielo australe a 1700 pc, le misure millimetriche di BOOMERanG pubblicate da Silvia Masi e collaboratori danno, dice de Bernardis, <i>«alcune centinaia di masse solari di polvere»</i>. I flussi usati non sono leggibili nel testo estratto delle diapositive, e il conto con i numeri lo faccio sull&rsquo;esercizio d&rsquo;esame della tappa seguente.</p>`},
+  {t:'prosa', title:'Un esercizio di de Bernardis: la nube di grani vicino a una stella A5', tag:'de Bernardis, slide 2016, esercizio', html:R`
+  <p>De Bernardis propone una nube di grani a $D=1000$ UA ($1{,}5\cdot10^{14}$ m) da una stella A5 con $T_e=8200$ K. Se stella e grani sono corpi neri, un grano di raggio $a$ assorbe $\pi a^2\,\sigma T_e^4(R_*/D)^2$ e riemette $4\pi a^2\sigma T_g^4$; uguagliando,</p>
+  <p>$$T_g=T_e\left(\frac{R_*}{2D}\right)^{1/2},$$</p>
+  <p>indipendente dalla dimensione del grano. Il raggio della stella non è leggibile nel testo che ho delle slide, quindi il numero di questo primo punto non lo do. Il secondo punto è più interessante: i grani veri assorbono bene nell&rsquo;ultravioletto, dove emette la stella, ed emettono male nel lontano infrarosso, dove emettono loro. Con un rapporto di efficienze $e_{UV}/e_{IR}=2000$ l&rsquo;equilibrio diventa $e_{UV}\,\pi a^2\sigma T_e^4(R_*/D)^2=e_{IR}\,4\pi a^2\sigma T_g^4$, e la temperatura sale del fattore $2000^{1/4}=6{,}69$: un grano che non sa raffreddarsi si scalda.</p>
+  <p>Poi la nube: sferica, diametro 200 UA, dieci grani per metro cubo, grani di diametro 0,1 µm e densità 0,2 g/cm$^3$. Un grano pesa $m=\frac43\pi(5\cdot10^{-8}\,\mathrm m)^3\cdot200\ \mathrm{kg/m^3}=1{,}05\cdot10^{-19}$ kg; i grani sono $N=10\cdot\frac43\pi R^3=1{,}41\cdot10^{41}$, e la nube pesa $M=1{,}48\cdot10^{22}$ kg, un quinto della massa della Luna. La nube è legata se l&rsquo;energia gravitazionale $\frac35GM^2/R$ supera il doppio dell&rsquo;energia termica $3NkT$, cioè se</p>
+  <p>$$T\lt T_c=\frac{GMm}{5kR}=100\ \mathrm K .$$</p>
+  <p>Lungo un diametro la profondità ottica, con efficienza di estinzione 1, è $\tau=n\pi a^2\cdot2R=2{,}36$, cioè $A=1{,}086\,\tau=2{,}56$ magnitudini. L&rsquo;ultimo punto rovescia il problema: se la stessa nube, con lo stesso numero di particelle, fosse di idrogeno atomico, la massa di ogni particella scenderebbe di un fattore $10^{8}$ e la temperatura critica a $2{,}5\cdot10^{-14}$ K: nessun gas di idrogeno di quella densità può essere legato. La polvere può esserlo solo perché ogni grano è un mattone da $10^{8}$ masse atomiche che si muove a velocità termiche bassissime.</p>`}
+]},
+
+/* ---------------- 05 · L'ESERCIZIO L1246 ---------------- */
+{ num:'05', title:'La nube molecolare L1246: che tipo di emissione, e quanta polvere', meta:'prova del 13 settembre 2007 · l’indice spettrale distingue free-free, sincrotrone e polvere · 49 masse solari · un’incongruenza nei dati',
+  blocchi:[
+  {t:'prosa', title:'Il testo e la diagnosi', tag:'compito 08, esercizio 2', html:R`
+  <p><i>La nube molecolare L1246 dista 730 pc e produce 13,1 Jy a 450 µm e 4,0 Jy a 850 µm. Si discuta se l&rsquo;emissione può essere di free-free, di sincrotrone o termica da polvere. Considerando la terza ipotesi, con brillanza $\kappa_\nu B_\nu(T_d)$, $T_d=12$ K e $\kappa_\nu=0{,}001$ m²/kg a 850 µm, proporzionale a $\nu^2$, si calcoli la massa della polvere, e di quanto varia se la temperatura è sbagliata del +20%.</i></p>
+  <p>La diagnosi è l&rsquo;indice spettrale $\alpha$, definito da $F_\nu\propto\nu^{\alpha}$. Fra 850 e 450 µm il flusso cresce con la frequenza, con $\alpha=\ln(13{,}1/4{,}0)/\ln(850/450)=1{,}87$. Il free-free sottile è quasi piatto, $\alpha\simeq-0{,}1$, e il sincrotrone ha $\alpha<0$ (tappa 08). Solo una sorgente termica nella regione di Rayleigh-Jeans o vicino al massimo può avere $\alpha$ fra 2 e 4. È polvere.</p>`},
+  {t:'prosa', title:'La massa, la sensibilità alla temperatura, e un dato che non torna', tag:'il conto', html:R`
+  <p>A 850 µm $h\nu/k=16{,}9\ \mathrm{K}$, confrontabile con la temperatura, quindi non si può usare Rayleigh-Jeans e serve Planck intera. Con la formula della tappa 04 la massa è $49\,M_\odot$. Se la temperatura vera fosse il 20% più alta, 14,4 K, la funzione di Planck crescerebbe e la massa scenderebbe a $35\,M_\odot$, il 28% in meno. La massa dipende dalla temperatura più che linearmente, perché a questa lunghezza d&rsquo;onda si è ancora vicini al lato di Wien, ed è per questo che le masse di polvere si misurano il più possibile nel millimetrico, dove la dipendenza da $T$ diventa lineare.</p>
+  <p>Una cosa va dichiarata. Con $T=12$ K e $\kappa\propto\nu^2$, il rapporto atteso fra i flussi a 450 e a 850 µm è $5{,}6$, mentre quello misurato è $3{,}3$. I due dati non sono compatibili con le ipotesi del testo: richiederebbero una temperatura più bassa o un&rsquo;emissività meno ripida, oppure un errore nel flusso a 450 µm. La massa calcolata dal solo punto a 850 µm, come chiede l&rsquo;esercizio, resta il conto da fare. Ma chi lo fa dovrebbe notare che il primo punto, quello usato per la diagnosi, contraddice l&rsquo;ipotesi usata per il secondo.</p>`}
+]},
+
+/* ---------------- 06 · THOMSON E COMPTON ---------------- */
+{ num:'06', title:'Lo scattering da elettroni liberi: Thomson e Compton', meta:'l’elettrone che oscilla nel campo dell’onda · la sezione d’urto classica · perché l’elettrone e non il protone · quando la luce cede energia',
+  blocchi:[
+  {t:'prosa', title:'La sezione di Thomson, come conto classico', tag:'la seconda domanda dell’orale', html:R`
+  <p>Un&rsquo;onda elettromagnetica incide su un elettrone libero. Se l&rsquo;energia del fotone è piccola rispetto a quella di riposo dell&rsquo;elettrone, $h\nu\ll m_ec^{2}$, il problema è classico (de Bernardis, lezione10_2020_B). Il campo elettrico dell&rsquo;onda accelera l&rsquo;elettrone, $m\ddot{\vec r}=e\vec E_0\cos\omega t$, e la forza magnetica si trascura perché la velocità acquistata è piccola. Si crea un dipolo oscillante $\vec d=e\vec r$ con $\ddot{\vec d}=e^2\vec E/m$. Un dipolo oscillante irraggia, e la potenza per unità di angolo solido va come $\ddot d^2\sin^2\theta$, con $\theta$ l&rsquo;angolo fra campo elettrico e direzione di osservazione. Dividendo per il flusso incidente, il vettore di Poynting $c\epsilon_0E_0^2$, si ha una superficie, la sezione d&rsquo;urto differenziale:
+  $$\frac{d\sigma}{d\Omega}=\left(\frac{e^{2}}{4\pi\epsilon_0m_ec^{2}}\right)^{2}\sin^{2}\theta.$$
+  La quantità fra parentesi è il raggio classico dell&rsquo;elettrone, $r_e=\frac{e^{2}}{4\pi\epsilon_0m_ec^{2}}$. Integrando su tutte le direzioni:
+  $$\sigma_T=\frac{8\pi}{3}r_e^{2},$$
+  cioè $0{,}665\cdot10^{-24}\ \mathrm{cm^{2}}$. Non dipende dalla frequenza: lo scattering Thomson è <b>grigio</b>. E dipende da $1/m^2$. Un protone, 1836 volte più pesante, ha una sezione $3{,}37\cdot10^{6}$ volte più piccola: <b>a diffondere sono gli elettroni</b>, che il campo dell&rsquo;onda riesce a scuotere. Per radiazione non polarizzata, mediando sull&rsquo;orientazione del campo, la distribuzione è $\frac{d\sigma}{d\Omega}\Big|_{\mathrm{unp}}=\frac{r_e^{2}}{2}\big(1+\cos^{2}\Theta\big)$, con $\Theta$ l&rsquo;angolo di diffusione: massima in avanti e indietro, minima a 90°, dove la luce diffusa è completamente polarizzata.</p>`},
+  {t:'prosa', title:'Compton e Compton inverso', tag:'lezione11_2020', html:R`
+  <p>Quando il fotone è energetico, il problema è quantistico e lo scattering non è più elastico. Conservando energia e impulso si ottiene lo spostamento Compton, $\lambda'-\lambda=\frac{h}{m_ec}(1-\cos\Theta)$, dove la lunghezza Compton dell&rsquo;elettrone vale $2{,}43\ \mathrm{pm}$: il fotone cede energia all&rsquo;elettrone. La sezione d&rsquo;urto, data dalla formula di Klein-Nishina, diminuisce all&rsquo;aumentare dell&rsquo;energia, e sopra $2m_ec^2$ compare la creazione di coppie. Il caso opposto, che in astrofisica è il più importante, è il <b>Compton inverso</b>, in cui l&rsquo;elettrone è relativistico e il fotone guadagna energia. De Bernardis lo indica nei dischi di accrescimento attorno ai buchi neri, dove i fotoni termici del disco incontrano elettroni relativistici, e nei lobi delle radiogalassie, dove gli stessi elettroni che emettono per sincrotrone diffondono i fotoni radio portandoli a energie alte. Lo stesso processo, con il gas caldo degli ammassi di galassie e i fotoni del fondo cosmico, distorce lo spettro del fondo. È l&rsquo;effetto Sunyaev-Zel&rsquo;dovich, che l&rsquo;esperimento OLIMPO citato da de Bernardis cerca di misurare spettroscopicamente.</p>`},
+  {t:'prosa', title:'Thomson su scala cosmica: la fotosfera dell&rsquo;universo, e la sua polarizzazione', tag:'Marconi, cap. 9.4 e cap. 16, pp. 133-137, 253-254 e 279-281', html:R`
+  <p>Marconi usa la sezione di Thomson per l&rsquo;oggetto più grande che diffonda luce: il gas dell&rsquo;universo prima della ricombinazione. Finché l&rsquo;idrogeno è ionizzato la profondità ottica Thomson fino a $z=1500$ sarebbe di circa 110: <i>«tutto quello che avviene quando il gas è ionizzato va perso perché i fotoni subiscono molti scattering e perdono memoria delle loro condizioni fisiche iniziali»</i>. La radiazione del fondo cosmico viene dalla regione dove $\tau\simeq1$, la <i>superficie di ultimo scattering</i>, <i>«in modo analogo alla fotosfera»</i> di una stella. La probabilità che un fotone abbia avuto l&rsquo;ultimo urto fra $z$ e $z+dz$ è la funzione di visibilità $e^{-\tau}d\tau$; nel modello di riferimento ha il massimo a $z\simeq1090$ e metà altezza fra 1178 e 983, cioè $\Delta z=1178-983=195$, circa 370 000 anni dopo il Big Bang. La ricombinazione non è istantanea perché quasi ogni decadimento produce un fotone che reionizza; l&rsquo;unica via d&rsquo;uscita è la transizione proibita a due fotoni $2S\to1S$, con $A=8{,}23\ \mathrm{s^{-1}}$.</p>
+  <p>Lo stesso urto polarizza. Marconi ricorda che lo scattering Thomson dà radiazione polarizzata al 100% quando l&rsquo;elettrone è visto perpendicolarmente alla direzione di propagazione: per luce incidente non polarizzata il grado di polarizzazione diffusa è</p>
+  <p>$$\Pi(\theta)=\frac{\sin^2\theta}{1+\cos^2\theta},$$</p>
+  <p>che vale 1 a 90° e $0{,}6$ a 60°. Ma un elettrone illuminato in modo isotropo, o con un dipolo, non produce polarizzazione netta: serve un campo di radiazione con anisotropia di <i>quadrupolo</i>. Per questo, spiega Marconi, il segnale polarizzato del fondo cosmico nasce da due urti entrambi nello strato di ultimo scattering, e ha il massimo su scale pari al cammino libero medio dei fotoni in quello strato. Dopo la ricombinazione l&rsquo;universo è neutro fino alle prime stelle, che lo reionizzano: tra noi e la superficie di ultimo scattering resta una profondità ottica Thomson di $\tau=0{,}1$-$0{,}2$ se la reionizzazione è a $z=10$-$20$, che attenua le fluttuazioni originali del fattore standard $e^{-\tau}$, cioè a $0{,}90$-$0{,}82$.</p>
+  <p>Il Compton inverso, infine, lascia sul fondo cosmico l&rsquo;impronta degli ammassi di galassie, che de Bernardis cita fra i luoghi dove avviene: è l&rsquo;effetto Sunyaev-Zel&rsquo;dovich, per cui i fotoni che attraversano il gas caldo degli ammassi vengono spostati a frequenze più alte e, nella parte di Rayleigh-Jeans, la temperatura apparente diminuisce fino a $\Delta T/T\sim-10^{-4}$, cioè $2{,}7255\ \mathrm K\cdot10^{-4}=273\ \mu$K.</p>`}
+]},
+
+/* ---------------- 07 · RAYLEIGH ---------------- */
+{ num:'07', title:'Lo scattering da elettroni legati: Rayleigh, e il cielo blu', meta:'l’elettrone come oscillatore con una frequenza propria · omega alla quarta · perché il cielo è blu e il tramonto rosso',
+  blocchi:[
+  {t:'prosa', title:'L’oscillatore lontano dalla risonanza', tag:'lezione11_2020, diapositive 5-9', html:R`
+  <p>Se l&rsquo;elettrone è legato elasticamente all&rsquo;atomo, con frequenza propria $\omega_0$, l&rsquo;equazione del moto acquista una forza di richiamo, e la soluzione forzata ha ampiezza proporzionale a $1/(\omega_0^2-\omega^2)$. Rifacendo il conto di Thomson, la sezione d&rsquo;urto si moltiplica per il quadrato del fattore di risposta, $\left(\frac{\omega^{2}}{\omega_0^{2}-\omega^{2}}\right)^{2}$. Lontano dalla risonanza e sotto di essa, $\omega\ll\omega_0$, è il caso delle molecole dell&rsquo;aria, la cui frequenza propria sta nell&rsquo;ultravioletto. Allora $\left(\frac{\omega^{2}}{\omega_0^{2}-\omega^{2}}\right)^{2}\to\left(\frac{\omega}{\omega_0}\right)^{4}$, e
+  $$\sigma_R=\sigma_T\left(\frac{\omega}{\omega_0}\right)^{4}.$$
+  La luce blu a 400 nm è diffusa $(700/400)^4=9{,}4$ volte più della rossa a 700 nm, e de Bernardis arrotonda a 10. Guardando lontano dal Sole si vede luce diffusa, quindi blu. Guardando verso il Sole al tramonto, attraverso molta atmosfera, si vede la luce che non è stata diffusa, quindi rossa. Di giorno intorno al Sole domina invece lo scattering di Mie dal particolato atmosferico, quasi indipendente dalla lunghezza d&rsquo;onda, che dà l&rsquo;alone bianco, più debole dove l&rsquo;aria è pulita. È la stessa fisica dei regimi di Mie della tappa 03: i grani più piccoli della lunghezza d&rsquo;onda diffondono come $\lambda^{-4}$.</p>`}
+]},
+
+/* ---------------- 08 · SINCROTRONE ---------------- */
+{ num:'08', title:'La radiazione di sincrotrone: elettroni relativistici in un campo magnetico', meta:'l’elica e la frequenza di girazione · il cono di apertura 1/gamma · il tempo d’arrivo compresso · la frequenza caratteristica gamma² eB/m',
+  blocchi:[
+  {t:'prosa', title:'Il moto e il cono', tag:'lezione12_2017, diapositive 8-14', html:R`
+  <p>Un elettrone relativistico in un campo magnetico obbedisce a $\frac{d(\gamma m\vec v)}{dt}=q\,\vec v\times\vec B$. Il campo non compie lavoro, quindi $|v|$ e $\gamma$ restano costanti, e l&rsquo;equazione è quella del ciclotrone con $m$ sostituita da $\gamma m$. Il moto è un&rsquo;elica, con frequenza di girazione $\omega_s=\frac{qB}{\gamma m}$. <i>«Si potrebbe pensare quindi che l&rsquo;emissione di sincrotrone avvenga alla frequenza $\omega_s$. Ma non è così»</i>. Per velocità relativistiche i due lobi di emissione di una carica accelerata si deformano e si concentrano nella direzione della velocità, in un cono di semiapertura $\theta\simeq\frac{1}{\gamma}$, che si ottiene dalla formula dell&rsquo;aberrazione applicata all&rsquo;emissione a 90° nel riferimento della carica. Un osservatore riceve radiazione solo quando il cono lo spazza, per un tempo $\Delta t\sim2/(\gamma\omega_s)$.</p>
+  <p>Il secondo effetto è la compressione del tempo d&rsquo;arrivo. Durante $\Delta t$ la carica si muove verso l&rsquo;osservatore quasi alla velocità della luce, inseguendo la propria radiazione, e la radiazione emessa alla fine arriva poco dopo quella emessa all&rsquo;inizio: $\Delta t'=\Delta t\left(1-\frac{v}{c}\right)\simeq\frac{\Delta t}{2\gamma^{2}}$, perché $1-\frac{v}{c}\simeq\frac{1}{2\gamma^{2}}$. L&rsquo;impulso osservato dura quindi $\Delta t'\sim\frac{1}{\gamma^{3}\omega_s}$, e uno spettro, come ogni impulso, contiene frequenze fino all&rsquo;inverso della sua durata, la <span class="str" data-str="trasformata-di-fourier">trasformata di Fourier</span> di un lampo breve. La frequenza caratteristica è
+  $$\omega_c\sim\gamma^{3}\omega_s=\gamma^{2}\frac{qB}{m}.$$
+  Due fattori $\gamma$ in più della frequenza non relativistica del ciclotrone. Sono <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span>, e bastano. Un elettrone con $\gamma=10^4$ in un campo interstellare di 1 µG ($10^{-10}$ T) emette intorno a $280\ \mathrm{MHz}$, nel radio. Nella nebulosa del Granchio, con campi di circa 100 µG ed elettroni fino a $\gamma\sim10^6$, si arriva a $2{,}8\cdot10^{14}\ \mathrm{Hz}$, nel visibile: è il <i>«fondo azzurro diffuso nella nebulosa del Granchio»</i> delle slide.</p>`},
+  {t:'prosa', title:'Lo spettro di una popolazione', tag:'legge di potenza', html:R`
+  <p>Un singolo elettrone emette in una banda larga intorno a $\omega_c$. Una popolazione di elettroni accelerati da onde d&rsquo;urto ha in genere una distribuzione a legge di potenza, $N(E)\propto E^{-p}$. Sommando i contributi, con $\omega_c\propto E^2$, lo spettro risultante è anch&rsquo;esso una legge di potenza, $F_\nu\propto\nu^{-(p-1)/2}$. È un risultato standard che non ho trovato derivato nelle slide estratte, e lo dichiaro. Con il tipico $p=2{,}5$ l&rsquo;indice spettrale è $-0{,}75$: il flusso <i>diminuisce</i> con la frequenza. È la firma che distingue il sincrotrone dalla polvere, che sale, e dal free-free, piatto, ed è la diagnosi dell&rsquo;esercizio della L1246. La radiazione di sincrotrone è inoltre fortemente polarizzata, perpendicolarmente al campo proiettato in cielo, e insieme alla polarizzazione della polvere è il modo con cui si mappa il campo magnetico galattico.</p>`},
+  {t:'plot', title:'Tre firme spettrali nel radio e nel lontano infrarosso',
+   intro:R`Densità di flusso in unità relative, in scala logaritmica, contro $\log_{10}\nu$ (GHz). Viola: sincrotrone con $\alpha=-0{,}75$. Ciano: free-free otticamente sottile, $\alpha=-0{,}1$. Oro: polvere a 20 K con emissività $\propto\nu^{2}$ (corpo grigio).`,
+   plots:[
+    {kind:'func2d', xr:[0,3.5], yr:[-3,3], height:300, equal:false,
+     title:'log10 nu (GHz)      log10 F_nu (relativo)',
+     curves:[{f:'-0.75*x+0.5', col:'#b98cff', label:'sincrotrone'},
+             {f:'-0.1*x-0.3', col:'#5eead4', label:'free-free'},
+             {f:'log(pow(pow(10,x)/1000,2)*pow(pow(10,x)/1000,3)/(exp(0.048*pow(10,x)/20)-1))/log(10)+1.2', col:'#d8a13a', label:'polvere 20 K'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> sincrotrone e free-free dominano a bassa frequenza e scendono, la polvere sale ripidamente fino a un massimo intorno a qualche migliaio di GHz, cioè a circa 100 µm, e poi crolla sul lato di Wien. Le curve si incrociano intorno a 100 GHz, che è il motivo per cui le misure del fondo cosmico si fanno lì: è la finestra dove i primi piani galattici sono al minimo.</p>
+   <p><b>Che cosa impararne:</b> l&rsquo;indice spettrale fra due frequenze basta a dire quale meccanismo si sta guardando. Due flussi sono un termometro della fisica, prima ancora che della temperatura.</p>`}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: l’estinzione in magnitudini e la sezione di Thomson', meta:'la domanda teorica della mappa · due copioni brevi',
+  blocchi:[
+  {t:'reveal', title:'L’estinzione, in quattro mosse', tag:'copione', steps:[
+   {label:'Mossa 1: dentro la magnitudine', body:R`<p>«La polvere attenua come $e^{-\tau}$. Nella definizione di magnitudine: $A=-2{,}5\log e^{-\tau}=(2{,}5/\ln10)\tau$, quindi $A_\lambda=1{,}086\,\tau_\lambda$. Il 1,086 è il cambio di base del logaritmo.»</p>`},
+   {label:'Mossa 2: l’arrossamento', body:R`<p>«La polvere estingue di più il blu: l&rsquo;eccesso di colore $E(B-V)=(B-V)-(B-V)_0=A_B-A_V$ non dipende dalla distanza.»</p>`},
+   {label:'Mossa 3: R_V', body:R`<p>«Per passare all&rsquo;estinzione totale serve la pendenza della curva: $A_V=R_VE(B-V)$, con $R_V\simeq3{,}1$ in media nella Galassia, fino a 5 nelle nubi dense. Va dichiarato, perché sbagliarlo sbaglia la distanza.»</p>`},
+   {label:'Mossa 4: perché', body:R`<p>«Grani di circa 0,2 µm: confrontabili con la luce visibile, quindi $Q_{\mathrm{ext}}\propto1/\lambda$. La stessa polvere riemette nel lontano infrarosso a circa 20 K.»</p>`}
+  ]},
+  {t:'reveal', title:'La sezione di Thomson, in quattro mosse', tag:'copione', steps:[
+   {label:'Mossa 1: l’elettrone scosso', body:R`<p>«Il campo dell&rsquo;onda accelera l&rsquo;elettrone, $m\ddot r=eE$; si forma un dipolo oscillante che irraggia come $\sin^2\theta$.»</p>`},
+   {label:'Mossa 2: il rapporto', body:R`<p>«Potenza diffusa per angolo solido divisa per il flusso incidente: $d\sigma/d\Omega=r_e^2\sin^2\theta$, con $r_e=e^2/4\pi\epsilon_0m_ec^2$.»</p>`},
+   {label:'Mossa 3: il totale', body:R`<p>«Integrando, $\sigma_T=\frac{8\pi}{3}\left(\frac{e^{2}}{4\pi\epsilon_0m_ec^{2}}\right)^{2}$, cioè 0,665·10⁻²⁴ cm², indipendente dalla frequenza.»</p>`},
+   {label:'Mossa 4: perché l’elettrone', body:R`<p>«Va come $1/m^2$: un protone diffonde tre milioni di volte meno. Per fotoni energetici diventa Compton; per elettroni legati e $\omega\ll\omega_0$ diventa Rayleigh, $\propto\omega^4$.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove questa fisica torna', meta:'otto voci · dalla Galassia al fondo cosmico',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Estinzione:</b> $A=1{,}086\,\tau$; in media circa 1 magnitudine per kpc nel visuale sul piano galattico.</li>
+  <li><b>Arrossamento:</b> $A_V=R_VE(B-V)$, con $R_V\simeq3{,}1$ (dichiarato); $E(U-B)/E(B-V)\simeq0{,}79$.</li>
+  <li><b>Curva:</b> $\propto1/\lambda$ nel visibile; picco a 218 nm; banda dei silicati a 9,6 µm.</li>
+  <li><b>Grani:</b> circa 0,2 µm; $Q_{\mathrm{ext}}\to2$ per $\lambda\ll a$, $\propto\lambda^{-4}$ per $\lambda\gg a$; polarizzazione/estinzione circa 0,03.</li>
+  <li><b>Polvere che emette:</b> circa 20 K, massimo a circa 100 µm; $M=F_\nu D^{2}/\kappa_\nu B_\nu(T_d)$.</li>
+  <li><b>Thomson:</b> $\sigma_T=6{,}65\cdot10^{-29}\ \mathrm{m^{2}}$, grigio, $\propto1/m^2$; lunghezza Compton 2,43 pm.</li>
+  <li><b>Rayleigh:</b> $\sigma\propto\omega^4$; blu contro rosso circa 10 volte.</li>
+  <li><b>Sincrotrone:</b> $\omega_c\sim\gamma^2eB/m$; $F_\nu\propto\nu^{-(p-1)/2}$, $\alpha\simeq-0{,}75$.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>Lo scattering Thomson è l&rsquo;opacità degli interni stellari caldissimi e, in cosmologia, quella del plasma primordiale. Il fondo cosmico è la luce che ha avuto l&rsquo;ultimo scattering Thomson quando gli elettroni si sono legati ai protoni, e la sua polarizzazione viene dalla stessa dipendenza angolare $1+\cos^2\Theta$. La polvere e il sincrotrone della nostra Galassia sono i primi piani che ogni misura del fondo cosmico deve togliere, e la figura della tappa 08 mostra dove sono deboli. L&rsquo;estinzione è la correzione che entra in ogni misura di distanza con le candele standard, dalle Cefeidi alle supernovae, e la sua dipendenza dalla lunghezza d&rsquo;onda è il motivo per cui le distanze più affidabili si misurano nel vicino infrarosso.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-12-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-12 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-12-polvere-scattering-e-radiazione-non-termica.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

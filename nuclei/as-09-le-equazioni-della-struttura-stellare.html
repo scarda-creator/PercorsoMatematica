@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-09 — Le equazioni della struttura stellare: cinque equazioni, e una massa che decide tutto</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-09 — Le equazioni della struttura stellare: cinque equazioni, e una massa che decide tutto</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["integrale-gaussiano"] = {"nome":"Integrale gaussiano","riga":"$\\displaystyle\\int_{-\\infty}^{+\\infty} e^{-ax^{2}}\\,dx=\\sqrt{\\pi/a}$ per $a>0$, e $\\displaystyle\\int_{-\\infty}^{+\\infty} x^{2}e^{-ax^{2}}\\,dx=\\tfrac12\\sqrt{\\pi/a^{3}}$.","serve":"E' l'unico integrale che serve davvero sapere a memoria in meccanica statistica, perche' l'energia cinetica e' quadratica nell'impulso e quindi ogni integrazione sugli impulsi e' una gaussiana. Il trucco della dimostrazione — elevare al quadrato e passare in coordinate polari — vale la pena di vederlo una volta: e' il motivo per cui compare un $\\pi$ in una formula che di cerchi non parla.","esempio":"Da $I^{2}=\\iint e^{-a(x^{2}+y^{2})}dx\\,dy=2\\pi\\int_{0}^{\\infty}re^{-ar^{2}}dr=\\pi/a$ segue $I=\\sqrt{\\pi/a}$. I momenti superiori si ottengono derivando rispetto ad $a$ sotto il segno: $-\\partial_a I=\\int x^{2}e^{-ax^{2}}dx=\\tfrac12\\sqrt{\\pi}\\,a^{-3/2}$. Derivare rispetto a un parametro e' piu' rapido che integrare per parti, e funziona per tutti i momenti pari.","pieno":null,"qui":{"meccanica-statistica":{"serve":"La funzione di partizione di una particella libera e' un prodotto di tre gaussiane negli impulsi, e da li' esce la lunghezza d'onda termica $\\lambda=h/\\sqrt{2\\pi m k T}$ — che e' la grandezza con cui si misura quando un gas smette di essere classico.","esempio":"$\\int e^{-\\beta p^{2}/2m}dp=\\sqrt{2\\pi m/\\beta}$, quindi $Z_{1}=\\dfrac{V}{h^{3}}(2\\pi mkT)^{3/2}=V/\\lambda^{3}$. Lo stesso integrale col peso $p^{2}$ da' $\\langle p^{2}/2m\\rangle=\\tfrac12 kT$ per grado di liberta': l'equipartizione non e' un principio a parte, e' questo integrale."}}};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["elettronvolt"] = {"nome":"Elettronvolt","riga":"L'energia che un elettrone acquista attraversando una differenza di potenziale di un volt: $1\\ \\mathrm{eV}=1{,}602\\cdot10^{-19}$ J; divisa per $c^{2}$ è una massa, $1\\ \\mathrm{eV}/c^{2}=1{,}783\\cdot10^{-36}$ kg.","serve":"A leggere senza conversioni le tabelle in cui la fisica delle particelle e l'astrofisica scrivono le masse a riposo come energie — l'elettrone 0,511 MeV, il protone 938 MeV, il bosone di Higgs 125 GeV. La scelta non è una bizzarria di notazione: in un processo la quantità che si conserva è l'energia, e scrivere la massa già in energia dice a colpo d'occhio quali reazioni sono possibili e quante ne resta per l'energia cinetica o per i fotoni. L'elettronvolt ha anche un secondo mestiere, e in astrofisica è il più usato dei due: convertito in temperatura tramite $k_BT$ dà la scala termica a cui un processo di quella energia diventa frequente, e questo è ciò che permette di dire a che punto della storia dell'universo o a che profondità di una stella un certo processo si accende.","esempio":"Dalla massa del protone espressa come energia, $938{,}3$ MeV, si ricavano i chilogrammi in un passaggio: $m_p=938{,}3\\cdot10^{6}\\cdot1{,}783\\cdot10^{-36}=1{,}673\\cdot10^{-27}$ kg, che è il valore stampato in calce al foglio d'esame. Sul versante termico, $T=\\dfrac{1{,}602\\cdot10^{-19}}{1{,}381\\cdot10^{-23}}=11600$ K: un'energia di un elettronvolt corrisponde a poco più di undicimila kelvin, e siccome ionizzare l'idrogeno costa 13,6 eV si capisce subito perché serva una fotosfera da qualche decina di migliaia di kelvin per trovarlo ionizzato.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"05","come":"le masse delle particelle elementari scritte come energie, con la conversione in chilogrammi e la gerarchia delle masse, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.602177e-19/(2.99792458e8)**2*1e36","vale":"1.783","dove":"riga","appare":"1,783\\cdot10^{-36}"},{"tipo":"numero","espr":"938.3e6*1.783e-36*1e27","vale":"1.673","dove":"esempio","appare":"1,673\\cdot10^{-27}"},{"tipo":"numero","espr":"1.602e-19/1.381e-23","vale":"11600","dove":"esempio","appare":"11600"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-09: Le equazioni della struttura stellare: cinque equazioni, e una massa che decide tutto <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-09 — le equazioni della struttura stellare
+identita:  cinque equazioni in cinque incognite, e un teorema che dice che massa e composizione bastano a
+           determinare tutto il resto; e le stime di tre righe che dicono perche' una stella e' calda e
+           perche' deve bruciare nuclei.
+copre:     R.1
+serve:     as-08 (trasporto radiativo, opacita'), as-06 (gas ionizzato, Saha)
+apre:      calcolato da verifica-mappa.py
+profondita: comprensione (3 prove, densita' 1,3). Le equazioni si enunciano e si capisce che cosa vincola
+           ciascuna; il valore sta nelle stime: temperatura centrale dall'equilibrio idrostatico, tempo di
+           Kelvin-Helmholtz. All'orale: equilibrio idrostatico e stima di T_c.
+fonti:     lezione7_2017 (pagine 1-24): equilibrio idrostatico, teorema del viriale (E_K = -E_GR/2),
+           continuita', equazione di stato con pressione del gas e di radiazione, trasporto radiativo con
+           l'opacita', conservazione dell'energia, condizioni al contorno, teorema di Vogt-Russell,
+           modello politropico, modello standard (n=3), equazione di Lane-Emden con le soluzioni n=0 e n=1.
+           lezione8_2017 (pagine 1-20): la massa e il raggio delle politropiche, il criterio di
+           Schwarzschild (nabla_ad = 0,4), i meccanismi di opacita', le zone convettive da opacita' e da
+           flusso, il confronto fra n=3 e il modello solare standard.
+           LEZIONE3_B_2020 (pagine 7-27): la massa del Sole dall'orbita terrestre, la barriera coulombiana,
+           l'effetto tunnel (Bethe 1937), il picco di Gamow e la tabella dei <sigma v>, gli ordini di
+           grandezza del bruciamento, la durata della sequenza principale T = f M c^2 / L e T ~ M^-2,5, il
+           ciclo pp, il 3-alfa e la risonanza di Hoyle.
+           lezione4_2020 (pagine 1-7): il problema dei neutrini solari, il flusso 6,4e10 /cm2/s, le catene
+           pp I-II-III, Homestake e lo SNU, le oscillazioni (Pontecorvo).
+           DICHIARATO (tappa 06): la slide da' una barriera coulombiana di 550 keV a r_N = 2 fm; il conto
+           e^2/(4 pi eps0 r) da' 720 keV a 2 fm, e 550 keV a 2,6 fm. La conclusione (barriera di centinaia
+           di keV contro kT di 1 keV) non cambia.
+           NON TRATTATO QUI: la materia degenere e le stelle compatte, che le stesse lezioni 8 portano subito
+           dopo (sono l'oggetto di un altro movimento).
+           Masani, Astrofisica, cap. 6-10 (pagine 47-62) e cap. 16 parte storica (pagine 201-206), letto per
+           intero dal dossier: stelle fredde a un parametro e stelle perfette a due parametri, il gradiente
+           convettivo (gamma-1)/gamma, il gradiente radiativo, il modello con beta costante (n = 3), le densita'
+           centrali 8,4 e 76 g/cm^3, la storia delle fonti di energia solare (Pouillet, Kelvin, Helmholtz,
+           Lane, Ritter, Emden).
+           DICHIARATO (Masani): la massa meteoritica necessaria e' scritta 1,3e25 g/s, ma L = m v^2/2 con
+           v = 630 km/s da' 2,0e18 g/s.
+registro:  lezione7_2017, lezione8_2017, LEZIONE3_B_2020, lezione4_2020
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac{dP}{dr}=-\\frac{GM(r)\\rho(r)}{r^{2}}", "perche": "e' l'equazione dell'equilibrio idrostatico, ricavata nel testo dal bilancio delle forze sul guscio: la forza di pressione dP dS bilancia il peso G M(r) dm / r^2 con dm = rho dS dr."},
+ {"tipo": "uguale", "sinistra": "(G*M*rho*dS*dr/r**2)/(dS*dr)", "vale": "G*M*rho/r**2", "ipotesi": {"G": "positive", "M": "positive", "rho": "positive", "dS": "positive", "dr": "positive", "r": "positive"}, "dove": "01", "appare": "-dP\\,dS=\\frac{GM(r)}{r^{2}}\\,\\rho\\,dS\\,dr"},
+ {"tipo": "numero", "espr": "1.49e11*(3e4)**2/6.674e-11/1e30", "vale": "2.01", "dove": "01", "appare": "2{,}01\\cdot10^{30}\\ \\mathrm{kg}"},
+ {"tipo": "simbolico", "dove": "01", "appare": "M_\\odot=\\frac{Rv^{2}}{G}", "perche": "e' l'uguaglianza di forza centripeta e gravitazionale per un'orbita circolare, v^2/R = G M / R^2: la definizione dell'equilibrio orbitale."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\int_0^R4\\pi r^{3}\\frac{dP}{dr}dr=-\\int_0^R\\frac{GM(r)}{r}\\,4\\pi r^{2}\\rho\\,dr", "perche": "e' l'equazione dell'equilibrio idrostatico moltiplicata per 4 pi r^3 e integrata su tutta la stella, come nelle slide: un passaggio, non un valore."},
+ {"tipo": "uguale", "sinistra": "integrate(4*pi*r**3*diff(Pc*(1-(r/R)**k),r),(r,0,R))", "vale": "-3*integrate(4*pi*r**2*Pc*(1-(r/R)**k),(r,0,R))", "ipotesi": {"r": "positive", "R": "positive", "Pc": "positive", "k": "positive"}, "dove": "02", "appare": "-3\\langle P\\rangle V"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\int_0^R4\\pi r^{3}\\frac{dP}{dr}dr=\\big[4\\pi r^{3}P\\big]_0^R-3\\int_0^R4\\pi r^{2}P\\,dr=-3\\langle P\\rangle V", "perche": "e' l'integrazione per parti con P(R)=0, il cui termine di bordo e' asserito sopra; <P>V e' la definizione della pressione media sul volume."},
+ {"tipo": "simbolico", "dove": "02", "appare": "E_{GR}=-\\int_0^M\\frac{GM(r)}{r}dM", "perche": "e' la definizione dell'energia potenziale gravitazionale della stella, costruita aggiungendo un guscio alla volta."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\langle P\\rangle V=-\\frac{E_{GR}}{3}", "perche": "e' l'uguaglianza dei due membri appena riscritti: conseguenza delle due righe precedenti."},
+ {"tipo": "uguale", "sinistra": "((N/V)*m*v**2/3)*V", "vale": "Rational(2,3)*(N*m*v**2/2)", "ipotesi": {"m": "positive", "v": "positive", "V": "positive", "N": "positive"}, "dove": "02", "appare": "PV=\\frac13Nm\\langle v^{2}\\rangle=\\frac23E_K"},
+ {"tipo": "uguale", "sinistra": "solve(Rational(2,3)*EK+EGR/3,EK)[0]", "vale": "-EGR/2", "ipotesi": {"EGR": "negative", "EK": "positive"}, "dove": "02", "appare": "E_K=-\\frac{E_{GR}}{2}"},
+ {"tipo": "uguale", "sinistra": "-EGR/2+EGR", "vale": "EGR/2", "ipotesi": {"EGR": "negative"}, "dove": "02", "appare": "E_{\\mathrm{tot}}=E_K+E_{GR}=\\frac{E_{GR}}{2}"},
+ {"tipo": "simbolico", "dove": "02", "appare": "n=N/V", "perche": "definizione della densita' numerica."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{dM}{dr}=4\\pi r^{2}\\rho(r)", "perche": "e' l'equazione di continuita': la massa di un guscio di spessore dr, una definizione geometrica."},
+ {"tipo": "simbolico", "dove": "03", "appare": "P=P(\\rho,T,\\mu)", "perche": "e' l'equazione di stato scritta in forma generale."},
+ {"tipo": "simbolico", "dove": "03", "appare": "P_{\\mathrm{gas}}=nkT=\\frac{\\rho}{\\mu m_H}kT", "perche": "e' la legge dei gas perfetti con il peso molecolare medio mu come numero di masse atomiche per particella: definizione di mu."},
+ {"tipo": "simbolico", "dove": "03", "appare": "P_{\\mathrm{rad}}=\\frac{aT^{4}}{3}", "perche": "e' la pressione di un gas di fotoni isotropo, un terzo della densita' di energia aT^4."},
+ {"tipo": "numero", "espr": "1/(2*0.75+Rational(3,4)*0.25)", "vale": "0.59", "dove": "03", "appare": "0{,}59"},
+ {"tipo": "numero", "espr": "1/(2*0.70+Rational(3,4)*0.28+Rational(1,2)*0.02)", "vale": "0.62", "dove": "03", "appare": "0{,}62"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{dT}{dr}=-\\frac{3}{4ac}\\,\\frac{\\kappa\\rho}{T^{3}}\\,\\frac{L(r)}{4\\pi r^{2}}", "perche": "e' l'equazione del trasporto radiativo in un mezzo spesso (limite di diffusione), come la scrivono le slide, con L = 4 pi r^2 F: una legge, non un conto."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\frac{dL}{dr}=4\\pi r^{2}\\rho\\,\\varepsilon(\\rho,T)", "perche": "e' la conservazione dell'energia sul guscio: la luminosita' cresce dell'energia prodotta nella massa dm = 4 pi r^2 rho dr."},
+ {"tipo": "simbolico", "dove": "03", "appare": "L(r)=4\\pi r^{2}F(r)", "perche": "definizione della luminosita' attraverso la sfera di raggio r."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\ell=\\frac{1}{\\kappa\\rho}", "perche": "definizione del cammino libero medio con l'opacita' per unita' di massa."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\mu=\\frac{1}{2X+\\frac34Y+\\frac12Z}", "perche": "e' il peso molecolare medio di un gas completamente ionizzato: per massa unitaria, l'idrogeno da' 2 particelle per m_H, l'elio 3 per 4 m_H, i metalli circa 1/2 per m_H."},
+ {"tipo": "simbolico", "dove": "04", "appare": "M(0)=0,\\ L(0)=0,\\ M(R)=M_s,\\ L(R)=L_s,\\ P(R)\\simeq0,\\ T(R)=T_s", "perche": "sono le condizioni al contorno delle slide: definizioni del problema, non conti."},
+ {"tipo": "uguale", "sinistra": "(diff(P(M),M)).subs(diff(P(M),M),-G*M*rho/r**2*(1/(4*pi*r**2*rho)))", "vale": "-G*M/(4*pi*r**4)", "ipotesi": {"G": "positive", "M": "positive", "rho": "positive", "r": "positive", "P": "funzione"}, "dove": "04", "appare": "\\frac{dP}{dM}=-\\frac{GM}{4\\pi r^{4}}"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\frac{dr}{dM}=\\frac{1}{4\\pi r^{2}\\rho}", "perche": "e' l'equazione di continuita' invertita: un cambio di variabile."},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\frac{dL}{dM}=\\varepsilon", "perche": "e' la conservazione dell'energia divisa per dM/dr: un cambio di variabile."},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\frac{dT}{dM}=-\\frac{3\\kappa L}{64\\pi^{2}acr^{4}T^{3}}", "perche": "e' il trasporto radiativo diviso per dM/dr = 4 pi r^2 rho: un cambio di variabile (il rho si semplifica)."},
+ {"tipo": "uguale", "sinistra": "(-(3/(4*a*c))*(k*rho/T**3)*(L/(4*pi*r**2)))/(4*pi*r**2*rho)", "vale": "-3*k*L/(64*pi**2*a*c*r**4*T**3)", "ipotesi": {"a": "positive", "c": "positive", "k": "positive", "rho": "positive", "T": "positive", "L": "positive", "r": "positive"}, "dove": "04", "appare": "64\\pi^{2}acr^{4}T^{3}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{1}{r^{2}}\\frac{d}{dr}\\left(\\frac{r^{2}}{\\rho}\\frac{dP}{dr}\\right)=-4\\pi G\\rho", "perche": "e' la combinazione di equilibrio idrostatico e continuita' delle slide: si moltiplica la prima per r^2/rho, si deriva e si usa dM/dr = 4 pi r^2 rho."},
+ {"tipo": "simbolico", "dove": "05", "appare": "P=A\\rho^{1+1/n}", "perche": "e' la definizione del modello politropico di indice n."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{1}{\\xi^{2}}\\frac{d}{d\\xi}\\left(\\xi^{2}\\frac{d\\theta}{d\\xi}\\right)=-\\theta^{n}", "perche": "e' l'equazione di Lane-Emden, ottenuta sostituendo rho = rho_c theta^n e r = alpha xi: un cambio di variabili."},
+ {"tipo": "uguale", "sinistra": "diff(xi**2*diff(1-xi**2/6,xi),xi)/xi**2+(1-xi**2/6)**0", "vale": "0", "ipotesi": {"xi": "positive"}, "dove": "05", "appare": "\\theta_0=1-\\frac{\\xi^{2}}{6}"},
+ {"tipo": "uguale", "sinistra": "diff(xi**2*diff(sin(xi)/xi,xi),xi)/xi**2+sin(xi)/xi", "vale": "0", "ipotesi": {"xi": "positive"}, "dove": "05", "appare": "\\theta_1=\\frac{\\sin\\xi}{\\xi}"},
+ {"tipo": "limite", "espr": "sin(xi)/xi", "var": "xi", "a": "0", "vale": "1", "ipotesi": {"xi": "positive"}, "dove": "05", "appare": "\\theta(0)=1"},
+ {"tipo": "numero", "espr": "sqrt(6)", "vale": "2.449", "dove": "05", "appare": "\\xi_1=\\sqrt6=2{,}449"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\xi_1=\\pi", "perche": "primo zero di sin(xi)/xi, la soluzione asserita: un fatto elementare."},
+ {"tipo": "uguale", "sinistra": "series(sin(xi)/xi,xi,0,4).removeO()", "vale": "1-xi**2/6", "ipotesi": {"xi": "positive"}, "dove": "05", "appare": "\\theta\\simeq1-\\frac{\\xi^{2}}{6}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\theta'(0)=0", "perche": "condizione iniziale (temperatura liscia al centro), non un conto."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{1-\\beta}{\\beta}=\\frac{P_r}{P_g}=\\frac{aT^{3}\\mu m_H}{3\\rho k}", "perche": "e' il rapporto delle due pressioni dell'equazione di stato, asserite come definizioni nella tappa 03."},
+ {"tipo": "simbolico", "dove": "05", "appare": "P\\propto\\rho^{4/3}", "perche": "conseguenza del modello standard (beta costante): eliminando T dalla relazione fra le due pressioni, come nelle slide."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\rho=\\rho_c\\theta^{n}", "perche": "definizione della variabile theta."},
+ {"tipo": "simbolico", "dove": "05", "appare": "r=\\alpha\\xi", "perche": "definizione del raggio adimensionale."},
+ {"tipo": "uguale", "sinistra": "(G*M/R**2)*(M/R**3)*R", "vale": "G*M**2/R**4", "ipotesi": {"G": "positive", "M": "positive", "R": "positive"}, "dove": "06", "appare": "P_c\\sim\\frac{GM}{R^{2}}\\cdot\\frac{M}{R^{3}}\\cdot R=\\frac{GM^{2}}{R^{4}}"},
+ {"tipo": "numero", "espr": "6.674e-11*(1.989e30)**2/(6.957e8)**4/1e15", "vale": "1.13", "dove": "06", "appare": "1{,}13\\cdot10^{15}\\ \\mathrm{Pa}"},
+ {"tipo": "uguale", "sinistra": "(G*M**2/R**4)*(mp/(k*(M/R**3)))", "vale": "G*M*mp/(k*R)", "ipotesi": {"G": "positive", "M": "positive", "R": "positive", "mp": "positive", "k": "positive"}, "dove": "06", "appare": "T_c\\sim\\frac{P_c\\,m_p}{\\rho_ck}\\sim\\frac{GMm_p}{kR}"},
+ {"tipo": "numero", "espr": "6.674e-11*1.989e30*1.6726e-27/(1.380649e-23*6.957e8)/1e7", "vale": "2.31", "dove": "06", "appare": "2{,}31\\cdot10^{7}\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "0.62*2.315e7/1e7", "vale": "1.4", "dove": "06", "appare": "1{,}4\\cdot10^{7}\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "6.674e-11*(1.989e30)**2/(6.957e8*3.846e26)/3.156e7/1e7", "vale": "3.1", "dove": "06", "appare": "3{,}1\\cdot10^{7}\\ \\mathrm{anni}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "t_{KH}\\sim\\frac{GM^{2}}{RL}", "perche": "e' la definizione del tempo scala di Kelvin-Helmholtz: l'energia gravitazionale disponibile divisa per la potenza irraggiata (il fattore 1/2 del viriale cambia solo l'ordine di grandezza di un fattore 2)."},
+ {"tipo": "numero", "espr": "4.6e9/3.1e7/100", "vale": "1.5", "dove": "06", "appare": "150"},
+ {"tipo": "numero", "espr": "1.44/2*1e3", "vale": "720", "dove": "07", "appare": "720\\ \\mathrm{keV}"},
+ {"tipo": "numero", "espr": "1.44/0.550", "vale": "2.6", "dove": "07", "appare": "2{,}6\\ \\mathrm{fm}"},
+ {"tipo": "numero", "espr": "8.617333e-5*1e7/1e3", "vale": "0.862", "dove": "07", "appare": "0{,}862\\ \\mathrm{keV}"},
+ {"tipo": "numero", "espr": "-550/0.8617/log(10)", "vale": "-277", "dove": "07", "appare": "10^{-277}"},
+ {"tipo": "numero", "espr": "2*(938.272/2)*(pi/137.036)**2*1e3", "vale": "493", "dove": "07", "appare": "493\\ \\mathrm{keV}"},
+ {"tipo": "numero", "espr": "8.617333e-5*1.5e7/1e3", "vale": "1.293", "dove": "07", "appare": "1{,}293\\ \\mathrm{keV}"},
+ {"tipo": "numero", "espr": "(493.1*1.2926**2/4)**(1.0/3)", "vale": "5.9", "dove": "07", "appare": "5{,}9\\ \\mathrm{keV}"},
+ {"tipo": "uguale", "sinistra": "solve(diff(-E/kT-sqrt(EG/E),E),E)[0]", "vale": "(EG*kT**2/4)**Rational(1,3)", "ipotesi": {"E": "positive", "kT": "positive", "EG": "positive"}, "dove": "07", "appare": "E_0=\\left(\\frac{E_G(kT)^{2}}{4}\\right)^{1/3}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "V_c(r)=\\frac{Z_1Z_2e^{2}}{4\\pi\\epsilon_0r}", "perche": "e' il potenziale coulombiano fra due nuclei, la definizione; il valore numerico a 2 fm e' asserito (e^2/4 pi eps0 = 1,44 MeV fm)."},
+ {"tipo": "simbolico", "dove": "07", "appare": "P\\propto e^{-\\sqrt{E_G/E}}", "perche": "e' il fattore di Gamow della probabilita' di tunnel attraverso la barriera coulombiana, risultato di meccanica quantistica (Bethe 1937) citato dalle slide."},
+ {"tipo": "simbolico", "dove": "07", "appare": "E_G=2m_rc^{2}(\\pi\\alpha Z_1Z_2)^{2}", "perche": "definizione dell'energia di Gamow, con m_r massa ridotta e alpha costante di struttura fine."},
+ {"tipo": "simbolico", "dove": "07", "appare": "e^{-E/kT}", "perche": "fattore di Boltzmann della coda maxwelliana."},
+ {"tipo": "numero", "espr": "3.846e26/(26.73*1.602e-13)/1e37", "vale": "8.98", "dove": "08", "appare": "8{,}98\\cdot10^{37}"},
+ {"tipo": "numero", "espr": "4*8.98e37/1e38", "vale": "3.6", "dove": "08", "appare": "3{,}6\\cdot10^{38}"},
+ {"tipo": "numero", "espr": "6.0e11*4.6e9*3.156e7/1.989e30*100", "vale": "4.4", "dove": "08", "appare": "4{,}4\\%"},
+ {"tipo": "numero", "espr": "(4*1.6726e-27-6.6447e-27)/(4*1.6726e-27)", "vale": "0.0068", "dove": "08", "appare": "0{,}0068"},
+ {"tipo": "numero", "espr": "3.6e38*1.6726e-27/1e11", "vale": "6.0", "dove": "08", "appare": "6{,}0\\cdot10^{11}\\ \\mathrm{kg/s}"},
+ {"tipo": "numero", "espr": "0.1*0.0068*1.989e30*(2.998e8)**2/3.846e26/3.156e7/1e10", "vale": "1.0", "dove": "08", "appare": "1{,}0\\cdot10^{10}\\ \\mathrm{anni}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "T=\\frac{fMc^{2}}{L}", "perche": "e' la definizione della durata della sequenza principale come energia disponibile su potenza (slide 19)."},
+ {"tipo": "uguale", "sinistra": "M/M**Rational(7,2)", "vale": "M**Rational(-5,2)", "ipotesi": {"M": "positive"}, "dove": "08", "appare": "T\\propto M/M^{3{,}5}=M^{-2{,}5}"},
+ {"tipo": "numero", "espr": "10**(10-2.5*1)/1e7", "vale": "3.2", "dove": "08", "appare": "3{,}2\\cdot10^{7}\\ \\mathrm{anni}"},
+ {"tipo": "numero", "espr": "10**(10+2.5*log(2,10))/1e10", "vale": "5.7", "dove": "08", "appare": "5{,}7\\cdot10^{10}\\ \\mathrm{anni}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "L\\propto M^{3{,}5}", "perche": "e' la relazione massa-luminosita' empirica delle slide (e di Eddington, in Masani): un dato di osservazione."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\left(\\frac{dT}{dP}\\right)_{\\mathrm{rad}}>\\left(\\frac{dT}{dP}\\right)_{\\mathrm{ad}}", "perche": "e' il criterio di Schwarzschild come le slide lo enunciano: una condizione di instabilita', non un conto."},
+ {"tipo": "uguale", "sinistra": "(Rational(5,3)-1)/Rational(5,3)", "vale": "Rational(2,5)", "dove": "09", "appare": "\\nabla_{ad}=\\frac{\\gamma-1}{\\gamma}=0{,}4"},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\nabla\\equiv\\frac{d\\ln T}{d\\ln P}", "perche": "definizione del gradiente logaritmico."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\nabla_{\\mathrm{rad}}=\\frac{3\\kappa LP}{16\\pi acGMT^{4}}", "perche": "e' il gradiente radiativo ottenuto dividendo l'equazione del trasporto per quella dell'equilibrio idrostatico e moltiplicando per P/T, come le slide (dT/dP = 3 kappa L / (16 pi a c G M T^3))."},
+ {"tipo": "uguale", "sinistra": "((-(3/(4*a*c))*(k*rho/T**3)*(L/(4*pi*r**2)))/(-G*M*rho/r**2))*P/T", "vale": "3*k*L*P/(16*pi*a*c*G*M*T**4)", "ipotesi": {"a": "positive", "c": "positive", "k": "positive", "rho": "positive", "T": "positive", "L": "positive", "r": "positive", "G": "positive", "M": "positive", "P": "positive"}, "dove": "09", "appare": "16\\pi acGMT^{4}"},
+ {"tipo": "simbolico", "dove": "09", "appare": "T^{14}", "perche": "esponente della dipendenza dalla temperatura del ciclo CNO dato dalle slide: un dato."},
+ {"tipo": "numero", "espr": "2*8.98e37/(4*pi*(1.496e13)**2)/1e10", "vale": "6.4", "dove": "10", "appare": "6{,}4\\cdot10^{10}"},
+ {"tipo": "numero", "espr": "1/(1e30*1e-36)/86400", "vale": "11.6", "dove": "10", "appare": "11{,}6"},
+ {"tipo": "numero", "espr": "1/(3*1e30*1e-36)/86400", "vale": "3.9", "dove": "10", "appare": "3{,}9"},
+ {"tipo": "simbolico", "dove": "10", "appare": "p+p\\to d+e^{+}+\\nu_e", "perche": "e' la prima reazione della catena pp, scritta come nelle slide."},
+ {"tipo": "simbolico", "dove": "10", "appare": "\\nu_e+{}^{37}\\mathrm{Cl}\\to{}^{37}\\mathrm{Ar}+e^{-}", "perche": "e' la reazione di cattura del rivelatore di Homestake."},
+ {"tipo": "simbolico", "dove": "10", "appare": "4p\\to{}^{4}\\mathrm{He}+2e^{+}+2\\nu_e", "perche": "e' il bilancio netto della catena pp: due neutrini per nucleo di elio."},
+ {"tipo": "simbolico", "dove": "11", "appare": "P_c\\sim GM^{2}/R^{4}", "perche": "restituzione della stima della tappa 06."},
+ {"tipo": "simbolico", "dove": "11", "appare": "T_c\\sim GMm_p/kR", "perche": "restituzione della stima della tappa 06."},
+ {"tipo": "simbolico", "dove": "11", "appare": "dP/dr=-GM\\rho/r^{2}", "perche": "restituzione dell'equilibrio idrostatico della tappa 01."},
+ {"tipo": "simbolico", "dove": "11", "appare": "t_{KH}\\sim GM^{2}/RL", "perche": "restituzione della definizione della tappa 06."},
+ {"tipo": "uguale", "sinistra": "1/(Rational(3,4))", "vale": "Rational(4,3)", "dove": "03", "appare": "4/3"},
+ {"tipo": "simbolico", "dove": "01", "appare": "v^2/R=GM_\\odot/R^2", "perche": "e' l'uguaglianza di accelerazione centripeta e gravitazionale per l'orbita circolare: la condizione da cui si ricava la massa, asserita numericamente."},
+ {"tipo": "simbolico", "dove": "02", "appare": "E_{\\mathrm{tot}}=E_{GR}/2=-E_K", "perche": "restituzione delle due identita' del viriale asserite nella stessa tappa."},
+ {"tipo": "simbolico", "dove": "05", "appare": "dM/dr=4\\pi r^2\\rho", "perche": "restituzione dell'equazione di continuita' della tappa 03."},
+ {"tipo": "numero", "espr": "(2**2/2**4)", "vale": "0.25", "dove": "06", "appare": "4/16=1/4"},
+ {"tipo": "simbolico", "dove": "07", "appare": "e^{2}/4\\pi\\epsilon_0=1{,}44", "perche": "e' il valore della costante e^2/(4 pi eps0) in MeV fm: alpha * hbar c = 197,3/137,04 = 1,44, una costante."},
+ {"tipo": "numero", "espr": "197.327/137.036", "vale": "1.44", "dove": "07", "appare": "1{,}44"},
+ {"tipo": "simbolico", "dove": "04", "appare": "M=M(\\rho_c,K_0)", "perche": "struttura a due parametri delle stelle perfette (Masani p. 50)"},
+ {"tipo": "simbolico", "dove": "04", "appare": "R=R(\\rho_c,K_0)", "perche": "idem"},
+ {"tipo": "numero", "espr": "1.989e33/(4/3.*pi*6.96e10**3)", "vale": "1.41", "dove": "05", "appare": "\\bar\\rho_\\odot=M_\\odot/(\\frac43\\pi R_\\odot^3)=1{,}41"},
+ {"tipo": "numero", "espr": "1.41*5.99", "vale": "8.4", "dove": "05", "appare": "\\rho_c(n=1{,}5)=1{,}41\\cdot5{,}99=8{,}4\\ \\mathrm{g/cm^3}"},
+ {"tipo": "numero", "espr": "1.41*54.18", "vale": "76", "dove": "05", "appare": "\\rho_c(n=3)=1{,}41\\cdot54{,}18=76\\ \\mathrm{g/cm^3}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\beta=P_g/P", "perche": "definizione"},
+ {"tipo": "simbolico", "dove": "05", "appare": "P_g=\\frac{k}{\\mu m_H}\\rho T", "perche": "gas perfetto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "P_r=\\frac13aT^4", "perche": "pressione di radiazione"},
+ {"tipo": "uguale", "sinistra": "simplify((rho*(rho/c)**Rational(1,3))/rho**Rational(4,3))", "vale": "c**Rational(-1,3)", "dove": "05", "appare": "P_g\\propto\\rho T\\propto\\rho^{4/3}", "ipotesi": {"rho": "positive", "c": "positive"}},
+ {"tipo": "numero", "espr": "1.94*4.186e7/60*4*pi*1.496e13**2/1e33", "vale": "3.8", "dove": "06", "appare": "3{,}8\\cdot10^{33}"},
+ {"tipo": "numero", "espr": "1e4*2e33*4.186e7/1e44", "vale": "8.4", "dove": "06", "appare": "=8{,}4\\cdot10^{44}"},
+ {"tipo": "numero", "espr": "1e4*2e33*4.186e7/3.9e33/3.156e7/100", "vale": "68", "dove": "06", "appare": "$6800$ anni"},
+ {"tipo": "numero", "espr": "sqrt(2*6.674e-8*1.989e33/6.96e10)/1e5", "vale": "618", "dove": "06", "appare": "v=\\sqrt{2GM_\\odot/R_\\odot}=618"},
+ {"tipo": "numero", "espr": "2*3.9e33/(6.3e7)**2/1e18", "vale": "2.0", "dove": "06", "appare": "m=2L/v^2=2{,}0\\cdot10^{18}"},
+ {"tipo": "numero", "espr": "2*3.9e33/(6.3e7)**2*3.156e7/1.989e33*1e8", "vale": "3", "dove": "06", "appare": "3\\cdot10^{-8}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "0.6*6.674e-8*1.989e33/(6.96e10*4.186e7)/1e7", "vale": "2.7", "dove": "06", "appare": "=2{,}7\\cdot10^7\\ \\mathrm K"},
+ {"tipo": "simbolico", "dove": "06", "appare": "M\\sigma T=\\frac35GM^2/R", "perche": "ipotesi di Helmholtz (Masani p. 202)"},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\frac{d\\log T}{d\\log P}=\\frac{\\gamma-1}{\\gamma}", "perche": "gradiente adiabatico"},
+ {"tipo": "numero", "espr": "(5/3.-1)/(5/3.)", "vale": "0.4", "dove": "09", "appare": "(5/3-1)/(5/3)=0{,}4"},
+ {"tipo": "numero", "espr": "(4/3.-1)/(4/3.)", "vale": "0.25", "dove": "09", "appare": "(4/3-1)/(4/3)=0{,}25"},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\frac{d\\log T}{d\\log P}=\\frac{3\\kappa PL}{16\\pi acGMT^4}", "perche": "gradiente radiativo (Masani p. 60)"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché le equazioni della struttura stellare', meta:'dalla superficie all’interno · cinque equazioni per cinque incognite · il valore sta nelle stime',
+  blocchi:[
+  {t:'prosa', title:'Che cosa c’è in mezzo', tag:'architettura', html:R`
+  <p>Gli spettri dicono che cosa succede nella fotosfera, a qualche migliaio di kelvin, dove il gas diventa trasparente. Le slide di de Bernardis (lezione7_2017) partono da lì e pongono le domande che lo spettro non può rispondere: <i>«Cosa c&rsquo;è nel mezzo? In che condizioni fisiche si trova il gas alle diverse quote nella stella? Come avviene il trasporto di energia dal centro alla periferia? Come varia la composizione? Come evolve la stella?»</i>. Nel centro, aggiungono, il gas è caldissimo, $10^7$ K, totalmente ionizzato, e lì avvengono le reazioni nucleari che producono l&rsquo;energia e la pressione che tengono la stella in equilibrio contro la sua gravità.</p>
+  <p>La risposta di de Bernardis è un sistema di <b>cinque equazioni in cinque incognite</b>, pressione, massa, densità, temperatura e luminosità in funzione del raggio, e un teorema, quello di Vogt-Russell, che dice che massa e composizione chimica bastano a fissare la soluzione. La mappa del corso è chiara su che cosa l&rsquo;esame chiede: le equazioni si enunciano, si capisce che cosa vincola ciascuna, ma non si integrano. Il valore sta nelle stime di tre righe. La temperatura centrale che l&rsquo;equilibrio idrostatico impone, il tempo scala di Kelvin-Helmholtz, la durata della sequenza principale, il flusso dei neutrini solari. Sono conti d&rsquo;ordine di grandezza che dicono due cose grandi: una stella è calda <i>perché</i> è legata dalla gravità, e deve bruciare nuclei <i>perché</i> la gravità da sola non basterebbe a farla brillare abbastanza a lungo.</p>`}
+]},
+
+/* ---------------- 01 · EQUILIBRIO IDROSTATICO ---------------- */
+{ num:'01', title:'L’equilibrio idrostatico, derivato sul guscio', meta:'la forza di pressione contro il peso del guscio · il teorema di Gauss · la massa del Sole dall’orbita della Terra',
+  blocchi:[
+  {t:'prosa', title:'Un guscio sottile', tag:'la derivazione dell’orale', html:R`
+  <p>Si assuma simmetria sferica. Si prenda un elementino di materia a distanza $r$ dal centro, di base $dS$ e spessore $dr$, con massa $dm=\rho\,dS\,dr$. Su di esso agiscono due forze. La gravità: per il teorema di Gauss, solo la massa $M(r)$ interna alla sfera di raggio $r$ attira, come se fosse concentrata al centro, mentre i gusci esterni si annullano. La forza è $GM(r)\,dm/r^{2}$ verso il centro. E la pressione: sotto l&rsquo;elemento la pressione è $P(r)$, sopra è $P(r+dr)$, e la forza netta verso l&rsquo;esterno è $-dP\,dS$. In equilibrio le due si bilanciano, $-dP\,dS=\frac{GM(r)}{r^{2}}\,\rho\,dS\,dr$, e dividendo per il volume dell&rsquo;elemento si ha l&rsquo;<b>equazione dell&rsquo;equilibrio idrostatico</b>:
+  $$\frac{dP}{dr}=-\frac{GM(r)\rho(r)}{r^{2}}.$$
+  La pressione deve <i>diminuire</i> verso l&rsquo;esterno, e tanto più rapidamente quanto più intensa è la gravità locale. Ogni strato regge il peso di tutti quelli che ha sopra. Al centro la pressione è il peso dell&rsquo;intera stella per unità di superficie.</p>`},
+  {t:'prosa', title:'Il numero che serve per primo: la massa del Sole', tag:'LEZIONE3_B, diapositiva 7', html:R`
+  <p>De Bernardis apre il discorso con la domanda <i>«come si misura la massa del Sole?»</i> e rispondono con l&rsquo;orbita della Terra: $R=1{,}49\cdot10^{11}$ m e $v=3\cdot10^{4}$ m/s. L&rsquo;equilibrio fra forza centripeta e gravità, $v^2/R=GM_\odot/R^2$, dà $M_\odot=\frac{Rv^{2}}{G}$, cioè $2{,}01\cdot10^{30}\ \mathrm{kg}$. Poi: <i>«la massa degli strati più alti grava su quelli più bassi producendo una enorme pressione dall&rsquo;esterno verso l&rsquo;interno. Serve una pressione opposta, derivante da una enorme agitazione termica. Quindi serve una enorme sorgente di energia termica»</i>. In quelle tre frasi c&rsquo;è l&rsquo;intero movimento: l&rsquo;equilibrio idrostatico, la temperatura centrale, e la necessità di una sorgente di energia.</p>`}
+]},
+
+/* ---------------- 02 · IL TEOREMA DEL VIRIALE ---------------- */
+{ num:'02', title:'Il teorema del viriale: perché una stella legata deve essere calda', meta:'l’equilibrio idrostatico integrato su tutta la stella · l’integrazione per parti · E_K = -E_GR/2',
+  blocchi:[
+  {t:'prosa', title:'Integrare l’equilibrio su tutta la stella', tag:'lezione7_2017, diapositive 2-4', html:R`
+  <p>De Bernardis moltiplica l&rsquo;equazione dell&rsquo;equilibrio idrostatico per $4\pi r^{3}$ e integrano da 0 al raggio $R$:
+  $$\int_0^R4\pi r^{3}\frac{dP}{dr}dr=-\int_0^R\frac{GM(r)}{r}\,4\pi r^{2}\rho\,dr.$$
+  A destra, con $dM=4\pi r^2\rho\,dr$, c&rsquo;è l&rsquo;<b>energia potenziale gravitazionale</b> della stella, $E_{GR}=-\int_0^M\frac{GM(r)}{r}dM$: è il lavoro che si fa costruendo la stella un guscio alla volta, portando ciascun guscio dall&rsquo;infinito sopra la massa già accumulata. A sinistra si integra per parti. Il termine di bordo $\big[4\pi r^{3}P\big]_0^R$ è nullo, perché $r^3=0$ al centro e $P(R)=0$ alla superficie, e resta
+  $$\int_0^R4\pi r^{3}\frac{dP}{dr}dr=\big[4\pi r^{3}P\big]_0^R-3\int_0^R4\pi r^{2}P\,dr=-3\langle P\rangle V,$$
+  con $\langle P\rangle$ la pressione media sul volume. Quindi $\langle P\rangle V=-\frac{E_{GR}}{3}$.</p>`},
+  {t:'prosa', title:'Pressione e energia cinetica', tag:'il viriale', html:R`
+  <p>Per un gas di particelle non relativistiche, con $n=N/V$ particelle per unità di volume e impulso $p=mv$, la teoria cinetica dà $P=\frac13nm\langle v^2\rangle$, cioè
+  $$PV=\frac13Nm\langle v^{2}\rangle=\frac23E_K,$$
+  con $E_K$ l&rsquo;energia cinetica totale delle particelle, che per un gas è la sua energia termica. Confrontando con il risultato precedente, $\frac23E_K=-\frac{E_{GR}}{3}$, cioè
+  $$E_K=-\frac{E_{GR}}{2}.$$
+  È il <b>teorema del viriale</b> per la struttura stellare. L&rsquo;energia totale è $E_{\mathrm{tot}}=E_K+E_{GR}=\frac{E_{GR}}{2}$, negativa: la stella è legata. De Bernardis ne trae la conseguenza: <i>«nubi molto legate gravitazionalmente DEVONO essere molto calde. È l&rsquo;energia gravitazionale il motivo dell&rsquo;alta temperatura delle stelle»</i>.</p>
+  <p>C&rsquo;è un corollario controintuitivo, e vale la pena dirlo. Se una stella perde energia irraggiando, $E_{\mathrm{tot}}$ diminuisce, quindi $E_{GR}$ diventa più negativa e la stella si contrae. Ma $E_K=-E_{GR}/2$ <i>aumenta</i>: <b>perdendo energia, una stella in equilibrio si scalda</b>. Metà dell&rsquo;energia gravitazionale liberata dalla contrazione va in radiazione, metà in calore. È il meccanismo che accende le reazioni nucleari in una protostella e quello che fa passare una stella da un combustibile al successivo.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una stella che irraggia senza produrre energia si raffredda o si scalda?`,
+    a:R`Si scalda. Per il viriale $E_{\mathrm{tot}}=E_{GR}/2=-E_K$: se $E_{\mathrm{tot}}$ diminuisce (irraggiamento), $E_K$ aumenta della stessa quantità, mentre $E_{GR}$ diminuisce del doppio. Metà dell&rsquo;energia gravitazionale liberata dalla contrazione esce come luce, metà scalda il gas. Una stella ha «calore specifico negativo».`}
+  ]}
+]},
+
+/* ---------------- 03 · LE ALTRE EQUAZIONI ---------------- */
+{ num:'03', title:'Continuità, stato, trasporto, energia: le altre quattro equazioni', meta:'la massa di un guscio · gas perfetto e radiazione, con il peso molecolare · il gradiente di temperatura e l’opacità · la produzione di energia',
+  blocchi:[
+  {t:'prosa', title:'Due equazioni, tre incognite', tag:'continuità e stato', html:R`
+  <p>L&rsquo;equilibrio idrostatico lega $P$, $M$ e $\rho$. La seconda equazione è puramente geometrica, l&rsquo;<b>equazione di continuità</b>, cioè la massa di un guscio di spessore $dr$:
+  $$\frac{dM}{dr}=4\pi r^{2}\rho(r).$$
+  Due equazioni in tre incognite. La terza è l&rsquo;<b>equazione di stato</b> $P=P(\rho,T,\mu)$, che dice di che materia è fatta la stella. De Bernardis distingue due contributi. Il primo è la pressione del gas, che <i>«in condizioni normali»</i> è un gas perfetto,
+  $$P_{\mathrm{gas}}=nkT=\frac{\rho}{\mu m_H}kT.$$
+  Qui il <b>peso molecolare medio</b> $\mu$ è la massa media di una particella in unità della massa dell&rsquo;idrogeno. Il secondo è la pressione di radiazione, $P_{\mathrm{rad}}=\frac{aT^{4}}{3}$, con $a$ la costante di radiazione. Per un gas completamente ionizzato, con frazioni in massa $X$ di idrogeno, $Y$ di elio e $Z$ di metalli, contando le particelle per unità di massa si ha $\mu=\frac{1}{2X+\frac34Y+\frac12Z}$. Per la composizione del Sole oggi, circa $X=0{,}70$, $Y=0{,}28$, $Z=0{,}02$, viene $0{,}62$. Per la composizione primordiale, $X=0{,}75$ e $Y=0{,}25$, viene $0{,}59$: il valore tipico da ricordare è $\mu\simeq0{,}6$. Nel nucleo del Sole, dove metà dell&rsquo;idrogeno è già diventato elio, $\mu$ è più alto, e per un nucleo di puro elio ionizzato vale $4/3$. La composizione pesa: a parità di pressione e densità, la temperatura è proporzionale a $\mu$.</p>`},
+  {t:'prosa', title:'Il trasporto e l’energia', tag:'quarta e quinta', html:R`
+  <p>L&rsquo;equazione di stato introduce una quarta incognita, $T(r)$. Le slide osservano: <i>«se in generale T=T(r), vuol dire che c&rsquo;è un gradiente di temperatura all&rsquo;interno della stella, e quindi un flusso di energia»</i>. L&rsquo;energia si trasporta in tre modi, per conduzione, convezione e radiazione. Senza convezione, dentro la stella la radiazione è all&rsquo;equilibrio locale e la profondità ottica è enorme. Il trasporto diventa allora una diffusione, e il flusso di energia è proporzionale al gradiente di temperatura, con un coefficiente che contiene l&rsquo;<b>opacità</b> $\kappa$ (per unità di massa), cioè <i>«la resistenza del mezzo a trasportare energia»</i>. Il cammino libero medio dei fotoni è $\ell=\frac{1}{\kappa\rho}$. Con $L(r)=4\pi r^{2}F(r)$ l&rsquo;equazione del trasporto radiativo è
+  $$\frac{dT}{dr}=-\frac{3}{4ac}\,\frac{\kappa\rho}{T^{3}}\,\frac{L(r)}{4\pi r^{2}}.$$
+  Infine la luminosità, nuova variabile, obbedisce a una legge di conservazione. Uno strato di massa $dm=4\pi r^2\rho\,dr$ in cui si produce energia con potenza per unità di massa $\varepsilon(\rho,T)$ aggiunge alla luminosità
+  $$\frac{dL}{dr}=4\pi r^{2}\rho\,\varepsilon(\rho,T).$$</p>`}
+]},
+
+/* ---------------- 04 · IL SISTEMA, I CONTORNI E VOGT-RUSSELL ---------------- */
+{ num:'04', title:'Il sistema completo, le condizioni al contorno e il teorema di Vogt-Russell', meta:'cinque equazioni, cinque incognite · la massa come variabile indipendente · massa e composizione fissano la stella',
+  blocchi:[
+  {t:'prosa', title:'Cinque equazioni e i loro contorni', tag:'diapositive 9-12', html:R`
+  <p>Il sistema è chiuso: equilibrio idrostatico, continuità, equazione di stato, trasporto, conservazione dell&rsquo;energia, nelle cinque incognite $P(r)$, $M(r)$, $\rho(r)$, $T(r)$, $L(r)$. Le condizioni al contorno sono: al centro $M(0)=0,\ L(0)=0,\ M(R)=M_s,\ L(R)=L_s,\ P(R)\simeq0,\ T(R)=T_s$, dove l&rsquo;indice $s$ indica le quantità globali della stella misurabili dall&rsquo;esterno. Metà delle condizioni stanno al centro e metà alla superficie. Per questo il problema non si integra «in avanti» come un problema ai valori iniziali, e i codici stellari devono raccordare due integrazioni.</p>
+  <p>De Bernardis riscrive il sistema con la massa $M$ come variabile indipendente, perché la massa di un elemento di gas, a differenza del suo raggio, non cambia quando la stella si espande o si contrae:
+  $$\frac{dP}{dM}=-\frac{GM}{4\pi r^{4}},\qquad\frac{dr}{dM}=\frac{1}{4\pi r^{2}\rho},\qquad\frac{dL}{dM}=\varepsilon,\qquad\frac{dT}{dM}=-\frac{3\kappa L}{64\pi^{2}acr^{4}T^{3}}.$$
+  E poi il risultato che dà senso al diagramma HR, il <b>teorema di Vogt-Russell</b>: <i>«se la massa complessiva e la composizione chimica della stella sono specificate, il set di 5 equazioni sopra ha una sola soluzione e la struttura della stella è univocamente determinata»</i>. Due stelle con la stessa massa e la stessa composizione sono la stessa stella. È per questo che la sequenza principale è una <i>linea</i> e non una nuvola nel diagramma HR. Lungo di essa varia una sola cosa, la massa, e la composizione cambia lentamente con l&rsquo;età.</p>`},
+  {t:'prosa', title:'Lo stesso teorema detto da Masani: stelle a uno e a due parametri', tag:'Masani, cap. 6-8, pp. 47-50 e 59-60', html:R`
+  <p>Masani arriva al contenuto del teorema di Vogt-Russell per un&rsquo;altra strada, contando i parametri liberi. Una stella <i>fredda</i>, degenere, ha un&rsquo;equazione di stato $P=K_0\rho^\gamma$ con $K_0$ fissato dalla fisica: la sua struttura dipende da un solo parametro, la massa o il raggio, e <i>«non può evolvere, non potendo cambiare col tempo la struttura stessa»</i>. Una stella <i>calda</i>, di gas perfetto, in equilibrio convettivo ha formalmente la stessa relazione $P=K_0\rho^\gamma$, ma qui $K_0$ non è una costante della natura: dipende dal contenuto termico con cui le bolle compiono la trasformazione adiabatica. Le soluzioni dipendono allora da due parametri, $M=M(\rho_c,K_0)$ e $R=R(\rho_c,K_0)$, e <i>«la natura biparametrica delle soluzioni è quella che permette a una stella di data massa di trovare una struttura di equilibrio con diversi raggi e cioè di evolvere»</i>.</p>
+  <p>Che cosa toglie la seconda libertà? La sorgente di energia. Se l&rsquo;energia è gravitazionale, la velocità di contrazione si aggiusta da sola e massa e raggio restano liberi: la stella si contrae. Se è termonucleare, il ritmo di produzione dipende in modo rigido da densità e temperatura, e l&rsquo;uguaglianza fra energia prodotta e irraggiata si realizza solo per un raggio, data la massa: <i>«l&rsquo;equilibrio meccanico ed energetico può aversi solo per un dato valore del raggio»</i>. È la ragione fisica per cui la sequenza principale è una linea e non una regione: massa e composizione, dice de Bernardis con Vogt-Russell; massa più una sorgente rigida, dice Masani. La stessa idea, vista dall&rsquo;equazione o dal conteggio.</p>`}
+]},
+
+/* ---------------- 05 · POLITROPI E LANE-EMDEN ---------------- */
+{ num:'05', title:'Il modello politropico, l’equazione di Lane-Emden e il modello standard', meta:'P proporzionale a una potenza di rho · due soluzioni esatte · n = 3 e la pressione di radiazione',
+  blocchi:[
+  {t:'prosa', title:'Pressione e densità soltanto', tag:'diapositive 13-14', html:R`
+  <p>Se si combina l&rsquo;equilibrio idrostatico con la continuità (si moltiplica la prima per $r^2/\rho$, si deriva e si usa $dM/dr=4\pi r^2\rho$) restano solo pressione e densità:
+  $$\frac{1}{r^{2}}\frac{d}{dr}\left(\frac{r^{2}}{\rho}\frac{dP}{dr}\right)=-4\pi G\rho.$$
+  <i>«La relazione tra pressione e densità dipende dal fluido»</i>. Il <b>modello politropico</b> la sceglie della forma più semplice, $P=A\rho^{1+1/n}$, con $n$ l&rsquo;indice politropico. De Bernardis elenca i casi notevoli: $n=0$, gas omogeneo; $n=\infty$, gas perfetto isotermo; $n=3/2$, gas perfetto monoatomico adiabatico, oppure gas degenere non relativistico; $n=3$, il «modello standard», oppure gas degenere relativistico. Con $\rho=\rho_c\theta^{n}$ e il raggio adimensionalizzato $r=\alpha\xi$ si ottiene l&rsquo;<b>equazione di Lane-Emden</b>:
+  $$\frac{1}{\xi^{2}}\frac{d}{d\xi}\left(\xi^{2}\frac{d\theta}{d\xi}\right)=-\theta^{n},$$
+  con le condizioni $\theta(0)=1$ e $\theta'(0)=0$. Per un gas perfetto $\theta$ è la temperatura in unità di quella centrale, e la condizione sulla derivata dice che al centro la temperatura varia lentamente.</p>`},
+  {t:'prosa', title:'Due soluzioni esatte', tag:'n = 0 e n = 1', html:R`
+  <p>L&rsquo;equazione è lineare solo per $n=0$ e $n=1$, e lì si risolve a mano. Per $n=0$ il secondo membro è $-1$, si integra due volte e con le condizioni iniziali si ha $\theta_0=1-\frac{\xi^{2}}{6}$, con il primo zero, la superficie della stella, a $\xi_1=\sqrt6=2{,}449$. Per $n=1$ le slide pongono $\chi=\xi\theta$ e trovano l&rsquo;equazione dell&rsquo;oscillatore armonico, con soluzione $\theta_1=\frac{\sin\xi}{\xi}$, regolare al centro dove vale $\theta(0)=1$, e con primo zero a $\xi_1=\pi$. Vicino al centro, sviluppando il seno, $\theta\simeq1-\frac{\xi^{2}}{6}$, lo stesso andamento del caso $n=0$, e le slide notano che <i>«si può dimostrare che questo andamento asintotico vale per qualsiasi n»</i>. Per gli altri indici l&rsquo;equazione va integrata numericamente, tranne $n=5$, il cui primo zero è all&rsquo;infinito: una stella di raggio infinito, senza significato fisico.</p>`},
+  {t:'plot', title:'Le soluzioni di Lane-Emden per n = 0 e n = 1',
+   intro:R`$\theta(\xi)$ fino al primo zero: in ciano $n=0$, $1-\xi^2/6$; in oro $n=1$, $\sin\xi/\xi$. Il primo zero è il raggio della stella in unità di $\alpha$.`,
+   plots:[
+    {kind:'func2d', xr:[0,3.3], yr:[-0.1,1.05], height:280, equal:false,
+     title:'xi      theta',
+     curves:[{f:'x<=2.4495?1-x*x/6:NaN', col:'#5eead4', label:'n = 0'},
+             {f:'x<=3.1416?(x<1e-6?1:sin(x)/x):NaN', col:'#d8a13a', label:'n = 1'}],
+     marks:[{x:2.449, y:0, label:'sqrt 6', col:'#5eead4', up:true},{x:3.1416, y:0, label:'pi', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> le due curve partono insieme, con la stessa curvatura al centro, e si separano verso l&rsquo;esterno: il politropo $n=1$ è più esteso. Al crescere di $n$ la stella diventa sempre più concentrata al centro, con un nucleo denso e un inviluppo esteso e rarefatto.</p>
+   <p><b>Che cosa impararne:</b> l&rsquo;indice politropico è una misura della concentrazione centrale. Per $n=3$, il modello standard, la densità centrale è circa 54 volte quella media: è la stella di sequenza principale.</p>`},
+  {t:'prosa', title:'Il modello standard di Eddington', tag:'n = 3', html:R`
+  <p>Il caso $n=3$ ha un&rsquo;origine fisica. Si supponga che la pressione totale sia la somma di gas e radiazione, con il gas che porta una frazione costante $\beta$ della pressione totale e la radiazione la frazione $1-\beta$. Il rapporto è $\frac{1-\beta}{\beta}=\frac{P_r}{P_g}=\frac{aT^{3}\mu m_H}{3\rho k}$. Se $\beta$ è costante, $T^3\propto\rho$, e sostituendo nella pressione del gas si ha $P\propto\rho^{4/3}$: è un politropo di indice 3. Le slide notano che il rapporto fra pressione di radiazione e del gas cresce con la temperatura. Per le stelle massicce la radiazione non si può trascurare, per il Sole sì. E concludono, confrontando con il modello solare standard moderno, molto più complesso, che <i>«il modello politropico con n=3, pur trascurando i dettagli del trasporto radiativo e della produzione di energia, fornisce una descrizione decentemente approssimata per M e P di una stella di sequenza principale come il sole»</i>.</p>`},
+  {t:'prosa', title:'Le densità centrali di Masani, e perché n = 3', tag:'Masani, cap. 8 e 16, pp. 50-51, 59, 203', html:R`
+  <p>Masani scrive la stessa equazione di Lane-Emden e ne dà due numeri per il Sole. Il rapporto tra densità centrale e media è $\rho_c/\bar\rho=5{,}99$ per $n=1{,}5$ e $54{,}18$ per $n=3$; con $\bar\rho_\odot=M_\odot/(\frac43\pi R_\odot^3)=1{,}41$ g/cm$^3$ si ottengono</p>
+  <p>$$\rho_c(n=1{,}5)=1{,}41\cdot5{,}99=8{,}4\ \mathrm{g/cm^3},\qquad\rho_c(n=3)=1{,}41\cdot54{,}18=76\ \mathrm{g/cm^3},$$</p>
+  <p>i valori del libro. Il secondo è vicino ai 150 g/cm$^3$ del modello solare moderno, il primo molto lontano: il Sole è più vicino a un politropo $n=3$ che a uno convettivo. Masani racconta anche perché queste densità preoccupavano i fondatori della teoria, Lane, Ritter, Kelvin ed Emden: a decine di grammi per centimetro cubo le distanze tra molecole sarebbero confrontabili con le dimensioni delle molecole stesse, circa $10^{-8}$ cm, e la legge dei gas perfetti non dovrebbe valere. Il dubbio si scioglie con la ionizzazione completa: nuclei ed elettroni sono molto più piccoli degli atomi, e il gas resta perfetto.</p>
+  <p>Il libro spiega anche da dove viene $n=3$, il modello standard di Eddington. Se il rapporto $\beta=P_g/P$ tra pressione del gas e pressione totale è lo stesso in tutta la stella, allora $P_g/P_r$ è costante; con $P_g=\frac{k}{\mu m_H}\rho T$ e $P_r=\frac13aT^4$ questo impone $\rho\propto T^3$, e quindi $P_g\propto\rho T\propto\rho^{4/3}$: un politropo con $\gamma=4/3$, cioè $n=3$. <i>«Un modello radiativo che realizzi la condizione β = cost coincide col modello convettivo corrispondente a γ = 4/3»</i>.</p>`}
+]},
+
+/* ---------------- 06 · LE STIME ---------------- */
+{ num:'06', title:'Le stime che l’esame chiede: pressione e temperatura centrali, tempo di Kelvin-Helmholtz', meta:'l’equilibrio idrostatico ridotto a una frazione · il milione di gradi entro un fattore · trenta milioni di anni che non bastano',
+  blocchi:[
+  {t:'prosa', title:'La pressione centrale', tag:'la stima dell’orale', html:R`
+  <p>Nell&rsquo;equilibrio idrostatico si sostituiscono le derivate con rapporti e le funzioni con valori tipici: $dP/dr\sim P_c/R$, $M(r)\sim M$, $r\sim R$, $\rho\sim M/R^3$. Allora
+  $$P_c\sim\frac{GM}{R^{2}}\cdot\frac{M}{R^{3}}\cdot R=\frac{GM^{2}}{R^{4}}.$$
+  Per il Sole dà $1{,}13\cdot10^{15}\ \mathrm{Pa}$, dieci miliardi di atmosfere. Il valore dei modelli è circa venti volte più grande, perché la stella è concentrata al centro, come il politropo $n=3$ della tappa precedente: una stima di ordine di grandezza ha esattamente questo errore.</p>`},
+  {t:'prosa', title:'La temperatura centrale', tag:'il milione di gradi', html:R`
+  <p>Se quella pressione la regge un gas perfetto, $P_c=\rho_ckT_c/m_p$ (per ora con particelle di massa $m_p$), allora
+  $$T_c\sim\frac{P_c\,m_p}{\rho_ck}\sim\frac{GMm_p}{kR}.$$
+  Per il Sole viene $2{,}31\cdot10^{7}\ \mathrm{K}$. Con il peso molecolare di un gas ionizzato, $\mu\simeq0{,}62$, si moltiplica per $\mu$ e si ottiene $1{,}4\cdot10^{7}\ \mathrm{K}$. Il modello solare dà circa 15-16 milioni di gradi, e la stima ci arriva entro il 10%, un accordo in parte fortunato. È la stessa temperatura che il teorema del viriale assegna al gas medio della stella: $kT\sim GMm_p/R$ è l&rsquo;energia gravitazionale per particella. Ed è, in ordine di grandezza, la temperatura a cui le reazioni nucleari diventano possibili. Non è una coincidenza: è il meccanismo che regola le stelle, come si vedrà nella tappa 08.</p>`},
+  {t:'prosa', title:'Il tempo di Kelvin-Helmholtz, e perché serve la fusione', tag:'la conclusione storica', html:R`
+  <p>Se il Sole brillasse a spese della sola contrazione gravitazionale, quanto potrebbe durare? L&rsquo;energia disponibile è dell&rsquo;ordine di $GM^2/R$, la potenza è $L$, e il rapporto definisce il <b>tempo scala di Kelvin-Helmholtz</b>, $t_{KH}\sim\frac{GM^{2}}{RL}$. Per il Sole è $3{,}1\cdot10^{7}\ \mathrm{anni}$, e la metà per il viriale. Ma la Terra, i meteoriti e le rocce lunari hanno circa 4,6 miliardi di anni, $150$ volte di più. È la conclusione che a cavallo fra Ottocento e Novecento oppose i fisici ai geologi: la contrazione non basta. Serve una sorgente di energia che non sia né chimica né gravitazionale, e la tappa seguente spiega quale.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una stella ha massa doppia e raggio doppio del Sole. Come cambiano la sua temperatura centrale e la sua pressione centrale stimate?`,
+    a:R`$T_c\propto M/R$ resta uguale. $P_c\propto M^2/R^4$ diventa $4/16=1/4$ di quella solare. La stella è più rarefatta (densità media $M/R^3$ ridotta a un quarto) alla stessa temperatura.`}
+  ]},
+  {t:'prosa', title:'Prima della fusione: chimica, meteoriti, contrazione', tag:'Masani, cap. 16, pp. 201-203', html:R`
+  <p>Masani ripercorre la storia della domanda da cui nasce il tempo di Kelvin-Helmholtz. Pouillet misurò nel 1827 la costante solare, 1,76 cal cm$^{-2}$ min$^{-1}$; il valore moderno del libro, 1,94 cal cm$^{-2}$ min$^{-1}$, moltiplicato per la sfera di raggio 1 UA, dà una luminosità di $3{,}8\cdot10^{33}$ erg/s (il libro scrive $3{,}9\cdot10^{33}$). Che cosa la alimenta? Kelvin provò la chimica: un grammo di carbone dà circa $10^4$ calorie, e tutto il Sole ne darebbe $10^4\cdot2\cdot10^{33}$ cal $=8{,}4\cdot10^{44}$ erg, abbastanza per $6800$ anni al ritmo attuale. Poi l&rsquo;ipotesi meteoritica: un corpo che cade sul Sole arriva con la velocità di fuga, $v=\sqrt{2GM_\odot/R_\odot}=618$ km/s (il libro scrive 630), e per mantenere la luminosità servirebbe una massa $m=2L/v^2=2{,}0\cdot10^{18}$ g ogni secondo. Il libro scrive $1{,}3\cdot10^{25}$ g/s, un errore di sette ordini di grandezza che non cambia la conclusione: anche il numero giusto, $3\cdot10^{-8}\,M_\odot$ all&rsquo;anno, aumenterebbe la massa del Sole di tre masse solari in cento milioni di anni.</p>
+  <p>Helmholtz propose allora la contrazione: il calore del Sole è il lavoro delle forze gravitazionali, $M\sigma T=\frac35GM^2/R$. Con il calore specifico dell&rsquo;acqua, $\sigma=1$ cal/(g K), questo dà</p>
+  <p>$$T=\frac{3GM_\odot}{5R_\odot\sigma}=2{,}7\cdot10^7\ \mathrm K$$</p>
+  <p>(Helmholtz trovò 28,6 milioni di gradi): <i>«con un tale ragionamento si venne per la prima volta a parlare di temperature dell&rsquo;ordine delle decine di milioni di gradi per l&rsquo;interno del Sole»</i>. Il calore specifico era sbagliato, ma l&rsquo;ordine di grandezza della temperatura centrale era giusto, ed è la stessa stima del viriale di questo movimento. Il tempo di contrazione che ne seguiva, $3\cdot10^7$ anni, è il tempo di Kelvin-Helmholtz, troppo breve per la geologia: la contraddizione che la fusione nucleare ha risolto.</p>`}
+]},
+
+/* ---------------- 07 · LA FUSIONE ---------------- */
+{ num:'07', title:'La fusione: una barriera troppo alta, attraversata per effetto tunnel', meta:'la barriera coulombiana · la coda di Maxwell non basta · Gamow e il picco · 5,9 keV per il p+p nel Sole',
+  blocchi:[
+  {t:'prosa', title:'La barriera', tag:'LEZIONE3_B, diapositive 9-11', html:R`
+  <p>Due nuclei carichi si respingono con il potenziale coulombiano $V_c(r)=\frac{Z_1Z_2e^{2}}{4\pi\epsilon_0r}$ finché, a distanze di qualche femtometro, non entra in gioco la forza forte, attrattiva, che li lega e libera l&rsquo;energia di legame. Per arrivare nella zona di legame bisogna superare la cima della barriera. Le slide la stimano al raggio nucleare e scrivono $V_c(r_N)=550$ keV per $r_N=2$ fm. Il conto con $e^{2}/4\pi\epsilon_0=1{,}44$ MeV fm dà $720\ \mathrm{keV}$ a 2 fm, mentre 550 keV corrispondono a $2{,}6\ \mathrm{fm}$. Lo dichiaro, ma non cambia nulla: la barriera è di centinaia di keV. A $10^7$ K, invece, $kT=0{,}862\ \mathrm{keV}$. Classicamente servirebbe un protone della coda maxwelliana con energia seicento volte la media, e la frazione di protoni che l&rsquo;ha è dell&rsquo;ordine di $e^{-E/kT}$, cioè di $10^{-277}$ (le slide: $10^{-275}$). Nemmeno un protone del Sole fonderebbe mai.</p>`},
+  {t:'prosa', title:'Il tunnel e il picco di Gamow', tag:'Bethe 1937, Gamow', html:R`
+  <p><i>«Quantisticamente, il quadrato della sua funzione d&rsquo;onda ha un valore non zero anche ad $r_N$ e quindi si ottiene una probabilità di penetrazione molto maggiore di quella classica»</i>. La soluzione dell&rsquo;equazione di Schrödinger per un potenziale coulombiano (Bethe 1937, citato nelle slide) dà per la probabilità di tunnel il fattore di Gamow, $P\propto e^{-\sqrt{E_G/E}}$, con l&rsquo;energia di Gamow $E_G=2m_rc^{2}(\pi\alpha Z_1Z_2)^{2}$, dove $m_r$ è la massa ridotta e $\alpha$ la costante di struttura fine. Per due protoni $E_G=493\ \mathrm{keV}$. A $10^7$ K, dicono le slide, la probabilità di penetrazione è <i>«solo $10^{-9}$. Ma è sufficiente!»</i>.</p>
+  <p>Le reazioni avvengono allora dove si incontrano due code. La coda alta della distribuzione di Maxwell va come $e^{-E/kT}$, e decresce con l&rsquo;energia. La coda bassa della probabilità di tunnel cresce con l&rsquo;energia. Il prodotto $e^{-E/kT-\sqrt{E_G/E}}$ ha un massimo stretto, il <b>picco di Gamow</b>, che si trova annullando la derivata dell&rsquo;esponente:
+  $$E_0=\left(\frac{E_G(kT)^{2}}{4}\right)^{1/3}.$$
+  Vicino al massimo l&rsquo;esponente è una parabola, e il picco è approssimativamente una gaussiana. La sua area, che dà il tasso di reazione, è un <span class="str" data-str="integrale-gaussiano">integrale gaussiano</span>. Al centro del Sole, $1{,}5\cdot10^7$ K, cioè $kT=1{,}293\ \mathrm{keV}$, il picco per p+p cade a $5{,}9\ \mathrm{keV}$, esattamente il numero della tabella delle slide, con $E_0\gg kT$ ed $E_0\ll E_c$. Le slide riportano per le altre reazioni picchi sempre più alti e prodotti $\langle\sigma v\rangle$ sempre più piccoli: 26,5 keV per p+¹⁴N, e $6{,}2\cdot10^{-239}$ per ¹⁶O+¹⁶O. La conclusione: <i>«sono le specie con numero atomico inferiore che producono la maggior parte dell&rsquo;energia, e quindi si consumano prima»</i>. Quando finiscono, la stella si contrae, il nucleo si scalda (il viriale) e si accende il combustibile successivo: idrogeno, elio, ioni pesanti.</p>`}
+,
+  {t:'plot', title:'Il picco di Gamow per p+p al centro del Sole',
+   intro:R`Ascissa: energia in keV. In ciano la coda di Maxwell $e^{-E/kT}$ con $kT=1{,}293$ keV; in viola la probabilità di tunnel $e^{-\sqrt{E_G/E}}$ con $E_G=493$ keV, moltiplicata per $10^{4}$; in oro il prodotto, moltiplicato per $10^{6}$.`,
+   plots:[
+    {kind:'func2d', xr:[0.5,20], yr:[0,1.05], height:300, equal:false,
+     title:'E (keV)',
+     curves:[{f:'exp(-x/1.293)', col:'#5eead4', label:'Maxwell'},
+             {f:'1e4*exp(-sqrt(493/x))', col:'#b98cff', label:'tunnel x 1e4', dash:true},
+             {f:'1e6*exp(-x/1.293-sqrt(493/x))/1.1', col:'#d8a13a', label:'prodotto (picco di Gamow)'}],
+     marks:[{x:5.9, y:0.98, label:'E0 = 5,9 keV', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la coda di Maxwell crolla, la probabilità di tunnel sale, e il loro prodotto è un picco stretto intorno a 5,9 keV, quasi cinque volte $kT$ e cento volte meno della barriera.</p>
+   <p><b>Che cosa impararne:</b> le reazioni nucleari di una stella le fa una piccolissima minoranza di protoni, quelli con quattro-sette volte l&rsquo;energia media. Il tasso dipende in modo violento dalla temperatura, perché uno spostamento della coda di Maxwell cambia di molto l&rsquo;area sotto il picco. È il motivo per cui una stella è un termostato.</p>`}
+]},
+
+/* ---------------- 08 · BILANCI E DURATE ---------------- */
+{ num:'08', title:'Il bilancio del Sole e la durata della sequenza principale', meta:'quante reazioni al secondo · sei milioni di tonnellate al secondo · T = f M c² / L · T proporzionale a M alla meno 2,5',
+  blocchi:[
+  {t:'prosa', title:'Ordini di grandezza del bruciamento', tag:'diapositiva 16', html:R`
+  <p>Gli <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span> della slide 16 si rifanno così. Ogni catena protone-protone trasforma quattro protoni in un nucleo di elio e libera $26{,}73$ MeV, un numero da tradurre in <span class="str" data-str="elettronvolt">elettronvolt</span> e joule con cura. Con $L_\odot=3{,}846\cdot10^{26}$ W servono $8{,}98\cdot10^{37}$ catene al secondo, cioè $3{,}6\cdot10^{38}$ protoni consumati al secondo, $6{,}0\cdot10^{11}\ \mathrm{kg/s}$ di idrogeno trasformato in elio. La massa che scompare è la frazione $(4m_p-m_{\mathrm{He}})/4m_p=0{,}0068$ di quella trasformata. In 4,6 miliardi di anni il Sole ha trasformato in elio circa il $4{,}4\%$ della sua massa, quasi metà dell&rsquo;idrogeno del suo nucleo.</p>`},
+  {t:'prosa', title:'Quanto dura una stella', tag:'diapositive 19-20', html:R`
+  <p>Se una stella può bruciare una frazione $f$ della sua massa, l&rsquo;energia totale disponibile è $fMc^2$ e la durata della sequenza principale è $T=\frac{fMc^{2}}{L}$. Per il Sole, con il 10% della massa nel nucleo e l&rsquo;efficienza di 0,0068, viene $1{,}0\cdot10^{10}\ \mathrm{anni}$: il Sole è a metà della sua vita. Ma la luminosità dipende fortemente dalla massa, $L\propto M^{3{,}5}$ secondo i dati che le slide mostrano, quindi $T\propto M/M^{3{,}5}=M^{-2{,}5}$. Una stella di 10 masse solari dura $3{,}2\cdot10^{7}\ \mathrm{anni}$. Una di mezza massa solare dura $5{,}7\cdot10^{10}\ \mathrm{anni}$, più dell&rsquo;età dell&rsquo;universo: tutte le stelle piccole mai nate sono ancora in sequenza principale.</p>`},
+  {t:'prosa', title:'Catena pp, ciclo CNO, tre alfa', tag:'diapositive 22-27', html:R`
+  <p>Nel Sole l&rsquo;energia viene soprattutto dalla <b>catena protone-protone</b>. Nelle stelle più massicce, con temperatura centrale più alta, domina il <b>ciclo CNO</b>, in cui carbonio, azoto e ossigeno fanno da catalizzatori, con un tasso che le slide di lezione 8 danno come $T^{14}$. Quando l&rsquo;idrogeno del nucleo è finito e la temperatura supera $10^8$ K, si accende il <b>processo tre-alfa</b>, $3\,{}^4$He$\to{}^{12}$C. De Bernardis racconta la storia di Fred Hoyle, che nel 1950 nota che il processo è troppo improbabile per spiegare il carbonio osservato e predice uno stato eccitato del ¹²C, una risonanza nucleare mai misurata, che lo renda possibile. La risonanza fu poi trovata. De Bernardis cita Hawking e Mlodinow: <i>«a change of as little as 0.5% in the strength of the strong nuclear force, or 4 percent in the electric force, would destroy either nearly all carbon or all oxygen in every star»</i>.</p>`}
+]},
+
+/* ---------------- 09 · CONVEZIONE E OPACITÀ ---------------- */
+{ num:'09', title:'Quando la radiazione non basta: il criterio di Schwarzschild e l’opacità', meta:'una bolla che sale e si espande · gradiente radiativo contro gradiente adiabatico · 0,4 · dove nascono le zone convettive',
+  blocchi:[
+  {t:'prosa', title:'Il criterio', tag:'lezione8_2017, diapositive 10-13', html:R`
+  <p>Il Sole mostra celle convettive grandi migliaia di chilometri, quindi in qualche zona il trasporto radiativo da solo non regge. Il criterio è un esperimento mentale. Si sposta in su di $dr$ una bolla di gas, lentamente rispetto al suono, così che resti in equilibrio di pressione con l&rsquo;ambiente, e rapidamente rispetto agli scambi di calore, così che si raffreddi adiabaticamente. Se arrivata in alto è <i>più calda</i> dell&rsquo;ambiente, è meno densa e la spinta di Archimede la fa continuare a salire: lo strato è <b>instabile</b>. Se è più fredda, ricade: lo strato è stabile. La bolla è più calda quando il gradiente di temperatura dell&rsquo;ambiente, fissato dalla radiazione, è più ripido di quello adiabatico:
+  $$\left(\frac{dT}{dP}\right)_{\mathrm{rad}}>\left(\frac{dT}{dP}\right)_{\mathrm{ad}}.$$
+  È il <b>criterio di Schwarzschild</b>. In forma logaritmica, con $\nabla\equiv\frac{d\ln T}{d\ln P}$, per un gas perfetto monoatomico $\nabla_{ad}=\frac{\gamma-1}{\gamma}=0{,}4$. Dividendo il trasporto radiativo per l&rsquo;equilibrio idrostatico si ha
+  $$\nabla_{\mathrm{rad}}=\frac{3\kappa LP}{16\pi acGMT^{4}},$$
+  dove il denominatore $16\pi acGMT^{4}$ viene dai due coefficienti combinati. Il gradiente radiativo è proporzionale all&rsquo;opacità e al flusso: dove una delle due cresce molto, la convezione si instaura.</p>`},
+  {t:'prosa', title:'I quattro meccanismi di opacità, e le due zone convettive', tag:'diapositive 14-19', html:R`
+  <p>Un fotone interagisce con un elettrone in quattro modi, a seconda che l&rsquo;elettrone sia legato o libero prima e dopo. <b>Legato-legato</b>: un elettrone salta fra due livelli, ed è il processo delle righe. <b>Legato-libero</b>: il fotone ionizza l&rsquo;atomo, e siccome l&rsquo;energia finale dell&rsquo;elettrone è qualsiasi, vengono assorbiti fotoni di qualunque frequenza sopra la soglia, il che è efficacissimo sul continuo. <b>Libero-libero</b>: un elettrone libero assorbe un fotone nel campo di uno ione, a qualunque frequenza. <b>Diffusione</b> sugli elettroni liberi. L&rsquo;opacità totale si calcola numericamente. Ad alte temperature è bassa, perché i fotoni molto energetici vengono assorbiti poco. A basse temperature è bassa, perché gli atomi sono neutri e mancano gli elettroni liberi.</p>
+  <p>Di qui le due origini della convezione. La <b>convezione da opacità</b>: dove l&rsquo;idrogeno è parzialmente ionizzato, lo strato studiato con Saha, l&rsquo;opacità è altissima perché i fotoni ionizzano facilmente atomi già eccitati. Tutte le stelle con superficie abbastanza più fredda di 10 000 K hanno quindi un inviluppo convettivo, e il Sole lo ha nel suo 30% più esterno. La <b>convezione da flusso</b>: reazioni fortemente dipendenti dalla temperatura, come il CNO che va come $T^{14}$ e il tre-alfa come $T^{22}$, concentrano la produzione di energia al centro, e il flusso enorme rende il nucleo convettivo. Le stelle massicce hanno nucleo convettivo e inviluppo radiativo, il Sole il contrario.</p>`},
+  {t:'prosa', title:'Il criterio nella forma di Masani: il gradiente più basso vince', tag:'Masani, cap. 7-9, pp. 48-49, 58-61', html:R`
+  <p>Masani formula la scelta tra radiazione e convezione come un principio di stabilità: <i>«per motivi di stabilità, esse realizzano il tipo di equilibrio corrispondente al gradiente termico più basso»</i>. Il gradiente convettivo, per bolle che si espandono adiabaticamente, è</p>
+  <p>$$\frac{d\log T}{d\log P}=\frac{\gamma-1}{\gamma},$$</p>
+  <p>che vale $(5/3-1)/(5/3)=0{,}4$ per un gas monoatomico e $(4/3-1)/(4/3)=0{,}25$ per un gas dominato dalla radiazione. Il gradiente radiativo, nella forma del libro, è $\frac{d\log T}{d\log P}=\frac{3\kappa PL}{16\pi acGMT^4}$, che cresce con l&rsquo;opacità e con il flusso. Dove il radiativo supererebbe l&rsquo;adiabatico, la convezione prende il sopravvento e riporta il gradiente al valore più basso: è il criterio di Schwarzschild detto in una riga. Masani ne trae la geografia delle stelle che le slide mostrano in figura: <i>«nelle stelle di massa intermedia la zona centrale è in equilibrio convettivo e l&rsquo;altra in equilibrio radiativo; nelle stelle di massa piccola si verifica il caso opposto»</i>, perché nelle prime il flusso è concentrato nel nucleo del ciclo CNO, nelle seconde l&rsquo;opacità degli strati esterni freddi è enorme. E dà un&rsquo;immagine utile dell&rsquo;opacità: $1/(\kappa\rho)$ è il libero cammino medio dei fotoni, la distanza in cui il flusso cala di un fattore $e$; un&rsquo;opacità grande accorcia il cammino e rende l&rsquo;equilibrio termodinamico locale una buona approssimazione all&rsquo;interno della stella.</p>`}
+]},
+
+/* ---------------- 10 · I NEUTRINI SOLARI ---------------- */
+{ num:'10', title:'I neutrini solari: guardare dentro il nucleo', meta:'due neutrini per ogni nucleo di elio · 6,4·10¹⁰ per centimetro quadrato al secondo · Homestake e il deficit · le oscillazioni',
+  blocchi:[
+  {t:'prosa', title:'Il flusso atteso', tag:'lezione4_2020', html:R`
+  <p>I fotoni prodotti al centro impiegano migliaia di anni a uscire, i neutrini no. La prima reazione della catena pp, $p+p\to d+e^{+}+\nu_e$, produce un neutrino elettronico, e il bilancio netto della catena è $4p\to{}^{4}\mathrm{He}+2e^{+}+2\nu_e$: due neutrini per ogni nucleo di elio. Con $8{,}98\cdot10^{37}$ catene al secondo, a una unità astronomica arrivano $6{,}4\cdot10^{10}$ neutrini per cm² al secondo. È il valore del modello solare standard che le slide riportano, ottenuto qui con un conto di una riga dalla sola luminosità. Le catene pp I, II e III, con i loro rami (84,7%, 13,8% e 0,02% nel diagramma delle slide), producono neutrini di energie diverse. Il ramo più raro, quello del ⁸B, dà i neutrini più energetici, ed è il più sensibile alla temperatura centrale. È per questo che i neutrini sono un termometro del nucleo.</p>`},
+  {t:'prosa', title:'Homestake, e un deficit che era fisica nuova', tag:'1 SNU', html:R`
+  <p>Il primo rivelatore, negli anni &rsquo;60 nella miniera di Homestake, a 1478 m di profondità, usava 380 m³ di tetracloroetilene. I neutrini sopra 0,9 MeV fanno la reazione $\nu_e+{}^{37}\mathrm{Cl}\to{}^{37}\mathrm{Ar}+e^{-}$, e si contano gli atomi di argon prodotti ogni qualche settimana. L&rsquo;unità è lo SNU, $10^{-36}$ catture al secondo per nucleo bersaglio. Con circa $10^{30}$ nuclei di cloro nel serbatoio, un flusso di 1 SNU dà una cattura ogni $11{,}6$ giorni. Le misure diedero circa 3 SNU, cioè una cattura ogni $3{,}9$ giorni: meno del previsto. Esperimenti successivi (Kamiokande, SAGE, GALLEX, Super-Kamiokande, SNO) confermarono il deficit. La sua spiegazione, anticipata da Pontecorvo nel 1957, sono le <b>oscillazioni del neutrino</b>: durante il viaggio una parte dei neutrini elettronici si trasforma in neutrini di altro sapore, a cui il cloro è cieco. Il modello del Sole era giusto. Era la fisica delle particelle a essere incompleta.</p>`}
+]},
+
+/* ---------------- 11 · ALL'ORALE ---------------- */
+{ num:'11', title:'All’orale: l’equilibrio idrostatico e la stima della temperatura centrale', meta:'la domanda teorica della mappa · il copione in cinque mosse · Kelvin-Helmholtz come conclusione',
+  blocchi:[
+  {t:'reveal', title:'Il copione', tag:'cinque mosse', steps:[
+   {label:'Mossa 1: il guscio', body:R`<p>«Prendo un elemento di area $dS$ e spessore $dr$ a raggio $r$. La gravità della massa interna $M(r)$, per Gauss, tira verso il centro con $GM(r)\rho\,dS\,dr/r^2$; la differenza di pressione spinge fuori con $-dP\,dS$. In equilibrio: $dP/dr=-GM\rho/r^{2}$.»</p>`},
+   {label:'Mossa 2: la pressione centrale', body:R`<p>«Riduco a ordini di grandezza: $dP/dr\sim P_c/R$, $\rho\sim M/R^3$. Ottengo $P_c\sim GM^{2}/R^{4}$, per il Sole circa $10^{15}$ Pa.»</p>`},
+   {label:'Mossa 3: la temperatura centrale', body:R`<p>«La pressione la regge un gas perfetto, $P=\rho kT/\mu m_p$, quindi $T_c\sim GMm_p/kR$ per $\mu$: per il Sole una decina di milioni di kelvin, che è il valore giusto entro un fattore. È l&rsquo;energia gravitazionale per particella, come dice il viriale.»</p>`},
+   {label:'Mossa 4: il viriale', body:R`<p>«Integrando l&rsquo;equilibrio su tutta la stella si ha $E_K=-E_{GR}/2$: una stella legata deve essere calda, e perdendo energia si contrae e si scalda.»</p>`},
+   {label:'Mossa 5: Kelvin-Helmholtz', body:R`<p>«Se il Sole brillasse solo per contrazione durerebbe $t_{KH}\sim GM^{2}/RL\simeq3\cdot10^7$ anni, molto meno dell&rsquo;età della Terra. Quindi serve un&rsquo;altra sorgente: la fusione, che a $10^7$ K avviene per effetto tunnel al picco di Gamow.»</p>`}
+  ]}
+]},
+
+/* ---------------- 12 · I NUMERI ---------------- */
+{ num:'12', title:'I numeri di questo movimento, e dove le stelle tornano', meta:'otto voci · le stelle come laboratori',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Equilibrio idrostatico:</b> $dP/dr=-GM\rho/r^{2}$; con continuità, stato, trasporto, energia: cinque equazioni.</li>
+  <li><b>Viriale:</b> $E_K=-E_{GR}/2$, $E_{\mathrm{tot}}=E_{GR}/2$.</li>
+  <li><b>Stime solari:</b> $P_c\sim GM^{2}/R^{4}$, circa $10^{15}$ Pa; $T_c\sim GMm_p/kR$, $1$-$2\cdot10^7$ K.</li>
+  <li><b>Kelvin-Helmholtz:</b> $t_{KH}\sim GM^{2}/RL$, circa $3\cdot10^7$ anni per il Sole.</li>
+  <li><b>Fusione:</b> barriera di centinaia di keV contro $kT\simeq1$ keV; picco di Gamow p+p a 5,9 keV.</li>
+  <li><b>Bilancio:</b> 26,7 MeV per elio; $9\cdot10^{37}$ catene/s; $6\cdot10^{11}$ kg/s di idrogeno; efficienza 0,7%.</li>
+  <li><b>Durata:</b> $T=fMc^2/L$, $10^{10}$ anni per il Sole, $T\propto M^{-2,5}$.</li>
+  <li><b>Convezione:</b> $\nabla_{\mathrm{rad}}>\nabla_{ad}=0{,}4$; neutrini a terra $6{,}4\cdot10^{10}$ cm⁻² s⁻¹.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>Le stesse equazioni, con un&rsquo;equazione di stato diversa, descrivono le stelle che hanno finito il combustibile. Quando la pressione termica viene meno resta la pressione quantistica degli elettroni degeneri, che è ancora un politropo, di indice 3/2 o 3. Per $n=3$ la massa non dipende più dal raggio, e quella massa è il limite di Chandrasekhar. Il teorema del viriale torna identico nelle nubi interstellari, dove decide se una nube collassa per formare stelle (il criterio di Jeans), e negli ammassi di galassie, dove la dispersione delle velocità diventa una massa. La catena di bruciamenti successivi è la fabbrica degli elementi. Il carbonio della risonanza di Hoyle, l&rsquo;ossigeno e il ferro sono stati fatti in stelle come queste e restituiti al mezzo interstellare.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-09-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-09 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-09-le-equazioni-della-struttura-stellare.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

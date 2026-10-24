@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-08 — Il trasporto radiativo: l’equazione che collega la materia al telescopio</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-08 — Il trasporto radiativo: l’equazione che collega la materia al telescopio</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+STRUM["magnitudine"] = {"nome":"Magnitudine (relazione di Pogson)","riga":"La magnitudine è una scala logaritmica di flusso, $m-m_o=-2{,}5\\log(F/F_o)$: al crescere del flusso la magnitudine diminuisce, e un fattore $100$ in flusso corrisponde esattamente a $5$ magnitudini.","serve":"A confrontare flussi che differiscono di molti ordini di grandezza con numeri piccoli e maneggevoli, e a tradurre un rapporto di flusso in una differenza che si somma e si sottrae come un numero ordinario. Il coefficiente $2{,}5$ non è arbitrario: viene dal vincolo storico che le sei classi di Ipparco (una differenza di $5$ «grandezze») corrispondessero a un fattore $100$ in flusso misurato fotometricamente, da cui $100^{1/5}=2{,}512$ come fattore per una sola magnitudine. Applicata al confronto fra la magnitudine a distanza vera $D$ e quella a distanza standard di $10$ pc (la magnitudine assoluta $M$), la stessa relazione dà il modulo di distanza $M=m+5-5\\log D(\\mathrm{pc})-A$.","esempio":"Un ammasso di $N=2000$ stelle identiche ha magnitudine apparente complessiva $4{,}3$: poiché è il flusso, non la magnitudine, che si somma linearmente ($F_{\\mathrm{ammasso}}=N F_\\star$), la magnitudine di una singola stella è $m_\\star=m_{\\mathrm{ammasso}}+2{,}5\\log N=4{,}3+2{,}5\\log(2000)=12{,}55$ — non $4{,}3/2000$.","pieno":{"file":"as-03-che-cosa-si-misura-davvero.html","tappa":"05","come":"la derivazione storica del fattore 2,512 da Ipparco e Pogson, la relazione generale, e la magnitudine limite di occhio e telescopio; il modulo di distanza è derivato nella tappa 06 dello stesso movimento"},"controllo":[{"tipo":"numero","espr":"100**(1.0/5)","vale":"2.512","dove":"serve","appare":"2{,}512"},{"tipo":"numero","espr":"4.3+2.5*log(2000,10)","vale":"12.55","dove":"esempio","appare":"12{,}55"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-08: Il trasporto radiativo: l’equazione che collega la materia al telescopio <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-08 — il trasporto radiativo
+identita:  l'equazione che collega cio' che succede dentro la materia a cio' che esce e arriva al telescopio:
+           senza di essa uno spettro e' un disegno, non una misura.
+copre:     A.12
+serve:     as-04 (Planck, Rayleigh-Jeans, temperatura di brillanza), as-05 (righe, strato uniforme)
+apre:      calcolato da verifica-mappa.py
+profondita: allenamento pesante (21 prove, densita' 4,4). Equazione del trasporto, profondita' ottica,
+           funzione sorgente, estinzione, con il conto svolto nei tre regimi: sottile, spesso, intermedio.
+           All'orale: la soluzione formale, derivata per intero.
+fonti:     lezione9_B_2020 (pagine 2-31): profondita' ottica, funzione sorgente, soluzione formale,
+           radiazione termica con S = B(T), il «modello brutale» di una stella (interno a Tc, fotosfera a
+           Ts) con righe in assorbimento per Tc > Ts e in emissione per Tc < Ts, i coefficienti di
+           Einstein con l'emissione stimolata, la legge di Kirchhoff generalizzata, l'inversione di
+           popolazione e i maser, l'esercizio della sorgente a 22 GHz (30 000 Jy da meno di 0,1").
+           lezione9_2020 (pagine 39-46): l'atmosfera isoterma, tau = tau_Z/cos(theta), la retta in massa
+           d'aria e la legge della cosecante, con i due esempi (fondo cosmico e stella) di pendenza opposta.
+           lezione10_2020 (pagine 1-9): l'equazione con assorbimento ed emissione, lo scattering
+           isotropo che la rende integro-differenziale, il random walk e la diffusione dei fotoni nel
+           Sole (cammino libero medio 1 cm, 2,3 s contro circa 30 000 anni). Stesso contenuto in
+           lezione10_2017.
+           Scritti_Esoneri_Astrofisica(2010-2016), esonero con la nebulosa planetaria (rapporti
+           Halpha/Hbeta = 6,00 e Hgamma/Hbeta = 0,333, curva di estinzione A/A(1um) = -0,49+1,49/lambda) e
+           la sua soluzione (A_alpha = 1,80).
+           DICHIARATO (tappa 07): con le cifre delle slide (cammino libero medio 1 cm, raggio solare) il
+           random walk da' circa 5000 anni, non 30 000; i 30 000 anni chiedono un cammino libero medio di
+           circa 0,17 cm. Non ho una fonte che dica quale delle due cifre la slide intendesse.
+           Masani, Astrofisica, cap. 19, pagine stampate 203-210 (PDF 213-220), lette per intero dal dossier:
+           la storia della teoria delle atmosfere 1870-1920, lo strato invertente, la soluzione di Schuster
+           (1902) per un'atmosfera isoterma, l'oscuramento al bordo e l'equilibrio radiativo di Schwarzschild
+           (1906), l'equazione del 1914 con la diffusione, nella nota 7. CORREZIONE di una dichiarazione del
+           turno precedente, che dava queste pagine come «non usate, non la soluzione formale»: la nota 7 di
+           Masani E' la soluzione formale, e la formula di Schuster ne e' il caso isotermo. Le pagine 203-204
+           (Helmholtz, Kelvin, Lane-Emden) e 210 (evoluzione stellare, H-R) sono d'altro argomento.
+           Il profilo di Eddington (2+3 mu)/5 per l'atmosfera grigia e' standard, non delle fonti.
+registro:  lezione9_B_2020, lezione9_2020, lezione10_2020, lezione10_2017
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac{dI_\\nu}{ds}=-\\alpha_\\nu I_\\nu+j_\\nu", "perche": "e' l'equazione del trasporto come la scrivono le slide: un bilancio di energia sul fascio (perdita proporzionale all'intensita', guadagno indipendente), non un conto."},
+ {"tipo": "uguale", "sinistra": "diff(I0*exp(-a*s),s)+a*(I0*exp(-a*s))", "vale": "0", "ipotesi": {"I0": "positive", "a": "positive", "s": "positive"}, "dove": "01", "appare": "I_\\nu(s)=I_\\nu(0)\\,e^{-\\tau_\\nu}"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\tau_\\nu=\\int_{s_0}^{s}\\alpha_\\nu(s')\\,ds'", "perche": "e' la definizione della profondita' ottica (spessore ottico) come integrale del coefficiente di assorbimento lungo il cammino."},
+ {"tipo": "integrale", "espr": "x*exp(-x)", "var": "x", "da": "0", "a": "oo", "vale": "1", "ipotesi": {"x": "positive"}, "dove": "01", "appare": "\\langle\\tau\\rangle=\\int_0^\\infty\\tau\\,e^{-\\tau}d\\tau=1"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\ell=1/\\alpha_\\nu", "perche": "e' la definizione del cammino libero medio, conseguenza della media unitaria in profondita' ottica appena asserita."},
+ {"tipo": "numero", "espr": "exp(-1)", "vale": "0.368", "dove": "01", "appare": "e^{-1}=0{,}368"},
+ {"tipo": "simbolico", "dove": "02", "appare": "S_\\nu=\\frac{j_\\nu}{\\alpha_\\nu}", "perche": "e' la definizione della funzione sorgente."},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\frac{dI_\\nu}{d\\tau_\\nu}=-I_\\nu+S_\\nu", "perche": "e' l'equazione del trasporto divisa per alpha, con d tau = alpha ds: un cambio di variabile."},
+ {"tipo": "uguale", "sinistra": "diff(exp(t)*I(t),t)", "vale": "exp(t)*(diff(I(t),t)+I(t))", "ipotesi": {"t": "positive", "I": "funzione"}, "dove": "02", "appare": "\\frac{d}{d\\tau}\\big(e^{\\tau}I\\big)=e^{\\tau}\\left(\\frac{dI}{d\\tau}+I\\right)=e^{\\tau}S"},
+ {"tipo": "uguale", "sinistra": "diff(I0*exp(-t)+Integral(S(u)*exp(-(t-u)),(u,0,t)),t)+(I0*exp(-t)+Integral(S(u)*exp(-(t-u)),(u,0,t)))-S(t)", "vale": "0", "ipotesi": {"t": "positive", "u": "positive", "I0": "positive", "S": "funzione"}, "dove": "02", "appare": "I_\\nu(\\tau_\\nu)=I_\\nu(0)\\,e^{-\\tau_\\nu}+\\int_0^{\\tau_\\nu}S_\\nu(\\tau')\\,e^{-(\\tau_\\nu-\\tau')}d\\tau'"},
+ {"tipo": "uguale", "sinistra": "I0*exp(-t)+integrate(S*exp(-(t-u)),(u,0,t))", "vale": "I0*exp(-t)+S*(1-exp(-t))", "ipotesi": {"t": "positive", "u": "positive", "I0": "positive", "S": "positive"}, "dove": "02", "appare": "I_\\nu(\\tau_\\nu)=I_\\nu(0)\\,e^{-\\tau_\\nu}+S_\\nu\\big(1-e^{-\\tau_\\nu}\\big)"},
+ {"tipo": "uguale", "sinistra": "series(I0*exp(-t)+S*(1-exp(-t)),t,0,2).removeO()", "vale": "I0+(S-I0)*t", "ipotesi": {"t": "positive", "I0": "positive", "S": "positive"}, "dove": "03", "appare": "I_\\nu\\simeq I_\\nu(0)+\\big(S_\\nu-I_\\nu(0)\\big)\\tau_\\nu"},
+ {"tipo": "limite", "espr": "I0*exp(-t)+S*(1-exp(-t))", "var": "t", "a": "oo", "vale": "S", "ipotesi": {"t": "positive", "I0": "positive", "S": "positive"}, "dove": "03", "appare": "I_\\nu\\to S_\\nu"},
+ {"tipo": "numero", "espr": "exp(-0.1)", "vale": "0.905", "dove": "03", "appare": "0{,}905"},
+ {"tipo": "numero", "espr": "exp(-3)", "vale": "0.050", "dove": "03", "appare": "0{,}050"},
+ {"tipo": "numero", "espr": "exp(-10)*1e5", "vale": "4.5", "dove": "03", "appare": "4{,}5\\cdot10^{-5}"},
+ {"tipo": "numero", "espr": "1-exp(-1)", "vale": "0.632", "dove": "03", "appare": "0{,}632"},
+ {"tipo": "simbolico", "dove": "03", "appare": "I\\simeq S\\tau", "perche": "e' il caso I(0)=0 della forma lineare asserita nella stessa tappa."},
+ {"tipo": "simbolico", "dove": "04", "appare": "j_\\nu=\\alpha_\\nu B_\\nu(T)", "perche": "e' la legge di Kirchhoff per un emettitore termico, come la scrivono le slide: una legge di termodinamica, non un conto."},
+ {"tipo": "simbolico", "dove": "04", "appare": "S_\\nu=B_\\nu(T)", "perche": "e' la definizione dell'equilibrio termodinamico locale, conseguenza diretta della riga precedente divisa per alpha."},
+ {"tipo": "simbolico", "dove": "04", "appare": "I_A=B_\\nu(T_c)\\,e^{-\\tau_A}+B_\\nu(T_s)\\big(1-e^{-\\tau_A}\\big)", "perche": "e' la soluzione per S costante (asserita nella tappa 02) applicata al modello brutale delle slide, con I(0)=B(Tc) e S=B(Ts)."},
+ {"tipo": "uguale", "sinistra": "(Bc*exp(-t)+Bs*(1-exp(-t)))-Bc", "vale": "(Bs-Bc)*(1-exp(-t))", "ipotesi": {"Bc": "positive", "Bs": "positive", "t": "positive"}, "dove": "04", "appare": "I_A-B_\\nu(T_c)=\\big(B_\\nu(T_s)-B_\\nu(T_c)\\big)\\big(1-e^{-\\tau_A}\\big)"},
+ {"tipo": "numero", "espr": "(exp(14388/(0.5*6000))-1)/(exp(14388/(0.5*4500))-1)", "vale": "0.201", "dove": "04", "appare": "0{,}201"},
+ {"tipo": "numero", "espr": "(exp(14388/(0.5*6000))-1)/(exp(14388/(0.5*4500))-1)*(1-exp(-1))+exp(-1)", "vale": "0.495", "dove": "04", "appare": "0{,}495"},
+ {"tipo": "simbolico", "dove": "05", "appare": "n_1B_{12}J_\\nu=n_2A_{21}+n_2B_{21}J_\\nu", "perche": "e' l'equilibrio dettagliato fra transizioni verso l'alto e verso il basso: la condizione stazionaria imposta da Einstein."},
+ {"tipo": "uguale", "sinistra": "solve(n1*B12*J-n2*A21-n2*B21*J,J)[0].subs(n1,n2*(g1/g2)*exp(x))", "vale": "(A21/B21)/((g1*B12/(g2*B21))*exp(x)-1)", "ipotesi": {"n1": "positive", "n2": "positive", "B12": "positive", "B21": "positive", "A21": "positive", "g1": "positive", "g2": "positive", "x": "positive"}, "dove": "05", "appare": "J_\\nu=\\frac{A_{21}/B_{21}}{(g_1B_{12}/g_2B_{21})\\,e^{h\\nu/kT}-1}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "g_1B_{12}=g_2B_{21}", "perche": "e' la prima relazione di Einstein, ottenuta imponendo che J coincida con la funzione di Planck a ogni temperatura (coefficiente dell'esponenziale uguale a 1)."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{A_{21}}{B_{21}}=\\frac{2h\\nu^{3}}{c^{2}}", "perche": "e' la seconda relazione di Einstein, il numeratore della formula di Planck: confronto termine a termine con B_nu(T)."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{n_1}{n_2}=\\frac{g_1}{g_2}e^{h\\nu/kT}", "perche": "e' la distribuzione di Boltzmann fra i due livelli."},
+ {"tipo": "uguale", "sinistra": "(A21*n2)/((B12*n1-B21*n2))", "vale": "(A21/B21)/((B12/B21)*n1/n2-1)", "ipotesi": {"A21": "positive", "n2": "positive", "B12": "positive", "n1": "positive", "B21": "positive"}, "dove": "05", "appare": "S_\\nu=\\frac{n_2A_{21}}{n_1B_{12}-n_2B_{21}}"},
+ {"tipo": "uguale", "sinistra": "(n2*(2*h*nu**3/c**2)*B21)/(n1*(g2*B21/g1)-n2*B21)", "vale": "(2*h*nu**3/c**2)/((n1*g2)/(n2*g1)-1)", "ipotesi": {"h": "positive", "nu": "positive", "c": "positive", "n1": "positive", "n2": "positive", "g1": "positive", "g2": "positive", "B21": "positive"}, "dove": "05", "appare": "S_\\nu=\\frac{2h\\nu^{3}}{c^{2}}\\,\\frac{1}{\\dfrac{n_1g_2}{n_2g_1}-1}"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\alpha_\\nu=\\frac{h\\nu}{4\\pi}\\big(n_1B_{12}-n_2B_{21}\\big)\\phi(\\nu)", "perche": "e' il coefficiente di assorbimento corretto per l'emissione stimolata (slide 23), con il profilo di riga phi: l'emissione stimolata conta come assorbimento negativo."},
+ {"tipo": "simbolico", "dove": "05", "appare": "j_\\nu=\\frac{h\\nu}{4\\pi}n_2A_{21}\\phi(\\nu)", "perche": "e' il coefficiente di emissione spontanea (slide 22): energia per diseccitazione per numero di diseccitazioni, distribuita su 4 pi e sul profilo."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\frac{n_2}{g_2}>\\frac{n_1}{g_1}", "perche": "e' la definizione di inversione di popolazione."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\tau_\\nu<0", "perche": "conseguenza del segno di alpha con inversione di popolazione, non un conto."},
+ {"tipo": "numero", "espr": "log(exp(100),10)", "vale": "43.4", "dove": "06", "appare": "e^{100}\\simeq10^{43}"},
+ {"tipo": "numero", "espr": "pi*(0.1/206265)**2/4*1e13", "vale": "1.85", "dove": "06", "appare": "1{,}85\\cdot10^{-13}\\ \\mathrm{sr}"},
+ {"tipo": "numero", "espr": "3e4*1e-26/(pi*(0.1/206265)**2/4)*1e9", "vale": "1.63", "dove": "06", "appare": "1{,}63\\cdot10^{-9}"},
+ {"tipo": "numero", "espr": "2*1.380649e-23*(22e9)**2/(2.998e8)**2*1e19", "vale": "1.49", "dove": "06", "appare": "1{,}49\\cdot10^{-19}"},
+ {"tipo": "numero", "espr": "1.6251e-9/1.4869e-19/1e10", "vale": "1.1", "dove": "06", "appare": "1{,}1\\cdot10^{10}\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "5.879e10*1.093e10/1e20", "vale": "6.4", "dove": "06", "appare": "6{,}4\\cdot10^{20}\\ \\mathrm{Hz}"},
+ {"tipo": "numero", "espr": "6.62607e-34*6.43e20/1.602e-13", "vale": "2.7", "dove": "06", "appare": "2{,}7\\ \\mathrm{MeV}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "B_\\nu=\\frac{F_\\nu}{\\Omega}", "perche": "definizione della brillanza media di una sorgente di angolo solido Omega."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\Omega=\\pi\\theta^{2}/4", "perche": "angolo solido di un disco di diametro angolare theta piccolo."},
+ {"tipo": "simbolico", "dove": "06", "appare": "T_b=\\frac{c^{2}}{2k\\nu^{2}}B_\\nu", "perche": "definizione della temperatura di brillanza di Rayleigh-Jeans."},
+ {"tipo": "uguale", "sinistra": "Sum(l**2,(i,1,N))", "vale": "N*l**2", "ipotesi": {"l": "positive", "N": "positive", "i": "integer"}, "dove": "07", "appare": "\\langle R^{2}\\rangle=\\sum_i\\langle r_i^{2}\\rangle=N\\ell^{2}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "R=\\ell\\sqrt N", "perche": "radice della riga asserita sopra."},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\langle\\vec r_i\\cdot\\vec r_j\\rangle=0", "perche": "e' l'ipotesi del random walk: direzioni successive indipendenti e isotrope, quindi i prodotti misti si annullano in media."},
+ {"tipo": "uguale", "sinistra": "solve(l*sqrt(N)-L,N)[0]/(L/l)**2", "vale": "1", "ipotesi": {"l": "positive", "N": "positive", "L": "positive"}, "dove": "07", "appare": "N=(L/\\ell)^{2}=\\tau^{2}"},
+ {"tipo": "numero", "espr": "6.96e8/2.998e8", "vale": "2.3", "dove": "07", "appare": "2{,}3\\ \\mathrm{s}"},
+ {"tipo": "numero", "espr": "(6.96e10/1)**2/1e21", "vale": "4.8", "dove": "07", "appare": "4{,}8\\cdot10^{21}"},
+ {"tipo": "numero", "espr": "(6.96e10)**2/2.998e10/3.156e7/1e3", "vale": "5.1", "dove": "07", "appare": "5{,}1\\cdot10^{3}"},
+ {"tipo": "numero", "espr": "(6.96e10)**2/(3e4*3.156e7*2.998e10)", "vale": "0.17", "dove": "07", "appare": "0{,}17\\ \\mathrm{cm}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "t=\\frac{N\\ell}{c}=\\frac{L^{2}}{\\ell c}", "perche": "e' il tempo per N passi di lunghezza l alla velocita' della luce, con N=(L/l)^2 asserito sopra: una sostituzione."},
+ {"tipo": "simbolico", "dove": "07", "appare": "1-e^{-\\tau}\\simeq\\tau", "perche": "primo ordine dell'esponenziale, gia' usato nella tappa 03."},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\frac{dI_\\nu}{ds}=-\\sigma_\\nu\\left(I_\\nu-\\frac{1}{4\\pi}\\int I_\\nu\\,d\\Omega\\right)", "perche": "e' l'equazione del trasporto con scattering isotropo e coerente come la scrivono le slide: la funzione sorgente e' la media angolare dell'intensita'."},
+ {"tipo": "uguale", "sinistra": "-5/2*log(exp(-t),10)", "vale": "5/2*t/log(10)", "ipotesi": {"t": "positive"}, "dove": "08", "appare": "A_\\lambda=-2{,}5\\log\\frac{F}{F_0}=1{,}086\\,\\tau_\\lambda"},
+ {"tipo": "numero", "espr": "2.5/log(10)", "vale": "1.086", "dove": "08", "appare": "1{,}086"},
+ {"tipo": "numero", "espr": "log(6.00/2.86)", "vale": "0.741", "dove": "08", "appare": "0{,}741"},
+ {"tipo": "numero", "espr": "1.0857*log(6.00/2.86)", "vale": "0.804", "dove": "08", "appare": "0{,}804"},
+ {"tipo": "numero", "espr": "-0.49+1.49/0.6563", "vale": "1.780", "dove": "08", "appare": "1{,}780"},
+ {"tipo": "numero", "espr": "-0.49+1.49/0.4861", "vale": "2.575", "dove": "08", "appare": "2{,}575"},
+ {"tipo": "numero", "espr": "0.80446/(2.57521-1.78030)", "vale": "1.012", "dove": "08", "appare": "1{,}012"},
+ {"tipo": "numero", "espr": "1.01202*1.78030", "vale": "1.80", "dove": "08", "appare": "A_\\alpha=1{,}80"},
+ {"tipo": "numero", "espr": "-0.49+1.49/0.54", "vale": "2.269", "dove": "08", "appare": "2{,}269"},
+ {"tipo": "numero", "espr": "1.01202*2.26926", "vale": "2.30", "dove": "08", "appare": "A_V=2{,}30"},
+ {"tipo": "numero", "espr": "1.0857*log(0.47/0.333)/((-0.49+1.49/0.4341)-(-0.49+1.49/0.4861))*(-0.49+1.49/0.54)", "vale": "2.31", "dove": "08", "appare": "2{,}31"},
+ {"tipo": "numero", "espr": "10**(-0.4*2.2965)", "vale": "0.12", "dove": "08", "appare": "0{,}12"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\frac{F_\\alpha/F_\\beta}{(F_\\alpha/F_\\beta)_0}=e^{-(\\tau_\\alpha-\\tau_\\beta)}", "perche": "e' il rapporto delle due leggi di attenuazione F=F0 e^{-tau} scritte per le due righe, come nella soluzione d'esame."},
+ {"tipo": "simbolico", "dove": "08", "appare": "A_\\beta-A_\\alpha=A(1\\,\\mu\\mathrm{m})\\left[\\frac{A_\\beta}{A(1\\,\\mu\\mathrm{m})}-\\frac{A_\\alpha}{A(1\\,\\mu\\mathrm{m})}\\right]", "perche": "e' la riscrittura della differenza di estinzione con la curva normalizzata data dal testo: una fattorizzazione."},
+ {"tipo": "simbolico", "dove": "08", "appare": "A_\\lambda/A(1\\,\\mu\\mathrm{m})=-0{,}49+1{,}49/\\lambda(\\mu\\mathrm{m})", "perche": "e' la curva di estinzione data dal testo d'esame, valida fra 0,4 e 1,1 micron: un dato."},
+ {"tipo": "simbolico", "dove": "09", "appare": "\\frac{d}{d\\tau}\\big(e^{\\tau}I\\big)=e^{\\tau}S", "perche": "restituzione del fattore integrante della tappa 02."},
+ {"tipo": "simbolico", "dove": "09", "appare": "I(\\tau)=I(0)e^{-\\tau}+\\int_0^{\\tau}S(\\tau')e^{-(\\tau-\\tau')}d\\tau'", "perche": "restituzione della soluzione formale asserita nella tappa 02."},
+ {"tipo": "simbolico", "dove": "09", "appare": "I=I(0)e^{-\\tau}+S(1-e^{-\\tau})", "perche": "restituzione del caso S costante asserito nella tappa 02."},
+ {"tipo": "simbolico", "dove": "10", "appare": "A=1{,}086\\,\\tau", "perche": "restituzione del legame magnitudini-profondita' ottica della tappa 08."},
+ {"tipo": "simbolico", "dove": "10", "appare": "I=I_0e^{-\\tau}+S(1-e^{-\\tau})", "perche": "restituzione del caso S costante della tappa 02."},
+ {"tipo": "numero", "espr": "exp(-1)", "vale": "0.368", "dove": "03", "appare": "e^{-1}=0{,}368"},
+ {"tipo": "simbolico", "dove": "09", "appare": "dI/d\\tau=-I+S", "perche": "restituzione dell'equazione in profondita' ottica della tappa 02."},
+ {"tipo": "simbolico", "dove": "10", "appare": "dI/d\\tau=-I+S", "perche": "restituzione dell'equazione in profondita' ottica della tappa 02."},
+ {"tipo": "simbolico", "dove": "09", "appare": "dI/ds=-\\alpha I+j", "perche": "restituzione del bilancio della tappa 01."},
+ {"tipo": "simbolico", "dove": "10", "appare": "e^{-1}=0{,}37", "perche": "restituzione arrotondata del valore asserito nella tappa 01."},
+ {"tipo": "simbolico", "dove": "10", "appare": "e^{-3}=0{,}05", "perche": "restituzione del valore asserito nella tappa 03."},
+ {"tipo": "simbolico", "dove": "10", "appare": "A_{21}/B_{21}=2h\\nu^3/c^2", "perche": "restituzione della relazione di Einstein della tappa 05."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\tau_\\nu(\\theta)=\\tau_Z/\\cos\\theta", "perche": "e' la geometria del cammino inclinato in uno strato piano: dl = dz/cos(theta), come nelle slide."},
+ {"tipo": "simbolico", "dove": "03", "appare": "I_\\nu(\\theta)=I_\\nu(0)\\,e^{-\\tau_Z/\\cos\\theta}+B_\\nu(T)\\big(1-e^{-\\tau_Z/\\cos\\theta}\\big)", "perche": "e' la soluzione dello strato uniforme della tappa 02 con tau = tau_Z/cos(theta) e S = B(T)."},
+ {"tipo": "uguale", "sinistra": "series(I0*exp(-t*x)+B*(1-exp(-t*x)),t,0,2).removeO()", "vale": "I0+(B-I0)*t*x", "ipotesi": {"I0": "positive", "B": "positive", "t": "positive", "x": "positive"}, "dove": "03", "appare": "I_\\nu(\\theta)\\simeq I_\\nu(0)+\\big[B_\\nu(T)-I_\\nu(0)\\big]\\frac{\\tau_Z}{\\cos\\theta}"},
+ {"tipo": "uguale", "sinistra": "-5/2*log(exp(-t*x),10)", "vale": "5/2/log(10)*t*x", "ipotesi": {"t": "positive", "x": "positive"}, "dove": "03", "appare": "m(\\theta)=m_0+1{,}086\\,\\tau_Z/\\cos\\theta"},
+ {"tipo": "numero", "espr": "1.0857*0.2", "vale": "0.217", "dove": "03", "appare": "0{,}217"},
+ {"tipo": "numero", "espr": "1/cos(pi/3)", "vale": "2", "dove": "03", "appare": "$2$"},
+ {"tipo": "numero", "espr": "1.0857*0.2/cos(pi/3)", "vale": "0.434", "dove": "03", "appare": "0{,}434"},
+ {"tipo": "uguale", "sinistra": "diff(P*exp(-t*s)+A*(1-exp(-t*s)),t)/s", "vale": "-(P*exp(-t*s)+A*(1-exp(-t*s)))+A", "ipotesi": {"P": "positive", "A": "positive", "t": "positive", "s": "positive"}, "dove": "02", "appare": "I_\\nu=P_\\nu\\,e^{-\\tau_\\nu\\sec\\theta}+A_\\nu\\left(1-e^{-\\tau_\\nu\\sec\\theta}\\right)"},
+ {"tipo": "numero", "espr": "(0.3/0.29-1)*100", "vale": "3.4", "dove": "02", "appare": "il 3,4%"},
+ {"tipo": "simbolico", "dove": "04", "appare": "I(\\theta)=\\int_0^\\infty B(\\tau)\\,e^{-\\tau\\sec\\theta}\\sec\\theta\\,d\\tau", "perche": "soluzione formale con I(0) all'infinito ottico e S = B (Masani, p. 207)"},
+ {"tipo": "integrale", "espr": "(a+b*t)*exp(-t/m)/m", "var": "t", "da": "0", "a": "oo", "vale": "a+b*m", "ipotesi": {"a": "positive", "b": "positive", "m": "positive", "t": "positive"}, "dove": "04", "appare": "\\frac{d\\tau}{\\mu}=a+b\\mu"},
+ {"tipo": "simbolico", "dove": "04", "appare": "I(\\mu)/I(1)=(2+3\\mu)/5", "perche": "approssimazione di Eddington per l'atmosfera grigia: S proporzionale a tau + 2/3"},
+ {"tipo": "numero", "espr": "(2+3*0)/5*100", "vale": "40", "dove": "04", "appare": "il 40%"},
+ {"tipo": "numero", "espr": "(2+3*0.5)/5*100", "vale": "70", "dove": "04", "appare": "il 70%"},
+ {"tipo": "simbolico", "dove": "07", "appare": "S_\\nu=\\frac{k_\\nu B_\\nu(T)+\\sigma_\\nu J_\\nu}{k_\\nu+\\sigma_\\nu}", "perche": "definizione della funzione sorgente con assorbimento e diffusione isotropa coerente (Masani, nota 7)"},
+ {"tipo": "numero", "espr": "1/(2/3.)", "vale": "1.5", "dove": "04", "appare": "b/a=3/2"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\cos\\theta\\,dI_\\nu/d\\tau_\\nu=I_\\nu-S_\\nu", "perche": "equazione del trasporto in profondita' ottica (Schwarzschild 1914, Masani nota 7)"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché un’equazione del trasporto', meta:'quello che si misura è ciò che è uscito, non ciò che c’era · una sola equazione per ogni regime · che cosa si deriva per intero',
+  blocchi:[
+  {t:'prosa', title:'Fra la materia e il telescopio', tag:'architettura', html:R`
+  <p>Uno spettro è la brillanza che arriva al telescopio, frequenza per frequenza. La materia che l&rsquo;ha prodotta può essere un interno stellare opaco, una fotosfera semitrasparente, una nube di polvere, un gas rarefatto. Fra il punto in cui la luce è nata e lo strumento, la luce è stata in parte assorbita, in parte riemessa, in parte deviata. L&rsquo;<b>equazione del trasporto radiativo</b> è il bilancio di quello che succede a un fascio lungo il cammino. De Bernardis (lezione10_2020) ne dice la forza in una riga: <i>«a seconda del tipo di materia e della frequenza della radiazione avverranno processi fisici diversi, e quindi i coefficienti saranno differenti, ma l&rsquo;equazione è sempre la stessa»</i>. Per questo la mappa del corso la chiama il cuore calcolistico della materia. Le domande d&rsquo;esame che chiedono «quanta luce arriva», da una stella dietro una nube, da una nebulosa, da una sorgente radio, sono tutte la stessa equazione nei suoi tre regimi.</p>
+  <p>Il movimento la costruisce in quest&rsquo;ordine. I due coefficienti, assorbimento ed emissione, e la profondità ottica. La funzione sorgente e la <b>soluzione formale</b>, derivata per intero, che è la domanda dell&rsquo;orale. I tre regimi, sottile, spesso e intermedio. L&rsquo;equilibrio termodinamico locale e il modello «brutale» di una stella. I coefficienti di Einstein, che spiegano a livello atomico perché emissione e assorbimento sono legati, e che contengono i maser. Lo scattering e il random walk dei fotoni nel Sole. Infine l&rsquo;estinzione interstellare, con l&rsquo;esercizio della nebulosa planetaria.</p>`}
+]},
+
+/* ---------------- 01 · ASSORBIMENTO, EMISSIONE, PROFONDITÀ OTTICA ---------------- */
+{ num:'01', title:'Assorbimento, emissione e profondità ottica', meta:'il bilancio di un fascio · la legge esponenziale · la profondità ottica come numero di cammini liberi medi · si vede fino a tau dell’ordine di uno',
+  blocchi:[
+  {t:'prosa', title:'Il bilancio di un fascio', tag:'l’equazione', html:R`
+  <p>Si segua un fascio di brillanza specifica $I_\nu$ lungo un cammino $s$ dentro la materia. In un tratto $ds$ il fascio perde una frazione di sé stesso proporzionale a $ds$, $\alpha_\nu I_\nu\,ds$, dove $\alpha_\nu$ è il <b>coefficiente di assorbimento</b>, che ha le dimensioni di un inverso di lunghezza. E guadagna l&rsquo;energia emessa dalla materia in quel tratto nella sua direzione, $j_\nu\,ds$, dove $j_\nu$ è il <b>coefficiente di emissione</b>, energia per unità di tempo, volume, frequenza e angolo solido. Il bilancio è
+  $$\frac{dI_\nu}{ds}=-\alpha_\nu I_\nu+j_\nu.$$
+  La perdita dipende da quanta luce c&rsquo;è, il guadagno no. È questa asimmetria a dare all&rsquo;equazione tutta la sua fisica.</p>`},
+  {t:'prosa', title:'La legge esponenziale e il significato di tau', tag:'assorbimento puro', html:R`
+  <p>Senza emissione, l&rsquo;equazione si integra subito: $I_\nu(s)=I_\nu(0)\,e^{-\tau_\nu}$, dove la <b>profondità ottica</b> (o spessore ottico) è
+  $$\tau_\nu=\int_{s_0}^{s}\alpha_\nu(s')\,ds'.$$
+  La profondità ottica conta quante volte il cammino contiene il <b>cammino libero medio</b> $\ell=1/\alpha_\nu$. La legge esponenziale ha anche una lettura probabilistica, che de Bernardis usa: $e^{-\tau}$ è la probabilità che un singolo fotone attraversi lo spessore $\tau$ senza essere assorbito. La profondità ottica a cui un fotone viene assorbito è allora distribuita come $e^{-\tau}d\tau$, e la sua media è $\langle\tau\rangle=\int_0^\infty\tau\,e^{-\tau}d\tau=1$. In media un fotone percorre una profondità ottica unitaria. Da qui la regola pratica che regge tutta l&rsquo;astrofisica degli spettri: <b>guardando dentro un mezzo, si vede fino a una profondità ottica dell&rsquo;ordine di uno</b>. A $\tau=1$ arriva ancora $e^{-1}=0{,}368$ della luce, a $\tau=5$ meno dell&rsquo;1%. La «superficie» di una stella non è un oggetto materiale. È il luogo dove la profondità ottica misurata dall&rsquo;esterno arriva a circa 1, e siccome $\alpha_\nu$ dipende dalla frequenza, quella superficie sta a profondità diverse a frequenze diverse.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una nube ha profondità ottica 2 nel visibile. Che frazione della luce di una stella dietro di essa passa?`,
+    a:R`$e^{-2}\simeq0{,}135$, cioè il 13,5%: la nube toglie l&rsquo;86% della luce. Se la nube emettesse, al telescopio arriverebbe in più la sua emissione propria, ed è il caso della tappa 02.`},
+   {q:R`Che cosa vuol dire che la fotosfera del Sole è «dove tau vale circa 1»?`,
+    a:R`Che i fotoni che riceviamo hanno subito l&rsquo;ultima interazione, in media, a una profondità ottica unitaria misurata dall&rsquo;esterno: più dentro la materia è troppo opaca perché la luce esca, più fuori è troppo rarefatta per emetterne molta. La fotosfera è la superficie da cui la luce <i>esce</i>, non un confine della materia.`}
+  ]}
+]},
+
+/* ---------------- 02 · LA SOLUZIONE FORMALE ---------------- */
+{ num:'02', title:'La funzione sorgente e la soluzione formale', meta:'dividere per alpha · il fattore integrante e^tau · ciò che arriva è la sorgente di fondo attenuata più ogni strato attenuato da ciò che ha davanti',
+  blocchi:[
+  {t:'prosa', title:'L’equazione in profondità ottica', tag:'la funzione sorgente', html:R`
+  <p>Dividendo per $\alpha_\nu$ e usando $d\tau_\nu=\alpha_\nu\,ds$ come variabile, compare il rapporto fra emissione e assorbimento, la <b>funzione sorgente</b>
+  $$S_\nu=\frac{j_\nu}{\alpha_\nu},$$
+  e l&rsquo;equazione diventa (lezione9_B_2020)
+  $$\frac{dI_\nu}{d\tau_\nu}=-I_\nu+S_\nu.$$
+  Tutto il materiale è sparito. Resta una sola funzione, $S_\nu$, che ha le dimensioni di una brillanza, e una sola variabile, la profondità ottica. La forma dice già il risultato. Se $I<S$ l&rsquo;intensità cresce, se $I>S$ cala: <b>la brillanza tende alla funzione sorgente</b>, con «velocità» unitaria in profondità ottica.</p>`},
+  {t:'prosa', title:'La derivazione, per intero', tag:'la domanda dell’orale', html:R`
+  <p>È un&rsquo;equazione lineare del primo ordine, e si risolve con il fattore integrante $e^{\tau}$. Moltiplicando per $e^{\tau}$ il membro sinistro diventa una derivata esatta:
+  $$\frac{d}{d\tau}\big(e^{\tau}I\big)=e^{\tau}\left(\frac{dI}{d\tau}+I\right)=e^{\tau}S.$$
+  Si integra fra 0, dove il fascio entra con brillanza $I_\nu(0)$, e $\tau_\nu$: $e^{\tau_\nu}I_\nu(\tau_\nu)-I_\nu(0)=\int_0^{\tau_\nu}e^{\tau'}S_\nu(\tau')\,d\tau'$. Moltiplicando per $e^{-\tau_\nu}$ si ha la <b>soluzione formale</b>:
+  $$I_\nu(\tau_\nu)=I_\nu(0)\,e^{-\tau_\nu}+\int_0^{\tau_\nu}S_\nu(\tau')\,e^{-(\tau_\nu-\tau')}d\tau'.$$
+  Va letta termine per termine, ed è la lettura che si chiede all&rsquo;orale. Il primo termine è la luce che entra dal fondo, attenuata da tutto lo spessore. Il secondo è la somma dei contributi di tutti gli strati: lo strato a profondità $\tau'$ emette $S_\nu(\tau')\,d\tau'$, e quell&rsquo;emissione deve ancora attraversare lo spessore $\tau_\nu-\tau'$ che ha davanti, quindi arriva attenuata di $e^{-(\tau_\nu-\tau')}$. È «formale» perché $S_\nu$ è in generale incognita: dipende dalla materia, e con lo scattering dipende dalla radiazione stessa. Ma ogni volta che $S_\nu$ è nota, la soluzione è un integrale.</p>
+  <p>Il caso che risolve quasi tutti gli esercizi è quello di uno strato <b>uniforme</b>, con $S_\nu$ costante. L&rsquo;integrale si fa subito:
+  $$I_\nu(\tau_\nu)=I_\nu(0)\,e^{-\tau_\nu}+S_\nu\big(1-e^{-\tau_\nu}\big).$$</p>`},
+  {t:'prosa', title:'Come ci si è arrivati: Schuster, 1902', tag:'Masani, cap. 19, pp. 204-208', html:R`
+  <p>Masani racconta che la soluzione formale è nata per risolvere un problema concreto. Intorno al 1900 si pensava la stella come un interno politropico in equilibrio convettivo (Lane, Ritter, Kelvin, Emden), chiuso da una fotosfera di <i>«metalli allo stato di vapore e nebbie molto condensate»</i> che emetteva il continuo, sopra la quale stava un&rsquo;atmosfera più fredda, lo <i>strato invertente</i> di Huggins, Young e Schuster, che produceva le righe per la terza legge di Kirchhoff. Rowland aveva pubblicato nel 1890 l&rsquo;analisi di 20 000 lunghezze d&rsquo;onda dello spettro solare. Restava inspiegato l&rsquo;<i>oscuramento al bordo</i>: il disco del Sole è più scuro ai margini che al centro. Se l&rsquo;atmosfera assorbisse soltanto, un raggio che la attraversa con angolo $\theta$ dalla normale uscirebbe con $I=P\,e^{-\tau\sec\theta}$, e questo spiegava il fenomeno solo qualitativamente.</p>
+  <p>Nel 1902 Arthur Schuster aggiunse l&rsquo;idea che, dice Masani, <i>«doveva risultare assai più rivoluzionaria di quanto poteva apparire»</i>: l&rsquo;atmosfera non solo assorbe, ma emette per la propria temperatura, con un&rsquo;emissione uguale al coefficiente di assorbimento per una funzione universale $A_\nu(T)$, che oggi chiamiamo $B_\nu(T)$. Per un&rsquo;atmosfera isoterma l&rsquo;equazione diventa quella della funzione sorgente costante, e la sua soluzione, scritta da Schuster, è</p>
+  <p>$$I_\nu=P_\nu\,e^{-\tau_\nu\sec\theta}+A_\nu\left(1-e^{-\tau_\nu\sec\theta}\right),$$</p>
+  <p>esattamente la soluzione formale con $S_\nu=A_\nu$ e lo spessore ottico allungato di $\sec\theta$. Misurando $I_\nu$ in tre punti lungo un raggio del disco, Schuster ricavò le tre incognite $P_\nu$, $\tau_\nu$, $A_\nu$, frequenza per frequenza; dalle tre curve di tipo planckiano, con la legge di Wien (che Masani scrive $\lambda_mT=0{,}3$ cm K, il 3,4% sopra il valore $0{,}29$ cm K), trovò l&rsquo;atmosfera più fredda della fotosfera di circa il 15%. La conseguenza, nota Masani, andava oltre il bordo del Sole: l&rsquo;atmosfera non era più un corpo estraneo appoggiato sulla stella, ma una sua parte continua con la fotosfera, ed era stata scritta l&rsquo;equazione del trasporto che sarebbe diventata la base della struttura stellare in equilibrio radiativo.</p>`}
+]},
+
+/* ---------------- 03 · I TRE REGIMI ---------------- */
+{ num:'03', title:'I tre regimi: sottile, spesso, e quello in mezzo', meta:'si vede la sorgente · si vede la funzione sorgente · il caso intermedio che l’esame ama',
+  blocchi:[
+  {t:'prosa', title:'Sottile e spesso', tag:'i due limiti', html:R`
+  <p><b>Mezzo otticamente sottile</b>, $\tau_\nu\ll1$. Sviluppando al primo ordine,
+  $$I_\nu\simeq I_\nu(0)+\big(S_\nu-I_\nu(0)\big)\tau_\nu.$$
+  Si vede la sorgente di fondo quasi intatta, a $\tau=0{,}1$ ne passa $0{,}905$, più un piccolo contributo dello strato, proporzionale alla sua profondità ottica. Se dietro non c&rsquo;è niente, $I\simeq S\tau$, e la brillanza è proporzionale alla quantità di materia lungo la linea di vista. È il regime in cui uno spettro <i>conta gli atomi</i>, quello della larghezza equivalente lineare e della riga a 21 cm.</p>
+  <p><b>Mezzo otticamente spesso</b>, $\tau_\nu\gg1$. Il termine di fondo muore, a $\tau=3$ ne passa $0{,}050$ e a $\tau=10$ solo $4{,}5\cdot10^{-5}$, e
+  $$I_\nu\to S_\nu.$$
+  Si vede la funzione sorgente, e soltanto quella. Non si vede più né che cosa c&rsquo;è dietro né quanto materiale c&rsquo;è: raddoppiare lo spessore non cambia nulla. Se il mezzo è in equilibrio termico, $S_\nu$ è la funzione di Planck (tappa 04), e un mezzo spesso è un corpo nero.</p>`},
+  {t:'prosa', title:'Il caso intermedio', tag:'quello che de Bernardis ama', html:R`
+  <p>Per $\tau_\nu\sim1$ non si trascura niente: a $\tau=1$ il fondo passa per $e^{-1}=0{,}368$, e lo strato contribuisce con la frazione $0{,}632$ della sua funzione sorgente. Il risultato dipende da tre numeri insieme, $I(0)$, $S$ e $\tau$, ed è per questo che l&rsquo;esame lo ama. Non si può rispondere con una regola, si deve fare il conto. La strategia è sempre la stessa. (1) Identificare che cosa fa da sorgente di fondo e che cosa da strato. (2) Stimare $\tau$, da una densità colonnare per una sezione d&rsquo;urto o da un&rsquo;estinzione in magnitudini. (3) Scrivere $I=I(0)e^{-\tau}+S(1-e^{-\tau})$ e solo alla fine decidere se uno dei due termini si può buttare. La figura mostra la stessa formula con i tre regimi affiancati.</p>`},
+  {t:'plot', title:'La brillanza in uscita al variare della profondità ottica, in scala logaritmica',
+   intro:R`Ascissa $\log_{10}\tau$. Fondo $I(0)=1$. Ciano: strato con $S=0{,}2$ (più freddo); oro: $S=3$ (più caldo); viola tratteggiato: niente dietro ($I(0)=0$, $S=1$), dove la curva segue $S\tau$ finché $\tau$ è piccolo.`,
+   plots:[
+    {kind:'func2d', xr:[-2,1.5], yr:[0,3.2], height:300, equal:false,
+     title:'log10 tau      I',
+     curves:[{f:'exp(-pow(10,x))+0.2*(1-exp(-pow(10,x)))', col:'#5eead4', label:'I(0)=1, S=0,2'},
+             {f:'exp(-pow(10,x))+3*(1-exp(-pow(10,x)))', col:'#d8a13a', label:'I(0)=1, S=3'},
+             {f:'1-exp(-pow(10,x))', col:'#b98cff', label:'I(0)=0, S=1', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> a sinistra, $\tau\le0{,}01$, le curve stanno sul loro valore di fondo. A destra, $\tau\ge5$, stanno sulla loro funzione sorgente. Tutta la transizione avviene in poco più di una decade di $\tau$, intorno a 1.</p>
+   <p><b>Che cosa impararne:</b> in scala logaritmica il regime intermedio è stretto, ma è proprio lì che cadono molti oggetti astrofisici interessanti, come una nube di polvere con $A_V$ di qualche magnitudine o una riga al ginocchio della curva di crescita. Lì entrambe le informazioni, fondo e strato, sono presenti e mescolate.</p>`}
+,
+  {t:'prosa', title:'Il caso che il docente ama: l’atmosfera isoterma', tag:'lezione9_2020, diapositive 39-46', html:R`
+  <p>L&rsquo;esempio che de Bernardis, nella lezione 9, svolge per intero è quello che ogni osservatore incontra per primo: l&rsquo;atmosfera terrestre, schematizzata come uno strato isotermo. Emette radiazione termica e insieme trasmette in parte quella che arriva da fuori. Se lo spessore ottico allo zenit è $\tau_Z$ e si guarda a un angolo $\theta$ dalla verticale, il cammino si allunga di $1/\cos\theta$ e lo spessore ottico diventa $\tau_\nu(\theta)=\tau_Z/\cos\theta$. La soluzione per lo strato uniforme dà la brillanza misurata a terra:
+  $$I_\nu(\theta)=I_\nu(0)\,e^{-\tau_Z/\cos\theta}+B_\nu(T)\big(1-e^{-\tau_Z/\cos\theta}\big).$$
+  Il primo termine è la sorgente astronomica attenuata, il secondo l&rsquo;emissione propria dell&rsquo;atmosfera. Alle frequenze dove l&rsquo;atmosfera è opaca, $\tau_Z\gg1$, si vede soltanto un corpo nero alla temperatura dell&rsquo;aria. Le «finestre atmosferiche» sono le frequenze in cui $\tau_Z$ è piccolo. In una finestra, sviluppando al primo ordine,
+  $$I_\nu(\theta)\simeq I_\nu(0)+\big[B_\nu(T)-I_\nu(0)\big]\frac{\tau_Z}{\cos\theta},$$
+  e la brillanza misurata è una <b>retta</b> in funzione della massa d&rsquo;aria $1/\cos\theta$. Il valore a $1/\cos\theta=0$ sarebbe la brillanza fuori dall&rsquo;atmosfera. Non si può osservare, perché la massa d&rsquo;aria vale almeno 1 allo zenit, ma la si ottiene estrapolando la retta misurata a diverse inclinazioni. È la «legge della cosecante», detta così perché $1/\cos\theta$ è la cosecante dell&rsquo;elevazione.</p>
+  <p>La pendenza della retta ha il segno di $B_\nu(T)-I_\nu(0)$, e de Bernardis dà i due esempi opposti. Per il fondo cosmico a microonde $I_\nu(0)$ è un corpo nero a 2,725 K e l&rsquo;atmosfera un corpo grigio a circa 240 K: la pendenza è positiva, e il cielo è più brillante verso l&rsquo;orizzonte. Per una stella nel visibile la funzione di Planck dell&rsquo;atmosfera a 240 K è trascurabile, e la pendenza è negativa: la stella è più debole verso l&rsquo;orizzonte. In magnitudini l&rsquo;attenuazione è lineare in massa d&rsquo;aria, $m(\theta)=m_0+1{,}086\,\tau_Z/\cos\theta$. Con $\tau_Z=0{,}2$ nel visibile sono $0{,}217$ magnitudini per massa d&rsquo;aria, e a 60° dallo zenit, dove la massa d&rsquo;aria vale $2$, la stella è più debole di $0{,}434$ magnitudini che fuori dall&rsquo;atmosfera.</p>`},
+  {t:'plot', title:'La retta di Bouguer: brillanza misurata in funzione della massa d’aria',
+   intro:R`Brillanza in unità arbitrarie contro $1/\cos\theta$, con $\tau_Z=0{,}1$. Ciano: sorgente debole e atmosfera più brillante ($I(0)=1$, $B=5$): pendenza positiva, come per il fondo cosmico. Oro: sorgente brillante e atmosfera trascurabile ($I(0)=5$, $B=0$): pendenza negativa, come per una stella nel visibile. In tratteggio le rette tangenti a massa d’aria 0.`,
+   plots:[
+    {kind:'func2d', xr:[0,4], yr:[0,6.5], height:300, equal:false,
+     title:'1 / cos(theta)  (massa d aria)      I',
+     curves:[{f:'1*exp(-0.1*x)+5*(1-exp(-0.1*x))', col:'#5eead4', label:'I(0)=1, B=5'},
+             {f:'5*exp(-0.1*x)', col:'#d8a13a', label:'I(0)=5, B=0'},
+             {f:'1+(5-1)*0.1*x', col:'#5eead4', label:'retta tangente', dash:true},
+             {f:'5-5*0.1*x', col:'#d8a13a', label:'retta tangente', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> fra massa d&rsquo;aria 1 e 3, dove si osserva davvero, le curve sono quasi rette, e la loro prosecuzione all&rsquo;indietro fino a massa d&rsquo;aria zero ritrova il valore fuori dall&rsquo;atmosfera, 1 o 5.</p>
+   <p><b>Che cosa impararne:</b> con osservazioni a diverse inclinazioni si misura insieme la sorgente (l&rsquo;intercetta) e l&rsquo;atmosfera (la pendenza, cioè $\tau_Z$). È la calibrazione quotidiana di ogni fotometro da terra.</p>`}
+]},
+
+/* ---------------- 04 · ETL E IL MODELLO BRUTALE ---------------- */
+{ num:'04', title:'Equilibrio termodinamico locale, e il modello brutale di una stella', meta:'Kirchhoff: S = B(T) · un interno a Tc e una fotosfera a Ts · righe scure se Tc > Ts, brillanti se Tc < Ts',
+  blocchi:[
+  {t:'prosa', title:'Quando la funzione sorgente è un corpo nero', tag:'S = B(T)', html:R`
+  <p>Per un emettitore termico la legge di Kirchhoff lega i due coefficienti, $j_\nu=\alpha_\nu B_\nu(T)$, cioè $S_\nu=B_\nu(T)$. De Bernardis scrive l&rsquo;equazione del trasporto per radiazione termica sostituendo semplicemente la funzione sorgente con il corpo nero. È l&rsquo;<b>equilibrio termodinamico locale</b>, ETL. La materia è all&rsquo;equilibrio con sé stessa a una temperatura $T$ che può variare da punto a punto, mentre la radiazione non è necessariamente all&rsquo;equilibrio, perché può fuggire. È l&rsquo;ipotesi che rende risolubili le atmosfere stellari. Con ETL un mezzo spesso emette la brillanza di corpo nero della sua temperatura <i>locale</i>, quella dello strato dove $\tau\sim1$.</p>`},
+  {t:'prosa', title:'Il modello brutale', tag:'lezione9_B_2020, diapositive 4-8', html:R`
+  <p>De Bernardis costruisce la stella più semplice possibile. Un interno opaco che emette come un corpo nero a temperatura $T_c$, e intorno una fotosfera in equilibrio termico a temperatura $T_s$, con profondità ottica $\tau_A$ lungo la direzione $A$ verso il centro. La soluzione per $S$ costante dà
+  $$I_A=B_\nu(T_c)\,e^{-\tau_A}+B_\nu(T_s)\big(1-e^{-\tau_A}\big).$$
+  Ora si supponga che il guscio assorba in una banda stretta intorno a $\nu_0$, con $\alpha$ grande lì e trascurabile altrove. Fuori dalla riga $\tau_A\simeq0$ e si vede $B_\nu(T_c)$, il continuo dell&rsquo;interno. Dentro la riga $\tau_A\gg1$ e si vede $B_\nu(T_s)$. La differenza rispetto al continuo è
+  $$I_A-B_\nu(T_c)=\big(B_\nu(T_s)-B_\nu(T_c)\big)\big(1-e^{-\tau_A}\big),$$
+  negativa se $T_c>T_s$, <b>riga di assorbimento</b>, e positiva se $T_c<T_s$, <b>riga di emissione</b>. La seconda e la terza legge di Kirchhoff dell&rsquo;analisi spettrale sono questa riga di algebra. Un esempio numerico illustrativo, con numeri scelti da me: a 500 nm, con $T_c=6000$ K e $T_s=4500$ K, il centro di una riga otticamente spessa scende a $B(T_s)/B(T_c)=0{,}201$ del continuo, e una riga con $\tau_A=1$ al centro solo a $0{,}495$.</p>
+  <p>De Bernardis mostra anche che cosa succede quando la profondità ottica è grande in molte bande: lo spettro passa da un corpo nero all&rsquo;altro, $B(T_c)$ dove il guscio è trasparente e $B(T_s)$ dove è opaco. È il caso tipico, $T_c>T_s$, delle bande di Fraunhofer: oggi nello spettro del Sole si conoscono più di un milione di righe di assorbimento, contro le 600 viste da Fraunhofer. Le stelle con righe di emissione sono rare. Sono le Wolf-Rayet, con atmosfere estese e calde, e in casi particolari, dice de Bernardis, le righe di emissione sono dovute a un meccanismo laser naturale, <i>«scoperte 130 anni prima dell&rsquo;invenzione del laser!»</i>.</p>`}
+,
+  {t:'plot', title:'Lo spettro del modello brutale, con due righe',
+   intro:R`Brillanza $B_\lambda$ in unità di $10^{3}$ W/cm²/sr/µm fra 0,40 e 0,70 µm. Il guscio ha due righe gaussiane a 0,486 e 0,656 µm con profondità ottica 3 al centro. Ciano: interno a 6000 K e guscio a 4500 K (righe scure). Oro: interno a 4500 K e guscio a 6000 K (righe brillanti).`,
+   plots:[
+    {kind:'func2d', xr:[0.4,0.7], yr:[0,3.6], height:300, equal:false,
+     title:'lambda (um)      B_lambda (10^3 W/cm2/sr/um)',
+     curves:[{f:'(function(){var B=function(T){return 1.191e4/(pow(x,5)*(exp(14388/(x*T))-1))/1e3;};var t=3*exp(-pow((x-0.486)/0.003,2))+3*exp(-pow((x-0.656)/0.003,2));return B(6000)*exp(-t)+B(4500)*(1-exp(-t));})()', col:'#5eead4', label:'Tc = 6000 K, Ts = 4500 K'},
+             {f:'(function(){var B=function(T){return 1.191e4/(pow(x,5)*(exp(14388/(x*T))-1))/1e3;};var t=3*exp(-pow((x-0.486)/0.003,2))+3*exp(-pow((x-0.656)/0.003,2));return B(4500)*exp(-t)+B(6000)*(1-exp(-t));})()', col:'#d8a13a', label:'Tc = 4500 K, Ts = 6000 K'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> fuori dalle righe ciascuna curva è il corpo nero dell&rsquo;interno; al centro delle righe tocca quasi il corpo nero del guscio (con $\tau=3$ manca solo il 5%). Lo stesso guscio dà righe scure nel primo caso e brillanti nel secondo.</p>
+   <p><b>Che cosa impararne:</b> la profondità della riga non misura quanta materia c&rsquo;è, una volta che il centro è spesso: misura la differenza fra le due funzioni sorgente, cioè fra le due temperature. È il motivo per cui le righe forti di uno spettro stellare sono una sonda del gradiente di temperatura.</p>`},
+  {t:'prosa', title:'L&rsquo;oscuramento al bordo: Schwarzschild, 1906', tag:'Masani, cap. 19, pp. 207-209', html:R`
+  <p>Il modello brutale ha una funzione sorgente costante; una vera atmosfera ha una temperatura che cresce verso l&rsquo;interno, e questo si vede. Masani racconta che nel 1906 Karl Schwarzschild riprese il problema di Schuster mostrando che l&rsquo;oscuramento al bordo <i>«giocava fortemente a favore di un equilibrio radiativo per la parte atmosferica»</i>: l&rsquo;energia attraversa l&rsquo;atmosfera per assorbimenti e riemissioni successive, a flusso costante, e da questa condizione si ricava la temperatura $T(\tau)$. L&rsquo;intensità uscente nella direzione $\theta$ è la soluzione formale con il fondo all&rsquo;infinito,</p>
+  <p>$$I(\theta)=\int_0^\infty B(\tau)\,e^{-\tau\sec\theta}\sec\theta\,d\tau .$$</p>
+  <p>Se la funzione sorgente cresce linearmente, $B=a+b\tau$, l&rsquo;integrale si fa e dà, con $\mu=\cos\theta$,</p>
+  <p>$$\int_0^\infty (a+b\tau)\,e^{-\tau/\mu}\,\frac{d\tau}{\mu}=a+b\mu :$$</p>
+  <p>l&rsquo;intensità che esce con inclinazione $\mu$ è la funzione sorgente alla profondità ottica $\tau=\mu$. Guardando il centro del disco ($\mu=1$) si vede fino a $\tau=1$; guardando verso il bordo ($\mu\to0$) si vede solo lo strato più esterno, più freddo, ed è per questo che il bordo è più scuro. È l&rsquo;interpretazione che Masani riporta: la radiazione vista sotto l&rsquo;angolo $\theta$ <i>«proviene praticamente da uno strato più vicino alla superficie solare (e quindi più freddo)»</i>. Per un&rsquo;atmosfera grigia in equilibrio radiativo, con l&rsquo;approssimazione di Eddington, $b/a=3/2$ e il profilo è $I(\mu)/I(1)=(2+3\mu)/5$: al bordo resta il 40% dell&rsquo;intensità del centro, a metà strada in $\mu$, $\mu=0{,}5$, il 70%, vicino a quanto si misura sul Sole nel visibile. Schwarzschild ricavò anche il criterio che decide fra equilibrio radiativo e convettivo, e trovò che nell&rsquo;atmosfera vince il primo e nell&rsquo;interno il secondo; e mostrò che con l&rsquo;equilibrio radiativo la densità cade così in fretta con l&rsquo;altezza da giustificare il bordo netto del disco solare, senza bisogno della fotosfera di nebbie.</p>
+  <p>Quello che a Schwarzschild mancava, chiude Masani, era un coefficiente di assorbimento per le righe, che solo la fisica atomica poteva dare. Quando nel 1920 arrivarono la teoria della ionizzazione di Saha e quella dell&rsquo;eccitazione, la stessa equazione, con un $\kappa_\nu$ che dipende dalla frequenza, spiegò insieme l&rsquo;oscuramento al bordo, le righe e la discontinuità di Balmer, e mostrò che le differenze fra gli spettri delle stelle vengono soprattutto da temperatura e pressione, non dalla composizione.</p>`}
+]},
+
+/* ---------------- 05 · I COEFFICIENTI DI EINSTEIN ---------------- */
+{ num:'05', title:'I coefficienti di Einstein: perché emissione e assorbimento sono legati', meta:'emissione spontanea, assorbimento, emissione stimolata · le due relazioni dedotte da Planck · la legge di Kirchhoff generalizzata',
+  blocchi:[
+  {t:'prosa', title:'Tre processi in un atomo a due livelli', tag:'Einstein, 1916', html:R`
+  <p>La legge di Kirchhoff è macroscopica. De Bernardis nota che implica <i>«una relazione tra emissione ed assorbimento anche a livello microscopico»</i>, e che <i>«Einstein derivò questa relazione in un caso semplice di interazione della radiazione con un atomo»</i>. Si prende un sistema a due livelli, 1 ed 2, con pesi statistici $g_1$ e $g_2$ e separazione $h\nu_0$, e tre processi. (1) <b>Emissione spontanea</b>: dal livello 2 al livello 1, con probabilità per unità di tempo $A_{21}$. (2) <b>Assorbimento</b>: da 1 a 2, con probabilità proporzionale alla densità di radiazione $J_\nu$ alla frequenza giusta, $B_{12}J_\nu$. (3) <b>Emissione stimolata</b>: da 2 a 1 in presenza di radiazione della stessa frequenza, $B_{21}J_\nu$, con un fotone emesso identico, cioè stessa frequenza e stessa direzione, a quello che lo stimola. De Bernardis sottolinea che Einstein <i>«dovette assumere l&rsquo;esistenza dell&rsquo;emissione stimolata, meno intuitiva delle due precedenti, per poter derivare la legge di Planck (in assenza di emissione stimolata si ottiene la legge di Wien, che vale solo per energie alte)»</i>.</p>`},
+  {t:'prosa', title:'Le relazioni, dedotte dall’equilibrio', tag:'il conto', html:R`
+  <p>All&rsquo;equilibrio le transizioni verso l&rsquo;alto bilanciano quelle verso il basso: $n_1B_{12}J_\nu=n_2A_{21}+n_2B_{21}J_\nu$. Risolvendo per $J_\nu$ e usando Boltzmann, $\frac{n_1}{n_2}=\frac{g_1}{g_2}e^{h\nu/kT}$, si ha
+  $$J_\nu=\frac{A_{21}/B_{21}}{(g_1B_{12}/g_2B_{21})\,e^{h\nu/kT}-1}.$$
+  All&rsquo;equilibrio termodinamico $J_\nu$ deve essere la funzione di Planck, $\frac{2h\nu^3}{c^2}\frac{1}{e^{h\nu/kT}-1}$, a <i>qualunque</i> temperatura. Le due espressioni coincidono per ogni $T$ solo se
+  $$g_1B_{12}=g_2B_{21},\qquad\frac{A_{21}}{B_{21}}=\frac{2h\nu^{3}}{c^{2}}.$$
+  Sono le <b>relazioni di Einstein</b>. Non contengono la temperatura, quindi sono proprietà dell&rsquo;atomo e valgono anche fuori dall&rsquo;equilibrio: <i>«dato un coefficiente di Einstein, dalle relazioni di Einstein si trovano subito gli altri due»</i>. Senza emissione stimolata il $-1$ al denominatore non ci sarebbe, e si otterrebbe la legge di Wien.</p>`},
+  {t:'prosa', title:'Il trasporto scritto con i coefficienti', tag:'Kirchhoff generalizzata', html:R`
+  <p>Il coefficiente di emissione viene dalle diseccitazioni spontanee, $j_\nu=\frac{h\nu}{4\pi}n_2A_{21}\phi(\nu)$, con $\phi$ il profilo di riga normalizzato. L&rsquo;emissione stimolata aggiunge al fascio energia proporzionale al fascio stesso, quindi funziona come un <i>assorbimento negativo</i>, e il coefficiente di assorbimento netto è $\alpha_\nu=\frac{h\nu}{4\pi}\big(n_1B_{12}-n_2B_{21}\big)\phi(\nu)$. La funzione sorgente è
+  $$S_\nu=\frac{n_2A_{21}}{n_1B_{12}-n_2B_{21}},$$
+  e con le relazioni di Einstein
+  $$S_\nu=\frac{2h\nu^{3}}{c^{2}}\,\frac{1}{\dfrac{n_1g_2}{n_2g_1}-1}.$$
+  È la <b>legge di Kirchhoff generalizzata</b> delle slide. Se le popolazioni seguono Boltzmann alla temperatura $T$, $S_\nu=B_\nu(T)$ ed è l&rsquo;ETL. Se non la seguono, la stessa formula definisce una funzione sorgente non termica, e la temperatura che le corrisponde, la «temperatura di eccitazione», non è quella del gas.</p>`}
+]},
+
+/* ---------------- 06 · MASER ---------------- */
+{ num:'06', title:'Quando l’assorbimento cambia segno: i maser astrofisici', meta:'inversione di popolazione · profondità ottica negativa e amplificazione esponenziale · la sorgente a 22 GHz che dovrebbe essere a dieci miliardi di kelvin',
+  blocchi:[
+  {t:'prosa', title:'Inversione di popolazione', tag:'lezione9_B_2020, diapositive 25-26', html:R`
+  <p>In equilibrio termico $\frac{n_2}{g_2}<\frac{n_1}{g_1}$ e $\alpha_\nu>0$. Ma <i>«a volte è possibile (in situazioni di non equilibrio) mandare nel livello superiore un numero di atomi talmente elevato che»</i> $\frac{n_2}{g_2}>\frac{n_1}{g_1}$. È l&rsquo;<b>inversione delle popolazioni</b>, e il coefficiente di assorbimento diventa negativo. Allora anche la profondità ottica è negativa, $\tau_\nu<0$, e la legge esponenziale, invece di attenuare, amplifica: $I\propto e^{|\tau|}$. È un <b>maser</b> (o laser), amplificazione di microonde (o di luce) per emissione stimolata di radiazione. De Bernardis dà l&rsquo;ordine di grandezza: una profondità ottica di $-100$ lungo una nube molecolare dà un&rsquo;amplificazione $e^{100}\simeq10^{43}$. Nessun laser di laboratorio ha un mezzo attivo lungo anni luce.</p>`},
+  {t:'prosa', title:'L’esercizio: 30 000 jansky a 22 GHz', tag:'esercizio di lezione', html:R`
+  <p><i>Una emissione di 30 000 Jy a 22 GHz da una sorgente di dimensioni inferiori a 0,1″ è così alta che, per essere di origine termica, dovrebbe provenire da un oggetto a temperatura estremamente alta. Calcolare la temperatura che dovrebbe avere un corpo nero per produrre il flusso misurato. Calcolare a che frequenza si avrebbe la massima emissione.</i> L&rsquo;esercizio è nelle diapositive 28-30 della lezione9_B_2020, e nelle edizioni 2016 e 2017 della lezione 10.</p>
+  <p>La sorgente ha angolo solido $\Omega=\pi\theta^{2}/4$, con $\theta=0{,}1''$ (con l&rsquo;<span class="str" data-str="angolo-piccolo">approssimazione di angolo piccolo</span>), cioè $1{,}85\cdot10^{-13}\ \mathrm{sr}$. La brillanza media è $B_\nu=\frac{F_\nu}{\Omega}$: con $3\cdot10^{4}$ Jy $=3\cdot10^{-22}$ W m⁻² Hz⁻¹ viene $1{,}63\cdot10^{-9}$ W m⁻² Hz⁻¹ sr⁻¹. A 22 GHz qualunque corpo nero ragionevole è in regime di Rayleigh-Jeans, quindi $T_b=\frac{c^{2}}{2k\nu^{2}}B_\nu$, con $2k\nu^2/c^2=1{,}49\cdot10^{-19}$ W m⁻² Hz⁻¹ sr⁻¹ K⁻¹. La temperatura è $1{,}1\cdot10^{10}\ \mathrm{K}$ (de Bernardis: $10^{10}$ K, con la brillanza arrotondata a $1{,}5\cdot10^{-9}$). Un corpo nero così caldo avrebbe il massimo, per la legge di Wien in frequenza, a $6{,}4\cdot10^{20}\ \mathrm{Hz}$, fotoni da $2{,}7\ \mathrm{MeV}$, cioè raggi gamma. E sarebbe molto più brillante a ogni frequenza più alta di 22 GHz. Siccome <i>«non si vede emissione a frequenze alte (visibile, UV, X, gamma) se ne conclude che si tratta di emissione non termica»</i>: la riga dell&rsquo;acqua a 22 GHz amplificata da un maser, nella nube molecolare W43A.</p>`}
+]},
+
+/* ---------------- 07 · SCATTERING E RANDOM WALK ---------------- */
+{ num:'07', title:'Lo scattering, e il cammino a caso dei fotoni nel Sole', meta:'un’equazione integro-differenziale · la radice di N · quanti urti per uscire da un mezzo spesso · due secondi e qualche migliaio di anni',
+  blocchi:[
+  {t:'prosa', title:'Quando la luce non viene assorbita ma deviata', tag:'lezione10_2020', html:R`
+  <p>Finora un fotone tolto al fascio era assorbito. Con lo <b>scattering</b> viene deviato in un&rsquo;altra direzione, e un fascio guadagna anche i fotoni deviati verso di lui da tutte le altre direzioni. Per scattering isotropo e coerente, cioè con la stessa probabilità in ogni direzione e senza cambio di frequenza, con coefficiente di scattering $\sigma_\nu$, l&rsquo;emissione per scattering è la media angolare dell&rsquo;intensità, e l&rsquo;equazione diventa
+  $$\frac{dI_\nu}{ds}=-\sigma_\nu\left(I_\nu-\frac{1}{4\pi}\int I_\nu\,d\Omega\right).$$
+  <i>«È un&rsquo;equazione integro-differenziale nella variabile $I_\nu$! Difficile da risolvere, non vale la soluzione formale»</i>, perché la funzione sorgente contiene l&rsquo;incognita. I metodi approssimati, come quello di Eddington, <i>«esulano da questo corso»</i>. Per gli <span class="str" data-str="ordini-di-grandezza">ordini di grandezza</span> serve invece un argomento probabilistico.</p>`},
+  {t:'prosa', title:'Il random walk', tag:'la radice di N', html:R`
+  <p>Un fotone fa un passo $\vec r_1$, viene diffuso, fa un passo $\vec r_2$ in una direzione a caso, e così via. Dopo $N$ diffusioni è in $\vec R=\vec r_1+\dots+\vec r_N$. Le direzioni sono indipendenti, quindi in media $\langle\vec r_i\cdot\vec r_j\rangle=0$ per $i\neq j$, e restano solo i quadrati:
+  $$\langle R^{2}\rangle=\sum_i\langle r_i^{2}\rangle=N\ell^{2},$$
+  con $\ell$ il cammino libero medio. L&rsquo;allontanamento netto è $R=\ell\sqrt N$, e non $N\ell$. Per uscire da un mezzo di dimensione $L$ e alta profondità ottica, $\tau=L/\ell\gg1$, servono quindi
+  $$N=(L/\ell)^{2}=\tau^{2}$$
+  diffusioni. Se invece $\tau\ll1$, la probabilità di anche un solo scattering è $1-e^{-\tau}\simeq\tau$. Il tempo per uscire è $t=\frac{N\ell}{c}=\frac{L^{2}}{\ell c}$: in un mezzo spesso <b>la luce diffonde, non viaggia</b>, e il tempo cresce come il quadrato della dimensione.</p>`},
+  {t:'prosa', title:'Il Sole, e una cifra da controllare', tag:'diapositive 8-9', html:R`
+  <p>De Bernardis applica l&rsquo;argomento al Sole. Alla velocità della luce, un fotone uscirebbe dal centro in $2{,}3\ \mathrm{s}$. Ma <i>«i fotoni hanno un cammino libero medio di solo 1 cm. Quindi vengono diffusi ed anche spezzati in più fotoni di energia più bassa»</i>, e <i>«il loro random walk li porta ad uscire dal Sole circa 30000 anni dopo la loro generazione»</i>. I neutrini, con la loro sezione d&rsquo;urto minuscola, escono subito. Rifacendo il conto con i numeri della slide, $\ell=1$ cm e $L=R_\odot=6{,}96\cdot10^{10}$ cm, servono $N=(L/\ell)^2=4{,}8\cdot10^{21}$ passi, e un tempo $L^2/\ell c$ di $5{,}1\cdot10^{3}$ anni, non 30 000. Per avere 30 000 anni il cammino libero medio dovrebbe essere $0{,}17\ \mathrm{cm}$. Lo dichiaro: le due cifre della slide non stanno insieme con la formula del random walk, e non ho una fonte che dica quale delle due fosse intesa. Il cammino libero medio vero varia enormemente dal centro alla superficie, quindi un solo $\ell$ è comunque una caricatura. Il messaggio di de Bernardis non cambia: migliaia o decine di migliaia di anni contro due secondi, perché $t\propto\tau^2$.</p>`},
+  {t:'prosa', title:'L&rsquo;equazione con la diffusione, nella forma del 1914', tag:'Masani, cap. 19, nota 7, pp. 207-208', html:R`
+  <p>Masani riporta in nota l&rsquo;equazione come la scrisse Schwarzschild nel 1914, con assorbimento $k_\nu$ e diffusione $\sigma_\nu$ insieme: $\cos\theta\,dI_\nu/d\tau_\nu=I_\nu-S_\nu$, con $d\tau_\nu=-(k_\nu+\sigma_\nu)\rho\,dx$ e la funzione sorgente</p>
+  <p>$$S_\nu=\frac{k_\nu B_\nu(T)+\sigma_\nu J_\nu}{k_\nu+\sigma_\nu},\qquad J_\nu=\oint I_\nu\,\frac{d\omega}{4\pi}.$$</p>
+  <p>Il libro nota che la soluzione formale <i>«risolve solo formalmente l&rsquo;equazione del trasporto, poiché la funzione $S_\nu(\tau)$ non è nota»</i>: con la diffusione $S_\nu$ contiene $J_\nu$, cioè l&rsquo;intensità stessa mediata su tutte le direzioni, ed è l&rsquo;equazione integro-differenziale di questa tappa. Il caso senza diffusione, $\sigma_\nu=0$, dà $S_\nu=B_\nu$, ed è quello che Schuster e Schwarzschild sapevano integrare.</p>`}
+]},
+
+/* ---------------- 08 · L'ESTINZIONE ---------------- */
+{ num:'08', title:'L’estinzione interstellare: profondità ottica in magnitudini', meta:'A = 1,086 tau · il decremento di Balmer come termometro della polvere · l’esonero della nebulosa planetaria',
+  blocchi:[
+  {t:'prosa', title:'Da profondità ottica a magnitudini', tag:'1,086', html:R`
+  <p>Una stella dietro una nube di polvere che non emette nel visibile è il caso più semplice della soluzione: $F=F_0e^{-\tau_\lambda}$. Gli astronomi esprimono l&rsquo;attenuazione in <span class="str" data-str="magnitudine">magnitudini</span>, l&rsquo;<b>estinzione</b>
+  $$A_\lambda=-2{,}5\log\frac{F}{F_0}=1{,}086\,\tau_\lambda,$$
+  perché $2{,}5\log e=1{,}086$. Una magnitudine di estinzione è quasi esattamente una unità di profondità ottica. Il problema pratico è che $F_0$ non si conosce: non si sa quanto sarebbe brillante la sorgente senza la nube. Il trucco è usare due lunghezze d&rsquo;onda per cui si conosce il rapporto intrinseco dei flussi. La polvere estingue di più il blu del rosso, e il rapporto osservato, confrontato con quello intrinseco, dà la differenza di estinzione. Una curva di estinzione nota trasforma poi quella differenza nell&rsquo;estinzione a qualunque lunghezza d&rsquo;onda.</p>`},
+  {t:'prosa', title:'L’esonero della nebulosa planetaria', tag:'Scritti_Esoneri 2010-2016', html:R`
+  <p><i>Nello spettro di una nebulosa planetaria il rapporto dei flussi H-alfa/H-beta è 6,00 e H-gamma/H-beta è 0,333, mentre nello spettro di ricombinazione dovrebbero essere 2,86 e 0,47, fissati da costanti fondamentali. Lunghezze d&rsquo;onda 656,3, 486,1 e 434,1 nm. Assumendo che la differenza sia dovuta a polvere interstellare con curva di estinzione $A_\lambda/A(1\,\mu\mathrm{m})=-0{,}49+1{,}49/\lambda(\mu\mathrm{m})$ fra 0,4 e 1,1 µm, calcolare $A_V$ a $\lambda_V=540$ nm.</i></p>
+  <p>Per ciascuna riga $F=F_0e^{-\tau}$, e il rapporto delle due dà $\frac{F_\alpha/F_\beta}{(F_\alpha/F_\beta)_0}=e^{-(\tau_\alpha-\tau_\beta)}$. Il rapporto osservato è più che doppio di quello intrinseco: H-beta, più blu, è stata estinta di più. $\tau_\beta-\tau_\alpha=\ln(6{,}00/2{,}86)=0{,}741$, cioè $A_\beta-A_\alpha=0{,}804$ magnitudini. La curva di estinzione dà i fattori $1{,}780$ a H-alfa e $2{,}575$ a H-beta. Scrivendo $A_\beta-A_\alpha=A(1\,\mu\mathrm{m})\left[\frac{A_\beta}{A(1\,\mu\mathrm{m})}-\frac{A_\alpha}{A(1\,\mu\mathrm{m})}\right]$ si ricava $A(1\,\mu\mathrm{m})=1{,}012$ mag, e quindi $A_\alpha=1{,}80$, il valore della soluzione. Alla banda V il fattore è $2{,}269$, e $A_V=2{,}30$ magnitudini. Il controllo con la seconda coppia, H-gamma su H-beta, dà $2{,}31$. Due misure indipendenti che concordano dicono che il modello, polvere davanti più spettro di ricombinazione, regge. Nel visibile la nebulosa ci arriva con il $0{,}12$ della sua luce, cioè con profondità ottica 2,1 in V. È un caso intermedio, come la tappa 03 diceva che l&rsquo;esame ama.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché nell’esercizio non serve conoscere la distanza o la luminosità della nebulosa?`,
+    a:R`Perché si usano solo rapporti di flussi fra righe della stessa sorgente: la distanza, la luminosità e la geometria si semplificano nel rapporto, e resta la sola differenza di estinzione fra le due lunghezze d&rsquo;onda, che dipende dalla polvere.`},
+   {q:R`Se la polvere emettesse nel visibile, l’esercizio sarebbe sbagliato?`,
+    a:R`Sì, andrebbe aggiunto il termine $S(1-e^{-\tau})$. Ma la polvere interstellare è a decine di kelvin, e la sua funzione sorgente nel visibile è una funzione di Planck a 20 K, enormemente più piccola della brillanza della nebulosa: nel visibile la polvere estingue e basta. Emette nel lontano infrarosso.`}
+  ]}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: la soluzione formale dell’equazione del trasporto', meta:'la domanda teorica della mappa · il copione in sei mosse · i due limiti e il caso intermedio',
+  blocchi:[
+  {t:'reveal', title:'Il copione', tag:'sei mosse', steps:[
+   {label:'Mossa 1: il bilancio', body:R`<p>«Lungo un fascio, $dI/ds=-\alpha I+j$: perdo una frazione di quello che c&rsquo;è, guadagno l&rsquo;emissione locale. Definisco la profondità ottica $d\tau=\alpha\,ds$ e la funzione sorgente $S=j/\alpha$: $dI/d\tau=-I+S$.»</p>`},
+   {label:'Mossa 2: il fattore integrante', body:R`<p>«Moltiplico per $e^\tau$: $\frac{d}{d\tau}\big(e^{\tau}I\big)=e^{\tau}S$. Integro da 0 a $\tau$, con $I(0)$ la luce che entra.»</p>`},
+   {label:'Mossa 3: la soluzione e la sua lettura', body:R`<p>«$I(\tau)=I(0)e^{-\tau}+\int_0^{\tau}S(\tau')e^{-(\tau-\tau')}d\tau'$: la luce di fondo attenuata da tutto lo spessore, più ogni strato attenuato dallo spessore che ha davanti.»</p>`},
+   {label:'Mossa 4: lo strato uniforme', body:R`<p>«Con $S$ costante, $I=I(0)e^{-\tau}+S(1-e^{-\tau})$. È la formula di quasi ogni esercizio.»</p>`},
+   {label:'Mossa 5: i due limiti', body:R`<p>«Per $\tau\ll1$ vedo la sorgente più $S\tau$: conto la materia. Per $\tau\gg1$ vedo solo $S$: con ETL $S=B(T)$, e un mezzo spesso è un corpo nero alla sua temperatura. Il caso $\tau\sim1$ va calcolato per intero.»</p>`},
+   {label:'Mossa 6: la conseguenza', body:R`<p>«Con un interno a $T_c$ e un guscio a $T_s$ che assorbe solo in riga, la riga è scura se $T_c>T_s$ e brillante se $T_c<T_s$: sono le leggi di Kirchhoff dell&rsquo;analisi spettrale, ricavate.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove il trasporto torna', meta:'otto voci · dagli interni stellari alle nubi',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>Equazione:</b> $dI/d\tau=-I+S$, con $\tau=\int\alpha\,ds$ e $S=j/\alpha$.</li>
+  <li><b>Strato uniforme:</b> $I=I_0e^{-\tau}+S(1-e^{-\tau})$.</li>
+  <li><b>Trasmissione:</b> $e^{-1}=0{,}37$, $e^{-3}=0{,}05$, $e^{-5}<1\%$; si vede fino a $\tau\sim1$.</li>
+  <li><b>ETL:</b> $S=B_\nu(T)$; un mezzo spesso in ETL è un corpo nero.</li>
+  <li><b>Einstein:</b> $g_1B_{12}=g_2B_{21}$, $A_{21}/B_{21}=2h\nu^3/c^2$; l&rsquo;emissione stimolata è un assorbimento negativo.</li>
+  <li><b>Maser:</b> $\tau<0$, amplificazione $e^{|\tau|}$; 30 000 Jy a 22 GHz da 0,1″ chiedono $T_b\sim10^{10}$ K.</li>
+  <li><b>Random walk:</b> $R=\ell\sqrt N$, $N=\tau^2$, $t=L^2/\ell c$.</li>
+  <li><b>Estinzione:</b> $A=1{,}086\,\tau$; decremento di Balmer intrinseco H-alfa/H-beta = 2,86.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>Negli interni stellari il trasporto radiativo è il modo in cui l&rsquo;energia prodotta al centro arriva alla superficie, e nel limite di grande profondità ottica diventa un&rsquo;equazione di diffusione per il flusso di energia. È una delle equazioni della struttura stellare, con la sua opacità media. Nelle atmosfere stellari la soluzione formale con ETL e la temperatura che cresce verso l&rsquo;interno spiega l&rsquo;oscuramento al bordo: guardando il bordo del disco si vede fino a $\tau=1$ lungo una linea obliqua, quindi più in alto e più freddo. Nel mezzo interstellare, la riga a 21 cm in emissione o in assorbimento, la polvere che estingue nel visibile ed emette nel lontano infrarosso, e le righe molecolari con le loro temperature d&rsquo;antenna sono tutte la stessa formula dello strato uniforme. In cosmologia il fondo cosmico è la radiazione che ha avuto l&rsquo;ultimo scattering quando l&rsquo;universo è diventato otticamente sottile, e la superficie dove «$\tau=1$» è un&rsquo;epoca invece che un luogo.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-08-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-08 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-08-il-trasporto-radiativo.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>

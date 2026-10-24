@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento as-11 — Il mezzo interstellare, il gas: l’idrogeno in tre forme e tre modi di farsi vedere</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Astrofisica · Movimento <b>as-11 — Il mezzo interstellare, il gas: l’idrogeno in tre forme e tre modi di farsi vedere</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'astrofisica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["elettronvolt"] = {"nome":"Elettronvolt","riga":"L'energia che un elettrone acquista attraversando una differenza di potenziale di un volt: $1\\ \\mathrm{eV}=1{,}602\\cdot10^{-19}$ J; divisa per $c^{2}$ è una massa, $1\\ \\mathrm{eV}/c^{2}=1{,}783\\cdot10^{-36}$ kg.","serve":"A leggere senza conversioni le tabelle in cui la fisica delle particelle e l'astrofisica scrivono le masse a riposo come energie — l'elettrone 0,511 MeV, il protone 938 MeV, il bosone di Higgs 125 GeV. La scelta non è una bizzarria di notazione: in un processo la quantità che si conserva è l'energia, e scrivere la massa già in energia dice a colpo d'occhio quali reazioni sono possibili e quante ne resta per l'energia cinetica o per i fotoni. L'elettronvolt ha anche un secondo mestiere, e in astrofisica è il più usato dei due: convertito in temperatura tramite $k_BT$ dà la scala termica a cui un processo di quella energia diventa frequente, e questo è ciò che permette di dire a che punto della storia dell'universo o a che profondità di una stella un certo processo si accende.","esempio":"Dalla massa del protone espressa come energia, $938{,}3$ MeV, si ricavano i chilogrammi in un passaggio: $m_p=938{,}3\\cdot10^{6}\\cdot1{,}783\\cdot10^{-36}=1{,}673\\cdot10^{-27}$ kg, che è il valore stampato in calce al foglio d'esame. Sul versante termico, $T=\\dfrac{1{,}602\\cdot10^{-19}}{1{,}381\\cdot10^{-23}}=11600$ K: un'energia di un elettronvolt corrisponde a poco più di undicimila kelvin, e siccome ionizzare l'idrogeno costa 13,6 eV si capisce subito perché serva una fotosfera da qualche decina di migliaia di kelvin per trovarlo ionizzato.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"05","come":"le masse delle particelle elementari scritte come energie, con la conversione in chilogrammi e la gerarchia delle masse, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.602177e-19/(2.99792458e8)**2*1e36","vale":"1.783","dove":"riga","appare":"1,783\\cdot10^{-36}"},{"tipo":"numero","espr":"938.3e6*1.783e-36*1e27","vale":"1.673","dove":"esempio","appare":"1,673\\cdot10^{-27}"},{"tipo":"numero","espr":"1.602e-19/1.381e-23","vale":"11600","dove":"esempio","appare":"11600"}]};
+STRUM["angolo-piccolo"] = {"nome":"Angolo piccolo","riga":"Per $\\theta\\ll1$ radiante valgono $\\sin\\theta\\simeq\\tan\\theta\\simeq\\theta$, e un oggetto di dimensione trasversa $l$ posto a distanza $d\\gg l$ sottende l'angolo $\\theta\\simeq l/d$.","serve":"È l'approssimazione su cui poggia tutta la geometria osservativa: l'unica grandezza che un telescopio misura direttamente è un angolo, e trasformarlo in una lunghezza richiede solo questa relazione più una distanza nota. L'errore relativo che si commette è controllato e piccolissimo: dallo sviluppo $\\sin\\theta=\\theta-\\theta^{3}/6+\\dots$ segue che $\\theta$ sovrastima $\\sin\\theta$ di una frazione $\\theta^{2}/6$, quindi per il disco solare — l'oggetto più grande del cielo insieme alla Luna, e già solo mezzo grado — si sbaglia di una parte su settantamila. Per qualunque oggetto extrasolare l'approssimazione è esatta a tutti gli effetti pratici. La regola pratica che ne segue vale più della formula: un angolo in radianti si legge subito come rapporto fra due lunghezze, e i secondi d'arco esistono solo perché il radiante è troppo grande — $1''=4{,}848\\cdot10^{-6}$ rad.","esempio":"La Luna ha diametro $l=3{,}476\\cdot10^{6}$ m e dista $d=3{,}844\\cdot10^{8}$ m, quindi sottende $\\theta=\\dfrac{3{,}476\\cdot10^{6}}{3{,}844\\cdot10^{8}}=9{,}043\\cdot10^{-3}$ rad, che in gradi sono $\\theta=9{,}043\\cdot10^{-3}\\cdot180/\\pi=0{,}518$ gradi. L'errore dell'approssimazione, $\\theta^{2}/6$, vale una parte su settantamila: invisibile rispetto a qualunque incertezza osservativa.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"03","come":"l'angolo sotteso come unica grandezza direttamente misurabile, con la stima dell'errore dell'approssimazione di angolo piccolo"},"controllo":[{"tipo":"numero","espr":"pi/648000*1e6","vale":"4.848","dove":"serve","appare":"4,848"},{"tipo":"numero","espr":"3.476e6/3.844e8*1e3","vale":"9.043","dove":"esempio","appare":"9,043\\cdot10^{-3}"},{"tipo":"numero","espr":"3.476e6/3.844e8*180/pi","vale":"0.518","dove":"esempio","appare":"0,518"}]};
+STRUM["ordini-di-grandezza"] = {"nome":"Ordini di grandezza","riga":"Stimare una quantità alla potenza di dieci giusta: si tiene una cifra significativa, si sommano e si sottraggono gli esponenti, e si controlla che l'unità del risultato sia quella che si voleva.","serve":"A sapere se un risultato è plausibile prima di averlo calcolato con precisione, e ad accorgersi di un errore di impostazione quando c'è ancora tempo per rimediare. In astrofisica non è una comodità ma il modo normale di ragionare, per due ragioni: le grandezze in gioco vanno da $10^{-36}$ kg a $10^{53}$ kg e nessuna intuizione le copre, e i dati osservativi sono noti al dieci o al venti per cento, quindi una cifra significativa è spesso tutto ciò che il problema contiene davvero. Il controllo che smaschera più errori non è sul numero, è sull'**unità**: un conto che dovrebbe dare una densità e dà dei kg è sbagliato nell'impostazione, e nessun affinamento dell'aritmetica lo salverà. La seconda regola è il confronto con un termine noto — l'acqua per una densità, il Sole per una massa o una luminosità, il parsec per una distanza galattica — perché un numero senza metro non dice niente.","esempio":"Densità media del Sole, dalle due sole quantità stampate in calce al foglio d'esame, $M_\\odot=1{,}989\\cdot10^{30}$ kg e $R_\\odot=6{,}957\\cdot10^{8}$ m: $\\rho=\\dfrac{3M_\\odot}{4\\pi R_\\odot^{3}}=1410\\ \\mathrm{kg/m^3}$. Il confronto è immediato e istruttivo: è quasi una volta e mezza l'acqua, cioè il Sole è in media meno denso della Terra — una stella non è un sasso grande, è un gas tenuto insieme dal proprio peso.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"01","come":"la gerarchia delle strutture cosmiche letta come scala di ordini di grandezza, e il tempo di luce come secondo asse della stessa tabella"},"controllo":[{"tipo":"numero","espr":"3*1.989e30/(4*pi*(6.957e8)**3)","vale":"1410","dove":"esempio","appare":"1410"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo as-11: Il mezzo interstellare, il gas: l’idrogeno in tre forme e tre modi di farsi vedere <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        as-11 — il mezzo interstellare: il gas
+identita:  fra le stelle non c'e' il vuoto, e l'idrogeno in tre forme — neutro, ionizzato, molecolare — si fa
+           vedere con tre meccanismi diversi: la riga a 21 cm, la ricombinazione e il free-free, le righe
+           molecolari che raffreddano le nubi.
+copre:     A.13, A.14, A.15
+serve:     as-08 (trasporto radiativo, coefficienti di Einstein, temperatura di brillanza)
+apre:      calcolato da verifica-mappa.py
+profondita: misto (13 prove, densita' 2,2): servono svolti i conti di densita' di colonna e di massa di nube.
+           All'orale: la sfera di Stromgren e la riga a 21 cm.
+fonti:     lezione13_2020 (pagine 1-29): radiazione non termica e free-free (stima classica con la massima
+           accelerazione, spettro piatto, i due regimi dell'emissione radio di una regione HII), M51, la
+           risoluzione angolare, l'idrogeno neutro e la riga a 21 cm (spin-flip, A21 = 2,85e-15 s^-1, 11
+           milioni di anni, g1=1 e g2=3, T_s = 150 K, Delta E = 5,6e-6 eV), il profilo in velocita' e la
+           formula pratica N_H = 1,82e18 int T_b dv, lo spettro a longitudine 90 gradi.
+           lezione10_2020_B (pagine 9-12): le regioni HII, la ricombinazione e H-alfa, la crescita del
+           fronte di ionizzazione, il raggio di Stromgren con i numeri tipici (n = 10 cm^-3, alpha = 2,6e-13
+           cm^3/s, R_S circa 6 pc) e le due complicazioni (fotoni di ricombinazione ionizzanti,
+           sovrapressione: 7000 K contro 70 K).
+           lezione15b_2020 (pagine 1-9): raffreddamento delle nubi per righe molecolari, viriale per una
+           nube sferica omogenea (U = -3GM^2/5R), massa e lunghezza di Jeans.
+           Prova scritta 20150723, esercizio 2 (nube di HI di 0,7 pc: luminosita' a 21 cm, temperatura
+           minima, tempo di caduta libera).
+           DICHIARATO (tappa 03): la slide da' Delta E = 5,6e-6 eV per la transizione iperfine; h nu a
+           1420,4 MHz e' 5,87e-6 eV.
+           DICHIARATO (tappa 06): l'approssimazione di Mezger-Henderson per la profondita' ottica di
+           free-free (0,082 T^-1,35 nu^-2,1 EM) NON e' nelle fonti del corso: e' usata come formula
+           standard, solo per la stima della frequenza di passaggio.
+           La curva di rotazione galattica dalla riga a 21 cm, che le stesse slide di lezione 13 portano
+           subito dopo, e' trattata con le galassie e la materia oscura.
+           Marconi, Cosmologia, cap. 10.3 (pagine 150-153): le pagine che il dossier assegna a questo movimento
+           parlano di nucleosintesi, non di mezzo interstellare (le coordinate erano «candidate», e qui lo si
+           dice). Sono usate solo nei due punti in cui toccano il gas: la riga iperfine dell'elio-3 come gemella
+           della 21 cm, e le regioni HII a bassa metallicita' e l'assorbimento interstellare come laboratori
+           dell'elio e del deuterio primordiali. La frequenza 8665,65 MHz della riga di 3He+ e' standard, non
+           dalle fonti.
+registro:  lezione13_2020, lezione10_2020_B, lezione15b_2020, lezione14_2017 (diapositive 25-46: collasso, frammentazione, fine della frammentazione; tappa 08)
+generata:  2026-10-20
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "numero", "espr": "1.380649e-23*100/1.602e-19*1e3", "vale": "8.6", "dove": "01", "appare": "8{,}6\\ \\mathrm{meV}"},
+ {"tipo": "numero", "espr": "6.62607e-34*1.4204058e9/1.602177e-19*1e6", "vale": "5.87", "dove": "02", "appare": "5{,}87\\cdot10^{-6}\\ \\mathrm{eV}"},
+ {"tipo": "numero", "espr": "6.62607e-34*1.4204058e9/1.380649e-23", "vale": "0.068", "dove": "02", "appare": "0{,}068\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "1/2.85e-15/3.156e7/1e6", "vale": "11.1", "dove": "02", "appare": "11{,}1"},
+ {"tipo": "numero", "espr": "3*exp(-0.0682/150)/(1+3*exp(-0.0682/150))", "vale": "0.7499", "dove": "02", "appare": "0{,}7499"},
+ {"tipo": "limite", "espr": "3*exp(-a/T)/(1+3*exp(-a/T))", "var": "T", "a": "oo", "vale": "Rational(3,4)", "ipotesi": {"a": "positive", "T": "positive"}, "dove": "02", "appare": "\\frac{n_2}{n_H}\\to\\frac34"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\frac{n_2}{n_1}=\\frac{g_2}{g_1}e^{-h\\nu_{21}/kT_s}\\simeq3", "perche": "e' la distribuzione di Boltzmann con g2=3, g1=1, e h nu/k T_s = 0,068/150 trascurabile: il limite asserito."},
+ {"tipo": "numero", "espr": "2.998e8/1.4204058e9*100", "vale": "21.1", "dove": "02", "appare": "21{,}1\\ \\mathrm{cm}"},
+ {"tipo": "simbolico", "dove": "03", "appare": "j_\\nu=\\frac{h\\nu}{4\\pi}\\,n_2A_{21}\\,\\phi(\\nu)", "perche": "coefficiente di emissione spontanea (sistema a due livelli), come nelle slide."},
+ {"tipo": "uguale", "sinistra": "(h*nu/(4*pi))*(Rational(3,4)*N)*A*phi", "vale": "Rational(3,16)/pi*h*nu*A*N*phi", "ipotesi": {"h": "positive", "nu": "positive", "A": "positive", "N": "positive", "phi": "positive"}, "dove": "03", "appare": "I_\\nu=\\frac{3}{16\\pi}h\\nu A_{21}N_H\\phi(\\nu)"},
+ {"tipo": "uguale", "sinistra": "c**2/(2*k*nu**2)*Rational(3,16)/pi*h*nu*A*N*phi", "vale": "3*c**2*h*A*N*phi/(32*pi*k*nu)", "ipotesi": {"c": "positive", "k": "positive", "h": "positive", "nu": "positive", "A": "positive", "N": "positive", "phi": "positive"}, "dove": "03", "appare": "T_b=\\frac{3c^{2}hA_{21}}{32\\pi k\\nu}\\,N_H\\phi(\\nu)"},
+ {"tipo": "uguale", "sinistra": "solve(Tv-3*c**2*h*A*N/(32*pi*k*nu)*(c/nu),N)[0]", "vale": "32*pi*k*nu**2*Tv/(3*h*c**3*A)", "ipotesi": {"c": "positive", "k": "positive", "h": "positive", "nu": "positive", "A": "positive", "N": "positive", "Tv": "positive"}, "dove": "03", "appare": "N_H=\\frac{32\\pi k\\nu^{2}}{3hc^{3}A_{21}}\\int T_b\\,dv"},
+ {"tipo": "numero", "espr": "32*pi*1.380649e-23*(1.4204058e9)**2/(3*6.62607e-34*(2.998e8)**3*2.85e-15)*1e3/1e4/1e18", "vale": "1.83", "dove": "03", "appare": "1{,}83\\cdot10^{18}"},
+ {"tipo": "numero", "espr": "1.82e18*100*10/1e21", "vale": "1.82", "dove": "03", "appare": "1{,}82\\cdot10^{21}\\ \\mathrm{cm^{-2}}"},
+ {"tipo": "simbolico", "dove": "03", "appare": "N_H=1{,}82\\cdot10^{18}\\int\\frac{T_b(v)}{\\mathrm{K}}\\,\\frac{dv}{\\mathrm{km/s}}\\ \\ \\mathrm{cm^{-2}}", "perche": "e' la formula pratica delle slide (diapositiva 25): la riga precedente con le costanti in unita' pratiche, il cui coefficiente e' asserito."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\phi(\\nu)\\,d\\nu=\\phi_v\\,dv", "perche": "cambio di variabile da frequenza a velocita' con d nu = nu dv / c, che conserva la normalizzazione del profilo."},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\Delta\\nu/\\nu_0=v/c", "perche": "Doppler non relativistico."},
+ {"tipo": "numero", "espr": "0.7*3.086e16/1e16", "vale": "2.16", "dove": "04", "appare": "2{,}16\\cdot10^{16}\\ \\mathrm{m}"},
+ {"tipo": "numero", "espr": "4e-17*4*pi/3*(0.7*3.086e16)**3/1.989e30", "vale": "849", "dove": "04", "appare": "849\\,M_\\odot"},
+ {"tipo": "numero", "espr": "4e-17*4*pi/3*(0.7*3.086e16)**3/1.6735e-27/1e60", "vale": "1.01", "dove": "04", "appare": "1{,}01\\cdot10^{60}"},
+ {"tipo": "numero", "espr": "0.75*1.0093e60*2.9e-15*6.62607e-34*1.42e9/1e21", "vale": "2.07", "dove": "04", "appare": "2{,}07\\cdot10^{21}\\ \\mathrm{W}"},
+ {"tipo": "numero", "espr": "2.0654e21/3.846e26*1e6", "vale": "5.4", "dove": "04", "appare": "5{,}4\\cdot10^{-6}\\,L_\\odot"},
+ {"tipo": "simbolico", "dove": "04", "appare": "L=\\frac34N_HA_{21}h\\nu_{21}", "perche": "e' la potenza emessa da tutti gli atomi nello stato superiore, ciascuno con probabilita' A21 per secondo di emettere un fotone h nu: un conteggio, con il 3/4 dato dal testo."},
+ {"tipo": "simbolico", "dove": "05", "appare": "N_\\gamma=\\frac43\\pi R_S^{3}\\,n_en_p\\,\\alpha", "perche": "e' il bilancio di Stromgren all'equilibrio (dR/dt=0): fotoni ionizzanti emessi per secondo uguali alle ricombinazioni per secondo nel volume."},
+ {"tipo": "uguale", "sinistra": "solve(N-Rational(4,3)*pi*R**3*n**2*a,R)[0]", "vale": "(3*N/(4*pi*a*n**2))**Rational(1,3)", "ipotesi": {"N": "positive", "R": "positive", "n": "positive", "a": "positive"}, "dove": "05", "appare": "R_S=\\left(\\frac{3N_\\gamma}{4\\pi\\alpha n^{2}}\\right)^{1/3}"},
+ {"tipo": "numero", "espr": "(3*1e48/(4*pi*100*2.6e-13))**(1.0/3)/3.086e18", "vale": "6.8", "dove": "05", "appare": "6{,}8\\ \\mathrm{pc}"},
+ {"tipo": "numero", "espr": "(3*1e49/(4*pi*100*2.6e-13))**(1.0/3)/3.086e18", "vale": "14.6", "dove": "05", "appare": "14{,}6\\ \\mathrm{pc}"},
+ {"tipo": "numero", "espr": "10**(1.0/3)", "vale": "2.15", "dove": "05", "appare": "2{,}15"},
+ {"tipo": "numero", "espr": "(1e2)**(-2.0/3)*1e2", "vale": "4.6", "dove": "05", "appare": "4{,}6\\%"},
+ {"tipo": "numero", "espr": "(2*7000)/70", "vale": "200", "dove": "05", "appare": "200"},
+ {"tipo": "simbolico", "dove": "05", "appare": "N_\\gamma=4\\pi R^{2}n_H\\frac{dR}{dt}+\\frac43\\pi R^{3}n_en_p\\alpha", "perche": "e' il bilancio del fronte di ionizzazione della slide 10: i fotoni servono a ionizzare il gas nuovo raggiunto dal fronte e a compensare le ricombinazioni nel volume gia' ionizzato."},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\ell=1/(n\\sigma)", "perche": "cammino libero medio di un fotone ionizzante nel gas neutro."},
+ {"tipo": "simbolico", "dove": "05", "appare": "R_S\\propto n^{-2/3}", "perche": "conseguenza della formula di R_S asserita."},
+ {"tipo": "simbolico", "dove": "06", "appare": "W=\\frac{2}{3}\\frac{e^{2}a^{2}}{4\\pi\\epsilon_0c^{3}}", "perche": "e' la formula di Larmor per la potenza irraggiata da una carica accelerata, citata dalle slide."},
+ {"tipo": "simbolico", "dove": "06", "appare": "a_{\\max}=\\frac{Ze^{2}}{4\\pi\\epsilon_0m_eb^{2}}", "perche": "accelerazione coulombiana alla distanza minima b: la definizione della stima."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\tau\\simeq2b/v", "perche": "durata dell'incontro alla distanza minima b."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\nu_{\\max}\\sim\\frac{v}{2b}", "perche": "inverso della durata dell'impulso: la frequenza massima del pacchetto d'onde."},
+ {"tipo": "uguale", "sinistra": "(Rational(2,3)*e**2*(Z*e**2/(4*pi*eps*m*b**2))**2/(4*pi*eps*c**3))*(2*b/v)", "vale": "4*Z**2*e**6/(3*(4*pi*eps)**3*m**2*c**3*b**3*v)", "ipotesi": {"e": "positive", "Z": "positive", "eps": "positive", "m": "positive", "b": "positive", "c": "positive", "v": "positive"}, "dove": "06", "appare": "Q(b)\\sim W\\tau=\\frac{4Z^{2}e^{6}}{3(4\\pi\\epsilon_0)^{3}m_e^{2}c^{3}b^{3}v}"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\mathrm{EM}=\\int n_e^{2}\\,dl", "perche": "definizione della misura di emissione."},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\tau_{ff}\\simeq0{,}082\\,T^{-1{,}35}\\,\\nu_{\\mathrm{GHz}}^{-2{,}1}\\,\\mathrm{EM}", "perche": "approssimazione standard di Mezger-Henderson per la profondita' ottica di free-free (EM in pc cm^-6), dichiarata come non presa dalle fonti del corso."},
+ {"tipo": "numero", "espr": "(0.082*8000**(-1.35)*1e6)**(1/2.1)", "vale": "0.68", "dove": "06", "appare": "0{,}68\\ \\mathrm{GHz}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "U=-\\frac35\\frac{GM_c^{2}}{R_c}", "perche": "e' l'energia gravitazionale di una sfera omogenea (slide 6 di lezione15b), ottenuta integrando dU = -G M_r dm / r: asserita con l'integrale qui sotto."},
+ {"tipo": "uguale", "sinistra": "integrate(-G*(Rational(4,3)*pi*r**3*rho)*4*pi*r**2*rho/r,(r,0,R)).subs(rho,M/(Rational(4,3)*pi*R**3))", "vale": "-Rational(3,5)*G*M**2/R", "ipotesi": {"G": "positive", "r": "positive", "rho": "positive", "R": "positive", "M": "positive"}, "dove": "07", "appare": "-\\frac35\\frac{GM_c^{2}}{R_c}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "K=\\frac32NkT=\\frac32\\frac{M_c}{\\mu m_H}kT", "perche": "energia cinetica totale di un gas perfetto monoatomico di N particelle: definizione."},
+ {"tipo": "uguale", "sinistra": "solve(3*M*k*T/(mu*mH)-Rational(3,5)*G*M**2/R,T)[0]", "vale": "G*M*mu*mH/(5*k*R)", "ipotesi": {"M": "positive", "k": "positive", "T": "positive", "mu": "positive", "mH": "positive", "G": "positive", "R": "positive"}, "dove": "07", "appare": "T_{\\min}=\\frac{G M_c\\mu m_H}{5kR_c}"},
+ {"tipo": "uguale", "sinistra": "(solve(3*M*k*T/(mu*mH)-Rational(3,5)*G*M**2/(3*M/(4*pi*rho))**Rational(1,3),M)[0])", "vale": "(5*k*T/(G*mu*mH))**Rational(3,2)*(3/(4*pi*rho))**Rational(1,2)", "ipotesi": {"M": "positive", "k": "positive", "T": "positive", "mu": "positive", "mH": "positive", "G": "positive", "rho": "positive"}, "dove": "07", "appare": "M_J=\\left(\\frac{5kT}{G\\mu m_H}\\right)^{3/2}\\left(\\frac{3}{4\\pi\\rho_0}\\right)^{1/2}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "R_J=\\left(\\frac{15kT}{4\\pi G\\mu m_H\\rho_0}\\right)^{1/2}", "perche": "lunghezza di Jeans della slide 9, la stessa condizione espressa con il raggio invece che con la massa (M = 4/3 pi R^3 rho_0)."},
+ {"tipo": "simbolico", "dove": "07", "appare": "2K<-U", "perche": "condizione di collasso dal teorema del viriale, come nelle slide."},
+ {"tipo": "numero", "espr": "(6.674e-11*1.689e33*1.6735e-27/(5*1.380649e-23*0.7*3.086e16))/100", "vale": "1.27", "dove": "07", "appare": "127\\ \\mathrm{K}"},
+ {"tipo": "numero", "espr": "sqrt(3*pi/(32*6.674e-11*4e-17))/3.156e7/1e5", "vale": "3.3", "dove": "07", "appare": "3{,}3\\cdot10^{5}\\ \\mathrm{anni}"},
+ {"tipo": "simbolico", "dove": "07", "appare": "t_{ff}=\\sqrt{\\frac{3\\pi}{32G\\rho_0}}", "perche": "tempo di caduta libera di una sfera omogenea, risultato classico (meta' del periodo di un'orbita radiale degenere)."},
+ {"tipo": "numero", "espr": "(5*1.380649e-23*100/(6.674e-11*1.6735e-27))**1.5*(3/(4*pi*1e7*1.6735e-27))**0.5/1.989e30/1e4", "vale": "2.9", "dove": "07", "appare": "2{,}9\\cdot10^{4}\\,M_\\odot"},
+ {"tipo": "numero", "espr": "(5*1.380649e-23*10/(6.674e-11*2*1.6735e-27))**1.5*(3/(4*pi*1e9*2*1.6735e-27))**0.5/1.989e30", "vale": "23", "dove": "07", "appare": "23\\,M_\\odot"},
+ {"tipo": "simbolico", "dove": "09", "appare": "R_S=(3N_\\gamma/4\\pi\\alpha n^{2})^{1/3}", "perche": "restituzione della tappa 05."},
+ {"tipo": "simbolico", "dove": "09", "appare": "N_H=1{,}82\\cdot10^{18}\\int T_b\\,dv", "perche": "restituzione della tappa 03."},
+ {"tipo": "simbolico", "dove": "10", "appare": "A_{21}=2{,}85\\cdot10^{-15}\\ \\mathrm{s^{-1}}", "perche": "dato della meccanica quantistica riportato dalle slide."},
+ {"tipo": "simbolico", "dove": "10", "appare": "M_J\\propto T^{3/2}\\rho^{-1/2}", "perche": "restituzione della dipendenza della massa di Jeans asserita nella tappa 07."},
+ {"tipo": "numero", "espr": "0.211/100*206265/60", "vale": "7.3", "dove": "02", "appare": "circa 7 primi"},
+ {"tipo": "simbolico", "dove": "09", "appare": "h\\nu/k=0{,}07", "perche": "restituzione arrotondata del valore 0,068 K asserito nella tappa 02."},
+ {"tipo": "numero", "espr": "(3*1e48/(4*pi*2.6e-13*1e8))**(1.0/3)/3.086e18*1e2", "vale": "6.8", "dove": "05", "appare": "0{,}07"},
+ {"tipo": "simbolico", "dove": "03", "appare": "T_b=T_s(1-e^{-\\tau})+T_ce^{-\\tau}", "perche": "e' la soluzione dello strato uniforme con S = B(T_s) e fondo T_c, in temperature di Rayleigh-Jeans (lineari nella brillanza)."},
+ {"tipo": "uguale", "sinistra": "series(Ts*(1-exp(-t)),t,0,2).removeO()", "vale": "Ts*t", "ipotesi": {"Ts": "positive", "t": "positive"}, "dove": "03", "appare": "T_b\\simeq T_s\\tau"},
+ {"tipo": "simbolico", "dove": "03", "appare": "N_H=1{,}82\\cdot10^{18}\\,T_s\\int\\tau\\,dv", "perche": "e' la formula della colonna con T_b = T_s tau del regime sottile: una sostituzione nella formula asserita."},
+ {"tipo": "numero", "espr": "5e8*1.67e-27*1e19", "vale": "8.4", "dove": "08", "appare": "=8{,}4\\cdot10^{-19}"},
+ {"tipo": "numero", "espr": "(5*1.381e-23*50/(6.674e-11*1.6726e-27))**1.5*(3/(4*pi*5e8*1.6726e-27))**0.5/1.989e30", "vale": "1461", "dove": "08", "appare": "=1461\\,M_\\odot"},
+ {"tipo": "numero", "espr": "(5*1.381e-23*150/(6.674e-11*1.6726e-27))**1.5*(3/(4*pi*1e14*1.6726e-27))**0.5/1.989e30", "vale": "17", "dove": "08", "appare": "M_J=17\\,M_\\odot"},
+ {"tipo": "uguale", "sinistra": "expand(2*G*(4*pi*r0**3*rho/3)*(1/r-1/r0))", "vale": "8*pi*G*rho*r0**2/3*(r0/r-1)", "dove": "08", "appare": "\\left(\\frac{dr}{dt}\\right)^2=\\frac{8\\pi G\\rho_0r_0^2}{3}\\left(\\frac{r_0}{r}-1\\right)", "ipotesi": {"G": "positive", "rho": "positive", "r0": "positive", "r": "positive"}},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\ddot r=-GM_r/r^2", "perche": "gravita' della massa interna"},
+ {"tipo": "simbolico", "dove": "08", "appare": "M_r=\\frac43\\pi r_0^3\\rho_0", "perche": "massa interna costante durante il collasso"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\dot r=-2r_0\\cos\\xi\\sin\\xi\\,\\dot\\xi", "perche": "derivata della sostituzione r = r0 cos^2 xi"},
+ {"tipo": "uguale", "sinistra": "simplify(r0**2*(1/cos(q)**2-1))", "vale": "r0**2*tan(q)**2", "dove": "08", "appare": "K^2r_0^2\\tan^2\\xi", "ipotesi": {"r0": "positive"}},
+ {"tipo": "uguale", "sinistra": "simplify(diff(q+sin(2*q)/2,q))", "vale": "2*cos(q)**2", "dove": "08", "appare": "\\xi+\\frac12\\sin2\\xi=Kt"},
+ {"tipo": "uguale", "sinistra": "simplify(pi/(2*sqrt(8*pi*G*rho/3)))", "vale": "sqrt(3*pi/(32*G*rho))", "dove": "08", "appare": "t_{ff}=\\frac{\\pi}{2K}=\\sqrt{\\frac{3\\pi}{32G\\rho_0}}", "ipotesi": {"G": "positive", "rho": "positive"}},
+ {"tipo": "numero", "espr": "sqrt(3*pi/(32*6.674e-11*2e-13))/3.156e7", "vale": "4707", "dove": "08", "appare": "t_{ff}=4707"},
+ {"tipo": "numero", "espr": "2e-16*1e3*1e13", "vale": "2", "dove": "08", "appare": "=2\\cdot10^{-13}"},
+ {"tipo": "numero", "espr": "2/pi*(pi/4+0.5)", "vale": "0.818", "dove": "08", "appare": "0,82 t_ff"},
+ {"tipo": "uguale", "sinistra": "Rational(3,2)*(g-1)-Rational(1,2)", "vale": "(3*g-4)/2", "dove": "08", "appare": "=\\rho^{(3\\gamma-4)/2}"},
+ {"tipo": "numero", "espr": "(3*5/3.-4)/2", "vale": "0.5", "dove": "08", "appare": "\\rho^{1/2}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\approx\\frac{G^{3/2}M_J^{5/2}}{R_J^{5/2}}", "perche": "luminosita' di collasso a meno di fattori di ordine uno, come nella slide"},
+ {"tipo": "uguale", "sinistra": "solve(G**Rational(3,2)*M**Rational(5,2)-4*pi*e*s*T**4*(G*mu*m*M/(5*k*T))**Rational(9,2),M)[0]", "vale": "((5*k)**Rational(9,2)*T**Rational(1,2)/(4*pi*e*s*G**3*(mu*m)**Rational(9,2)))**Rational(1,2)", "dove": "08", "appare": "M_{\\min}=\\left[\\frac{(5k)^{9/2}T^{1/2}}{4\\pi e\\sigma G^3(\\mu m_H)^{9/2}}\\right]^{1/2}", "ipotesi": {"G": "positive", "M": "positive", "e": "positive", "s": "positive", "T": "positive", "mu": "positive", "m": "positive", "k": "positive"}},
+ {"tipo": "simbolico", "dove": "08", "appare": "M_J^{5/2}=\\frac{4\\pi e\\sigma T^4}{G^{3/2}}R_J^{9/2}", "perche": "L_ff = L_rad"},
+ {"tipo": "simbolico", "dove": "08", "appare": "R_J=G\\mu m_HM_J/(5kT)", "perche": "dalle due relazioni di Jeans"},
+ {"tipo": "numero", "espr": "((5*1.381e-23)**4.5/(4*pi*5.67e-8*6.674e-11**3*1.6726e-27**4.5))**0.5/1.989e30", "vale": "0.027", "dove": "08", "appare": "=0{,}027\\,M_\\odot"},
+ {"tipo": "numero", "espr": "0.02654*1000**0.25/0.1**0.5", "vale": "0.47", "dove": "08", "appare": "M_{\\min}=0{,}47\\,M_\\odot"},
+ {"tipo": "numero", "espr": "10**0.25", "vale": "1.8", "dove": "08", "appare": "di 1,8"},
+ {"tipo": "simbolico", "dove": "08", "appare": "E_f=U/2=-\\frac{3}{10}GM_J^2/R_J", "perche": "viriale: E = U/2"},
+ {"tipo": "simbolico", "dove": "08", "appare": "L_{\\rm rad}=4\\pi R_J^2e\\sigma T^4", "perche": "corpo grigio con efficienza e"},
+ {"tipo": "simbolico", "dove": "08", "appare": "2\\cos^2\\xi\\,d\\xi=K\\,dt", "perche": "sostituzione nella legge dell'energia, segno scelto per il collasso"},
+ {"tipo": "simbolico", "dove": "08", "appare": "R_J^3=3M_J/(4\\pi\\rho)", "perche": "definizione di densita' media della sfera"},
+ {"tipo": "numero", "espr": "2.998e10/8665.65e6", "vale": "3.46", "dove": "02", "appare": "\\lambda=c/\\nu=3{,}46"},
+ {"tipo": "numero", "espr": "121.567*3.5", "vale": "425", "dove": "05", "appare": "121{,}567\\cdot3{,}5=425"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · PERCHÉ QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Perché il gas fra le stelle', meta:'tre forme dell’idrogeno, tre meccanismi di emissione · le due quantità che l’esame chiede: densità colonnare e massa di una nube',
+  blocchi:[
+  {t:'prosa', title:'Il vuoto che non è vuoto', tag:'architettura', html:R`
+  <p>De Bernardis apre la lezione 13 con una frase di inventario: <i>«la nostra Galassia non è fatta solo di stelle. C&rsquo;è un mezzo interstellare complesso fatto di polveri e di gas. L&rsquo;elemento più abbondante nel gas interstellare è l&rsquo;idrogeno nelle tre forme: neutro (HI), ionizzato (HII), molecolare (H₂)»</i>. Ognuna delle tre forme si fa vedere in un modo diverso, e la ragione è sempre la stessa: quale transizione è accessibile alla temperatura del gas. L&rsquo;idrogeno ionizzato si vede per le righe di ricombinazione, soprattutto H-alfa, e per il continuo radio di free-free. L&rsquo;idrogeno neutro freddo ha tutti gli atomi nello stato fondamentale e si vede solo con la riga a 21 cm. L&rsquo;idrogeno molecolare, freddo e simmetrico, quasi non emette, e lo si vede attraverso le molecole che lo accompagnano, soprattutto il CO, le cui righe sono anche il meccanismo con cui le nubi si raffreddano.</p>
+  <p>La mappa del corso dice che l&rsquo;esame pesca in questo argomento due conti: la <b>densità colonnare</b> dalla riga a 21 cm, e la <b>massa di una nube</b>, con la domanda se collassa. Entrambi sono svolti per intero. All&rsquo;orale si chiedono la sfera di Strömgren e la riga a 21 cm.</p>`}
+]},
+
+/* ---------------- 01 · PERCHÉ GLI ATOMI TACCIONO ---------------- */
+{ num:'01', title:'Perché nelle nubi gli atomi tacciono', meta:'l’energia degli urti a cento kelvin · dieci elettronvolt contro meno di un centesimo · che cosa resta da osservare',
+  blocchi:[
+  {t:'prosa', title:'Il conto delle slide', tag:'lezione15b_2020', html:R`
+  <p>Una nube interstellare tipica è a temperature fra qualche decina e un centinaio di kelvin. A 100 K l&rsquo;energia cinetica di una particella è dell&rsquo;ordine di $kT$, cioè $8{,}6\ \mathrm{meV}$ in <span class="str" data-str="elettronvolt">elettronvolt</span>. De Bernardis fa lo stesso conto. Il primo livello eccitato dell&rsquo;idrogeno sta 10,2 eV sopra il fondamentale, più di mille volte tanto. <i>«Negli urti, l&rsquo;energia cinetica disponibile non è sufficiente a eccitare gli atomi nei loro livelli eccitati, quindi gli atomi restano nello stato fondamentale. Gli atomi non emettono radiazione»</i>. E lontano dalle stelle O e B, aggiunge de Bernardis nella lezione 13, mancano anche i fotoni ultravioletti che potrebbero eccitarli per assorbimento.</p>
+  <p>Restano due vie. La prima è una transizione con un&rsquo;energia piccolissima <i>dentro</i> il livello fondamentale dell&rsquo;atomo di idrogeno, la riga a 21 cm. La seconda sono le molecole, i cui livelli rotazionali stanno a qualche meV: <i>«la poca energia disponibile negli urti è sufficiente a far passare le molecole a stati eccitati»</i>. Dove invece una stella calda fornisce fotoni sopra 13,6 eV, l&rsquo;idrogeno è ionizzato, e si accende un terzo regime: le regioni HII.</p>`}
+]},
+
+/* ---------------- 02 · LA RIGA A 21 CM ---------------- */
+{ num:'02', title:'La riga a 21 cm: lo spin che si capovolge', meta:'la struttura iperfine · undici milioni di anni di vita media · perché la si vede comunque · tre quarti degli atomi nello stato superiore',
+  blocchi:[
+  {t:'prosa', title:'La transizione iperfine', tag:'lezione13_2020, diapositive 11 e 18-20', html:R`
+  <p>Il protone e l&rsquo;elettrone dell&rsquo;idrogeno hanno ciascuno uno spin, e l&rsquo;energia del livello fondamentale dipende di pochissimo dal loro orientamento reciproco. Con gli spin paralleli l&rsquo;energia è leggermente più alta che con gli spin antiparalleli. Il ribaltamento dello spin dell&rsquo;elettrone, lo <b>spin-flip</b>, emette o assorbe un fotone a 1420,4 MHz, cioè a $21{,}1\ \mathrm{cm}$. La separazione è $h\nu=5{,}87\cdot10^{-6}\ \mathrm{eV}$ (le slide scrivono $5{,}6\cdot10^{-6}$ eV, un arrotondamento che non torna con la frequenza: lo dichiaro), che corrisponde a una temperatura di $0{,}068\ \mathrm{K}$.</p>
+  <p>La transizione è <b>proibita</b> a dipolo elettrico, e la meccanica quantistica dà un coefficiente di emissione spontanea minuscolo, $A_{21}=2{,}85\cdot10^{-15}$ s⁻¹. Un atomo isolato nello stato superiore aspetta in media $1/A_{21}$, cioè $11{,}1$ milioni di anni, prima di emettere. De Bernardis spiega perché la riga si osserva lo stesso: <i>«nel mezzo interstellare questo processo può avvenire, perché le collisioni tra atomi, che potrebbero diseccitarli o più probabilmente portarli a un livello energetico più alto, sono estremamente rare. In laboratorio non è possibile fare un vuoto così spinto»</i>. E c&rsquo;è tantissimo idrogeno: una probabilità minuscola per atomo, moltiplicata per $10^{60}$ atomi in una nube, dà un segnale misurabile. Per risolverlo servono grandi radiotelescopi, perché la risoluzione angolare va come $\lambda/D$ (nell&rsquo;<span class="str" data-str="angolo-piccolo">approssimazione di angolo piccolo</span>): a 21 cm un telescopio da 100 m risolve circa 7 primi d&rsquo;arco: de Bernardis mostra Effelsberg, Green Bank e Parkes, da 64 a 100 m, e il Sardinia Radio Telescope.</p>`},
+  {t:'prosa', title:'Le popolazioni: il fattore tre quarti', tag:'Boltzmann quando kT è enorme', html:R`
+  <p>Lo stato superiore ha peso statistico $g_2=3$, il tripletto, e quello inferiore $g_1=1$, il singoletto. Le collisioni, rare per la diseccitazione radiativa ma frequenti su milioni di anni, tengono le popolazioni all&rsquo;equilibrio di Boltzmann a una «temperatura di spin» $T_s$, tipicamente 150 K. Siccome $h\nu_{21}/k=0{,}068$ K è minuscolo rispetto a $T_s$, l&rsquo;esponenziale vale 1, $\frac{n_2}{n_1}=\frac{g_2}{g_1}e^{-h\nu_{21}/kT_s}\simeq3$, e la frazione di atomi nello stato superiore è $0{,}7499$. Al limite di temperatura infinita $\frac{n_2}{n_H}\to\frac34$. È il «3/4 degli atomi in stato di spin parallelo» che le prove scritte danno come dato. Non dipende dalla temperatura, e per questo la riga a 21 cm in emissione conta gli atomi senza bisogno di sapere quanto è caldo il gas.</p>`},
+  {t:'prosa', title:'La gemella della 21 cm: l’elio-3', tag:'Marconi, cap. 10.3.3, p. 151', html:R`
+  <p>Il meccanismo della riga a 21 cm non è esclusivo dell&rsquo;idrogeno. Serve un solo elettrone e un nucleo con spin, e lo ione $^3\mathrm{He}^+$ li ha entrambi: Marconi ricorda che l&rsquo;elio-3 <i>«può anche essere osservato nelle onde radio nella transizione di struttura iperfine equivalente alla riga a 21 cm di HI»</i>. La riga cade a 8665,65 MHz (valore tabulato, non del libro), cioè a $\lambda=c/\nu=3{,}46$ cm, e nelle regioni HII della Galassia permette di misurare l&rsquo;abbondanza di $^3$He: Marconi riporta $[^3\mathrm{He}/\mathrm H]\approx(1{,}5$-$15)\cdot10^{-5}$ nelle nubi del mezzo interstellare. L&rsquo;intervallo è largo perché l&rsquo;elio-3 nelle stelle si produce bruciando il deuterio e si distrugge bruciando sé stesso: è un&rsquo;abbondanza che il mezzo interstellare ha rimescolato, e per questo, conclude il libro, è utile come controllo di coerenza della nucleosintesi più che come misura.</p>`}
+]},
+
+/* ---------------- 03 · LA DENSITÀ COLONNARE ---------------- */
+{ num:'03', title:'Dalla temperatura di brillanza alla densità colonnare', meta:'il caso otticamente sottile · il profilo in velocità · la costante 1,82·10¹⁸ ricavata · il conto che l’esame chiede',
+  blocchi:[
+  {t:'prosa', title:'La derivazione', tag:'diapositive 20-25', html:R`
+  <p>Il coefficiente di emissione è quello di un sistema a due livelli, $j_\nu=\frac{h\nu}{4\pi}\,n_2A_{21}\,\phi(\nu)$, con $\phi$ il profilo di riga normalizzato. Lungo una linea di vista otticamente sottile la brillanza è l&rsquo;integrale di $j$, e con $n_2=\frac34n_H$ si ha
+  $$I_\nu=\frac{3}{16\pi}h\nu A_{21}N_H\phi(\nu),$$
+  con $N_H=\int n_H\,dl$ la densità colonnare. I radioastronomi esprimono la brillanza come temperatura di brillanza di Rayleigh-Jeans, $T_b=c^2I_\nu/2k\nu^2$:
+  $$T_b=\frac{3c^{2}hA_{21}}{32\pi k\nu}\,N_H\phi(\nu).$$
+  Il profilo della riga è fatto dagli spostamenti Doppler delle nubi in moto, $\Delta\nu/\nu_0=v/c$, e si dà in funzione della velocità. Con $\phi(\nu)\,d\nu=\phi_v\,dv$ e integrando su tutta la riga,
+  $$N_H=\frac{32\pi k\nu^{2}}{3hc^{3}A_{21}}\int T_b\,dv.$$
+  Il coefficiente, in unità pratiche, vale $1{,}83\cdot10^{18}$, ed è la formula delle slide:
+  $$N_H=1{,}82\cdot10^{18}\int\frac{T_b(v)}{\mathrm{K}}\,\frac{dv}{\mathrm{km/s}}\ \ \mathrm{cm^{-2}}.$$
+  Non compare né la temperatura di spin né la distanza. L&rsquo;area sotto il profilo misurato, in K·km/s, è direttamente il numero di atomi per cm² lungo la linea di vista. Per una temperatura di brillanza di 100 K su 10 km/s, l&rsquo;esempio tipico delle slide, si hanno $1{,}82\cdot10^{21}\ \mathrm{cm^{-2}}$.</p>`},
+  {t:'prosa', title:'Che cosa si legge in uno spettro a 21 cm', tag:'diapositive 24-29', html:R`
+  <p>Lo spettro che de Bernardis mostra, nel piano galattico a longitudine 90°, ha tre righe larghe e circa gaussiane a velocità diverse. <i>«La linea di vista attraversa 3 bracci a spirale, che hanno velocità medie diverse rispetto a noi. Inoltre all&rsquo;interno di ciascun braccio le nubi di gas hanno velocità relative diverse, dirette sostanzialmente a caso»</i>. L&rsquo;integrale di ciascuna riga dà la colonna di quel braccio, e ripetendo il conto su tutto il cielo si ottiene la mappa delle densità colonnari dell&rsquo;idrogeno neutro. Le velocità contengono la rotazione della Galassia, e da esse si ricava la curva di rotazione. Una riga a velocità molto diversa da quelle del disco, come nella prova del 5 maggio 2008, rivela una nube che non partecipa alla rotazione, una «nube ad alta velocità» a −160 km/s. Lì la soluzione decide se è dentro la Galassia guardando se le righe H e K del calcio di una stella lontana mostrano assorbimento alla stessa velocità.</p>`},
+  {t:'prosa', title:'In assorbimento: la temperatura di spin', tag:'lo strato davanti a una sorgente', html:R`
+  <p>La stessa riga si vede anche in assorbimento, quando la nube sta davanti a una radiosorgente continua di temperatura di brillanza $T_c$. È di nuovo la soluzione dello strato uniforme, scritta in temperature di Rayleigh-Jeans: $T_b=T_s(1-e^{-\tau})+T_ce^{-\tau}$. Dove la sorgente è più calda della nube, $T_c>T_s$, la riga appare scura; guardando accanto alla sorgente, $T_c=0$, appare brillante. Nel regime sottile l&rsquo;emissione dà $T_b\simeq T_s\tau$, e quindi la stessa costante delle slide si legge anche così: $N_H=1{,}82\cdot10^{18}\,T_s\int\tau\,dv$. Le due misure insieme, emissione accanto alla sorgente e assorbimento davanti, danno separatamente $\tau$ e $T_s$. È il modo con cui si scopre che l&rsquo;idrogeno neutro della Galassia ha due fasi in equilibrio di pressione: nubi fredde, intorno a 80 K, e un mezzo diffuso tiepido, a qualche migliaio di kelvin, il cui assorbimento è troppo debole per vedersi. Il valore $T_s=150$ K delle slide è una media tipica fra le due. In emissione, dove $T_s$ non compare, la colonna è giusta comunque, purché la riga sia sottile. Se non lo è, $T_b$ si satura verso $T_s$ e la formula sottostima gli atomi, esattamente come la larghezza equivalente di una riga satura.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la formula della densità colonnare non contiene la temperatura di spin?`,
+    a:R`Perché in emissione e in regime sottile la brillanza è proporzionale al numero di atomi nello stato superiore, $\frac34N_H$, e quel 3/4 non dipende da $T_s$ finché $T_s\gg0{,}068$ K. Se la riga fosse otticamente spessa, o in assorbimento davanti a una sorgente, $T_s$ ricomparirebbe.`}
+  ]}
+]},
+
+/* ---------------- 04 · UNA NUBE A 21 CM ---------------- */
+{ num:'04', title:'L’esercizio della nube di idrogeno: quanta luce a 21 cm', meta:'prova del 23 luglio 2015 · massa, numero di atomi, luminosità · un miliardesimo di Sole',
+  blocchi:[
+  {t:'prosa', title:'Il testo e il conto', tag:'prova scritta 20150723, esercizio 2', html:R`
+  <p><i>Una nube sferica di idrogeno neutro ha raggio 0,7 pc e densità $4\cdot10^{-17}$ kg/m³. Qual è la luminosità della nube nella riga di spin-flip, assumendo che 3/4 degli atomi siano nello stato di spin parallelo e che la probabilità di diseccitazione per unità di tempo sia $A=2{,}9\cdot10^{-15}$ s⁻¹? A che temperatura si deve trovare il gas, come minimo, per evitare il collasso gravitazionale? Quale sarebbe il tempo di caduta libera?</i></p>
+  <p>Il raggio è $2{,}16\cdot10^{16}\ \mathrm{m}$, la massa $\rho\cdot\frac43\pi R^3$, cioè $849\,M_\odot$, e gli atomi $1{,}01\cdot10^{60}$. Ogni atomo nello stato superiore emette un fotone $h\nu_{21}$ con probabilità $A$ per secondo, quindi la luminosità è il conteggio $L=\frac34N_HA_{21}h\nu_{21}$, cioè $2{,}07\cdot10^{21}\ \mathrm{W}$, $5{,}4\cdot10^{-6}\,L_\odot$. Una nube di quasi mille masse solari brilla a 21 cm come un milionesimo di Sole. Eppure la riga è la sola cosa che di lei si vede, ed è abbastanza perché i radiotelescopi la mappino in tutta la Galassia. La seconda e la terza domanda sono il criterio di Jeans della tappa 07, dove l&rsquo;esercizio si chiude.</p>`}
+]},
+
+/* ---------------- 05 · REGIONI HII E STRÖMGREN ---------------- */
+{ num:'05', title:'Le regioni HII e la sfera di Strömgren', meta:'fotoni sopra 13,6 eV · il fronte di ionizzazione che avanza · ionizzazioni uguali a ricombinazioni · sei parsec',
+  blocchi:[
+  {t:'prosa', title:'Che cos’è una regione HII', tag:'lezione10_2020_B, diapositiva 9', html:R`
+  <p><i>«La regione HII è una nuvola di idrogeno ionizzato dai fotoni ultravioletti (hν &gt; 13,6 eV) di stelle O e B che si trovano al suo interno»</i>. Le stelle O e B sono giovani e sono ancora immerse nella nube molecolare da cui sono nate. Parte di essa viene ionizzata. Gli elettroni e i protoni liberati però si ricombinano, <i>«di solito ad uno stato eccitato da cui poi decadono ai livelli più bassi»</i>, e la cascata produce le righe di ricombinazione. La luminosità rossa delle regioni HII nelle immagini, come la nebulosa Aquila o IC434 dietro la Testa di Cavallo, è H-alfa, la caduta da $n=3$ a $n=2$. La regione HII è dunque un sistema in equilibrio dinamico: ogni secondo la stella ionizza, e ogni secondo il gas si ricombina.</p>`},
+  {t:'prosa', title:'Il raggio di Strömgren, derivato', tag:'la domanda dell’orale', html:R`
+  <p>De Bernardis costruisce il raggio passo per passo. Il flusso di fotoni ionizzanti ionizza il primo strato di gas, di spessore pari al cammino libero medio $\ell=1/(n\sigma)$ di quei fotoni nel gas neutro, cortissimo. I fotoni successivi attraversano lo strato già ionizzato senza essere assorbiti e ionizzano il secondo, e così via. Il fronte di ionizzazione avanza finché le ricombinazioni non consumano tutti i fotoni. Se la stella emette $N_\gamma$ fotoni ionizzanti al secondo, il bilancio sul guscio di raggio $R$ è
+  $$N_\gamma=4\pi R^{2}n_H\frac{dR}{dt}+\frac43\pi R^{3}n_en_p\alpha,$$
+  dove il primo termine sono gli atomi nuovi raggiunti dal fronte e il secondo le ricombinazioni per secondo in tutto il volume ionizzato, con $\alpha$ il coefficiente di ricombinazione. All&rsquo;equilibrio $dR/dt=0$, cioè $N_\gamma=\frac43\pi R_S^{3}\,n_en_p\,\alpha$, e con $n_e=n_p=n$ il <b>raggio di Strömgren</b> è
+  $$R_S=\left(\frac{3N_\gamma}{4\pi\alpha n^{2}}\right)^{1/3}.$$
+  Con i numeri tipici delle slide, $N_\gamma=10^{48}$ s⁻¹, $n=10$ cm⁻³ e $\alpha=2{,}6\cdot10^{-13}$ cm³/s, si ha $6{,}8\ \mathrm{pc}$, che de Bernardis arrotonda a 6 pc. Una stella O più calda, $10^{49}$ fotoni al secondo, dà $14{,}6\ \mathrm{pc}$: dieci volte i fotoni allargano il raggio solo di $2{,}15$ volte, la radice cubica. La densità pesa di più, perché $R_S\propto n^{-2/3}$. Una nube cento volte più densa ha una regione HII ridotta al $4{,}6\%$ del raggio, perché le ricombinazioni crescono come $n^2$.</p>`},
+  {t:'plot', title:'Il raggio di Strömgren in funzione della densità',
+   intro:R`Ascissa $\log_{10}n$ (cm⁻³), ordinata $\log_{10}R_S$ (pc), con $\alpha=2{,}6\cdot10^{-13}$ cm³/s. Ciano: $N_\gamma=10^{48}$ s⁻¹; oro: $10^{49}$ s⁻¹ (una stella O più calda); viola: $10^{47}$ s⁻¹ (una B).`,
+   plots:[
+    {kind:'func2d', xr:[-1,4], yr:[-2,2.5], height:300, equal:false,
+     title:'log10 n (cm-3)      log10 R_S (pc)',
+     curves:[{f:'log(pow(3*1e48/(4*PI*2.6e-13*pow(10,2*x)),1/3)/3.086e18)/log(10)', col:'#5eead4', label:'1e48 fotoni/s'},
+             {f:'log(pow(3*1e49/(4*PI*2.6e-13*pow(10,2*x)),1/3)/3.086e18)/log(10)', col:'#d8a13a', label:'1e49 fotoni/s'},
+             {f:'log(pow(3*1e47/(4*PI*2.6e-13*pow(10,2*x)),1/3)/3.086e18)/log(10)', col:'#b98cff', label:'1e47 fotoni/s'}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> rette di pendenza $-2/3$, distanziate di $1/3$ in logaritmo per ogni fattore 10 in $N_\gamma$. A 10 cm⁻³ la stella da $10^{48}$ s⁻¹ ionizza circa 7 pc; in una nube molecolare a $10^4$ cm⁻³ solo $0{,}07$ parsec.</p>
+   <p><b>Che cosa impararne:</b> la stessa stella fa una regione HII enorme nel gas diffuso e una minuscola, «ultracompatta», nella nube densa dove è appena nata. Le regioni HII ultracompatte sono il segno delle stelle massicce più giovani.</p>`},
+  {t:'prosa', title:'Le due complicazioni', tag:'diapositiva 12', html:R`
+  <p>De Bernardis elenca subito che cosa il modello trascura. (1) <i>«Spesso la ricombinazione fornisce un fotone ionizzante»</i>: se l&rsquo;elettrone ricade direttamente nel fondamentale, il fotone emesso ha più di 13,6 eV e ionizza di nuovo, e il raggio vero è più grande. (2) L&rsquo;equilibrio delle pressioni. La regione HII ha temperatura molto maggiore del gas neutro attorno, circa 7000 K contro 70 K, e la pressione va come $nT$, con il doppio delle particelle perché il gas è ionizzato. A parità di densità la pressione interna è circa $200$ volte quella esterna, quindi la regione HII non può stare ferma: si espande, spingendo il gas neutro come un pistone. È uno dei modi con cui le stelle massicce rimodellano la nube in cui sono nate.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una regione HII ha raggio 5 pc. Se la stella centrale diventasse otto volte più luminosa nell’ultravioletto, quanto diventerebbe grande?`,
+    a:R`$R_S\propto N_\gamma^{1/3}$, quindi il raggio raddoppia: 10 pc. Il volume ionizzato cresce di otto volte, quanto i fotoni, perché all&rsquo;equilibrio ogni fotone in più compensa una ricombinazione in più nel volume.`}
+  ]},
+  {t:'prosa', title:'Le regioni HII come laboratorio cosmologico', tag:'Marconi, cap. 10.3.1-10.3.2, pp. 150-151', html:R`
+  <p>Le regioni HII hanno un uso che le slide non menzionano e che Marconi descrive: sono il laboratorio dove si misura l&rsquo;elio prodotto nei primi minuti dell&rsquo;universo. Le righe di ricombinazione di idrogeno ed elio, le stesse che fanno brillare il gas ionizzato da una stella calda, danno il rapporto He/H; ma l&rsquo;elio si produce anche nelle stelle, insieme agli elementi pesanti. Si scelgono allora regioni HII in galassie povere di metalli, si misura la frazione in massa di elio in funzione dell&rsquo;abbondanza di ossigeno, e si estrapola a ossigeno zero (Izotov e Thuan): il valore primordiale è $Y_p=0{,}244\pm0{,}002$. Il gas interstellare serve anche al deuterio, che si misura con le righe di assorbimento risonanti delle nubi davanti a un quasar: per un assorbitore a $z=2{,}5$ la Lyman-$\alpha$ del deuterio, accanto a quella dell&rsquo;idrogeno, cade a $121{,}567\cdot3{,}5=425$ nm, nell&rsquo;ottico. Il valore medio è D/H $=(2{,}6\pm0{,}4)\cdot10^{-5}$. Ionizzazione, ricombinazione e assorbimento: la fisica di questo movimento è anche la strumentazione della cosmologia.</p>`}
+]},
+
+/* ---------------- 06 · IL FREE-FREE ---------------- */
+{ num:'06', title:'La radiazione di free-free: come brilla nel radio un gas ionizzato', meta:'un elettrone deviato da un protone · lo spettro piatto · autoassorbimento a bassa frequenza · la misura di emissione',
+  blocchi:[
+  {t:'prosa', title:'La stima classica delle slide', tag:'lezione13_2020, diapositive 1-6', html:R`
+  <p>Un elettrone che passa vicino a un nucleo viene deviato, cioè accelerato, e una carica accelerata irraggia. È la <b>radiazione di frenamento</b>, bremsstrahlung, detta di <b>free-free</b> perché l&rsquo;elettrone è libero prima e dopo. De Bernardis ne fa una teoria approssimata non relativistica. Alla distanza minima $b$ l&rsquo;accelerazione è $a_{\max}=\frac{Ze^{2}}{4\pi\epsilon_0m_eb^{2}}$. La potenza irraggiata è quella di Larmor, $W=\frac{2}{3}\frac{e^{2}a^{2}}{4\pi\epsilon_0c^{3}}$, e dura il tempo dell&rsquo;incontro, $\tau\simeq2b/v$. L&rsquo;energia emessa in un incontro è
+  $$Q(b)\sim W\tau=\frac{4Z^{2}e^{6}}{3(4\pi\epsilon_0)^{3}m_e^{2}c^{3}b^{3}v},$$
+  e il pacchetto d&rsquo;onda emesso, lungo $\tau$, contiene frequenze fino a $\nu_{\max}\sim\frac{v}{2b}$. <i>«Se supponiamo grossolanamente che l&rsquo;energia sia emessa in modo uniforme a tutte le frequenze»</i> fino a $\nu_{\max}$, lo spettro di un singolo incontro è <b>piatto</b>. Sommando su tutti gli incontri, con la distribuzione termica delle velocità degli elettroni, resta uno spettro quasi piatto fino a frequenze dell&rsquo;ordine di $kT/h$, poi un taglio esponenziale. Il calcolo dettagliato è complesso, e de Bernardis ne dà i regimi.</p>`},
+  {t:'prosa', title:'I due regimi di una regione HII nel radio', tag:'sottile e spesso', html:R`
+  <p>Lo spettro radio continuo di una regione HII, nella figura delle slide, ha due rami. A frequenze alte il gas è otticamente sottile, e lo spettro è quasi piatto: è l&rsquo;emissione di free-free vista per quello che è. A frequenze basse l&rsquo;assorbimento di free-free, il processo inverso, cresce rapidamente, la profondità ottica supera 1 e <i>«la regione emette come un corpo nero»</i> alla temperatura degli elettroni, nella regione di Rayleigh-Jeans, quindi con brillanza $\propto\nu^2$. È di nuovo la soluzione dello strato uniforme: spesso, si vede la funzione sorgente, sottile, si conta la materia. La quantità che conta la materia, per un processo che richiede un elettrone e uno ione insieme, è la <b>misura di emissione</b>, $\mathrm{EM}=\int n_e^{2}\,dl$: emissione e assorbimento di free-free vanno come il prodotto delle due densità. Per collocare il ginocchio fra i due regimi, l&rsquo;approssimazione standard di Mezger-Henderson, che le fonti del corso non riportano e che uso dichiarandolo, è $\tau_{ff}\simeq0{,}082\,T^{-1{,}35}\,\nu_{\mathrm{GHz}}^{-2{,}1}\,\mathrm{EM}$, con EM in pc cm⁻⁶. Una regione HII compatta con EM $=10^6$ pc cm⁻⁶ e $T=8000$ K diventa trasparente sopra circa $0{,}68\ \mathrm{GHz}$.</p>`},
+  {t:'plot', title:'Lo spettro radio di una regione HII',
+   intro:R`Brillanza di uno strato isotermo a 8000 K, $T_b=T(1-e^{-\tau_{ff}})$ con $\tau_{ff}\propto\nu^{-2{,}1}$ e $\tau=1$ a 0,68 GHz, in scala logaritmica: ascissa $\log_{10}\nu$ (GHz), ordinata $\log_{10}$ della densità di flusso relativa, $\propto\nu^{2}T_b$.`,
+   plots:[
+    {kind:'func2d', xr:[-1.5,1.5], yr:[-2.5,1.5], height:300, equal:false,
+     title:'log10 nu (GHz)      log10 S_nu (unita relative)',
+     curves:[{f:'log(pow(10,2*x)*(1-exp(-pow(pow(10,x)/0.68,-2.1))))/log(10)', col:'#5eead4', label:'free-free'},
+             {f:'2*x', col:'#b98cff', label:'spesso: nu^2', dash:true},
+             {f:'-0.1*x+2.1*log(0.68)/log(10)', col:'#d8a13a', label:'sottile: quasi piatto', dash:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> a sinistra la curva sale con pendenza 2, il corpo nero di Rayleigh-Jeans di una regione otticamente spessa. A destra si appiattisce su una pendenza di −0,1, l&rsquo;emissione sottile. Il ginocchio sta dove $\tau_{ff}\simeq1$.</p>
+   <p><b>Che cosa impararne:</b> dalla frequenza del ginocchio si ricava la misura di emissione, quindi la densità del gas ionizzato. Le regioni HII compatte e dense hanno il ginocchio a frequenze più alte. È così che nel radio si distinguono le regioni HII giovani da quelle evolute.</p>`}
+]},
+
+/* ---------------- 07 · NUBI MOLECOLARI, RAFFREDDAMENTO E JEANS ---------------- */
+{ num:'07', title:'Le nubi molecolari: raffreddarsi, e collassare', meta:'le righe che portano via l’energia · il viriale per una sfera omogenea · massa e lunghezza di Jeans · la nube dell’esercizio',
+  blocchi:[
+  {t:'prosa', title:'Il raffreddamento', tag:'lezione15b_2020, diapositive 1-2', html:R`
+  <p>Nel cuore di una nube la polvere scherma il gas dalla luce delle stelle, e la temperatura la decidono gli urti e la radiazione emessa. Le molecole eccitate dagli urti si diseccitano emettendo fotoni infrarossi e millimetrici, <i>«che per la loro grande lunghezza d&rsquo;onda non sono fermati dalla polvere interstellare e quindi lasciano la nube. Così la nube perde energia, e si raffredda. Il raffreddamento delle nubi è importante per la formazione di stelle»</i>. Le righe rotazionali del CO sono le principali «righe di raffreddamento» del gas molecolare, e insieme il suo termometro. Una nube fredda ha poca pressione termica, e la domanda diventa se la sua gravità la farà collassare.</p>`},
+  {t:'prosa', title:'Il criterio di Jeans dal viriale', tag:'diapositive 5-9', html:R`
+  <p>Per una nube sferica omogenea di massa $M_c$ e raggio $R_c$, l&rsquo;energia gravitazionale si ottiene integrando gusci: $dU=-GM_r\,dm/r$, con $M_r=\frac43\pi r^3\rho$, e il risultato è $U=-\frac35\frac{GM_c^{2}}{R_c}$. L&rsquo;energia cinetica termica è $K=\frac32NkT=\frac32\frac{M_c}{\mu m_H}kT$. Il teorema del viriale dice che la nube è in equilibrio se $2K=-U$, e che collassa se $2K<-U$. Uguagliando si ottiene la temperatura minima che regge una nube data, $T_{\min}=\frac{G M_c\mu m_H}{5kR_c}$. Esprimendo il raggio con la densità, $R_c=(3M_c/4\pi\rho_0)^{1/3}$, si ottiene invece la massa sopra la quale una nube di data densità e temperatura collassa, la <b>massa di Jeans</b>:
+  $$M_J=\left(\frac{5kT}{G\mu m_H}\right)^{3/2}\left(\frac{3}{4\pi\rho_0}\right)^{1/2},$$
+  e l&rsquo;equivalente in raggio, la lunghezza di Jeans, $R_J=\left(\frac{15kT}{4\pi G\mu m_H\rho_0}\right)^{1/2}$. Una nube più fredda e più densa collassa a masse più piccole. Una nube di idrogeno atomico a 100 K con $10^7$ atomi per m³ ha $M_J=2{,}9\cdot10^{4}\,M_\odot$. Una nube molecolare densa, $\mu=2$ a 10 K con $10^9$ molecole per m³, ha $23\,M_\odot$. È per questo che le stelle nascono nelle nubi molecolari fredde e non nel gas atomico diffuso. Sono stime di <span class="str" data-str="ordini-di-grandezza">ordine di grandezza</span>: il fattore 5 del viriale e la forma sferica cambiano i numeri di un fattore qualche, non il confronto.</p>`},
+  {t:'prosa', title:'La nube dell’esercizio, chiusa', tag:'prova del 2015, seconda e terza domanda', html:R`
+  <p>Per la nube di 849 masse solari e 0,7 pc della tappa 04, idrogeno atomico con $\mu=1$, la temperatura minima per non collassare è $127\ \mathrm{K}$. Se è più fredda collassa, e il tempo che impiega è quello di caduta libera, $t_{ff}=\sqrt{\frac{3\pi}{32G\rho_0}}$, che con $4\cdot10^{-17}$ kg/m³ vale $3{,}3\cdot10^{5}\ \mathrm{anni}$. È un tempo breve rispetto alla vita della Galassia. Se tutte le nubi instabili collassassero in caduta libera, la Galassia avrebbe già consumato tutto il suo gas, e il fatto che non sia successo dice che turbolenza, campi magnetici e la pressione delle stelle già nate sostengono le nubi più a lungo.</p>`}
+,
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Una nube a 20 K si raffredda a 10 K senza cambiare densità. La sua massa di Jeans cresce o diminuisce, e di quanto?`,
+    a:R`Diminuisce: $M_J\propto T^{3/2}$ a densità fissata, quindi dimezzare la temperatura riduce la massa di Jeans di un fattore $2^{3/2}\simeq2{,}8$. Il raffreddamento per righe molecolari rende instabili nubi che prima erano stabili: è il motivo per cui il raffreddamento è il primo passo della formazione stellare.`},
+   {q:R`Perché la temperatura minima della nube dell’esercizio non dipende dalla densità, ma dal rapporto M/R?`,
+    a:R`Perché il viriale confronta l&rsquo;energia termica per particella, $\sim kT$, con l&rsquo;energia gravitazionale per particella, $\sim GM\mu m_H/R$: la condizione $T_{\min}\propto M/R$ è la stessa stima della temperatura centrale di una stella, applicata a una nube. Fissata la densità, $M/R\propto R^2$, e le nubi grandi chiedono temperature alte per reggersi.`}
+  ]}
+]},
+
+/* ---------------- 08 · COLLASSO E FRAMMENTAZIONE ---------------- */
+{ num:'08', title:'Il collasso, la frammentazione, e perché si ferma a mezza massa solare', meta:'due nubi a confronto · la caduta libera risolta · Jeans durante il collasso · isotermo contro adiabatico · M_min ≈ 0,5 M☉',
+  blocchi:[
+  {t:'prosa', title:'Quali nubi collassano: i due esempi della lezione', tag:'lezione14_2017, diapositive 31-32', html:R`
+  <p>De Bernardis, nella lezione 14 del 2017, applica la massa di Jeans a due nubi tipiche, con $\mu=1$. La prima è una nube di idrogeno diffusa, visibile a 21 cm, con $T=50$ K e $n=500$ cm$^{-3}$, cioè $\rho_0=5\cdot10^8\cdot1{,}67\cdot10^{-27}=8{,}4\cdot10^{-19}$ kg/m$^3$:</p>
+  <p>$$M_J=\left(\frac{5k\cdot50\,\mathrm K}{Gm_H}\right)^{3/2}\left(\frac{3}{4\pi\rho_0}\right)^{1/2}=1461\,M_\odot,$$</p>
+  <p>le 1500 masse solari della slide. Queste nubi hanno masse di 1-100 $M_\odot$: <i>«le nubi sono quindi stabili, non collassano»</i>. La seconda è il nucleo più denso di una nube molecolare gigante, con $T=150$ K e $n=10^8$ cm$^{-3}$: con la stessa formula $M_J=17\,M_\odot$, mentre questi nuclei hanno masse osservate di 10-1000 $M_\odot$: <i>«sono instabili e possono collassare. In effetti sono i luoghi privilegiati dove si vedono formarsi stelle»</i>. Un fattore $2\cdot10^5$ in densità vince largamente su un fattore 3 in temperatura, perché $M_J\propto T^{3/2}\rho^{-1/2}$.</p>`},
+  {t:'prosa', title:'La caduta libera, risolta', tag:'diapositive 33-37', html:R`
+  <p>Quando la condizione di Jeans è soddisfatta la pressione diventa trascurabile e ogni guscio cade attirato dalla massa interna, che non cambia durante il collasso: $\ddot r=-GM_r/r^2$, con $M_r=\frac43\pi r_0^3\rho_0$. La nube resta circa isoterma finché è otticamente sottile, perché l&rsquo;energia liberata viene irraggiata via. Moltiplicando per $\dot r$ e integrando con $\dot r=0$ a $r=r_0$:</p>
+  <p>$$\left(\frac{dr}{dt}\right)^2=\frac{8\pi G\rho_0r_0^2}{3}\left(\frac{r_0}{r}-1\right).$$</p>
+  <p>La sostituzione delle slide è $r=r_0\cos^2\xi$. Allora $\dot r=-2r_0\cos\xi\sin\xi\,\dot\xi$, il membro di destra diventa $K^2r_0^2\tan^2\xi$ con $K=\sqrt{8\pi G\rho_0/3}$, e resta $2\cos^2\xi\,d\xi=K\,dt$, che si integra subito:</p>
+  <p>$$\xi+\frac12\sin2\xi=Kt .$$</p>
+  <p>La nube arriva a $r=0$ per $\xi=\pi/2$, cioè al tempo di caduta libera</p>
+  <p>$$t_{ff}=\frac{\pi}{2K}=\sqrt{\frac{3\pi}{32G\rho_0}} .$$</p>
+  <p>Non dipende dal raggio iniziale: se la densità è uniforme ogni guscio arriva al centro nello stesso istante, il collasso è <i>omologo</i>; ma se il centro è un po&rsquo; più denso, lì $t_{ff}$ è più breve e la densità centrale cresce più in fretta. Per la nube densa della lezione, $\rho_0=2\cdot10^{-16}$ g/cm$^3$ $=2\cdot10^{-13}$ kg/m$^3$, $t_{ff}=4707$ anni: <i>«l&rsquo;andamento tipico del collasso è lento all&rsquo;inizio, e sempre più veloce poi»</i>.</p>`},
+  {t:'plot', title:'Il collasso in caduta libera',
+   intro:R`Tempo trascorso t/t_ff in funzione del raggio raggiunto r/r₀, dalla soluzione esatta t/t_ff = (2/π)(ξ + ½ sin 2ξ) con r/r₀ = cos²ξ. Si legge da destra a sinistra: la nube parte da r = r₀ a t = 0 e arriva a r = 0 a t = t_ff.`,
+   plots:[
+    {kind:'func2d', xr:[0,1], yr:[0,1.05], height:260, equal:false,
+     title:'r / r₀      t / t_ff',
+     curves:[{f:'(function(u){var q=acos(sqrt(u));return 2/PI*(q+0.5*sin(2*q));})(x)', col:'#5eead4', label:'caduta libera'}],
+     marks:[{x:0.5, y:0.818, label:'metà raggio a 0,82 t_ff', col:'#d8a13a', up:false}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> per dimezzare il raggio serve l'82% del tempo di caduta libera; l'ultima metà si percorre nel restante 18%.</p>
+   <p><b>Che cosa impararne:</b> il collasso accelera da solo, perché la densità, e con essa la gravità, cresce mentre la nube si contrae; è il motivo per cui le fasi finali della formazione di una protostella sono brevissime e difficili da osservare.</p>`},
+  {t:'prosa', title:'Perché una nube fa molte stelle: la frammentazione', tag:'diapositive 38-40', html:R`
+  <p>Se il collasso fosse davvero omologo si formerebbe un&rsquo;unica stella con tutta la massa della nube. Invece le stelle nascono in gruppi, dalle binarie agli ammassi di centinaia di migliaia di stelle. La ragione è nella stessa formula di Jeans: in un collasso isotermo l&rsquo;unica cosa che cambia è la densità, e $M_J\propto\rho^{-1/2}$ scende. Quando la densità è cresciuta di molti ordini di grandezza, sottosezioni della nube, centrate su punti inizialmente un po&rsquo; più densi, soddisfano da sole la condizione di Jeans e collassano per conto proprio. Ogni frammento a sua volta si frammenta. <i>«Se questa situazione continuasse, si genererebbe un numero sempre più grande di oggetti di massa sempre più piccola. Ma a un certo punto il processo si ferma»</i>.</p>
+  <p>Il collasso resta isotermo solo finché la nube irraggia efficacemente l&rsquo;energia gravitazionale liberata. Man mano che la densità cresce la nube diventa otticamente spessa e si avvicina al limite opposto, adiabatico, in cui tutta l&rsquo;energia gravitazionale si trasforma in calore. Per una trasformazione adiabatica $TV^{\gamma-1}$ è costante, cioè $T\propto\rho^{\gamma-1}$, e la massa di Jeans diventa</p>
+  <p>$$M_J\propto T^{3/2}\rho^{-1/2}\propto\rho^{\frac32(\gamma-1)-\frac12}=\rho^{(3\gamma-4)/2},$$</p>
+  <p>che per un gas monoatomico, $\gamma=5/3$, è $\rho^{1/2}$: <b>in regime adiabatico la massa di Jeans cresce con la densità</b>, e la frammentazione si arresta.</p>`},
+  {t:'plot', title:'La massa di Jeans durante il collasso',
+   intro:R`log₁₀(M_J/M_J,0) contro log₁₀(ρ/ρ₀), schema: in regime isotermo M_J ∝ ρ^{−1/2} (ciano), in regime adiabatico con γ = 5/3 M_J ∝ ρ^{+1/2} (oro). Il passaggio, qui messo a ρ/ρ₀ = 10⁸ per illustrazione, è dove la nube diventa otticamente spessa.`,
+   plots:[
+    {kind:'func2d', xr:[0,12], yr:[-5,1], height:260, equal:false,
+     title:'log₁₀ ρ/ρ₀      log₁₀ M_J/M_J,0',
+     curves:[{f:'x<8 ? -0.5*x : -4+0.5*(x-8)', col:'#5eead4', label:'isotermo, poi adiabatico'},
+             {f:'-0.5*x', col:'#94a3b8', label:'se restasse isotermo', dash:true}],
+     marks:[{x:8, y:-4, label:'minimo: fine della frammentazione', col:'#d8a13a', up:true}]}
+   ],
+   leggi:R`<p><b>Che cosa guardare:</b> la massa di Jeans scende di mezzo ordine di grandezza per ogni ordine in densità finché la nube irraggia, poi risale.</p>
+   <p><b>Che cosa impararne:</b> il minimo è la massa più piccola dei frammenti; il conto che segue lo stima, ed è di mezza massa solare.</p>`},
+  {t:'prosa', title:'La fine della frammentazione, con i numeri', tag:'diapositive 41-46', html:R`
+  <p>Il criterio per la transizione confronta l&rsquo;energia che il collasso libera con quella che la nube riesce a irraggiare. Partendo da masse lontane e ferme l&rsquo;energia iniziale è circa zero, e per il viriale quella finale è $E_f=U/2=-\frac{3}{10}GM_J^2/R_J$: l&rsquo;energia irraggiata in un tempo di caduta libera dà una luminosità che, a meno di fattori dell&rsquo;ordine dell&rsquo;unità (la slide li lascia cadere), è</p>
+  <p>$$L_{ff}\approx\frac{GM_J^2/R_J}{t_{ff}}\approx\frac{G^{3/2}M_J^{5/2}}{R_J^{5/2}},$$</p>
+  <p>perché $t_{ff}\sim(G\rho)^{-1/2}\sim(R^3/GM)^{1/2}$. La nube non è un corpo nero in equilibrio, quindi irraggia meno di un corpo nero della stessa temperatura, di un fattore di efficienza $0\lt e\lt 1$: $L_{\rm rad}=4\pi R_J^2e\sigma T^4$. Gli effetti adiabatici diventano importanti quando la nube non riesce più a smaltire l&rsquo;energia, cioè quando $L_{ff}\approx L_{\rm rad}$:</p>
+  <p>$$M_J^{5/2}=\frac{4\pi e\sigma T^4}{G^{3/2}}R_J^{9/2} .$$</p>
+  <p>Per eliminare il raggio si usano le due relazioni di Jeans: dalla massa di Jeans si ricava $\rho$ in funzione di $M_J$, e da $R_J^3=3M_J/(4\pi\rho)$ segue $R_J=G\mu m_HM_J/(5kT)$. Sostituendo,</p>
+  <p>$$M_{\min}=\left[\frac{(5k)^{9/2}T^{1/2}}{4\pi e\sigma G^3(\mu m_H)^{9/2}}\right]^{1/2}=0{,}027\,M_\odot\,\frac{T^{1/4}}{e^{1/2}\mu^{9/4}},$$</p>
+  <p>con $T$ in kelvin: il coefficiente 0,03 della slide. Per $T=1000$ K, $\mu=1$, $e=0{,}1$ si ottiene $M_{\min}=0{,}47\,M_\odot$, la «massa di 0,5 $M_\odot$ per la fine della frammentazione» della lezione. La dipendenza dai parametri incerti è debolissima, $T^{1/4}e^{-1/2}$: anche sbagliando $T$ di un fattore 10 il risultato cambia di 1,8. <i>«Cioè non si formano strutture di massa molto più piccola di quella del Sole. Questo è esattamente ciò che si osserva nella galassia»</i>.</p>
+  <p>La lezione chiude con le avvertenze che vanno ripetute all&rsquo;orale: il criterio di Jeans, derivato per una nube statica, è stato usato in tutte le fasi; si sono trascurati il trasporto radiativo, la polvere che domina l&rsquo;opacità e si vaporizza, la ionizzazione, la rotazione e il momento angolare, i campi magnetici. I risultati sono ordini di grandezza; i numeri veri richiedono l&rsquo;integrazione dell&rsquo;idrodinamica. La protostella che ne nasce, nel profondo della nube e schermata dalla polvere, si vede solo nell&rsquo;infrarosso: oggetti T Tauri, il globulo di Bok B335, le sorgenti della nebulosa di Orione.</p>`}
+]},
+
+/* ---------------- 09 · ALL'ORALE ---------------- */
+{ num:'09', title:'All’orale: la sfera di Strömgren e la riga a 21 cm', meta:'la domanda teorica della mappa · due copioni brevi',
+  blocchi:[
+  {t:'reveal', title:'La sfera di Strömgren, in quattro mosse', tag:'copione', steps:[
+   {label:'Mossa 1: che cosa si bilancia', body:R`<p>«Una stella O emette $N_\gamma$ fotoni al secondo sopra 13,6 eV. Ionizzano il gas fino al raggio in cui le ricombinazioni nel volume li consumano tutti.»</p>`},
+   {label:'Mossa 2: il bilancio', body:R`<p>«Le ricombinazioni per secondo sono $n_en_p\alpha$ per il volume: $N_\gamma=\frac43\pi R_S^3n^2\alpha$, quindi $R_S=(3N_\gamma/4\pi\alpha n^{2})^{1/3}$.»</p>`},
+   {label:'Mossa 3: il numero', body:R`<p>«Con $10^{48}$ fotoni al secondo e 10 cm⁻³ vengono circa 6 pc. La dipendenza forte è dalla densità, $n^{-2/3}$, perché le ricombinazioni vanno come $n^2$.»</p>`},
+   {label:'Mossa 4: che cosa manca', body:R`<p>«I fotoni di ricombinazione diretta al fondamentale ionizzano di nuovo, e la regione HII, a 7000 K contro 70 K, ha una pressione molto maggiore del gas neutro e si espande.»</p>`}
+  ]},
+  {t:'reveal', title:'La riga a 21 cm, in quattro mosse', tag:'copione', steps:[
+   {label:'Mossa 1: la struttura iperfine', body:R`<p>«Nel fondamentale dell&rsquo;idrogeno gli spin di protone ed elettrone paralleli stanno $5{,}9\cdot10^{-6}$ eV sopra gli antiparalleli: il ribaltamento dà 1420 MHz, 21 cm.»</p>`},
+   {label:'Mossa 2: proibita, ma visibile', body:R`<p>«È una transizione proibita: $A_{21}=2{,}85\cdot10^{-15}\ \mathrm{s^{-1}}$, undici milioni di anni. La si vede perché nel mezzo interstellare le collisioni sono rare e l&rsquo;idrogeno è tantissimo.»</p>`},
+   {label:'Mossa 3: tre quarti', body:R`<p>«Pesi 3 e 1, e $h\nu/k=0{,}07$ K molto minore della temperatura di spin: tre quarti degli atomi sono nello stato superiore, a qualunque temperatura ragionevole.»</p>`},
+   {label:'Mossa 4: la colonna', body:R`<p>«In regime sottile $T_b\propto N_H\phi$, e integrando sul profilo in velocità $N_H=1{,}82\cdot10^{18}\int T_b\,dv$ cm⁻², senza temperatura né distanza. Le velocità danno la rotazione della Galassia.»</p>`}
+  ]}
+]},
+
+/* ---------------- 10 · I NUMERI ---------------- */
+{ num:'10', title:'I numeri di questo movimento, e dove il gas torna', meta:'otto voci · dal mezzo interstellare alla formazione delle stelle',
+  blocchi:[
+  {t:'prosa', title:'All’orale non c’è il foglio dei dati', tag:'otto voci', html:R`
+  <ul>
+  <li><b>21 cm:</b> 1420,4 MHz; $A_{21}=2{,}85\cdot10^{-15}\ \mathrm{s^{-1}}$ (11 milioni di anni); pesi 1 e 3; 3/4 degli atomi su.</li>
+  <li><b>Colonna:</b> $N_H=1{,}82\cdot10^{18}\int T_b\,dv$ cm⁻² con $T_b$ in K e $v$ in km/s.</li>
+  <li><b>Regioni HII:</b> fotoni sopra 13,6 eV da stelle O e B; H-alfa a 656 nm dalla ricombinazione.</li>
+  <li><b>Strömgren:</b> $R_S=(3N_\gamma/4\pi\alpha n^2)^{1/3}$; circa 6 pc per $10^{48}$ s⁻¹ e 10 cm⁻³; $\alpha\simeq2{,}6\cdot10^{-13}$ cm³/s.</li>
+  <li><b>Temperature:</b> HI freddo 70-150 K, HII 7000-10 000 K, nubi molecolari 10-30 K.</li>
+  <li><b>Free-free:</b> spettro piatto in regime sottile, $\nu^2$ in regime spesso; misura di emissione $\int n_e^2dl$.</li>
+  <li><b>Viriale per una sfera omogenea:</b> $U=-\frac35GM^2/R$, collasso se $2K<-U$.</li>
+  <li><b>Jeans:</b> $M_J\propto T^{3/2}\rho^{-1/2}$; da $10^4$ masse solari nel gas atomico a decine nelle nubi molecolari dense.</li>
+  </ul>`},
+  {t:'prosa', title:'Dove riappare', tag:'il senso', html:R`
+  <p>La riga a 21 cm è lo strumento con cui si misura la rotazione delle galassie fino a grandi distanze dal centro, ben oltre le stelle visibili, ed è lì che si scopre che la massa non segue la luce. Il criterio di Jeans torna identico in cosmologia, dove decide quali perturbazioni di densità dell&rsquo;universo primordiale crescono fino a diventare galassie. Le regioni HII sono i segnali delle stelle appena nate: contarle in una galassia lontana, attraverso H-alfa o il continuo radio, misura il suo tasso di formazione stellare. E il free-free degli elettroni caldi, insieme allo scattering Compton, torna negli ammassi di galassie, il cui gas a cento milioni di gradi brilla in raggi X per bremsstrahlung.</p>`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleoas-11-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo as-11 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: as-11-il-mezzo-interstellare-il-gas.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
