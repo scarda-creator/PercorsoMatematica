@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento mq-15 — Perturbazioni nel caso degenere: la base che la perturbazione sceglie, e quando il risultato vale</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Meccanica Quantistica · Movimento <b>mq-15 — Perturbazioni nel caso degenere: la base che la perturbazione sceglie, e quando il risultato vale</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'meccanica-quantistica';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["spettro"] = {"nome":"Spettro di un operatore","riga":"Lo spettro di un operatore e' l'insieme dei possibili esiti di una misura — i suoi autovalori — e puo' essere discreto (autovalori separati, autovettori in $\\mathcal H$), continuo (autovalori che riempiono un intervallo, autovettori non normalizzabili), o misto.","serve":"E' la quantita' che la fisica chiede davvero: scrivere l'hamiltoniana e trovarne lo spettro E' il problema d'esame. La distinzione discreto/continuo non e' tecnica — decide se un autostato e' uno stato preparabile (discreto) o una distribuzione che vive fuori dallo spazio di Hilbert (continuo), come l'onda piana e la delta.","esempio":"Per $\\sigma_z=\\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}$ lo spettro e' $\\{+1,-1\\}$, discreto, e i due invarianti della matrice lo riassumono senza risolvere l'equazione secolare: la somma degli autovalori e' la traccia, $\\operatorname{tr}\\sigma_z=0$, il loro prodotto e' il determinante, $\\det\\sigma_z=-1$. Per l'operatore posizione lo spettro e' tutta la retta reale, continuo, e gli autovettori sono delte di Dirac.","debito":"la costruzione rigorosa dello spettro continuo (teorema spettrale generalizzato, misura spettrale $E(\\lambda)$ di von Neumann) sta fuori da questo percorso: qui si dichiara che esiste e si lavora coi casi concreti. La separazione fra spettro continuo e spettro residuo non si tratta.","controllo":[{"tipo":"uguale","sinistra":"Matrix([[1,0],[0,-1]]).trace()","vale":"0","dove":"esempio","appare":"\\operatorname{tr}\\sigma_z=0"},{"tipo":"uguale","sinistra":"Matrix([[1,0],[0,-1]]).det()","vale":"-1","dove":"esempio","appare":"\\det\\sigma_z=-1"}],"qui":{},"pieno":null};
+STRUM["proiettore-ortogonale"] = {"nome":"Proiettore ortogonale","riga":"Un proiettore ortogonale e' un operatore $\\hat P$ che soddisfa due condizioni insieme: $\\hat P^2=\\hat P$ (idempotenza — proiettare due volte equivale a proiettare una volta) e $\\hat P^{\\dagger}=\\hat P$ (autoaggiuntezza, che rende la proiezione perpendicolare al sottospazio invece che obliqua).","serve":"E' il mattone di tutta la teoria della misura: $\\hat P=|\\psi\\rangle\\langle\\psi|$ su un ket normalizzato e' l'osservabile «lo stato e' $|\\psi\\rangle$?» con esiti $1$ e $0$, e il suo valor medio e' la probabilita'. L'identita' si scrive come somma di proiettori, $\\mathbb 1=\\sum_i\\hat P_i$, ed e' con questa che si cambia base e si decompone un'osservabile.","esempio":"Da $|\\psi\\rangle=(\\tfrac35,\\tfrac45)$ normalizzato si costruisce $\\hat P=|\\psi\\rangle\\langle\\psi|$ con entrate $\\tfrac{9}{25},\\tfrac{12}{25},\\tfrac{16}{25}$. L'elemento $(1,1)$ di $\\hat P^2$ vale $(\\tfrac{9}{25})^2+(\\tfrac{12}{25})^2=\\tfrac{9}{25}$, cioe' $\\hat P^2=\\hat P$; la traccia e' $\\tfrac{9}{25}+\\tfrac{16}{25}=1$, come per ogni proiettore di rango uno.","debito":"la decomposizione spettrale di un operatore autoaggiunto con spettro continuo in una famiglia di proiettori $E(\\lambda)$ (la misura spettrale) sta fuori da qui: si usa il caso discreto, dove i proiettori sono $|i\\rangle\\langle i|$.","controllo":[{"tipo":"simbolico","dove":"esempio","appare":"\\hat P^2=\\hat P","perche":"e' l'idempotenza, meta' della definizione di proiettore: un'identita' fra operatori, non un conto numerico. Il caso concreto che la sostiene e' l'entrata $(1,1)$ asserita qui sotto, dove i numeri ci sono"},{"tipo":"uguale","sinistra":"(Rational(9,25))**2+(Rational(12,25))**2","vale":"9/25","dove":"esempio","appare":"(\\tfrac{9}{25})^2+(\\tfrac{12}{25})^2=\\tfrac{9}{25}"},{"tipo":"uguale","sinistra":"Rational(9,25)+Rational(16,25)","vale":"1","dove":"esempio","appare":"\\tfrac{9}{25}+\\tfrac{16}{25}=1"}],"qui":{},"pieno":null};
+STRUM["commutatore"] = {"nome":"Commutatore","riga":"$[\\hat A,\\hat B]=\\hat A\\hat B-\\hat B\\hat A$, antisimmetrico, con la regola di Leibniz $[\\hat A,\\hat B\\hat C]=[\\hat A,\\hat B]\\hat C+\\hat B[\\hat A,\\hat C]$ e la relazione canonica $[\\hat x,\\hat p]=i\\hbar$.","serve":"E' la misura di quanto due operazioni dipendano dall'ordine, e qui l'ordine e' fisica: due osservabili che non commutano non hanno una base comune di autostati, quindi non si misurano insieme con precisione arbitraria. Quasi ogni conto che sembra magico — l'algebra del momento angolare, gli operatori di salita e discesa, il teorema di Ehrenfest — e' una manipolazione di commutatori fatta con quelle regole e nient'altro.","esempio":"Dalla regola di Leibniz, $[\\hat x,\\hat p^{2}]=[\\hat x,\\hat p]\\hat p+\\hat p[\\hat x,\\hat p]=2i\\hbar\\hat p$. E' il conto che fa uscire il teorema di Ehrenfest: la meccanica classica ricompare come relazione fra valori medi, e ricompare perche' quel commutatore vale proprio $2i\\hbar\\hat p$.","debito":"l'identita' di Jacobi si enuncia e non si dimostra; la corrispondenza fra commutatore e parentesi di Poisson — che e' l'idea di Dirac e non un'analogia decorativa — sta in mq-07, e li' va letta per intero.","controllo":[{"tipo":"uguale","sinistra":"I*hbar*p + p*I*hbar","vale":"2*I*hbar*p","ipotesi":{"hbar":"positive","p":"real"},"dove":"esempio","appare":"2i\\hbar\\hat p"},{"tipo":"simbolico","dove":"riga","appare":"[\\hat x,\\hat p]=i\\hbar","perche":"e' la relazione di commutazione canonica, il POSTULATO da cui discende il resto della teoria: non si dimostra, si assume, ed e' cio' che separa la meccanica quantistica dalla classica"}],"qui":{},"pieno":null};
+STRUM["operatore-aggiunto"] = {"nome":"Operatore aggiunto e autoaggiunto","riga":"L'aggiunto e' definito da $\\langle\\phi|\\hat A\\psi\\rangle=\\langle\\hat A^{\\dagger}\\phi|\\psi\\rangle$ per ogni coppia di stati, e l'operatore e' autoaggiunto quando coincidono sia $\\hat A^{\\dagger}$ con $\\hat A$ sia i loro domini.","serve":"E' la condizione che rende un operatore un'osservabile: autovalori reali, e autovettori di autovalori distinti ortogonali. In dimensione finita «autoaggiunto» e «hermitiano» coincidono; in dimensione infinita no, e la differenza non e' pedanteria — l'operatore impulso su una semiretta e' hermitiano e non autoaggiunto, e infatti non e' un'osservabile.","esempio":"Se $\\hat A\\psi=a\\psi$ con $\\hat A$ autoaggiunto, allora $a\\langle\\psi|\\psi\\rangle=\\langle\\psi|\\hat A\\psi\\rangle=\\langle\\hat A\\psi|\\psi\\rangle=a^{*}\\langle\\psi|\\psi\\rangle$; siccome la norma non e' nulla segue $a=a^{*}$, cioe' l'autovalore e' reale. Tre righe, e sono la ragione per cui le osservabili si rappresentano cosi'.","debito":"la distinzione fra hermitiano e autoaggiunto in dimensione infinita — domini, estensioni, indici di difetto — e' il programma di von Neumann e sta fuori da questo percorso: qui si dichiara che esiste e si lavora nel caso buono. La regola di inversione dell'ordine nell'aggiunto di un prodotto si usa e non si dimostra.","controllo":[{"tipo":"uguale","sinistra":"conjugate(a)","vale":"a","ipotesi":{"a":"real"},"dove":"esempio","appare":"a=a^{*}"}],"qui":{},"pieno":null};
+STRUM["simmetrie"] = {"nome":"Simmetrie","riga":"L'insieme delle trasformazioni che lasciano identica la sorgente, e che perciò devono lasciare identico anche il campo che ne nasce.","serve":"È il ragionamento che decide la FORMA del campo prima di calcolarlo, e senza il quale la legge di Gauss non serve a niente: Gauss dà un solo numero — il flusso totale — e da un numero si ricava un campo soltanto se si sa già in che direzione punta e da quali variabili dipende. L'argomento ha una forma sola: se una trasformazione lascia identica la distribuzione di carica, lascia identico il campo; quindi ogni componente che quella trasformazione cambierebbe deve essere nulla, e ogni variabile che essa sposta non può comparire.","esempio":"Per un filo infinito uniformemente carico, la traslazione lungo il filo e la rotazione attorno a esso lasciano la carica identica: $\\mathbf E$ non può dipendere né da $z$ né dall'angolo. La riflessione nel piano perpendicolare al filo manderebbe $E_z$ in $-E_z$ lasciando uguale la sorgente, quindi $E_z=0$; resta la sola componente radiale $E_r(r)$. Solo a quel punto il cilindro coassiale è la superficie giusta, e Gauss dà $E_r\\cdot 2\\pi rL=\\dfrac{\\lambda L}{\\varepsilon_0}$, da cui $E_r=\\dfrac{\\lambda}{2\\pi\\varepsilon_0 r}$.","qui":{"meccanica-quantistica":{"serve":"Qui l'argomento di simmetria non decide la forma di un campo: decide la forma degli OPERATORI, ed è il modo in cui questo corso costruisce la teoria. Lo schema è lo stesso — una trasformazione che lascia identica la situazione fisica deve lasciare identica la descrizione — ma la conseguenza è più forte: ogni trasformazione di simmetria continua è realizzata da un operatore unitario, ogni operatore unitario continuo è l'esponenziale di un generatore autoaggiunto, e quel generatore è una quantità conservata. Impulso, momento angolare ed energia non si postulano: sono i generatori delle traslazioni, delle rotazioni e delle traslazioni temporali.","esempio":"Lo spazio è omogeneo, quindi traslare un sistema isolato non ne cambia la fisica: $\\hat U(a)=e^{-ia\\hat P/\\hbar}$ deve commutare con $\\hat H$. Al primo ordine in $a$ questo dà $[\\hat P,\\hat H]=0$, e quindi $\\dfrac{d}{dt}\\langle \\hat P\\rangle=0$: l'omogeneità dello spazio è la conservazione dell'impulso, e il passaggio da una all'altra è di due righe."}},"debito":"nessun nucleo del percorso tratta l'argomento di simmetria come strumento a sé: qui c'è la forma dell'argomento e non la sua giustificazione, che è di teoria dei gruppi e sta fuori dal percorso costruito finora. Quello che il percorso copre è il pezzo di destra — l'integrale di flusso, nel nucleo 03 tappa 04 — non il pezzo di sinistra che decide quale superficie scegliere.","controllo":[{"tipo":"uguale","sinistra":"(lam/(2*pi*e0*r))*2*pi*r*L","vale":"lam*L/e0","dove":"esempio","appare":"\\dfrac{\\lambda L}{\\varepsilon_0}"}]};
+STRUM["clebsch-gordan"] = {"nome":"Coefficienti di Clebsch-Gordan","riga":"Sono il cambio di base fra quella disaccoppiata $|j_1m_1\\rangle|j_2m_2\\rangle$ e quella accoppiata $|JM\\rangle$, dove $J$ va da $|j_1-j_2|$ a $j_1+j_2$ a passi di uno e il coefficiente si annulla se $M$ non vale $m_1+m_2$.","serve":"Servono ogni volta che due momenti angolari si sommano — spin-orbita, due elettroni, spin nucleare ed elettronico — e serve la base in cui il momento totale e' definito. I coefficienti si leggono su tavola; cio' che va saputo a memoria e' quali valori del totale escono, e che senza la somma delle proiezioni il coefficiente e' zero.","esempio":"Due spin un mezzo danno un singoletto e un tripletto. Il conteggio torna, ed e' il primo controllo da fare su ogni composizione: $2\\cdot2=4$ stati nella base disaccoppiata, e $1+3=4$ in quella accoppiata. La dimensione non cambia mai, perche' e' solo un cambio di base.","debito":"le convenzioni di fase (Condon-Shortley) e le formule di ricorrenza non stanno qui. Le tavole dei vari testi differiscono proprio sulle fasi: quando se ne usa una, va dichiarata quale.","controllo":[{"tipo":"uguale","sinistra":"2*2","vale":"4","dove":"esempio","appare":"2\\cdot2=4"},{"tipo":"uguale","sinistra":"1+3","vale":"4","dove":"esempio","appare":"1+3=4"}],"qui":{},"pieno":null};
+STRUM["raggio-di-bohr"] = {"nome":"Raggio di Bohr","riga":"$a_0=4\\pi\\varepsilon_0\\hbar^{2}/(m_ee^{2})\\simeq0{,}529\\times10^{-10}$ m, con energia associata $E_1\\simeq-13{,}6$ eV.","serve":"E' la scala di lunghezza dell'atomo, e si ottiene senza risolvere niente: si minimizza la somma fra il costo cinetico dell'indeterminazione, che va come l'inverso del quadrato del raggio, e l'attrazione coulombiana, che va come l'inverso del raggio. Serve come controllo d'ordine di grandezza su ogni risultato atomico: se un conto da' una lunghezza mille volte diversa, il conto e' sbagliato.","esempio":"I livelli vanno come l'inverso del quadrato del numero quantico principale, quindi il secondo vale $-3{,}4$ eV e la prima riga di Lyman ha energia $10{,}2$ eV. Il raggio medio cresce col quadrato: lo stato con numero quantico dieci e' $10^{2}=100$ volte piu' grande del fondamentale, ed e' la ragione fisica per cui gli atomi di Rydberg sono enormi.","debito":"la derivazione completa dall'equazione radiale sta nel movimento sull'idrogeno; qui ci sono la stima variazionale e i numeri da ricordare.","controllo":[{"tipo":"numero","espr":"-13.6/4","vale":"-3.4","dove":"esempio","appare":"-3{,}4"},{"tipo":"numero","espr":"-13.6/4 - (-13.6)","vale":"10.2","dove":"esempio","appare":"10{,}2"},{"tipo":"uguale","sinistra":"10**2","vale":"100","dove":"esempio","appare":"10^{2}=100"}],"qui":{},"pieno":null};
+STRUM["armoniche-sferiche"] = {"nome":"Armoniche sferiche","riga":"$Y_\\ell^{m}(\\theta,\\varphi)$ sono le autofunzioni simultanee di $\\hat L^{2}$, con autovalore $\\hbar^{2}\\ell(\\ell+1)$, e di $\\hat L_z$, con autovalore $\\hbar m$, ortonormali e complete sulla sfera.","serve":"Sono la parte angolare di ogni problema a simmetria sferica: appena il potenziale dipende solo dalla distanza, l'equazione si separa e la dipendenza angolare e' sempre una di queste, qualunque sia il potenziale. Cio' che cambia da problema a problema e' solo la parte radiale — per questo si imparano una volta e si riusano sempre.","esempio":"Per ogni $\\ell$ ci sono $2\\ell+1$ valori di $m$: e' la degenerazione essenziale di ogni livello a simmetria sferica, e non dipende dal potenziale. Per $\\ell=2$ vengono $2\\cdot2+1=5$ stati. La prima armonica e' costante, ed e' il motivo per cui lo stato fondamentale di un potenziale centrale e' sempre sfericamente simmetrico.","debito":"la costruzione esplicita dai polinomi di Legendre associati, e le formule di ricorrenza, non stanno qui: si usano gli enunciati e l'ortonormalita'.","controllo":[{"tipo":"uguale","sinistra":"2*2+1","vale":"5","dove":"esempio","appare":"2\\cdot2+1=5"},{"tipo":"simbolico","dove":"riga","appare":"\\hbar^{2}\\ell(\\ell+1)","perche":"e' l'autovalore del quadrato del momento angolare, che discende dall'algebra dei commutatori e non dalla forma esplicita delle armoniche. Si enuncia qui perche' e' cio' che le definisce"}],"qui":{},"pieno":null};
+STRUM["matrici-di-pauli"] = {"nome":"Matrici di Pauli","riga":"Sono le tre matrici $2\\times2$ hermitiane a traccia nulla il cui quadrato e' l'identita' e il cui commutatore riproduce l'algebra del momento angolare, da cui lo spin $\\hat S_i=\\tfrac{\\hbar}{2}\\sigma_i$.","serve":"Sono la rappresentazione piu' piccola non banale del momento angolare, e insieme all'identita' formano una base di tutte le matrici due per due hermitiane: qualunque osservabile di un sistema a due stati e' una combinazione dell'identita' e delle tre. Ogni conto di spin un mezzo — Stern-Gerlach, precessione, risonanza magnetica, qubit — si riduce alla loro algebra.","esempio":"Siccome il quadrato di una combinazione unitaria delle tre e' l'identita', qualunque esponenziale collassa: l'operatore di rotazione dello spinore diventa $\\cos(\\theta/2)$ per l'identita' meno $i\\sin(\\theta/2)$ per la combinazione. Il mezzo nell'angolo e' la ragione per cui una rotazione di un giro intero cambia segno allo stato, perche' $\\cos(\\pi)=-1$.","debito":"la costruzione generale delle rappresentazioni di SU(2) e il suo legame con SO(3) stanno nel movimento sul momento angolare; qui c'e' il caso di spin un mezzo con le sue regole di calcolo.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi/2)","vale":"-1","dove":"esempio","appare":"\\cos(\\pi)=-1"},{"tipo":"uguale","sinistra":"cos(pi/3)**2+sin(pi/3)**2","vale":"1","dove":"esempio","appare":"\\sin(\\theta/2)"}],"qui":{},"pieno":null};
+STRUM["elettronvolt"] = {"nome":"Elettronvolt","riga":"L'energia che un elettrone acquista attraversando una differenza di potenziale di un volt: $1\\ \\mathrm{eV}=1{,}602\\cdot10^{-19}$ J; divisa per $c^{2}$ è una massa, $1\\ \\mathrm{eV}/c^{2}=1{,}783\\cdot10^{-36}$ kg.","serve":"A leggere senza conversioni le tabelle in cui la fisica delle particelle e l'astrofisica scrivono le masse a riposo come energie — l'elettrone 0,511 MeV, il protone 938 MeV, il bosone di Higgs 125 GeV. La scelta non è una bizzarria di notazione: in un processo la quantità che si conserva è l'energia, e scrivere la massa già in energia dice a colpo d'occhio quali reazioni sono possibili e quante ne resta per l'energia cinetica o per i fotoni. L'elettronvolt ha anche un secondo mestiere, e in astrofisica è il più usato dei due: convertito in temperatura tramite $k_BT$ dà la scala termica a cui un processo di quella energia diventa frequente, e questo è ciò che permette di dire a che punto della storia dell'universo o a che profondità di una stella un certo processo si accende.","esempio":"Dalla massa del protone espressa come energia, $938{,}3$ MeV, si ricavano i chilogrammi in un passaggio: $m_p=938{,}3\\cdot10^{6}\\cdot1{,}783\\cdot10^{-36}=1{,}673\\cdot10^{-27}$ kg, che è il valore stampato in calce al foglio d'esame. Sul versante termico, $T=\\dfrac{1{,}602\\cdot10^{-19}}{1{,}381\\cdot10^{-23}}=11600$ K: un'energia di un elettronvolt corrisponde a poco più di undicimila kelvin, e siccome ionizzare l'idrogeno costa 13,6 eV si capisce subito perché serva una fotosfera da qualche decina di migliaia di kelvin per trovarlo ionizzato.","pieno":{"file":"as-01-la-scala-del-cosmo.html","tappa":"05","come":"le masse delle particelle elementari scritte come energie, con la conversione in chilogrammi e la gerarchia delle masse, nel movimento sulla scala del cosmo"},"controllo":[{"tipo":"numero","espr":"1.602177e-19/(2.99792458e8)**2*1e36","vale":"1.783","dove":"riga","appare":"1,783\\cdot10^{-36}"},{"tipo":"numero","espr":"938.3e6*1.783e-36*1e27","vale":"1.673","dove":"esempio","appare":"1,673\\cdot10^{-27}"},{"tipo":"numero","espr":"1.602e-19/1.381e-23","vale":"11600","dove":"esempio","appare":"11600"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo mq-15: Perturbazioni nel caso degenere: la base che la perturbazione sceglie, e quando il risultato vale <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        mq-15 — perturbazioni nel caso degenere, e quando l'approssimazione regge
+identita:  il denominatore che si annulla, e la diagonalizzazione dentro l'autospazio che
+           lo evita. Il filo del movimento e' un rovesciamento di prospettiva: nel caso
+           degenere non e' la perturbazione a essere piccola rispetto ai livelli, e' il
+           livello a non sapere quale base usare, e la perturbazione, per quanto piccola,
+           la sceglie. Da qui il metodo (l'equazione secolare nel sottospazio), il modo di
+           evitarlo (un operatore che commuta con H0 e con la perturbazione), i casi in cui
+           la degenerazione sopravvive al primo ordine, i livelli quasi degeneri in cui
+           conviene diagonalizzare esattamente, e la gerarchia di perturbazioni che decide
+           quali numeri quantici sono buoni
+copre:     Q.16 (teoria delle perturbazioni indipendenti dal tempo: estensione al caso
+           degenere; validita' dell'approssimazione)
+serve:     mq-14 (la serie non degenere, il criterio sugli elementi di matrice, il secondo
+           ordine e la repulsione dei livelli: qui se ne vede il punto di rottura)
+apre:      lo calcola verifica-mappa.py invertendo i `serve` degli altri movimenti
+strumenti: spettro, proiettore-ortogonale, operatore-aggiunto, commutatore,
+           armoniche-sferiche, matrici-di-pauli, raggio-di-bohr, elettronvolt,
+           simmetrie, clebsch-gordan
+fonti:     Sakurai-Napolitano, Modern Quantum Mechanics (2a ed., 2010) — §5.2 (pag.
+           stampate 316-321): la derivazione con i proiettori P0 e P1 e la hamiltoniana
+           efficace (5.2.2)-(5.2.15), la procedura in quattro passi, l'effetto Stark lineare
+           e la domanda sulla realta' della degenerazione 2s-2p; §5.3 (pag. 321-326): la
+           regola «choose unperturbed kets that diagonalize the perturbation», la regola
+           degli intervalli di Lande', le righe D del sodio. Il Sakurai italiano e' una
+           scansione e non si e' potuto aprire.
+           Griffiths, Introduction to Quantum Mechanics (2a ed.) — §6.2 (pag. stampate
+           262-270): la degenerazione doppia con la formula (6.27), il teorema sugli stati
+           «buoni» con la sua dimostrazione, la scatola cubica con un quarto rialzato
+           (esempio 6.2), i problemi 6.9 e 6.11.
+           Shankar, Principles of Quantum Mechanics — §17.3 (pag. stampate 464-470):
+           l'argomento della non analiticita' (la base che salta), la figura 17.1, lo Stark
+           a n=2 come esempio contro la conclusione affrettata dalla parita', l'esercizio
+           17.3.2 sullo spin 1, la struttura fine.
+           Ballentine, Quantum Mechanics: A Modern Development — §10.5, la parte sul caso
+           degenere (pag. 284-287): l'equazione (10.92) e l'esempio 4, Stark lineare con il
+           dipolo spontaneo 3ea0.
+           Picasso, Lezioni di Meccanica Quantistica (ETS 2015) — §12.2-12.4 (pag. 190-200):
+           l'effetto Stark a n=2 con le tre regole di selezione, la decomposizione H'=H'0+H''
+           che tratta degenere e non degenere insieme, i livelli quasi degeneri (12.28);
+           §13.7 (pag. 217-218) sul perche' l'effetto Stark e' quasi solo dell'idrogeno;
+           §14.1 (pag. 230-231) sull'albero genealogico dei livelli; §16.4-16.6 (pag.
+           274-290): Russell-Saunders, i numeri quantici approssimativamente buoni, la riga
+           di intercombinazione del mercurio, lo Zeeman intermedio sul 2p del litio e il non
+           incrocio. Le pagine 325-328 indicate nella mappa sono l'indice analitico, non
+           contenuto: dichiarato.
+           Landau-Lifsits, Fisica Teorica vol. III (MIR 1976) — VOCE FONDATIVA: §39
+           l'equazione secolare (e il nome, dalla meccanica celeste), la somma delle radici,
+           il secondo ordine dentro il gruppo degenere (39,3)-(39,4); §66 e §72 la struttura
+           fine come equazione secolare, Russell-Saunders e jj; §76-77 effetto Stark,
+           lineare nell'idrogeno in coordinate paraboliche; §113 effetto Zeeman e fattore
+           di Lande'.
+           Dirac, I Principi (ed. italiana) — §43, l'equazione [43.7] nel caso con piu'
+           stati per livello e il nome «perturbazioni secolari».
+registro:  e' il conto d'esame per eccellenza: «degenerazione» compare in 20 dei 51 file di
+           compiti, e quasi sempre da rimuovere con una perturbazione. Gli esempi della
+           tappa 04 sono tre compiti veri (14-07-2021, 15-07-2020, 18-09-2017), il caso
+           portante della mappa (un livello di momento angolare piu' L.S o un campo lungo
+           z) e' svolto nelle tappe 03, 04 e 07.
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {
+  "tipo": "uguale",
+  "sinistra": "simplify(2*((sqrt(D**2/4+l**2*V**2)-D/2)/(l*V))/(1-((sqrt(D**2/4+l**2*V**2)-D/2)/(l*V))**2))",
+  "vale": "2*l*V/D",
+  "ipotesi": {
+   "D": "positive",
+   "V": "positive",
+   "l": "positive",
+   "x": "positive"
+  },
+  "dove": "01",
+  "appare": "\\tan2\\theta=\\frac{2\\lambda V}{\\Delta}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series(atan(2*x/D)/2,x,0,2).removeO()",
+  "vale": "x/D",
+  "ipotesi": {
+   "D": "positive",
+   "V": "positive",
+   "l": "positive",
+   "x": "positive"
+  },
+  "dove": "01",
+  "appare": "\\theta\\simeq\\lambda V/\\Delta"
+ },
+ {
+  "tipo": "limite",
+  "espr": "atan(2*l*V/D)/2",
+  "var": "D",
+  "a": "0",
+  "vale": "pi/4",
+  "ipotesi": {
+   "D": "positive",
+   "V": "positive",
+   "l": "positive",
+   "x": "positive"
+  },
+  "dove": "01",
+  "appare": "\\theta\\to\\pi/4"
+ },
+ {
+  "tipo": "limite",
+  "espr": "sqrt(D**2/4+l**2*V**2)",
+  "var": "D",
+  "a": "0",
+  "vale": "l*V",
+  "ipotesi": {
+   "D": "positive",
+   "V": "positive",
+   "l": "positive",
+   "x": "positive"
+  },
+  "dove": "01",
+  "appare": "\\pm\\lambda V"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([[0,1],[1,0]])[0,0]",
+  "vale": "0",
+  "dove": "01",
+  "appare": "\\langle1|\\lambda V\\sigma_{x}|1\\rangle=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/a)**3*V0*integrate(sin(pi*x/a)*sin(2*pi*x/a),(x,0,a/2))*integrate(sin(2*pi*y/a)*sin(pi*y/a),(y,0,a/2))*integrate(sin(pi*z/a)**2,(z,0,a))",
+  "vale": "16*V0/(9*pi**2)",
+  "ipotesi": {
+   "a": "positive",
+   "V0": "positive",
+   "x": "real",
+   "y": "real",
+   "z": "real"
+  },
+  "dove": "02",
+  "appare": "W_{bc}=\\frac{16}{9\\pi^{2}}V_{0}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/a)**3*V0*integrate(sin(pi*x/a)**2,(x,0,a/2))*integrate(sin(pi*y/a)**2,(y,0,a/2))*integrate(sin(2*pi*z/a)**2,(z,0,a))",
+  "vale": "V0/4",
+  "ipotesi": {
+   "a": "positive",
+   "V0": "positive",
+   "x": "real",
+   "y": "real",
+   "z": "real"
+  },
+  "dove": "02",
+  "appare": "E^{1}=V_{0}/4"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/a)**3*V0*integrate(sin(pi*x/a)**2,(x,0,a/2))*integrate(sin(2*pi*y/a)**2,(y,0,a/2))*integrate(sin(pi*z/a)**2,(z,0,a))",
+  "vale": "V0/4",
+  "ipotesi": {
+   "a": "positive",
+   "V0": "positive",
+   "x": "real",
+   "y": "real",
+   "z": "real"
+  },
+  "dove": "02",
+  "appare": "Gli elementi diagonali sono tutti $V_{0}/4$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/a)**3*V0*integrate(sin(pi*x/a)**2,(x,0,a/2))*integrate(sin(pi*y/a)*sin(2*pi*y/a),(y,0,a/2))*integrate(sin(2*pi*z/a)*sin(pi*z/a),(z,0,a))",
+  "vale": "0",
+  "ipotesi": {
+   "a": "positive",
+   "V0": "positive",
+   "x": "real",
+   "y": "real",
+   "z": "real"
+  },
+  "dove": "02",
+  "appare": "$\\psi_{a}=\\psi_{112}$ sono nulli"
+ },
+ {
+  "tipo": "numero",
+  "espr": "(8/(3*pi))**2",
+  "vale": "0.7205",
+  "dove": "02",
+  "appare": "\\kappa=(8/3\\pi)^{2}\\approx0{,}7205"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[1,0,0],[0,1,(8/(3*pi))**2],[0,(8/(3*pi))**2,1]])-(1+(8/(3*pi))**2)*eye(3)).det()",
+  "vale": "0",
+  "dove": "02",
+  "appare": "\\frac{V_{0}}{4}(1+\\kappa)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[1,0,0],[0,1,(8/(3*pi))**2],[0,(8/(3*pi))**2,1]])-(1-(8/(3*pi))**2)*eye(3)).det()",
+  "vale": "0",
+  "dove": "02",
+  "appare": "\\frac{V_{0}}{4}(1-\\kappa)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(8/(3*pi))**2*V0/4",
+  "vale": "16*V0/(9*pi**2)",
+  "ipotesi": {
+   "a": "positive",
+   "V0": "positive",
+   "x": "real",
+   "y": "real",
+   "z": "real"
+  },
+  "dove": "02",
+  "appare": "\\kappa=(8/3\\pi)^{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "V0/4+V0/4*(1+k)+V0/4*(1-k)",
+  "vale": "3*V0/4",
+  "ipotesi": {
+   "V0": "positive",
+   "k": "positive"
+  },
+  "dove": "02",
+  "appare": "La somma delle tre correzioni è $3V_{0}/4$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand((Waa-(Waa+Wbb+sqrt((Waa-Wbb)**2+4*Wab**2))/2)*(Wbb-(Waa+Wbb+sqrt((Waa-Wbb)**2+4*Wab**2))/2)-Wab**2)",
+  "vale": "0",
+  "ipotesi": {
+   "Waa": "real",
+   "Wbb": "real",
+   "Wab": "real"
+  },
+  "dove": "02",
+  "appare": "E_{\\pm}^{1}=\\frac12\\Big[W_{aa}+W_{bb}\\pm\\sqrt{(W_{aa}-W_{bb})^{2}+4|W_{ab}|^{2}}\\Big]"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "equazioni di Sakurai (5.2.2)-(5.2.4) e (5.2.7) con i proiettori P0, P1",
+  "perche": "sono identita' fra operatori astratti non commutanti (proiezioni dell'equazione di Schrodinger e loro eliminazione), che sympy renderebbe commutative: si dichiarano. Il loro contenuto verificabile, l'equazione secolare e i suoi autovalori, e' asserito sulla matrice della scatola cubica",
+  "dove": "02",
+  "appare": "0=(E-H_{0}-\\lambda V)|l\\rangle=(E-E_{D}^{(0)}-\\lambda V)P_{0}|l\\rangle+(E-H_{0}-\\lambda V)P_{1}|l\\rangle"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "(E-E_D-lambda P0VP0)P0|l0>=0",
+  "perche": "e' la (5.2.7) di Sakurai troncata al primo ordine: definizione dell'equazione secolare",
+  "dove": "02",
+  "appare": "\\big(E-E_{D}^{(0)}-\\lambda P_{0}VP_{0}\\big)P_{0}|l^{(0)}\\rangle=0"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "(10.92) di Ballentine",
+  "perche": "e' l'equazione agli autovalori della matrice della perturbazione ristretta al livello, scritta per componenti: una definizione",
+  "dove": "02",
+  "appare": "\\sum_{r'}\\langle n,s|H_{1}|n,r'\\rangle c_{r,r'}=E_{n}^{(1)}c_{r,s}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(diag(mu,nu)*Matrix([[h11,w],[conjugate(w),h22]])-Matrix([[h11,w],[conjugate(w),h22]])*diag(mu,nu))[0,1]",
+  "vale": "(mu-nu)*w",
+  "ipotesi": {
+   "mu": "real",
+   "nu": "real",
+   "w": "complex",
+   "h11": "real",
+   "h22": "real"
+  },
+  "dove": "03",
+  "appare": "=(\\mu-\\nu)W_{ab}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(kronecker_product(diag(1,0,-1),diag(Rational(1,2),-Rational(1,2)))+(kronecker_product(Matrix([[0,sqrt(2),0],[0,0,sqrt(2)],[0,0,0]]),Matrix([[0,0],[1,0]]))+kronecker_product(Matrix([[0,0,0],[sqrt(2),0,0],[0,sqrt(2),0]]),Matrix([[0,1],[0,0]])))/2)[0,0]",
+  "vale": "Rational(1,2)",
+  "dove": "03",
+  "appare": "\\langle1,+\\tfrac12|\\mathbf L\\cdot\\mathbf S|1,+\\tfrac12\\rangle=\\tfrac12\\hbar^{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(kronecker_product(diag(1,0,-1),diag(Rational(1,2),-Rational(1,2)))+(kronecker_product(Matrix([[0,sqrt(2),0],[0,0,sqrt(2)],[0,0,0]]),Matrix([[0,0],[1,0]]))+kronecker_product(Matrix([[0,0,0],[sqrt(2),0,0],[0,sqrt(2),0]]),Matrix([[0,1],[0,0]])))/2)[1:3,1:3]",
+  "vale": "Matrix([[-Rational(1,2),1/sqrt(2)],[1/sqrt(2),0]])",
+  "dove": "03",
+  "appare": "\\begin{pmatrix}-\\tfrac12&\\tfrac{1}{\\sqrt2}\\\\ \\tfrac{1}{\\sqrt2}&0\\end{pmatrix}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([[-Rational(1,2),1/sqrt(2)],[1/sqrt(2),0]]).eigenvals()=={Rational(1,2):1,-1:1}",
+  "vale": "True",
+  "dove": "03",
+  "appare": "con autovalori $\\tfrac12$ e $-1$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(kronecker_product(diag(1,0,-1),diag(Rational(1,2),-Rational(1,2)))+(kronecker_product(Matrix([[0,sqrt(2),0],[0,0,sqrt(2)],[0,0,0]]),Matrix([[0,0],[1,0]]))+kronecker_product(Matrix([[0,0,0],[sqrt(2),0,0],[0,sqrt(2),0]]),Matrix([[0,1],[0,0]])))/2).eigenvals()=={Rational(1,2):4,-1:2}",
+  "vale": "True",
+  "dove": "03",
+  "appare": "quattro stati con correzione $+\\tfrac12A\\hbar^{2}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*(Rational(3,2)*Rational(5,2)-2-Rational(3,4))",
+  "vale": "Rational(1,2)",
+  "dove": "03",
+  "appare": "$\\tfrac12\\hbar^{2}$ per $j=\\tfrac32$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*(Rational(1,2)*Rational(3,2)-2-Rational(3,4))",
+  "vale": "-1",
+  "dove": "03",
+  "appare": "$-\\hbar^{2}$ per $j=\\tfrac12$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand(Rational(1,2)*((l+Rational(1,2))*(l+Rational(3,2))-l*(l+1)-Rational(3,4)))",
+  "vale": "l/2",
+  "ipotesi": {
+   "l": "positive"
+  },
+  "dove": "03",
+  "appare": "$\\tfrac{l}{2}\\hbar^{2}$ per $j=l+\\tfrac12$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand(Rational(1,2)*((l-Rational(1,2))*(l+Rational(1,2))-l*(l+1)-Rational(3,4)))",
+  "vale": "-(l+1)/2",
+  "ipotesi": {
+   "l": "positive"
+  },
+  "dove": "03",
+  "appare": "$-\\tfrac{l+1}{2}\\hbar^{2}$ per $j=l-\\tfrac12$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand((2*l+2)*l/2+2*l*(-(l+1)/2))",
+  "vale": "0",
+  "ipotesi": {
+   "l": "positive"
+  },
+  "dove": "03",
+  "appare": "(2l+2)\\,\\frac{l}{2}+2l\\Big(-\\frac{l+1}{2}\\Big)=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "l/2-(-(l+1)/2)",
+  "vale": "l+Rational(1,2)",
+  "ipotesi": {
+   "l": "positive"
+  },
+  "dove": "03",
+  "appare": "proporzionale a $l+\\tfrac12$"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "L.S = (J^2-L^2-S^2)/2",
+  "perche": "e' l'identita' fra operatori J^2=L^2+S^2+2L.S (L e S commutano fra loro): sympy la renderebbe banale; il suo contenuto (autovalori 1/2 e -1 per l=1) e' asserito sulla matrice esplicita qui sopra",
+  "dove": "03",
+  "appare": "\\mathbf L\\cdot\\mathbf S=\\tfrac12\\big(J^{2}-L^{2}-S^{2}\\big)"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "L.S = LzSz + (L+S- + L-S+)/2",
+  "perche": "definizione degli operatori di salita e discesa riscritta; la matrice che ne risulta e' asserita qui sopra",
+  "dove": "03",
+  "appare": "\\mathbf L\\cdot\\mathbf S=L_{z}S_{z}+\\tfrac12(L_{+}S_{-}+L_{-}S_{+})"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "A psi_a = mu psi_a, A psi_b = nu psi_b",
+  "perche": "sono le ipotesi del teorema (equazioni agli autovalori), non conti",
+  "dove": "03",
+  "appare": "A\\psi_{a}^{0}=\\mu\\psi_{a}^{0}"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "A psi_b = nu psi_b",
+  "perche": "ipotesi del teorema",
+  "dove": "03",
+  "appare": "A\\psi_{b}^{0}=\\nu\\psi_{b}^{0}"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "J^2 = L^2+S^2+2L.S",
+  "perche": "quadrato di J=L+S con [L_i,S_j]=0: identita' fra operatori; il suo contenuto spettrale e' asserito sulla matrice 6x6 esplicita",
+  "dove": "03",
+  "appare": "J^{2}=L^{2}+S^{2}+2\\mathbf L\\cdot\\mathbf S"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*m*w**2*(hb/(2*m*w)*3-hb/(2*m*w)*1)",
+  "vale": "hb*w/2",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "\\langle1,0|V|1,0\\rangle=\\frac{\\hbar\\omega}{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*m*w**2*(hb/(2*m*w)*1-hb/(2*m*w)*3)",
+  "vale": "-hb*w/2",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "\\langle0,1|V|0,1\\rangle=-\\frac{\\hbar\\omega}{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series(hb*w*(Rational(3,2)*sqrt(1+e)+Rational(1,2)*sqrt(1-e)),e,0,2).removeO()",
+  "vale": "2*hb*w+e*hb*w/2",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "2\\hbar\\omega+\\frac{\\epsilon\\hbar\\omega}{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "m*w**2*sqrt(hb/(2*m*w))*sqrt(hb/(2*m*w))",
+  "vale": "hb*w/2",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "\\langle1,0|m\\omega^{2}xy|0,1\\rangle=\\frac{\\hbar\\omega}{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand(((x+y)/sqrt(2))**2/2-((x-y)/sqrt(2))**2/2)",
+  "vale": "x*y",
+  "ipotesi": {
+   "x": "real",
+   "y": "real"
+  },
+  "dove": "04",
+  "appare": "xy=\\tfrac12(u^{2}-v^{2})"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*2*sqrt(hb/(2*m*w))**2",
+  "vale": "hb/(2*m*w)",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "$\\langle xy\\rangle=\\hbar/2m\\omega$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(conjugate(exp(I*1*th)/sqrt(2*pi))*l*sin(th)*cos(th)*exp(I*-1*th)/sqrt(2*pi),(th,0,2*pi))",
+  "vale": "-I*l/4",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "\\langle1|V|-1\\rangle=-\\frac{i\\lambda}{4}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(conjugate(exp(I*0*th)/sqrt(2*pi))*l*sin(th)*cos(th)*exp(I*0*th)/sqrt(2*pi),(th,0,2*pi))",
+  "vale": "0",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "\\langle0|V|0\\rangle=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(l*sin(th)*cos(th)*(cos(th)+sin(th))**2/(2*pi),(th,0,2*pi))",
+  "vale": "l/4",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "$E_{1}+\\lambda/4$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(l*sin(th)*cos(th)*(cos(th)-sin(th))**2/(2*pi),(th,0,2*pi))",
+  "vale": "-l/4",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "$E_{1}-\\lambda/4$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "simplify((cos(th)+sin(th))/sqrt(2*pi)-cos(th-pi/4)/sqrt(pi))",
+  "vale": "0",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "=\\cos(\\theta\\mp\\pi/4)/\\sqrt{\\pi}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "-2*Abs(integrate(conjugate(exp(I*2*th)/sqrt(2*pi))*l*sin(th)*cos(th)*exp(I*0*th)/sqrt(2*pi),(th,0,2*pi)))**2/(hb**2*4/(2*M*R**2))",
+  "vale": "-l**2*M*R**2/(16*hb**2)",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "E_{0}^{(2)}=-2\\,|\\lambda/4|^{2}/E_{2}=-\\lambda^{2}MR^{2}/16\\hbar^{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[1, I]])*Matrix([[0,-I],[I,0]])*Matrix([1,-I]))[0,0]/2",
+  "vale": "-1",
+  "dove": "04",
+  "appare": "\\langle\\chi_{-y}|\\mathbf S|\\chi_{-y}\\rangle=-\\tfrac{\\hbar}{2}\\hat y"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(-l*Matrix([[0,-I*sqrt(2)/2,0],[I*sqrt(2)/2,0,-I*sqrt(2)/2],[0,I*sqrt(2)/2,0]])).eigenvals()=={l:1,0:1,-l:1}",
+  "vale": "True",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "$\\lambda\\hbar^{2}$, $0$, $-\\lambda\\hbar^{2}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "2*l*(-Rational(1,2))",
+  "vale": "-l",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "=-\\lambda\\hbar\\,\\langle m|L_{y}|m'\\rangle"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*m*w**2*(hb/(2*m*w))*((2*2+1)-(2*0+1))",
+  "vale": "hb*w",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "$\\epsilon\\hbar\\omega$, $0$, $-\\epsilon\\hbar\\omega$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,2)*m*w**2*(hb/(2*m*w))*((2*nx+1)-(2*ny+1))",
+  "vale": "Rational(1,2)*hb*w*(nx-ny)",
+  "ipotesi": {
+   "m": "positive",
+   "w": "positive",
+   "hb": "positive",
+   "e": "real",
+   "l": "real",
+   "M": "positive",
+   "R": "positive",
+   "x": "real",
+   "th": "real",
+   "nx": "nonnegative",
+   "ny": "nonnegative"
+  },
+  "dove": "04",
+  "appare": "\\tfrac12\\hbar\\omega(n_{x}-n_{y})\\epsilon"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand((exp(2*I*th)-exp(-2*I*th))/(4*I)-sin(th)*cos(th),complex=True)",
+  "vale": "0",
+  "ipotesi": {
+   "th": "real"
+  },
+  "dove": "04",
+  "appare": "\\sin\\theta\\cos\\theta=\\tfrac12\\sin2\\theta=\\tfrac{1}{4i}(e^{2i\\theta}-e^{-2i\\theta})"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(1/sqrt(2)*a**Rational(-3,2)*(1-r/(2*a))*exp(-r/(2*a))*1/sqrt(24)*a**Rational(-3,2)*(r/a)*exp(-r/(2*a))*r**3,(r,0,oo))",
+  "vale": "-3*sqrt(3)*a",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "05",
+  "appare": "\\int R_{20}R_{21}r^{3}dr=-3\\sqrt3\\,a_{0}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(1/sqrt(4*pi)*cos(th)*sqrt(3/(4*pi))*cos(th)*2*pi*sin(th),(th,0,pi))",
+  "vale": "1/sqrt(3)",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "05",
+  "appare": "\\int Y_{00}\\cos\\theta\\,Y_{10}\\,d\\Omega=1/\\sqrt3"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(1/sqrt(2)*a**Rational(-3,2)*(1-r/(2*a))*exp(-r/(2*a))*1/sqrt(24)*a**Rational(-3,2)*(r/a)*exp(-r/(2*a))*r**3,(r,0,oo))*integrate(1/sqrt(4*pi)*cos(th)*sqrt(3/(4*pi))*cos(th)*2*pi*sin(th),(th,0,pi))",
+  "vale": "-3*a",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "05",
+  "appare": "\\langle200|z|210\\rangle=-3a_{0}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate((1/sqrt(2)*a**Rational(-3,2)*(1-r/(2*a))*exp(-r/(2*a)))**2*r**2,(r,0,oo))+integrate((1/sqrt(24)*a**Rational(-3,2)*(r/a)*exp(-r/(2*a)))**2*r**2,(r,0,oo))",
+  "vale": "2",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "05",
+  "appare": "$R_{20}=\\tfrac{1}{\\sqrt2}a_{0}^{-3/2}\\big(1-\\tfrac{r}{2a_{0}}\\big)e^{-r/2a_{0}}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(e*F*Matrix([[0,0,-3*a,0],[0,0,0,0],[-3*a,0,0,0],[0,0,0,0]])).eigenvals()=={3*e*F*a:1,-3*e*F*a:1,0:2}",
+  "vale": "True",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "05",
+  "appare": "E^{(1)}=\\pm3e\\mathcal Ea_{0},\\qquad0,\\qquad0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[1,1]])*Matrix([[0,-3*a],[-3*a,0]])*Matrix([1,1]))[0,0]/2",
+  "vale": "-3*a",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "05",
+  "appare": "$\\langle z\\rangle=-3a_{0}$"
+ },
+ {
+  "tipo": "numero",
+  "espr": "3*1e4*0.529177e-8/1e-4",
+  "vale": "1.6",
+  "dove": "05",
+  "appare": "3e\\mathcal Ea_{0}\\approx1{,}6\\times10^{-4}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(3,2)*2*(1-0)",
+  "vale": "3",
+  "dove": "05",
+  "appare": "E^{(1)}=\\frac32\\,n\\,(n_{1}-n_{2})\\,e\\mathcal Ea_{0}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand(Rational(3,2)*n*((n-1)-0)-Rational(3,2)*n*(0-(n-1)))",
+  "vale": "3*n*(n-1)",
+  "ipotesi": {
+   "n": "positive"
+  },
+  "dove": "05",
+  "appare": "all&rsquo;incirca proporzionale a $n^{2}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))**2-(Matrix([[0,-I,0],[I,0,-I],[0,I,0]])/sqrt(2))**2",
+  "vale": "Matrix([[0,0,1],[0,0,0],[1,0,0]])",
+  "dove": "06",
+  "appare": "\\langle+1|B(S_{x}^{2}-S_{y}^{2})|-1\\rangle=B"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(A*diag(1,0,1)+B*((Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))**2-(Matrix([[0,-I,0],[I,0,-I],[0,I,0]])/sqrt(2))**2)).eigenvals()=={A+B:1,A-B:1,0:1}",
+  "vale": "True",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "A+B,\\qquad A-B,\\qquad0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[0,1]",
+  "vale": "1/sqrt(2)",
+  "dove": "06",
+  "appare": "\\langle\\pm1|S_{x}|0\\rangle=1/\\sqrt2"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[0,2]",
+  "vale": "0",
+  "dove": "06",
+  "appare": "ha elementi tutti nulli"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([[B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[0,1]*B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[1,0]/A, B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[0,1]*B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[1,2]/A],[B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[2,1]*B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[1,0]/A, B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[2,1]*B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))[1,2]/A]])",
+  "vale": "B**2/(2*A)*Matrix([[1,1],[1,1]])",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "V^{\\rm eff}=\\frac{B^{2}}{2A}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(B**2/(2*A)*Matrix([[1,1],[1,1]])).eigenvals()=={B**2/A:1,0:1}",
+  "vale": "True",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "con autovalori $B^{2}/A$ e $0$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(A*diag(1,0,1)+B*(Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2)))*Matrix([1,0,-1])-A*Matrix([1,0,-1])",
+  "vale": "Matrix([0,0,0])",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "la sua energia è esattamente $A$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand((A-(A/2+sqrt(A**2/4+B**2)))*(0-(A/2+sqrt(A**2/4+B**2)))-B**2)",
+  "vale": "0",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "E=\\frac{A}{2}\\pm\\sqrt{\\frac{A^{2}}{4}+B^{2}}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series(A/2+sqrt(A**2/4+B**2),B,0,3).removeO()",
+  "vale": "A+B**2/A",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "$A+B^{2}/A$ per il ramo superiore"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series(A/2-sqrt(A**2/4+B**2),B,0,3).removeO()",
+  "vale": "-B**2/A",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "$-B^{2}/A$ per quello inferiore"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(B**2/A+0)/2",
+  "vale": "B**2/(2*A)",
+  "ipotesi": {
+   "A": "positive",
+   "B": "positive"
+  },
+  "dove": "06",
+  "appare": "$|\\langle\\pm1|BS_{x}|0\\rangle|^{2}/A=B^{2}/2A$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Matrix([[0,1,0],[0,0,1],[0,0,0]])*sqrt(2))**2+(Matrix([[0,0,0],[1,0,0],[0,1,0]])*sqrt(2))**2",
+  "vale": "2*((Matrix([[0,1,0],[1,0,1],[0,1,0]])/sqrt(2))**2-(Matrix([[0,-I,0],[I,0,-I],[0,I,0]])/sqrt(2))**2)",
+  "dove": "06",
+  "appare": "S_{x}^{2}-S_{y}^{2}=\\tfrac12(S_{+}^{2}+S_{-}^{2})"
+ },
+ {
+  "tipo": "numero",
+  "espr": "100*abs((0.5-sqrt(0.25+0.09))+0.09)/abs(0.5-sqrt(0.25+0.09))",
+  "vale": "8",
+  "dove": "06",
+  "appare": "$10\\%$"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "V_eff = V_ab + sum V_am V_mb/(E_D-E_m)",
+  "perche": "definizione della matrice efficace al secondo ordine (Sakurai 5.2.12, Landau 39,4); la sua applicazione e' asserita sul caso dello spin 1 qui sopra, confrontato con l'esatto",
+  "dove": "06",
+  "appare": "V^{\\rm eff}_{ab}=V_{ab}+\\sum_{m\\notin D}\\frac{V_{am}V_{mb}}{E_{D}^{(0)}-E_{m}^{(0)}}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand((d/2-sqrt(d**2/4+9*F**2))*(-d/2-sqrt(d**2/4+9*F**2))-9*F**2)",
+  "vale": "0",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "E_{\\pm}=\\pm\\sqrt{\\frac{\\delta E_{0}^{2}}{4}+9e^{2}\\mathcal E^{2}a_{0}^{2}}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series(sqrt(d**2/4+9*F**2)-d/2,F,0,3).removeO()",
+  "vale": "9*F**2/d",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "\\pm\\frac{9e^{2}\\mathcal E^{2}a_{0}^{2}}{\\delta E_{0}}"
+ },
+ {
+  "tipo": "limite",
+  "espr": "sqrt(d**2/4+9*F**2)/(3*F)",
+  "var": "F",
+  "a": "oo",
+  "vale": "1",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "E_{\\pm}\\simeq\\pm3e\\mathcal Ea_{0}"
+ },
+ {
+  "tipo": "numero",
+  "espr": "4e-5/(6*0.529177e-8)/1e3",
+  "vale": "1.3",
+  "dove": "07",
+  "appare": "\\mathcal E_{c}=\\frac{\\delta E_{0}}{6ea_{0}}\\approx1{,}3\\times10^{3}\\ \\text{V/cm}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "expand((-A/2-(Rational(1,2)*(x-A/2)+Rational(1,2)*sqrt((x+A/2)**2+2*A**2)))*(x-(Rational(1,2)*(x-A/2)+Rational(1,2)*sqrt((x+A/2)**2+2*A**2)))-A**2/2)",
+  "vale": "0",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "E_{\\pm}=\\frac12\\Big(\\mu_{B}B-\\frac{A\\hbar^{2}}{2}\\Big)\\pm\\frac12\\sqrt{\\Big(\\mu_{B}B+\\frac{A\\hbar^{2}}{2}\\Big)^{2}+2A^{2}\\hbar^{4}}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([[-A/2,A/sqrt(2)],[A/sqrt(2),0]])+diag(0,x)",
+  "vale": "Matrix([[-A/2,A/sqrt(2)],[A/sqrt(2),x]])",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "\\begin{pmatrix}-\\tfrac12A\\hbar^{2}&\\tfrac{1}{\\sqrt2}A\\hbar^{2}\\\\ \\tfrac{1}{\\sqrt2}A\\hbar^{2}&\\mu_{B}B\\end{pmatrix}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "simplify((Rational(1,2)*(x-A/2)+Rational(1,2)*sqrt((x+A/2)**2+2*A**2)).subs(x,0))",
+  "vale": "A/2",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "Per $B=0$ si ritrovano $\\tfrac12A\\hbar^{2}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "simplify((Rational(1,2)*(x-A/2)-Rational(1,2)*sqrt((x+A/2)**2+2*A**2)).subs(x,0))",
+  "vale": "-A",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "e $-A\\hbar^{2}$, i due livelli di struttura fine"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "simplify(diff((Rational(1,2)*(x-A/2)+Rational(1,2)*sqrt((x+A/2)**2+2*A**2)),x).subs(x,0))",
+  "vale": "Rational(2,3)",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "le pendenze iniziali dei due autovalori sono $\\tfrac23\\mu_{B}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "simplify(diff((Rational(1,2)*(x-A/2)-Rational(1,2)*sqrt((x+A/2)**2+2*A**2)),x).subs(x,0))",
+  "vale": "Rational(1,3)",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "e $\\tfrac13\\mu_{B}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1+(Rational(3,2)*Rational(5,2)-2+Rational(3,4))/(2*Rational(3,2)*Rational(5,2))",
+  "vale": "Rational(4,3)",
+  "dove": "07",
+  "appare": "$g_{3/2}=\\tfrac43$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1+(Rational(1,2)*Rational(3,2)-2+Rational(3,4))/(2*Rational(1,2)*Rational(3,2))",
+  "vale": "Rational(2,3)",
+  "dove": "07",
+  "appare": "$g_{1/2}=\\tfrac23$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(4,3)*Rational(1,2)",
+  "vale": "Rational(2,3)",
+  "dove": "07",
+  "appare": "$g_{j}m_{j}\\mu_{B}$"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(Rational(1,2)*(x-A/2)+Rational(1,2)*sqrt((x+A/2)**2+2*A**2))-x",
+  "var": "x",
+  "a": "oo",
+  "vale": "0",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "I due autovalori tendono a $\\mu_{B}B$"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(Rational(1,2)*(x-A/2)-Rational(1,2)*sqrt((x+A/2)**2+2*A**2))",
+  "var": "x",
+  "a": "oo",
+  "vale": "-A/2",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "e a $-\\tfrac12A\\hbar^{2}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "A*Rational(1,2)+x*(1+2*Rational(1,2))",
+  "vale": "A/2+2*x",
+  "ipotesi": {
+   "d": "positive",
+   "F": "positive",
+   "A": "positive",
+   "x": "positive",
+   "J": "positive"
+  },
+  "dove": "07",
+  "appare": "$\\tfrac12A\\hbar^{2}+2\\mu_{B}B$"
+ },
+ {
+  "tipo": "simbolico",
+  "espr": "g = 1 + [J(J+1)-L(L+1)+S(S+1)]/[2J(J+1)]",
+  "perche": "e' la formula di Lande' ricavata da Landau con il teorema di proiezione; i suoi due valori per L=1, S=1/2 sono asseriti qui sopra e confrontati con le pendenze della diagonalizzazione esatta",
+  "dove": "07",
+  "appare": "g=1+\\frac{J(J+1)-L(L+1)+S(S+1)}{2J(J+1)}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([1+1,0+1,-1+1,1-1,0-1,-1-1])",
+  "vale": "Matrix([2,1,0,0,-1,-2])",
+  "dove": "07",
+  "appare": "m_{l}+2m_{s}=2,1,0,0,-1,-2"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series((sqrt(D**2/4+v**2)-D/2)/v,v,0,2).removeO()",
+  "vale": "v/D",
+  "ipotesi": {
+   "D": "positive",
+   "v": "positive"
+  },
+  "dove": "08",
+  "appare": "\\tan\\theta\\simeq\\frac{v}{\\Delta}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "series(((sqrt(D**2/4+v**2)-D/2)/v)**2/(1+((sqrt(D**2/4+v**2)-D/2)/v)**2),v,0,3).removeO()",
+  "vale": "v**2/D**2",
+  "ipotesi": {
+   "D": "positive",
+   "v": "positive"
+  },
+  "dove": "08",
+  "appare": "circa $v^{2}/\\Delta^{2}$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(diag(mu,nu)*Matrix([[h11,w],[conjugate(w),h22]])-Matrix([[h11,w],[conjugate(w),h22]])*diag(mu,nu))[0,1]",
+  "vale": "(mu-nu)*w",
+  "ipotesi": {
+   "mu": "real",
+   "nu": "real",
+   "w": "complex",
+   "h11": "real",
+   "h22": "real"
+  },
+  "dove": "09",
+  "appare": "0=\\langle a|[A,H']|b\\rangle=(\\mu-\\nu)\\langle a|H'|b\\rangle"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "integrate(1/sqrt(2)*a**Rational(-3,2)*(1-r/(2*a))*exp(-r/(2*a))*1/sqrt(24)*a**Rational(-3,2)*(r/a)*exp(-r/(2*a))*r**3,(r,0,oo))*integrate(1/sqrt(4*pi)*cos(th)*sqrt(3/(4*pi))*cos(th)*2*pi*sin(th),(th,0,pi))",
+  "vale": "-3*a",
+  "ipotesi": {
+   "a": "positive",
+   "r": "positive",
+   "th": "real",
+   "F": "positive",
+   "e": "positive"
+  },
+  "dove": "09",
+  "appare": "Con le funzioni radiali standard il conto dà $-3a_{0}$"
+ }
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Meccanica Quantistica · voce Q.16 · il caso degenere e la validità dell approssimazione · la perturbazione che sceglie la base · il conto che metà degli appelli chiede',
+  blocchi:[
+  {t:'prosa', title:'La domanda, e il rovesciamento che contiene', tag:'architettura', html:R`
+  <p>La teoria delle perturbazioni non degenere si regge su un&rsquo;ipotesi che Dirac scrive prima di ogni formula: <i>«ciascun autovalore $H'$ di $H$ è molto vicino a uno e un sol autovalore $E'$ di $E$»</i>. Quando un livello dello <span class="str" data-str="spettro">spettro</span> imperturbato è degenere, cioè quando a un&rsquo;energia $E^{(0)}$ corrispondono più stati indipendenti, questa ipotesi cade in modo istruttivo. Accendendo la perturbazione, il livello si separa in generale in più livelli vicini, e ciascuno di essi proviene da una combinazione <i>particolare</i> degli stati imperturbati. Quale combinazione, l&rsquo;energia da sola non lo dice. Sakurai lo formula così: <i>«it is not a priori obvious to what linear combination of the unperturbed kets the perturbed ket is reduced in the limit $\lambda\to0$»</i>.</p>
+  <p>Il rovesciamento è questo. Nel caso non degenere la perturbazione era piccola rispetto alle distanze fra i livelli, e il problema era stimare di quanto spostava un livello che si conosceva. Nel caso degenere la distanza fra gli stati di un livello è <b>zero</b>, e qualunque perturbazione, anche minuscola, è grande rispetto a essa. Dentro il livello degenere non c&rsquo;è nessuna serie da sviluppare. C&rsquo;è da diagonalizzare una matrice, e la perturbazione, per quanto piccola, decide da sola quale base è quella giusta. La teoria delle perturbazioni torna utile solo per ciò che collega il livello agli altri livelli, lontani in energia.</p>
+  <p>Il programma del corso chiede in una riga sola <i>«estensione al caso degenere, validità dell&rsquo;approssimazione»</i>. La misura sugli scritti dice che è il conto più richiesto della parte di teoria: la parola «degenerazione» compare in venti dei cinquantuno file di compiti, quasi sempre come livello da separare con una perturbazione. La combinazione tipica è un livello di momento angolare più un termine $\mathbf L\cdot\mathbf S$ o un campo lungo $z$.</p>`},
+  {t:'prosa', title:'Come è fatto il movimento', tag:'architettura', html:R`
+  <p><b>Il primo blocco è il metodo.</b> La tappa 01 mostra perché la serie non degenere si rompe, e la ragione non è solo il denominatore nullo: è che la base imperturbata giusta salta in modo discontinuo quando si accende la perturbazione. La 02 ricava il metodo, l&rsquo;equazione secolare nel sottospazio degenere, seguendo la derivazione con i proiettori di Sakurai, e lo confronta con le forme di Landau, Ballentine, Griffiths e Dirac. La 03 dà il modo di evitarlo: il teorema degli stati «buoni», e il caso dell&rsquo;interazione spin-orbita, svolto prima nella base sbagliata e poi in quella giusta.</p>
+  <p><b>Il secondo blocco sono gli esempi.</b> La 04 risolve tre compiti d&rsquo;esame veri. La 05 è l&rsquo;effetto Stark lineare dell&rsquo;idrogeno, il caso in cui la degenerazione fa comparire un effetto che nei livelli non degeneri non c&rsquo;è.</p>
+  <p><b>Il terzo blocco è dove il metodo arriva al suo limite.</b> La 06 tratta il caso in cui la degenerazione sopravvive al primo ordine e va rimossa al secondo. La 07 i livelli quasi degeneri, con due esempi in cui si vede il passaggio da un regime all&rsquo;altro: lo Stark con una piccola separazione fra $2s$ e $2p$, e un elettrone $p$ in un campo magnetico confrontabile con la struttura fine. La 08 la gerarchia di perturbazioni e i numeri quantici approssimativamente buoni, cioè la domanda «quando il risultato vale». La 09 mette a confronto le fonti.</p>
+  <p><b>Che cosa questo movimento non fa.</b> Non costruisce la teoria della composizione dei momenti angolari, né le tavole dei coefficienti di Clebsch-Gordan: dove servono, si usa il fatto che $\mathbf L\cdot\mathbf S$ è diagonale negli autostati del momento totale, e si mostra che cosa succede senza saperlo. Non calcola la struttura fine dell&rsquo;idrogeno nei dettagli relativistici. E non usa il metodo variazionale, che il programma esclude.</p>`}
+]},
+/* ---------------- 01 · PERCHE' LA SERIE SI ROMPE ---------------- */
+{ num:'01', title:'Perché la serie non degenere si rompe, e non solo per un denominatore', meta:'il denominatore nullo e il numeratore che non lo è · la base che salta di colpo · il problema a due livelli quando la distanza va a zero · l angolo di mescolamento come funzione discontinua',
+  blocchi:[
+  {t:'prosa', title:'Il sintomo e la malattia', tag:'architettura', html:R`
+  <p>Il sintomo è visibile nelle formule. La correzione al primo ordine dello stato e quella al secondo ordine dell&rsquo;energia hanno al denominatore $E_{n}^{(0)}-E_{k}^{(0)}$. Se due stati hanno la stessa energia imperturbata il denominatore è nullo, e se l&rsquo;elemento di matrice fra i due non è nullo il termine esplode. Griffiths nota una via d&rsquo;uscita: la formula sopravvive <i>«unless, perhaps, the numerator vanishes»</i>, se l&rsquo;elemento di matrice fra i due stati degeneri è zero. È una scappatoia che diventerà il metodo, nella tappa 03.</p>
+  <p>La malattia è più profonda, e Shankar la descrive senza formule. Si immagini di accendere la perturbazione con continuità, da zero al suo valore pieno. Se né $H_{0}$ né $H_{0}+H'$ sono degeneri, la base di autovettori cambia con continuità da $|n^{0}\rangle$ a $|n\rangle$, e la serie è lo sviluppo di Taylor di questa variazione. Se invece $H_{0}$ è degenere, si può partire dalla base perturbata e <i>spegnere</i> la perturbazione: si arriva a una base ben precisa del sottospazio degenere, quella che la perturbazione ha selezionato. Ma <i>«since $H^{0}$ is degenerate, we needn&rsquo;t have started with this basis; we could have started with some other basis [...] chosen randomly. But if we start with any basis except [that one], and turn on the external field of infinitesimal size, the change in the basis will not be infinitesimal. It is this nonanalytic behavior that is signaled by the divergence in the first-order matrix element»</i>.</p>
+  <p>Il denominatore nullo, dunque, è il segnale che si è partiti dalla base sbagliata. Una perturbazione infinitesima produce un cambiamento finito della base dentro il sottospazio degenere, e nessuno sviluppo in serie può descrivere un salto. La cura, anticipata da Shankar, è partire dalla base giusta: <i>«it is a basis that diagonalizes $H'$ within the degenerate space»</i>.</p>`},
+  {t:'reveal', title:'Il salto, visto sul problema a due livelli', tag:'costruzione', steps:[
+   {label:'Gli autovettori esatti', body:R`
+   <p>Si prenda la hamiltoniana a due livelli</p>
+   $$H=\begin{pmatrix}\Delta/2&\lambda V\\ \lambda V&-\Delta/2\end{pmatrix},$$
+   <p>con $V$ reale e positivo. Gli autovettori si scrivono con un angolo di mescolamento $\theta$: quello superiore è $\cos\theta\,|1\rangle+\sin\theta\,|2\rangle$, con</p>
+   $$\tan2\theta=\frac{2\lambda V}{\Delta}.$$
+   <p>Per $\Delta$ grande rispetto a $\lambda V$ l&rsquo;angolo è piccolo, $\theta\simeq\lambda V/\Delta$, e l&rsquo;autovettore è quasi $|1\rangle$ con una piccola correzione proporzionale a $\lambda$: è la serie non degenere, con il suo coefficiente $\lambda V/\Delta$.</p>`},
+   {label:'Il limite degenere', body:R`
+   <p>Ora si faccia tendere $\Delta$ a zero. Per ogni $\lambda\gt0$, per quanto piccolo, $\tan2\theta\to+\infty$ e $\theta\to\pi/4$: l&rsquo;autovettore superiore diventa $(|1\rangle+|2\rangle)/\sqrt2$, a metà strada fra i due stati di partenza. Per $\lambda=0$ invece qualunque combinazione è autovettore. La funzione $\theta(\lambda)$, a $\Delta=0$, vale $\pi/4$ per ogni $\lambda\gt0$ e non è definita in $\lambda=0$: non c&rsquo;è nessun modo di arrivarci per piccole variazioni partendo da $|1\rangle$. La base «buona», $(|1\rangle\pm|2\rangle)/\sqrt2$, non dipende da quanto è piccola la perturbazione. Dipende solo dalla sua <i>forma</i>, cioè dalla direzione dell&rsquo;elemento fuori diagonale.</p>
+   <p>Gli autovalori, nello stesso limite, sono $\pm\lambda V$: lineari in $\lambda$. Una serie di Rayleigh e Schrödinger costruita su $|1\rangle$ e $|2\rangle$ non può produrli, perché il suo primo ordine è $\langle1|\lambda V\sigma_{x}|1\rangle=0$ e il secondo ha il denominatore $\Delta$ che va a zero.</p>`}
+  ]},
+  {t:'plot', title:'L’angolo di mescolamento, da continuo a discontinuo',
+   intro:R`<p>L&rsquo;angolo di mescolamento $\theta$ dell&rsquo;autovettore superiore in funzione di $\lambda V$, per tre valori della distanza imperturbata: $\Delta=0{,}4$ (blu), $\Delta=0{,}1$ (arancio), $\Delta=0{,}01$ (verde). La retta grigia orizzontale è $\pi/4$.</p>`,
+   plots:[{kind:'func2d', xr:[0,1], yr:[0,0.9], height:270, ticks:true,
+     title:'theta(lambda V) = (1/2) arctan(2 lambda V / Delta)',
+     curves:[{f:'0.5*Math.atan(2*x/0.4)', col:'#5aa9ff', width:2.4, label:'Delta = 0.4'},
+             {f:'0.5*Math.atan(2*x/0.1)', col:'#ffb86b', width:2.4, label:'Delta = 0.1'},
+             {f:'0.5*Math.atan(2*x/0.01)', col:'#6bdc9b', width:2.4, label:'Delta = 0.01'},
+             {f:'Math.PI/4', col:'#6f7a90', width:1.2, label:'pi/4'}],
+     xlabel:'lambda V', ylabel:'theta'}],
+   leggi:R`<p><b>Che cosa guardare.</b> Per $\Delta=0{,}4$ l&rsquo;angolo cresce dolcemente da zero, e la sua pendenza nell&rsquo;origine, $1/\Delta$, è il coefficiente della correzione al primo ordine. Riducendo $\Delta$ la pendenza cresce, e per $\Delta=0{,}01$ l&rsquo;angolo sale a $\pi/4$ quasi verticalmente e poi resta fermo.</p>
+   <p><b>Che cosa impararne.</b> Al limite $\Delta\to0$ la curva diventa un gradino: zero nell&rsquo;origine, $\pi/4$ subito dopo. La serie non degenere è lo sviluppo di Taylor della curva nell&rsquo;origine, e un gradino non ha sviluppo di Taylor. Il metodo degenere fa il contrario: prende la curva <i>dopo</i> il gradino, dove è costante, e calcola da lì.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Se la perturbazione non ha elementi di matrice fra gli stati del livello degenere, la formula non degenere si può usare?`,
+    a:R`Sì, ed è la scappatoia di Griffiths. Se tutti gli elementi $\langle a|V|b\rangle$ fra stati diversi del livello sono nulli, la base imperturbata è già quella che diagonalizza la perturbazione nel sottospazio: i numeratori pericolosi sono zero, e il primo ordine è semplicemente il valor medio su ciascuno stato. Il caso degenere diventa un problema non degenere per ciascuno stato separatamente. Il metodo della tappa 03 consiste nello scegliere la base in modo che questo accada.`},
+   {q:R`Nel limite degenere l&rsquo;autovettore superiore è $(|1\rangle+|2\rangle)/\sqrt2$ per ogni $\lambda\gt0$. Che cosa succede se $V$ cambia segno?`,
+    a:R`L&rsquo;autovettore superiore diventa $(|1\rangle-|2\rangle)/\sqrt2$, e i due stati si scambiano i ruoli. La base buona non dipende dal modulo della perturbazione ma da come è fatta: due perturbazioni diverse sullo stesso livello degenere possono scegliere basi diverse. È quello che mostra l&rsquo;esercizio sull&rsquo;oscillatore bidimensionale della tappa 04, dove due perturbazioni con lo stesso spettro esatto scelgono basi diverse.`}
+  ]}
+]},
+/* ---------------- 02 · IL METODO ---------------- */
+{ num:'02', title:'Il metodo: diagonalizzare la perturbazione dentro il livello degenere', meta:'la derivazione di Sakurai con due proiettori · l equazione secolare e il suo nome · la somma delle radici · la procedura in quattro passi · la scatola cubica di Griffiths, dove il conto ingenuo sbaglia due livelli su tre',
+  blocchi:[
+  {t:'reveal', title:'La derivazione con i proiettori', tag:'costruzione', steps:[
+   {label:'Separare il sottospazio degenere dal resto', body:R`
+   <p>Sakurai organizza il conto in modo che la parte singolare resti isolata. Sia $D$ il sottospazio degenere di dimensione $g$, con energia imperturbata $E_{D}^{(0)}$, sia $P_{0}$ il <span class="str" data-str="proiettore-ortogonale">proiettore</span> su $D$ e $P_{1}=1-P_{0}$ il proiettore sul resto. L&rsquo;equazione di Schrödinger per uno stato perturbato $|l\rangle$ è</p>
+   $$0=(E-H_{0}-\lambda V)|l\rangle=(E-E_{D}^{(0)}-\lambda V)P_{0}|l\rangle+(E-H_{0}-\lambda V)P_{1}|l\rangle,$$
+   <p>dove si è usato che $H_{0}$ agisce su $D$ come il numero $E_{D}^{(0)}$. Proiettando a sinistra con $P_{0}$ e con $P_{1}$ si ottengono due equazioni accoppiate (5.2.3)-(5.2.4):</p>
+   $$\big(E-E_{D}^{(0)}-\lambda P_{0}VP_{0}\big)P_{0}|l\rangle-\lambda P_{0}VP_{1}|l\rangle=0,$$
+   $$-\lambda P_{1}VP_{0}|l\rangle+\big(E-H_{0}-\lambda P_{1}VP_{1}\big)P_{1}|l\rangle=0.$$`},
+   {label:'Eliminare il resto', body:R`
+   <p>La seconda si risolve per $P_{1}|l\rangle$, perché l&rsquo;operatore $E-H_{0}-\lambda P_{1}VP_{1}$, ristretto a $P_{1}$, non è singolare: <i>«E is close to $E_{D}^{(0)}$ and the eigenvalues of $P_{1}H_{0}P_{1}$ are all different from $E_{D}^{(0)}$»</i>. Sostituendo nella prima si ottiene un&rsquo;equazione per la sola parte nel sottospazio degenere (5.2.7):</p>
+   $$\Big(E-E_{D}^{(0)}-\lambda P_{0}VP_{0}-\lambda^{2}P_{0}VP_{1}\frac{1}{E-H_{0}-\lambda V}P_{1}VP_{0}\Big)P_{0}|l\rangle=0.$$
+   <p>È esatta. L&rsquo;operatore fra parentesi agisce solo su $D$, che ha dimensione finita, e il resto dello spazio vi compare solo attraverso il termine di ordine $\lambda^{2}$. Al primo ordine quel termine si trascura e resta</p>
+   $$\big(E-E_{D}^{(0)}-\lambda P_{0}VP_{0}\big)P_{0}|l^{(0)}\rangle=0.$$
+   <p>È un problema agli autovalori per la matrice $g\times g$ di $V$ ristretta al sottospazio degenere. Le correzioni al primo ordine sono gli autovalori di quella matrice, cioè le radici dell&rsquo;<b>equazione secolare</b></p>
+   $$\det\big[V_{ab}-E^{(1)}\delta_{ab}\big]=0,\qquad a,b\in D,$$
+   <p>e gli stati all&rsquo;ordine zero sono i suoi autovettori. Sakurai: <i>«by solving the eigenvalue problem, we obtain in one stroke both the first-order energy shifts and the correct zeroth-order eigenkets»</i>.</p>`}
+  ]},
+  {t:'prosa', title:'La stessa equazione in quattro libri, e quello che ciascuno ne dice', tag:'teorema', html:R`
+  <p><b>Landau</b> la scrive come (39,2), $|V_{nn'}-E^{(1)}\delta_{nn'}|=0$, e spiega il nome in una nota: <i>«Denominazione mutuata dalla meccanica celeste»</i>. Nelle perturbazioni dei moti planetari, i termini che non oscillano e producono effetti cumulativi su tempi lunghi si chiamano secolari, e il problema analogo di trovare le combinazioni giuste delle orbite imperturbate porta allo stesso tipo di determinante. Landau ne trae due osservazioni. La prima: <i>«la somma delle sue radici è uguale alla somma degli elementi di matrice diagonali»</i>, perché è il coefficiente del termine di grado $s-1$ nell&rsquo;equazione. La perturbazione può separare il livello, ma il baricentro delle correzioni resta fisso. La seconda: <i>«Questa rimozione della degenerazione può essere completa o parziale»</i>.</p>
+  <p><b>Dirac</b>, al paragrafo 43, arriva alla sua equazione [43.7] e la commenta così: <i>«i vari possibili valori per $a_{1}$ sono gli autovalori della matrice $\langle E'\beta'|V|E'\beta''\rangle$. Questa matrice è una parte del rappresentativo dell&rsquo;energia di perturbazione [...] e precisamente la parte consistente di quegli elementi che si riferiscono allo stesso livello energetico imperturbato $E'$ sia per la riga che per la colonna»</i>. E aggiunge un&rsquo;asimmetria importante: ciascuno stato stazionario del sistema perturbato si approssima a uno stato del sistema imperturbato, <i>«ma l&rsquo;inverso, cioè che ciascuno stato stazionario del sistema imperturbato si approssimi a uno stato stazionario del sistema perturbato, non è vero»</i>. Il problema di trovare le combinazioni giuste <i>«corrisponde al problema delle &ldquo;perturbazioni secolari&rdquo; della meccanica classica»</i>.</p>
+  <p><b>Ballentine</b> la scrive come (10.92), $\sum_{r'}\langle n,s|H_{1}|n,r'\rangle c_{r,r'}=E_{n}^{(1)}c_{r,s}$, e ne dice l&rsquo;uso: una volta scelti come base gli autovettori di questa matrice, le formule non degeneri <i>«become usable because the diagonalization of (10.92) ensures that $\langle m|H_{1}|n\rangle=0$ whenever $\varepsilon_{n}-\varepsilon_{m}=0$. Thus the potentially troublesome terms in the perturbation formulas do not contribute»</i>.</p>
+  <p><b>Picasso</b> non scrive l&rsquo;equazione come caso a parte. La decomposizione $H'=H'_{0}+H''$, dove $H'_{0}$ contiene i soli elementi fra stati con la stessa energia, tratta insieme il caso degenere e quello non degenere: si diagonalizza $H_{0}+H'_{0}$ blocco per blocco, e $H''$ non contribuisce al primo ordine. Picasso osserva poi un fatto sugli autovettori che vale ricordare: <i>«mentre gli autovalori approssimati di $H$ dipendono linearmente dagli elementi di matrice della perturbazione $H'$, gli autovettori approssimati sono indipendenti dalla perturbazione e sono ancora autovettori di $H_{0}$»</i>.</p>
+  <p><b>Griffiths</b> scrive per esteso il caso doppio, con $W_{ij}=\langle\psi_{i}^{0}|H'|\psi_{j}^{0}\rangle$ (6.27):</p>
+  $$E_{\pm}^{1}=\frac12\Big[W_{aa}+W_{bb}\pm\sqrt{(W_{aa}-W_{bb})^{2}+4|W_{ab}|^{2}}\Big],$$
+  <p>e lo chiama <i>«the fundamental result of degenerate perturbation theory»</i>. È la formula del problema a due livelli, scritta per gli elementi di matrice della perturbazione invece che per la hamiltoniana intera.</p>`},
+  {t:'prosa', title:'La procedura, in quattro passi', tag:'esame', html:R`
+  <p>Sakurai la riassume così, ed è lo schema da seguire in ogni esercizio.</p>
+  <p><b>1.</b> Identificare gli stati imperturbati degeneri e costruire la matrice $g\times g$ della perturbazione fra di essi.</p>
+  <p><b>2.</b> Diagonalizzarla, risolvendo l&rsquo;equazione secolare.</p>
+  <p><b>3.</b> Le radici sono le correzioni al primo ordine; gli autovettori sono gli stati all&rsquo;ordine zero, quelli verso cui gli stati perturbati tendono per $\lambda\to0$.</p>
+  <p><b>4.</b> Per gli ordini superiori usare le formule non degeneri, escludendo dalle somme gli stati del sottospazio degenere.</p>
+  <p>Sakurai aggiunge un limite: la procedura funziona se le radici dell&rsquo;equazione secolare sono tutte diverse. Se due coincidono, resta l&rsquo;ambiguità di prima dentro quel sottospazio più piccolo, e la pone come <i>«a challenge for the experts»</i>. La tappa 06 la affronta.</p>`},
+  {t:'reveal', title:'Un esempio in cui il conto ingenuo sbaglia: la scatola cubica di Griffiths', tag:'esempio', steps:[
+   {label:'Il problema', body:R`
+   <p>Una particella in una scatola cubica di lato $a$ a pareti infinite. Gli stati sono prodotti di seni, $\psi_{n_{x}n_{y}n_{z}}$, con energie proporzionali a $n_{x}^{2}+n_{y}^{2}+n_{z}^{2}$. Il fondamentale $(1,1,1)$ non è degenere. Il primo eccitato è triplo, con gli stati $\psi_{a}=\psi_{112}$, $\psi_{b}=\psi_{121}$, $\psi_{c}=\psi_{211}$. La perturbazione di Griffiths alza il potenziale di $V_{0}$ in un quarto della scatola, $0\lt x\lt a/2$ e $0\lt y\lt a/2$, per ogni $z$.</p>
+   <p>Per il fondamentale basta il caso non degenere: la correzione è $V_{0}$ per la probabilità di stare in quel quarto, che per simmetria è un quarto, $E^{1}=V_{0}/4$.</p>`},
+   {label:'La matrice nel livello triplo', body:R`
+   <p>Gli elementi diagonali sono tutti $V_{0}/4$, per la stessa ragione. Gli elementi fuori diagonale che coinvolgono $\psi_{a}=\psi_{112}$ sono nulli, perché l&rsquo;integrale in $z$ di $\sin(\pi z/a)\sin(2\pi z/a)$ su tutto il lato è zero: la perturbazione non dipende da $z$. Resta $W_{bc}$, che si fattorizza in tre integrali, e vale</p>
+   $$W_{bc}=\frac{16}{9\pi^{2}}V_{0}.$$
+   <p>Scrivendo $\kappa=(8/3\pi)^{2}\approx0{,}7205$, la matrice è $\tfrac{V_{0}}{4}$ per la matrice con $1$ sulla diagonale e $\kappa$ nelle posizioni $bc$ e $cb$, e i suoi autovalori sono</p>
+   $$E^{1}=\frac{V_{0}}{4},\qquad\frac{V_{0}}{4}(1+\kappa),\qquad\frac{V_{0}}{4}(1-\kappa),$$
+   <p>con gli stati $\psi_{a}$, $(\psi_{b}+\psi_{c})/\sqrt2$, $(\psi_{b}-\psi_{c})/\sqrt2$.</p>`},
+   {label:'Che cosa avrebbe dato il conto ingenuo', body:R`
+   <p>Applicando la formula non degenere a ciascuno dei tre stati di partenza si troverebbe $V_{0}/4$ per tutti e tre: nessuna separazione. Griffiths: <i>«Notice that if we had naively applied non-degenerate perturbation theory to this problem, we would have concluded that the first-order correction is the same for all three states, and equal to $V_{0}/4$ — which is actually correct only for the middle state»</i>. Le due combinazioni giuste hanno un significato geometrico: $(\psi_{b}+\psi_{c})/\sqrt2$ concentra la probabilità nel quarto rialzato e sale, $(\psi_{b}-\psi_{c})/\sqrt2$ la toglie da lì e scende. La somma delle tre correzioni è $3V_{0}/4$, come la traccia della matrice: il baricentro è rimasto dov&rsquo;era.</p>`}
+  ]},
+  {t:'plot', title:'La separazione del livello triplo nella scatola cubica',
+   intro:R`<p>Le correzioni al primo ordine del primo eccitato in funzione dell&rsquo;intensità $\lambda$ della perturbazione, in unità di $V_{0}$: i tre livelli $\tfrac{\lambda}{4}(1+\kappa)$, $\tfrac{\lambda}{4}$, $\tfrac{\lambda}{4}(1-\kappa)$.</p>`,
+   plots:[{kind:'func2d', xr:[0,1], yr:[0,0.5], height:250, ticks:true,
+     title:'Griffiths, esempio 6.2: il livello triplo si separa in tre',
+     curves:[{f:'x/4*(1+0.7205)', col:'#5aa9ff', width:2.4, label:'(psi_b+psi_c)/sqrt2'},
+             {f:'x/4', col:'#ffb86b', width:2.4, label:'psi_a'},
+             {f:'x/4*(1-0.7205)', col:'#6bdc9b', width:2.4, label:'(psi_b-psi_c)/sqrt2'}],
+     xlabel:'lambda', ylabel:'E1 / V0'}],
+   leggi:R`<p><b>Che cosa guardare.</b> Le tre rette partono dallo stesso punto e si allontanano linearmente in $\lambda$: è la firma del caso degenere, dove le correzioni cominciano al primo ordine e sono diverse fra loro. La retta centrale è quella che il conto ingenuo avrebbe dato per tutti e tre gli stati.</p>
+   <p><b>Che cosa impararne.</b> La media delle tre pendenze è $\tfrac14$, la pendenza centrale: il baricentro del livello si sposta come il valor medio della perturbazione sul livello, cioè come un quarto di $V_{0}$, mentre la separazione dipende dagli elementi fuori diagonale. Il risultato ingenuo dà il baricentro giusto e la struttura sbagliata.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nella derivazione di Sakurai il termine di ordine $\lambda^{2}$ è stato trascurato. Perché non cambia gli autovalori al primo ordine ma può cambiare gli stati al primo ordine?`,
+    a:R`Perché, dopo aver diagonalizzato $P_{0}VP_{0}$, le correzioni all&rsquo;energia dentro il sottospazio sono separate di quantità di ordine $\lambda$. Il termine $\lambda^{2}$, trattato come perturbazione della matrice efficace, cambia gli autovalori di ordine $\lambda^{2}$, ma cambia gli stati di $\lambda^{2}$ diviso per le distanze fra gli autovalori, che sono di ordine $\lambda$: il risultato è di ordine $\lambda$. Sakurai lo dice così: <i>«although the third term in the effective Hamiltonian [...] is of order $\lambda^{2}$, it is divided by energy denominators of order $\lambda$ in forming the correction to the eigenvector»</i>.`},
+   {q:R`Se la matrice della perturbazione nel sottospazio degenere è proporzionale all&rsquo;identità, che cosa succede?`,
+    a:R`Tutte le radici dell&rsquo;equazione secolare coincidono: il livello si sposta in blocco di quel valore e resta degenere al primo ordine. Ogni base del sottospazio diagonalizza la perturbazione, e la questione di quale combinazione sia quella giusta resta aperta. La decidono gli ordini superiori, attraverso il termine di ordine $\lambda^{2}$ della hamiltoniana efficace, cioè gli accoppiamenti con i livelli lontani. È il caso della tappa 06.`}
+  ]}
+]},
+/* ---------------- 03 · LA BASE BUONA ---------------- */
+{ num:'03', title:'Indovinare la base buona: un operatore che commuta con tutti e due', meta:'il teorema di Griffiths e la sua dimostrazione in tre righe · la regola di Sakurai · l interazione spin orbita su un livello p, prima nella base sbagliata poi in quella giusta · la regola degli intervalli e il baricentro pesato',
+  blocchi:[
+  {t:'reveal', title:'Il teorema degli stati buoni', tag:'teorema', steps:[
+   {label:'L’enunciato', body:R`
+   <p>Diagonalizzare una matrice $g\times g$ è sempre possibile, ma spesso è inutile, perché la base giusta si può indovinare. Griffiths lo dice con un teorema. <i>Sia $A$ un operatore hermitiano che <span class="str" data-str="commutatore">commuta</span> con $H^{0}$ e con $H'$. Se $\psi_{a}^{0}$ e $\psi_{b}^{0}$, autofunzioni degeneri di $H^{0}$, sono anche autofunzioni di $A$ con autovalori distinti, $A\psi_{a}^{0}=\mu\psi_{a}^{0}$ e $A\psi_{b}^{0}=\nu\psi_{b}^{0}$ con $\mu\ne\nu$, allora $W_{ab}=0$, e $\psi_{a}^{0}$ e $\psi_{b}^{0}$ sono gli stati «buoni» da usare nella teoria delle perturbazioni.</i></p>`},
+   {label:'La dimostrazione', body:R`
+   <p>Si prende l&rsquo;elemento di matrice del commutatore, che è zero per ipotesi, e lo si apre facendo agire $A$ una volta a destra e una volta a sinistra:</p>
+   $$0=\langle\psi_{a}^{0}|[A,H']|\psi_{b}^{0}\rangle=\langle A\psi_{a}^{0}|H'\psi_{b}^{0}\rangle-\langle\psi_{a}^{0}|H'A\psi_{b}^{0}\rangle=(\mu-\nu)W_{ab}.$$
+   <p>Nel primo termine si è usata l&rsquo;<span class="str" data-str="operatore-aggiunto">hermiticità</span> di $A$ per spostarlo a sinistra, e il suo autovalore reale $\mu$. Siccome $\mu\ne\nu$, l&rsquo;elemento fuori diagonale è zero. Che $A$ commuti anche con $H^{0}$ serve a garantire che si possano scegliere autostati comuni di $H^{0}$ e $A$ dentro il livello.</p>
+   <p>La morale di Griffiths: <i>«If you&rsquo;re faced with degenerate states, look around for some hermitian operator $A$ that commutes with $H^{0}$ and $H'$; pick as your unperturbed states ones that are simultaneously eigenfunctions of $H^{0}$ and $A$. Then use ordinary first-order perturbation theory»</i>. In pratica l&rsquo;operatore $A$ è quasi sempre il generatore di una <span class="str" data-str="simmetrie">simmetria</span> che sopravvive alla perturbazione: una rotazione attorno all&rsquo;asse di un campo, una riflessione, il momento angolare totale.</p>`},
+   {label:'La regola di Sakurai, detta senza giri di parole', body:R`
+   <p>Sakurai trasforma il teorema in un precetto, a proposito dell&rsquo;interazione spin-orbita: <i>«Remember the cardinal rule: Choose unperturbed kets that diagonalize the perturbation»</i>. E aggiunge, sulla base che non commuta con la perturbazione: <i>«You have to be either a fool or a masochist to use the $L_{z}$, $S_{z}$ eigenkets as the base kets for this problem; if we proceeded to apply blindly the method of degenerate perturbation theory starting with set 1 as our base kets, we would be forced to diagonalize the $V_{LS}$ matrix written in the $L_{z}$, $S_{z}$ representation. The results of this, after a lot of hard algebra, give us just the $J^{2}$, $J_{z}$ eigenkets»</i>. Il blocco successivo fa quel conto, per vedere che cosa costa e che cosa dà.</p>`}
+  ]},
+  {t:'reveal', title:'L’interazione spin-orbita su un livello p, nelle due basi', tag:'esempio', steps:[
+   {label:'Il livello e la perturbazione', body:R`
+   <p>Un elettrone in uno stato con $l=1$ e spin $s=\tfrac12$: il livello imperturbato è degenere sei volte, tre valori di $m_{l}$ per due valori di $m_{s}$. La perturbazione è $V=A\,\mathbf L\cdot\mathbf S$, con $A$ costante. $V$ non commuta né con $L_{z}$ né con $S_{z}$, ma commuta con $J_{z}=L_{z}+S_{z}$ e con $J^{2}$. Picasso, nel paragrafo 16.4, fa lo stesso ragionamento per un atomo qualunque: la parte relativistica della hamiltoniana <i>«commuta con $J$ e quindi, in particolare con $J_{z}$ e $J^{2}$, mentre invece non commuta né con $L_{z}$ né con $S_{z}$»</i>, e conclude che conviene <i>«senz&rsquo;altro»</i> la base del momento totale.</p>`},
+   {label:'La via del masochista: la base di L_z e S_z', body:R`
+   <p>Si usa almeno il teorema con $A=J_{z}$: la matrice di $V$ nella base $|m_{l},m_{s}\rangle$ è a blocchi, uno per ogni valore di $m_{j}=m_{l}+m_{s}$. I blocchi con $m_{j}=\pm\tfrac32$ hanno un solo stato, $|1,+\tfrac12\rangle$ e $|-1,-\tfrac12\rangle$, e lì $V$ è già diagonale. Scrivendo $\mathbf L\cdot\mathbf S=L_{z}S_{z}+\tfrac12(L_{+}S_{-}+L_{-}S_{+})$, sullo stato $|1,+\tfrac12\rangle$ il termine con gli operatori di salita e discesa dà zero e resta</p>
+   $$\langle1,+\tfrac12|\mathbf L\cdot\mathbf S|1,+\tfrac12\rangle=\tfrac12\hbar^{2}.$$
+   <p>Il blocco con $m_{j}=+\tfrac12$ contiene due stati, $|1,-\tfrac12\rangle$ e $|0,+\tfrac12\rangle$. Il termine diagonale $L_{z}S_{z}$ vale $-\tfrac12\hbar^{2}$ sul primo e $0$ sul secondo. Il termine $\tfrac12L_{+}S_{-}$ porta $|0,+\tfrac12\rangle$ in $|1,-\tfrac12\rangle$ con coefficiente $\tfrac12\cdot\sqrt2\hbar\cdot\hbar$. La matrice del blocco, in unità di $\hbar^{2}$, è</p>
+   $$\begin{pmatrix}-\tfrac12&\tfrac{1}{\sqrt2}\\ \tfrac{1}{\sqrt2}&0\end{pmatrix},$$
+   <p>con autovalori $\tfrac12$ e $-1$. Il blocco con $m_{j}=-\tfrac12$ è lo specchio di questo e dà gli stessi autovalori.</p>`},
+   {label:'Il risultato, e la via diretta', body:R`
+   <p>Raccogliendo: quattro stati con correzione $+\tfrac12A\hbar^{2}$ (i due dei blocchi esterni e uno per ciascun blocco interno) e due con $-A\hbar^{2}$. Sono i livelli $j=\tfrac32$ e $j=\tfrac12$, con le degenerazioni $2j+1=4$ e $2$. La via diretta è un&rsquo;identità: siccome $J^{2}=L^{2}+S^{2}+2\mathbf L\cdot\mathbf S$,</p>
+   $$\mathbf L\cdot\mathbf S=\tfrac12\big(J^{2}-L^{2}-S^{2}\big),$$
+   <p>e negli autostati di $J^{2}$, $L^{2}$, $S^{2}$ il valore è $\tfrac12\hbar^{2}[j(j+1)-l(l+1)-s(s+1)]$: per $l=1$, $s=\tfrac12$ si ha $\tfrac12\hbar^{2}$ per $j=\tfrac32$ e $-\hbar^{2}$ per $j=\tfrac12$. La via del masochista non era sbagliata. Ha rifatto, per un caso particolare, la diagonalizzazione che porta alla base del momento totale, e i suoi autovettori sono le combinazioni che si scrivono con i <span class="str" data-str="clebsch-gordan">coefficienti di Clebsch-Gordan</span>.</p>`},
+   {label:'La regola degli intervalli e il baricentro', body:R`
+   <p>Per $l$ qualunque la stessa identità dà le due correzioni, nella forma di Sakurai (5.3.20): $\tfrac{l}{2}\hbar^{2}$ per $j=l+\tfrac12$ e $-\tfrac{l+1}{2}\hbar^{2}$ per $j=l-\tfrac12$, moltiplicate per la costante radiale. La distanza fra i due livelli è proporzionale a $l+\tfrac12$, cioè al $j$ maggiore: è la regola degli intervalli di Landé. Il baricentro pesato con le degenerazioni resta fermo,</p>
+   $$(2l+2)\,\frac{l}{2}+2l\Big(-\frac{l+1}{2}\Big)=0,$$
+   <p>come vuole l&rsquo;osservazione di Landau sulla somma delle radici: la traccia di $\mathbf L\cdot\mathbf S$ su tutto il livello è nulla. Landau, al paragrafo 66, descrive la struttura fine di un atomo proprio così: sotto l&rsquo;azione della perturbazione relativistica <i>«un livello degenere con $L$ e $S$ dati si &lsquo;separa&rsquo; in più livelli diversi (vicini l&rsquo;uno all&rsquo;altro) che si differenziano per il valore del momento angolare totale $J$. Questi livelli sono determinati (in prima approssimazione) dall&rsquo;equazione secolare corrispondente»</i>.</p>`}
+  ]},
+  {t:'plot', title:'Le due correzioni spin-orbita in funzione di l',
+   intro:R`<p>Le correzioni al primo ordine $\tfrac{l}{2}$ (blu, $j=l+\tfrac12$) e $-\tfrac{l+1}{2}$ (arancio, $j=l-\tfrac12$), in unità di $A\hbar^{2}$, al variare di $l$, e la loro distanza $l+\tfrac12$ (verde). Le curve sono continue per leggibilità; hanno senso ai valori interi di $l$.</p>`,
+   plots:[{kind:'func2d', xr:[0,5], yr:[-3.2,5.7], height:260, ticks:true,
+     title:'spin-orbita: j = l + 1/2, j = l - 1/2 e la loro distanza',
+     curves:[{f:'x/2', col:'#5aa9ff', width:2.4, label:'j = l + 1/2'},
+             {f:'-(x+1)/2', col:'#ffb86b', width:2.4, label:'j = l - 1/2'},
+             {f:'x+0.5', col:'#6bdc9b', width:1.8, label:'distanza'}],
+     xlabel:'l', ylabel:'correzione / (A hbar^2)'}],
+   leggi:R`<p><b>Che cosa guardare.</b> Il livello con $j=l+\tfrac12$ sale e quello con $j=l-\tfrac12$ scende, e la loro distanza cresce linearmente con $l$. Per $l=0$ esiste solo $j=\tfrac12$, e la correzione è nulla: non c&rsquo;è momento orbitale con cui lo spin possa accoppiarsi.</p>
+   <p><b>Che cosa impararne.</b> Il livello con più stati, $j=l+\tfrac12$, si sposta di meno di quello con meno stati: è la conseguenza del baricentro fermo. Chi ricorda il baricentro ricorda anche il rapporto fra i due spostamenti, $l$ contro $-(l+1)$, senza dover ricordare nessuna formula.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Un campo magnetico lungo $z$ aggiunge $\mu_{B}B(L_{z}+2S_{z})/\hbar$. Quale operatore commuta con questa perturbazione e con $H_{0}$, e quale base suggerisce?`,
+    a:R`$L_{z}$ e $S_{z}$ separatamente, quindi anche $J_{z}$. Se la perturbazione è solo il campo, la base $|m_{l},m_{s}\rangle$ è quella buona e la perturbazione è già diagonale, con correzioni $\mu_{B}B(m_{l}+2m_{s})$. Se ci sono insieme campo e spin-orbita, il solo operatore che commuta con entrambi è $J_{z}$, e la matrice è a blocchi di $m_{j}$ ma non diagonale: è il caso intermedio della tappa 07.`},
+   {q:R`Il teorema di Griffiths richiede autovalori <i>distinti</i> di $A$. Che cosa succede se due stati degeneri hanno lo stesso autovalore di $A$?`,
+    a:R`Il teorema non dice niente sull&rsquo;elemento di matrice fra loro, che può essere diverso da zero. Bisogna cercare un altro operatore che li distingua, oppure diagonalizzare il blocco che hanno in comune. È quello che è successo con $J_{z}$ nell&rsquo;esempio: i due stati con $m_{j}=\tfrac12$ hanno lo stesso autovalore di $J_{z}$, e il blocco $2\times2$ andava diagonalizzato. Con $J^{2}$, che ha autovalori diversi su quei due stati, il blocco sarebbe stato già diagonale.`}
+  ]}
+]},
+/* ---------------- 04 · TRE ESERCIZI D'ESAME ---------------- */
+{ num:'04', title:'Tre esercizi d esame sui livelli degeneri', meta:'l oscillatore bidimensionale e due perturbazioni con lo stesso spettro, compito del 14 luglio 2021 · la particella sull anello e le onde stazionarie lungo le diagonali, compito del 15 luglio 2020 · lo spin orbita su un livello con lo spin già fissato, compito del 18 settembre 2017',
+  blocchi:[
+  {t:'reveal', title:'Esercizio 1: l’oscillatore bidimensionale, primo livello eccitato', tag:'esame', steps:[
+   {label:'Il testo, e il livello', body:R`
+   <p>Il compito del 14 luglio 2021 prende l&rsquo;oscillatore isotropo in due dimensioni e la perturbazione $\epsilon V$ con $V=\tfrac12 m\omega^{2}(x^{2}-y^{2})$, e chiede le correzioni al primo ordine per il fondamentale e il primo eccitato, discutendo la rimozione della degenerazione e confrontando con il risultato esatto. Il fondamentale è non degenere e ha correzione nulla al primo ordine. Il primo eccitato ha energia $2\hbar\omega$ ed è doppio, con gli stati $|1,0\rangle$ e $|0,1\rangle$ (un quanto lungo $x$ o lungo $y$).</p>`},
+   {label:'La matrice, e l’operatore che la rende diagonale', body:R`
+   <p>Sugli stati del livello, $\langle x^{2}\rangle$ vale $\tfrac{\hbar}{2m\omega}(2n_{x}+1)$, quindi gli elementi diagonali sono</p>
+   $$\langle1,0|V|1,0\rangle=\frac{\hbar\omega}{2},\qquad\langle0,1|V|0,1\rangle=-\frac{\hbar\omega}{2}.$$
+   <p>L&rsquo;elemento fuori diagonale $\langle1,0|V|0,1\rangle$ è nullo, perché $x^{2}$ e $y^{2}$ cambiano il numero di quanti di zero o di due, e i due stati differiscono di uno lungo ciascun asse. La matrice è già diagonale, e le correzioni sono $\pm\epsilon\hbar\omega/2$: la degenerazione è rimossa completamente. Il teorema degli stati buoni spiega perché non c&rsquo;era niente da diagonalizzare: la hamiltoniana dell&rsquo;oscillatore lungo $x$ da solo, $H_{x}$, commuta sia con $H_{0}$ sia con $V$, e i due stati hanno autovalori diversi di $H_{x}$.</p>
+   <p>Il confronto con l&rsquo;esatto è immediato, perché la hamiltoniana perturbata è separabile con frequenze $\omega\sqrt{1\pm\epsilon}$. Per lo stato $|1,0\rangle$ l&rsquo;energia esatta è $\hbar\omega\big(\tfrac32\sqrt{1+\epsilon}+\tfrac12\sqrt{1-\epsilon}\big)$, e il suo sviluppo al primo ordine è</p>
+   $$2\hbar\omega+\frac{\epsilon\hbar\omega}{2},$$
+   <p>come previsto.</p>`},
+   {label:'La stessa domanda con la perturbazione ruotata', body:R`
+   <p>Il punto 1 dello stesso compito costruisce uno stato del livello con $\langle xy\rangle=\hbar/2m\omega$ e $\langle V\rangle=0$: è $(|1,0\rangle+|0,1\rangle)/\sqrt2$. Non è uno stato buono per $V$. È invece uno stato buono per una perturbazione diversa, $V'=m\omega^{2}xy$, che è $V$ ruotata di $45^{\circ}$: nelle coordinate $u=(x+y)/\sqrt2$, $v=(x-y)/\sqrt2$ si ha $xy=\tfrac12(u^{2}-v^{2})$. Per $V'$ gli elementi diagonali sono nulli e quello fuori diagonale vale</p>
+   $$\langle1,0|m\omega^{2}xy|0,1\rangle=\frac{\hbar\omega}{2},$$
+   <p>quindi la matrice è $\tfrac{\hbar\omega}{2}\sigma_{x}$, con autovalori $\pm\hbar\omega/2$ e stati buoni $(|1,0\rangle\pm|0,1\rangle)/\sqrt2$. <b>Stesso livello, stesse correzioni, basi diverse</b>: lo spettro esatto di $H_{0}+\epsilon V'$ è identico a quello di $H_{0}+\epsilon V$, perché i due problemi differiscono per una rotazione, ma la perturbazione sceglie la base orientata come lei.</p>`}
+  ]},
+  {t:'reveal', title:'Esercizio 2: la particella sull’anello', tag:'esame', steps:[
+   {label:'Il testo, e i livelli', body:R`
+   <p>Il compito del 15 luglio 2020 prende una particella di massa $M$ vincolata su una circonferenza di raggio $R$, senza potenziale, e aggiunge $V(\theta)=\lambda\sin\theta\cos\theta$, chiedendo le energie dei primi tre stati al primo ordine in $\lambda$. Gli autostati imperturbati sono $\psi_{k}=e^{ik\theta}/\sqrt{2\pi}$ con $E_{k}=\hbar^{2}k^{2}/2MR^{2}$, $k$ intero. Il fondamentale $k=0$ non è degenere; il primo eccitato è doppio, $k=\pm1$, perché la particella può girare nei due versi. Lo stesso problema compare in Griffiths come problema 6.9, con una perturbazione diversa.</p>`},
+   {label:'Gli elementi di matrice', body:R`
+   <p>Scrivendo $\sin\theta\cos\theta=\tfrac12\sin2\theta=\tfrac{1}{4i}(e^{2i\theta}-e^{-2i\theta})$ si vede che $V$ collega solo stati con $k$ che differiscono di $\pm2$. Quindi il fondamentale ha correzione nulla al primo ordine, $\langle0|V|0\rangle=0$, e nel livello $k=\pm1$ gli elementi diagonali sono nulli mentre quello fuori diagonale non lo è:</p>
+   $$\langle1|V|-1\rangle=-\frac{i\lambda}{4}.$$
+   <p>La matrice è $\tfrac{\lambda}{4}\sigma_{y}$, con autovalori $\pm\lambda/4$. Le energie dei primi tre stati al primo ordine sono quindi $0$, $E_{1}-\lambda/4$, $E_{1}+\lambda/4$.</p>`},
+   {label:'Gli stati buoni, e perché sono quelli', body:R`
+   <p>Gli autovettori, riscritti come funzioni reali, sono $(\cos\theta\pm\sin\theta)/\sqrt{2\pi}=\cos(\theta\mp\pi/4)/\sqrt{\pi}$: onde stazionarie con i ventri lungo le diagonali. Quella con il segno $+$ ha la densità concentrata dove $\sin2\theta=+1$, cioè dove la perturbazione è massima, e sale di $\lambda/4$; l&rsquo;altra la ha dove $\sin2\theta=-1$ e scende. Gli stati imperturbati $e^{\pm i\theta}$, che descrivono una particella che gira, hanno densità uniforme e non sentono la perturbazione al primo ordine: sono stati di momento angolare definito, e la perturbazione non conserva il momento angolare.</p>
+   <p>L&rsquo;operatore del teorema di Griffiths è la riflessione $\theta\to\pi/2-\theta$, che scambia $x$ e $y$: lascia invariati $H_{0}$ e $\sin\theta\cos\theta$, e le due onde stazionarie sono una pari e una dispari rispetto a essa.</p>
+   <p>Per il fondamentale, il primo effetto viene dal secondo ordine, attraverso gli stati $k=\pm2$: $E_{0}^{(2)}=-2\,|\lambda/4|^{2}/E_{2}=-\lambda^{2}MR^{2}/16\hbar^{2}$. Il compito non lo chiede, ma è il controllo che il secondo ordine sul fondamentale sia negativo.</p>`}
+  ]},
+  {t:'plot', title:'Le due onde stazionarie buone sull’anello',
+   intro:R`<p>Le densità $|\psi|^{2}$ dei due stati buoni del livello $k=\pm1$ in funzione dell&rsquo;angolo, $(1\pm\sin2\theta)/2\pi$ (blu e arancio), e il profilo della perturbazione $\sin\theta\cos\theta$ (grigio, in scala). La densità degli stati $e^{\pm i\theta}$ è la costante $1/2\pi$ (verde).</p>`,
+   plots:[{kind:'func2d', xr:[0,6.2832], yr:[-0.55,0.35], height:270, ticks:true,
+     title:'stati buoni sull anello e perturbazione sin(theta)cos(theta)',
+     curves:[{f:'(1+Math.sin(2*x))/(2*Math.PI)', col:'#5aa9ff', width:2.4, label:'(cos+sin)/sqrt(2pi): sale'},
+             {f:'(1-Math.sin(2*x))/(2*Math.PI)', col:'#ffb86b', width:2.4, label:'(cos-sin)/sqrt(2pi): scende'},
+             {f:'1/(2*Math.PI)', col:'#6bdc9b', width:1.6, label:'e^(+-i theta)'},
+             {f:'0.5*Math.sin(x)*Math.cos(x)-0.25', col:'#6f7a90', width:1.4, label:'V (spostata)'}],
+     xlabel:'theta', ylabel:''}],
+   leggi:R`<p><b>Che cosa guardare.</b> La curva blu ha i massimi in $\theta=\pi/4$ e $5\pi/4$, dove la perturbazione grigia è massima, e i minimi dove è minima; la curva arancione fa il contrario. La curva verde è piatta, e il valor medio della perturbazione su di essa è zero.</p>
+   <p><b>Che cosa impararne.</b> Su un livello degenere la perturbazione sceglie gli stati che si adattano meglio, o peggio, alla sua forma. Le energie al primo ordine sono il valor medio della perturbazione su quegli stati, ed è un conto di geometria prima che di algebra. Questo è il motivo per cui, nella parte b) dello stesso compito, le onde che girano e quelle stazionarie si comportano così diversamente.</p>`},
+  {t:'reveal', title:'Esercizio 3: lo spin-orbita con lo spin già fissato', tag:'esame', steps:[
+   {label:'Il testo', body:R`
+   <p>Il compito del 18 settembre 2017 prende una particella di spin $\tfrac12$ in un oscillatore tridimensionale, con una hamiltoniana che nella base degli autostati di $S_{z}$ ha la forma di una matrice $2\times2$ con $H_{0}$ sulla diagonale e $\mp i\mu B$ fuori: è $H_{0}+\mu B\,\sigma_{y}$. Si chiede lo spostamento dello stato fondamentale e dei primi due eccitati quando si aggiunge la perturbazione $V=2\lambda\,\mathbf L\cdot\mathbf S$, con $0\lt\mu B\ll\hbar\omega$.</p>`},
+   {label:'I livelli imperturbati', body:R`
+   <p>Lo spin entra solo con $\sigma_{y}$, che commuta con $H_{0}$: i livelli sono $(n+\tfrac32)\hbar\omega\pm\mu B$, con lo spin lungo $\mp y$. Siccome $\mu B\ll\hbar\omega$, i tre livelli più bassi sono: il fondamentale $\tfrac32\hbar\omega-\mu B$ con $n=0$ e spin lungo $-y$; il primo eccitato $\tfrac32\hbar\omega+\mu B$ con $n=0$ e spin lungo $+y$; il secondo eccitato $\tfrac52\hbar\omega-\mu B$ con $n=1$, $l=1$, spin lungo $-y$, triplo per i tre valori di $m$.</p>`},
+   {label:'Le correzioni', body:R`
+   <p>Per i primi due livelli $l=0$, quindi $\mathbf L|\psi\rangle=0$ e la correzione è nulla. Per il terzo, lo spin è lo stesso in tutti e tre gli stati, $|\chi_{-y}\rangle$, e dentro il livello si può sostituire $\mathbf S$ con il suo valor medio su quello spinore, $\langle\chi_{-y}|\mathbf S|\chi_{-y}\rangle=-\tfrac{\hbar}{2}\hat y$:</p>
+   $$\langle m,\chi_{-y}|2\lambda\,\mathbf L\cdot\mathbf S|m',\chi_{-y}\rangle=-\lambda\hbar\,\langle m|L_{y}|m'\rangle.$$
+   <p>La perturbazione, ristretta al livello, è $-\lambda\hbar L_{y}$. I suoi autovalori sono $-\lambda\hbar$ per gli autovalori di $L_{y}$ su $l=1$, cioè $-\hbar,0,\hbar$: le correzioni sono $\lambda\hbar^{2}$, $0$, $-\lambda\hbar^{2}$, e il livello triplo si separa in tre. Gli stati buoni sono gli autostati di $L_{y}$, non di $L_{z}$: chi lavorasse nella base $|l=1,m\rangle$ con $m$ autovalore di $L_{z}$ dovrebbe diagonalizzare la matrice di $L_{y}$, cioè rifare a mano una rotazione.</p>
+   <p><b>Un controllo di validità.</b> La perturbazione collega anche gli stati con spin lungo $-y$ a quelli con spin lungo $+y$ dello stesso $n$, che stanno $2\mu B$ più in alto. Il conto è corretto al primo ordine se $\lambda\hbar^{2}\ll2\mu B$; in caso contrario i due livelli con $n=1$ vanno trattati insieme come quasi degeneri.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nell&rsquo;esercizio 1 la perturbazione $V$ e la perturbazione ruotata $V'$ danno le stesse correzioni sul primo eccitato. Danno le stesse correzioni anche sul secondo eccitato, che ha tre stati?`,
+    a:R`Sì, per lo stesso argomento: $H_{0}+\epsilon V'$ si ottiene da $H_{0}+\epsilon V$ con una rotazione di $45^{\circ}$, che lascia invariato $H_{0}$, quindi gli spettri esatti coincidono, e con loro tutte le correzioni a ogni ordine. Cambiano solo gli stati buoni. Con $V$ sono $|2,0\rangle$, $|1,1\rangle$, $|0,2\rangle$ e le correzioni sono $\epsilon\hbar\omega$, $0$, $-\epsilon\hbar\omega$, cioè $\tfrac12\hbar\omega(n_{x}-n_{y})\epsilon$; con $V'$ sono le loro rotazioni.`},
+   {q:R`Nell&rsquo;esercizio 3, perché si può sostituire $\mathbf S$ con il suo valor medio?`,
+    a:R`Perché dentro il livello considerato tutti gli stati hanno lo stesso spinore, quindi ogni elemento di matrice $\langle m,\chi|L_{i}S_{i}|m',\chi\rangle$ si fattorizza in $\langle m|L_{i}|m'\rangle\langle\chi|S_{i}|\chi\rangle$. È un caso particolare di una regola più generale: al primo ordine, la perturbazione si sostituisce con la sua proiezione sul sottospazio degenere, e se in quel sottospazio un grado di libertà è congelato, l&rsquo;operatore che vi agisce si sostituisce con il suo valor medio. Landau usa la stessa idea per lo spin nel fattore di Landé, sostituendo $\mathbf S$ con la sua proiezione lungo $\mathbf J$.`}
+  ]}
+]},
+/* ---------------- 05 · L'EFFETTO STARK LINEARE ---------------- */
+{ num:'05', title:'L effetto Stark lineare: la degenerazione che fa comparire un dipolo', meta:'il livello n uguale 2 dell idrogeno e le tre regole di selezione di Picasso · il solo elemento che sopravvive e il suo segno, che dipende dalla convenzione · gli stati buoni hanno un dipolo permanente · la riga Lyman alfa che si divide in tre · il caso generale di Landau in coordinate paraboliche',
+  blocchi:[
+  {t:'prosa', title:'Perché qui il primo ordine non è zero', tag:'architettura', html:R`
+  <p>Per il fondamentale dell&rsquo;idrogeno, in un campo elettrico uniforme, il primo ordine è nullo: la perturbazione $H'=e\mathcal Ez$ è dispari e lo stato ha parità definita. Il primo eccitato, $n=2$, ha quattro stati con la stessa energia, $|200\rangle$, $|211\rangle$, $|210\rangle$, $|21,-1\rangle$, e fra questi ci sono stati di parità opposta: il $2s$ è pari, i tre $2p$ sono dispari. Shankar mette in guardia contro la conclusione affrettata: <i>«Are we to conclude that there is no first-order shift because [...] by parity invariance, or equivalently, because the atom in these states has no intrinsic dipole moment? No, because these states need not provide the correct starting points for a perturbative calculation in view of the degeneracy»</i>. Gli stati imperturbati di partenza vanno scelti diagonalizzando la perturbazione nel livello, e combinazioni di stati di parità opposta possono avere un valor medio di $z$ diverso da zero.</p>
+  <p>Picasso, al paragrafo 13.7, spiega perché questo accade quasi solo nell&rsquo;idrogeno: l&rsquo;esistenza di un effetto al primo ordine <i>«è legata all&rsquo;esistenza di stati imperturbati con la stessa energia ma diversa parità, cosa che si verifica nell&rsquo;idrogeno (dove c&rsquo;è la degenerazione su $l$) ma non in altri atomi, dove la complessità della hamiltoniana rimuove qualsiasi degenerazione che non sia imposta da ragioni di simmetria»</i>. Negli altri atomi l&rsquo;effetto Stark è quadratico, come nel fondamentale; nell&rsquo;idrogeno eccitato è lineare, ed è un effetto della degenerazione accidentale del potenziale coulombiano.</p>`},
+  {t:'reveal', title:'La matrice quattro per quattro', tag:'costruzione', steps:[
+   {label:'Gli elementi nulli, con tre regole di selezione', body:R`
+   <p>Picasso calcola gli elementi di matrice $\langle2,l,m|z|2,l',m'\rangle$ eliminandone prima il più possibile. <b>Fra stati $s$</b>: $\langle200|z|200\rangle=0$, perché $z$ applicato a uno stato $s$ dà uno stato $p$. <b>Per parità</b>: $\langle21m|z|21m'\rangle=0$ per ogni $m,m'$, perché i tre stati $2p$ hanno tutti parità $-1$. <b>Su $L_{z}$</b>: $z$ commuta con $L_{z}$, quindi collega solo stati con lo stesso $m$, e $\langle200|z|21,\pm1\rangle=0$. Resta un solo elemento, insieme al suo complesso coniugato:</p>
+   $$\langle200|z|210\rangle,$$
+   <p>per il quale <i>«nessuna delle tre regole di selezione si applica»</i>. Picasso osserva che non se ne possono cercare altre: le regole usate si riferiscono ai numeri quantici che commutano con $H_{0}$, e <i>«esaurito l&rsquo;insieme dei numeri quantici che sappiamo attribuire a questi stati viene meno la possibilità di scoprire altre regole di selezione»</i>. Bisogna fare il conto.</p>`},
+   {label:'Il conto, e una divergenza di segno fra i libri', body:R`
+   <p>Con le funzioni radiali $R_{20}=\tfrac{1}{\sqrt2}a_{0}^{-3/2}\big(1-\tfrac{r}{2a_{0}}\big)e^{-r/2a_{0}}$ e $R_{21}=\tfrac{1}{\sqrt{24}}a_{0}^{-3/2}\tfrac{r}{a_{0}}e^{-r/2a_{0}}$, dove $a_{0}$ è il <span class="str" data-str="raggio-di-bohr">raggio di Bohr</span>, e le <span class="str" data-str="armoniche-sferiche">armoniche sferiche</span> $Y_{00}$ e $Y_{10}=\sqrt{3/4\pi}\cos\theta$, l&rsquo;integrale si separa in una parte radiale, $\int R_{20}R_{21}r^{3}dr=-3\sqrt3\,a_{0}$, e una angolare, $\int Y_{00}\cos\theta\,Y_{10}\,d\Omega=1/\sqrt3$. Il prodotto è</p>
+   $$\langle200|z|210\rangle=-3a_{0}.$$
+   <p>Qui i libri divergono, e la divergenza va dichiarata. Picasso scrive <i>«$\langle2,1,0|z|2,0,0\rangle=3a_{B}$»</i>, con il segno positivo; Ballentine scrive $\langle210|H_{1}|200\rangle=-3e|\mathcal E|a_{0}$, e Sakurai, con la perturbazione $V=-ez|\mathcal E|$ e la carica dell&rsquo;elettrone scritta come $e\lt0$, scrive $3ea_{0}|\mathcal E|$. Il segno di un elemento di matrice fra stati diversi dipende dalla fase con cui si scelgono le funzioni d&rsquo;onda, e cambiando il segno di $R_{21}$ o di $Y_{10}$ cambia il segno dell&rsquo;elemento. Gli autovalori non ne dipendono. Quale delle due combinazioni sia quella più bassa in energia sì, e per questo, quando si scrivono gli stati buoni, bisogna dire quali funzioni si sono usate. Con le funzioni scritte sopra, che sono quelle standard e positive vicino all&rsquo;origine, il segno è negativo, come in Ballentine.</p>`},
+   {label:'Autovalori e stati buoni', body:R`
+   <p>La matrice della perturbazione nel livello ha un blocco $2\times2$ fra $|200\rangle$ e $|210\rangle$, proporzionale alla <span class="str" data-str="matrici-di-pauli">matrice di Pauli</span> $\sigma_{x}$, e zeri altrove. I suoi autovalori sono</p>
+   $$E^{(1)}=\pm3e\mathcal Ea_{0},\qquad0,\qquad0,$$
+   <p>con stati buoni $(|200\rangle\pm|210\rangle)/\sqrt2$ per i primi due e $|21,\pm1\rangle$ per gli altri. Con il segno calcolato sopra, la combinazione con il $+$ ha $\langle z\rangle=-3a_{0}$ ed energia $-3e\mathcal Ea_{0}$: l&rsquo;elettrone sta preferibilmente dalla parte delle $z$ negative, dove la forza del campo lo spinge. Il livello quattro volte degenere si separa in tre: uno spostato in basso, uno in alto, e uno doppio che resta dov&rsquo;era. Picasso: <i>«la perturbazione ha rimosso parzialmente la degenerazione del livello $n=2$»</i>.</p>`}
+  ]},
+  {t:'plot', title:'Gli stati buoni hanno la carica spostata lungo il campo',
+   intro:R`<p>La densità di probabilità lungo l&rsquo;asse $z$ (in unità $a_{0}=1$, a meno della costante $1/64\pi$) per le due combinazioni $(|200\rangle\pm|210\rangle)/\sqrt2$: con il $+$ (blu) e con il $-$ (arancio).</p>`,
+   plots:[{kind:'func2d', xr:[-10,10], yr:[0,4.4], height:270, ticks:true,
+     title:'|psi|^2 lungo l asse z per i due stati di Stark',
+     curves:[{f:'Math.pow(x-Math.abs(x)+2,2)*Math.exp(-Math.abs(x))', col:'#5aa9ff', width:2.4, label:'(200 + 210)/sqrt2'},
+             {f:'Math.pow(-x-Math.abs(x)+2,2)*Math.exp(-Math.abs(x))', col:'#ffb86b', width:2.4, label:'(200 - 210)/sqrt2'}],
+     xlabel:'z / a0', ylabel:'densita (x 64 pi)'}],
+   leggi:R`<p><b>Che cosa guardare.</b> La curva blu ha, oltre al picco centrale, un secondo lobo lontano dalla parte delle $z$ negative, assente dall&rsquo;altra parte; la curva arancione è la sua immagine speculare. Ciascuno dei due stati ha la carica dell&rsquo;elettrone spostata da un lato del protone, cioè un dipolo elettrico. Gli stati $2s$ e $2p$ separatamente sono simmetrici e un dipolo non ce l&rsquo;hanno.</p>
+   <p><b>Che cosa impararne.</b> L&rsquo;effetto lineare è l&rsquo;energia di un dipolo <i>permanente</i> nel campo. Ballentine ne calcola il valore, <i>«$\langle d_{z}\rangle=3ea_{0}$»</i>, e Picasso lo interpreta: l&rsquo;esistenza di stati con momento di dipolo proprio <i>«è dovuta al fatto che nell&rsquo;idrogeno si ha la degenerazione su $l$: grazie alla regola di selezione sulla parità, per ottenere un valor medio non nullo dell&rsquo;operatore di dipolo $D$, è necessario sovrapporre stati di parità diversa»</i>.</p>`},
+  {t:'prosa', title:'Che cosa si vede, e il caso generale', tag:'esempio', html:R`
+  <p><b>La riga Lyman alfa si divide in tre.</b> Il fondamentale non si sposta al primo ordine, il livello $n=2$ si separa in tre. Picasso: <i>«si dovranno osservare tre righe nelle transizioni fra i livelli con $n=1$ e $n=2$: di queste tre righe quella centrale coincide con la prima riga della serie di Lyman; le altre due sono simmetricamente disposte rispetto a questa e distano in frequenza da essa della quantità $\Delta\nu=\pm3e\mathcal Ea_{B}/h$»</i>. Con il campo di $10^{4}$ V/cm lo spostamento è $3e\mathcal Ea_{0}\approx1{,}6\times10^{-4}$ eV, a fronte dei $10{,}2$ <span class="str" data-str="elettronvolt">eV</span> della distanza fra $n=1$ e $n=2$: il criterio di validità è soddisfatto con larghissimo margine, come Picasso nota.</p>
+  <p><b>Il caso generale, in coordinate paraboliche.</b> Per un $n$ qualunque la matrice nel livello ha dimensione $n^{2}$ e la ricerca della base buona sembra lunga. Landau la evita scegliendo fin dall&rsquo;inizio funzioni d&rsquo;onda che diagonalizzano la perturbazione: quelle dell&rsquo;idrogeno separate in coordinate paraboliche, in cui la matrice di perturbazione è <i>«diagonale rispetto ad ogni gruppo di stati mutuamente degeneri»</i>. È il teorema degli stati buoni applicato con l&rsquo;operatore giusto, che in questo caso è legato a una simmetria nascosta del problema coulombiano. Il risultato, con i numeri quantici parabolici $n_{1},n_{2}$ e $m$, è la formula (77,2) di Landau. Nel testo estratto la formula è illeggibile, e qui la si scrive nella forma standard, in unità ordinarie, controllandola sul caso $n=2$:</p>
+  $$E^{(1)}=\frac32\,n\,(n_{1}-n_{2})\,e\mathcal Ea_{0},$$
+  <p>che per $n=2$ ridà $\pm3e\mathcal Ea_{0}$ e $0$. Landau ricorda che il risultato <i>«è stato ottenuto da K. Schwarzschild e da P. Epstein sulla base della vecchia teoria dei quanti, e da W. Pauli e E. Schrödinger sulla base della meccanica quantistica (1926)»</i>, e ne trae due conseguenze. La separazione totale del livello <i>«è all&rsquo;incirca proporzionale a $n^{2}$»</i>, perché gli elettroni più lontani dal nucleo danno un dipolo più grande. E la degenerazione non è rimossa del tutto: lo spostamento non dipende da $m$, e restano degeneri stati che un campo uniforme non può distinguere.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Gli stati $|21,\pm1\rangle$ non si spostano al primo ordine. Si spostano al secondo?`,
+    a:R`Sì, in generale: la perturbazione li collega agli stati con $m=\pm1$ di altri livelli, $n=3,4,\dots$, e al secondo ordine nascono correzioni quadratiche nel campo. Al primo ordine restano degeneri fra loro, e lo restano a ogni ordine, perché il campo lungo $z$ è invariante per la riflessione in un piano che contiene l&rsquo;asse $z$, che scambia $m$ con $-m$. Landau lo nota per tutti gli atomi: un campo elettrico uniforme non può rimuovere la degenerazione fra stati che differiscono solo per il segno di $m$.`},
+   {q:R`Che cosa succede se si sceglie l&rsquo;asse $z$ non parallelo al campo?`,
+    a:R`La perturbazione diventa $e\mathcal E(z\cos\alpha+x\sin\alpha)$, e $x$ collega $|200\rangle$ con $|21,\pm1\rangle$: la matrice nel livello si riempie, e la si deve diagonalizzare tutta. Gli autovalori sono gli stessi, $\pm3e\mathcal Ea_{0}$ e $0$ due volte, perché sono una proprietà fisica. Gli stati buoni sono le stesse combinazioni, scritte in una base ruotata. Picasso lo dice prima di cominciare: <i>«avendo scelto l&rsquo;asse $z$ parallelo al campo elettrico, conviene avere diagonale $L_{z}$ piuttosto che un&rsquo;altra componente»</i>. È il teorema degli stati buoni usato come scelta degli assi.`}
+  ]}
+]},
+/* ---------------- 06 · QUANDO LA DEGENERAZIONE SOPRAVVIVE AL PRIMO ORDINE ---------------- */
+{ num:'06', title:'Quando la degenerazione sopravvive al primo ordine', meta:'la sfida che Sakurai lascia agli esperti · la hamiltoniana efficace al secondo ordine e l osservazione di Landau · lo spin 1 di Shankar dove il primo ordine è esatto · lo stesso spin con una perturbazione che separa solo al secondo ordine',
+  blocchi:[
+  {t:'prosa', title:'Il problema', tag:'architettura', html:R`
+  <p>La procedura della tappa 02 funziona se l&rsquo;equazione secolare ha radici distinte: allora ogni radice individua una combinazione degli stati imperturbati, e da lì si può procedere con le formule non degeneri. Se due radici coincidono, l&rsquo;ambiguità si ripresenta in un sottospazio più piccolo. Sakurai la lascia come sfida: <i>«A challenge for the experts: How must we proceed if the degeneracy is not removed in first order — that is, if some of the roots of the secular equation are equal?»</i>.</p>
+  <p>Landau la affronta nel paragrafo 39, partendo da un caso che negli esercizi è frequente: <i>«Per varie ragioni può succedere che tutti gli elementi di matrice della transizione all&rsquo;interno di un gruppo di stati reciprocamente degeneri $n,n',\dots$ siano abbastanza piccoli (o persino nulli). Allora può essere opportuno, oltre che tener conto, al primo ordine, degli elementi di matrice $V_{nn'}$, tener conto anche, al secondo ordine, degli elementi di matrice $V_{nm}$ per le transizioni tra stati con energie diverse»</i>. La ragione tipica è una simmetria: la perturbazione non collega direttamente gli stati del livello, ma li collega passando per uno stato intermedio di un altro livello.</p>`},
+  {t:'reveal', title:'La hamiltoniana efficace al secondo ordine', tag:'costruzione', steps:[
+   {label:'Dalla derivazione di Sakurai', body:R`
+   <p>La derivazione con i proiettori della tappa 02 conteneva già la risposta. L&rsquo;equazione esatta per la parte nel sottospazio degenere aveva un termine di ordine $\lambda^{2}$, che al primo ordine si era trascurato. Sakurai lo tiene nella (5.2.12), sostituendo l&rsquo;energia al denominatore con il suo valore imperturbato:</p>
+   $$\Big(E-E_{D}^{(0)}-\lambda P_{0}VP_{0}-\lambda^{2}P_{0}VP_{1}\frac{1}{E_{D}^{(0)}-H_{0}}P_{1}VP_{0}\Big)P_{0}|l\rangle=0.$$
+   <p>È un problema agli autovalori nel sottospazio $D$ per una matrice <b>efficace</b>, i cui elementi fra due stati $a,b$ del livello sono</p>
+   $$V^{\rm eff}_{ab}=V_{ab}+\sum_{m\notin D}\frac{V_{am}V_{mb}}{E_{D}^{(0)}-E_{m}^{(0)}}.$$
+   <p>Il secondo termine contiene i cammini che escono dal livello verso uno stato $m$ lontano e tornano. Landau scrive la stessa sostituzione nella sua equazione secolare (39,4): si diagonalizza la matrice efficace al posto di quella della sola perturbazione.</p>`},
+   {label:'Quando conta', body:R`
+   <p>Se la parte di primo ordine $V_{ab}$ separa già il livello, il termine di secondo ordine è una piccola correzione e si può trattare con la formula non degenere, sommando sugli stati fuori dal livello. È la (5.2.15) di Sakurai. Se invece $V_{ab}$ è nulla, o proporzionale all&rsquo;identità, nel livello, il termine di secondo ordine è la sola cosa che distingue gli stati, e la base buona è quella che diagonalizza la matrice efficace. I due esempi che seguono, entrambi su una particella di spin $1$, mostrano i due casi.</p>`}
+  ]},
+  {t:'reveal', title:'Spin 1, primo caso: l’esercizio di Shankar', tag:'esempio', steps:[
+   {label:'Il problema', body:R`
+   <p>Shankar propone come esercizio 17.3.2 una particella di spin $1$, senza gradi di libertà orbitali, con hamiltoniana $H=AS_{z}^{2}+B(S_{x}^{2}-S_{y}^{2})$ e $A\gg B$, chiedendo di trattare il termine in $B$ come perturbazione, di trovare gli stati imperturbati <i>«stable under the perturbation»</i>, e di confrontare con la soluzione esatta. Con $\hbar=1$, $H_{0}=AS_{z}^{2}$ ha l&rsquo;autovalore $0$ su $|0\rangle$ e l&rsquo;autovalore $A$, doppio, su $|\pm1\rangle$.</p>`},
+   {label:'La soluzione', body:R`
+   <p>Si scrive la perturbazione con gli operatori di salita e discesa: $S_{x}^{2}-S_{y}^{2}=\tfrac12(S_{+}^{2}+S_{-}^{2})$. Gli operatori $S_{\pm}^{2}$ cambiano $m$ di due, quindi collegano solo $|+1\rangle$ e $|-1\rangle$, con</p>
+   $$\langle+1|B(S_{x}^{2}-S_{y}^{2})|-1\rangle=B.$$
+   <p>Nel livello doppio la matrice è $B\sigma_{x}$: le correzioni sono $\pm B$, con stati buoni $(|+1\rangle\pm|-1\rangle)/\sqrt2$, mentre $|0\rangle$ non si sposta. Il confronto chiesto da Shankar dà un risultato netto: la perturbazione non collega mai $|0\rangle$ agli altri due, la hamiltoniana completa è a blocchi, e gli autovalori esatti sono</p>
+   $$A+B,\qquad A-B,\qquad0,$$
+   <p>cioè <b>il primo ordine è esatto</b>. Il motivo è che il sottospazio degenere è anche un sottospazio invariante per la perturbazione, e l&rsquo;osservazione di Sakurai, <i>«if the degenerate subspace were the whole space, we would have solved the problem exactly in this manner»</i>, qui vale alla lettera.</p>`}
+  ]},
+  {t:'reveal', title:'Spin 1, secondo caso: una perturbazione che separa solo al secondo ordine', tag:'esempio', steps:[
+   {label:'Il problema, e il primo ordine nullo', body:R`
+   <p>Si cambi la perturbazione in $V=BS_{x}$, cioè un piccolo campo magnetico trasverso. Con $\hbar=1$, $S_{x}=\tfrac{1}{\sqrt2}(S_{+}+S_{-})$ cambia $m$ di uno, quindi nel livello $\{|+1\rangle,|-1\rangle\}$ ha elementi tutti nulli: <b>il primo ordine non separa niente</b>. Ma $S_{x}$ collega entrambi gli stati del livello a $|0\rangle$, con $\langle\pm1|S_{x}|0\rangle=1/\sqrt2$.</p>`},
+   {label:'La matrice efficace', body:R`
+   <p>Il solo stato intermedio è $|0\rangle$, con denominatore $E_{D}^{(0)}-E_{0}^{(0)}=A$. La matrice efficace nel livello è</p>
+   $$V^{\rm eff}=\frac{B^{2}}{2A}\begin{pmatrix}1&1\\1&1\end{pmatrix},$$
+   <p>con autovalori $B^{2}/A$ e $0$, e stati buoni $(|+1\rangle+|-1\rangle)/\sqrt2$ e $(|+1\rangle-|-1\rangle)/\sqrt2$. La perturbazione ha scelto la base attraverso il secondo ordine: lo stato simmetrico, che è quello che $S_{x}$ raggiunge partendo da $|0\rangle$, si sposta di $B^{2}/A$; quello antisimmetrico, che $S_{x}$ non raggiunge, resta fermo.</p>`},
+   {label:'Il confronto con l’esatto', body:R`
+   <p>Il problema si risolve esattamente. Lo stato antisimmetrico è disaccoppiato da tutto, perché $S_{x}$ applicato a esso dà zero, e la sua energia è esattamente $A$. Lo stato simmetrico e $|0\rangle$ formano un blocco $\begin{pmatrix}A&B\\B&0\end{pmatrix}$, con autovalori</p>
+   $$E=\frac{A}{2}\pm\sqrt{\frac{A^{2}}{4}+B^{2}},$$
+   <p>il cui sviluppo per $B\ll A$ dà $A+B^{2}/A$ per il ramo superiore e $-B^{2}/A$ per quello inferiore. Il secondo ordine degenere ha dato esattamente il primo termine dello sviluppo, e anche il segno giusto per $|0\rangle$, che scende come vuole la regola del fondamentale.</p>`}
+  ]},
+  {t:'plot', title:'Lo spin 1 nel campo trasverso: esatto e secondo ordine',
+   intro:R`<p>Con $A=1$, gli autovalori esatti di $AS_{z}^{2}+BS_{x}$ in funzione di $B$ (linee continue) e le loro approssimazioni al secondo ordine $1+B^{2}$, $1$, $-B^{2}$ (tratteggio implicito, in colori più chiari).</p>`,
+   plots:[{kind:'func2d', xr:[0,1], yr:[-0.6,1.7], height:280, ticks:true,
+     title:'spin 1: A Sz^2 + B Sx, autovalori esatti e al secondo ordine',
+     curves:[{f:'0.5+Math.sqrt(0.25+x*x)', col:'#5aa9ff', width:2.6, label:'esatto, simmetrico'},
+             {f:'1', col:'#ffb86b', width:2.6, label:'esatto, antisimmetrico'},
+             {f:'0.5-Math.sqrt(0.25+x*x)', col:'#6bdc9b', width:2.6, label:'esatto, |0>'},
+             {f:'1+x*x', col:'#9ccdff', width:1.4, label:'secondo ordine'},
+             {f:'-x*x', col:'#a8f0c6', width:1.4, label:'secondo ordine'}],
+     xlabel:'B / A', ylabel:'E / A'}],
+   leggi:R`<p><b>Che cosa guardare.</b> Il livello doppio in $E=A$ si separa, ma i due rami si allontanano quadraticamente, non linearmente: è la firma di una separazione che nasce al secondo ordine. Lo stato antisimmetrico resta esattamente a $E=A$ per ogni $B$. Le curve chiare seguono da vicino quelle esatte fino a circa $B\approx0{,}3A$, dove l&rsquo;errore sullo spostamento è dell&rsquo;ordine del $10\%$.</p>
+   <p><b>Che cosa impararne.</b> Il ramo superiore e $|0\rangle$ si respingono, come due livelli collegati al secondo ordine; il ramo antisimmetrico non partecipa, perché nessun elemento di matrice lo collega. Nella figura si leggono insieme il caso degenere, in cui la base la sceglie la perturbazione, e il caso non degenere, in cui i livelli si respingono.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel secondo esempio, che cosa succederebbe se si usassero subito gli stati $|\pm1\rangle$ con la formula non degenere del secondo ordine, senza diagonalizzare la matrice efficace?`,
+    a:R`Si troverebbe per ciascuno $|\langle\pm1|BS_{x}|0\rangle|^{2}/A=B^{2}/2A$: lo stesso spostamento per entrambi, cioè nessuna separazione, e il valore sbagliato per tutti e due. Il valore $B^{2}/2A$ è la media delle due correzioni vere, $B^{2}/A$ e $0$: la traccia della matrice efficace divisa per due. È lo stesso errore della scatola cubica alla tappa 02, che trovava il baricentro giusto e la struttura sbagliata, spostato al secondo ordine.`},
+   {q:R`Perché nel secondo esempio il termine di primo ordine $V_{ab}$ è nullo?`,
+    a:R`Perché $S_{x}$ cambia $m$ di $\pm1$ e i due stati del livello hanno $m=\pm1$, cioè differiscono di due. Per collegarli servono due applicazioni di $S_{x}$, quindi il secondo ordine. In generale, se gli stati di un livello differiscono per un numero quantico che la perturbazione cambia di $k$ unità alla volta, il primo ordine li collega solo se differiscono esattamente di $k$, e la separazione nasce all&rsquo;ordine pari al numero di passi necessari.`}
+  ]}
+]},
+/* ---------------- 07 · I LIVELLI QUASI DEGENERI ---------------- */
+{ num:'07', title:'I livelli quasi degeneri: diagonalizzare esattamente il blocco dei vicini', meta:'quanto deve essere esatta una degenerazione per usare il metodo · lo Stark con il 2s e il 2p appena separati, da quadratico a lineare · un elettrone p in un campo magnetico confrontabile con la struttura fine · i fattori di Landé come pendenze iniziali · le linee con lo stesso m che non si incrociano',
+  blocchi:[
+  {t:'prosa', title:'Una degenerazione è mai esatta?', tag:'architettura', html:R`
+  <p>Sakurai fa la domanda dopo aver risolto lo Stark lineare: nell&rsquo;idrogeno vero i livelli $2s$ e $2p$ non sono esattamente degeneri, perché la struttura fine li separa e l&rsquo;elettrodinamica quantistica separa anche quelli che la teoria di Dirac lascia degeneri. <i>«We might therefore ask, is it realistic to apply degenerate perturbation theory to this problem?»</i> La risposta dipende dal rapporto fra due energie: la separazione $\delta$ fra i livelli quasi degeneri e l&rsquo;elemento di matrice della perturbazione che li collega. Se l&rsquo;elemento di matrice è molto più grande di $\delta$, i livelli sono degeneri <i>a tutti gli effetti pratici</i> e il metodo degenere funziona. Se è molto più piccolo, i livelli sono ben separati e funziona il metodo non degenere. Nel caso intermedio, Sakurai: <i>«we must work harder; it is safer to attempt to diagonalize the Hamiltonian exactly in the space spanned by all the nearby levels»</i>. Shankar dice lo stesso: <i>«Degenerate perturbation theory is relevant not only when the levels are exactly degenerate but also when they are close [...] In that case one must diagonalize $H^{0}+H'$ exactly in the almost degenerate subspace»</i>. È la procedura di Picasso per i livelli quasi degeneri: si includono nella parte risolubile i termini responsabili della piccola separazione, e si diagonalizza il blocco esattamente.</p>`},
+  {t:'reveal', title:'Lo Stark con un 2s e un 2p appena separati', tag:'esempio', steps:[
+   {label:'Il blocco due per due', body:R`
+   <p>Picasso riprende l&rsquo;effetto Stark a $n=2$ supponendo che i livelli con $l=0$ e $l=1$ non siano degeneri ma separati di una quantità $\delta E_{0}$, e scrive la matrice (12.28): sulla diagonale $E_{0}^{2s}$ e $E_{0}^{2p}$, fuori diagonale l&rsquo;elemento $3e\mathcal Ea_{B}$. Prendendo lo zero delle energie a metà fra i due livelli, gli autovalori del blocco sono</p>
+   $$E_{\pm}=\pm\sqrt{\frac{\delta E_{0}^{2}}{4}+9e^{2}\mathcal E^{2}a_{0}^{2}}.$$
+   <p>E Picasso conclude: siccome $3e\mathcal Ea_{B}$ <i>«è dello stesso ordine di $\delta E_{0}$, lo sviluppo in potenze di $3e\mathcal Ea_{B}/\delta E_{0}$ sarebbe completamente privo di senso»</i>.</p>`},
+   {label:'I due regimi, e il campo di passaggio', body:R`
+   <p>Per campi deboli, $3e\mathcal Ea_{0}\ll\delta E_{0}/2$, la radice si sviluppa e lo spostamento di ciascun livello dalla sua posizione imperturbata è</p>
+   $$\pm\frac{9e^{2}\mathcal E^{2}a_{0}^{2}}{\delta E_{0}},$$
+   <p>quadratico nel campo: è il risultato del secondo ordine non degenere, con i due livelli che si respingono. Per campi forti, $3e\mathcal Ea_{0}\gg\delta E_{0}/2$, la radice è dominata dal campo e $E_{\pm}\simeq\pm3e\mathcal Ea_{0}$: lo Stark lineare. Il passaggio avviene dove i due termini sotto radice sono uguali, $3e\mathcal Ea_{0}=\delta E_{0}/2$. Picasso stima la separazione fra $2s$ e $2p$ dovuta alla sola correzione relativistica dell&rsquo;energia cinetica in circa $4\times10^{-5}$ eV; prendendo questo numero come ordine di grandezza della separazione, il campo di passaggio è</p>
+   $$\mathcal E_{c}=\frac{\delta E_{0}}{6ea_{0}}\approx1{,}3\times10^{3}\ \text{V/cm}.$$
+   <p>Sopra qualche migliaio di volt per centimetro lo Stark dell&rsquo;idrogeno è lineare, sotto è quadratico. Il numero è indicativo, perché la separazione vera fra i sottolivelli di $n=2$ coinvolge anche lo spin, come Sakurai ricorda; l&rsquo;ordine di grandezza basta a dire che con i campi del laboratorio si sta quasi sempre nel regime lineare.</p>`}
+  ]},
+  {t:'plot', title:'Da quadratico a lineare',
+   intro:R`<p>I due livelli del blocco in unità di $\delta E_{0}/2$, in funzione di $u=6e\mathcal Ea_{0}/\delta E_{0}$: esatti (blu), lineari $\pm u$ (arancio), quadratici $\pm(1+u^{2}/2)$ (verde).</p>`,
+   plots:[{kind:'func2d', xr:[0,3], yr:[-3.3,3.3], height:290, ticks:true,
+     title:'Stark a n = 2 con 2s e 2p separati: esatto, lineare, quadratico',
+     curves:[{f:'Math.sqrt(1+x*x)', col:'#5aa9ff', width:2.6, label:'esatto'},
+             {f:'-Math.sqrt(1+x*x)', col:'#5aa9ff', width:2.6, label:''},
+             {f:'x', col:'#ffb86b', width:1.6, label:'lineare (degenere)'},
+             {f:'-x', col:'#ffb86b', width:1.6, label:''},
+             {f:'1+x*x/2', col:'#6bdc9b', width:1.6, label:'quadratico (non degenere)'},
+             {f:'-1-x*x/2', col:'#6bdc9b', width:1.6, label:''}],
+     xlabel:'u = 6 e E a0 / delta E0', ylabel:'E / (delta E0 / 2)'}],
+   leggi:R`<p><b>Che cosa guardare.</b> Per $u\lt0{,}5$ la curva esatta segue la parabola verde: i livelli partono separati e si allontanano quadraticamente. Per $u\gt2$ segue la retta arancione: lo spostamento è lineare nel campo, come se i livelli fossero degeneri. Fra le due, nessuna delle due approssimazioni funziona, e serve la radice.</p>
+   <p><b>Che cosa impararne.</b> «Degenere» e «non degenere» non sono proprietà di un livello, ma del rapporto fra la separazione e la perturbazione. Lo stesso atomo è non degenere per un campo debole e degenere per un campo forte. La diagonalizzazione esatta del blocco li contiene entrambi, ed è per questo che Picasso, Sakurai e Shankar la raccomandano nel caso intermedio.</p>`},
+  {t:'reveal', title:'Un elettrone p in un campo magnetico: dal regime di Landé al regime opposto', tag:'esempio', steps:[
+   {label:'Il problema di Picasso', body:R`
+   <p>Picasso, nel paragrafo 16.6, tratta un atomo in un campo magnetico <i>«Intermedio»</i>, in cui <i>«le separazioni Zeeman sono confrontabili con quelle di struttura fine»</i>, e sceglie il livello $2p$ del litio, <i>«uno dei pochi casi in cui la separazione di struttura fine è confrontabile con le separazioni Zeeman per campi ragionevoli»</i>: $0{,}42\times10^{-4}$ eV. La perturbazione comprende l&rsquo;interazione spin-orbita e l&rsquo;interazione con il campo, $H'=A\,\mathbf L\cdot\mathbf S+\mu_{B}B(L_{z}+2S_{z})/\hbar$, sui sei stati di un elettrone $p$. Nessuna base diagonalizza entrambi i termini: lo spin-orbita vuole il momento totale, il campo vuole $L_{z}$ e $S_{z}$ separati. L&rsquo;unico operatore che commuta con tutti e due è $J_{z}$, e la matrice si spezza in blocchi di $m_{j}$: due blocchi di dimensione uno, $m_{j}=\pm\tfrac32$, e due di dimensione due, $m_{j}=\pm\tfrac12$.</p>`},
+   {label:'I blocchi', body:R`
+   <p>Per $m_{j}=+\tfrac32$, lo stato $|1,+\tfrac12\rangle$ dà $\tfrac12A\hbar^{2}+2\mu_{B}B$, come nella (16.61) di Picasso. Per $m_{j}=+\tfrac12$, nella base $|1,-\tfrac12\rangle$, $|0,+\tfrac12\rangle$, lo spin-orbita dà la matrice della tappa 03 e il campo aggiunge $\mu_{B}B(m_{l}+2m_{s})$ sulla diagonale, cioè $0$ e $\mu_{B}B$:</p>
+   $$\begin{pmatrix}-\tfrac12A\hbar^{2}&\tfrac{1}{\sqrt2}A\hbar^{2}\\ \tfrac{1}{\sqrt2}A\hbar^{2}&\mu_{B}B\end{pmatrix},$$
+   <p>con autovalori</p>
+   $$E_{\pm}=\frac12\Big(\mu_{B}B-\frac{A\hbar^{2}}{2}\Big)\pm\frac12\sqrt{\Big(\mu_{B}B+\frac{A\hbar^{2}}{2}\Big)^{2}+2A^{2}\hbar^{4}}.$$
+   <p>Per $B=0$ si ritrovano $\tfrac12A\hbar^{2}$ e $-A\hbar^{2}$, i due livelli di struttura fine.</p>`},
+   {label:'Campo debole: i fattori di Landé', body:R`
+   <p>Per $\mu_{B}B$ piccolo rispetto alla struttura fine, le pendenze iniziali dei due autovalori sono $\tfrac23\mu_{B}$ e $\tfrac13\mu_{B}$. Sono i valori di $g_{j}m_{j}\mu_{B}$ con i fattori di Landé $g_{3/2}=\tfrac43$ e $g_{1/2}=\tfrac23$. Landau li ricava nel paragrafo 113 con un argomento di proiezione: in uno stato con $J$ fissato, lo spin mediato <i>«può essere &lsquo;diretto&rsquo; soltanto lungo $J$, l&rsquo;unico &lsquo;vettore&rsquo; conservativo che caratterizza l&rsquo;atomo libero»</i>, e da qui il fattore</p>
+   $$g=1+\frac{J(J+1)-L(L+1)+S(S+1)}{2J(J+1)},$$
+   <p>che per $L=1$, $S=\tfrac12$ dà $\tfrac43$ e $\tfrac23$. La condizione di Landau per questo regime è esplicita: il campo deve essere <i>«piccolo rispetto alle distanze fra i livelli energetici dell&rsquo;atomo, nonché rispetto agli intervalli della struttura fine»</i>. In questo regime lo spin-orbita fa la parte di $H_{0}$ e il campo quella della perturbazione, sul livello degenere $2J+1$ volte.</p>`},
+   {label:'Campo forte, e le linee che non si incrociano', body:R`
+   <p>Per $\mu_{B}B$ grande rispetto alla struttura fine i ruoli si scambiano: il campo è la parte risolubile, con la base $|m_{l},m_{s}\rangle$, e lo spin-orbita è la perturbazione, che al primo ordine contribuisce con il suo valor medio $A\hbar^{2}m_{l}m_{s}$. I due autovalori tendono a $\mu_{B}B$ e a $-\tfrac12A\hbar^{2}$, cioè agli stati $|0,+\tfrac12\rangle$ e $|1,-\tfrac12\rangle$. Picasso disegna i sei livelli in funzione del campo, nella sua figura 16.4, e nota che <i>«le due linee con $m=+1/2$ non si incontrano, e lo stesso per quanto riguarda le linee con $m=-1/2$»</i>, mentre la linea con $m=-3/2$ incrocia linee con $m=\pm\tfrac12$: linee con la stessa simmetria si respingono, linee con simmetria diversa possono incrociarsi. È il teorema di non incrocio visto su un caso misurabile.</p>`}
+  ]},
+  {t:'plot', title:'I sei livelli del p in funzione del campo',
+   intro:R`<p>In unità della separazione di struttura fine $\tfrac32A\hbar^{2}=1$, in funzione di $x=\mu_{B}B$: i livelli con $m_{j}=+\tfrac32$ (blu) e $-\tfrac32$ (arancio), i due con $m_{j}=+\tfrac12$ (verde) e i due con $m_{j}=-\tfrac12$ (viola).</p>`,
+   plots:[{kind:'func2d', xr:[0,2], yr:[-2.6,4.4], height:310, ticks:true,
+     title:'elettrone p: spin-orbita piu campo magnetico, dal regime di Lande a quello di campo forte',
+     curves:[{f:'1/3+2*x', col:'#5aa9ff', width:2.2, label:'mj = +3/2'},
+             {f:'1/3-2*x', col:'#ffb86b', width:2.2, label:'mj = -3/2'},
+             {f:'0.5*(x-1/3)+0.5*Math.sqrt((x+1/3)*(x+1/3)+8/9)', col:'#6bdc9b', width:2.2, label:'mj = +1/2'},
+             {f:'0.5*(x-1/3)-0.5*Math.sqrt((x+1/3)*(x+1/3)+8/9)', col:'#6bdc9b', width:2.2, label:''},
+             {f:'0.5*(-x-1/3)+0.5*Math.sqrt((x-1/3)*(x-1/3)+8/9)', col:'#c49bff', width:2.2, label:'mj = -1/2'},
+             {f:'0.5*(-x-1/3)-0.5*Math.sqrt((x-1/3)*(x-1/3)+8/9)', col:'#c49bff', width:2.2, label:''}],
+     xlabel:'mu_B B / (3/2 A hbar^2)', ylabel:'E'}],
+   leggi:R`<p><b>Che cosa guardare.</b> A sinistra i livelli partono dai due valori di struttura fine, $\tfrac13$ (quattro stati, $j=\tfrac32$) e $-\tfrac23$ (due stati, $j=\tfrac12$), e si aprono a ventaglio con pendenze proporzionali a $g_{j}m_{j}$. A destra si dispongono in rette parallele con pendenze $m_{l}+2m_{s}=2,1,0,0,-1,-2$. Le due curve verdi si avvicinano e si allontanano senza toccarsi, e così le due viola; la retta arancione taglia invece una curva verde e una viola.</p>
+   <p><b>Che cosa impararne.</b> Nessuno dei due regimi è una perturbazione dell&rsquo;altro quando $\mu_{B}B$ è dell&rsquo;ordine della struttura fine. Il problema si risolve solo diagonalizzando i blocchi di $m_{j}$, che sono piccoli. Un orale chiede spesso di disegnare questa figura a memoria: basta sapere le pendenze ai due estremi e che le linee con lo stesso $m_{j}$ non si incrociano.</p>`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Nel regime di campo debole i livelli con $j=\tfrac32$ si separano in quattro. Perché la separazione è uniforme, con distanze uguali fra livelli adiacenti?`,
+    a:R`Perché nel regime di Landé la perturbazione, ristretta al livello con $J$ fissato, è proporzionale a $J_{z}$: lo spin mediato è proporzionale a $\mathbf J$, quindi $L_{z}+2S_{z}$ diventa $g_{j}J_{z}$. Gli autovalori di $J_{z}$ sono equispaziati, e lo sono anche gli spostamenti, di $g_{j}\mu_{B}B$. La separazione smette di essere uniforme quando il campo diventa abbastanza grande da mescolare livelli con $J$ diversi, e questo accade solo fra stati con lo stesso $m_{j}$: è il motivo per cui le linee con $m_{j}=\pm\tfrac32$ restano rette per ogni campo.`},
+   {q:R`Per lo Stark, che cosa si dovrebbe fare se i livelli vicini fossero tre invece di due?`,
+    a:R`Diagonalizzare il blocco $3\times3$ di $H_{0}+H'$ ristretto ai tre livelli, includendo sulla diagonale le loro piccole separazioni e fuori diagonale gli elementi della perturbazione. Gli autovalori non hanno una formula semplice come la radice del caso doppio, ma sono le radici di un&rsquo;equazione di terzo grado, che si risolvono numericamente. Il resto dello spettro, lontano, si tratta al secondo ordine, come nella matrice efficace della tappa 06.`}
+  ]}
+]},
+/* ---------------- 08 · QUANDO IL RISULTATO VALE ---------------- */
+{ num:'08', title:'Quando il risultato vale: la gerarchia delle perturbazioni e i numeri quantici approssimativamente buoni', meta:'che cosa deve essere piccolo nel caso degenere, e che cosa no · l osservazione di Landau sull esattezza dentro il livello · l albero genealogico dei livelli di Picasso · Russell Saunders e jj · il mercurio e la riga che non dovrebbe esserci',
+  blocchi:[
+  {t:'prosa', title:'Che cosa deve essere piccolo', tag:'teorema', html:R`
+  <p>Nel caso non degenere il criterio era uno solo: gli elementi di matrice della perturbazione piccoli rispetto alle distanze fra i livelli. Nel caso degenere il criterio si divide in due, e la divisione è il contenuto di questa tappa.</p>
+  <p><b>Dentro il livello degenere non serve niente.</b> L&rsquo;equazione secolare diagonalizza esattamente la perturbazione ristretta al livello, per quanto grandi siano i suoi elementi. Landau lo dice in una nota al problema 2 del paragrafo 39: la condizione di piccolezza <i>«richiede sempre che siano osservate le condizioni (38,9) soltanto per le transizioni tra gli stati relativi ai diversi livelli energetici. Quanto alle transizioni tra gli stati relativi a uno stesso livello degenere, di esse l&rsquo;equazione secolare dà conto in maniera in un certo senso esatta»</i>.</p>
+  <p><b>Fra il livello e gli altri livelli serve tutto.</b> Gli elementi di matrice che collegano il livello degenere a livelli lontani devono essere piccoli rispetto alle distanze, altrimenti il termine di secondo ordine della matrice efficace della tappa 06 non è piccolo e la separazione calcolata al primo ordine è sbagliata. La tappa 07 ha mostrato che cosa fare quando un livello «lontano» non lo è abbastanza: lo si include nel blocco e si diagonalizza esattamente.</p>
+  <p>La pratica che ne segue è una <b>gerarchia</b>: si ordinano le interazioni per grandezza, si tratta la più grande come parte risolubile, la successiva come perturbazione sui livelli degeneri che la prima lascia, e così via. A ogni gradino la degenerazione residua definisce il sottospazio in cui diagonalizzare il gradino successivo. La gerarchia funziona se ogni gradino è piccolo rispetto alle distanze create dal precedente.</p>`},
+  {t:'reveal', title:'L’albero genealogico dei livelli', tag:'esempio', steps:[
+   {label:'L’idea di Picasso', body:R`
+   <p>Picasso, al paragrafo 14.1, descrive la gerarchia per gli atomi a molti elettroni con un&rsquo;immagine. Si moltiplica la repulsione fra gli elettroni per un parametro $\lambda$ e lo si fa scendere con continuità da $1$ a $0$. Siccome l&rsquo;effetto della repulsione <i>«è quello di rimuovere parte della degenerazione presente nell&rsquo;approssimazione a elettroni indipendenti, gruppi di livelli energetici, separati per $\lambda\ne0$, confluiranno, per $\lambda=0$, in un unico livello corrispondente ad una ben determinata configurazione elettronica: quindi in cima all&rsquo;albero genealogico di ogni livello energetico [...] c&rsquo;è la configurazione elettronica da cui discende»</i>.</p>
+   <p>E ne trae una conclusione che vale per tutto il movimento: <i>«l&rsquo;approssimazione ad elettroni indipendenti va molto male per calcolare le energie, mentre gioca un ruolo essenziale per classificare gli stati»</i>. La teoria delle perturbazioni degeneri serve anche quando le perturbazioni non sono piccole: anche se i numeri sono sbagliati, la struttura dell&rsquo;albero, cioè quanti livelli nascono da ogni configurazione e con quali numeri quantici, è giusta.</p>`},
+   {label:'Il secondo gradino: Russell-Saunders', body:R`
+   <p>Il gradino successivo sono le interazioni relativistiche, principalmente lo spin-orbita. Picasso giustifica il trattarle al primo ordine dentro ciascun termine con $L$ e $S$ fissati, che chiama approssimazione di Russell-Saunders, con un confronto di energie: le differenze dovute alle sole interazioni elettrostatiche sono, per i livelli bassi, <i>«dell&rsquo;ordine dell&rsquo;elettronvolt»</i>, mentre le separazioni dovute agli effetti relativistici, dentro un multipletto, sono più piccole di <i>«circa tre ordini di grandezza»</i>. Il risultato è quello della tappa 03 in grande: la perturbazione commuta con $\mathbf J$, e <i>«ha rimosso completamente la degenerazione su $J$ [...] lasciando però inalterata la degenerazione su $J_{z}$ (che è protetta dall&rsquo;invarianza [...] per rotazioni)»</i>.</p>
+   <p>Landau, al paragrafo 72, dà il limite della gerarchia: l&rsquo;approssimazione richiede che <i>«gli intervalli della struttura fine devono essere piccoli rispetto alle differenze dei livelli con $L$ e $S$ diversi»</i>, e <i>«man mano che il numero atomico cresce le interazioni relativistiche nell&rsquo;atomo diventano più intense e l&rsquo;approssimazione di Russell-Saunders diventa inapplicabile»</i>. Nel limite opposto, accoppiamento $jj$, l&rsquo;ordine dei gradini si inverte: prima lo spin-orbita di ciascun elettrone, poi la repulsione. Fra i due, gli atomi pesanti mostrano <i>«diverse forme di accoppiamento intermedio»</i>, che sono il caso quasi degenere della tappa 07 applicato a un atomo intero.</p>`},
+   {label:'Il terzo gradino, e la sua inversione', body:R`
+   <p>Un campo magnetico esterno è il gradino successivo, finché è piccolo rispetto alla struttura fine: si tratta al primo ordine dentro ciascun livello con $J$ fissato, e dà i fattori di Landé. Quando il campo cresce fino a superare la struttura fine, l&rsquo;ordine degli ultimi due gradini si inverte, ed è il passaggio che la figura della tappa 07 mostra. Lo stesso atomo, nello stesso laboratorio, sta su una gerarchia o sull&rsquo;altra a seconda del valore di una manopola.</p>`}
+  ]},
+  {t:'reveal', title:'I numeri quantici approssimativamente buoni', tag:'teorema', steps:[
+   {label:'Che cosa vuol dire approssimativamente', body:R`
+   <p>Un numero quantico è «buono» se è l&rsquo;autovalore di un osservabile che commuta con la hamiltoniana completa. Ogni gradino della gerarchia rompe qualche simmetria, e con essa qualche numero quantico. Ma se il gradino è piccolo rispetto alle distanze del precedente, gli stati veri sono quasi autostati del numero quantico rotto, con una piccola mescolanza. Per due stati con numeri quantici diversi, separati da $\Delta$ e collegati da un elemento di matrice $v$, l&rsquo;angolo di mescolanza della tappa 01 dà, per $v\ll\Delta$,</p>
+   $$\tan\theta\simeq\frac{v}{\Delta},$$
+   <p>e la probabilità di trovare nello stato vero la componente «sbagliata» è circa $v^{2}/\Delta^{2}$. Il numero quantico è buono a meno di questa probabilità. Picasso lo dice in termini operativi: <i>«una regola di selezione sarà tanto meglio verificata quanto più &lsquo;buono&rsquo; è il numero quantico a cui si riferisce e viceversa»</i>.</p>`},
+   {label:'Il mercurio e la riga di intercombinazione', body:R`
+   <p>Il caso che Picasso porta è il mercurio, con $Z=80$. Il fondamentale è un $^{1}S$, e la prima configurazione eccitata, $6s\,6p$, dà un livello $^{1}P_{1}$ e uno $^{3}P_{1}$, con lo stesso $J$. Per l&rsquo;alto valore di $Z$, <i>«l&rsquo;interazione spin-orbita ha elementi di matrice non trascurabili fra stati con energie diverse (ma con lo stesso $J$), in particolare fra gli stati $^{1}P_{1}$ e $^{3}P_{1}$; ciò ha come conseguenza il fatto che, oltre a rimuovere la degenerazione su $J$, l&rsquo;interazione spin-orbita mescola apprezzabilmente fra loro gli stati $^{1}P_{1}$ e $^{3}P_{1}$»</i>. Lo spin totale $S$ non è più un numero quantico buono, e la regola di selezione $\Delta S=0$ viene violata: dal livello che gli spettroscopisti chiamano $^{3}P_{1}$ parte una transizione verso il fondamentale $^{1}S_{0}$, la <i>«riga di intercombinazione»</i>. La sua intensità relativa misura il quadrato dell&rsquo;ampiezza di mescolanza. Lo stesso meccanismo, con un mescolamento molto più piccolo, spiega le debolissime transizioni fra ortoelio e paraelio nell&rsquo;elio.</p>`}
+  ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`In un esercizio un livello degenere di momento angolare è perturbato da un campo magnetico e da un termine $\mathbf L\cdot\mathbf S$ di intensità confrontabile. Si può trattare prima l&rsquo;uno e poi l&rsquo;altro?`,
+    a:R`No: la gerarchia richiede che ogni gradino sia piccolo rispetto alle distanze create dal precedente, e qui nessuno dei due è piccolo rispetto all&rsquo;altro. Si deve diagonalizzare la somma delle due perturbazioni sul livello degenere, sfruttando l&rsquo;unico operatore che commuta con entrambe, $J_{z}$, per spezzare la matrice in blocchi. È il caso intermedio della tappa 07, ed è anche il caso in cui un esercizio d&rsquo;esame dà un risultato esatto al primo ordine, perché il livello degenere è un sottospazio finito su cui la somma si diagonalizza.`},
+   {q:R`L&rsquo;approssimazione a elettroni indipendenti sbaglia l&rsquo;energia dell&rsquo;elio di molti elettronvolt. Perché si continua a usarla?`,
+    a:R`Perché classifica gli stati correttamente, come dice Picasso. La configurazione elettronica, $1s^{2}$ o $1s\,2s$, determina quali livelli nascono, quanti sono e con quali numeri quantici, anche se le loro energie vanno calcolate meglio. Per il primo ordine nella repulsione questo è garantito: gli autovettori approssimati sono combinazioni di stati della stessa configurazione, che quindi <i>«sopravvive»</i> come etichetta. È lo stesso fatto della tappa 02, che gli stati all&rsquo;ordine zero restano autostati di $H_{0}$, letto come classificazione.`}
+  ]}
+]},
+/* ---------------- 09 · LE FONTI A CONFRONTO, E LE ROTTE ---------------- */
+{ num:'09', title:'Dove le fonti divergono, e dove il metodo riappare', meta:'sei strade per la stessa equazione · un segno che cambia da libro a libro · la mappa del corso e il programma sul metodo variazionale · bande, molecole, spin in un cristallo · domande d orale',
+  blocchi:[
+  {t:'prosa', title:'Sei strade per la stessa equazione', tag:'architettura', html:R`
+  <p>Il contenuto del caso degenere è uno solo: si diagonalizza la perturbazione ristretta al livello. Le fonti di questo movimento ci arrivano per strade diverse, e ciascuna strada mette in luce un aspetto che le altre lasciano in ombra.</p>
+  <p><b>Dirac</b> ci arriva come caso generale del suo paragrafo 43, senza separarlo dal non degenere, e lo collega al problema delle perturbazioni secolari della meccanica classica. È il solo a insistere sull&rsquo;asimmetria: ogni stato perturbato si avvicina a uno stato imperturbato, ma non ogni stato imperturbato si avvicina a uno perturbato. <b>Landau</b> parte dalla stessa forma matriciale del caso non degenere, ne ricava l&rsquo;equazione secolare con il suo nome astronomico e la somma delle radici, e prosegue fino al secondo ordine dentro il gruppo degenere. <b>Sakurai</b> organizza il conto con due proiettori e arriva a una hamiltoniana efficace esatta, da cui si legge ogni ordine. <b>Ballentine</b> tratta il degenere dentro la stessa sezione del non degenere, come il caso generale di cui l&rsquo;altro è un caso particolare. <b>Picasso</b> scompone la perturbazione in una parte che resta dentro i livelli e una che li collega, e con quella scomposizione tratta insieme degenere, non degenere e quasi degenere. <b>Griffiths</b> parte dal caso doppio e arriva al teorema degli stati buoni, che è lo strumento pratico più usato. <b>Shankar</b> dà la ragione per cui la serie si rompe: la base che salta.</p>
+  <p>Anche il nome degli stati giusti cambia: «stati buoni» per Griffiths, <i>«stable under the perturbation»</i> per Shankar, <i>«correct zeroth-order kets»</i> per Sakurai, autovettori approssimati all&rsquo;ordine zero per Picasso. Sono la stessa cosa, e l&rsquo;esame può usare uno qualunque di questi nomi.</p>`},
+  {t:'prosa', title:'Due divergenze dichiarate', tag:'architettura', html:R`
+  <p><b>Il segno di un elemento di matrice.</b> Per l&rsquo;effetto Stark a $n=2$, Picasso scrive $\langle2,1,0|z|2,0,0\rangle=3a_{B}$, Ballentine $\langle210|H_{1}|200\rangle=-3e|\mathcal E|a_{0}$, Sakurai $3ea_{0}|\mathcal E|$ con una carica dell&rsquo;elettrone scritta come negativa. Con le funzioni radiali standard il conto dà $-3a_{0}$. Il segno di un elemento di matrice fra stati diversi dipende dalle fasi scelte per gli stati, e non ha significato fisico da solo; ce l&rsquo;ha la sua combinazione con gli stati buoni, cioè quale combinazione sta più in basso. In un esercizio va detto quali funzioni si usano, e il risultato fisico, cioè che lo stato più basso ha l&rsquo;elettrone spostato contro il verso del campo, non dipende dalla scelta.</p>
+  <p><b>La mappa del corso e il programma.</b> La mappa di questo corso indica fra le fonti del movimento anche il paragrafo 10.6 di Ballentine, sul metodo variazionale, come <i>«la risposta alla domanda &lsquo;e quando non funziona?&rsquo;»</i>. Il programma ufficiale esclude invece esplicitamente il metodo variazionale. Questo movimento segue il programma: le risposte alla domanda «e quando non funziona?» sono qui la diagonalizzazione esatta del blocco dei livelli vicini, la matrice efficace al secondo ordine e la gerarchia delle perturbazioni, che sono tutte dentro il perimetro di Q.16. La pagina di Ballentine è stata aperta e non è stata usata, e lo si dichiara.</p>`},
+  {t:'prosa', title:'Dove il metodo riappare, in fisica', tag:'architettura', html:R`
+  <p><b>Negli spettri atomici.</b> Struttura fine, effetto Zeeman in tutti i suoi regimi, effetto Stark lineare dell&rsquo;idrogeno e degli stati di Rydberg, dove la separazione cresce come $n^{2}$: sono tutti casi di perturbazioni su livelli degeneri, e la figura dei sei livelli $p$ della tappa 07 è il modello di come si leggono.</p>
+  <p><b>Negli spin in un ambiente anisotropo.</b> La hamiltoniana dell&rsquo;esercizio di Shankar, $AS_{z}^{2}+B(S_{x}^{2}-S_{y}^{2})$, è la forma con cui si descrive uno spin $1$ in un cristallo o in una molecola con simmetria ridotta, e i due casi della tappa 06 sono i due modi in cui un campo può separare i livelli $m=\pm1$, direttamente o attraverso il livello $m=0$.</p>
+  <p><b>Nelle molecole e nei solidi.</b> Due atomi uguali lontani hanno livelli degeneri, uno per atomo; avvicinandoli, l&rsquo;elemento di matrice che li collega sceglie le combinazioni simmetrica e antisimmetrica, e separa i livelli in uno legante e uno antilegante. In un cristallo, un elettrone quasi libero ha stati degeneri ai bordi della zona di Brillouin, e il potenziale periodico, diagonalizzato in quel sottospazio, apre la banda proibita. È il problema a due livelli della tappa 01, nel limite degenere.</p>`},
+  {t:'collaudo', title:'Domande d’orale', items:[
+   {q:R`Perché nel caso degenere la teoria delle perturbazioni non degenere non funziona? Non mi dica solo che il denominatore si annulla.`,
+    a:R`Perché gli stati imperturbati di partenza non sono determinati: qualunque combinazione degli stati del livello è autostato di $H_{0}$, e la perturbazione, anche infinitesima, ne sceglie alcune in particolare. Partendo da una combinazione diversa, lo stato perturbato non è vicino a quello di partenza, e la variazione della base con la perturbazione non è analitica: è un salto. Il denominatore nullo è il sintomo con cui la serie segnala questo salto. La cura è partire dalla base che diagonalizza la perturbazione nel livello.`},
+   {q:R`Mi enunci e dimostri il teorema che permette di evitare la diagonalizzazione.`,
+    a:R`Se un operatore hermitiano $A$ commuta con $H_{0}$ e con la perturbazione $H'$, e due stati degeneri sono autostati di $A$ con autovalori diversi $\mu\ne\nu$, allora l&rsquo;elemento di matrice di $H'$ fra loro è nullo. Dimostrazione: $0=\langle a|[A,H']|b\rangle=(\mu-\nu)\langle a|H'|b\rangle$, usando l&rsquo;hermiticità di $A$ a sinistra. Quindi gli autostati comuni di $H_{0}$ e $A$ sono già la base buona, e il primo ordine è il valor medio della perturbazione su ciascuno di essi. In pratica $A$ è il generatore di una simmetria che la perturbazione rispetta.`},
+   {q:R`Un atomo di idrogeno nel livello $n=2$ in un campo elettrico: quante righe vede nella transizione verso il fondamentale, e perché?`,
+    a:R`Tre, al primo ordine. Il fondamentale non si sposta, perché è non degenere e $z$ è dispari. Il livello $n=2$ si separa in tre: $E_{2}-3e\mathcal Ea_{0}$ e $E_{2}+3e\mathcal Ea_{0}$, con gli stati $(|200\rangle\pm|210\rangle)/\sqrt2$ che hanno un dipolo permanente di modulo $3ea_{0}$, e $E_{2}$ doppio, con gli stati $|21,\pm1\rangle$. La riga centrale coincide con la Lyman alfa imperturbata, le altre due sono spostate di $\pm3e\mathcal Ea_{0}$. L&rsquo;effetto è lineare perché nell&rsquo;idrogeno ci sono stati di parità opposta con la stessa energia; in un atomo senza questa degenerazione sarebbe quadratico.`},
+   {q:R`Che cosa vuol dire che lo spin totale $S$ è un numero quantico approssimativamente buono?`,
+    a:R`Che $S^{2}$ non commuta con la hamiltoniana completa, perché l&rsquo;interazione spin-orbita lo mescola, ma che il mescolamento fra stati con $S$ diverso è piccolo, di ampiezza dell&rsquo;ordine dell&rsquo;elemento di matrice diviso per la distanza fra i livelli. Negli atomi leggeri lo è; nel mercurio non abbastanza, e la regola di selezione $\Delta S=0$ è violata dalla riga di intercombinazione, la cui intensità misura il quadrato dell&rsquo;ampiezza di mescolanza. Un numero quantico è tanto buono quanto lo è la regola di selezione che gli corrisponde.`}
+  ]}
+]}
+
+/* FINE */
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleomq-15-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo mq-15 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: mq-15-perturbazioni-degeneri.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
