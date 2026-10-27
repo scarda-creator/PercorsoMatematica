@@ -7,6 +7,12 @@
  *   1. SIGLA   ogni nucleo che una mappa referenzia porta, nel proprio META, la sigla
  *              che quella mappa gli da'. Finche' no, il corso si presenta con due
  *              numerazioni sovrapposte (me-01 nella casa, «Movimento 11» nella pagina).
+ *   1b. ID      l'`id:` nella testa /*MOVIMENTO coincide con quello che la mappa da' al
+ *              nucleo. Aggiunto il 2026-10-27: il controllo 1 guardava `nn` nel META e
+ *              diceva «114/114 allineate» mentre QUATTORDICI nuclei portavano un id
+ *              doppiato — `me-01-01`, `ms-05-05` — uscito da uno script di rinumerazione
+ *              il 17-10. Un id malformato non si vede leggendo la pagina e rompe ogni
+ *              organo che risolve il movimento dal file invece che dalla mappa.
  *   2. INDICE  nessun nucleo finisce con `mov: 0`, che vuol dire: sta nell'indice ed e'
  *              invisibile nell'app.
  *   3. RIMANDI nessun rimando testuale «nucleo NN» nella prosa punta a una sigla che
@@ -28,6 +34,34 @@ const cont = path.join(dir, 'contenuti');
 const soloCorsi = process.argv.slice(2).filter(a => !a.startsWith('--'));
 
 let guai = 0;
+
+/* 1b. l'`id:` della testa MOVIMENTO contro la mappa (vedi sopra). */
+{
+  const nuc2mov = {};
+  for (const d of fs.readdirSync(path.join(dir, '..'), { withFileTypes: true })) {
+    if (!d.isDirectory()) continue;
+    const mp = path.join(dir, '..', d.name, 'mappa.json');
+    if (!fs.existsSync(mp)) continue;
+    try {
+      (JSON.parse(fs.readFileSync(mp, 'utf8')).movimenti || []).forEach(v => {
+        if (v.nucleo) nuc2mov[v.nucleo] = v.id;
+      });
+    } catch (e) { /* lo segnala il controllo 1 */ }
+  }
+  let storti = 0;
+  for (const [html, atteso] of Object.entries(nuc2mov)) {
+    const js = path.join(cont, html.replace(/\.html$/, '.js'));
+    if (!fs.existsSync(js)) continue;
+    const m = fs.readFileSync(js, 'utf8').match(/^id:\s*(\S+)/m);
+    if (!m) continue;
+    if (m[1] !== atteso) {
+      console.log('  id storto: ' + html.replace(/\.html$/, '.js') + ' porta `' + m[1] +
+                  '` ma la mappa dice `' + atteso + '`');
+      storti++; guai++;
+    }
+  }
+  if (!storti) console.log('  id: tutti coincidono con la mappa');
+}
 const dice = (s) => console.log(s);
 
 /* ---------- 1. la sigla del META contro la sigla della mappa ---------- */
