@@ -30,6 +30,19 @@ const CAMPI = ['nome', 'riga', 'serve', 'esempio'];
 /* Un esempio EVOCATO invece che svolto e' il difetto piu' frequente e il meno visibile:
  * la frase suona bene e non insegna niente. Il segno oggettivo e' che non contiene
  * matematica — nessun $…$ — oppure apre con una formula di rito. */
+/* IL MARCATORE DI PACCHETTO (2026-10-27). `impacchetta-lavoro.py` ritaglia la navicella
+ * per spedirla in cloud, e in un ritaglio la casa di una scheda puo' stare in un nucleo
+ * che non e' a bordo. Senza sapere di essere in un pacchetto questo cancello chiama
+ * «non esiste» cio' che e' soltanto «altrove»: al primo collaudo bocciava 25 schede su
+ * 74, tutte sane. Un cancello rosso che non si puo' riparare e' peggio di uno assente,
+ * perche' manda a lavorare sul posto sbagliato.
+ * Nella navicella il marcatore non c'e' e il controllo resta severo come prima. */
+const PACCHETTO = (() => {
+  const via = path.join(__dirname, '..', '..', '..', '00-capitano', 'PACCHETTO.json');
+  try { return JSON.parse(fs.readFileSync(via, 'utf8')); } catch (e) { return null; }
+})();
+let caseFuori = 0;
+
 const EVOCATIVO = /^\s*(si usa|si incontra|compare spesso|è utile|serve spesso|ad esempio in|tipicamente)/i;
 
 /* Le schede sono JSON, non oggetti JavaScript, e la ragione e' misurata il 2026-09-12.
@@ -122,7 +135,9 @@ function verifica(file) {
     }
     if (s.pieno.file) {
       const dove = path.join(__dirname, s.pieno.file);
-      if (!fs.existsSync(dove)) {
+      if (!fs.existsSync(dove) && PACCHETTO) {
+        caseFuori++;                   // casa fuori dal pacchetto: si conta, non si boccia
+      } else if (!fs.existsSync(dove)) {
         guai.push('`pieno.file` punta a un nucleo che non esiste: ' + s.pieno.file);
       } else if (s.pieno.tappa) {
         const h = fs.readFileSync(dove, 'utf8');
@@ -254,6 +269,7 @@ function main() {
     }
   }
   console.log('\n%d su %d passano.', esiti.length - rotte, esiti.length);
+  if (caseFuori) console.log('  (%d schede hanno la casa fuori da questo pacchetto: controllo di casa sospeso, non e\' un difetto)', caseFuori);
   return rotte ? 1 : 0;
 }
 
