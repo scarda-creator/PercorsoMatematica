@@ -76,6 +76,19 @@
     font-size:.93rem;color:var(--muted);}
   .plot-leggi b{color:#7ab8e0;}
   .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
   .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
   .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
   .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
@@ -277,265 +290,656 @@ var TAPPE = [
 /*MOVIMENTO
 id:        me-12 — funzioni di Green
 identita:  la risposta a una sorgente puntiforme, e perché da lì si ricostruisce tutto
-copre:     F.4 — Metodi di risoluzione di equazioni differenziali: classificazione, ODE del primo e secondo ordine, PDE del secondo ordine con condizioni iniziali e al bordo, funzioni di Green
-serve:     me-09 (15-distribuzioni.html), me-10b (me-10b-trasformata-di-laplace.html), me-11 (17-edp.html)
-apre:      — (chiude la voce F.4)
-fonti:     Set 4 «Differential equations» es. 9-11 (Esposito) · More problems es. 18-21 (Esposito) · cinque scritti d'appello 2023-2025 · scaletta note §15 (corpo ASSENTE dal PDF: vedi tappa 00)
-generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+copre:     F.4 — Metodi di risoluzione di equazioni differenziali: classificazione, ODE del primo e se...
+serve:     me-09 (15-distribuzioni.html), me-10b (me-10b-trasformata-di-laplace.html), me-11 (17-edp.html), me-09b (me-09b-operatori-dimensione-infinita.html)
+apre:      — (e' una foglia)
+strumenti: delta-di-dirac · operatore-aggiunto · residuo · singolarita-isolate
+fonti:     programma: Petrini 6.1-6.4
+generata:  2026-11-06 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"integrale","espr":"DiracDelta(x-y)*j(y)","var":"y","da":"-oo","a":"oo","vale":"j(x)",
-  "ipotesi":{"j":"funzione","x":"real","y":"real"},
-  "nota":"proprieta' del setaccio della delta: e' il passo che dimostra D f(x)=j(x)",
-  "dove":"01","appare":"D f(x)=\\int dy\\;\\big[D_xG(x,y)\\big]\\,j(y)=\\int dy\\;\\delta(x-y)\\,j(y)=j(x)"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"combinazioni \\alpha f(a)+\\beta f'(a)=0",
-  "perche":"e' la FORMA GENERALE di una condizione al bordo omogenea lineare, non un'identita' da verificare"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"a_2(x)\\,\\partial_x^2G+a_1(x)\\,\\partial_xG+a_0(x)\\,G=\\delta(x-y)",
-  "perche":"e' la DEFINIZIONE del problema che si sta impostando (D_x G = delta), non un conto da verificare"},
-
- {"tipo":"integrale","espr":"DiracDelta(x-y)","var":"x","da":"-oo","a":"oo","vale":"1",
-  "ipotesi":{"y":"real"},
-  "dove":"02","appare":"\\int\\delta(x-y)dx=1"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"a_2(y)\\Big[\\partial_xG(y^+,y)-\\partial_xG(y^-,y)\\Big]=1",
-  "perche":"e' il risultato dell'integrazione dell'equazione nel limite epsilon->0 appena descritta in prosa (continuita' dei termini di ordine basso + l'integrale della delta asserito sopra): non e' un'identita' indipendente da verificare su G generica"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"\\partial_xG\\big|_{y^-}^{y^+}=\\frac{1}{a_2(y)}",
-  "perche":"segue dividendo per a_2(y) la relazione precedente: stessa asserzione, nessun conto nuovo"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"\\partial_xG=B(y)f_2'(x)",
-  "perche":"e' la SOSTITUZIONE dell'ansatz G=B(y)f_2(x) per x>y: definisce la derivata dell'ansatz, non calcola un valore indipendente"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"C(y)\\Big[f_1(y)f_2'(y)-f_1'(y)f_2(y)\\Big]=\\frac{1}{a_2(y)}",
-  "perche":"e' la stessa relazione del salto riscritta dopo la sostituzione A=Cf_2, B=Cf_1: nessun conto nuovo rispetto alle due asserzioni precedenti"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"l'equazione a_2\\partial_x^2G+\\dots=\\delta",
-  "perche":"e' la stessa equazione DEFINITORIA di questa tappa, abbreviata nella domanda del collaudo"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"la condizione è a_2(y)[\\partial_xG]=1",
-  "perche":"e' la stessa relazione del salto, richiamata nella domanda del collaudo"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"x^2f''=\\delta'(x-1)",
-  "perche":"e' la sorgente di un esercizio d'appello citato (04/07/2023), un DATO del problema non un conto di questa tappa"},
-
- {"tipo":"uguale","sinistra":"(x-1/x)*diff(x-4/x,x)-diff(x-1/x,x)*(x-4/x)","vale":"6/x",
-  "ipotesi":{"x":"positive"},
-  "dove":"04","appare":"W(x)=\\dfrac{6}{x}"},
-
- {"tipo":"uguale",
-  "sinistra":"(x-4/x)/6*(x**3/3-x+Rational(2,3))+(x-1/x)/6*(-Rational(16,3)-x**3/3+4*x)",
-  "vale":"(3*x**3-7*x**2+4)/(9*x)","ipotesi":{"x":"positive"},
-  "dove":"04","appare":"\\dfrac{3x^{3}-7x^{2}+4}{9x}"},
-
- {"tipo":"uguale",
-  "sinistra":"x**2*diff((3*x**3-7*x**2+4)/(9*x),x,2)+x*diff((3*x**3-7*x**2+4)/(9*x),x)-(3*x**3-7*x**2+4)/(9*x)",
-  "vale":"x**2","ipotesi":{"x":"positive"},
-  "dove":"04","appare":"rimette in piedi $x^{2}$"},
-
- {"tipo":"limite","espr":"(3*x**3-7*x**2+4)/(9*x)","var":"x","a":"1","vale":"0",
-  "ipotesi":{"x":"positive"},
-  "dove":"04","appare":"f(1)=0"},
-
- {"tipo":"limite","espr":"(3*x**3-7*x**2+4)/(9*x)","var":"x","a":"2","vale":"0",
-  "ipotesi":{"x":"positive"},
-  "dove":"04","appare":"f(2)=0"},
-
- {"tipo":"limite","espr":"(a*x+b/x)+3*(a-b/x**2)","var":"x","a":"1","vale":"4*a-2*b",
-  "ipotesi":{"x":"positive"},
-  "dove":"05","appare":"4a-2b=0"},
-
- {"tipo":"limite","espr":"(a*x+b/x)-6*(a-b/x**2)","var":"x","a":"2","vale":"-4*a+2*b",
-  "ipotesi":{"x":"positive"},
-  "dove":"05","appare":"-4a+2b=0"},
-
- {"tipo":"uguale","sinistra":"(x+2/x)*diff(x+2/x,x)-diff(x+2/x,x)*(x+2/x)","vale":"0",
-  "ipotesi":{"x":"positive"},
-  "dove":"05","appare":"W\\equiv0"},
-
- {"tipo":"uguale","sinistra":"x*diff(x-2,x)-diff(x,x)*(x-2)","vale":"2",
-  "dove":"06","appare":"W=2"},
-
- {"tipo":"limite","espr":"(x/2-1)-(-3*x/2)","var":"x","a":"1","vale":"1",
-  "dove":"06","appare":"salta di esattamente $1$"},
-
- {"tipo":"uguale",
-  "sinistra":"(exp(x)-exp(2*x))*diff(exp(x)-exp(2*(x-1)),x)-diff(exp(x)-exp(2*x),x)*(exp(x)-exp(2*(x-1)))",
-  "vale":"(exp(2)-1)*exp(3*x-2)",
-  "dove":"06","appare":"(e^{2}-1)e^{3x-2}"},
-
- {"tipo":"uguale","sinistra":"x**l*diff(x**(-l-1),x)-diff(x**l,x)*x**(-l-1)","vale":"-(2*l+1)/x**2",
-  "ipotesi":{"x":"positive","l":"positive"},
-  "dove":"06","appare":"-\\dfrac{2\\ell+1}{x^{2}}"},
-
- {"tipo":"uguale","sinistra":"log(x)*diff(Integer(1),x)-diff(log(x),x)*Integer(1)","vale":"-1/x",
-  "ipotesi":{"x":"positive"},
-  "dove":"06","appare":"W(x)=-\\dfrac{1}{x}"},
-
- {"tipo":"integrale","espr":"log(x)/x**2","var":"x","da":"1","a":"2","vale":"(1-log(2))/2",
-  "ipotesi":{"x":"positive"},
-  "dove":"06","appare":"\\dfrac{1-\\log 2}{2}"},
-
- {"tipo":"uguale",
-  "sinistra":"x**2*diff(1-1/x,x,2)+x*diff(1-1/x,x)+1/x","vale":"0",
-  "ipotesi":{"x":"positive"},
-  "dove":"06","appare":"f(x)=1-\\dfrac{1}{x}"},
-
- {"tipo":"integrale","espr":"exp(-s*t)*sin(w*t)/w","var":"t","da":"0","a":"oo",
-  "vale":"1/(s**2+w**2)","ipotesi":{"s":"positive","w":"positive","t":"positive"},
-  "dove":"07","appare":"\\dfrac{1}{s^{2}+\\omega_0^{2}}"},
-
- {"tipo":"uguale","sinistra":"diff(sin(w*t)/w,t,2)+w**2*(sin(w*t)/w)","vale":"0",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"09","appare":"risolve l'omogenea per $t>0$"},
-
- {"tipo":"limite","espr":"sin(w*t)/w","var":"t","a":"0","vale":"0",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"09","appare":"parte da fermo"},
-
- {"tipo":"limite","espr":"cos(w*t)","var":"t","a":"0","vale":"1",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"09","appare":"riceve un calcio di velocità $1$"},
-
- {"tipo":"uguale","sinistra":"1/(2*w)*(1/(u+w)-1/(u-w))","vale":"-1/(u**2-w**2)",
-  "ipotesi":{"w":"positive"},
-  "dove":"09","appare":"\\dfrac{1}{\\omega+\\omega_0}-\\dfrac{1}{\\omega-\\omega_0}"},
-
- {"tipo":"uguale","sinistra":"diff(I*exp(-I*w*t)/(2*w),t,2)+w**2*(I*exp(-I*w*t)/(2*w))","vale":"0",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"09","appare":"anche $G_F$ risolve l'omogenea lontano dall'origine"},
-
- {"tipo":"integrale","espr":"exp(-k*q**2*t)*cos(q*x)/(2*pi)","var":"q","da":"-oo","a":"oo",
-  "vale":"exp(-x**2/(4*k*t))/sqrt(4*pi*k*t)",
-  "ipotesi":{"k":"positive","t":"positive","x":"positive","q":"real"},
-  "dove":"08","appare":"\\sqrt{4\\pi\\kappa t}"},
-
- {"tipo":"uguale",
-  "sinistra":"diff(exp(-x**2/(4*k*t))/sqrt(4*pi*k*t),t)-k*diff(exp(-x**2/(4*k*t))/sqrt(4*pi*k*t),x,2)",
-  "vale":"0","ipotesi":{"k":"positive","t":"positive","x":"positive"},
-  "dove":"08","appare":"soddisfa l'equazione del calore"},
-
- {"tipo":"integrale","espr":"sin(u*t)/u","var":"u","da":"-oo","a":"oo","vale":"pi",
-  "ipotesi":{"t":"positive","u":"real"},
-  "dove":"08","appare":"\\pi\\,\\mathrm{sgn}(t)"},
-
- {"tipo":"uguale","sinistra":"diff(sin(w*t)/w,t)","vale":"cos(w*t)",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"03","appare":"\\cos(\\omega_0 t)"},
-
- {"tipo":"uguale","sinistra":"(x-1/x)*diff(x-4/x,x)-diff(x-1/x,x)*(x-4/x)",
-  "vale":"(2*(x-1/x))*diff((x-4/x)/2,x)-diff(2*(x-1/x),x)*((x-4/x)/2)",
-  "ipotesi":{"x":"positive"},
-  "dove":"03","appare":"non cambia"},
-
- {"tipo":"uguale","sinistra":"1/(y**2*(6/y))","vale":"1/(6*y)",
-  "ipotesi":{"y":"positive"},
-  "dove":"04","appare":"\\dfrac{1}{6y}"},
-
- {"tipo":"uguale","sinistra":"(x-1)*(3*x**2-4*x-4)","vale":"3*x**3-7*x**2+4",
-  "ipotesi":{"x":"positive"},
-  "dove":"04","appare":"(x-1)(3x^2-4x-4)"},
-
- {"tipo":"uguale","sinistra":"y*(x-2)/(2*y**2)","vale":"(x-2)/(2*y)",
-  "ipotesi":{"x":"positive","y":"positive"},
-  "dove":"06","appare":"\\dfrac{x-2}{2y}"},
-
- {"tipo":"uguale","sinistra":"1/(I*w+k*q**2)","vale":"-I/(w-I*k*q**2)",
-  "ipotesi":{"w":"real","k":"positive","q":"real"},
-  "dove":"08","appare":"-\\dfrac{i}{\\omega-i\\kappa q^2}"},
-
- {"tipo":"uguale","sinistra":"-I/2-I/2","vale":"-I",
-  "dove":"08","appare":"-i\\,\\theta(t)"},
-
- {"tipo":"uguale","sinistra":"1/(y**2*(-1/y))","vale":"-1/y",
-  "ipotesi":{"y":"positive"},
-  "dove":"06","appare":"-\\dfrac1y"},
-
- {"tipo":"integrale","espr":"log(x)/x**2","var":"x","indefinito":true,
-  "vale":"-(1+log(x))/x","ipotesi":{"x":"positive"},
-  "dove":"06","appare":"-\\frac{1+\\log x}{x}"},
-
- {"tipo":"uguale","sinistra":"diff(sin(w*t)/w,t,2)+w**2*(sin(w*t)/w)","vale":"0",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"09","appare":"\\frac{\\sin(\\omega_0t)}{\\omega_0}"},
-
- {"tipo":"uguale","sinistra":"(1/(2*pi))*(-2*pi*I)","vale":"-I",
-  "dove":"09","appare":"\\frac{1}{2\\pi}(-2\\pi i)=-i"},
-
- {"tipo":"uguale","sinistra":"(1/(2*pi))*(-2*pi*I)*(I*sin(w*t)/w)","vale":"sin(w*t)/w",
-  "ipotesi":{"w":"positive","t":"positive"},
-  "dove":"09","appare":"\\frac{i\\sin(\\omega_0t)}{\\omega_0}"},
-
- {"tipo":"simbolico","dove":"05","appare":"f_1(x)",
-  "perche":"e' il NOME della soluzione dell'omogenea selezionata dalla condizione a sinistra, non un valore: l'esistenza e' argomentata nella riga sopra (spazio di dimensione 2, una condizione lineare ne fissa una direzione)"},
-
- {"tipo":"simbolico","dove":"06","appare":"\\delta'(x-1)",
-  "perche":"e' la sorgente dell'appello del 04/07/2023, cioe' un DATO del problema: non un risultato che questa tappa calcola"},
-
- {"tipo":"simbolico","dove":"06","appare":"-\\varphi'(1)",
-  "perche":"e' la definizione stessa di derivata distribuzionale, dimostrata in me-09: qui viene citata, non ricavata"},
-
- {"tipo":"simbolico","dove":"07","appare":"(G*j)(x)",
-  "perche":"e' la notazione della convoluzione introdotta in questa riga: un nome dato all'integrale scritto immediatamente prima"},
-
- {"tipo":"simbolico","dove":"07","appare":"\\mathcal L[G]\\cdot\\mathcal L[j]",
-  "perche":"e' il teorema di convoluzione, dimostrato in me-10b e qui richiamato per nome"},
-
- {"tipo":"simbolico","dove":"08","appare":"\\theta(t)",
-  "perche":"la funzione di Heaviside e' un oggetto, non un valore numerico: cio' che questa tappa AFFERMA e' che l'integrale si annulla per t<0, ed e' asserito dall'integrale col segno (\\pi\\,\\mathrm{sgn}(t))"},
-
- {"tipo":"simbolico","dove":"08","appare":"\\hat G=1",
-  "perche":"l'1 a destra e' la trasformata di Fourier della delta con la convenzione dichiarata due righe sopra: identita' distribuzionale di me-09, non un conto di questa tappa"},
-
- {"tipo":"simbolico","dove":"09","appare":"\\omega_0^2x(t)=j(t)",
-  "perche":"j(t) e' la forzante generica dell'oscillatore, cioe' il dato dell'equazione: non un risultato"},
-
- {"tipo":"simbolico","dove":"09","appare":"\\delta(t)",
-  "perche":"e' la sorgente puntiforme che DEFINISCE la funzione di Green: compare come membro destro dell'equazione che si sta impostando"},
-
- {"tipo":"simbolico","dove":"10","appare":"f''(x)-f(x)=e^{x}",
-  "perche":"e' l'enunciato dell'esercizio (1), un DATO non un risultato"},
-
- {"tipo":"simbolico","dove":"10","appare":"\\lambda^2=1",
-  "perche":"e' l'equazione caratteristica dell'omogenea f''-f=0, non un'identita' da verificare: lambda=+-1 e' la sua soluzione"},
-
- {"tipo":"uguale","sinistra":"sinh(x)*cosh(x-1)-cosh(x)*sinh(x-1)","vale":"sinh(1)",
-  "ipotesi":{"x":"real"},
-  "nota":"formula di sottrazione degli iperbolici: sinh(x)cosh(x-1)-cosh(x)sinh(x-1)=sinh(x-(x-1))=sinh(1)",
-  "dove":"10","appare":"\\sinh x\\cosh(x-1)-\\cosh x\\sinh(x-1)=\\sinh\\big(x-(x-1)\\big)=\\sinh 1"},
-
- {"tipo":"simbolico","dove":"10","appare":"f''(x)+f(x)=j(x)",
-  "perche":"e' l'enunciato dell'esercizio (2), un DATO non un risultato"},
-
- {"tipo":"simbolico","dove":"10","appare":"omogenea è f''+f=0",
-  "perche":"e' l'equazione omogenea dell'esercizio (2), la premessa non un conto"},
-
- {"tipo":"uguale","sinistra":"x*1-1*(x-1)","vale":"1",
-  "ipotesi":{"x":"real"},
-  "dove":"10","appare":"W=x\\cdot1-1\\cdot(x-1)"},
-
- {"tipo":"integrale","espr":"F*sin(omega0*u)/omega0","var":"u","da":"0","a":"t",
-  "vale":"F*(1-cos(omega0*t))/omega0**2",
-  "ipotesi":{"omega0":"positive","t":"real","F":"real"},
-  "dove":"10","appare":"x(t)=\\frac{F}{\\omega_0}\\int_0^t\\sin(\\omega_0u)\\,du=\\frac{F}{\\omega_0^2}\\big[1-\\cos(\\omega_0t)\\big]"},
-
- {"tipo":"uguale","sinistra":"sin(0)","vale":"0",
-  "dove":"10","appare":"\\dot x(0)=\\frac{F}{\\omega_0}\\sin(0)=0"},
-
- {"tipo":"simbolico","dove":"11","appare":"\\ddot G+\\omega_0^2G=\\delta",
-  "perche":"e' l'equazione DEFINITORIA della funzione di Green dell'oscillatore sull'asse dei tempi, citata nella risposta del collaudo finale: non un conto di questo movimento"}
+ {
+  "tipo": "integrale",
+  "espr": "DiracDelta(x-y)*j(y)",
+  "var": "y",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "j(x)",
+  "ipotesi": {
+   "j": "funzione",
+   "x": "real",
+   "y": "real"
+  },
+  "nota": "proprieta' del setaccio della delta: e' il passo che dimostra D f(x)=j(x)",
+  "dove": "01",
+  "appare": "D f(x)=\\int dy\\;\\big[D_xG(x,y)\\big]\\,j(y)=\\int dy\\;\\delta(x-y)\\,j(y)=j(x)"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "combinazioni \\alpha f(a)+\\beta f'(a)=0",
+  "perche": "e' la FORMA GENERALE di una condizione al bordo omogenea lineare, non un'identita' da verificare"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "a_2(x)\\,\\partial_x^2G+a_1(x)\\,\\partial_xG+a_0(x)\\,G=\\delta(x-y)",
+  "perche": "e' la DEFINIZIONE del problema che si sta impostando (D_x G = delta), non un conto da verificare"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "DiracDelta(x-y)",
+  "var": "x",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "1",
+  "ipotesi": {
+   "y": "real"
+  },
+  "dove": "02",
+  "appare": "\\int\\delta(x-y)dx=1"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "a_2(y)\\Big[\\partial_xG(y^+,y)-\\partial_xG(y^-,y)\\Big]=1",
+  "perche": "e' il risultato dell'integrazione dell'equazione nel limite epsilon->0 appena descritta in prosa (continuita' dei termini di ordine basso + l'integrale della delta asserito sopra): non e' un'identita' indipendente da verificare su G generica"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "\\partial_xG\\big|_{y^-}^{y^+}=\\frac{1}{a_2(y)}",
+  "perche": "segue dividendo per a_2(y) la relazione precedente: stessa asserzione, nessun conto nuovo"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "\\partial_xG=B(y)f_2'(x)",
+  "perche": "e' la SOSTITUZIONE dell'ansatz G=B(y)f_2(x) per x>y: definisce la derivata dell'ansatz, non calcola un valore indipendente"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "C(y)\\Big[f_1(y)f_2'(y)-f_1'(y)f_2(y)\\Big]=\\frac{1}{a_2(y)}",
+  "perche": "e' la stessa relazione del salto riscritta dopo la sostituzione A=Cf_2, B=Cf_1: nessun conto nuovo rispetto alle due asserzioni precedenti"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "l'equazione a_2\\partial_x^2G+\\dots=\\delta",
+  "perche": "e' la stessa equazione DEFINITORIA di questa tappa, abbreviata nella domanda del collaudo"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "la condizione è a_2(y)[\\partial_xG]=1",
+  "perche": "e' la stessa relazione del salto, richiamata nella domanda del collaudo"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "x^2f''=\\delta'(x-1)",
+  "perche": "e' la sorgente di un esercizio d'appello citato (04/07/2023), un DATO del problema non un conto di questa tappa"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(x-1/x)*diff(x-4/x,x)-diff(x-1/x,x)*(x-4/x)",
+  "vale": "6/x",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "04",
+  "appare": "W(x)=\\dfrac{6}{x}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(x-4/x)/6*(x**3/3-x+Rational(2,3))+(x-1/x)/6*(-Rational(16,3)-x**3/3+4*x)",
+  "vale": "(3*x**3-7*x**2+4)/(9*x)",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "04",
+  "appare": "\\dfrac{3x^{3}-7x^{2}+4}{9x}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x**2*diff((3*x**3-7*x**2+4)/(9*x),x,2)+x*diff((3*x**3-7*x**2+4)/(9*x),x)-(3*x**3-7*x**2+4)/(9*x)",
+  "vale": "x**2",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "04",
+  "appare": "rimette in piedi $x^{2}$"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(3*x**3-7*x**2+4)/(9*x)",
+  "var": "x",
+  "a": "1",
+  "vale": "0",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "04",
+  "appare": "f(1)=0"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(3*x**3-7*x**2+4)/(9*x)",
+  "var": "x",
+  "a": "2",
+  "vale": "0",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "04",
+  "appare": "f(2)=0"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(a*x+b/x)+3*(a-b/x**2)",
+  "var": "x",
+  "a": "1",
+  "vale": "4*a-2*b",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "05",
+  "appare": "4a-2b=0"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(a*x+b/x)-6*(a-b/x**2)",
+  "var": "x",
+  "a": "2",
+  "vale": "-4*a+2*b",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "05",
+  "appare": "-4a+2b=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(x+2/x)*diff(x+2/x,x)-diff(x+2/x,x)*(x+2/x)",
+  "vale": "0",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "05",
+  "appare": "W\\equiv0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x*diff(x-2,x)-diff(x,x)*(x-2)",
+  "vale": "2",
+  "dove": "06",
+  "appare": "W=2"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(x/2-1)-(-3*x/2)",
+  "var": "x",
+  "a": "1",
+  "vale": "1",
+  "dove": "06",
+  "appare": "salta di esattamente $1$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(exp(x)-exp(2*x))*diff(exp(x)-exp(2*(x-1)),x)-diff(exp(x)-exp(2*x),x)*(exp(x)-exp(2*(x-1)))",
+  "vale": "(exp(2)-1)*exp(3*x-2)",
+  "dove": "06",
+  "appare": "(e^{2}-1)e^{3x-2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x**l*diff(x**(-l-1),x)-diff(x**l,x)*x**(-l-1)",
+  "vale": "-(2*l+1)/x**2",
+  "ipotesi": {
+   "x": "positive",
+   "l": "positive"
+  },
+  "dove": "06",
+  "appare": "-\\dfrac{2\\ell+1}{x^{2}}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "log(x)*diff(Integer(1),x)-diff(log(x),x)*Integer(1)",
+  "vale": "-1/x",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "06",
+  "appare": "W(x)=-\\dfrac{1}{x}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "log(x)/x**2",
+  "var": "x",
+  "da": "1",
+  "a": "2",
+  "vale": "(1-log(2))/2",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "06",
+  "appare": "\\dfrac{1-\\log 2}{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x**2*diff(1-1/x,x,2)+x*diff(1-1/x,x)+1/x",
+  "vale": "0",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "06",
+  "appare": "f(x)=1-\\dfrac{1}{x}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-s*t)*sin(w*t)/w",
+  "var": "t",
+  "da": "0",
+  "a": "oo",
+  "vale": "1/(s**2+w**2)",
+  "ipotesi": {
+   "s": "positive",
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "07",
+  "appare": "\\dfrac{1}{s^{2}+\\omega_0^{2}}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(sin(w*t)/w,t,2)+w**2*(sin(w*t)/w)",
+  "vale": "0",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "09",
+  "appare": "risolve l'omogenea per $t>0$"
+ },
+ {
+  "tipo": "limite",
+  "espr": "sin(w*t)/w",
+  "var": "t",
+  "a": "0",
+  "vale": "0",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "09",
+  "appare": "parte da fermo"
+ },
+ {
+  "tipo": "limite",
+  "espr": "cos(w*t)",
+  "var": "t",
+  "a": "0",
+  "vale": "1",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "09",
+  "appare": "riceve un calcio di velocità $1$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1/(2*w)*(1/(u+w)-1/(u-w))",
+  "vale": "-1/(u**2-w**2)",
+  "ipotesi": {
+   "w": "positive"
+  },
+  "dove": "09",
+  "appare": "\\dfrac{1}{\\omega+\\omega_0}-\\dfrac{1}{\\omega-\\omega_0}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(I*exp(-I*w*t)/(2*w),t,2)+w**2*(I*exp(-I*w*t)/(2*w))",
+  "vale": "0",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "09",
+  "appare": "anche $G_F$ risolve l'omogenea lontano dall'origine"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-k*q**2*t)*cos(q*x)/(2*pi)",
+  "var": "q",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "exp(-x**2/(4*k*t))/sqrt(4*pi*k*t)",
+  "ipotesi": {
+   "k": "positive",
+   "t": "positive",
+   "x": "positive",
+   "q": "real"
+  },
+  "dove": "08",
+  "appare": "\\sqrt{4\\pi\\kappa t}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(exp(-x**2/(4*k*t))/sqrt(4*pi*k*t),t)-k*diff(exp(-x**2/(4*k*t))/sqrt(4*pi*k*t),x,2)",
+  "vale": "0",
+  "ipotesi": {
+   "k": "positive",
+   "t": "positive",
+   "x": "positive"
+  },
+  "dove": "08",
+  "appare": "soddisfa l'equazione del calore"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "sin(u*t)/u",
+  "var": "u",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "pi",
+  "ipotesi": {
+   "t": "positive",
+   "u": "real"
+  },
+  "dove": "08",
+  "appare": "\\pi\\,\\mathrm{sgn}(t)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(sin(w*t)/w,t)",
+  "vale": "cos(w*t)",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "03",
+  "appare": "\\cos(\\omega_0 t)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(x-1/x)*diff(x-4/x,x)-diff(x-1/x,x)*(x-4/x)",
+  "vale": "(2*(x-1/x))*diff((x-4/x)/2,x)-diff(2*(x-1/x),x)*((x-4/x)/2)",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "03",
+  "appare": "non cambia"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1/(y**2*(6/y))",
+  "vale": "1/(6*y)",
+  "ipotesi": {
+   "y": "positive"
+  },
+  "dove": "04",
+  "appare": "\\dfrac{1}{6y}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(x-1)*(3*x**2-4*x-4)",
+  "vale": "3*x**3-7*x**2+4",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "04",
+  "appare": "(x-1)(3x^2-4x-4)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "y*(x-2)/(2*y**2)",
+  "vale": "(x-2)/(2*y)",
+  "ipotesi": {
+   "x": "positive",
+   "y": "positive"
+  },
+  "dove": "06",
+  "appare": "\\dfrac{x-2}{2y}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1/(I*w+k*q**2)",
+  "vale": "-I/(w-I*k*q**2)",
+  "ipotesi": {
+   "w": "real",
+   "k": "positive",
+   "q": "real"
+  },
+  "dove": "08",
+  "appare": "-\\dfrac{i}{\\omega-i\\kappa q^2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "-I/2-I/2",
+  "vale": "-I",
+  "dove": "08",
+  "appare": "-i\\,\\theta(t)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1/(y**2*(-1/y))",
+  "vale": "-1/y",
+  "ipotesi": {
+   "y": "positive"
+  },
+  "dove": "06",
+  "appare": "-\\dfrac1y"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "log(x)/x**2",
+  "var": "x",
+  "indefinito": true,
+  "vale": "-(1+log(x))/x",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "06",
+  "appare": "-\\frac{1+\\log x}{x}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(sin(w*t)/w,t,2)+w**2*(sin(w*t)/w)",
+  "vale": "0",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "09",
+  "appare": "\\frac{\\sin(\\omega_0t)}{\\omega_0}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1/(2*pi))*(-2*pi*I)",
+  "vale": "-I",
+  "dove": "09",
+  "appare": "\\frac{1}{2\\pi}(-2\\pi i)=-i"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1/(2*pi))*(-2*pi*I)*(I*sin(w*t)/w)",
+  "vale": "sin(w*t)/w",
+  "ipotesi": {
+   "w": "positive",
+   "t": "positive"
+  },
+  "dove": "09",
+  "appare": "\\frac{i\\sin(\\omega_0t)}{\\omega_0}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05",
+  "appare": "f_1(x)",
+  "perche": "e' il NOME della soluzione dell'omogenea selezionata dalla condizione a sinistra, non un valore: l'esistenza e' argomentata nella riga sopra (spazio di dimensione 2, una condizione lineare ne fissa una direzione)"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "\\delta'(x-1)",
+  "perche": "e' la sorgente dell'appello del 04/07/2023, cioe' un DATO del problema: non un risultato che questa tappa calcola"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "-\\varphi'(1)",
+  "perche": "e' la definizione stessa di derivata distribuzionale, dimostrata in me-09: qui viene citata, non ricavata"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "07",
+  "appare": "(G*j)(x)",
+  "perche": "e' la notazione della convoluzione introdotta in questa riga: un nome dato all'integrale scritto immediatamente prima"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "07",
+  "appare": "\\mathcal L[G]\\cdot\\mathcal L[j]",
+  "perche": "e' il teorema di convoluzione, dimostrato in me-10b e qui richiamato per nome"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "08",
+  "appare": "\\theta(t)",
+  "perche": "la funzione di Heaviside e' un oggetto, non un valore numerico: cio' che questa tappa AFFERMA e' che l'integrale si annulla per t<0, ed e' asserito dall'integrale col segno (\\pi\\,\\mathrm{sgn}(t))"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "08",
+  "appare": "\\hat G=1",
+  "perche": "l'1 a destra e' la trasformata di Fourier della delta con la convenzione dichiarata due righe sopra: identita' distribuzionale di me-09, non un conto di questa tappa"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "09",
+  "appare": "\\omega_0^2x(t)=j(t)",
+  "perche": "j(t) e' la forzante generica dell'oscillatore, cioe' il dato dell'equazione: non un risultato"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "09",
+  "appare": "\\delta(t)",
+  "perche": "e' la sorgente puntiforme che DEFINISCE la funzione di Green: compare come membro destro dell'equazione che si sta impostando"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "f''(x)-f(x)=e^{x}",
+  "perche": "e' l'enunciato dell'esercizio (1), un DATO non un risultato"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "\\lambda^2=1",
+  "perche": "e' l'equazione caratteristica dell'omogenea f''-f=0, non un'identita' da verificare: lambda=+-1 e' la sua soluzione"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "sinh(x)*cosh(x-1)-cosh(x)*sinh(x-1)",
+  "vale": "sinh(1)",
+  "ipotesi": {
+   "x": "real"
+  },
+  "nota": "formula di sottrazione degli iperbolici: sinh(x)cosh(x-1)-cosh(x)sinh(x-1)=sinh(x-(x-1))=sinh(1)",
+  "dove": "10",
+  "appare": "\\sinh x\\cosh(x-1)-\\cosh x\\sinh(x-1)=\\sinh\\big(x-(x-1)\\big)=\\sinh 1"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "f''(x)+f(x)=j(x)",
+  "perche": "e' l'enunciato dell'esercizio (2), un DATO non un risultato"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "omogenea è f''+f=0",
+  "perche": "e' l'equazione omogenea dell'esercizio (2), la premessa non un conto"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x*1-1*(x-1)",
+  "vale": "1",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "10",
+  "appare": "W=x\\cdot1-1\\cdot(x-1)"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "F*sin(omega0*u)/omega0",
+  "var": "u",
+  "da": "0",
+  "a": "t",
+  "vale": "F*(1-cos(omega0*t))/omega0**2",
+  "ipotesi": {
+   "omega0": "positive",
+   "t": "real",
+   "F": "real"
+  },
+  "dove": "10",
+  "appare": "x(t)=\\frac{F}{\\omega_0}\\int_0^t\\sin(\\omega_0u)\\,du=\\frac{F}{\\omega_0^2}\\big[1-\\cos(\\omega_0t)\\big]"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "sin(0)",
+  "vale": "0",
+  "dove": "10",
+  "appare": "\\dot x(0)=\\frac{F}{\\omega_0}\\sin(0)=0"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "11",
+  "appare": "\\ddot G+\\omega_0^2G=\\delta",
+  "perche": "e' l'equazione DEFINITORIA della funzione di Green dell'oscillatore sull'asse dei tempi, citata nella risposta del collaudo finale: non un conto di questo movimento"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "Derivative(DiracDelta(x),x)",
+  "var": "x",
+  "da": "-1",
+  "a": "1",
+  "vale": "0",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "10",
+  "appare": "[u']=-\\int\\delta'=0"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "10",
+  "appare": "B(1-\\xi)-A\\xi=-1",
+  "perche": "e' l'equazione di giunzione postulata per questo esercizio (il segno dalla sorgente -u''=delta'), non un'identita' indipendente"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "-(-A)-A",
+  "vale": "0",
+  "nota": "[u']=-B-A=0 sostituendo B=-A: -(-A)-A=A-A=0",
+  "dove": "10",
+  "appare": "-B-A=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "-A*(1-xi)-A*xi",
+  "vale": "-A",
+  "ipotesi": {
+   "xi": "real"
+  },
+  "nota": "sostituendo B=-A nella condizione B(1-xi)-A*xi, il risultato e' -A per ogni xi: quindi -A=-1 da' A=1",
+  "dove": "10",
+  "appare": "-A(1-\\xi)-A\\xi=-1"
+ }
 ]
 CONTROLLO*/
 
@@ -904,6 +1308,22 @@ CONTROLLO*/
 /* ---------------- 10 · ESERCIZI ---------------- */
 { num:'10', title:'Esercizi — tocca a te', meta:'quattro esercizi con soluzione, dal tipo d’appello al propagatore',
   blocchi:[
+  {t:'esercizio', title:'Green con sorgente $\\delta^{\\prime}$: $-u^{\\prime\\prime}=\\delta^{\\prime}(x-\\xi)$ su $[0,1]$',
+   src:'IL trabocchetto n.1 dell’esame',
+   testo:R`Risolvere $-u''(x)=\delta'(x-\xi)$ su $[0,1]$ con $u(0)=u(1)=0$, imponendo le condizioni di giunzione corrette.`,
+   steps:[
+    {label:'Struttura e condizioni', body:R`<p>Fuori da $\xi$: $u''=0$, quindi $u=Ax$ per $x\lt\xi$ e $u=B(1-x)$ per $x\gt\xi$ (già compatibili col bordo). Le giunzioni, per una sorgente $\delta^{\prime}$, sono: <b>salto della funzione</b> e <b>continuità della derivata</b>.</p>`},
+    {label:'Imponi', body:R`<p>Integrando $-u''=\delta'$ una volta: $-u'=\delta+\text{cost}$, quindi $u$ <b>salta</b>; integrando due volte, $[u']=-\int\delta'=0$.
+    <ul>
+    <li>$[u]=u(\xi^+)-u(\xi^-)=B(1-\xi)-A\xi=-1$ (il segno viene da $-u''=\delta'$: si ricava confrontando con la soluzione di controllo $u=-H(x-\xi)$);</li>
+    <li>$[u']=-B-A=0$, cioè $B=-A$.</li>
+    </ul>
+    Sostituendo: $-A(1-\xi)-A\xi=-1$, cioè $-A=-1$, $A=1$ e $B=-1$:
+    $$u(x)=\begin{cases}x,& x\lt\xi\\ -(1-x),& x\gt\xi\end{cases}$$</p>`},
+    {label:'Controlla il disegno', body:R`<p>Le due rette hanno la <b>stessa pendenza</b> ($1$ da entrambe le parti: derivata continua ✓) e la funzione <b>salta</b> di $-1$ attraversando $\xi$ ✓. Ai bordi: $u(0)=0$ ✓, $u(1)=0$ ✓. $\blacksquare$
+    <p>Confronta col disegno della tappa 03 (sorgente $\delta$): lì angolo senza salto, qui salto senza angolo. <b>Sono le due firme grafiche da riconoscere a colpo d&rsquo;occhio.</b></p>`}
+   ],
+   nota:R`Se all&rsquo;esame ti trovi a imporre «continuità + salto della derivata» su una sorgente $\delta^{\prime}$, fermati: stai risolvendo l&rsquo;esercizio dell&rsquo;anno scorso. La regola sicura è <b>integrare l&rsquo;equazione attorno al punto</b> e leggere cosa salta, invece di ricordare a memoria.`},
   {t:'esercizio', title:'(1) Il tipo d’appello, senza rete',
    src:'palestra — costruita sul modello dei cinque appelli',
    testo:R`Risolvere $f''(x)-f(x)=e^{x}$ su $x\in[0,1]$ con $f(0)=f(1)=0$, col metodo delle funzioni di Green.`,

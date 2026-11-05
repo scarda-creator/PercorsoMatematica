@@ -76,6 +76,19 @@
     font-size:.93rem;color:var(--muted);}
   .plot-leggi b{color:#7ab8e0;}
   .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
   .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
   .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
   .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
@@ -280,222 +293,590 @@ identita:  scomporre in frequenze, e cosa si conserva mentre lo fai
 copre:     F.3 — Analisi di Fourier: serie di Fourier, trasformata di Fourier, trasformata di Laplace
 serve:     me-08 (me-08-l2-basi-di-funzioni.html), me-09 (15-distribuzioni.html)
 apre:      me-10b (me-10b-trasformata-di-laplace.html), me-11 (17-edp.html)
-fonti:     note Esposito §10.1-10.4 (pp. 57-68: Dirichlet, Dini, Gibbs)
-fonti:     Calogero, Dispense, cap. su serie di Fourier (p. 187 e segg.: Parseval, forma trigonometrica/esponenziale, Fejér, Gibbs)
-generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+strumenti: disuguaglianza-di-schwarz · spazio-di-hilbert · trasformata-di-fourier · successione-di-cauchy
+fonti:     note Esposito paragrafo 10.1-10.4 (pp. 57-68: Dirichlet, Dini, Gibbs)
+fonti:     Calogero, Dispense, cap. su serie di Fourier (p. 187 e segg.: Parseval, forma trigonometrica/esponenziale, Fejer, Gibbs)
+generata:  2026-11-06 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"somma","espr":"1/n**2","var":"n","da":"1","a":"oo","vale":"pi**2/6",
-  "ipotesi":{"n":"integer"},
-  "dove":"00","appare":"\\sum 1/n^2=\\pi^2/6"},
-
- {"tipo":"somma","espr":"1/n**4","var":"n","da":"1","a":"oo","vale":"pi**4/90",
-  "ipotesi":{"n":"integer"},
-  "dove":"00","appare":"\\sum 1/n^4=\\pi^4/90"},
-
- {"tipo":"uguale","sinistra":"(a-0)**2+(0-b)**2","vale":"a**2+b**2",
-  "ipotesi":{"a":"real","b":"real"},
-  "nota":"istanza concreta (f,g ortogonali come vettori (a,0),(0,b)) del teorema di Pitagora",
-  "dove":"01","appare":"\\lVert f+g\\rVert^2=\\lVert f\\rVert^2+\\lVert g\\rVert^2"},
-
- {"tipo":"uguale","sinistra":"cj-cj","vale":"0",
-  "dove":"01","appare":"\\langle f,e_j\\rangle-\\langle f,e_j\\rangle=0"},
-
- {"tipo":"uguale","sinistra":"(f-Pf)+(Pf-w)","vale":"f-w",
-  "ipotesi":{"f":"real","Pf":"real","w":"real"},
-  "dove":"01","appare":"f-w=(f-Pf)+(Pf-w)"},
-
- {"tipo":"simbolico","dove":"01",
-  "appare":"\\int_{-\\pi}^{\\pi}(f-S_Nf)\\cos kx\\,dx=0",
-  "perche":"e' l'istanza L^2/Fourier dell'ortogonalita' residuo-sottospazio appena dimostrata in generale in questa tappa (langle f-Pf,e_jrangle=0): non un conto indipendente"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"\\lVert f-S_Nf\\rVert^2=\\langle f-S_Nf,\\,f-S_Nf\\rangle",
-  "perche":"e' la DEFINIZIONE della norma come prodotto scalare di un vettore con se stesso, non un conto"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"\\lVert f-S_Nf\\rVert^2=\\lVert f\\rVert^2-\\sum_{n\\le N}|c_n|^2",
-  "perche":"e' il risultato della derivazione descritta in prosa subito sopra (espansione del prodotto scalare + Pitagora sui termini ortonormali): non un'identita' indipendente da riverificare"},
-
- {"tipo":"simbolico","dove":"02",
-  "appare":"vale l&rsquo;<b>identità di Parseval</b> \\displaystyle\\sum_n|c_n|^2=\\lVert f\\rVert^2",
-  "perche":"e' l'enunciato dell'identita' di Parseval, una delle tre condizioni equivalenti di completezza del sistema: una definizione, non un conto"},
-
- {"tipo":"integrale","espr":"sin(3*x)**2","var":"x","da":"-pi","a":"pi","vale":"pi",
-  "nota":"istanza concreta n=3 (simboli() non porta positive+integer insieme)",
-  "dove":"02","appare":"\\int_{-\\pi}^{\\pi}\\sin^2nx\\,dx=\\pi"},
-
- {"tipo":"integrale","espr":"1","var":"x","da":"-1","a":"1","vale":"2",
-  "dove":"02","appare":"\\int_{-1}^{1}1\\,dx"},
-
- {"tipo":"uguale","sinistra":"(1/sqrt(2))*integrate(x,(x,-1,1))","vale":"0",
-  "dove":"02","appare":"\\frac{1}{\\sqrt2}\\int_{-1}^1x\\,dx"},
-
- {"tipo":"integrale","espr":"x**2","var":"x","da":"-1","a":"1","vale":"Rational(2,3)",
-  "dove":"02","appare":"\\int_{-1}^1x^2dx"},
-
- {"tipo":"integrale","espr":"x**2*sqrt(Rational(3,2))*x","var":"x","da":"-1","a":"1","vale":"0",
-  "nota":"<x^2,e_1> con e_1=sqrt(3/2)x",
-  "dove":"02","appare":"\\langle x^2,e_1\\rangle=0"},
-
- {"tipo":"uguale","sinistra":"(1/sqrt(2))*Rational(2,3)","vale":"sqrt(2)/3",
-  "dove":"02","appare":"\\frac{1}{\\sqrt2}\\cdot\\frac23"},
-
- {"tipo":"uguale","sinistra":"x**2-(sqrt(2)/3)*(1/sqrt(2))","vale":"x**2-Rational(1,3)",
-  "ipotesi":{"x":"real"},
-  "dove":"02","appare":"x^2-\\frac{\\sqrt2}{3}\\cdot\\frac{1}{\\sqrt2}=x^2-\\frac13"},
-
- {"tipo":"uguale","sinistra":"Rational(2,5)-Rational(4,9)+Rational(2,9)","vale":"Rational(8,45)",
-  "dove":"02","appare":"\\frac25-\\frac49+\\frac29=\\frac{8}{45}"},
-
- {"tipo":"integrale","espr":"sin(3*x)**2","var":"x","da":"-pi","a":"pi","vale":"pi",
-  "nota":"stesso conto di sopra (istanza n=3), qui a sostegno della normalizzazione citata in tappa 03",
-  "dove":"03","appare":"\\lVert\\cos nx\\rVert^2=\\lVert\\sin nx\\rVert^2=\\pi"},
-
- {"tipo":"integrale","espr":"1","var":"x","da":"-pi","a":"pi","vale":"2*pi",
-  "dove":"03","appare":"\\lVert 1\\rVert^2=2\\pi"},
-
- {"tipo":"simbolico","dove":"03",
-  "appare":"c_{-n}=\\overline{c_n}",
-  "perche":"e' la proprieta' di simmetria coniugata dei coefficienti di Fourier per f reale, citata come proprieta' nota: non un conto"},
-
- {"tipo":"simbolico","dove":"03",
-  "appare":"\\dfrac1\\pi\\displaystyle\\int_{-\\pi}^{\\pi}|f|^2dx=\\dfrac{a_0^2}{2}+\\sum_{n\\ge1}(a_n^2+b_n^2)",
-  "perche":"e' l'identita' di Parseval in forma reale, citata nel formulario come proprieta' nota (equivalente alla forma esponenziale di me-10): non un conto"},
-
- {"tipo":"simbolico","dove":"03",
-  "appare":"cioè anche f(-\\pi)=f(\\pi)",
-  "perche":"e' la condizione di periodicita' richiesta per la convergenza uniforme, una premessa non un conto"},
-
- {"tipo":"uguale","sinistra":"(pi+(-pi))/2","vale":"0",
-  "dove":"03","appare":"\\frac{\\pi+(-\\pi)}{2}"},
-
- {"tipo":"simbolico","dove":"04","appare":"f(-x)=-f(x)",
-  "perche":"e' la DEFINIZIONE di funzione dispari, non un conto"},
-
- {"tipo":"integrale","espr":"sign(x)*cos(2*x)","var":"x","da":"-pi","a":"pi","vale":"0",
-  "nota":"istanza concreta (n=2, f=onda quadra dispari) di a_n=0 per f dispari",
-  "dove":"04","appare":"\\frac1\\pi\\int_{-\\pi}^{\\pi}f\\cos nx\\,dx=0\\quad\\forall n"},
-
- {"tipo":"uguale","sinistra":"(2/pi)*integrate(sin(3*x),(x,0,pi))","vale":"(2/(3*pi))*(1-(-1)**3)",
-  "nota":"istanza concreta n=3 della formula generale b_n=(2/n pi)(1-(-1)^n)",
-  "dove":"04","appare":"\\frac{2}{n\\pi}\\big(1-\\cos n\\pi\\big)=\\frac{2}{n\\pi}\\big(1-(-1)^n\\big)"},
-
- {"tipo":"uguale","sinistra":"(2/pi)*integrate(sin(2*x),(x,0,pi))","vale":"(2/(2*pi))*(1-(-1)**2)",
-  "nota":"istanza concreta n=2 (pari): il risultato e' zero",
-  "dove":"04","appare":"Quindi b_n=0 per n <b>pari</b>"},
-
- {"tipo":"uguale","sinistra":"Rational(1,1)/pi*(2*pi)","vale":"2",
-  "dove":"04","appare":"\\dfrac1\\pi\\displaystyle\\int_{-\\pi}^{\\pi}|f|^2dx=\\dfrac1\\pi\\cdot2\\pi=2"},
-
- {"tipo":"uguale","sinistra":"(2/(3*pi))*(1-(-1)**3)","vale":"Rational(4,3)/pi",
-  "dove":"04","appare":"b_{2k+1}=\\frac{4}{(2k+1)\\pi}"},
-
- {"tipo":"uguale","sinistra":"Rational(2,16)*pi**2","vale":"pi**2/8",
-  "dove":"04","appare":"\\sum_{k=0}^{\\infty}\\frac{1}{(2k+1)^2}=\\frac{2\\pi^2}{16}=\\frac{\\pi^2}{8}"},
-
- {"tipo":"uguale","sinistra":"Rational(3,4)*(pi**2/6)","vale":"pi**2/8",
-  "dove":"04","appare":"\\frac34\\sum\\frac1{n^2}=\\frac{\\pi^2}{8}"},
-
- {"tipo":"somma","espr":"1/n**2","var":"n","da":"1","a":"oo","vale":"pi**2/6",
-  "ipotesi":{"n":"integer"},
-  "dove":"04","appare":"\\sum\\frac1{n^2}=\\frac{\\pi^2}{6}"},
-
- {"tipo":"uguale","sinistra":"(2/pi)*(-pi*cos(2*pi)/2)","vale":"2*(-1)**(2+1)/2",
-  "nota":"istanza concreta n=2 della formula b_n per f(x)=x, per parti",
-  "dove":"04","appare":"\\frac2\\pi\\cdot\\frac{-\\pi\\cos n\\pi}{n}=\\frac{2(-1)^{n+1}}{n}"},
-
- {"tipo":"uguale","sinistra":"Rational(1,1)/pi*(2*pi**3/3)","vale":"2*pi**2/3",
-  "dove":"04","appare":"\\dfrac1\\pi\\displaystyle\\int_{-\\pi}^{\\pi}x^2dx=\\dfrac1\\pi\\cdot\\dfrac{2\\pi^3}{3}=\\dfrac{2\\pi^2}{3}"},
-
- {"tipo":"integrale","espr":"exp(I*(-3)*t)+exp(I*(-2)*t)+exp(I*(-1)*t)+1+exp(I*t)+exp(I*2*t)+exp(I*3*t)",
-  "var":"t","da":"-pi","a":"pi","vale":"2*pi","ipotesi":{"t":"real"},
-  "dove":"05","appare":"\\int_{-\\pi}^{\\pi}D_N(t)\\,dt=1"},
-
- {"tipo":"uguale","sinistra":"sin((3+Rational(1,2))*t)/sin(t/2)",
-  "vale":"exp(I*(-3)*t)+exp(I*(-2)*t)+exp(I*(-1)*t)+1+exp(I*t)+exp(I*2*t)+exp(I*3*t)",
-  "ipotesi":{"t":"real"},
-  "dove":"05","appare":"\\frac{\\sin\\big[(N+\\tfrac12)t\\big]}{\\sin(t/2)}"},
-
- {"tipo":"limite","espr":"Integral(x*sin(n*x),(x,0,1)).doit()","var":"n","a":"oo","vale":"0",
-  "ipotesi":{"n":"positive","x":"real"},
-  "dove":"05","appare":"\\to0"},
-
- {"tipo":"uguale","sinistra":"(1+0)/2","vale":"Rational(1,2)",
-  "dove":"06","appare":"\\frac{1+0}{2}=\\frac12"},
-
- {"tipo":"integrale","espr":"exp(-2*Abs(x))","var":"x","da":"-oo","a":"oo","vale":"1",
-  "ipotesi":{"x":"real"},
-  "dove":"06","appare":"\\int e^{-2|x|}dx=1"},
-
- {"tipo":"integrale","espr":"4/(1+k**2)**2/(2*pi)","var":"k","da":"-oo","a":"oo","vale":"1",
-  "ipotesi":{"k":"real"},
-  "dove":"06","appare":"\\frac{1}{2\\pi}\\int\\frac{4}{(1+k^2)^2}dk=1"},
-
- {"tipo":"uguale","sinistra":"I/(k+I)","vale":"1/(1-I*k)",
-  "ipotesi":{"k":"real"},
-  "dove":"06","appare":"\\dfrac{1}{1-ik}"},
-
- {"tipo":"uguale","sinistra":"1/(1+I*0)**2+1/(1-I*0)","vale":"2",
-  "dove":"06","appare":"\\hat f(0)=1+1=2"},
-
- {"tipo":"simbolico","dove":"06","appare":"\\widehat{f'}(k)=ik\\,\\hat f(k)",
-  "perche":"e' una proprieta' generale della trasformata, enunciata per simboli: non un valore calcolato su una funzione particolare"},
-
- {"tipo":"simbolico","dove":"06","appare":"\\widehat{f*g}=\\hat f\\cdot\\hat g",
-  "perche":"teorema di convoluzione enunciato in forma simbolica, dimostrato altrove (me-10b, me-12)"},
-
- {"tipo":"integrale","espr":"exp(-s*x)","var":"x","da":"0","a":"oo","vale":"1/s",
-  "ipotesi":{"s":"positive","x":"real"},
-  "dove":"06","appare":"\\frac1s"},
-
- {"tipo":"integrale","espr":"x*exp(-s*x)","var":"x","da":"0","a":"oo","vale":"1/s**2",
-  "ipotesi":{"s":"positive","x":"real"},
-  "dove":"06","appare":"\\frac1{s^2}"},
-
- {"tipo":"uguale","sinistra":"(-diff(1/s,s)).subs(s,1+I*k)","vale":"1/(1+I*k)**2",
-  "ipotesi":{"s":"positive","k":"real"},
-  "dove":"06","appare":"\\dfrac{1}{(1+ik)^2}"},
-
- {"tipo":"simbolico","dove":"05","appare":"\\ell=\\frac{f(x^+)+f(x^-)}{2}",
-  "perche":"e' la DEFINIZIONE del valore a cui si applica il teorema del Dini nei punti di salto, non un conto"},
-
- {"tipo":"uguale","sinistra":"(1/pi)*integrate(x**2,(x,-pi,pi))","vale":"2*pi**2/3",
-  "dove":"07","appare":"a_0=\\frac1\\pi\\int_{-\\pi}^{\\pi}x^2dx=\\frac{2\\pi^2}{3}"},
-
- {"tipo":"uguale","sinistra":"Rational(2,3)*pi**2/2","vale":"pi**2/3",
-  "dove":"07","appare":"\\frac{a_0}{2}=\\frac{\\pi^2}{3}"},
-
- {"tipo":"uguale","sinistra":"(2/pi)*integrate(x**2*cos(2*x),(x,0,pi))","vale":"4*(-1)**2/2**2",
-  "nota":"istanza concreta n=2 della formula a_n per doppia integrazione per parti",
-  "dove":"07","appare":"a_n=\\frac2\\pi\\int_0^{\\pi}x^2\\cos nx\\,dx=\\frac2\\pi\\left(\\left[\\frac{x^2\\sin nx}{n}\\right]_0^\\pi-\\frac2n\\int_0^\\pi x\\sin nx\\,dx\\right)=\\frac{4(-1)^n}{n^2}"},
-
- {"tipo":"somma","espr":"(-1)**n/n**2","var":"n","da":"1","a":"oo","vale":"-pi**2/12",
-  "ipotesi":{"n":"integer"},
-  "nota":"0=pi^2/3+4*sum((-1)^n/n^2) implica sum((-1)^n/n^2)=-pi^2/12, cioe' sum((-1)^(n+1)/n^2)=pi^2/12",
-  "dove":"07","appare":"da cui \\sum_{n\\ge1}\\frac{(-1)^{n+1}}{n^2}=\\frac{\\pi^2}{12}"},
-
- {"tipo":"simbolico","dove":"07","appare":"si ritrova invece \\sum1/n^2=\\pi^2/6",
-  "perche":"e' il risultato del problema di Basilea gia' verificato nella tappa 04 di questo stesso nucleo (serie sum 1/n^2): citato qui per confronto, non riverificato"},
-
- {"tipo":"uguale","sinistra":"(1/pi)*integrate(x**4,(x,-pi,pi))","vale":"2*pi**4/5",
-  "dove":"07","appare":"\\frac1\\pi\\int_{-\\pi}^{\\pi}x^4dx=\\frac{2\\pi^4}{5}"},
-
- {"tipo":"uguale","sinistra":"(Rational(2,3)*pi**2)**2/2","vale":"Rational(2,9)*pi**4",
-  "nota":"a_0^2/2 con a_0=2pi^2/3: il primo addendo del lato destro di Parseval",
-  "dove":"07","appare":"\\frac{a_0^2}{2}+\\sum a_n^2=\\frac{2\\pi^4}{9}+16\\sum\\frac1{n^4}"},
-
- {"tipo":"somma","espr":"1/n**4","var":"n","da":"1","a":"oo","vale":"pi**4/90",
-  "ipotesi":{"n":"integer"},
-  "dove":"07","appare":"\\sum_{n=1}^{\\infty}\\frac1{n^4}=\\frac{\\pi^4}{90}"},
-
- {"tipo":"simbolico","dove":"08","appare":"e \\sum|c_n|^2=\\lVert f\\rVert^2",
-  "perche":"e' l'identita' di Parseval, dimostrata nella tappa 02 di questo stesso nucleo: citata qui nel riassunto introduttivo, non un conto nuovo"},
-
- {"tipo":"simbolico","dove":"08","appare":"Parseval \\sum|c_n|^2=1",
-  "perche":"e' Parseval applicato a uno stato quantistico normalizzato (norma 1 per convenzione fisica): citazione, non un conto di questo nucleo"}
+ {
+  "tipo": "somma",
+  "espr": "1/n**2",
+  "var": "n",
+  "da": "1",
+  "a": "oo",
+  "vale": "pi**2/6",
+  "ipotesi": {
+   "n": "integer"
+  },
+  "dove": "00",
+  "appare": "\\sum 1/n^2=\\pi^2/6"
+ },
+ {
+  "tipo": "somma",
+  "espr": "1/n**4",
+  "var": "n",
+  "da": "1",
+  "a": "oo",
+  "vale": "pi**4/90",
+  "ipotesi": {
+   "n": "integer"
+  },
+  "dove": "00",
+  "appare": "\\sum 1/n^4=\\pi^4/90"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(a-0)**2+(0-b)**2",
+  "vale": "a**2+b**2",
+  "ipotesi": {
+   "a": "real",
+   "b": "real"
+  },
+  "nota": "istanza concreta (f,g ortogonali come vettori (a,0),(0,b)) del teorema di Pitagora",
+  "dove": "01",
+  "appare": "\\lVert f+g\\rVert^2=\\lVert f\\rVert^2+\\lVert g\\rVert^2"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "cj-cj",
+  "vale": "0",
+  "dove": "01",
+  "appare": "\\langle f,e_j\\rangle-\\langle f,e_j\\rangle=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(f-Pf)+(Pf-w)",
+  "vale": "f-w",
+  "ipotesi": {
+   "f": "real",
+   "Pf": "real",
+   "w": "real"
+  },
+  "dove": "01",
+  "appare": "f-w=(f-Pf)+(Pf-w)"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "\\int_{-\\pi}^{\\pi}(f-S_Nf)\\cos kx\\,dx=0",
+  "perche": "e' l'istanza L^2/Fourier dell'ortogonalita' residuo-sottospazio appena dimostrata in generale in questa tappa (langle f-Pf,e_jrangle=0): non un conto indipendente"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "\\lVert f-S_Nf\\rVert^2=\\langle f-S_Nf,\\,f-S_Nf\\rangle",
+  "perche": "e' la DEFINIZIONE della norma come prodotto scalare di un vettore con se stesso, non un conto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "\\lVert f-S_Nf\\rVert^2=\\lVert f\\rVert^2-\\sum_{n\\le N}|c_n|^2",
+  "perche": "e' il risultato della derivazione descritta in prosa subito sopra (espansione del prodotto scalare + Pitagora sui termini ortonormali): non un'identita' indipendente da riverificare"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "vale l&rsquo;<b>identità di Parseval</b> \\displaystyle\\sum_n|c_n|^2=\\lVert f\\rVert^2",
+  "perche": "e' l'enunciato dell'identita' di Parseval, una delle tre condizioni equivalenti di completezza del sistema: una definizione, non un conto"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "sin(3*x)**2",
+  "var": "x",
+  "da": "-pi",
+  "a": "pi",
+  "vale": "pi",
+  "nota": "istanza concreta n=3 (simboli() non porta positive+integer insieme)",
+  "dove": "02",
+  "appare": "\\int_{-\\pi}^{\\pi}\\sin^2nx\\,dx=\\pi"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "1",
+  "var": "x",
+  "da": "-1",
+  "a": "1",
+  "vale": "2",
+  "dove": "02",
+  "appare": "\\int_{-1}^{1}1\\,dx"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1/sqrt(2))*integrate(x,(x,-1,1))",
+  "vale": "0",
+  "dove": "02",
+  "appare": "\\frac{1}{\\sqrt2}\\int_{-1}^1x\\,dx"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "x**2",
+  "var": "x",
+  "da": "-1",
+  "a": "1",
+  "vale": "Rational(2,3)",
+  "dove": "02",
+  "appare": "\\int_{-1}^1x^2dx"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "x**2*sqrt(Rational(3,2))*x",
+  "var": "x",
+  "da": "-1",
+  "a": "1",
+  "vale": "0",
+  "nota": "<x^2,e_1> con e_1=sqrt(3/2)x",
+  "dove": "02",
+  "appare": "\\langle x^2,e_1\\rangle=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1/sqrt(2))*Rational(2,3)",
+  "vale": "sqrt(2)/3",
+  "dove": "02",
+  "appare": "\\frac{1}{\\sqrt2}\\cdot\\frac23"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x**2-(sqrt(2)/3)*(1/sqrt(2))",
+  "vale": "x**2-Rational(1,3)",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "02",
+  "appare": "x^2-\\frac{\\sqrt2}{3}\\cdot\\frac{1}{\\sqrt2}=x^2-\\frac13"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(2,5)-Rational(4,9)+Rational(2,9)",
+  "vale": "Rational(8,45)",
+  "dove": "02",
+  "appare": "\\frac25-\\frac49+\\frac29=\\frac{8}{45}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "sin(3*x)**2",
+  "var": "x",
+  "da": "-pi",
+  "a": "pi",
+  "vale": "pi",
+  "nota": "stesso conto di sopra (istanza n=3), qui a sostegno della normalizzazione citata in tappa 03",
+  "dove": "03",
+  "appare": "\\lVert\\cos nx\\rVert^2=\\lVert\\sin nx\\rVert^2=\\pi"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "1",
+  "var": "x",
+  "da": "-pi",
+  "a": "pi",
+  "vale": "2*pi",
+  "dove": "03",
+  "appare": "\\lVert 1\\rVert^2=2\\pi"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "03",
+  "appare": "c_{-n}=\\overline{c_n}",
+  "perche": "e' la proprieta' di simmetria coniugata dei coefficienti di Fourier per f reale, citata come proprieta' nota: non un conto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "03",
+  "appare": "\\dfrac1\\pi\\displaystyle\\int_{-\\pi}^{\\pi}|f|^2dx=\\dfrac{a_0^2}{2}+\\sum_{n\\ge1}(a_n^2+b_n^2)",
+  "perche": "e' l'identita' di Parseval in forma reale, citata nel formulario come proprieta' nota (equivalente alla forma esponenziale di me-10): non un conto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "03",
+  "appare": "cioè anche f(-\\pi)=f(\\pi)",
+  "perche": "e' la condizione di periodicita' richiesta per la convergenza uniforme, una premessa non un conto"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(pi+(-pi))/2",
+  "vale": "0",
+  "dove": "03",
+  "appare": "\\frac{\\pi+(-\\pi)}{2}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "04",
+  "appare": "f(-x)=-f(x)",
+  "perche": "e' la DEFINIZIONE di funzione dispari, non un conto"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "sign(x)*cos(2*x)",
+  "var": "x",
+  "da": "-pi",
+  "a": "pi",
+  "vale": "0",
+  "nota": "istanza concreta (n=2, f=onda quadra dispari) di a_n=0 per f dispari",
+  "dove": "04",
+  "appare": "\\frac1\\pi\\int_{-\\pi}^{\\pi}f\\cos nx\\,dx=0\\quad\\forall n"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/pi)*integrate(sin(3*x),(x,0,pi))",
+  "vale": "(2/(3*pi))*(1-(-1)**3)",
+  "nota": "istanza concreta n=3 della formula generale b_n=(2/n pi)(1-(-1)^n)",
+  "dove": "04",
+  "appare": "\\frac{2}{n\\pi}\\big(1-\\cos n\\pi\\big)=\\frac{2}{n\\pi}\\big(1-(-1)^n\\big)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/pi)*integrate(sin(2*x),(x,0,pi))",
+  "vale": "(2/(2*pi))*(1-(-1)**2)",
+  "nota": "istanza concreta n=2 (pari): il risultato e' zero",
+  "dove": "04",
+  "appare": "Quindi b_n=0 per n <b>pari</b>"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,1)/pi*(2*pi)",
+  "vale": "2",
+  "dove": "04",
+  "appare": "\\dfrac1\\pi\\displaystyle\\int_{-\\pi}^{\\pi}|f|^2dx=\\dfrac1\\pi\\cdot2\\pi=2"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/(3*pi))*(1-(-1)**3)",
+  "vale": "Rational(4,3)/pi",
+  "dove": "04",
+  "appare": "b_{2k+1}=\\frac{4}{(2k+1)\\pi}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(2,16)*pi**2",
+  "vale": "pi**2/8",
+  "dove": "04",
+  "appare": "\\sum_{k=0}^{\\infty}\\frac{1}{(2k+1)^2}=\\frac{2\\pi^2}{16}=\\frac{\\pi^2}{8}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(3,4)*(pi**2/6)",
+  "vale": "pi**2/8",
+  "dove": "04",
+  "appare": "\\frac34\\sum\\frac1{n^2}=\\frac{\\pi^2}{8}"
+ },
+ {
+  "tipo": "somma",
+  "espr": "1/n**2",
+  "var": "n",
+  "da": "1",
+  "a": "oo",
+  "vale": "pi**2/6",
+  "ipotesi": {
+   "n": "integer"
+  },
+  "dove": "04",
+  "appare": "\\sum\\frac1{n^2}=\\frac{\\pi^2}{6}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/pi)*(-pi*cos(2*pi)/2)",
+  "vale": "2*(-1)**(2+1)/2",
+  "nota": "istanza concreta n=2 della formula b_n per f(x)=x, per parti",
+  "dove": "04",
+  "appare": "\\frac2\\pi\\cdot\\frac{-\\pi\\cos n\\pi}{n}=\\frac{2(-1)^{n+1}}{n}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(1,1)/pi*(2*pi**3/3)",
+  "vale": "2*pi**2/3",
+  "dove": "04",
+  "appare": "\\dfrac1\\pi\\displaystyle\\int_{-\\pi}^{\\pi}x^2dx=\\dfrac1\\pi\\cdot\\dfrac{2\\pi^3}{3}=\\dfrac{2\\pi^2}{3}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(I*(-3)*t)+exp(I*(-2)*t)+exp(I*(-1)*t)+1+exp(I*t)+exp(I*2*t)+exp(I*3*t)",
+  "var": "t",
+  "da": "-pi",
+  "a": "pi",
+  "vale": "2*pi",
+  "ipotesi": {
+   "t": "real"
+  },
+  "dove": "05",
+  "appare": "\\int_{-\\pi}^{\\pi}D_N(t)\\,dt=1"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "sin((3+Rational(1,2))*t)/sin(t/2)",
+  "vale": "exp(I*(-3)*t)+exp(I*(-2)*t)+exp(I*(-1)*t)+1+exp(I*t)+exp(I*2*t)+exp(I*3*t)",
+  "ipotesi": {
+   "t": "real"
+  },
+  "dove": "05",
+  "appare": "\\frac{\\sin\\big[(N+\\tfrac12)t\\big]}{\\sin(t/2)}"
+ },
+ {
+  "tipo": "limite",
+  "espr": "Integral(x*sin(n*x),(x,0,1)).doit()",
+  "var": "n",
+  "a": "oo",
+  "vale": "0",
+  "ipotesi": {
+   "n": "positive",
+   "x": "real"
+  },
+  "dove": "05",
+  "appare": "\\to0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1+0)/2",
+  "vale": "Rational(1,2)",
+  "dove": "06",
+  "appare": "\\frac{1+0}{2}=\\frac12"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-2*Abs(x))",
+  "var": "x",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "1",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "06",
+  "appare": "\\int e^{-2|x|}dx=1"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "4/(1+k**2)**2/(2*pi)",
+  "var": "k",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "1",
+  "ipotesi": {
+   "k": "real"
+  },
+  "dove": "06",
+  "appare": "\\frac{1}{2\\pi}\\int\\frac{4}{(1+k^2)^2}dk=1"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "I/(k+I)",
+  "vale": "1/(1-I*k)",
+  "ipotesi": {
+   "k": "real"
+  },
+  "dove": "06",
+  "appare": "\\dfrac{1}{1-ik}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "1/(1+I*0)**2+1/(1-I*0)",
+  "vale": "2",
+  "dove": "06",
+  "appare": "\\hat f(0)=1+1=2"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "\\widehat{f'}(k)=ik\\,\\hat f(k)",
+  "perche": "e' una proprieta' generale della trasformata, enunciata per simboli: non un valore calcolato su una funzione particolare"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "\\widehat{f*g}=\\hat f\\cdot\\hat g",
+  "perche": "teorema di convoluzione enunciato in forma simbolica, dimostrato altrove (me-10b, me-12)"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-s*x)",
+  "var": "x",
+  "da": "0",
+  "a": "oo",
+  "vale": "1/s",
+  "ipotesi": {
+   "s": "positive",
+   "x": "real"
+  },
+  "dove": "06",
+  "appare": "\\frac1s"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "x*exp(-s*x)",
+  "var": "x",
+  "da": "0",
+  "a": "oo",
+  "vale": "1/s**2",
+  "ipotesi": {
+   "s": "positive",
+   "x": "real"
+  },
+  "dove": "06",
+  "appare": "\\frac1{s^2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(-diff(1/s,s)).subs(s,1+I*k)",
+  "vale": "1/(1+I*k)**2",
+  "ipotesi": {
+   "s": "positive",
+   "k": "real"
+  },
+  "dove": "06",
+  "appare": "\\dfrac{1}{(1+ik)^2}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05",
+  "appare": "\\ell=\\frac{f(x^+)+f(x^-)}{2}",
+  "perche": "e' la DEFINIZIONE del valore a cui si applica il teorema del Dini nei punti di salto, non un conto"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1/pi)*integrate(x**2,(x,-pi,pi))",
+  "vale": "2*pi**2/3",
+  "dove": "07",
+  "appare": "a_0=\\frac1\\pi\\int_{-\\pi}^{\\pi}x^2dx=\\frac{2\\pi^2}{3}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Rational(2,3)*pi**2/2",
+  "vale": "pi**2/3",
+  "dove": "07",
+  "appare": "\\frac{a_0}{2}=\\frac{\\pi^2}{3}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/pi)*integrate(x**2*cos(2*x),(x,0,pi))",
+  "vale": "4*(-1)**2/2**2",
+  "nota": "istanza concreta n=2 della formula a_n per doppia integrazione per parti",
+  "dove": "07",
+  "appare": "a_n=\\frac2\\pi\\int_0^{\\pi}x^2\\cos nx\\,dx=\\frac2\\pi\\left(\\left[\\frac{x^2\\sin nx}{n}\\right]_0^\\pi-\\frac2n\\int_0^\\pi x\\sin nx\\,dx\\right)=\\frac{4(-1)^n}{n^2}"
+ },
+ {
+  "tipo": "somma",
+  "espr": "(-1)**n/n**2",
+  "var": "n",
+  "da": "1",
+  "a": "oo",
+  "vale": "-pi**2/12",
+  "ipotesi": {
+   "n": "integer"
+  },
+  "nota": "0=pi^2/3+4*sum((-1)^n/n^2) implica sum((-1)^n/n^2)=-pi^2/12, cioe' sum((-1)^(n+1)/n^2)=pi^2/12",
+  "dove": "07",
+  "appare": "da cui \\sum_{n\\ge1}\\frac{(-1)^{n+1}}{n^2}=\\frac{\\pi^2}{12}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "07",
+  "appare": "si ritrova invece \\sum1/n^2=\\pi^2/6",
+  "perche": "e' il risultato del problema di Basilea gia' verificato nella tappa 04 di questo stesso nucleo (serie sum 1/n^2): citato qui per confronto, non riverificato"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(1/pi)*integrate(x**4,(x,-pi,pi))",
+  "vale": "2*pi**4/5",
+  "dove": "07",
+  "appare": "\\frac1\\pi\\int_{-\\pi}^{\\pi}x^4dx=\\frac{2\\pi^4}{5}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Rational(2,3)*pi**2)**2/2",
+  "vale": "Rational(2,9)*pi**4",
+  "nota": "a_0^2/2 con a_0=2pi^2/3: il primo addendo del lato destro di Parseval",
+  "dove": "07",
+  "appare": "\\frac{a_0^2}{2}+\\sum a_n^2=\\frac{2\\pi^4}{9}+16\\sum\\frac1{n^4}"
+ },
+ {
+  "tipo": "somma",
+  "espr": "1/n**4",
+  "var": "n",
+  "da": "1",
+  "a": "oo",
+  "vale": "pi**4/90",
+  "ipotesi": {
+   "n": "integer"
+  },
+  "dove": "07",
+  "appare": "\\sum_{n=1}^{\\infty}\\frac1{n^4}=\\frac{\\pi^4}{90}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "08",
+  "appare": "e \\sum|c_n|^2=\\lVert f\\rVert^2",
+  "perche": "e' l'identita' di Parseval, dimostrata nella tappa 02 di questo stesso nucleo: citata qui nel riassunto introduttivo, non un conto nuovo"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "08",
+  "appare": "Parseval \\sum|c_n|^2=1",
+  "perche": "e' Parseval applicato a uno stato quantistico normalizzato (norma 1 per convenzione fisica): citazione, non un conto di questo nucleo"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06b",
+  "appare": "\\int|f|^2=\\frac{1}{2\\pi}\\int|\\hat f|^2",
+  "perche": "e' il teorema di Plancherel, citato nel formulario come proprieta' nota (dimostrato altrove): non e' un conto da rifare qui"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06b",
+  "appare": "\\widehat{f*g}=\\hat f\\,\\hat g",
+  "perche": "e' il teorema di convoluzione per Fourier, citato nel formulario: non e' un conto da rifare qui"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-x**2)*exp(-I*k*(x+c))",
+  "var": "x",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "exp(-I*k*c)*sqrt(pi)*exp(-k**2/4)",
+  "ipotesi": {
+   "k": "real",
+   "c": "real"
+  },
+  "nota": "verifica la proprieta' di traslazione su una gaussiana concreta: FT di f(x-c) e' e^{-ikc} volte la FT di f",
+  "dove": "06b",
+  "appare": "\\widehat{f(x-a)}=e^{-ika}\\hat f(k)"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-a*x**2)*exp(-I*k*x)",
+  "var": "x",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "sqrt(pi/a)*exp(-k**2/(4*a))",
+  "ipotesi": {
+   "a": "positive",
+   "k": "real"
+  },
+  "dove": "06b",
+  "appare": "\\widehat{e^{-ax^2}}=\\sqrt{\\pi/a}\\,e^{-k^2/4a}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "exp(-alpha*x)*exp(-I*k*x)",
+  "var": "x",
+  "da": "0",
+  "a": "oo",
+  "vale": "1/(alpha+I*k)",
+  "ipotesi": {
+   "alpha": "positive",
+   "k": "positive"
+  },
+  "nota": "k preso positivo come caso rappresentativo (lo stesso espediente del semipiano in me-10b): la formula vale per k reale qualsiasi",
+  "dove": "06b",
+  "appare": "\\widehat{H(x)e^{-\\alpha x}}=\\frac{1}{\\alpha+ik}"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06b",
+  "appare": "2\\pi\\varphi(0) per la formula di inversione",
+  "perche": "segue applicando la formula di inversione (riga 'definizione' del formulario) nel punto x=0: non e' un conto indipendente"
+ }
 ]
 CONTROLLO*/
 
@@ -809,6 +1190,36 @@ CONTROLLO*/
     a:R`Perché se $f$ ha $m$ derivate sommabili, allora $k^m\hat f(k)$ è ancora limitata (e tende a zero per Riemann-Lebesgue): quindi $\hat f$ decade almeno come $|k|^{-m}$. <b>Regolarità nello spazio ↔ decadimento nelle frequenze</b>, ed è la stessa affermazione letta da due lati. Il caso estremo è la gaussiana, liscia ovunque, la cui trasformata è ancora una gaussiana; il caso opposto è la $\delta$, che è «tutta spigolo» e ha trasformata costante — non decade affatto.`},
    {q:R`Nel calcolo sopra, come si trova $\int_0^\infty xe^{-(1+ik)x}dx$ senza integrare per parti?`,
     a:R`Derivando rispetto al parametro: $\int_0^\infty e^{-sx}dx=\frac1s$, quindi $\int_0^\infty xe^{-sx}dx=-\frac{d}{ds}\frac1s=\frac1{s^2}$, con $s=1+ik$. <b>La derivazione sotto il segno è il trucco che negli scritti fa risparmiare più tempo</b>, e vale ogni volta che compare una potenza di $x$ moltiplicata per un esponenziale.`}
+  ]}
+]},
+
+/* ---------------- 06b · IL FORMULARIO ---------------- */
+{ num:'06b', title:'Il formulario della trasformata, e lindeterminazione', meta:'da $L^1$ a $L^2$ alle temperate · derivata ↔ moltiplicazione · convoluzione ↔ prodotto · indeterminazione',
+  blocchi:[
+  {t:'gram', title:'Convenzione e proprietà (il formulario)', rows:[
+   [R`definizione`, R`$\hat f(k)=\displaystyle\int_{-\infty}^{+\infty}f(x)e^{-ikx}dx$, inversa $f(x)=\frac{1}{2\pi}\displaystyle\int\hat f(k)e^{ikx}dk$. <b>Dichiarare la convenzione</b>: i fattori $2\pi$ cambiano da testo a testo.`],
+   [R`dominî`, R`su $L^1$: $\hat f$ continua e infinitesima (Riemann–Lebesgue). Su $L^2$: si estende per densità, ed è un&rsquo;<b>isometria</b> a meno di $2\pi$ (<b>Plancherel</b>): $\int|f|^2=\frac{1}{2\pi}\int|\hat f|^2$. Su $\mathcal{S}'$ (temperate): definita per dualità, $\langle\hat T,\varphi\rangle=\langle T,\hat\varphi\rangle$ — è così che si trasformano $\delta$, costanti, polinomi.`],
+   [R`derivata`, R`$\widehat{f'}=ik\,\hat f$ e $\widehat{xf}=i\,\dfrac{d\hat f}{dk}$. <b>La derivazione diventa moltiplicazione</b>: è la ragione per cui Fourier risolve le equazioni differenziali lineari a coefficienti costanti.`],
+   [R`convoluzione`, R`$\widehat{f*g}=\hat f\,\hat g$, con $(f*g)(x)=\int f(y)g(x-y)dy$. E viceversa: prodotto $\to$ convoluzione. <b>Cardine</b>: la risposta di un sistema lineare invariante per traslazioni è una convoluzione con la Green.`],
+   [R`traslazione`, R`$\widehat{f(x-a)}=e^{-ika}\hat f(k)$: traslare è moltiplicare per una fase.`],
+   [R`coppie notevoli`, R`$\hat\delta=1$; $\hat1=2\pi\delta$; $\widehat{e^{-ax^2}}=\sqrt{\pi/a}\,e^{-k^2/4a}$ (la gaussiana è autofunzione per $a=1/2$); $\widehat{H(x)e^{-\alpha x}}=\frac{1}{\alpha+ik}$.`]
+  ]},
+  {t:'plot', title:'Indeterminazione: stringere in $x$ è allargare in $k$',
+   intro:R`Gaussiane $e^{-ax^2}$ e le loro trasformate $\sqrt{\pi/a}\,e^{-k^2/4a}$ per $a=0{,}5$ (larga) e $a=4$ (stretta). Le due colonne sono lo stesso oggetto in due basi.`,
+   plots:[
+    {kind:'func2d', xr:[-4,4], yr:[-0.2,1.15], height:300, w:430,
+     title:'in x: stretta (a=4) contro larga (a=0.5)',
+     curves:[{f:'exp(-0.5*x*x)', col:'#5eead4', width:2.2, label:'a=0.5 (larga)'},
+             {f:'exp(-4*x*x)', col:'#b98cff', width:2.2, label:'a=4 (stretta)'}]},
+    {kind:'func2d', xr:[-8,8], yr:[-0.5,2.7], height:300, w:430,
+     title:'in k: le larghezze si scambiano',
+     curves:[{f:'sqrt(PI/0.5)*exp(-x*x/2)', col:'#5eead4', width:2.2, label:'trasf. di a=0.5'},
+             {f:'sqrt(PI/4)*exp(-x*x/16)', col:'#b98cff', width:2.2, label:'trasf. di a=4'}]}
+   ],
+   leggi:R`La gaussiana viola è <b>stretta in $x$</b> e la sua trasformata è <b>larga in $k$</b>; per la verde è l&rsquo;opposto. Quantitativamente: larghezza in $x$ $\sim1/\sqrt a$, larghezza in $k$ $\sim\sqrt a$, quindi il <b>prodotto è costante</b> — non si possono stringere entrambe. Questo non è un fatto quantistico: è una <b>proprietà della trasformata di Fourier</b>, vera per qualunque segnale. Diventa il <b>principio di indeterminazione</b> nel momento in cui si postula che $\psi$ e la sua trasformata descrivano posizione e impulso, con $p=\hbar k$: allora $\Delta x\,\Delta p\ge\hbar/2$, e la gaussiana è il caso di <b>uguaglianza</b> (stato di minima indeterminazione). Da tenere per il nucleo me-07: la stessa struttura riappare come non-commutatività degli operatori $\hat x$ e $\hat p$.`},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché $\hat1=2\pi\delta$, e in che senso, visto che la costante $1$ non sta in $L^1$ né in $L^2$?`,
+    a:R`In senso <b>distribuzionale</b>: $1$ è una distribuzione <b>temperata</b>, e la sua trasformata si definisce per dualità. Il conto: $\langle\hat1,\varphi\rangle=\langle1,\hat\varphi\rangle=\int\hat\varphi(k)dk=2\pi\varphi(0)$ per la formula di inversione, quindi $\hat1=2\pi\delta$. <b>È il motivo per cui le distribuzioni servono</b>: senza, le onde piane $e^{ikx}$ — che non sono normalizzabili — resterebbero fuori dalla teoria, e con esse gli stati del continuo della meccanica quantistica.`}
   ]}
 ]},
 

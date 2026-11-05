@@ -76,6 +76,19 @@
     font-size:.93rem;color:var(--muted);}
   .plot-leggi b{color:#7ab8e0;}
   .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
   .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
   .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
   .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
@@ -278,91 +291,236 @@ id:        me-11 — ODE ed EDP della fisica
 identita:  onde, calore, Laplace: tre equazioni e tre comportamenti diversi — e le ODE da cui nascono
 copre:     F.4 — Metodi di risoluzione di equazioni differenziali: classificazione, ODE del primo e se...
 serve:     me-10 (09-hilbert-fourier.html)
-apre:      me-12 (da costruire)
-strumenti: residuo
-fonti:     Calogero cap. 7 §§7.2-7.3, pp. 244-249 (ODE lineari del secondo ordine, Wronskiano, funzione di Green) — per la tappa 01
-fonti:     Borsi §9.2 p. 120 (principio di massimo per l'equazione del calore) e §12.3, pp. 140-142 (calore, onde) — per le tappe 02-06. ATTENZIONE: la riga precedente di questo file dichiarava «note Esposito §13 (pp. 81-85)», ma il PDF delle note si interrompe a pagina 80 (vedi me-12, tappa 00): quelle pagine non esistono nel file. Citazione falsa, corretta il 2026-10-02. Petrini e Zanghì restano non verificabili (scansione/assente, vedi taccuino P6)
-generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+apre:      me-12 (me-12-funzioni-di-green.html)
+strumenti: residuo · equazione-delle-onde · funzione-armonica
+fonti:     note Esposito §13 (pp. 81-85); programma: Petrini 4.1-4.3 e 5.1-5.2, Calogero 7.2-7.3, Zanghì cap. 7 e 11
+generata:  2026-11-06 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"derivata","espr":"C*exp(-alpha*k**2*t)","rispetto":["t"],
-  "vale":"-alpha*k**2*C*exp(-alpha*k**2*t)",
-  "ipotesi":{"alpha":"real","k":"real","t":"real"},
-  "nota":"verifica che l'ansatz u0*e^{-alpha k^2 t} risolva l'ODE u_t=-alpha k^2 u, con C=u0(k)",
-  "dove":"04","appare":"\\hat u_0(k)\\,e^{-\\alpha k^2t}"},
-
- {"tipo":"integrale","espr":"x**2*exp(-x**2/(4*alpha*t))/sqrt(4*pi*alpha*t)",
-  "var":"x","da":"-oo","a":"oo","vale":"2*alpha*t",
-  "ipotesi":{"alpha":"positive","t":"positive"},
-  "nota":"varianza della gaussiana K_t: il secondo momento del nucleo del calore",
-  "dove":"04","appare":"\\langle x^2\\rangle=2\\alpha t"},
-
- {"tipo":"simbolico","dove":"05",
-  "appare":"\\big(\\partial_t-c\\partial_x\\big)\\big(\\partial_t+c\\partial_x\\big)u=0",
-  "perche":"e' l'equazione delle onde (il premesso, non un'identita' per u generica): la fattorizzazione dell'operatore e' vera per ogni u, ed e' quella che e' identicamente u_tt-c^2u_xx, non zero"},
-
- {"tipo":"uguale","sinistra":"(Rational(1,2)*exp(-9*t))/exp(-t)","vale":"Rational(1,2)*exp(-8*t)",
-  "ipotesi":{"t":"real"},
-  "dove":"07","appare":"\\dfrac{\\frac12e^{-9t}}{e^{-t}}=\\dfrac12e^{-8t}"},
-
- {"tipo":"integrale","espr":"x**2*exp(-x**2/(4*alpha*t))/sqrt(4*pi*alpha*t)",
-  "var":"x","da":"-oo","a":"oo","vale":"2*alpha*t",
-  "ipotesi":{"alpha":"positive","t":"positive"},
-  "nota":"stesso conto della tappa 04, qui citato come relazione di Einstein",
-  "dove":"08","appare":"\\langle x^2\\rangle=2\\alpha t"},
-
- {"tipo":"uguale","sinistra":"x*diff(1/x,x)-diff(x,x)*(1/x)","vale":"-2/x",
-  "ipotesi":{"x":"positive"},
-  "dove":"01","appare":"-\\frac2x"},
-
- {"tipo":"uguale","sinistra":"x**2*diff(x,x,2)+x*diff(x,x)-x","vale":"0",
-  "ipotesi":{"x":"positive"},
-  "dove":"01","appare":"x^2f''+xf'-f=0"},
-
- {"tipo":"uguale","sinistra":"exp(x)*diff(exp(2*x),x)-diff(exp(x),x)*exp(2*x)","vale":"exp(3*x)",
-  "ipotesi":{"x":"real"},
-  "dove":"01","appare":"W=e^{3x}"},
-
- {"tipo":"uguale","sinistra":"exp(3*x)*diff(x*exp(3*x),x)-diff(exp(3*x),x)*(x*exp(3*x))",
-  "vale":"exp(6*x)","ipotesi":{"x":"real"},
-  "dove":"01","appare":"W=e^{6x}"},
-
- {"tipo":"uguale","sinistra":"a*(a-1)+a-1","vale":"a**2-1",
-  "dove":"01","appare":"\\alpha^2-1=0"},
-
- {"tipo":"uguale","sinistra":"a*(a-1)+3*a+1","vale":"(a+1)**2",
-  "dove":"01","appare":"\\alpha^2+2\\alpha+1=(\\alpha+1)^2"},
-
- {"tipo":"limite","espr":"(exp(r*x)-exp(x))/(r-1)","var":"r","a":"1","vale":"x*exp(x)",
-  "ipotesi":{"x":"real"},
-  "dove":"01","appare":"\\frac{e^{r_2x}-e^{r_1x}}{r_2-r_1}"},
-
- {"tipo":"uguale","sinistra":"diff(sin(x),x,2)+sin(x)","vale":"0",
-  "ipotesi":{"x":"real"},
-  "dove":"02","appare":"\\sin x"},
-
- {"tipo":"simbolico","dove":"01","appare":"W'=-\\dfrac{a_1}{a_2}W",
-  "perche":"e' l'enunciato della formula di Abel per coefficienti generici a_1, a_2: un'identita' fra funzioni non specificate, verificata sull'esempio di Eulero due righe piu' sotto"},
-
- {"tipo":"simbolico","dove":"01","appare":"r^2+br+c=0",
-  "perche":"e' l'equazione caratteristica scritta con coefficienti generici b e c: la forma del metodo, non un conto"},
-
- {"tipo":"simbolico","dove":"01","appare":"a_2(x)f''+a_1(x)f'+a_0(x)f=j(x)",
-  "perche":"e' la forma generale dell'equazione che si sta studiando: l'impostazione del problema, non un risultato"},
-
- {"tipo":"simbolico","dove":"01","appare":"\\det\\begin{pmatrix}f_1&f_2\\\\ f_1'&f_2'\\end{pmatrix}",
-  "perche":"e' la riscrittura del wronskiano come determinante, cioe' una notazione equivalente della definizione data due simboli prima"},
-
- {"tipo":"simbolico","dove":"01","appare":"f''-6f'+9f=e^{2x}",
-  "perche":"e' il testo dell'esercizio d'appello citato: la sorgente e' un dato, e cio' che qui si calcola (base e wronskiano) e' asserito a parte"},
-
- {"tipo":"simbolico","dove":"02","appare":"\\partial_tu=\\kappa\\partial_x^2u",
-  "perche":"e' l'equazione del calore, cioe' l'oggetto di cui si discute la buona posizione: una definizione, non un valore"},
-
- {"tipo":"simbolico","dove":"02","appare":"e^{-\\kappa k^2t}",
-  "perche":"e' il fattore di evoluzione del modo k, ricavato in tappa 04 (il calore): qui viene richiamato per leggerne il segno, non ricalcolato"}
+ {
+  "tipo": "derivata",
+  "espr": "C*exp(-alpha*k**2*t)",
+  "rispetto": [
+   "t"
+  ],
+  "vale": "-alpha*k**2*C*exp(-alpha*k**2*t)",
+  "ipotesi": {
+   "alpha": "real",
+   "k": "real",
+   "t": "real"
+  },
+  "nota": "verifica che l'ansatz u0*e^{-alpha k^2 t} risolva l'ODE u_t=-alpha k^2 u, con C=u0(k)",
+  "dove": "04",
+  "appare": "\\hat u_0(k)\\,e^{-\\alpha k^2t}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "x**2*exp(-x**2/(4*alpha*t))/sqrt(4*pi*alpha*t)",
+  "var": "x",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "2*alpha*t",
+  "ipotesi": {
+   "alpha": "positive",
+   "t": "positive"
+  },
+  "nota": "varianza della gaussiana K_t: il secondo momento del nucleo del calore",
+  "dove": "04",
+  "appare": "\\langle x^2\\rangle=2\\alpha t"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05",
+  "appare": "\\big(\\partial_t-c\\partial_x\\big)\\big(\\partial_t+c\\partial_x\\big)u=0",
+  "perche": "e' l'equazione delle onde (il premesso, non un'identita' per u generica): la fattorizzazione dell'operatore e' vera per ogni u, ed e' quella che e' identicamente u_tt-c^2u_xx, non zero"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(Rational(1,2)*exp(-9*t))/exp(-t)",
+  "vale": "Rational(1,2)*exp(-8*t)",
+  "ipotesi": {
+   "t": "real"
+  },
+  "dove": "07",
+  "appare": "\\dfrac{\\frac12e^{-9t}}{e^{-t}}=\\dfrac12e^{-8t}"
+ },
+ {
+  "tipo": "integrale",
+  "espr": "x**2*exp(-x**2/(4*alpha*t))/sqrt(4*pi*alpha*t)",
+  "var": "x",
+  "da": "-oo",
+  "a": "oo",
+  "vale": "2*alpha*t",
+  "ipotesi": {
+   "alpha": "positive",
+   "t": "positive"
+  },
+  "nota": "stesso conto della tappa 04, qui citato come relazione di Einstein",
+  "dove": "08",
+  "appare": "\\langle x^2\\rangle=2\\alpha t"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x*diff(1/x,x)-diff(x,x)*(1/x)",
+  "vale": "-2/x",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "01",
+  "appare": "-\\frac2x"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "x**2*diff(x,x,2)+x*diff(x,x)-x",
+  "vale": "0",
+  "ipotesi": {
+   "x": "positive"
+  },
+  "dove": "01",
+  "appare": "x^2f''+xf'-f=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "exp(x)*diff(exp(2*x),x)-diff(exp(x),x)*exp(2*x)",
+  "vale": "exp(3*x)",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "01",
+  "appare": "W=e^{3x}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "exp(3*x)*diff(x*exp(3*x),x)-diff(exp(3*x),x)*(x*exp(3*x))",
+  "vale": "exp(6*x)",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "01",
+  "appare": "W=e^{6x}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "a*(a-1)+a-1",
+  "vale": "a**2-1",
+  "dove": "01",
+  "appare": "\\alpha^2-1=0"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "a*(a-1)+3*a+1",
+  "vale": "(a+1)**2",
+  "dove": "01",
+  "appare": "\\alpha^2+2\\alpha+1=(\\alpha+1)^2"
+ },
+ {
+  "tipo": "limite",
+  "espr": "(exp(r*x)-exp(x))/(r-1)",
+  "var": "r",
+  "a": "1",
+  "vale": "x*exp(x)",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "01",
+  "appare": "\\frac{e^{r_2x}-e^{r_1x}}{r_2-r_1}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(sin(x),x,2)+sin(x)",
+  "vale": "0",
+  "ipotesi": {
+   "x": "real"
+  },
+  "dove": "02",
+  "appare": "\\sin x"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "W'=-\\dfrac{a_1}{a_2}W",
+  "perche": "e' l'enunciato della formula di Abel per coefficienti generici a_1, a_2: un'identita' fra funzioni non specificate, verificata sull'esempio di Eulero due righe piu' sotto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "r^2+br+c=0",
+  "perche": "e' l'equazione caratteristica scritta con coefficienti generici b e c: la forma del metodo, non un conto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "a_2(x)f''+a_1(x)f'+a_0(x)f=j(x)",
+  "perche": "e' la forma generale dell'equazione che si sta studiando: l'impostazione del problema, non un risultato"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "\\det\\begin{pmatrix}f_1&f_2\\\\ f_1'&f_2'\\end{pmatrix}",
+  "perche": "e' la riscrittura del wronskiano come determinante, cioe' una notazione equivalente della definizione data due simboli prima"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "f''-6f'+9f=e^{2x}",
+  "perche": "e' il testo dell'esercizio d'appello citato: la sorgente e' un dato, e cio' che qui si calcola (base e wronskiano) e' asserito a parte"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "\\partial_tu=\\kappa\\partial_x^2u",
+  "perche": "e' l'equazione del calore, cioe' l'oggetto di cui si discute la buona posizione: una definizione, non un valore"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "e^{-\\kappa k^2t}",
+  "perche": "e' il fattore di evoluzione del modo k, ricavato in tappa 04 (il calore): qui viene richiamato per leggerne il segno, non ricalcolato"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/L)*(integrate(2*h*x/L*sin(pi*x/L),(x,0,L/2)) + integrate(2*h*(L-x)/L*sin(pi*x/L),(x,L/2,L)))",
+  "vale": "8*h/pi**2",
+  "ipotesi": {
+   "L": "positive",
+   "h": "positive"
+  },
+  "nota": "il coefficiente A_1 della corda pizzicata, n=1: sin(pi/2)=1",
+  "dove": "05b",
+  "appare": "\\frac{8h}{n^2\\pi^2}\\sin\\frac{n\\pi}{2}"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/L)*(integrate(2*h*x/L*sin(3*pi*x/L),(x,0,L/2)) + integrate(2*h*(L-x)/L*sin(3*pi*x/L),(x,L/2,L)))",
+  "vale": "-8*h/(9*pi**2)",
+  "ipotesi": {
+   "L": "positive",
+   "h": "positive"
+  },
+  "nota": "n=3: sin(3pi/2)=-1, e il segno alternato che il testo dichiara",
+  "dove": "05b",
+  "appare": "alterna $+1,-1,+1"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "(2/L)*(integrate(2*h*x/L*sin(2*pi*x/L),(x,0,L/2)) + integrate(2*h*(L-x)/L*sin(2*pi*x/L),(x,L/2,L)))",
+  "vale": "0",
+  "ipotesi": {
+   "L": "positive",
+   "h": "positive"
+  },
+  "nota": "n=2, pari: deve annullarsi",
+  "dove": "05b",
+  "appare": "vale $0$ per $n$ pari"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "05b",
+  "appare": "-\\lambda",
+  "perche": "non e' il risultato di un conto: -lambda e' il NOME dato alla costante di separazione nel momento stesso in cui si introduce (il primo membro dipende solo da t, il secondo solo da x, quindi entrambi sono costanti) — non c'e' niente da verificare, solo una definizione"
+ }
 ]
 CONTROLLO*/
 
@@ -537,6 +695,38 @@ CONTROLLO*/
      ]}
    ],
    leggi:R`Il profilo iniziale si separa in <b>due copie di ampiezza metà</b> che viaggiano a velocità $\pm c$ mantenendo <b>forma identica</b>: nessun allargamento, nessuna perdita. Confronta con la figura del calore: là un solo bozzo che si abbassa e si allarga, qui due bozzi rigidi che si allontanano. <b>La stessa condizione iniziale, due operatori diversi, due mondi.</b> Il dato è recuperabile in ogni istante — basta far girare l&rsquo;equazione all&rsquo;indietro, perché il tempo compare al quadrato e $t\to-t$ è una simmetria. <b>Attenzione a una sottigliezza del caso 3D:</b> in tre dimensioni spaziali vale il <b>principio di Huygens</b> forte, e il segnale passa lasciando dietro di sé il silenzio esatto — mentre in 2D (onde sull&rsquo;acqua) resta una coda. È il motivo per cui il suono in aria è nitido: viviamo in un numero <b>dispari</b> di dimensioni, e non è un dettaglio matematico.`}
+]},
+
+/* ---------------- 05b · LA SEPARAZIONE AL LAVORO ---------------- */
+{ num:'05b', title:'La separazione al lavoro: il calore, e la corda pizzicata', meta:'calore e onde su un intervallo · i modi come base ortogonale · il dato iniziale sono i suoi coefficienti',
+  blocchi:[
+  {t:'reveal', title:'Il metodo, sull’equazione del calore', tag:'derivazione', steps:[
+   {label:'Separa', body:R`<p>Problema: $u_t=\alpha u_{xx}$ su $[0,L]$, con $u(0,t)=u(L,t)=0$ e dato iniziale $u(x,0)=u_0(x)$. Cerca soluzioni <b>fattorizzate</b> $u=X(x)T(t)$. Sostituendo e dividendo per $XT$:
+   $$\frac{T'}{\alpha T}=\frac{X''}{X}=-\lambda,$$
+   costante perché il primo membro dipende solo da $t$ e il secondo solo da $x$: se sono uguali, sono entrambi costanti. Una EDP è diventata <b>due EDO</b> (nucleo 06).</p>`},
+   {label:'Risolvi le due EDO e usa il bordo', body:R`<p>$X''+\lambda X=0$ con $X(0)=X(L)=0$ ha soluzioni non banali <b>solo</b> per $\lambda_n=\left(\frac{n\pi}{L}\right)^2$, con $X_n=\sin\frac{n\pi x}{L}$. È un <b>problema agli autovalori</b> — il nucleo me-07 lo generalizzerà (Sturm&ndash;Liouville). Poi $T_n'=-\alpha\lambda_nT_n$ dà $T_n=e^{-\alpha\lambda_nt}$.</p>`},
+   {label:'Sovrapponi, e riconosci Fourier', body:R`<p>$$u(x,t)=\sum_{n\ge1}c_n\sin\frac{n\pi x}{L}\;e^{-\alpha(n\pi/L)^2t},\qquad c_n=\frac{2}{L}\int_0^{L}u_0(x)\sin\frac{n\pi x}{L}dx.$$
+   I $c_n$ sono i <b>coefficienti di Fourier</b> in seni del dato iniziale, e si ottengono nel modo consueto: si proietta $u_0$ su ciascun modo, sfruttando che $\int_0^L\sin\frac{n\pi x}{L}\sin\frac{m\pi x}{L}dx$ vale $L/2$ per $n=m$ e zero altrimenti. La base è quella dei modi, e il dato iniziale si scompone su di essa. $\blacksquare$</p>
+   <div class="note">Da leggere: il modo $n$-esimo decade come $e^{-\alpha n^2\pi^2t/L^2}$, cioè <b>tanto più in fretta quanto più è oscillante</b>. Dopo un tempo breve sopravvive quasi solo $n=1$: il calore <b>liscia</b> i dettagli, e lo fa in modo irreversibile. Per l&rsquo;equazione delle <b>onde</b> lo stesso metodo dà $T_n''=-c^2\lambda_nT_n$, cioè $\cos,\sin$ invece di esponenziali decrescenti: i modi <b>oscillano</b> senza smorzarsi, e nulla si perde. <b>La stessa struttura, un&rsquo;equazione a coefficienti diversi, e due fisiche opposte: irreversibile contro reversibile.</b></div>`}
+  ]},
+  {t:'esercizio', title:'La stessa macchina sulle onde: la corda pizzicata',
+   src:'esercizio-tipo — la corda di chitarra',
+   testo:R`Una corda di lunghezza $L$, fissata agli estremi, è pizzicata al centro e lasciata andare da ferma: $u(x,0)=u_0(x)$ triangolare, con picco $h$ in $x=L/2$, e $u_t(x,0)=0$. Trovare $u(x,t)$.`,
+   steps:[
+    {label:'Separazione, identica alla tappa precedente', body:R`<p>$u_{tt}=c^2u_{xx}$ con $u(0,t)=u(L,t)=0$ dà, per separazione, gli stessi modi spaziali del calore — $X_n=\sin(n\pi x/L)$, stesso problema agli autovalori, stesso bordo — ma l&rsquo;equazione temporale è ora $T_n''=-c^2\lambda_nT_n$, cioè oscillatoria: $T_n(t)=A_n\cos(n\pi ct/L)+B_n\sin(n\pi ct/L)$. La condizione $u_t(x,0)=0$ annulla ogni $B_n$: la corda parte ferma, e resta vero modo per modo.</p>`},
+    {label:'I coefficienti, dal dato triangolare', body:R`<p>Con $u_0(x)=\frac{2hx}{L}$ per $x\le L/2$ e $u_0(x)=\frac{2h(L-x)}{L}$ per $x\ge L/2$ (il pizzico simmetrico), i coefficienti sono quelli della serie di Fourier in seni:
+    $$A_n=\frac{2}{L}\int_0^{L}u_0(x)\sin\frac{n\pi x}{L}dx=\frac{2}{L}\left[\int_0^{L/2}\frac{2hx}{L}\sin\frac{n\pi x}{L}dx+\int_{L/2}^{L}\frac{2h(L-x)}{L}\sin\frac{n\pi x}{L}dx\right]=\frac{8h}{n^2\pi^2}\sin\frac{n\pi}{2}.$$
+    Il fattore $\sin(n\pi/2)$ vale $0$ per $n$ pari — la simmetria del pizzico al centro <b>uccide tutte le armoniche pari</b> — e alterna $+1,-1,+1,\dots$ per $n=1,5,9,\dots$ e $n=3,7,11,\dots$.</p>`},
+    {label:'La soluzione, e cosa NON succede', body:R`<p>$$u(x,t)=\frac{8h}{\pi^2}\sum_{n\ \text{dispari}}\frac{(-1)^{(n-1)/2}}{n^2}\sin\frac{n\pi x}{L}\cos\frac{n\pi ct}{L}.$$
+    A differenza del calore, <b>nessun modo decade</b>: l&rsquo;ampiezza $8h/(n^2\pi^2)$ di ogni armonica resta quella del pizzico iniziale per sempre, e dopo un tempo $t=2L/c$ la corda torna <b>esattamente</b> alla forma triangolare di partenza — periodicità che il calore non ha mai, perché lì le fasi sono esponenziali reali e non ricorrono. $\blacksquare$</p>
+    <div class="note">Il confronto con la tappa precedente è il punto: stessa fattorizzazione, stessi autovalori $\lambda_n$, stessi seni — <b>l&rsquo;unica differenza è l&rsquo;equazione temporale</b>, e da quella sola differenza nascono smorzamento irreversibile da un lato e periodicità esatta dall&rsquo;altro. Vale la pena notare anche cosa resterebbe uguale cambiando lo strumento musicale: raddoppiare $h$ raddoppia ogni $A_n$ e quindi l&rsquo;intera $u(x,t)$ — la corda è <b>lineare</b>, e pizzicarla più forte non cambia il timbro, solo il volume.</div>`}
+   ]},
+  {t:'collaudo', title:'Controllo lampo', items:[
+   {q:R`Perché la separazione delle variabili &laquo;funziona&raquo;, se la maggior parte delle soluzioni non è affatto fattorizzata?`,
+    a:R`Perché le soluzioni fattorizzate formano una <b>base</b>: ogni soluzione è una loro sovrapposizione (per la completezza del sistema trigonometrico in $L^2$, cioè per il fatto che l&rsquo;unica funzione ortogonale a tutti i $\sin\frac{n\pi x}{L}$ è quella nulla). Il metodo non trova tutte le soluzioni una per una — trova i mattoni giusti, e la linearità fa il resto. Ecco perché fallisce sulle equazioni <b>non lineari</b>: lì la sovrapposizione non è permessa, e conoscere i mattoni non basta.`},
+   {q:R`Che relazione c&rsquo;è fra questo metodo e la funzione di Green?`,
+    a:R`Sono due modi di sfruttare la stessa linearità. La <b>Green</b> decompone la <b>sorgente</b> in impulsi puntiformi; la <b>separazione</b> decompone il <b>dato</b> in modi propri dell&rsquo;operatore. Nel nucleo me-07 si uniscono: la Green si <b>scrive nella base degli autovettori</b>, $G=\sum_n\frac{\phi_n(x)\phi_n(\xi)}{\lambda_n}$ — la sovrapposizione di impulsi e quella di modi diventano la stessa formula.`}
+  ]}
 ]},
 
 /* ---------------- 04 · IL FILO COMUNE ---------------- */
