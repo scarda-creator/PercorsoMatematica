@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movimento gd-06 — Lo spazio tangente e il differenziale: tre definizioni, un solo oggetto</title>
+<title>Movimento gd-06 — Lo spazio tangente e il differenziale: le velocità, e la carta che le legge</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -76,6 +76,19 @@
     font-size:.93rem;color:var(--muted);}
   .plot-leggi b{color:#7ab8e0;}
   .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
   .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
   .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
   .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
@@ -185,7 +198,7 @@
 </style>
 </head>
 <body>
-<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-06 — Lo spazio tangente e il differenziale: tre definizioni, un solo oggetto</b></div>
+<div class="banner">TENGRI · Geometria Differenziale · Movimento <b>gd-06 — Lo spazio tangente e il differenziale: le velocità, e la carta che le legge</b></div>
 <div class="shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main" id="main"></main>
@@ -222,11 +235,10 @@ function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html
    =================================================================== */
 var CORSO = 'geometria-differenziale';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
 var STRUM = {};
+STRUM["classe-di-equivalenza"] = {"nome":"Classe di equivalenza e quoziente","riga":"Una relazione $\\sim$ riflessiva, simmetrica e transitiva spezza un insieme $X$ in classi disgiunte $[x]=\\{y\\in X:y\\sim x\\}$, e l'insieme delle classi e' il quoziente $X/\\!\\sim$.","serve":"E' il modo di DEFINIRE un oggetto che non si puo' esibire. Quando di una cosa si sa riconoscere quando due rappresentanti sono la stessa, ma non si ha un rappresentante privilegiato da indicare, si definisce l'oggetto come la classe stessa. Diverio lo dice cosi' nelle note sullo spazio tangente: e' lo stesso trucco con cui si definisce una direzione nel piano come classe di rette parallele — nessuna retta e' LA direzione, e la direzione e' tutte quelle rette insieme. Da li' viene la definizione del vettore tangente: su una varieta' non c'e' nessuna freccia da disegnare, quindi la velocita' di una curva si definisce come la classe di tutte le curve che le somigliano al primo ordine. La stessa mossa costruisce lo spazio proiettivo, il toro come quoziente del piano, i germi di funzioni e i gruppi quoziente.","esempio":"Su $\\mathbb{Z}$ si ponga $a\\sim b$ quando $3$ divide $a-b$. Le classi sono tre — $[0]$, $[1]$, $[2]$ — e sono disgiunte e coprono tutto $\\mathbb{Z}$, che e' sempre il caso: un quoziente e' una PARTIZIONE. Sul quoziente $\\mathbb{Z}/3\\mathbb{Z}$ la somma $[a]+[b]=[a+b]$ e' ben definita, e ben definita vuol dire che il risultato non dipende dal rappresentante scelto: presi $a'=4$ al posto di $a=1$ e $b'=5$ al posto di $b=2$, si ha $a'+b'=9$ e $a+b=3$, e le due classi coincidono perche' $3$ divide $9-3$. E' la verifica che si deve fare ogni volta che si definisce qualcosa su un quoziente, ed e' l'unica: il Lemma 3.3 delle note di Diverio — la velocita' di una curva non dipende dalla carta — e' esattamente questa verifica fatta per i vettori tangenti.","debito":"la topologia quoziente, cioe' come si rende continua la proiezione $\\pi:X\\to X/\\!\\sim$, sta nella scheda `quoziente-topologico`; qui si guarda la sola struttura insiemistica, che e' quella che serve per definire un vettore tangente.","controllo":[{"tipo":"uguale","sinistra":"Mod(4 + 5, 3)","vale":"Mod(1 + 2, 3)","dove":"esempio","appare":"$a'+b'=9$ e $a+b=3$"},{"tipo":"uguale","sinistra":"Mod(9 - 3, 3)","vale":"0","dove":"esempio","appare":"$3$ divide $9-3$"},{"tipo":"simbolico","dove":"esempio","appare":"[a]+[b]=[a+b]","perche":"e' la DEFINIZIONE della somma sul quoziente, cioe' la regola che si propone; che sia ben posta e' il contenuto delle due asserzioni che seguono, non di questa riga"}]};
 STRUM["sommersione"] = {"nome":"Sommersione","riga":"Un'applicazione liscia $F:M\\to N$ il cui differenziale e surgettivo in ogni punto, cosa che richiede $\\dim M\\ge\\dim N$ e rende ogni fibra una sottovarieta.","serve":"a schiacciare una varieta su una di dimensione minore senza perdere struttura: in coordinate adatte una sommersione e sempre la proiezione $(x_1,\\dots,x_m)\\mapsto(x_1,\\dots,x_n)$, e questo rende locale ogni domanda su di essa. E la meta in uscita della coppia immersione/sommersione: l'immersione inietta il tangente, la sommersione lo proietta. Insieme danno il teorema del rango costante, che riduce lo studio locale di qualunque mappa di rango fisso a un'unica forma normale.","esempio":"$F:\\mathbb{R}^3\\to\\mathbb{R}^2$, $F(x,y,z)=(x^2+y^2+z^2-1,\\ z)$. Le due righe della jacobiana sono $(2x,2y,2z)$ e $(0,0,1)$, perche $\\partial_x(x^2+y^2+z^2-1)=2x$ e la seconda componente dipende da $z$ sola. Il minore sulle colonne $x$ e $z$ ha determinante $2x$: dove $x\\neq0$ il rango e $2$ e $F$ e una sommersione. Nel punto $(1,0,0)$ quel determinante vale $2$, quindi li $F$ e sommersione e la fibra $F^{-1}(0,0)$, la circonferenza equatoriale nel piano $z=0$, e una sottovarieta di dimensione $3-2=1$.","pieno":{"file":"gd-06-spazio-tangente.html","tappa":"04","come":"immersioni, sommersioni e il teorema del rango costante, con la forma normale"},"controllo":[{"tipo":"derivata","espr":"x**2+y**2+z**2-1","rispetto":["x"],"vale":"2*x","dove":"esempio","appare":"\\partial_x(x^2+y^2+z^2-1)=2x"},{"tipo":"uguale","sinistra":"Matrix([[2*x,2*z],[0,1]]).det()","vale":"2*x","dove":"esempio","appare":"ha determinante $2x$"},{"tipo":"uguale","sinistra":"Matrix([[2*1,2*0],[0,1]]).det()","vale":"2","dove":"esempio","appare":"quel determinante vale $2$"},{"tipo":"uguale","sinistra":"3-2","vale":"1","dove":"esempio","appare":"3-2=1"}]};
 STRUM["valore-regolare"] = {"nome":"Valore regolare","riga":"$c$ e un valore regolare di $F:M\\to N$ quando il differenziale $dF_p$ e surgettivo in ogni punto di $F^{-1}(c)$, e in quel caso $F^{-1}(c)$ e una sottovarieta di dimensione $\\dim M-\\dim N$.","serve":"a riconoscere una sottovarieta senza esibire carte: si scrive l'insieme come luogo di zeri, si deriva, e si controlla che il differenziale non degeneri. E il criterio operativo per eccellenza, perche gli insiemi interessanti arrivano quasi sempre dati da equazioni. Attenzione al quantificatore: la richiesta e su tutti i punti della fibra, non su un punto scelto bene, e un valore non e regolare quando anche un solo punto della sua controimmagine e critico. Un valore fuori dall'immagine e regolare per vacuita, e la fibra vuota conta come sottovarieta.","esempio":"La sfera $S^2$ come fibra di $F(x,y,z)=x^2+y^2+z^2$. Le derivate parziali sono $\\partial_xF=2x$, $\\partial_yF=2y$, $\\partial_zF=2z$, dunque $dF_p=(2x,2y,2z)$ si annulla solo nell'origine, che sta in $F^{-1}(0)$ e non in $F^{-1}(1)$. Quindi $1$ e un valore regolare e la fibra $F^{-1}(1)$, che e la sfera, e una sottovarieta di dimensione $3-1=2$; mentre $0$ non lo e, e infatti $F^{-1}(0)$ e un punto solo. Lo stesso conto su $SL(2,\\mathbb{R})=\\det^{-1}(1)$: con $\\det=ad-bc$ si ha $\\partial_a\\det=d$, e nell'identita il differenziale vale $(1,0,0,1)\\neq0$, dunque $SL(2,\\mathbb{R})$ e una sottovarieta di $\\mathbb{R}^4$ di dimensione $4-1=3$.","pieno":{"file":"gd-08-valori-regolari.html","tappa":"02","come":"il teorema del valore regolare, l'uso in tre righe, e i gruppi di matrici"},"controllo":[{"tipo":"derivata","espr":"x**2+y**2+z**2","rispetto":["x"],"vale":"2*x","dove":"esempio","appare":"\\partial_xF=2x"},{"tipo":"derivata","espr":"x**2+y**2+z**2","rispetto":["y"],"vale":"2*y","dove":"esempio","appare":"\\partial_yF=2y"},{"tipo":"derivata","espr":"x**2+y**2+z**2","rispetto":["z"],"vale":"2*z","dove":"esempio","appare":"\\partial_zF=2z"},{"tipo":"uguale","sinistra":"3-1","vale":"2","dove":"esempio","appare":"3-1=2"},{"tipo":"derivata","espr":"a*d-b*c","rispetto":["a"],"vale":"d","dove":"esempio","appare":"\\partial_a\\det=d"},{"tipo":"uguale","sinistra":"4-1","vale":"3","dove":"esempio","appare":"4-1=3"}]};
 STRUM["applicazione-propria"] = {"nome":"Applicazione propria","riga":"$F$ e propria quando la controimmagine di ogni compatto e compatta, ed e la condizione topologica che trasforma un'immersione iniettiva in un'immersione di sottovarieta.","serve":"a impedire che l'immagine si avvicini a se stessa senza toccarsi. Un'immersione iniettiva ha differenziale iniettivo in ogni punto e non identifica mai due punti, e cio nonostante la sua immagine puo non essere una sottovarieta: basta che due pezzi lontani nel dominio abbiano immagini arbitrariamente vicine. La propriezza lo vieta, perche un compatto dell'arrivo non puo avere controimmagine che fugge verso il bordo del dominio. Su un dominio compatto e automatica, ed e per questo che le patologie vivono tutte su domini aperti.","esempio":"La figura a otto $\\gamma(t)=(\\sin 2t,\\ \\sin t)$ su $(-\\pi,\\pi)$. E un'immersione, perche la velocita $(2\\cos 2t,\\ \\cos t)$ non si annulla mai: $\\cos t=0$ forza $t=\\pm\\pi/2$, e in $t=\\pi/2$ si ha $2\\cos 2t=-2\\neq0$. Ed e iniettiva. Ma non e propria: per $t\\to\\pi^-$ si ha $\\sin 2t\\to0$ e $\\sin t\\to0$, dunque la curva torna verso l'origine, che e anche $\\gamma(0)$. La controimmagine di un disco chiuso attorno all'origine contiene allora dei $t$ vicini a $\\pm\\pi$, e non e chiusa in $(-\\pi,\\pi)$: non e compatta. L'immagine non e una sottovarieta, perche nell'incrocio ogni intorno ha quattro rami.","pieno":{"file":"gd-09-immersioni-whitney.html","tappa":"01","come":"le applicazioni proprie come la condizione che mancava, col controesempio della figura a otto"},"controllo":[{"tipo":"limite","espr":"sin(2*t)","var":"t","a":"pi","verso":"-","vale":"0","dove":"esempio","appare":"\\sin 2t\\to0"},{"tipo":"limite","espr":"sin(t)","var":"t","a":"pi","verso":"-","vale":"0","dove":"esempio","appare":"\\sin t\\to0"},{"tipo":"uguale","sinistra":"2*cos(2*(pi/2))","vale":"-2","dove":"esempio","appare":"2\\cos 2t=-2"},{"tipo":"uguale","sinistra":"cos(pi/2)","vale":"0","dove":"esempio","appare":"\\cos t=0"}]};
-STRUM["omeomorfismo"] = {"nome":"Omeomorfismo","riga":"Una biiezione continua con inversa continua: due spazi omeomorfi sono lo stesso spazio scritto in due modi, per tutto ciò che la topologia sa vedere.","serve":"È la nozione di «uguale» che si usa quando si dice che una varietà è localmente come $\\mathbb{R}^n$. La richiesta che anche l'inversa sia continua non è pignoleria: senza di essa una biiezione continua può incollare cose lontane — l'applicazione $t\\mapsto(\\cos 2\\pi t,\\sin 2\\pi t)$ da $[0,1)$ alla circonferenza è continua e biunivoca, ma la sua inversa spezza la circonferenza in un punto, e infatti $[0,1)$ e $S^1$ non sono lo stesso spazio (uno è compatto, l'altro no). Le proprietà che si conservano per omeomorfismo — compattezza, connessione, dimensione, gruppo fondamentale — sono esattamente quelle di cui si può parlare su una varietà senza aver scelto una carta.","esempio":"L'intervallo aperto $(0,1)$ e la semiretta $(0,+\\infty)$ sono omeomorfi tramite $f(x)=\\dfrac{x}{1-x}$: è continua su $(0,1)$, manda $0^+$ in $0^+$ e $1^-$ in $+\\infty$, e la sua inversa è $g(y)=\\dfrac{y}{1+y}$, anch'essa continua. Che siano davvero una l'inversa dell'altra si verifica componendo: $g(f(x))=\\dfrac{x/(1-x)}{1+x/(1-x)}=x$. Ne segue che $(0,1)$ è omeomorfo anche a tutto $\\mathbb{R}$ (componendo con $y\\mapsto\\ln y$), il che dice una cosa che all'inizio sorprende: **la lunghezza non è una proprietà topologica**. Non lo è nemmeno l'essere limitato; lo è invece la compattezza, ed è per questo che $[0,1]$ non è omeomorfo a nessuno dei due.","debito":"nessun movimento del percorso tratta la topologia generale come argomento a sé: qui c'è ciò che serve per leggere la definizione di varietà. La classificazione di quali spazi sono omeomorfi a quali è il mestiere della topologia algebrica, e nel corso di Diverio entra solo per la numerabilità del gruppo fondamentale.","controllo":[{"tipo":"uguale","sinistra":"(x/(1-x))/(1+x/(1-x))","vale":"x","ipotesi":{"x":"positive"},"dove":"esempio","appare":"=x"}]};
-STRUM["compattezza"] = {"nome":"Compattezza","riga":"Ogni ricoprimento aperto ammette un sottoricoprimento finito: è la proprietà che permette di passare da «vale vicino a ogni punto» a «vale su tutto», con un numero finito di passi.","serve":"È l'ipotesi che rende globali le conclusioni locali, ed è per questo che ricorre in ogni dimostrazione di geometria differenziale. In $\\mathbb{R}^n$ equivale a chiuso e limitato (Heine-Borel), ma su una varietà quell'equivalenza non si può usare come definizione, perché «limitato» richiede una distanza e una varietà non ne ha una privilegiata. La conseguenza che si usa più spesso è negativa: gli unici sottoinsiemi di $\\mathbb{R}^n$ che sono **insieme** aperti e compatti sono $\\emptyset$ e nient'altro — ed è l'argomento per cui una varietà compatta non può essere coperta da una sola carta.","esempio":"L'intervallo $(0,1)$ non è compatto, e si vede esibendo un ricoprimento senza sottoricoprimento finito: gli aperti $A_n=\\left(\\tfrac1n,1\\right)$ per $n\\ge2$ ricoprono $(0,1)$, perché ogni $x\\gt0$ sta in $A_n$ appena $\\tfrac1n\\lt x$, cioè appena $n\\gt1/x$. Ma una sottofamiglia finita $A_{n_1},\\dots,A_{n_k}$ ha un indice massimo $N$, quindi la sua unione è $\\left(\\tfrac1N,1\\right)$, e il punto $x=\\tfrac1{2N}$ resta fuori: è positivo, dunque sta in $(0,1)$, ed è minore di $\\tfrac1N$. Il conto che regge l'argomento è $\\lim_{n\\to\\infty}\\tfrac1n=0$: gli $A_n$ si avvicinano a coprire tutto, ma nessuno di essi contiene un intorno di $0$, e servirebbero tutti. Chiudendo l'intervallo, $[0,1]$ diventa compatto e quel ricoprimento smette di essere un ricoprimento — $0$ non sta in nessun $A_n$.","debito":"la dimostrazione del teorema di Heine-Borel e la teoria generale degli spazi compatti stanno fuori dal percorso: qui c'è l'uso che se ne fa. Nel corso di Diverio la compattezza entra come ipotesi (sfera, gruppi di Lie compatti) e come conclusione della locale compattezza delle varietà.","controllo":[{"tipo":"limite","espr":"1/n","var":"n","a":"oo","vale":"0","ipotesi":{"n":"positive"},"dove":"esempio","appare":"\\lim_{n\\to\\infty}\\tfrac1n=0"},{"tipo":"disuguaglianza","sinistra":"1/(2*N)","destra":"1/N","relazione":"<","ipotesi":{"N":"positive"},"dove":"esempio","appare":"minore di $\\tfrac1N$"}]};
 STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
 
 function schedaHTML(s){
@@ -266,7 +278,7 @@ function cablaStrumenti(root){
 }
 
 /* ===================================================================
-   >>> CONTENUTO — Nucleo gd-06: Lo spazio tangente e il differenziale: tre definizioni, un solo oggetto <<<
+   >>> CONTENUTO — Nucleo gd-06: Lo spazio tangente e il differenziale: le velocità, e la carta che le legge <<<
    Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
    Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
    Tutta la matematica in R`...` (String.raw). Nelle formule si usano
@@ -277,128 +289,426 @@ var TAPPE = [
 
 
 /*MOVIMENTO
-id:        gd-06 — lo spazio tangente e il differenziale
-identita:  che cos'è un vettore quando non c'è uno spazio ambiente in cui disegnarlo
-copre:     G.13, R.5
+id:        gd-06 — lo spazio tangente e il differenziale: le velocità, e la carta che le legge
+identita:  che cos'è un vettore quando non c'è uno spazio ambiente in cui disegnarlo — e la risposta del docente: è la classe di tutti i moti che hanno quella velocità
+copre:     G.9 — Spazi tangenti
+copre:     G.10 — Differenziale di applicazioni
+copre:     G.11 — Immersioni e submersioni
+copre:     G.12 — Teorema del rango costante
 serve:     gd-05 (gd-05-partizioni-unita.html)
 apre:      gd-07 (gd-07-fibrato-tangente.html), gd-08 (gd-08-valori-regolari.html)
-strumenti: omeomorfismo, compattezza, quoziente-topologico
-fonti:     Lee — Introduction to Smooth Manifolds, cap. 3 (vettori tangenti come derivazioni,
-           il lemma di Hadamard, la base coordinata) e cap. 4 (il differenziale e il rango);
-           Diverio — registro delle lezioni del 18/10 e 22/10, dove il tangente e' introdotto
-           prima come velocita' di curve e poi come derivazioni. DEBITO DICHIARATO: la
-           connessione, che sola permetterebbe di confrontare spazi tangenti in punti
-           diversi, e' fuori dal programma e qui e' solo nominata.
-registro:  Lezioni del 18/10 e 22/10/2019 — tangente come velocità di curve, poi come derivazioni
-generata:  2026-09-18 da mappa.json — non modificare a mano, si cambia la mappa
+strumenti: applicazione-propria · classe-di-equivalenza · quoziente-topologico · sommersione · valore-regolare
+fonti:     Diverio — «Costruzione dello spazio tangente e differenziale di applicazioni tra varietà», note del corso a.a. 2026/27, 15 pagine (banca dati: 01-banca-dati/teoria/diverio-note-spazio-tangente-2627.pdf). E' la fonte PRIMARIA di questo movimento, e il motivo è scritto dentro le note: «we follow our textbook [1] quite closely, and whenever we depart from it you will find written notes like these. The tangent space is one of these occasions». Il libro definisce il vettore tangente come derivazione; lui lo definisce come classe di curve, e questo movimento segue lui. §1-2 la motivazione cinematica, §3 la definizione e il Lemma 3.3, §4 theta_varphi coi Lemmi 4.1-4.2 e la Proposizione 4.3, §5 i vettori coordinati e le polari, §6 il differenziale con le Proposizioni 6.2-6.3, §7 il dizionario per leggere Lee.
+fonti:     Diverio — diario di bordo 2026/27, lezioni 8 e 9.
+fonti:     Lee — Introduction to Smooth Manifolds, 2a ed., cap. 3: è il libro del corso, e la sua notazione differisce da quella del docente. Il dizionario di traduzione è a p. 15 delle note ed è riportato nella tappa 08.
+fonti:     Le nove figure di questo movimento sono di Diverio, estratte in vettoriale dalle note e ri-colorate sulla tavolozza del percorso da `figure-da-pdf.py`.
+coordinate: Diverio - note sullo spazio tangente 2026/27 · Lee - Introduction to Smooth Manifolds
+profondita: il movimento va PIENO, ed è il solo del corso di cui esista una dispensa scritta dal docente: quindici pagine e dieci figure su un argomento solo. Lo standard di complessità lo fissa quella dispensa, non il nostro giudizio. DUE COSE DA NON SBAGLIARE, misurate il 2026-11-05. PRIMA: la definizione è per CURVE, non per derivazioni — il libro fa il contrario e il docente dichiara di staccarsene proprio qui, quindi un movimento che parte dalle derivazioni insegna un altro corso. Le derivazioni restano, dove le mette lui: in coda, come anticipazione di un isomorfismo che il corso dimostrerà più avanti. SECONDA: la notazione è `T_{M,p}` e `d_pF`, non `T_pM` e `dF_p` — quella di Lee, di cui lui dà il dizionario per tradurre. IL PERNO TECNICO è `theta_varphi`, la biiezione indotta da una carta: prima della riscrittura aveva ZERO occorrenze nel nostro materiale, e senza di lei il Lemma 4.2 e la Proposizione 4.3 non si possono nemmeno enunciare. COSA NON ANDAVA PRIMA: su «spazio tangente», «differenziale» e «vettori coordinati» i tre movimenti che ne parlavano di più erano gd-07, gd-18 e gd-03 — gd-06 non era fra i primi tre su nessuno dei propri argomenti, ed era il movimento più magro del corso.
+generata:  2026-11-05 da mappa.json — non modificare a mano, si cambia la mappa
 MOVIMENTO*/
 
 /*CONTROLLO
 [
- {"tipo":"uguale","sinistra":"Matrix([r*cos(th),r*sin(th)]).jacobian([r,th]).det()","vale":"r",
-  "ipotesi":{"r":"positive","th":"real"},
-  "dove":"03","appare":"vale r"},
-
- {"tipo":"uguale","sinistra":"Matrix([r*cos(th),r*sin(th)]).jacobian([r,th])[0,1]","vale":"-r*sin(th)",
-  "ipotesi":{"r":"positive","th":"real"},
-  "dove":"03","appare":"-r\\sin\\theta"},
-
- {"tipo":"uguale","sinistra":"diff(sin(2*t),t)**2+diff(sin(t),t)**2","vale":"4*cos(2*t)**2+cos(t)**2",
-  "ipotesi":{"t":"real"},
-  "dove":"04","appare":"(2\\cos 2t,\\ \\cos t)"},
-
- {"tipo":"simbolico","dove":"01","appare":"v(f)=v(\\psi)f(p)+\\psi(p)v(f)=0",
-  "perche":"e' l'applicazione della regola di Leibniz a una funzione nulla vicino a p: un passaggio simbolico su funzioni non specificate, non un valore numerico"},
-
- {"tipo":"simbolico","dove":"01","appare":"v(fg)=v(f)\\,g(p)+f(p)\\,v(g)",
-  "perche":"e' la regola di Leibniz che DEFINISCE una derivazione: un assioma, non un conto"},
-
- {"tipo":"simbolico","dove":"02","appare":"\\left.\\frac{\\partial}{\\partial x^{i}}\\right|_p",
-  "perche":"e' la notazione dei vettori della base coordinata dello spazio tangente: una definizione"},
-
- {"tipo":"simbolico","dove":"03","appare":"dF_p",
-  "perche":"e' la notazione del differenziale in un punto, definito nella tappa stessa"}
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([r*cos(th),r*sin(th)]).jacobian([r,th]).det()",
+  "vale": "r",
+  "ipotesi": {
+   "r": "positive",
+   "th": "real"
+  },
+  "dove": "06",
+  "appare": "vale r"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([r*cos(th),r*sin(th)]).jacobian([r,th])[0,1]",
+  "vale": "-r*sin(th)",
+  "ipotesi": {
+   "r": "positive",
+   "th": "real"
+  },
+  "dove": "06",
+  "appare": "-r\\sin\\theta"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(sin(2*t),t)**2+diff(sin(t),t)**2",
+  "vale": "4*cos(2*t)**2+cos(t)**2",
+  "ipotesi": {
+   "t": "real"
+  },
+  "dove": "07",
+  "appare": "(2\\cos 2t,\\ \\cos t)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(Matrix([cos(th0+t)*r0, sin(th0+t)*r0]),t).subs(t,0)",
+  "vale": "Matrix([-r0*sin(th0), r0*cos(th0)])",
+  "ipotesi": {
+   "r0": "positive",
+   "th0": "real",
+   "t": "real"
+  },
+  "dove": "05",
+  "appare": "(-y,\\ x)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "sqrt((-r0*sin(th0))**2 + (r0*cos(th0))**2)",
+  "vale": "r0",
+  "ipotesi": {
+   "r0": "positive",
+   "th0": "real"
+  },
+  "dove": "05",
+  "appare": "ha lunghezza $r$, non $1$"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff(Matrix([cos(th0)*(r0+t), sin(th0)*(r0+t)]),t).subs(t,0)",
+  "vale": "Matrix([cos(th0), sin(th0)])",
+  "ipotesi": {
+   "r0": "positive",
+   "th0": "real",
+   "t": "real"
+  },
+  "dove": "05",
+  "appare": "(\\cos\\theta,\\ \\sin\\theta)"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "diff((x0+lam*t)**2, t).subs(t,0)",
+  "vale": "2*x0*lam",
+  "ipotesi": {
+   "x0": "real",
+   "lam": "real",
+   "t": "real"
+  },
+  "dove": "03",
+  "appare": "\\lambda\\,(\\varphi\\circ\\gamma)'(0)"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "03",
+  "appare": "\\theta_\\varphi([\\gamma])=(\\varphi\\circ\\gamma)'(0)",
+  "perche": "e' la DEFINIZIONE della lettura di un vettore tangente in una carta (Lemma 4.1 delle note): la regola che si pone, non un valore ricavato"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "03",
+  "appare": "\\theta_\\psi\\circ\\theta_\\varphi^{-1}=J_{\\psi\\circ\\varphi^{-1}}(\\varphi(p))",
+  "perche": "e' l'enunciato del Lemma 4.2: due letture dello stesso vettore differiscono per la jacobiana del cambio di carta. La dimostrazione e' la regola della catena, ed e' nella tappa"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "01",
+  "appare": "f(x)=f(x_0)+f'(x_0)(x-x_0)+O\\big((x-x_0)^{2}\\big)",
+  "perche": "e' la formula di Taylor al primo ordine, citata come strumento: un enunciato noto, non un conto di questo movimento"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "04",
+  "appare": "\\left.\\frac{\\partial}{\\partial x^{i}}\\right|_p=\\theta_\\varphi^{-1}(e_i)",
+  "perche": "e' la Definizione 5.1 delle note: i vettori coordinati si DEFINISCONO come le controimmagini della base canonica, non si ricavano"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "d_pF\\big([\\gamma]\\big)=[F\\circ\\gamma]",
+  "perche": "e' la Definizione 6.1 delle note: il differenziale si definisce spingendo avanti la curva. Che sia ben posto e lineare e' la Proposizione 6.2, dimostrata nella tappa"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "08",
+  "appare": "v(fg)=v(f)\\,g(p)+f(p)\\,v(g)",
+  "perche": "e' la regola di Leibniz che definisce una derivazione: un assioma della definizione alternativa, non un conto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "02",
+  "appare": "\\big\\|\\varphi(\\gamma_1(t))-\\varphi(\\gamma_2(t))\\big\\|=o(t)",
+  "perche": "e' la notazione di Landau: «o piccolo di t» dichiara un ordine di infinitesimo, non un valore calcolato. E' la riformulazione della relazione ~, non una sua conseguenza numerica"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "04",
+  "appare": "\\gamma^i=x^i\\circ\\gamma",
+  "perche": "e' la scrittura abbreviata per le coordinate del punto in movimento: si introduce un simbolo, non si ricava"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "04",
+  "appare": "y^i=y^i(x^1,\\dots,x^n)",
+  "perche": "e' l'abuso di notazione dichiarato nel periodo stesso — si scrive il cambio di carte come se le nuove coordinate fossero funzioni delle vecchie. E' una convenzione, e il testo la annuncia prima di usarla"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "04",
+  "appare": "v^k=\\delta_{jk}",
+  "perche": "e' la delta di Kronecker applicata alle componenti del vettore coordinato j-esimo: la notazione per «vale 1 se gli indici coincidono, 0 altrimenti»"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "F^{-1}\\circ F=\\mathrm{id}_M",
+  "perche": "e' la definizione di inversa di un diffeomorfismo, scritta per applicarvi le proprieta' (1) e (2): un'ipotesi, non un conto"
+ },
+ {
+  "tipo": "simbolico",
+  "dove": "06",
+  "appare": "F\\circ F^{-1}=\\mathrm{id}_N",
+  "perche": "idem, nell'altro verso"
+ },
+ {
+  "tipo": "uguale",
+  "sinistra": "Matrix([r0*cos(th0), r0*sin(th0)])/sqrt((r0*cos(th0))**2+(r0*sin(th0))**2)",
+  "vale": "Matrix([cos(th0), sin(th0)])",
+  "ipotesi": {
+   "r0": "positive",
+   "th0": "real"
+  },
+  "dove": "05",
+  "appare": "(x,y)/\\sqrt{x^2+y^2}"
+ }
 ]
 CONTROLLO*/
 
 /* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
-{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.13, R.5 · il cuore del corso',
+{ num:'00', title:'Di cosa parla questo movimento', meta:'Geometria Differenziale · voci G.13, R.5 · lezioni 8 e 9 · il cuore del corso',
   blocchi:[
   {t:'prosa', title:'Il problema, detto bene', tag:'architettura', html:R`
-  <p>Su una superficie dentro $\mathbb{R}^3$ un vettore tangente è una freccia: sta nello spazio ambiente ed è tangente alla superficie. <b>Su una varietà astratta quella descrizione non è disponibile</b>: non c&rsquo;è ambiente, e una freccia «che esce» non ha dove andare.</p>
-  <p>Eppure il vettore tangente serve: è la velocità di una curva, è la direzione lungo cui derivare, è il dato iniziale di un&rsquo;equazione differenziale. <b>Bisogna definirlo usando solo ciò che c&rsquo;è sulla varietà</b> — cioè le funzioni lisce e le curve.</p>
-  <p>Diverio dà due definizioni e mostra che coincidono. <b>Non è pedanteria</b>: la prima è quella che si usa per <i>capire</i>, la seconda quella che si usa per <i>dimostrare</i>, e la terza (in coordinate) quella che si usa per <i>calcolare</i>. Saper passare dall&rsquo;una all&rsquo;altra è il mestiere di questo corso.</p>`}
+  <p>Su una superficie dentro $\mathbb{R}^3$ un vettore tangente è una freccia: sta nello spazio ambiente ed è tangente alla superficie. <b>Su una varietà astratta quella descrizione non è disponibile</b>: non c&rsquo;è ambiente, e una freccia «che esce» non ha dove andare. Peggio: su $M$ non si possono nemmeno sottrarre due punti, quindi il limite $\lim_{t\to0}\frac{\gamma(t)-p}{t}$ che definirebbe la velocità non si scrive.</p>
+  <p>Eppure il vettore tangente serve, ed è la cosa di cui il resto del corso è fatto: è la velocità di una curva, è la direzione lungo cui derivare, è il dato iniziale di un&rsquo;equazione differenziale. <b>Bisogna definirlo usando solo ciò che c&rsquo;è sulla varietà</b> — cioè le curve, e le carte.</p>
+  <p><b>La risposta, e vale la pena anticiparla perché è tutto il movimento</b>: su $M$ non c&rsquo;è nessuna freccia da disegnare, quindi si definisce la velocità di $\gamma$ come <i>ciò che tutte le curve con la stessa velocità hanno in comune</i> — cioè la <span class="str" data-str="classe-di-equivalenza">classe</span> di $\gamma$ stessa. È il trucco con cui si definisce una direzione nel piano come classe di rette parallele: nessuna retta è la direzione, e la direzione è tutte quelle rette insieme.</p>
+  <div class="note"><b>Una nota sulla fonte, perché qui conta più del solito.</b> Il libro del corso è <b>Lee</b>, e Lee definisce il vettore tangente come <i>derivazione</i>. Diverio su questo punto si stacca dal libro e lo dichiara: «we follow our textbook quite closely, and whenever we depart from it you will find written notes like these. The tangent space is one of these occasions». Questo movimento segue le sue note. Le derivazioni ci sono, ma dove le mette lui — alla fine, come anticipazione di un isomorfismo che il corso dimostrerà più avanti.</div>`}
 ]},
 
-/* ---------------- 01 · LE DUE DEFINIZIONI ---------------- */
-{ num:'01', title:'Velocita di curve, e derivazioni', meta:'la classe di equivalenza di curve · la regola di Leibniz · e perche coincidono',
+/* ---------------- 01 · DALLA RETTA TANGENTE ALLA VELOCITA ---------------- */
+{ num:'01', title:'Dalla retta tangente alla velocita: il programma in tre ingredienti', meta:'la migliore approssimazione lineare · il punto di vista cinematico · e cosa sopravvive su una varieta',
   blocchi:[
-  {t:'reveal', title:'Le due strade', tag:'costruzione', steps:[
-   {label:'Prima: le velocita delle curve', body:R`
-   <p>Si considerano le curve lisce $\gamma:(-\epsilon,\epsilon)\to M$ con $\gamma(0)=p$, e si dicono <b>equivalenti</b> due curve che, lette in una carta, hanno la stessa derivata in $0$. <b>Un vettore tangente è una classe di equivalenza</b>, e $T_pM$ è l&rsquo;insieme delle classi.</p>
-   <p>La condizione non dipende dalla carta: cambiando carta si compone con una transizione, e la regola della catena moltiplica entrambe le derivate per la stessa jacobiana. <b>È il solito schema di gd-04, e qui è il passaggio che rende la definizione lecita.</b></p>
-   <p><b>Il vantaggio</b>: è intuitiva, dice che un vettore è «una direzione con una velocità». <b>Lo svantaggio</b>: che $T_pM$ sia uno spazio <i>vettoriale</i> non si vede — sommare due classi di curve non ha senso ovvio.</p>`},
-   {label:'Seconda: le derivazioni', body:R`
-   <p>Una <b>derivazione</b> in $p$ è un&rsquo;applicazione lineare $v$ dalle funzioni lisce ai numeri che soddisfa la regola di Leibniz:
-   $$v(fg)=v(f)\,g(p)+f(p)\,v(g).$$
-   <b>È la caratterizzazione algebrica di «derivata direzionale»</b>: lineare e con la regola del prodotto. Si definisce $T_pM$ come lo spazio delle derivazioni.</p>
-   $$T_pM=\Big\{v:C^{\infty}(M)\to\mathbb{R}\ \ \mathbb{R}\text{-lineare}\ :\ \forall f,g\in C^{\infty}(M)\ \ v(fg)=v(f)\,g(p)+f(p)\,v(g)\Big\}.$$
-   <p><b>Il vantaggio è immediato</b>: le derivazioni si sommano e si moltiplicano per scalari, quindi $T_pM$ <b>è</b> uno spazio vettoriale senza bisogno di dimostrarlo. <b>Lo svantaggio</b>: sembra non avere niente a che fare con le frecce.</p>`},
-   {label:'Perche sono la stessa cosa', body:R`
-   <p>A una curva $\gamma$ si associa la derivazione $f\mapsto\frac{d}{dt}\big|_0 f(\gamma(t))$: derivare $f$ lungo la curva. <b>La corrispondenza è biiettiva</b>, e la dimostrazione non banale è la suriettività: ogni derivazione viene da una curva. Si fa in carta, mostrando che una derivazione è determinata dai suoi valori sulle funzioni coordinate.</p>
-   <p><b>Un dettaglio tecnico che vale la pena notare</b>: la dimostrazione usa che una funzione liscia si scrive $f(x)=f(p)+\sum(x^i-p^i)g_i(x)$ con $g_i$ lisce (lemma di Hadamard), e per applicarla globalmente servono le <b>bump function di gd-05</b>. È il primo posto in cui la tappa precedente viene consumata davvero.</p>`}
-  ]},
-  {t:'prosa', title:'Perche i germi', tag:'idea', html:R`
-  <p>Diverio lavora con i <b>germi</b>: due funzioni lisce definiscono lo stesso germe in $p$ se coincidono su un intorno di $p$. La ragione è che una derivazione è un oggetto <b>locale</b> — dipende solo dal comportamento di $f$ vicino a $p$ — e i germi sono il modo di dirlo senza giri di parole.</p>
-  $$f\sim_p g\iff\exists U\ni p\ \text{aperto}\ :\ f|_U=g|_U,\qquad\text{e}\qquad f\sim_p g\ \Longrightarrow\ \forall v\in T_pM\ \ v(f)=v(g).$$
-  <p><b>Che sia davvero locale va dimostrato</b>, e la prova è graziosa: se $f\equiv0$ su un intorno $U$ di $p$, si prende una bump $\psi$ che vale $1$ fuori da $U$ e $0$ vicino a $p$; allora $f=\psi f$ ovunque, e per Leibniz $v(f)=v(\psi)f(p)+\psi(p)v(f)=0$. <b>Le bump servono anche qui</b>, e questo è il motivo per cui gd-05 viene prima.</p>`}
+  {t:'prosa', title:'La retta tangente, e in che senso e la migliore', tag:'first principles', html:R`
+  <p>Si parte da dove l&rsquo;intuizione funziona. Sia $f:I\to\mathbb{R}$ liscia, $\Gamma_f$ il suo grafico, $x_0\in I$ e $P=(x_0,f(x_0))$. La retta tangente a $\Gamma_f$ in $P$ è
+  $$y=f(x_0)+f'(x_0)(x-x_0),$$
+  e <b>«migliore approssimazione lineare» ha un senso preciso</b>, che conviene enunciare perché è l&rsquo;unico contenuto della frase. Per la formula di Taylor
+  $$f(x)=f(x_0)+f'(x_0)(x-x_0)+O\big((x-x_0)^{2}\big),$$
+  quindi mettendo $x$ nell&rsquo;equazione della retta invece che in $f$ si commette un errore <b>del secondo ordine</b>. Qualunque altra retta per $P$, con pendenza $m\neq f'(x_0)$, fa peggio: l&rsquo;errore vale $(f'(x_0)-m)(x-x_0)+O\big((x-x_0)^{2}\big)$, cioè è <b>del primo ordine</b>. <b>La tangente è l&rsquo;unica retta per $P$ il cui errore sparisce più in fretta della distanza</b>, e non c&rsquo;è niente di più da capire nella parola «tangente».</p>`},
+  {t:'prosa', title:'Lo stesso oggetto, guardato come un moto', tag:'idea', html:R`
+  <figure class="fig-nota">
+   <img src="gd-06-fig-01.svg" alt="Il grafico di f, la retta tangente in P, una curva c(t) che ci passa sopra e la sua velocita c'(0)">
+   <figcaption><b>Che cosa guardare.</b> Un punto si muove lungo il grafico e passa per $P$ al tempo $t=0$. <b>Qualunque sia il moto</b> — veloce, lento, avanti, indietro — la sua velocità punta lungo la retta tangente. Il disegno dice la cosa che la formula di Taylor non dice: la retta tangente non è una proprietà di $f$ soltanto, è <i>l&rsquo;insieme di tutte le velocità possibili</i> di tutti i moti che passano di lì.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>
+  <p>Si consideri dunque una curva liscia $c:(-\varepsilon,\varepsilon)\to\mathbb{R}^2$ con $c(t)\in\Gamma_f$ per ogni $t$ e $c(0)=P$. Poiché la traiettoria sta sul grafico, si scrive $c(t)=\big(c_1(t),f(c_1(t))\big)$, e derivando con la regola della catena
+  $$c'(0)=\big(\dot c_1(0),\ f'(x_0)\,\dot c_1(0)\big)=\dot c_1(0)\cdot\big(1,\ f'(x_0)\big).$$
+  <b>Qualunque sia il moto, la velocità è un multiplo del vettore $(1,f'(x_0))$</b>, che è il vettore direttore della retta tangente. E viceversa ogni multiplo si realizza: basta percorrere il grafico alla velocità giusta.</p>
+  <div class="note"><b>Per chi pensa in fisica.</b> Una pallina scorre senza attrito su un filo rigido piegato nella forma di $\Gamma_f$. Qualunque forza agisca, la pallina può muoversi <i>solo lungo il filo</i>, quindi la sua velocità è sempre tangente. La retta tangente è l&rsquo;insieme di tutte le velocità che la pallina può avere passando per $P$: niente di più, niente di meno.</div>`},
+  {t:'prosa', title:'I tre ingredienti, e quale dei tre non sopravvive', tag:'architettura', html:R`
+  <p>Guardando che cosa è servito per costruire la retta tangente a partire dai moti, si trovano <b>tre ingredienti</b>, e conviene separarli perché solo uno dà problemi:</p>
+  <ol>
+   <li><b>le curve che giacciono sull&rsquo;oggetto.</b> Ha senso su qualunque varietà: una curva su $M$ è semplicemente un&rsquo;applicazione liscia $\gamma:(-\varepsilon,\varepsilon)\to M$. <b>Nessun problema</b>;</li>
+   <li><b>la derivata di una curva.</b> Qui si rompe: $\gamma$ ha valori in $M$, e in $M$ non si sottraggono punti, quindi $\lim_{t\to0}\frac{\gamma(t)-p}{t}$ <b>non si può scrivere</b>;</li>
+   <li><b>il confronto fra moti diversi.</b> Si vuole poter dire che due curve «hanno la stessa velocità», e nel caso del grafico questo si leggeva confrontando due numeri.</li>
+  </ol>
+  <p>Il punto (2) è l&rsquo;unico ostacolo, e la via d&rsquo;uscita è quella che il corso usa da gd-02 in poi: <b>non si sa derivare su $M$, ma si sa derivare in carta</b>. Il programma di tutto il movimento è allora una frase sola: <b>lo spazio tangente in $p$ sarà l&rsquo;insieme di tutte le velocità possibili, in $p$, di tutti i moti possibili su $M$</b> — e «velocità» verrà definita passando per una carta, dopo aver verificato che la definizione non dipende dalla carta scelta.</p>`}
 ]},
 
-/* ---------------- 02 · LA BASE COORDINATA ---------------- */
-{ num:'02', title:'La base coordinata, e la dimensione', meta:'i vettori d/dx^i · dim T_pM = dim M · e come cambiano le componenti',
+/* ---------------- 02 · LA DEFINIZIONE ---------------- */
+{ num:'02', title:'La definizione: curve a contatto del primo ordine', meta:'il Lemma 3.3 · la classe di equivalenza · il contatto del primo ordine come o(t)',
   blocchi:[
-  {t:'prosa', title:'La base, e il cambio di base', tag:'grammatica', html:R`
-  <p>In una carta $(U,\varphi)$ con coordinate $x^1,\dots,x^n$ si definiscono le derivazioni
-  $$\left.\frac{\partial}{\partial x^{i}}\right|_p:\ f\ \longmapsto\ \frac{\partial(f\circ\varphi^{-1})}{\partial x^{i}}(\varphi(p)),$$
-  cioè «derivo rispetto alla $i$-esima coordinata, leggendo $f$ in carta». <b>Sono $n$ derivazioni indipendenti e generano tutto</b>: quindi $\dim T_pM=\dim M$, e ogni vettore si scrive $v=\sum v^{i}\frac{\partial}{\partial x^{i}}$.</p>
-  <p><b>Cambiando carta la base cambia</b>, e le componenti si trasformano con la <b>jacobiana della transizione</b>:
-  $$\tilde v^{j}=\sum_i\frac{\partial\tilde x^{j}}{\partial x^{i}}\,v^{i}.$$
-  <b>Questa formula è la definizione fisica di «vettore controvariante»</b>: in relatività e in meccanica analitica si <i>definisce</i> un vettore come un oggetto che si trasforma così. Qui non è una definizione: è un <b>teorema</b>, e l&rsquo;oggetto è stato costruito prima, senza coordinate.</p>
-  <div class="note"><b>Il punto di vista che questo corso insegna e che vale la pena portare via</b>: in fisica si dice «un vettore è ciò che si trasforma come un vettore», e sembra una circolarità. Qui si vede che non lo è: il vettore esiste come derivazione, indipendentemente da ogni carta, e la legge di trasformazione è <i>conseguenza</i> del cambio di base. <b>Le due frasi dicono la stessa cosa, ma solo una delle due spiega perché.</b></div>`}
+  {t:'prosa', title:'Il confronto in carta, e che non dipende dalla carta', tag:'teorema', html:R`
+  <p>Una <b>curva per $p$</b> è un&rsquo;applicazione liscia $\gamma:(-\varepsilon,\varepsilon)\to M$ con $\gamma(0)=p$. L&rsquo;$\varepsilon$ non è fissato una volta per tutte: ogni curva porta il suo, e restringerlo non cambia niente di ciò che ci interessa, perché tutto accade vicino a $t=0$ — <b>si restringerà tacitamente ogni volta che serve</b>, per esempio per far stare la curva dentro il dominio di una carta.</p>
+  <p>Se $(U,\varphi)$ è una carta in $p$, allora $\varphi\circ\gamma$ è una curva liscia in $\mathbb{R}^n$ definita per $|t|$ piccolo, e la sua velocità ordinaria $(\varphi\circ\gamma)'(0)\in\mathbb{R}^n$ <b>ha senso</b>. L&rsquo;idea naturale è dichiarare che due curve hanno la stessa velocità quando le loro immagini in carta ce l&rsquo;hanno. Prima di poterlo fare va controllato che non dipenda dalla carta, <b>altrimenti si starebbe definendo una proprietà delle carte e non di $M$</b>.</p>
+  <p><b>Lemma (3.3 delle note).</b> Siano $\gamma_1,\gamma_2$ curve per $p$ e $(U,\varphi)$, $(V,\psi)$ carte in $p$. Se $(\varphi\circ\gamma_1)'(0)=(\varphi\circ\gamma_2)'(0)$, allora anche $(\psi\circ\gamma_1)'(0)=(\psi\circ\gamma_2)'(0)$.</p>
+  <p><b>Dimostrazione.</b> Per $|t|$ piccolo $\gamma_i(t)\in U\cap V$, e là
+  $$\psi\circ\gamma_i=(\psi\circ\varphi^{-1})\circ(\varphi\circ\gamma_i),$$
+  dove la transizione $\psi\circ\varphi^{-1}$ è liscia fra aperti di $\mathbb{R}^n$. Adesso si è in $\mathbb{R}^n$, e la regola della catena ordinaria dà
+  $$(\psi\circ\gamma_i)'(0)=J_{\psi\circ\varphi^{-1}}(\varphi(p))\ (\varphi\circ\gamma_i)'(0),\qquad i=1,2.$$
+  <b>Le due velocità vengono moltiplicate per la stessa matrice</b>, quindi se erano uguali restano uguali. $\blacksquare$</p>
+  <p><b>Questa è esattamente la verifica che ogni definizione per classi richiede</b>, e vale la pena riconoscerla come tale: è la stessa mossa che su $\mathbb{Z}/3\mathbb{Z}$ controlla che la somma non dipenda dal rappresentante.</p>`},
+  {t:'prosa', title:'La definizione, e la figura che la spiega', tag:'grammatica', html:R`
+  <p>Si pone allora $\gamma_1\sim\gamma_2$ quando, in una carta qualunque in $p$, le due hanno la stessa velocità — e per il lemma «in una» equivale a «in tutte». È una relazione di equivalenza.</p>
+  <p><b>Definizione (3.4).</b> Lo <b>spazio tangente</b> a $M$ in $p$ è
+  $$T_{M,p}=\{\text{curve per }p\}\big/\!\sim,$$
+  e un <b>vettore tangente</b> è una classe $[\gamma]$.</p>
+  <figure class="fig-nota">
+   <img src="gd-06-fig-03.svg" alt="La varieta M con un aperto U, due curve gamma1 e gamma2 per p, e la carta phi che le manda in R^n dove hanno la stessa freccia rossa">
+   <figcaption><b>Che cosa guardare, ed è il cuore della costruzione.</b> A sinistra, su $M$, <b>non c&rsquo;è nessuna freccia disegnata</b> — e non è una mancanza del disegno: non c&rsquo;è proprio dove metterla. Le due curve $\gamma_1$ e $\gamma_2$ sono diverse. A destra, lette attraverso $\varphi$, hanno la stessa velocità ordinaria: la freccia rossa. <b>Il vettore tangente $[\gamma_1]=[\gamma_2]$ è la classe di tutte le curve che da quel lato danno quella freccia</b>, e la freccia vive in $\mathbb{R}^n$, non su $M$.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>
+  <p>Da adesso si scriverà anche $\gamma'(0)=[\gamma]$: è la notazione che diventerà comoda quando si differenzieranno le mappe, e per ora si tiene $[\gamma]$ perché ricorda che si sta maneggiando una <i>classe</i>.</p>`},
+  {t:'prosa', title:'Che cosa vuol dire davvero «stessa velocita»', tag:'idea', html:R`
+  <p>Due osservazioni che costano poco e tolgono due dubbi ricorrenti.</p>
+  <p><b>(a) Conta solo ciò che succede vicino a $t=0$.</b> Se due curve coincidono per $|t|$ piccolo hanno la stessa velocità; in particolare restringere l&rsquo;$\varepsilon$ non cambia il vettore tangente. <b>Il vettore tangente è un oggetto locale nel tempo</b>, non una proprietà della traiettoria intera.</p>
+  <p><b>(b) «Stessa velocità» significa contatto del primo ordine.</b> In una carta, $\gamma_1\sim\gamma_2$ se e solo se
+  $$\big\|\varphi(\gamma_1(t))-\varphi(\gamma_2(t))\big\|=o(t)\qquad (t\to0),$$
+  e lo si vede sviluppando entrambe al primo ordine: partono dallo stesso punto $\varphi(p)$, quindi la differenza è $\big((\varphi\circ\gamma_1)'(0)-(\varphi\circ\gamma_2)'(0)\big)t+o(t)$, e si annulla più in fretta di $t$ esattamente quando le due derivate coincidono. <b>In parole: i due punti in movimento lasciano $p$ insieme, e cominciano a separarsi solo al second&rsquo;ordine.</b> È la stessa nozione di «migliore approssimazione» della tappa 01, spostata dalla retta alla curva.</p>
+  <div class="note"><b>Il caso che chiude il cerchio.</b> Se $M=U$ è un aperto di $\mathbb{R}^n$ si può prendere la carta identica, e la definizione restituisce esattamente la velocità ordinaria: $T_{U,p}$ si identifica con $\mathbb{R}^n$. <b>La costruzione astratta non ha cambiato nulla dove già sapevamo la risposta</b>, ed è l&rsquo;unico modo di sapere che è quella giusta.</div>`}
 ]},
 
-/* ---------------- 03 · IL DIFFERENZIALE ---------------- */
-{ num:'03', title:'Il differenziale: la jacobiana senza coordinate', meta:'la definizione · in carta e la matrice jacobiana · la regola della catena · lesempio delle polari',
+/* ---------------- 03 · LA CARTA LEGGE I VETTORI ---------------- */
+{ num:'03', title:'La carta legge i vettori: la biiezione, e la struttura di spazio vettoriale', meta:'theta_phi e il Lemma 4.1 · il Lemma 4.2 e la jacobiana · la Proposizione 4.3 e lunicita',
   blocchi:[
-  {t:'prosa', title:'La definizione e il calcolo', tag:'costruzione', html:R`
-  <p>Data $F:M\to N$ liscia e $p\in M$, il <b>differenziale</b> $dF_p:T_pM\to T_{F(p)}N$ si definisce su una derivazione $v$ così:
-  $$dF_p(v)(f)=v(f\circ F).$$
-  In parole: <b>per derivare $f$ lungo l&rsquo;immagine, si deriva $f\circ F$ lungo l&rsquo;originale</b>. Sulle curve l&rsquo;interpretazione è ancora più semplice: la velocità della curva immagine.</p>
-  <p><b>In coordinate, $dF_p$ è la matrice jacobiana</b> di $\psi\circ F\circ\varphi^{-1}$ nel punto. Quindi tutta l&rsquo;algebra lineare che si conosce si applica: rango, nucleo, immagine, invertibilità. E la <b>regola della catena</b> diventa $d(G\circ F)_p=dG_{F(p)}\circ dF_p$: la composizione di mappe corrisponde al prodotto di matrici. <b>È l&rsquo;enunciato più pulito della regola della catena che si possa dare</b>, e non contiene indici.</p>
-  <p><b>L&rsquo;esempio da avere in mano</b>: il passaggio a coordinate polari $F(r,\theta)=(r\cos\theta,\ r\sin\theta)$ ha jacobiana
-  $$dF=\begin{pmatrix}\cos\theta&-r\sin\theta\\ \sin\theta&r\cos\theta\end{pmatrix},$$
-  con l&rsquo;entrata in alto a destra che è $-r\sin\theta$ e determinante che <b>vale $r$</b>. Il determinante si annulla in $r=0$: lì le polari non sono una carta, ed è la ragione per cui l&rsquo;origine va sempre esclusa. <b>Lo stesso $r$ è il fattore che compare nell&rsquo;integrale doppio in polari</b> — il determinante jacobiano di Analisi Vettoriale è questo differenziale.</p>`}
+  {t:'prosa', title:'La lettura in carta, e che e biiettiva', tag:'teorema', html:R`
+  <p>Fissata una carta $(U,\varphi)$ in $p$, si definisce
+  $$\theta_\varphi([\gamma])=(\varphi\circ\gamma)'(0),\qquad \theta_\varphi:T_{M,p}\to\mathbb{R}^n.$$
+  <b>È la lettura del vettore tangente attraverso quella carta</b>, e il simbolo merita un nome proprio perché da qui in poi regge tutto.</p>
+  <p><b>Lemma (4.1).</b> $\theta_\varphi$ è ben definita e biiettiva.</p>
+  <p><b>Dimostrazione.</b> Ben definita e <i>iniettiva</i> per la definizione stessa di $\sim$: due curve hanno la stessa immagine sotto $\theta_\varphi$ esattamente quando sono equivalenti — l&rsquo;iniettività non è un teorema, è la relazione letta al rovescio. Per la <i>suriettività</i> si prende $a\in\mathbb{R}^n$: poiché $\varphi(U)$ è aperto, il punto $\varphi(p)+ta$ gli appartiene per $|t|<\varepsilon$ con $\varepsilon$ piccolo, e
+  $$\gamma_a(t)=\varphi^{-1}\big(\varphi(p)+ta\big)$$
+  è una curva per $p$ — liscia, perché $\varphi^{-1}$ è liscia. Allora $\varphi\circ\gamma_a(t)=\varphi(p)+ta$ e $\theta_\varphi([\gamma_a])=a$. $\blacksquare$</p>
+  <p><b>$\gamma_a$ è la curva che, vista in carta, è il moto rettilineo con velocità $a$</b>: è la risposta standard a «esibisci una curva con quella velocità», e tornerà ogni volta che servirà costruire un vettore invece di riconoscerlo.</p>`},
+  {t:'prosa', title:'Due carte, due letture, e la jacobiana che le lega', tag:'teorema', html:R`
+  <p>Attenzione a una differenza che è facile perdere: <b>la relazione $\sim$ non dipende dalla carta, ma la biiezione $\theta_\varphi$ sì</b>. Lo stesso vettore tangente ha in generale immagini diverse sotto $\theta_\varphi$ e $\theta_\psi$. La buona notizia è che si sa esattamente come sono legate.</p>
+  <p><b>Lemma (4.2).</b> Per due carte $(U,\varphi)$ e $(V,\psi)$ in $p$,
+  $$\theta_\psi\circ\theta_\varphi^{-1}=J_{\psi\circ\varphi^{-1}}(\varphi(p)),$$
+  cioè le due letture differiscono per la <b>matrice jacobiana del cambio di carte</b> nel punto. In particolare $\theta_\psi\circ\theta_\varphi^{-1}:\mathbb{R}^n\to\mathbb{R}^n$ è un <b>isomorfismo lineare</b>.</p>
+  <p><b>Dimostrazione.</b> È il conto del Lemma 3.3 riletto: $\theta_\psi([\gamma])=(\psi\circ\gamma)'(0)=J_{\psi\circ\varphi^{-1}}(\varphi(p))\,\theta_\varphi([\gamma])$. E la jacobiana di un diffeomorfismo è invertibile. $\blacksquare$</p>
+  <figure class="fig-nota">
+   <img src="gd-06-fig-04.svg" alt="Lo stesso vettore tangente letto in due carte: a in quella di phi, b in quella di psi, legati dalla jacobiana del cambio">
+   <figcaption><b>Che cosa guardare.</b> Un solo oggetto su $M$ — la classe $[\gamma]$ — e <b>due numeri diversi</b>, $a$ a sinistra e $b$ a destra. Non è un&rsquo;ambiguità: è il fatto che un vettore non <i>è</i> una $n$-upla, ma diventa una $n$-upla appena si sceglie una carta. Il passaggio dall&rsquo;una all&rsquo;altra è lineare e invertibile, ed è precisamente perché è <b>lineare</b> che nella prossima proposizione le somme e i multipli non dipendono dalla scelta.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>`},
+  {t:'prosa', title:'La struttura di spazio vettoriale, e perche ce ne una sola', tag:'teorema', html:R`
+  <p>Finora $T_{M,p}$ è solo un insieme. Adesso diventa uno spazio vettoriale, e il modo in cui lo diventa è istruttivo.</p>
+  <p><b>Proposizione (4.3).</b> Esiste <b>una e una sola</b> struttura di spazio vettoriale reale su $T_{M,p}$ tale che, per ogni carta $(U,\varphi)$ in $p$, la biiezione $\theta_\varphi$ sia un isomorfismo lineare. In particolare $\dim T_{M,p}=n=\dim M$.</p>
+  <p><b>Dimostrazione.</b> Si fissa <i>una</i> carta $\varphi$ e si trasporta la struttura di $\mathbb{R}^n$:
+  $$v+w=\theta_\varphi^{-1}\big(\theta_\varphi(v)+\theta_\varphi(w)\big),\qquad \lambda v=\theta_\varphi^{-1}\big(\lambda\,\theta_\varphi(v)\big).$$
+  Con queste operazioni $T_{M,p}$ è uno spazio vettoriale — tutti gli assiomi si ereditano da $\mathbb{R}^n$ — e $\theta_\varphi$ è lineare per costruzione. Sia ora $(V,\psi)$ un&rsquo;altra carta: per il Lemma 4.2
+  $$\theta_\psi=\big(\theta_\psi\circ\theta_\varphi^{-1}\big)\circ\theta_\varphi=J_{\psi\circ\varphi^{-1}}(\varphi(p))\circ\theta_\varphi$$
+  è composizione di due isomorfismi lineari, quindi è un isomorfismo lineare anch&rsquo;essa. <b>Equivalentemente: avendo usato $\psi$ al posto di $\varphi$ si sarebbero ottenute la stessa somma e gli stessi multipli.</b> L&rsquo;unicità è chiara, perché già la richiesta che <i>una sola</i> $\theta_\varphi$ sia lineare determina le operazioni. $\blacksquare$</p>
+  <p><b>La morale, ed è il punto da portare via</b>: ogni carta offre un modo di leggere i vettori tangenti come $n$-uple; carte diverse danno letture diverse; <b>ma tutte differiscono per cambi lineari di coordinate, e un cambio lineare non cambia il significato di somme e multipli.</b> È per questo che la struttura è unica.</p>`},
+  {t:'prosa', title:'Le operazioni senza carte, e la somma vista in carta', tag:'idea', html:R`
+  <p>Vale la pena srotolare la definizione, perché due pezzi si descrivono <b>senza nominare carte</b> e questo dice che non sono artefatti della costruzione.</p>
+  <ul>
+   <li><b>il vettore nullo</b> è la velocità della curva costante $\gamma(t)\equiv p$: la velocità di un punto fermo;</li>
+   <li><b>la moltiplicazione per uno scalare</b> $\lambda\neq0$ è $\lambda[\gamma]=[\gamma_\lambda]$ con $\gamma_\lambda(t)=\gamma(\lambda t)$, cioè <b>lo stesso moto percorso $\lambda$ volte più in fretta</b> (all&rsquo;indietro se $\lambda<0$). Infatti $(\varphi\circ\gamma_\lambda)'(0)=\lambda\,(\varphi\circ\gamma)'(0)$, che su una coordinata si legge: la derivata in $0$ di $x_0+\lambda t$ volte la velocità, ovvero $2x_0\lambda$ per la coordinata $x\mapsto x^2$ letta lungo $x_0+\lambda t$. Si noti che $\gamma_\lambda$ è definita su $(-\varepsilon/|\lambda|,\varepsilon/|\lambda|)$: ecco dove serve poter restringere l&rsquo;$\varepsilon$.</li>
+  </ul>
+  <p>La <b>somma</b>, invece, una descrizione senza carte non ce l&rsquo;ha, e il disegno dice perché.</p>
+  <figure class="fig-nota">
+   <img src="gd-06-fig-05.svg" alt="La somma di due velocita vista in carta: la curva somma ha per velocita la diagonale del parallelogramma">
+   <figcaption><b>Che cosa guardare.</b> In carta si costruisce la curva $\varphi\circ\sigma=\varphi\circ\gamma_1+\varphi\circ\gamma_2-\varphi(p)$, e la sua velocità è la <b>diagonale del parallelogramma</b>. In un&rsquo;altra carta si otterrebbe una curva $\sigma$ <i>diversa</i>, ma con la <b>stessa velocità in $p$</b> — ed è esattamente ciò che la Proposizione 4.3 garantisce. La somma di due velocità è ben definita; la curva che la realizza no.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>`}
 ]},
 
-/* ---------------- 04 · IMMERSIONI, SUBMERSIONI, RANGO ---------------- */
-{ num:'04', title:'Immersioni, sommersioni e rango costante', meta:'le definizioni · i due teoremi di forma normale · e la figura otto',
+/* ---------------- 04 · I VETTORI COORDINATI ---------------- */
+{ num:'04', title:'I vettori coordinati, e il cambio di coordinate', meta:'la Definizione 5.1 · le componenti come derivate delle coordinate · la Proposizione 5.2',
+  blocchi:[
+  {t:'prosa', title:'Una carta non da solo la struttura: da una base', tag:'grammatica', html:R`
+  <p>Sia $(U,\varphi)$ una carta in $p$, con funzioni componenti $\varphi=(x^1,\dots,x^n)$.</p>
+  <p><b>Definizione (5.1).</b> Detta $e_1,\dots,e_n$ la base canonica di $\mathbb{R}^n$, i <b>vettori coordinati</b> in $p$ associati alla carta sono
+  $$\left.\frac{\partial}{\partial x^{i}}\right|_p=\theta_\varphi^{-1}(e_i),\qquad i=1,\dots,n.$$
+  <p>Geometricamente $\partial/\partial x^i|_p$ è la velocità in $t=0$ della <b>$i$-esima curva coordinata</b> $t\mapsto\varphi^{-1}(\varphi(p)+te_i)$: il moto lungo cui cambia solo la $i$-esima coordinata, a velocità unitaria, mentre tutte le altre restano congelate. <b>È la curva $\gamma_a$ del Lemma 4.1 con $a=e_i$</b>, e per il momento il simbolo $\partial/\partial x^i|_p$ è soltanto un nome: che sia un nome <i>ben scelto</i> si vedrà nella tappa 06.</p>
+  <figure class="fig-nota">
+   <img src="gd-06-fig-06.svg" alt="La griglia coordinata tirata indietro da phi inverso su M, e i due vettori coordinati in p come velocita delle curve coordinate">
+   <figcaption><b>Che cosa guardare.</b> La griglia a destra è quadrata perché è in $\mathbb{R}^2$; a sinistra è la sua controimmagine tramite $\varphi$, e <b>si è storta</b>. I vettori coordinati in $p$ sono le velocità delle due curve della griglia che passano per $p$. <b>Non c&rsquo;è nessuna ragione perché siano perpendicolari o di lunghezza uno</b>: la griglia storta è la regola, non l&rsquo;eccezione — e su una varietà astratta «perpendicolare» e «lungo uno» non hanno nemmeno senso.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>
+  <p>Poiché $\theta_\varphi$ è un isomorfismo lineare, i vettori coordinati sono una <b>base</b> di $T_{M,p}$. E le componenti di un vettore su quella base si leggono subito: se $v=[\gamma]$ e si scrive $\gamma^i=x^i\circ\gamma$ per le coordinate del punto in movimento, allora $\theta_\varphi([\gamma])=(\dot\gamma^1(0),\dots,\dot\gamma^n(0))$, cioè
+  $$[\gamma]=\sum_{i=1}^{n}\dot\gamma^{i}(0)\,\left.\frac{\partial}{\partial x^{i}}\right|_p.$$
+  <b>Le componenti di una velocità sono le derivate delle coordinate del punto in movimento</b>, come in un primo corso di meccanica. Non c&rsquo;è niente di più, e questa frase è tutto il contenuto operativo della definizione.</p>`},
+  {t:'prosa', title:'Che succede cambiando carta', tag:'teorema', html:R`
+  <p>Sia $(V,\psi)$ un&rsquo;altra carta in $p$, con $\psi=(y^1,\dots,y^n)$. Seguendo l&rsquo;abuso di notazione consueto si scrive il cambio di carte $\psi\circ\varphi^{-1}$ come $y=y(x)$, cioè si pensano le nuove coordinate $y^i=y^i(x^1,\dots,x^n)$ come funzioni delle vecchie; le entrate della jacobiana $J_{\psi\circ\varphi^{-1}}$ sono allora le derivate parziali $\partial y^i/\partial x^j$.</p>
+  <p><b>Proposizione (5.2).</b> Se $v\in T_{M,p}$ ha componenti $(v^j)$ rispetto a $\varphi$ e $(w^i)$ rispetto a $\psi$, allora
+  $$w^{i}=\sum_{j=1}^{n}\frac{\partial y^{i}}{\partial x^{j}}(\varphi(p))\,v^{j},$$
+  e i vettori coordinati si trasformano con
+  $$\left.\frac{\partial}{\partial x^{j}}\right|_p=\sum_{i=1}^{n}\frac{\partial y^{i}}{\partial x^{j}}(\varphi(p))\left.\frac{\partial}{\partial y^{i}}\right|_p.$$
+  <b>Dimostrazione.</b> La prima è il Lemma 4.2 scritto in componenti. La seconda si ottiene applicando la prima a $v=\partial/\partial x^j|_p$, le cui componenti rispetto a $\varphi$ sono $v^k=\delta_{jk}$. $\blacksquare$</p>
+  <p><b>Queste due formule sono la definizione fisica di «vettore controvariante»</b>: in relatività e in meccanica analitica si <i>definisce</i> un vettore come un oggetto che si trasforma così. Qui non è una definizione: è un <b>teorema</b>, e l&rsquo;oggetto è stato costruito prima, senza coordinate. La seconda formula <i>sembra</i> la regola della catena — e nella tappa 06 si vedrà che lo è letteralmente.</p>
+  <div class="note"><b>Il punto di vista che vale la pena portare via.</b> In fisica si dice «un vettore è ciò che si trasforma come un vettore», e sembra una circolarità. Qui si vede che non lo è: il vettore esiste come classe di curve, indipendentemente da ogni carta, e la legge di trasformazione è <i>conseguenza</i> del cambio di base. <b>Le due frasi dicono la stessa cosa, ma solo una delle due spiega perché.</b></div>`}
+]},
+
+/* ---------------- 05 · LE POLARI ---------------- */
+{ num:'05', title:'Lesempio che toglie un equivoco: le coordinate polari', meta:'d/dr e d/dtheta calcolati · la verifica cinematica · e perche non sono ne unitari ne ortogonali',
+  blocchi:[
+  {t:'prosa', title:'Il conto, fatto fino in fondo', tag:'esempio', html:R`
+  <p>Su $\mathbb{R}^2$ si prendano la carta identica, con coordinate $(x,y)$, e la carta polare $(r,\theta)$, definita su $\mathbb{R}^2$ meno la semiretta chiusa $\{(x,0):x\le0\}$, con inversa $(r,\theta)\mapsto(r\cos\theta,\ r\sin\theta)$.</p>
+  <p>Applicando la Proposizione 5.2 con $x=r\cos\theta$ e $y=r\sin\theta$, i coefficienti sono le derivate parziali di queste due, e vengono funzioni delle coordinate <i>polari</i> di $p$. Ma i vettori coordinati a destra sono quelli <i>cartesiani</i>, quindi è più coerente esprimere tutto nelle coordinate cartesiane di $p$, usando
+  $$r=\sqrt{x^2+y^2},\qquad \cos\theta=\frac{x}{\sqrt{x^2+y^2}},\qquad \sin\theta=\frac{y}{\sqrt{x^2+y^2}}.$$
+  Si ottiene
+  $$\left.\frac{\partial}{\partial r}\right|_p=\frac{x}{\sqrt{x^2+y^2}}\left.\frac{\partial}{\partial x}\right|_p+\frac{y}{\sqrt{x^2+y^2}}\left.\frac{\partial}{\partial y}\right|_p,\qquad
+  \left.\frac{\partial}{\partial\theta}\right|_p=-y\left.\frac{\partial}{\partial x}\right|_p+x\left.\frac{\partial}{\partial y}\right|_p.$$
+  Identificando $T_{\mathbb{R}^2,p}=\mathbb{R}^2$: il vettore $\partial/\partial r|_p=(x,y)/\sqrt{x^2+y^2}$ è il versore che punta via dall&rsquo;origine, e $\partial/\partial\theta|_p=(-y,x)$ è il vettore posizione di $p$ <b>ruotato di un angolo retto</b>.</p>`},
+  {t:'prosa', title:'La verifica cinematica, e la lezione', tag:'first principles', html:R`
+  <p>Conviene ricontrollare per via cinematica, perché è lì che si vede la cosa che conta. La <b>curva coordinata $\theta$</b> per $p=(r\cos\theta_0,\ r\sin\theta_0)$ è
+  $$t\longmapsto\big(r\cos(\theta_0+t),\ r\sin(\theta_0+t)\big),$$
+  cioè un punto che corre sulla circonferenza di raggio $r$ con velocità angolare unitaria. Derivando in $t=0$ si ottiene $(-y,\ x)$, la cui lunghezza è $\sqrt{(-r\sin\theta_0)^2+(r\cos\theta_0)^2}$, che <b>ha lunghezza $r$, non $1$</b>. La <b>curva coordinata $r$</b> è invece $t\mapsto\big((r+t)\cos\theta_0,\ (r+t)\sin\theta_0\big)$, un punto che si allontana radialmente a velocità unitaria, e derivando dà $(\cos\theta,\ \sin\theta)$, di lunghezza uno.</p>
+  <figure class="fig-nota">
+   <img src="gd-06-fig-07.svg" alt="I vettori coordinati polari in p: d/dr lungo il raggio di lunghezza 1, d/dtheta tangente al cerchio di lunghezza r">
+   <figcaption><b>Che cosa guardare, ed è l&rsquo;equivoco che questa figura toglie.</b> I due vettori sono disegnati con lunghezze <i>diverse</i>: $\partial/\partial r$ ha lunghezza $1$, $\partial/\partial\theta$ ha lunghezza $r$. <b>I vettori coordinati non hanno nessuna ragione di avere lunghezza uno, né di essere ortogonali</b> — qui sono ortogonali per caso, perché le polari sono una carta ortogonale, ma la lunghezza già non torna. Su una varietà astratta la domanda non si pone nemmeno: <b>lunghezze e angoli non esistono ancora</b>, perché non c&rsquo;è una metrica.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>
+  <p><b>Perché l&rsquo;equivoco è dannoso e non innocuo</b>: in fisica si usano quasi sempre i versori $\hat r,\hat\theta$, che sono i vettori coordinati <i>normalizzati</i>, e si scrivono le velocità come $\dot r\,\hat r+r\dot\theta\,\hat\theta$. Quel fattore $r$ che compare nella seconda componente <b>è esattamente la lunghezza di $\partial/\partial\theta$</b>, rimessa a mano dopo averla tolta normalizzando. Chi confonde i due oggetti si trova dei fattori $r$ che compaiono e scompaiono senza ragione apparente.</p>`}
+]},
+
+/* ---------------- 06 · IL DIFFERENZIALE ---------------- */
+{ num:'06', title:'Il differenziale: si spinge avanti la curva', meta:'la Definizione 6.1 · ben posto e lineare · la jacobiana in coordinate · le quattro proprieta',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e perche e la piu naturale possibile', tag:'costruzione', html:R`
+  <p>Qui si raccoglie il frutto della definizione per curve.</p>
+  <p><b>Definizione (6.1).</b> Sia $F:M\to N$ liscia e $p\in M$. Il <b>differenziale</b> di $F$ in $p$ è
+  $$d_pF:T_{M,p}\to T_{N,F(p)},\qquad d_pF\big([\gamma]\big)=[F\circ\gamma].$$
+  <b>In parole: per spingere avanti una velocità, si spinge avanti il moto e se ne prende la velocità.</b> Non c&rsquo;è niente da inventare — ed è questo il vantaggio della definizione per curve rispetto a quella per derivazioni, dove il differenziale va definito con una formula.</p>
+  <figure class="fig-nota">
+   <img src="gd-06-fig-08.svg" alt="Il differenziale manda la velocita di gamma nella velocita della curva immagine F composto gamma">
+   <figcaption><b>Che cosa guardare.</b> Nessuna formula: una curva su $M$, la sua immagine su $N$, e le due velocità. <b>Il differenziale è questo disegno</b>, e la Proposizione 6.2 serve soltanto a verificare che il risultato non dipenda da quale curva della classe si è presa.
+   <span class="fonte">Figura di S. Diverio, note del corso 2026/27, ri-colorata.</span></figcaption>
+  </figure>
+  <p><b>Proposizione (6.2).</b> $d_pF$ è ben definito e lineare. Più precisamente, siano $(U,\varphi)$ una carta in $p$ e $(V,\psi)$ una carta in $F(p)$ con $F(U)\subseteq V$, e sia $\widehat F=\psi\circ F\circ\varphi^{-1}$ il <b>rappresentante locale</b> di $F$. Allora
+  $$\theta_\psi\circ d_pF=J_{\widehat F}(\varphi(p))\circ\theta_\varphi,$$
+  equivalentemente
+  $$d_pF\left(\left.\frac{\partial}{\partial x^{j}}\right|_p\right)=\sum_{i=1}^{m}\frac{\partial\widehat F^{i}}{\partial x^{j}}(\varphi(p))\left.\frac{\partial}{\partial y^{i}}\right|_{F(p)}:$$
+  <b>la matrice di $d_pF$ rispetto alle basi coordinate è la jacobiana del rappresentante locale.</b></p>
+  <p><b>Dimostrazione.</b> Per continuità si può sempre restringere $U$ in modo che $F(U)\subseteq V$. Data una curva $\gamma$ per $p$, per $|t|$ piccolo vale $\psi\circ F\circ\gamma=\widehat F\circ(\varphi\circ\gamma)$, e la regola della catena in $\mathbb{R}^n$ dà
+  $$\theta_\psi\big([F\circ\gamma]\big)=(\psi\circ F\circ\gamma)'(0)=J_{\widehat F}(\varphi(p))\,(\varphi\circ\gamma)'(0)=J_{\widehat F}(\varphi(p))\,\theta_\varphi\big([\gamma]\big).$$
+  Il membro di destra dipende solo da $[\gamma]$, e $\theta_\psi$ è iniettiva: quindi $[F\circ\gamma]$ dipende solo da $[\gamma]$, cioè <b>$d_pF$ è ben definito</b>. E la formula dice che $d_pF=\theta_\psi^{-1}\circ J_{\widehat F}(\varphi(p))\circ\theta_\varphi$ è composizione di applicazioni lineari, quindi è lineare. $\blacksquare$</p>`},
+  {t:'prosa', title:'Il cambio di notazione, e le quattro proprieta', tag:'grammatica', html:R`
+  <p>Da qui in poi si scrive $\gamma'(0)=[\gamma]$, come annunciato. Con questa notazione la Definizione 6.1 si legge
+  $$d_pF\big(\gamma'(0)\big)=(F\circ\gamma)'(0),$$
+  <b>che è la forma più intuitiva possibile della regola della catena</b>. Più in generale, se $\gamma:I\to M$ è liscia e $t_0\in I$, la velocità in $t_0$ è $\gamma'(t_0)=\big[s\mapsto\gamma(t_0+s)\big]\in T_{M,\gamma(t_0)}$, e per ogni $t$ vale $(F\circ\gamma)'(t)=d_{\gamma(t)}F\big(\gamma'(t)\big)$.</p>
+  <p><b>Proposizione (6.3).</b> Quattro proprietà, e la dimostrazione di ciascuna è una riga perché con le velocità è <i>associatività della composizione</i>:</p>
+  <ol>
+   <li><b>catena:</b> se $F:M\to N$ e $G:N\to P$ sono lisce, $d_p(G\circ F)=d_{F(p)}G\circ d_pF$. Infatti per ogni curva $\gamma$ per $p$: $d_p(G\circ F)([\gamma])=[G\circ(F\circ\gamma)]=d_{F(p)}G([F\circ\gamma])=d_{F(p)}G\big(d_pF([\gamma])\big)$;</li>
+   <li><b>identità:</b> $d_p(\mathrm{id}_M)=\mathrm{id}_{T_{M,p}}$, ovvio dalla definizione;</li>
+   <li><b>diffeomorfismi:</b> se $F$ è un diffeomorfismo, $d_pF$ è un isomorfismo, con inverso $d_{F(p)}(F^{-1})$ — si applicano (1) e (2) a $F^{-1}\circ F=\mathrm{id}_M$ e $F\circ F^{-1}=\mathrm{id}_N$;</li>
+   <li><b>aperti:</b> se $W\subseteq M$ è aperto, $p\in W$ e $\iota:W\to M$ è l&rsquo;inclusione, allora $d_p\iota:T_{W,p}\to T_{M,p}$ è un isomorfismo. Ogni curva in $M$ per $p$ sta in $W$ per $|t|$ piccolo, quindi dopo aver ristretto l&rsquo;$\varepsilon$ è una curva in $W$: $d_p\iota$ è suriettiva, e le due dimensioni coincidono.</li>
+  </ol>
+  <p>Grazie a (4) <b>si identifica sempre $T_{W,p}$ con $T_{M,p}$</b>, e lo si fa senza dirlo. E da (3) segue una conseguenza tutt&rsquo;altro che ovvia a mani nude: <b>due varietà diffeomorfe hanno la stessa dimensione</b>.</p>
+  <p><b>L&rsquo;esempio da avere in mano</b>, che collega tutto a quello che già si sa: il passaggio a coordinate polari $F(r,\theta)=(r\cos\theta,\ r\sin\theta)$ ha per rappresentante locale sé stesso, e jacobiana
+  $$J_F=\begin{pmatrix}\cos\theta&-r\sin\theta\\ \sin\theta&r\cos\theta\end{pmatrix},$$
+  con l&rsquo;entrata in alto a destra che è $-r\sin\theta$ e determinante che <b>vale $r$</b>. Il determinante si annulla in $r=0$: lì le polari non sono una carta, ed è la ragione per cui l&rsquo;origine va sempre esclusa. <b>Lo stesso $r$ è il fattore che compare nell&rsquo;integrale doppio in polari</b> — il determinante jacobiano di Analisi Vettoriale è questo differenziale.</p>`},
+  {t:'prosa', title:'Le velocita derivano le funzioni, e il nome era ben scelto', tag:'idea', html:R`
+  <p>Sia $f:M\to\mathbb{R}$ liscia. Allora $d_pf:T_{M,p}\to T_{\mathbb{R},f(p)}=\mathbb{R}$ è una forma lineare, data da
+  $$d_pf\big(\gamma'(0)\big)=(f\circ\gamma)'(0)=\left.\frac{d}{dt}\right|_{t=0}f(\gamma(t)).$$
+  <b>È il tasso di variazione di $f$ sentito da un punto che passa per $p$ con quella velocità</b>: la derivata di $f$ nella direzione del vettore tangente.</p>
+  <p>Calcolandola sui vettori coordinati — Proposizione 6.2 con $N=\mathbb{R}$ e $\psi=\mathrm{id}$ — si ottiene
+  $$d_pf\left(\left.\frac{\partial}{\partial x^{i}}\right|_p\right)=\frac{\partial\widehat f}{\partial x^{i}}(\varphi(p)),\qquad \widehat f=f\circ\varphi^{-1}.$$
+  <b>Il vettore coordinato $\partial/\partial x^i|_p$, dato in pasto al differenziale di una funzione, restituisce esattamente la derivata parziale rispetto alla $i$-esima coordinata</b>: il nome era ben scelto, e adesso si sa perché.</p>
+  <p>E dando entrambi i membri della seconda formula della Proposizione 5.2 in pasto a $d_pf$, si vede che quella formula <b>è</b> la regola della catena:
+  $$\frac{\partial\widehat f}{\partial x^{j}}=\sum_{i}\frac{\partial\widetilde f}{\partial y^{i}}\frac{\partial y^{i}}{\partial x^{j}},\qquad \widetilde f=f\circ\psi^{-1}.$$
+  <b>Non assomigliava alla regola della catena: lo era.</b></p>`}
+]},
+
+/* ---------------- 07 · IMMERSIONI, SOMMERSIONI, RANGO ---------------- */
+{ num:'07', title:'Immersioni, sommersioni e rango costante', meta:'le definizioni · i due teoremi di forma normale · e la figura otto',
   blocchi:[
   {t:'prosa', title:'Le definizioni, e cosa dicono davvero', tag:'grammatica', html:R`
-  <p>Si classifica $F$ in base al <b>rango</b> di $dF_p$:</p>
+  <p>Avendo il differenziale come applicazione lineare, si classifica $F$ in base al <b>rango</b> di $d_pF$:</p>
   <ul>
-   <li><b>immersione</b>: $dF_p$ è <b>iniettivo</b> per ogni $p$. Localmente $F$ «infila» $M$ dentro $N$ senza schiacciarla;</li>
-   <li><b>sommersione</b>: $dF_p$ è <b>suriettivo</b> per ogni $p$. Localmente $F$ proietta $M$ su $N$;</li>
-   <li><b>rango costante</b>: $\operatorname{rk}dF_p$ non dipende da $p$ (le prime due sono casi particolari).</li>
+   <li><b>immersione</b>: $d_pF$ è <b>iniettivo</b> per ogni $p$. Localmente $F$ «infila» $M$ dentro $N$ senza schiacciarla;</li>
+   <li><b>sommersione</b>: $d_pF$ è <b>suriettivo</b> per ogni $p$. Localmente $F$ proietta $M$ su $N$;</li>
+   <li><b>rango costante</b>: $\operatorname{rk}d_pF$ non dipende da $p$ (le prime due sono casi particolari).</li>
   </ul>
-  $$F\ \text{immersione}\iff\forall p\in M\ \ dF_p\ \text{iniettivo},\qquad F\ \text{sommersione}\iff\forall p\in M\ \ dF_p\ \text{surgettivo}.$$
+  $$F\ \text{immersione}\iff\forall p\in M\ \ d_pF\ \text{iniettivo},\qquad F\ \text{sommersione}\iff\forall p\in M\ \ d_pF\ \text{surgettivo}.$$
   <p><b>Il teorema del rango costante</b> dice che in quei casi esistono carte in cui $F$ si scrive nella <b>forma più semplice possibile</b>:
   $$(x^1,\dots,x^n)\ \longmapsto\ (x^1,\dots,x^k,0,\dots,0).$$
   <b>Cioè: a meno di cambi di coordinate, una mappa di rango costante è una proiezione seguita da un&rsquo;inclusione.</b> È il teorema più potente della tappa: riduce lo studio locale di qualunque mappa di rango costante a un&rsquo;unica forma normale.</p>
-  <p>Due corollari che si usano continuamente: se $dF_p$ è <b>invertibile</b>, $F$ è un diffeomorfismo locale (<b>teorema di invertibilità locale</b> — e si vede subito perché $t\mapsto t^3$ di gd-04 fallisce in $0$); se $F$ è una <span class="str" data-str="sommersione">sommersione</span>, le sue <b>fibre</b> sono sottovarietà, di dimensione $\dim M-\dim N$ — ed è l&rsquo;enunciato che il criterio del <span class="str" data-str="valore-regolare">valore regolare</span> rende operativo, perché trasforma la verifica di «questo insieme è una sottovarietà» in un conto di derivate.</p>`},
-  {t:'prosa', title:'La figura otto: immersione si, sottovarieta no', tag:'idea', html:R`
+  <p>Due corollari che si usano continuamente: se $d_pF$ è <b>invertibile</b>, $F$ è un diffeomorfismo locale (<b>teorema di invertibilità locale</b> — e si vede subito perché $t\mapsto t^3$ di gd-04 fallisce in $0$); se $F$ è una <span class="str" data-str="sommersione">sommersione</span>, le sue <b>fibre</b> sono sottovarietà, di dimensione $\dim M-\dim N$ — ed è l&rsquo;enunciato che il criterio del <span class="str" data-str="valore-regolare">valore regolare</span> rende operativo, perché trasforma la verifica di «questo insieme è una sottovarietà» in un conto di derivate.</p>`},
+  {t:'prosa', title:'La figura otto: immersione si, sottovarieta no', tag:'trappola', html:R`
   <p>La curva $\gamma(t)=(\sin2t,\ \sin t)$ su $(-\pi,\pi)$ disegna una <b>figura a otto</b>. La sua velocità è $(2\cos 2t,\ \cos t)$, che <b>non si annulla mai</b> — le due componenti non hanno zeri comuni — quindi $\gamma$ è un&rsquo;<b>immersione iniettiva</b>.</p>
   <p><b>Eppure l&rsquo;immagine non è una sottovarietà</b>: nel punto di incrocio ogni intorno ha quattro rami, e non è omeomorfo a un intervallo. L&rsquo;errore sta nel credere che «immersione iniettiva» implichi «l&rsquo;immagine è una sottovarietà»: <b>manca una condizione topologica</b>, e la curva la viola perché i due estremi del dominio si avvicinano allo stesso punto dell&rsquo;immagine.</p>
-  <p>La condizione che manca è la <span class="str" data-str="applicazione-propria">propriezza</span>: la controimmagine di ogni compatto deve essere compatta, e qui non lo è — un disco chiuso attorno al punto di incrocio ha per controimmagine dei $t$ che si accumulano sui due estremi del dominio, dove non c&rsquo;è nessun punto che li raccolga. <b>Questo esempio è il motivo per cui quel movimento esiste</b>: senza, si crederebbe che immergere basti.</p>`},
+  <p>La condizione che manca è la <span class="str" data-str="applicazione-propria">propriezza</span>: la controimmagine di ogni compatto deve essere compatta, e qui non lo è — un disco chiuso attorno al punto di incrocio ha per controimmagine dei $t$ che si accumulano sui due estremi del dominio, dove non c&rsquo;è nessun punto che li raccolga.</p>`},
   {t:'plot', title:'La figura otto: velocita mai nulla, e un punto che rovina tutto',
    intro:R`La curva $(\sin 2t,\ \sin t)$ per $t\in(-\pi,\pi)$: iniettiva, con velocità mai nulla, e con un&rsquo;immagine che non è una sottovarietà.`,
    plots:[
@@ -411,59 +721,50 @@ CONTROLLO*/
    <b>La lezione da portare avanti</b>: le condizioni sul differenziale controllano il comportamento <i>locale</i> nel dominio, e non dicono nulla su come l&rsquo;immagine si richiude su se stessa. Ogni volta che in questo corso si vuole concludere qualcosa <b>sull&rsquo;immagine</b>, serve un&rsquo;ipotesi topologica in più — ed è sempre la stessa: la propriezza.`}
 ]},
 
-/* ---------------- 04b · LA TERZA DEFINIZIONE, E PERCHE SONO TRE ---------------- */
-{ num:'04b', title:'La terza definizione, e perche i libri ne danno tre', meta:'le derivazioni · le curve · le componenti con legge di trasformazione · quale conviene quando',
+/* ---------------- 08 · LE ALTRE DUE DEFINIZIONI ---------------- */
+{ num:'08', title:'Le altre due definizioni, e perche i libri ne danno tre', meta:'le derivazioni di Lee · le componenti dei fisici · e il dizionario per leggere il libro',
   blocchi:[
-  {t:'prosa', title:'Tre definizioni dello stesso oggetto', tag:'architettura', html:R`
-  <p>Il vettore tangente è definito, nei testi, in tre modi diversi. <b>Sono equivalenti</b>, e nessuno dei tre è «il vero»: ciascuno è comodo per cose diverse, e sapere passare dall&rsquo;uno all&rsquo;altro vale più che padroneggiarne uno solo.</p>
-  <ul>
-   <li><b>come classe di curve</b>: due curve passanti per $p$ sono equivalenti se in una carta — cioè attraverso un <span class="str" data-str="omeomorfismo">omeomorfismo</span> su un aperto euclideo — hanno la stessa derivata in quel punto. È la definizione più intuitiva — un vettore è una velocità — e la più comoda per <i>costruire</i> vettori: basta esibire una curva;</li>
-   <li><b>come derivazione</b>: un&rsquo;applicazione lineare $v$ dalle funzioni lisce ai reali che soddisfa la regola di Leibniz $v(fg)=f(p)v(g)+g(p)v(f)$. È la definizione più astratta e la più comoda per <i>dimostrare</i>: non nomina carte, quindi tutto ciò che si prova con essa è automaticamente indipendente dalle coordinate;</li>
-   <li><b>come $n$-upla di componenti con legge di trasformazione</b>: un vettore è un elenco di numeri $(v^{1},\dots,v^{n})$ associato a una carta, con la regola che cambiando carta le componenti diventano $\tilde v^{i}=\sum_j\frac{\partial\tilde x^{i}}{\partial x^{j}}v^{j}$. È la definizione dei fisici, ed è la più comoda per <i>calcolare</i>.</li>
-  </ul>
-  <p><b>Il fatto che le tre siano equivalenti non è ovvio e va dimostrato</b>, ed è il contenuto tecnico del movimento. L&rsquo;equivalenza fra curve e derivazioni richiede il lemma di Hadamard; quella fra derivazioni e componenti è il conto che identifica la base coordinata. <b>Ogni testo sceglie una delle tre come definizione e dimostra le altre due come teoremi</b>: Lee parte dalle derivazioni, molti corsi italiani dalle curve, i testi di fisica dalle componenti. Sapere che sono la stessa cosa permette di leggere qualunque libro senza restare spiazzati dalla prima pagina.</p>
-  <p><b>La terza è quella che in relatività generale compare per prima</b>, spesso nella forma «un vettore è un oggetto che si trasforma come un vettore», che agli studenti di matematica suona circolare e non lo è: è la definizione per <i>proprietà di trasformazione</i>, e dice esattamente quale insieme di numeri merita quel nome. La sua equivalenza con le altre due è il contenuto della tappa 02 di questo movimento, dove si è visto che le componenti nella base coordinata si trasformano proprio con la jacobiana della transizione.</p>`},
-  {t:'reveal', title:'Come si passa da una allaltra, in pratica', tag:'metodo', steps:[
-   {label:'Da curva a derivazione', body:R`
-   <p>Data una curva $\gamma$ con $\gamma(0)=p$, la derivazione associata è</p>
-   $$v(f)=\left.\frac{d}{dt}\right|_{t=0}f(\gamma(t)),$$
-   <p>cioè «deriva $f$ lungo la curva». La regola di Leibniz si eredita dalla regola del prodotto per le funzioni di una variabile: $\frac{d}{dt}(fg)(\gamma(t))=f\dot g+g\dot f$, valutata in $t=0$. <b>Non c&rsquo;è niente da verificare che non sia il calcolo di base</b>, ed è il motivo per cui questa direzione è sempre facile.</p>`},
-   {label:'Da derivazione a componenti', body:R`
-   <p>Fissata una carta, si applicano la derivazione alle funzioni coordinate: $v^{i}=v(x^{i})$. Questi $n$ numeri determinano $v$ completamente, perché ogni funzione liscia si scrive (localmente, per il lemma di Hadamard) come</p>
-   $$f(x)=f(p)+\sum_i (x^{i}-p^{i})\,h_i(x),\qquad h_i(p)=\frac{\partial f}{\partial x^{i}}(p),$$
-   <p>e applicando $v$ e usando Leibniz i termini si semplificano lasciando $v(f)=\sum_i v^{i}\frac{\partial f}{\partial x^{i}}(p)$. <b>È questo conto che dimostra che $\{\partial/\partial x^{i}\}$ è una base</b>, e quindi che $\dim T_pM=n$.</p>
-   <p><b>Il punto tecnico nascosto</b>, che è anche il motivo per cui la definizione con le derivazioni funziona solo nel caso liscio: il lemma di Hadamard richiede $C^{\infty}$. Se si lavorasse con funzioni $C^{k}$, lo spazio delle derivazioni risulterebbe di dimensione <b>infinita</b>, e la teoria si romperebbe. <b>È una delle ragioni serie per cui si chiede la levigatezza infinita</b> e non ci si accontenta di $C^{1}$.</p>`},
-   {label:'Da componenti a curva', body:R`
-   <p>Il verso più semplice: date le componenti $(v^{i})$ in una carta $\varphi$, si prende la curva</p>
-   $$\gamma(t)=\varphi^{-1}\left(\varphi(p)+t\,v\right),$$
-   <p>cioè un segmento letto in carta e riportato sulla varietà. <b>Esiste sempre</b>, almeno per $t$ abbastanza piccolo da restare dentro $\varphi(U)$ — che è aperto, quindi contiene un intorno del punto — ed è la ragione per cui la corrispondenza fra vettori e classi di curve è suriettiva. Non è unica: infinite curve hanno la stessa velocità, e infatti la definizione è per classi di equivalenza.</p>
-   <p><b>Questa costruzione è più utile di quanto sembri</b>, perché è il modo standard di trasformare un problema «esiste una curva con la proprietà tale?» in un problema di analisi in $\mathbb{R}^{n}$. Riapparirà con le curve integrali di un campo di vettori, dove l'esistenza locale sarà garantita dal teorema di Cauchy letto in carta — con la stessa identica mossa: si scende in carta, si usa un teorema di analisi, si risale.</p>`}
-  ]},
-  {t:'prosa', title:'Perche non si puo dire che un vettore e una freccia', tag:'first principles', html:R`
-  <p>Su una superficie immersa in $\mathbb{R}^{3}$ un vettore tangente si disegna come una freccia che parte dal punto e giace nel piano tangente. <b>Quell&rsquo;immagine è corretta e non è una definizione</b>, per una ragione che vale la pena rendere esplicita: la freccia vive nello <i>spazio ambiente</i>, e una varietà astratta non ne ha uno.</p>
-  <p>Due conseguenze pratiche, entrambe da tenere ferme:</p>
-  <ul>
-   <li><b>gli spazi tangenti in punti diversi sono spazi vettoriali diversi</b>, e non c&rsquo;è nessun modo canonico di identificarli. Non ha senso chiedersi se il vettore $v\in T_pM$ e il vettore $w\in T_qM$ siano «uguali» o «paralleli»: la domanda richiede una struttura in più — una connessione — che questo corso non introduce. <b>Sommarli è un errore, non un&rsquo;imprecisione</b>;</li>
-   <li><b>non esiste «il vettore che punta verso un altro punto»</b>. In $\mathbb{R}^{n}$ si può, perché lo spazio è anche un gruppo e i punti si sottraggono; su una varietà no. È la stessa ragione per cui in relatività generale non si può dire che due velocità misurate in eventi lontani formino un certo angolo.</li>
-  </ul>
-  <p><b>Su una varietà <span class="str" data-str="compattezza">compatta</span> questa mancanza ha conseguenze visibili</b>: non potendo confrontare spazi tangenti lontani, non si può nemmeno «pettinare» in modo coerente un campo di vettori, e infatti sulla sfera ogni campo tangente continuo si annulla da qualche parte. Su una varietà non compatta il problema spesso non si pone, perché c&rsquo;è spazio per scappare all&rsquo;infinito.</p>
-  <p><b>L&rsquo;unica struttura che c&rsquo;è, e basta per quasi tutto</b>, è che ciascun $T_pM$ è uno spazio vettoriale di dimensione $n$ e che la collezione di tutti gli spazi tangenti si incolla in modo liscio — cosa che sarà il fibrato tangente, il passo successivo. <b>La geometria differenziale è in buona parte l&rsquo;arte di fare senza l&rsquo;identificazione che in $\mathbb{R}^{n}$ si ha gratis</b>, e chi porta con sé l&rsquo;immagine della freccia senza questa avvertenza sbaglia proprio nei punti in cui il corso è interessante.</p>`}
+  {t:'prosa', title:'Le derivazioni, cioe la definizione del libro', tag:'architettura', html:R`
+  <p>Le note lo mettono come anticipazione, ed è giusto tenerlo qui: a ogni $v\in T_{M,p}$ si associa l&rsquo;applicazione
+  $$C^{\infty}(M)\longrightarrow\mathbb{R},\qquad f\longmapsto d_pf(v).$$
+  È lineare, e soddisfa la <b>regola di Leibniz</b>
+  $$v(fg)=v(f)\,g(p)+f(p)\,v(g),$$
+  che si verifica derivando $t\mapsto f(\gamma(t))\,g(\gamma(t))$ in $t=0$ con la regola del prodotto. <b>Cioè è una <i>derivazione</i> in $p$, che è il modo in cui Lee definisce i vettori tangenti.</b></p>
+  <p>Più avanti nel corso si vedrà che questa corrispondenza è un <b>isomorfismo</b> fra il nostro $T_{M,p}$ e lo spazio tangente del libro, e che sotto quell&rsquo;isomorfismo il nostro $d_pF(v)$ corrisponde alla derivazione $f\mapsto d_p(f\circ F)(v)$, che è la definizione di differenziale del libro. <b>Per ora è un&rsquo;anticipazione, non uno strumento</b>, e il corso non la usa.</p>
+  <div class="note"><b>Perché il docente non parte da lì, visto che il libro lo fa.</b> La definizione per derivazioni ha un vantaggio vero: la struttura di spazio vettoriale è gratis, perché le derivazioni si sommano. Ma a prima vista una derivazione non ha niente a che fare con la figura che tutti abbiamo in mente — una freccia attaccata a un punto — e il prezzo è che il differenziale va <i>definito</i> con una formula invece che ottenuto spingendo avanti una curva. Con le velocità si paga la struttura vettoriale (la Proposizione 4.3) e si guadagna tutto il resto.</div>`},
+  {t:'prosa', title:'Le componenti, cioe la definizione dei fisici', tag:'idea', html:R`
+  <p>La terza definizione è quella che in relatività generale compare per prima: <b>un vettore è un elenco di numeri $(v^1,\dots,v^n)$ associato a una carta, con la regola che cambiando carta diventa $w^{i}=\sum_j\frac{\partial y^{i}}{\partial x^{j}}v^{j}$.</b> È la più comoda per <i>calcolare</i>, ed è spesso presentata nella forma «un vettore è un oggetto che si trasforma come un vettore», che agli studenti di matematica suona circolare.</p>
+  <p><b>Non lo è, e la tappa 04 dice esattamente perché</b>: la legge di trasformazione non è una definizione arbitraria, è la Proposizione 5.2, cioè una conseguenza del Lemma 4.2. L&rsquo;oggetto esiste prima; i numeri vengono dopo, appena si sceglie una carta.</p>
+  <p><b>Il riassunto operativo</b>, che vale più di qualunque preferenza fra le tre: le <b>curve</b> sono comode per <i>costruire</i> un vettore (basta esibire un moto); le <b>derivazioni</b> per <i>dimostrare</i> (non nominano carte, quindi ciò che si prova è automaticamente indipendente dalle coordinate); le <b>componenti</b> per <i>calcolare</i>. Ogni testo ne sceglie una come definizione e dimostra le altre due. <b>Saper passare dall&rsquo;una all&rsquo;altra vale più che padroneggiarne una sola</b>, ed è il motivo per cui questa tappa esiste.</p>`},
+  {t:'prosa', title:'Il dizionario per leggere il libro', tag:'metodo', html:R`
+  <p>Il libro del corso è Lee, e scrive le cose in modo diverso dalle note. Le note danno il dizionario, e conviene averlo sott&rsquo;occhio perché <b>la differenza è solo di notazione e non di sostanza</b>:</p>
+  <table>
+  <tr><th>Lee</th><th>le note, e questo movimento</th></tr>
+  <tr><td>$T_pM$, $dF_p$</td><td>$T_{M,p}$, $d_pF$</td></tr>
+  <tr><td>coordinate $x^i,\tilde x^i$; componenti $v^i,\tilde v^i$</td><td>$x^i,y^i$; $v^i,w^i$</td></tr>
+  <tr><td>vettori coordinati, formula (3.8)</td><td>Definizione 5.1</td></tr>
+  <tr><td>differenziale in coordinate, formula (3.9)</td><td>Proposizione 6.2</td></tr>
+  <tr><td>cambio di coordinate, formule (3.11) e (3.12)</td><td>Proposizione 5.2</td></tr>
+  <tr><td>proprietà dei differenziali, Proposizioni 3.6 e 3.9</td><td>Proposizione 6.3</td></tr>
+  <tr><td>velocità di una curva, Proposizione 3.24 e Corollario 3.25</td><td>Definizione 6.1</td></tr>
+  </table>
+  <p>Due avvertenze sulla lettura di Lee: scrive gli indici di coordinate e di componenti <b>in alto</b>, e usa la <b>convenzione di Einstein</b> — un indice ripetuto una volta in alto e una in basso è sommato, quindi $v^i\partial/\partial x^i|_p$ significa $\sum_i v^i\partial/\partial x^i|_p$. E il suo Corollario 3.25 dice che $dF_p(v)=(F\circ\gamma)'(0)$ per <i>una qualunque</i> curva con $\gamma(0)=p$ e $\gamma'(0)=v$: <b>per noi quello è la definizione</b>.</p>`}
 ]},
 
-/* ---------------- 04c · ESERCIZI ---------------- */
-{ num:'04c', title:'Esercizi — tocca a te', meta:'il tangente alla sfera calcolato in due modi · il differenziale del determinante · e le coordinate polari',
+/* ---------------- 09 · ESERCIZI ---------------- */
+{ num:'09', title:'Esercizi — tocca a te', meta:'il tangente alla sfera calcolato in due modi · il differenziale del determinante',
   blocchi:[
   {t:'esercizio', title:'1 · Lo spazio tangente alla sfera, per due strade',
    src:'il confronto fra il metodo astratto e quello con lambiente',
-   testo:R`Calcola $T_pS^{2}$ per $p\in S^{2}\subset\mathbb{R}^{3}$ in due modi: (a) come sottospazio di $\mathbb{R}^{3}$, usando che $S^{2}$ è un insieme di livello; (b) usando la carta stereografica. Verifica che danno lo stesso.`,
+   testo:R`Calcola $T_{S^2,p}$ per $p\in S^{2}\subset\mathbb{R}^{3}$ in due modi: (a) come sottospazio di $\mathbb{R}^{3}$, usando che $S^{2}$ è un insieme di livello; (b) usando la carta stereografica. Verifica che danno lo stesso.`,
    steps:[
     {label:'Con lambiente', body:R`
     <p>$S^{2}=F^{-1}(1)$ con $F(x)=|x|^{2}$. Una curva $\gamma$ sulla sfera soddisfa $|\gamma(t)|^{2}=1$; derivando in $t=0$:</p>
     $$2\,\langle\gamma(0),\dot\gamma(0)\rangle=0\quad\Longrightarrow\quad \dot\gamma(0)\perp p.$$
-    <p>Quindi $T_pS^{2}=\{v\in\mathbb{R}^{3}:\langle v,p\rangle=0\}=p^{\perp}$, <b>il piano ortogonale al raggio</b>, di dimensione $2$. Vale la pena notare che l'inclusione «$\subseteq$» è quella appena dimostrata, mentre «$\supseteq$» richiede di esibire, per ogni $v\perp p$, una curva sulla sfera con quella velocità — e basta il cerchio massimo $\gamma(t)=p\cos(|v|t)+\frac{v}{|v|}\sin(|v|t)$, che sta sulla sfera e ha $\dot\gamma(0)=v$. <b>Le due inclusioni si dimostrano con tecniche diverse</b>: una derivando il vincolo, l'altra costruendo curve, ed è tipico dei conti sugli spazi tangenti. <b>La regola generale che ne esce</b>: per un insieme di livello di $F$, lo spazio tangente è il <i>nucleo del differenziale</i> $\ker dF_p$ — qui il nucleo di $v\mapsto2\langle p,v\rangle$.</p>`},
+    <p>Quindi $T_{S^2,p}=\{v\in\mathbb{R}^{3}:\langle v,p\rangle=0\}=p^{\perp}$, <b>il piano ortogonale al raggio</b>, di dimensione $2$. Vale la pena notare che l'inclusione «$\subseteq$» è quella appena dimostrata, mentre «$\supseteq$» richiede di esibire, per ogni $v\perp p$, una curva sulla sfera con quella velocità — e basta il cerchio massimo $\gamma(t)=p\cos(|v|t)+\frac{v}{|v|}\sin(|v|t)$, che sta sulla sfera e ha $\dot\gamma(0)=v$. <b>Le due inclusioni si dimostrano con tecniche diverse</b>: una derivando il vincolo, l'altra costruendo curve, ed è tipico dei conti sugli spazi tangenti. <b>La regola generale che ne esce</b>: per un insieme di livello di $F$, lo spazio tangente è il <i>nucleo del differenziale</i> $\ker d_pF$ — qui il nucleo di $v\mapsto2\langle p,v\rangle$.</p>`},
     {label:'Con la carta', body:R`
     <p>Nella carta stereografica $\varphi_N$ i vettori tangenti sono generati da $\partial/\partial u^{1}$ e $\partial/\partial u^{2}$: due vettori, quindi dimensione $2$. <b>Il conto è più rapido ma dà meno informazione</b>: dice la dimensione e una base, non dice «quale piano di $\mathbb{R}^{3}$» — perché in quel linguaggio $\mathbb{R}^{3}$ non esiste.</p>
-    <p>Per confrontare si deve calcolare $d\iota$, il differenziale dell'inclusione $\iota:S^{2}\hookrightarrow\mathbb{R}^{3}$, e applicarlo ai due vettori della base: si ottengono due vettori di $\mathbb{R}^{3}$ ortogonali a $p$, che generano $p^{\perp}$. <b>Le due risposte coincidono, come devono</b>, e la morale è pratica: <b>quando c'è un ambiente conviene usarlo</b>, perché dà una descrizione concreta; quando non c'è, le carte bastano comunque.</p>`}
+    <p>Per confrontare si deve calcolare $d_p\iota$, il differenziale dell'inclusione $\iota:S^{2}\hookrightarrow\mathbb{R}^{3}$, e applicarlo ai due vettori della base: si ottengono due vettori di $\mathbb{R}^{3}$ ortogonali a $p$, che generano $p^{\perp}$. <b>Le due risposte coincidono, come devono</b>, e la morale è pratica: <b>quando c'è un ambiente conviene usarlo</b>, perché dà una descrizione concreta; quando non c'è, le carte bastano comunque.</p>`}
    ]},
   {t:'plot', title:'Il piano tangente come approssimazione, e come spazio a se',
    intro:R`La superficie $z=x^{2}-y^{2}$ con il piano tangente nel punto $(0{,}7,\,0{,}5)$. Trascina per ruotare: il piano tocca la superficie in un punto solo e la attraversa altrove, perché la sella ha curvature di segno opposto.`,
@@ -472,53 +773,57 @@ CONTROLLO*/
      tangent:{x0:0.7, y0:0.5, span:0.7},
      title:'la superficie e il suo piano tangente: contatto del primo ordine'}
    ],
-   leggi:R`<p><b>Il piano tangente approssima la superficie al primo ordine</b>: vicino al punto di contatto la differenza fra i due va a zero più rapidamente della distanza. È la definizione di differenziabilità, vista in tre dimensioni.</p>
+   leggi:R`<p><b>Il piano tangente approssima la superficie al primo ordine</b>: vicino al punto di contatto la differenza fra i due va a zero più rapidamente della distanza. È la definizione di differenziabilità, vista in tre dimensioni — ed è la stessa nozione di contatto del primo ordine della tappa 02, dove due curve erano equivalenti quando la loro differenza era $o(t)$.</p>
    <p>Ma la figura mostra anche il limite dell'immagine, ed è la ragione per cui il corso non la usa come definizione. <b>Questo piano è disegnato dentro $\mathbb{R}^{3}$</b>, e la sua posizione — inclinata così, appoggiata lì — è informazione sull'immersione, non sulla superficie. Una superficie astratta ha lo stesso spazio tangente senza avere nessun piano dove metterlo.</p>
    <p>Nota infine che il piano <b>attraversa</b> la superficie invece di restarle da una parte: succede perché la sella curva verso l'alto in una direzione e verso il basso nell'altra. In un punto di massimo il piano resterebbe tutto sopra, in uno di minimo tutto sotto. <b>Quella distinzione è il segno della forma quadratica seconda</b>, e appartiene alla geometria con metrica — cioè al capitolo che questo corso non apre. <b>Il tangente vede solo il primo ordine, e del primo ordine non sa dire se si sta salendo su una collina o attraversando una sella.</b></p>`},
   {t:'esercizio', title:'2 · Il differenziale del determinante, e lalgebra di Lie di SL(n)',
    src:'il conto che lega questo movimento ai gruppi di matrici',
-   testo:R`Calcola $d(\det)_I$, il differenziale del determinante nell'identità, e usalo per determinare lo spazio tangente a $SL(n,\mathbb{R})$ nell'identità.`,
+   testo:R`Calcola $d_I(\det)$, il differenziale del determinante nell'identità, e usalo per determinare lo spazio tangente a $SL(n,\mathbb{R})$ nell'identità.`,
    steps:[
     {label:'Il differenziale', body:R`
-    <p>Si usa la definizione con le curve. Prendendo $\gamma(t)=I+tH$, che per $t$ piccolo sta in $GL(n)$:</p>
+    <p>Si usa la definizione con le curve, ed è il caso in cui si vede che conviene. Prendendo $\gamma(t)=I+tH$, che per $t$ piccolo sta in $GL(n)$:</p>
     $$\det(I+tH)=1+t\,\mathrm{tr}(H)+O(t^{2}),$$
     <p>perché nello sviluppo del determinante il termine lineare in $t$ raccoglie esattamente la somma dei minori diagonali, cioè la traccia. Derivando in $t=0$:</p>
-    $$d(\det)_I(H)=\mathrm{tr}(H).$$
-    <p><b>È uno dei conti più usati di tutta la matematica applicata</b>, e conviene ricordarlo nella forma generale $d(\det)_A(H)=\det(A)\,\mathrm{tr}(A^{-1}H)$, che per $A=I$ si riduce a questa. Si incontra ovunque compaia un cambio di variabili: la derivata del determinante jacobiano che governa come cambiano i volumi, l'equazione di Liouville in meccanica statistica, la formula per la variazione del determinante della metrica in relatività.</p>`},
+    $$d_I(\det)(H)=\mathrm{tr}(H).$$
+    <p><b>È uno dei conti più usati di tutta la matematica applicata</b>, e conviene ricordarlo nella forma generale $d_A(\det)(H)=\det(A)\,\mathrm{tr}(A^{-1}H)$, che per $A=I$ si riduce a questa. Si incontra ovunque compaia un cambio di variabili: la derivata del determinante jacobiano che governa come cambiano i volumi, l'equazione di Liouville in meccanica statistica, la formula per la variazione del determinante della metrica in relatività.</p>`},
     {label:'Lo spazio tangente', body:R`
     <p>$SL(n)=\det^{-1}(1)$, e lo spazio tangente è il nucleo del differenziale:</p>
-    $$T_I\,SL(n)=\{H:\mathrm{tr}(H)=0\},$$
+    $$T_{SL(n),I}=\{H:\mathrm{tr}(H)=0\},$$
     <p>le matrici a <b>traccia nulla</b>. La dimensione è $n^{2}-1$, in accordo con il conto del rango già fatto. <b>Questo spazio si chiama $\mathfrak{sl}(n)$</b> ed è l'algebra di Lie del gruppo: tutta l'informazione infinitesima del gruppo è lì dentro.</p>
     <p><b>Lo stesso metodo dà $\mathfrak{o}(n)$</b>: derivando $A^{T}A=I$ lungo una curva $\gamma(t)$ con $\gamma(0)=I$ e $\dot\gamma(0)=H$ si ottiene $\dot\gamma^{T}\gamma+\gamma^{T}\dot\gamma=0$, che in $t=0$ dà $H^{T}+H=0$: le matrici <b>antisimmetriche</b>, di dimensione $\frac{n(n-1)}{2}$. Per $n=3$ sono tre parametri, e infatti una matrice antisimmetrica $3\times3$ si identifica con un vettore — il vettore velocità angolare, che è esattamente il modo in cui le rotazioni infinitesime compaiono in meccanica. <b>Vincolo simmetrico, tangente antisimmetrico</b>: è la regola che conviene tenere a mente, e che si ritrova ogni volta che un gruppo è definito da una forma bilineare da preservare.</p>`}
    ]},
   {t:'collaudo', title:'Controlla di aver capito', html:R`
   <ol>
   <li>Perché $\partial/\partial x^{i}$ dipende da tutta la carta e non solo dalla coordinata $x^{i}$?</li>
-  <li>Il differenziale $dF_p$ è definito fra quali spazi, e perché non ha senso parlare della «matrice jacobiana di $F$» senza altro?</li>
+  <li>Il differenziale $d_pF$ è definito fra quali spazi, e perché non ha senso parlare della «matrice jacobiana di $F$» senza altro?</li>
   <li>Due varietà diffeomorfe hanno spazi tangenti isomorfi. Vale il viceversa?</li>
+  <li>Nella Proposizione 4.3 si trasporta la struttura di $\mathbb{R}^n$ usando <i>una</i> carta. Perché il risultato non dipende da quale?</li>
   </ol>`,
    sol:R`<ol>
    <li>Perché $\partial/\partial x^{1}$ significa «derivare rispetto a $x^{1}$ <b>tenendo fisse le altre coordinate</b>», e quali siano le altre dipende dalla carta. Cambiando le coordinate $x^{2},\dots,x^{n}$ ma lasciando $x^{1}$ invariata, il vettore $\partial/\partial x^{1}$ <b>cambia</b>. <b>È l'errore più comune del corso</b>, e la notazione lo favorisce: il simbolo nomina una sola coordinata e dipende da tutte. In relatività generale lo stesso equivoco genera confusione sulla differenza fra «derivata parziale» e «derivata covariante».</li>
-   <li>Fra $T_pM$ e $T_{F(p)}N$, ed è un'applicazione <b>lineare fra spazi vettoriali astratti</b>. La matrice jacobiana è la sua rappresentazione <i>rispetto a due basi coordinate</i>, una in partenza e una in arrivo: cambiando carte la matrice cambia (per coniugio con le jacobiane delle transizioni) mentre l'applicazione lineare resta la stessa. <b>Il differenziale è l'oggetto, la jacobiana è la sua scrittura</b> — e questo è il motivo per cui il rango, che non dipende dalle basi, è una nozione geometrica.</li>
+   <li>Fra $T_{M,p}$ e $T_{N,F(p)}$, ed è un'applicazione <b>lineare fra spazi vettoriali astratti</b>. La matrice jacobiana è la sua rappresentazione <i>rispetto a due basi coordinate</i>, una in partenza e una in arrivo: cambiando carte la matrice cambia (per coniugio con le jacobiane delle transizioni) mentre l'applicazione lineare resta la stessa. <b>Il differenziale è l'oggetto, la jacobiana è la sua scrittura</b> — e questo è il motivo per cui il rango, che non dipende dalle basi, è una nozione geometrica.</li>
    <li><b>No, e clamorosamente no</b>: ogni varietà di dimensione $n$ ha tutti gli spazi tangenti isomorfi a $\mathbb{R}^{n}$, quindi la sfera e il toro — quest'ultimo costruibile come <span class="str" data-str="quoziente-topologico">quoziente</span> del piano, la prima no — hanno spazi tangenti isomorfi senza essere diffeomorfi. <b>Lo spazio tangente in un punto non sa niente della forma globale</b>: è un oggetto puramente locale, e tutta l'informazione interessante sta in <i>come</i> gli spazi tangenti si incollano al variare del punto. È esattamente questo il contenuto del fibrato tangente, e il motivo per cui esiste il movimento successivo.</li>
+   <li>Perché due letture diverse differiscono per $\theta_\psi\circ\theta_\varphi^{-1}$, che per il Lemma 4.2 è la <b>jacobiana del cambio di carte</b>, cioè un isomorfismo <i>lineare</i>. E un isomorfismo lineare manda somme in somme e multipli in multipli: trasportando la struttura con $\psi$ si ottengono le stesse operazioni che trasportandola con $\varphi$. <b>Se la transizione fosse solo un omeomorfismo la proposizione sarebbe falsa</b>, ed è il punto in cui la struttura <i>liscia</i> della varietà viene consumata.</li>
    </ol>`}
 ]},
 
-/* ---------------- 05 · IL SENSO ---------------- */
-{ num:'05', title:'Il senso, e le rotte', meta:'cosa apre, e dove il tangente riappare',
+/* ---------------- 10 · IL SENSO ---------------- */
+{ num:'10', title:'Il senso, e le rotte', meta:'cosa apre, e dove il tangente riappare',
   blocchi:[
   {t:'prosa', title:'Cosa lascia in mano', tag:'sintesi', html:R`
-  <p><b>Il punto.</b> Un vettore non è una freccia: è un <b>operatore di derivazione</b>. Questa sostituzione — da oggetto geometrico a oggetto algebrico — è ciò che rende possibile fare geometria senza ambiente, e si ripete a ogni livello: i campi vettoriali saranno derivazioni delle funzioni (gd-07), le parentesi di Lie saranno commutatori di derivazioni (gd-12), i flussi saranno esponenziali di derivazioni (gd-15).</p>
-  <p><b>A valle.</b> gd-07 mette insieme tutti i $T_pM$ e ne fa una varietà; gd-08 usa il rango per riconoscere sottovarietà; gd-12 studia cosa succede quando due derivazioni non commutano.</p>`},
+  <p><b>Il punto.</b> Un vettore non è una freccia: è <b>la classe di tutti i moti che hanno quella velocità</b>. La freccia esiste, ma vive in $\mathbb{R}^n$ e ci arriva attraverso una carta — ed è la carta a darle le coordinate, non la varietà. Questa sostituzione è ciò che rende possibile fare geometria senza ambiente.</p>
+  <p><b>La macchina, in tre righe.</b> $\theta_\varphi$ legge i vettori come $n$-uple; letture diverse differiscono per la jacobiana del cambio di carte; siccome quella è lineare, la struttura di spazio vettoriale è unica e il differenziale è la jacobiana del rappresentante locale. <b>Tutto il resto del movimento sono conseguenze di queste tre.</b></p>
+  <p><b>A valle.</b> gd-07 mette insieme tutti i $T_{M,p}$ e ne fa una varietà — e lì le derivazioni torneranno, perché un campo vettoriale è comodo vederlo come operatore; gd-08 usa il rango per riconoscere sottovarietà; gd-12 studia cosa succede quando due derivazioni non commutano.</p>
+  <div class="note"><b>Per chi pensa in meccanica.</b> Se $M$ è lo spazio delle configurazioni di un sistema, il fibrato tangente $TM$ è il suo <b>spazio degli stati</b>, e una lagrangiana è una funzione su $TM$. Questo risponde a un vecchio rompicapo: $\dot q$ è la derivata di $q$ o una variabile indipendente? <b>Su $TM$ è una coordinata indipendente</b>, e diventa la derivata di $q$ soltanto lungo il sollevamento $t\mapsto(\gamma(t),\gamma'(t))$ di una curva.</div>`},
   {t:'prolessi', title:'Dove riappare questo movimento',
-   oggetto:R`<b>Il vettore tangente come derivazione</b>, e il differenziale come approssimazione lineare senza coordinate.`,
+   oggetto:R`<b>Il vettore tangente come classe di velocità</b>, e il differenziale come spinta in avanti di un moto.`,
    rotte:[
     {dove:'Meccanica<br>analitica', txt:R`Le <b>velocità generalizzate</b> $\dot q$ sono vettori tangenti allo spazio delle configurazioni, e la lagrangiana è una funzione sul <b>fibrato tangente</b> (gd-07). Il passaggio a $p=\partial L/\partial\dot q$ porta al fibrato <i>co</i>tangente, ed è la ragione geometrica per cui hamiltoniana e lagrangiana vivono su spazi diversi.`},
     {dove:'Relativita<br>generale', txt:R`La <b>quadrivelocità</b> è un vettore tangente allo spazio-tempo, e il fatto che i vettori vivano in spazi tangenti <i>diversi</i> in punti diversi è la ragione per cui confrontarli richiede una connessione — e da lì la curvatura.`},
     {dove:'Sistemi<br>dinamici', txt:R`Un sistema dinamico è un campo vettoriale: a ogni stato si assegna la <b>velocità con cui evolve</b>. La linearizzazione attorno a un equilibrio è il differenziale, e i suoi autovalori decidono la stabilità.`},
     {dove:'Ottimizzazione', txt:R`Il <b>gradiente</b> su una varietà ha senso solo con una metrica, ma il <b>differenziale</b> no: e' definito sempre. La distinzione fra i due — covariante e controvariante — nasce esattamente qui, e in ottimizzazione decide se un algoritmo e' indipendente dalla parametrizzazione.`}
    ],
-   domanda:R`Lo spazio tangente in punti diversi è uno spazio vettoriale diverso: <b>non c&rsquo;è nessun modo canonico di confrontare un vettore in $p$ con uno in $q$</b>. In $\mathbb{R}^n$ sembra si possa (si traslano le frecce), ma quella è una struttura in più dello spazio euclideo, non della varietà. <b>Domanda che porti avanti:</b> che cosa serve per trasportare un vettore da un punto a un altro? La risposta è una <b>connessione</b>, la sua ambiguità lungo cammini diversi è la <b>curvatura</b>, e in fisica quell&rsquo;ambiguità è la fase di Berry e il campo di gauge. <b>Nel corso di Diverio non ci sono</b>: questo è precisamente il punto in cui il programma si ferma, e da cui parte la geometria riemanniana.`}
+   domanda:R`Lo spazio tangente in punti diversi è uno spazio vettoriale diverso: <b>non c&rsquo;è nessun modo canonico di confrontare un vettore in $p$ con uno in $q$</b>. In $\mathbb{R}^n$ sembra si possa (si traslano le frecce), ma quella è una struttura in più dello spazio euclideo, non della varietà. Sommare $v\in T_{M,p}$ e $w\in T_{M,q}$ non è un&rsquo;imprecisione: è un errore. <b>Domanda che porti avanti:</b> che cosa serve per trasportare un vettore da un punto a un altro? La risposta è una <b>connessione</b>, la sua ambiguità lungo cammini diversi è la <b>curvatura</b>, e in fisica quell&rsquo;ambiguità è la fase di Berry e il campo di gauge. <b>Nel corso di Diverio non ci sono</b>: questo è precisamente il punto in cui il programma si ferma, e da cui parte la geometria riemanniana.`}
 ]}
 
 ];
