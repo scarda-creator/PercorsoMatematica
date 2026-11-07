@@ -103,7 +103,10 @@ const TROPPO_COMUNI = new Set(['analitic', 'olomorf', 'polidrom', 'singolarita',
 const PAROLE_DI_FRASE = new Set(['perche', 'quando', 'come', 'dove', 'quale', 'quello',
   'quella', 'questo', 'questa', 'dalla', 'nella', 'sulla', 'senza', 'prima', 'dopo',
   'tutto', 'tutte', 'ogni', 'alcune', 'altre', 'altro', 'ancora', 'anche', 'meglio',
-  'invece', 'contro', 'verso', 'oltre', 'sotto', 'sopra', 'due', 'tre', 'palestra']);
+  'invece', 'contro', 'verso', 'oltre', 'sotto', 'sopra', 'due', 'tre', 'palestra',
+  // «Sintesi: perche' ...» apre un titolo come «Palestra»: e' il genere della tappa, non
+  // un argomento. Segnalato come rumore per due sessioni di fila (06-11), tolto il 07-11.
+  'sintesi']);
 
 function piano(s) {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
