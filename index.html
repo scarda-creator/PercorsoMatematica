@@ -300,25 +300,58 @@ function disegnaLibro(L){
     : "";
 }
 
+/* UNA RIGA DELLA LISTA. Estratta il 07-11 perche' ora la lista si disegna in due
+   modi — per ordine di lettura o per sezione — e la riga deve essere la stessa cosa
+   nei due casi, non due copie che divergono al primo ritocco. */
+function rigaNucleo(n, campo){
+  /* La sigla sta gia' nella colonna di sinistra: ripeterla nel titolo
+     («em-04   em-04 — I conduttori…») e' rumore, e si toglie qui invece che
+     nel dato - nel banner della pagina la sigla serve eccome. */
+  var t=String(n.titolo||"").replace(/^\s*[\w.-]+\s+—\s+/, "");
+  return el('<a class="nuc" href="'+n.file+'">'+
+    '<span class="id">'+n.nn+"</span>"+
+    '<span class="t">'+t+(campo? ' <span style="opacity:.5;font-size:11px">· '+campo+"</span>":"")+"</span>"+
+    '<span class="n">'+n.tappe.length+" tappe</span></a>");
+}
+
 function disegnaLista(L){
   document.getElementById("n-tit").textContent=L.nome+" · teoria";
   var ns=nucleiDi(L);
   document.getElementById("n-tag").textContent=ns.length+" movimenti";
   var c=document.getElementById("n-corpo"); c.innerHTML="";
+
+  /* L'ORDINE DI LETTURA VINCE SULLA SEZIONE. Riparato il 07-11-2026: la scheda qui
+     accanto promette «dal primo all'ultimo, nell'ordine in cui si studiano», e questa
+     lista non lo manteneva. Due ragioni sovrapposte, e servivano entrambe:
+       1. `ord` nell'indice veniva dall'ordine di DICHIARAZIONE della mappa, non dal
+          topologico sul grafo (riparato in `nuclei/indice-nuclei.js`);
+       2. QUI, anche con l'ordine giusto nel dato, il raggruppamento per sezione lo
+          spezzava: Metodi vive nelle sezioni 3 e 4 e il suo ordine di lettura le
+          INTRECCIA (me-00, me-06, me-01, me-07, …), quindi nessun ordinamento dentro
+          i gruppi puo' mostrarlo.
+     Percio': se ogni movimento del libro porta il suo posto nell'ordine (`ord`, che
+     arriva da `ordine-lettura.json`), si disegna UNA lista sola in quell'ordine, e la
+     sezione di provenienza resta scritta accanto al titolo invece di diventare una
+     gabbia. Chi non ha mappa — Analisi Vettoriale, Meccanica, Geometria — tiene i
+     gruppi di prima: la' la sezione e' l'unico ordine che esiste, e inventargliene uno
+     sarebbe una decisione travestita da ordinamento. */
+  var ordinati = ns.filter(function(n){ return typeof n.ord === "number"; });
+  if(ns.length && ordinati.length === ns.length){
+    var piu = L.sez.length > 1;   /* la sezione si scrive solo se ce n'e' piu' d'una */
+    ordinati.sort(function(a,b){ return a.ord - b.ord; });
+    var box=el('<div class="gruppo"><h3>Nell’ordine in cui si studiano</h3></div>');
+    ordinati.forEach(function(n){
+      box.appendChild(rigaNucleo(n, piu? (IDX.movimenti[n.mov]||"") : ""));
+    });
+    c.appendChild(box);
+    return;
+  }
+
   L.sez.forEach(function(m){
     var g=ns.filter(function(n){ return n.mov===m; });
     if(!g.length) return;
     var box=el('<div class="gruppo"><h3>'+(IDX.movimenti[m]||("Sezione "+m))+"</h3></div>");
-    g.forEach(function(n){
-      /* La sigla sta gia' nella colonna di sinistra: ripeterla nel titolo
-         («em-04   em-04 — I conduttori…») e' rumore, e si toglie qui invece che
-         nel dato - nel banner della pagina la sigla serve eccome. */
-      var t=String(n.titolo||"").replace(/^\s*[\w.-]+\s+—\s+/, "");
-      box.appendChild(el('<a class="nuc" href="'+n.file+'">'+
-        '<span class="id">'+n.nn+"</span>"+
-        '<span class="t">'+t+"</span>"+
-        '<span class="n">'+n.tappe.length+" tappe</span></a>"));
-    });
+    g.forEach(function(n){ box.appendChild(rigaNucleo(n, "")); });
     c.appendChild(box);
   });
 }
