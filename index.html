@@ -337,13 +337,24 @@ function disegnaLista(L){
      sarebbe una decisione travestita da ordinamento. */
   var ordinati = ns.filter(function(n){ return typeof n.ord === "number"; });
   if(ns.length && ordinati.length === ns.length){
-    var piu = L.sez.length > 1;   /* la sezione si scrive solo se ce n'e' piu' d'una */
     ordinati.sort(function(a,b){ return a.ord - b.ord; });
-    var box=el('<div class="gruppo"><h3>Nell’ordine in cui si studiano</h3></div>');
+    /* LE TRACCE SI DICHIARANO, NON SI DESUMONO. Istruzione di Giuseppe, 07-11:
+       «anche i numeri dei capitoli devono essere consequenziali, e complessa e
+       funzionali distinti». Da quando l'ordine di lettura esce uno-alla-volta
+       (`verifica-mappa.py`) le due tracce di Metodi sono gia' due blocchi contigui —
+       me-00…me-05 e me-06…me-12 — ma contiguo non vuol dire detto: senza un titolo in
+       mezzo si leggono come una lista sola di sedici, e il salto di argomento lo deve
+       indovinare chi studia. Il titolo compare quando la sezione cambia, quindi un
+       corso a traccia unica non ne vede nessuno di troppo. */
+    var ultima=null, box=null;
     ordinati.forEach(function(n){
-      box.appendChild(rigaNucleo(n, piu? (IDX.movimenti[n.mov]||"") : ""));
+      if(n.mov !== ultima){
+        ultima = n.mov;
+        box = el('<div class="gruppo"><h3>'+(IDX.movimenti[n.mov]||("Sezione "+n.mov))+"</h3></div>");
+        c.appendChild(box);
+      }
+      box.appendChild(rigaNucleo(n, ""));
     });
-    c.appendChild(box);
     return;
   }
 
