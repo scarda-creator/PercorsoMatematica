@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-11 — Gruppi e azioni: la simmetria come struttura</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-11 — Gruppi e azioni: la simmetria come struttura</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["gruppo-delle-permutazioni"] = {"nome":"Gruppo delle permutazioni","riga":"$S_N$ è l'insieme delle biiezioni di $\\{1,\\dots,N\\}$ in sé, con la composizione; ha $N!$ elementi, è generato dagli scambi di due oggetti, e il segno $\\operatorname{sgn}:S_N\\to\\{\\pm1\\}$ è un omomorfismo.","serve":"È il gruppo che agisce su un sistema di $N$ particelle identiche rinominandole: un'hamiltoniana fisica dev'essere invariante per ogni permutazione, perché due situazioni che differiscono solo per lo scambio di particelle identiche sono indistinguibili. Il segno è il numero che separa i due comportamenti possibili sotto scambio, bosoni e fermioni; l'ordine $N!$ è il fattore di Gibbs nel conteggio degli stati di un gas.","esempio":"$S_3$ ha $6$ elementi, le sei isometrie di un triangolo equilatero: tre riflessioni, che sono gli scambi e hanno segno $-1$, e due rotazioni di $120^\\circ$ e $240^\\circ$, che sono i cicli $(1\\,2\\,3)$ e $(1\\,3\\,2)$ e hanno segno $+1$, più l'identità. È il più piccolo gruppo non commutativo: $(1\\,2)(2\\,3)=(1\\,2\\,3)$ ma $(2\\,3)(1\\,2)=(1\\,3\\,2)$.","pieno":{"file":"tp-11-gruppi-e-azioni.html","tappa":"07","come":"cicli e trasposizioni, il segno definito come prodotto e dimostrato omomorfismo, le classi di coniugio per tipo di ciclo, S_3 come simmetrie del triangolo"},"controllo":[{"tipo":"uguale","sinistra":"factorial(3)","vale":"6","dove":"esempio","appare":"$S_3$ ha $6$ elementi"}]};
+STRUM["gruppo-di-lie"] = {"nome":"Gruppo di Lie","riga":"Una varieta differenziabile che e anche un gruppo, e in cui il prodotto $(g,h)\\mapsto gh$ e l'inverso $g\\mapsto g^{-1}$ sono applicazioni lisce.","serve":"a trattare insieme due strutture che di solito si studiano separate: la simmetria (il gruppo) e il calcolo differenziale (la varieta). La conseguenza che si usa di piu e l'omogeneita: le traslazioni $L_g(x)=gx$ sono diffeomorfismi, quindi ogni punto ha un intorno diffeomorfo a quello dell'identita, e tutto cio che si dimostra nell'identita si trasporta ovunque gratis. Da qui seguono due fatti usati continuamente: ogni gruppo di Lie e parallelizzabile, e per conoscerne la geometria infinitesima basta lo spazio tangente in un punto solo, che si chiama la sua algebra di Lie.","esempio":"Il gruppo delle rotazioni del piano $SO(2)$ e la circonferenza. Una sua matrice e $R(\\theta)=\\begin{pmatrix}\\cos\\theta & -\\sin\\theta\\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}$, e che il determinante valga $1$ si verifica subito: $\\cos^2\\theta+\\sin^2\\theta=1$. Il prodotto e liscio perche in coordinate e l'addizione degli angoli — svolgendo la riga in alto del prodotto $R(\\alpha)R(\\varphi)$ si trova $\\cos\\alpha\\cos\\varphi-\\sin\\alpha\\sin\\varphi=\\cos(\\alpha+\\varphi)$ e $\\sin\\alpha\\cos\\varphi+\\cos\\alpha\\sin\\varphi=\\sin(\\alpha+\\varphi)$, cioe $R(\\alpha)R(\\varphi)=R(\\alpha+\\varphi)$ — e l'inverso e $R(-\\theta)$, liscio in $\\theta$. La varieta sottostante e $S^1$, di dimensione $1$.","pieno":{"file":"gd-14-gruppi-di-lie.html","tappa":"01","come":"i gruppi di matrici, la traslazione che rende tutto omogeneo, e l'algebra di Lie come tangente all'identita"},"controllo":[{"tipo":"uguale","sinistra":"cos(theta)**2+sin(theta)**2","vale":"1","dove":"esempio","appare":"\\cos^2\\theta+\\sin^2\\theta=1"},{"tipo":"uguale","sinistra":"cos(alpha)*cos(varphi)-sin(alpha)*sin(varphi)","vale":"cos(alpha+varphi)","dove":"esempio","appare":"\\cos\\alpha\\cos\\varphi-\\sin\\alpha\\sin\\varphi=\\cos(\\alpha+\\varphi)"},{"tipo":"uguale","sinistra":"sin(alpha)*cos(varphi)+cos(alpha)*sin(varphi)","vale":"sin(alpha+varphi)","dove":"esempio","appare":"\\sin\\alpha\\cos\\varphi+\\cos\\alpha\\sin\\varphi=\\sin(\\alpha+\\varphi)"}]};
+STRUM["gruppo"] = {"nome":"Gruppo","riga":"Un insieme $G$ con un'operazione associativa, un elemento neutro $e$ e, per ogni elemento, un inverso: $\\forall a\\ \\exists a^{-1}:\\ aa^{-1}=a^{-1}a=e$.","serve":"È la struttura che le simmetrie hanno sempre, qualunque cosa trasformino: composte danno una simmetria, la trasformazione nulla è una simmetria, ogni simmetria si disfa. Per questo in fisica si studiano i gruppi e non le singole trasformazioni: le rotazioni, le traslazioni, il gruppo di Galilei, le permutazioni di particelle identiche, le fasi $e^{i\\theta}$. La commutatività non è negli assiomi, e infatti le rotazioni nello spazio non commutano: è la radice del fatto che le componenti del momento angolare non commutano.","esempio":"Le rotazioni del piano $R_\\theta$ formano un gruppo commutativo: ruotare di $\\alpha$ e poi di $\\beta$ è ruotare di $\\alpha+\\beta$, il neutro è $R_0=I$, l'inverso di $R_\\theta$ è $R_{-\\theta}$. Le rotazioni dello spazio no: un quarto di giro attorno a $z$ seguito da uno attorno a $x$ non è la stessa cosa dell'ordine inverso. Un insieme che fallisce: $(\\mathbb{N},+)$, dove $1$ non ha inverso.","pieno":{"file":"tp-11-gruppi-e-azioni.html","tappa":"01","come":"gli assiomi con i quantificatori e il perché sono quelli, l'unicità di neutro e inverso, esempi e non esempi, l'ordine di un elemento"},"controllo":[{"tipo":"uguale","sinistra":"simplify(Matrix([[cos(al),-sin(al)],[sin(al),cos(al)]])*Matrix([[cos(be),-sin(be)],[sin(be),cos(be)]]) - Matrix([[cos(al+be),-sin(al+be)],[sin(al+be),cos(al+be)]]))","vale":"zeros(2,2)","dove":"esempio","appare":"ruotare di $\\alpha$ e poi di $\\beta$ è ruotare di $\\alpha+\\beta$","nota":"R_alpha R_beta = R_(alpha+beta)"},{"tipo":"simbolico","dove":"riga","appare":"\\forall a\\ \\exists a^{-1}:\\ aa^{-1}=a^{-1}a=e","perche":"assioma dell'inverso: definizione, non un conto"}]};
+STRUM["classe-di-equivalenza"] = {"nome":"Classe di equivalenza e quoziente","riga":"Una relazione $\\sim$ riflessiva, simmetrica e transitiva spezza un insieme $X$ in classi disgiunte $[x]=\\{y\\in X:y\\sim x\\}$, e l'insieme delle classi e' il quoziente $X/\\!\\sim$.","serve":"E' il modo di DEFINIRE un oggetto che non si puo' esibire. Quando di una cosa si sa riconoscere quando due rappresentanti sono la stessa, ma non si ha un rappresentante privilegiato da indicare, si definisce l'oggetto come la classe stessa. Diverio lo dice cosi' nelle note sullo spazio tangente: e' lo stesso trucco con cui si definisce una direzione nel piano come classe di rette parallele — nessuna retta e' LA direzione, e la direzione e' tutte quelle rette insieme. Da li' viene la definizione del vettore tangente: su una varieta' non c'e' nessuna freccia da disegnare, quindi la velocita' di una curva si definisce come la classe di tutte le curve che le somigliano al primo ordine. La stessa mossa costruisce lo spazio proiettivo, il toro come quoziente del piano, i germi di funzioni e i gruppi quoziente.","esempio":"Su $\\mathbb{Z}$ si ponga $a\\sim b$ quando $3$ divide $a-b$. Le classi sono tre — $[0]$, $[1]$, $[2]$ — e sono disgiunte e coprono tutto $\\mathbb{Z}$, che e' sempre il caso: un quoziente e' una PARTIZIONE. Sul quoziente $\\mathbb{Z}/3\\mathbb{Z}$ la somma $[a]+[b]=[a+b]$ e' ben definita, e ben definita vuol dire che il risultato non dipende dal rappresentante scelto: presi $a'=4$ al posto di $a=1$ e $b'=5$ al posto di $b=2$, si ha $a'+b'=9$ e $a+b=3$, e le due classi coincidono perche' $3$ divide $9-3$. E' la verifica che si deve fare ogni volta che si definisce qualcosa su un quoziente, ed e' l'unica: il Lemma 3.3 delle note di Diverio — la velocita' di una curva non dipende dalla carta — e' esattamente questa verifica fatta per i vettori tangenti.","debito":"la topologia quoziente, cioe' come si rende continua la proiezione $\\pi:X\\to X/\\!\\sim$, sta nella scheda `quoziente-topologico`; qui si guarda la sola struttura insiemistica, che e' quella che serve per definire un vettore tangente.","controllo":[{"tipo":"uguale","sinistra":"Mod(4 + 5, 3)","vale":"Mod(1 + 2, 3)","dove":"esempio","appare":"$a'+b'=9$ e $a+b=3$"},{"tipo":"uguale","sinistra":"Mod(9 - 3, 3)","vale":"0","dove":"esempio","appare":"$3$ divide $9-3$"},{"tipo":"simbolico","dove":"esempio","appare":"[a]+[b]=[a+b]","perche":"e' la DEFINIZIONE della somma sul quoziente, cioe' la regola che si propone; che sia ben posta e' il contenuto delle due asserzioni che seguono, non di questa riga"}]};
+STRUM["omomorfismo"] = {"nome":"Omomorfismo","riga":"Una mappa fra due gruppi che rispetta il prodotto, $\\varphi(ab)=\\varphi(a)\\varphi(b)$, e il cui nucleo $\\ker\\varphi=\\{a:\\varphi(a)=e\\}$ è un sottogruppo normale, banale esattamente quando $\\varphi$ è iniettiva.","serve":"È la traduzione fra due gruppi che non tradisce la composizione, ed è il modo in cui un gruppo astratto diventa qualcosa che agisce: una simmetria in meccanica quantistica è un omomorfismo (a meno di una fase) dal gruppo delle trasformazioni agli operatori sullo spazio degli stati. Il nucleo misura quanto la traduzione confonde: due elementi hanno la stessa immagine esattamente quando differiscono per un elemento del nucleo, e il quoziente per il nucleo è isomorfo all'immagine. Vale identico per gli anelli, dove il nucleo è un ideale.","esempio":"L'esponenziale manda somme in prodotti, $e^{a+b}=e^a e^b$, quindi è un omomorfismo da $(\\mathbb{R},+)$ a $(\\mathbb{R}_{\\gt 0},\\cdot)$, iniettivo. La mappa $t\\mapsto e^{2\\pi it}$ da $(\\mathbb{R},+)$ alle fasi ha nucleo $\\mathbb{Z}$: avvolge la retta sul cerchio, un giro per ogni unità. Il determinante, $\\det(AB)=\\det A\\det B$, ha per nucleo le matrici di determinante uno.","pieno":{"file":"tp-11-gruppi-e-azioni.html","tappa":"03","come":"la definizione con gli esempi di Lee, ciò che si conserva da solo, nucleo e immagine, iniettività e nucleo banale, l'isomorfismo nella forma di Landau"},"controllo":[{"tipo":"uguale","sinistra":"simplify(exp(a+b)-exp(a)*exp(b))","vale":"0","dove":"esempio","appare":"e^{a+b}=e^a e^b"},{"tipo":"uguale","sinistra":"exp(2*pi*I*k)","vale":"1","ipotesi":{"k":"integer"},"dove":"esempio","appare":"ha nucleo $\\mathbb{Z}$","nota":"e^(2 pi i k) = 1 per ogni intero k"}]};
+STRUM["quoziente-topologico"] = {"nome":"Topologia quoziente","riga":"Si incollano punti dichiarandoli uguali, e si decide che un insieme è aperto nel quoziente quando la sua controimmagine è aperta sopra: è il modo di costruire spazi nuovi senza metterli dentro nessun ambiente.","serve":"È la seconda fabbrica di varietà, accanto ai grafici e ai prodotti, e produce proprio gli esempi che non si vedono come sottoinsiemi di $\\mathbb{R}^n$: il toro, il nastro di Möbius, lo spazio proiettivo. La regola pratica è sempre la stessa: una funzione definita sul quoziente è continua se e solo se, composta con la proiezione, è continua sopra — quindi si lavora sempre con i rappresentanti, controllando che il risultato non dipenda da quale si è scelto. Attenzione: **un quoziente di una varietà non è automaticamente una varietà**, e la proprietà che salta per prima è Hausdorff — la retta con due origini è proprio un quoziente mal riuscito.","esempio":"La circonferenza è $\\mathbb{R}/\\mathbb{Z}$: si dichiarano uguali due numeri che differiscono per un intero, e si manda la classe di $t$ nel punto $\\left(\\cos 2\\pi t,\\ \\sin 2\\pi t\\right)$. Perché la definizione sia lecita il risultato non deve dipendere dal rappresentante, e infatti $\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t$ e altrettanto per il seno: la mappa passa al quoziente. Ripetendo su due fattori si ottiene il toro $\\mathbb{T}^2=\\mathbb{R}^2/\\mathbb{Z}^2$, cioè il quadrato $[0,1]^2$ con i lati opposti incollati — lo spazio delle configurazioni del pendolo doppio, dove i due angoli sono definiti a meno di un giro. Le carte si prendono restringendo la proiezione a un quadratino di lato minore di $1$: lì è iniettiva, e la sua inversa dà le coordinate.","debito":"la verifica che il quoziente sia Hausdorff e a base numerabile va fatta caso per caso e qui non c'è: per il toro e per lo spazio proiettivo la si trova in Lee, Examples 1.4 e 1.5. Nel percorso, l'unico movimento che costruisce quozienti in dettaglio è gd-01.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi*(t+1))","vale":"cos(2*pi*t)","ipotesi":{"t":"real"},"dove":"esempio","appare":"\\cos\\!\\left(2\\pi(t+1)\\right)=\\cos 2\\pi t"},{"tipo":"simbolico","perche":"e' la notazione del quoziente di R^2 per il reticolo degli interi: si sta dando un nome allo spazio costruito, non calcolando un valore","dove":"esempio","appare":"\\mathbb{R}^2/\\mathbb{Z}^2"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-11: Gruppi e azioni: la simmetria come struttura <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-11 — gruppi e azioni: la simmetria come struttura
+identita:  una simmetria non e' una trasformazione sola ma l'insieme di tutte quelle che lasciano invariato qualcosa, e quell'insieme ha una struttura che non dipende da che cosa trasforma: si compone, ha un'identita', ogni elemento si disfa. Qui si costruisce quella struttura - gruppo, sottogruppo, omomorfismo, nucleo, sottogruppo normale, quoziente - e la si fa agire su un insieme, perche' in fisica un gruppo non si incontra mai da solo: si incontra mentre muove qualcosa (punti dello spazio, stati, particelle). Ogni definizione ha il suo esempio fisico: le traslazioni, le rotazioni, il gruppo di Galilei letto come gruppo e non come fisica, le permutazioni di N particelle col loro segno
+copre:     3.1 — Gruppi, omomorfismi, sottogruppi normali e quozienti; azioni, orbite, stabilizzatori;...
+serve:     tp-05 (tp-05-il-quoziente.html)
+apre:      tp-12 (da costruire), tp-14 (da costruire), tp-10 (tp-10-anelli-ideali-germi.html)
+strumenti: gruppo · omomorfismo · gruppo-delle-permutazioni · gruppo-di-lie · classe-di-equivalenza · quoziente-topologico
+fonti:     Landau-Lifsic 3, cap. XII, §§91-92
+fonti:     Lee cap. 7 (omomorfismi e azioni)
+fonti:     Ballentine §3.2 e §17.1
+coordinate: Landau-Lifsic, Fisica Teorica 3, Meccanica quantistica (Editori Riuniti-MIR 1976) pp. 419-427 · Lee, Introduction to Smooth Manifolds (2a ed.) pp. 151-157, 161-169 · Ballentine, Quantum Mechanics: A Modern Development pp. 65-71, 470-472
+profondita: non e' un corso di algebra: si prende la catena che serve a leggere mq-07, mq-09 e mq-22 senza parole mai definite, e si dimostra cio' che li' si usa (il nucleo e' normale, il primo teorema di isomorfismo, il segno e' un omomorfismo, la formula orbita-stabilizzatore per i gruppi finiti). Fuori: teoremi di Sylow, gruppi risolubili, classificazione dei gruppi finiti - nessun movimento della navicella li usa. Il gruppo di Galilei entra come esempio della struttura: la sua fisica e' di mq-07 e qui non si rifa'.
+generata:  2026-11-09 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "Matrix([[1,0,0],[0,0,-1],[0,1,0]])*Matrix([[0,-1,0],[1,0,0],[0,0,1]])", "vale": "Matrix([[0,-1,0],[0,0,-1],[1,0,0]])", "dove": "01", "appare": "R_xR_z=\\begin{pmatrix}0&-1&0\\\\0&0&-1\\\\1&0&0\\end{pmatrix}", "nota": "rotazione di 90 gradi attorno a z, poi attorno a x"},
+ {"tipo": "uguale", "sinistra": "Matrix([[0,-1,0],[1,0,0],[0,0,1]])*Matrix([[1,0,0],[0,0,-1],[0,1,0]])", "vale": "Matrix([[0,0,1],[1,0,0],[0,1,0]])", "dove": "01", "appare": "R_zR_x=\\begin{pmatrix}0&0&1\\\\1&0&0\\\\0&1&0\\end{pmatrix}", "nota": "l'ordine inverso da' un'altra matrice: SO(3) non e' commutativo"},
+ {"tipo": "uguale", "sinistra": "Matrix([[cos(2*pi/n),-sin(2*pi/n)],[sin(2*pi/n),cos(2*pi/n)]]).subs(n,6)**6", "vale": "eye(2)", "dove": "01", "appare": "R_{2\\pi/6}^{\\,6}=I", "nota": "la rotazione di un sesto di giro ha ordine 6"},
+ {"tipo": "uguale", "sinistra": "factorial(3)/2", "vale": "3", "dove": "02", "appare": "[S_3:H]=6/2=3"},
+ {"tipo": "uguale", "sinistra": "simplify(exp(a+b)-exp(a)*exp(b))", "vale": "0", "dove": "03", "appare": "e^{a+b}=e^a\\,e^b"},
+ {"tipo": "uguale", "sinistra": "expand((Matrix([[a,b],[c,d]])*Matrix([[e,f],[g,h]])).det() - Matrix([[a,b],[c,d]]).det()*Matrix([[e,f],[g,h]]).det())", "vale": "0", "dove": "03", "appare": "\\det(AB)=\\det A\\,\\det B", "nota": "verificato su matrici 2x2 generiche"},
+ {"tipo": "uguale", "sinistra": "simplify(Matrix([[cos(al),-sin(al)],[sin(al),cos(al)]])*Matrix([[cos(be),-sin(be)],[sin(be),cos(be)]]) - Matrix([[cos(al+be),-sin(al+be)],[sin(al+be),cos(al+be)]]))", "vale": "zeros(2,2)", "dove": "03", "appare": "R_\\alpha R_\\beta=R_{\\alpha+\\beta}"},
+ {"tipo": "uguale", "sinistra": "exp(2*pi*I*k)", "vale": "1", "ipotesi": {"k": "integer"}, "dove": "03", "appare": "e^{2\\pi i k}=1"},
+ {"tipo": "uguale", "sinistra": "simplify((Matrix([[1,0,0],[0,cos(p),-sin(p)],[0,sin(p),cos(p)]])*Matrix([[cos(q),-sin(q),0],[sin(q),cos(q),0],[0,0,1]])*Matrix([[1,0,0],[0,cos(p),sin(p)],[0,-sin(p),cos(p)]])).trace())", "vale": "1+2*cos(q)", "dove": "04", "appare": "\\operatorname{tr}(GAG^{-1})=\\operatorname{tr}A=1+2\\cos\\theta", "nota": "coniugare una rotazione attorno a z con una rotazione attorno a x lascia la traccia, quindi l'angolo"},
+ {"tipo": "uguale", "sinistra": "Matrix([[1,0,0],[0,0,-1],[0,1,0]])*Matrix([[1,0,0],[0,1,0],[0,0,-1]])*Matrix([[1,0,0],[0,0,1],[0,-1,0]])", "vale": "Matrix([[1,0,0],[0,-1,0],[0,0,1]])", "dove": "04", "appare": "R\\,\\sigma_z\\,R^{-1}=\\sigma_y", "nota": "la riflessione nel piano xy coniugata da un quarto di giro attorno a x diventa la riflessione nel piano xz"},
+ {"tipo": "uguale", "sinistra": "6*4", "vale": "8*3", "dove": "05", "appare": "6\\cdot 4=8\\cdot 3=12\\cdot 2=24"},
+ {"tipo": "uguale", "sinistra": "12*2", "vale": "24", "dove": "05", "appare": "6\\cdot 4=8\\cdot 3=12\\cdot 2=24"},
+ {"tipo": "uguale", "sinistra": "f(x-a-b)", "vale": "f(x-(a+b))", "ipotesi": {"f": "funzione"}, "dove": "05", "appare": "(T_a(T_bf))(x)=f(x-a-b)=(T_{a+b}f)(x)"},
+ {"tipo": "uguale", "sinistra": "expand((x+v1*t+a1) + v2*(t+s1) + a2)", "vale": "x + (v1+v2)*t + a1 + a2 + v2*s1", "dove": "06", "appare": "x''=x+(v_1+v_2)\\,t+(a_1+a_2+v_2s_1)", "nota": "legge di composizione di Ballentine (3.6) in una dimensione, R=1"},
+ {"tipo": "uguale", "sinistra": "expand((x+v*t+a) - v*(t+s) + (-a+v*s))", "vale": "x", "dove": "06", "appare": "\\tau^{-1}=(-v,\\,-a+vs,\\,-s)", "nota": "composto con tau da' l'identita'"},
+ {"tipo": "uguale", "sinistra": "expand(((x - v*t) ) + v*(t+s))", "vale": "x + v*s", "dove": "06", "appare": "x\\mapsto x+vs,\\quad t\\mapsto t+s", "nota": "boost, traslazione temporale, boost inverso: compare una traslazione spaziale vs"},
+ {"tipo": "uguale", "sinistra": "factorial(3)", "vale": "6", "dove": "07", "appare": "|S_3|=3!=6"},
+ {"tipo": "uguale", "sinistra": "cancel(((3-2)*(1-2)*(1-3))/((2-1)*(3-1)*(3-2)))", "vale": "1", "dove": "07", "appare": "\\operatorname{sgn}(1\\,2\\,3)=+1", "nota": "sigma=(1 2 3): sigma(1)=2, sigma(2)=3, sigma(3)=1; prodotto dei rapporti sulle tre coppie"},
+ {"tipo": "uguale", "sinistra": "cancel(((1-2)*(3-2)*(3-1))/((2-1)*(3-1)*(3-2)))", "vale": "-1", "dove": "07", "appare": "\\operatorname{sgn}(1\\,2)=-1", "nota": "tau=(1 2): tau(1)=2, tau(2)=1, tau(3)=3"},
+ {"tipo": "uguale", "sinistra": "1+3+2", "vale": "factorial(3)", "dove": "07", "appare": "1+3+2=6"},
+ {"tipo": "uguale", "sinistra": "1+6+3+8+6", "vale": "factorial(4)", "dove": "07", "appare": "1+6+3+8+6=24"},
+ {"tipo": "uguale", "sinistra": "4*3", "vale": "6*2", "dove": "08", "appare": "4\\cdot 3=6\\cdot 2=12"},
+ {"tipo": "simbolico", "dove": "01", "appare": "(ab)^{-1}=b^{-1}a^{-1}", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "01", "appare": "(AB)^{-1}=B^{-1}A^{-1}", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "01", "appare": "a^{-n}=(a^{-1})^n", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "02", "appare": "aa^{-1}=e\\in H", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "02", "appare": "eb^{-1}=b^{-1}\\in H", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "02", "appare": "a(b^{-1})^{-1}=ab\\in H", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "02", "appare": "(a^{-1}b)^{-1}=b^{-1}a", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "02", "appare": "(a^{-1}b)(b^{-1}c)=a^{-1}c", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\varphi(a^{-1})=\\varphi(a)^{-1}", "perche": "conseguenza diretta della definizione di omomorfismo, dimostrata nella prosa"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\varphi(ab^{-1})=\\varphi(a)\\varphi(b)^{-1}=e'e'^{-1}=e'", "perche": "conseguenza diretta della definizione di omomorfismo, dimostrata nella prosa"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\varphi(a)\\varphi(b)^{-1}=\\varphi(ab^{-1})", "perche": "conseguenza diretta della definizione di omomorfismo, dimostrata nella prosa"},
+ {"tipo": "simbolico", "dove": "04", "appare": "gh_1g^{-1}\\,gh_2g^{-1}=gh_1h_2g^{-1}", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "04", "appare": "N\\trianglelefteq G\\iff\\forall g\\in G:\\ gNg^{-1}=N.", "perche": "definizione introdotta nella prosa, non un conto"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\varphi(gng^{-1})=\\varphi(g)e'\\varphi(g)^{-1}=e'", "perche": "conseguenza diretta della definizione di omomorfismo, dimostrata nella prosa"},
+ {"tipo": "simbolico", "dove": "04", "appare": "x\\mapsto R(R^{-1}x+\\mathbf a)=x+R\\mathbf a", "perche": "definizione di un'azione o di un coniugio scritta per esteso, non un conto"},
+ {"tipo": "simbolico", "dove": "04", "appare": "(aN)^{-1}=a^{-1}N", "perche": "manipolazione con i soli assiomi di gruppo (associativita', neutro, inverso), svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\forall g_1,g_2\\in G,\\ \\forall p\\in M:\\ \\ g_1\\cdot(g_2\\cdot p)=(g_1g_2)\\cdot p,", "perche": "definizione introdotta nella prosa, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\forall p\\in M:\\ e\\cdot p=p.", "perche": "definizione introdotta nella prosa, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "R\\cdot\\mathbf x=R\\mathbf x", "perche": "definizione di un'azione o di un coniugio scritta per esteso, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\mathbf a\\cdot\\mathbf x=\\mathbf x+\\mathbf a", "perche": "definizione di un'azione o di un coniugio scritta per esteso, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "G\\cdot p=\\{g\\cdot p: g\\in G\\}", "perche": "definizione introdotta nella prosa, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "G_p=\\{g: g\\cdot p=p\\}", "perche": "definizione introdotta nella prosa, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "g\\cdot p=h\\cdot p\\iff h^{-1}g\\in G_p\\iff gG_p=hG_p", "perche": "definizione introdotta nella prosa, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "|G\\cdot p|\\cdot|G_p|=|G|.", "perche": "formula orbita-stabilizzatore: teorema dimostrato nella prosa dalla biiezione fra G/G_p e l'orbita, piu' Lagrange"},
+ {"tipo": "simbolico", "dove": "05", "appare": "(g\\cdot f)(x)=f(g^{-1}\\cdot x).", "perche": "definizione dell'azione indotta sulle funzioni, non un conto"},
+ {"tipo": "simbolico", "dove": "05", "appare": "(g_1\\cdot(g_2\\cdot f))(x)=(g_2\\cdot f)(g_1^{-1}x)=f(g_2^{-1}g_1^{-1}x)=f((g_1g_2)^{-1}x)", "perche": "conto con la definizione dell'azione sulle funzioni e con l'inverso di un prodotto della tappa 01"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\mathbf v_2+R_2\\mathbf v_1=\\mathbf 0", "perche": "condizione imposta sui parametri della legge di composizione (3.6) di Ballentine per ottenere il neutro, non un conto da verificare"},
+ {"tipo": "simbolico", "dove": "07", "appare": "(a_1\\,a_2\\,\\cdots\\,a_k)=(a_1\\,a_k)\\cdots(a_1\\,a_3)(a_1\\,a_2)", "perche": "identita' fra permutazioni, verificata nella prosa seguendo dove va ciascun elemento"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\pi(a_1\\,\\cdots\\,a_k)\\pi^{-1}=(\\pi(a_1)\\,\\cdots\\,\\pi(a_k))", "perche": "identita' fra permutazioni, verificata nella prosa seguendo dove va ciascun elemento"},
+ {"tipo": "uguale", "sinistra": "n*a-n*b", "vale": "n*(a-b)", "dove": "08", "appare": "na-nb=n(a-b)\\in n\\mathbb{Z}"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\mathbf v_3=\\mathbf 0+R\\mathbf v=R\\mathbf v", "perche": "applicazione diretta della legge di composizione (3.6) di Ballentine con a=0 e s=0"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\mathbf v_3=\\mathbf v+I\\cdot\\mathbf 0=\\mathbf v", "perche": "applicazione diretta della legge di composizione (3.6) di Ballentine con a=0 e s=0"},
+ {"tipo": "uguale", "sinistra": "(-1)**3", "vale": "-1", "dove": "08", "appare": "(-1)^3=-1"},
+ {"tipo": "simbolico", "dove": "08", "appare": "\\varphi(gng^{-1})=\\varphi(g)\\varphi(n)\\varphi(g)^{-1}", "perche": "conseguenza diretta della definizione di omomorfismo, dimostrata nella prosa"},
+ {"tipo": "simbolico", "dove": "08", "appare": "(g_1\\cdot(g_2\\cdot f))=(g_2g_1)\\cdot f", "perche": "che cosa si otterrebbe definendo l'azione senza l'inverso: conto con l'inverso di un prodotto, svolto nella prosa"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'la simmetria come insieme e non come gesto · la struttura che non dipende da cosa si trasforma · il gruppo che agisce',
+  blocchi:[
+  {t:'prosa', title:'Una simmetria non viene mai da sola', tag:'architettura', html:R`
+  <p>In fisica la parola «simmetria» indica di solito un gesto: ruoto il sistema, lo traslo, cambio sistema di riferimento, scambio due elettroni, e qualcosa resta uguale. Il punto di partenza di questo movimento è che quel gesto <b>non viene mai da solo</b>. Se una rotazione di trenta gradi lascia invariata l'equazione di Schrödinger, la lascia invariata anche la rotazione di sessanta, che è la prima fatta due volte; la lascia invariata la rotazione all'indietro, che disfa la prima; la lascia invariata il «non fare niente». Le simmetrie di un sistema formano un insieme chiuso rispetto alla composizione, con un elemento neutro e con gli inversi. Landau apre il capitolo sulla teoria della simmetria esattamente così, e chiama queste proprietà «evidenti» (Landau-Lifsic, vol. 3, cap. XII, §92, stampata 423): sono evidenti perché sono il modo stesso in cui le trasformazioni si compongono.</p>
+  <p>Il passo che rende utile l'osservazione è il successivo: <b>quelle tre proprietà non dipendono da che cosa si trasforma</b>. Le rotazioni di un quadrato attorno al centro e le potenze di $i$ nei numeri complessi, $\{1,i,-1,-i\}$, si compongono nello stesso modo, anche se le prime muovono punti del piano e le seconde sono numeri. Una struttura che si può studiare una volta sola, indipendentemente dal suo travestimento, è ciò che la matematica chiama <b>gruppo</b>, ed è il primo oggetto algebrico che la fisica incontra nella forma più pura.</p>
+  <p>Il movimento costruisce il gruppo e gli attrezzi che servono per maneggiarlo, in quest'ordine:</p>
+  <ol>
+  <li>gli assiomi, e perché sono quelli (tappa 01);</li>
+  <li>i sottogruppi, le classi laterali e il primo teorema vero, quello di Lagrange (tappa 02);</li>
+  <li>le mappe fra gruppi che rispettano la composizione, gli <b>omomorfismi</b>, e il loro nucleo (tappa 03);</li>
+  <li>il coniugio, i sottogruppi normali e il gruppo quoziente, cioè come si «divide» un gruppo per un suo sottogruppo (tappa 04);</li>
+  <li>il gruppo che <b>agisce</b> su un insieme, con orbite e stabilizzatori (tappa 05);</li>
+  <li>due esempi che la meccanica quantistica usa per intero: il gruppo di Galilei, letto come gruppo e non come fisica (tappa 06), e il <span class="str" data-str="gruppo-delle-permutazioni">gruppo delle permutazioni</span> con il suo segno (tappa 07).</li>
+  </ol>
+  <p>Che cosa resta fuori, dichiarato subito: i gruppi che sono anche varietà lisce — i <span class="str" data-str="gruppo-di-lie">gruppi di Lie</span> — si incontrano qui come esempi (rotazioni, matrici invertibili), ma la loro struttura liscia, l'esponenziale e l'algebra di Lie non si fanno; non si fanno nemmeno i teoremi di Sylow o la classificazione dei gruppi finiti, che nessun conto di fisica di questo percorso usa. Si prende la catena che serve a leggere le simmetrie in meccanica quantistica senza incontrare una parola mai definita, e la si dimostra.</p>`}
+]},
+
+/* ---------------- 01 · IL GRUPPO ---------------- */
+{ num:'01', title:'Il gruppo: tre assiomi che ogni simmetria rispetta', meta:'la definizione con i quantificatori · unicità di neutro e inverso · esempi e non esempi · commutativo o no · ordine di un elemento',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Un <b>gruppo</b> è un insieme $G$ con un'operazione $G\times G\to G$, $(a,b)\mapsto ab$, che soddisfa tre assiomi:</p>
+  $$\text{(G1)}\quad \forall a,b,c\in G:\ (ab)c=a(bc)$$
+  $$\text{(G2)}\quad \exists e\in G\ \ \forall a\in G:\ ea=ae=a$$
+  $$\text{(G3)}\quad \forall a\in G\ \ \exists a^{-1}\in G:\ aa^{-1}=a^{-1}a=e$$
+  <p>La chiusura — che il prodotto di due elementi di $G$ stia ancora in $G$ — è già dentro la parola «operazione $G\times G\to G$»: il prodotto ha valori in $G$ per definizione. Quando si verifica che qualcosa è un gruppo, però, la chiusura è spesso il primo controllo da fare, perché è lì che i candidati falliscono.</p>
+  <p>Perché questi tre assiomi e non altri: sono esattamente ciò che sopravvive del comporre trasformazioni. Se $G$ è un insieme di trasformazioni biiettive di qualcosa e il prodotto $ab$ è «prima $b$, poi $a$», l'associatività è gratis — la composizione di funzioni è sempre associativa, $(a\circ b)\circ c$ e $a\circ(b\circ c)$ mandano $x$ nello stesso punto $a(b(c(x)))$ —, l'identità è la trasformazione che non fa niente, l'inverso è la trasformazione che disfa. Landau lo dice in questa forma, con la notazione $E$ per l'elemento unità che usa per tutto il capitolo (Landau, §92, stampata 423): il gruppo astratto è ciò che resta delle trasformazioni quando si dimentica su che cosa agiscono.</p>
+  <p>La proprietà che <b>manca</b> negli assiomi è la commutatività. Un gruppo in cui $\forall a,b:\ ab=ba$ si dice <b>commutativo</b> o <b>abeliano</b>; Landau nota subito che «la proprietà commutativa, però, generalmente non vale» (§92, stampata 423), e per le rotazioni nello spazio è il fatto fisico più importante del capitolo.</p>`},
+  {t:'reveal', title:'Neutro e inverso sono unici, e l’inverso di un prodotto si rovescia', tag:'costruzione', steps:[
+   {label:'Il neutro è unico', body:R`<p>Se $e$ ed $e'$ soddisfano entrambi (G2), allora $e=ee'$ perché $e'$ è neutro, e $ee'=e'$ perché $e$ è neutro. Quindi $e=e'$. La dimostrazione usa solo l'assioma, nessuna proprietà dell'oggetto: vale per i numeri, le matrici, le permutazioni.</p>`},
+   {label:'L’inverso è unico', body:R`<p>Se $b$ e $c$ sono entrambi inversi di $a$, allora $b=be=b(ac)=(ba)c=ec=c$. Il passaggio centrale è l'associatività: senza (G1) non si potrebbe spostare la parentesi. È per questo che si può scrivere $a^{-1}$ con l'articolo determinativo.</p>`},
+   {label:'L’inverso di un prodotto', body:R`<p>$(ab)^{-1}=b^{-1}a^{-1}$, perché $(ab)(b^{-1}a^{-1})=a(bb^{-1})a^{-1}=aa^{-1}=e$, e l'inverso è unico. L'ordine si rovescia come quando ci si veste: si mette prima la calza e poi la scarpa, e per spogliarsi si toglie prima la scarpa. Landau lo enuncia come $(AB)^{-1}=B^{-1}A^{-1}$ e invita a convincersene «eseguendo la moltiplicazione» (§92, stampata 423).</p>`},
+   {label:'Si può semplificare', body:R`<p>Da $ab=ac$ segue $b=c$: si moltiplica a sinistra per $a^{-1}$. Conseguenza utile per i gruppi finiti: in ogni riga della tavola di moltiplicazione ogni elemento compare <b>esattamente una volta</b>, perché $b\mapsto ab$ è iniettiva e quindi, su un insieme finito, biiettiva.</p>`}
+  ]},
+  {t:'prosa', title:'Esempi, e i candidati che falliscono', tag:'esempi', html:R`
+  <p>Gli esempi che la fisica usa, dal più piccolo al più grande:</p>
+  <ul>
+  <li>$(\mathbb{Z},+)$, $(\mathbb{R},+)$, $(\mathbb{R}^3,+)$: commutativi, neutro $0$, inverso $-a$. Il terzo è il <b>gruppo delle traslazioni</b> dello spazio: la traslazione di $\mathbf a$ seguita da quella di $\mathbf b$ è la traslazione di $\mathbf a+\mathbf b$.</li>
+  <li>$U(1)=\{z\in\mathbb{C}:|z|=1\}$ col prodotto dei complessi: le <b>fasi</b>. Commutativo.</li>
+  <li>$GL(n,\mathbb{R})$, le matrici $n\times n$ invertibili col prodotto righe per colonne; dentro, $O(n)=\{A: A^TA=I\}$ e $SO(n)=\{A\in O(n):\det A=1\}$, le rotazioni. Per $n\ge3$ non commutativi.</li>
+  <li>Le rotazioni del piano $R_\theta$, cioè $SO(2)$: commutativo, perché ruotare di $\alpha$ e poi di $\beta$ è ruotare di $\alpha+\beta$ in qualunque ordine.</li>
+  </ul>
+  <p>E quelli che falliscono, ciascuno su un assioma diverso: $(\mathbb{N},+)$ ha il neutro $0$ ma non gli inversi; $(\mathbb{R},\cdot)$ ha il neutro $1$ ma lo zero non ha inverso — togliendolo, $(\mathbb{R}\setminus\{0\},\cdot)$ è un gruppo; $(\mathbb{Z},-)$ non è nemmeno associativo, perché $(1-1)-1=-1$ mentre $1-(1-1)=1$.</p>
+  <p>La non commutatività delle rotazioni nello spazio si vede su due quarti di giro. Siano $R_z$ la rotazione di $90^\circ$ attorno all'asse $z$ e $R_x$ quella di $90^\circ$ attorno all'asse $x$:</p>
+  $$R_xR_z=\begin{pmatrix}0&-1&0\\0&0&-1\\1&0&0\end{pmatrix},\qquad R_zR_x=\begin{pmatrix}0&0&1\\1&0&0\\0&1&0\end{pmatrix}.$$
+  <p>Le due matrici sono diverse: un libro ruotato prima attorno a un asse verticale e poi attorno a uno orizzontale finisce in una posizione diversa da quello ruotato nell'ordine opposto. È la radice, in meccanica quantistica, del fatto che le componenti del momento angolare non commutano. Questi gruppi di matrici sono anche varietà lisce, e su quella struttura si costruiscono i <span class="str" data-str="gruppo-di-lie">gruppi di Lie</span>; qui interessa solo il prodotto.</p>`},
+  {t:'prosa', title:'L’ordine di un elemento', tag:'grammatica', html:R`
+  <p>In un gruppo si possono fare le potenze, $a^n=a\cdots a$ ($n$ volte), $a^0=e$, $a^{-n}=(a^{-1})^n$. Se esiste un intero positivo $n$ con $a^n=e$, il più piccolo si chiama <b>ordine</b> di $a$; altrimenti l'ordine è infinito. Le potenze di $a$ formano un gruppo, che Landau chiama il <b>periodo</b> di $a$ e indica con $\{A\}$ (§92, stampata 424): oggi si dice <b>sottogruppo ciclico generato da $a$</b> e si scrive $\langle a\rangle$.</p>
+  <p>Per le rotazioni l'ordine ha un significato geometrico diretto: la rotazione di $2\pi/n$ attorno a un asse ha ordine $n$. Per esempio, la rotazione di un sesto di giro, fatta sei volte, torna all'identità e nessuna potenza più piccola ci riesce:</p>
+  $$R_{2\pi/6}^{\,6}=I.$$
+  <p>Una rotazione di un angolo che non è un multiplo razionale di $2\pi$, invece, ha ordine infinito: le sue potenze non tornano mai esattamente al punto di partenza. È la differenza fra le simmetrie di un cristallo, che hanno ordine finito, e quelle di un cerchio.</p>`}
+]},
+
+/* ---------------- 02 · SOTTOGRUPPI E LAGRANGE ---------------- */
+{ num:'02', title:'Sottogruppi, classi laterali e il teorema di Lagrange', meta:'il criterio del sottogruppo · perché la sola chiusura non basta · le classi laterali come partizione · ordine del sottogruppo che divide quello del gruppo',
+  blocchi:[
+  {t:'prosa', title:'Il sottogruppo, e il criterio che si usa', tag:'grammatica', html:R`
+  <p>Un sottoinsieme $H\subseteq G$ è un <b>sottogruppo</b>, e si scrive $H\le G$, se è a sua volta un <span class="str" data-str="gruppo">gruppo</span> con la stessa operazione. Nella pratica si verifica con un criterio solo:</p>
+  $$H\le G\iff H\ne\emptyset\ \ \text{e}\ \ \forall a,b\in H:\ ab^{-1}\in H.$$
+  <p>Una direzione è ovvia. Per l'altra: preso $a\in H$ (esiste perché $H$ non è vuoto), con $b=a$ si ottiene $aa^{-1}=e\in H$; con $a=e$ si ottiene $eb^{-1}=b^{-1}\in H$ per ogni $b\in H$, quindi gli inversi ci sono; e dati $a,b\in H$, poiché $b^{-1}\in H$, si ha $a(b^{-1})^{-1}=ab\in H$, quindi la chiusura c'è. L'associatività non va controllata: vale in $G$, quindi vale a maggior ragione in $H$.</p>
+  <p>Landau usa un criterio più corto: per decidere se un insieme di elementi è un sottogruppo «è sufficiente convincersi che moltiplicando due elementi qualsiasi si ottiene un elemento appartenente a questo insieme» (§92, stampata 424). La ragione che dà è che, se $A$ ha ordine $n$, l'inverso è la potenza $A^{n-1}$, e quindi sta già nell'insieme. L'argomento è giusto <b>per i gruppi finiti</b>, che sono quelli di cui Landau si occupa in quel paragrafo, ed è sbagliato in generale: $\mathbb{N}\subset\mathbb{Z}$ è chiuso rispetto alla somma e non è un sottogruppo, perché il $-1$ non c'è. Dove l'ordine è infinito le potenze positive non tornano mai indietro, e l'inverso va chiesto esplicitamente.</p>
+  <p>Esempi: $n\mathbb{Z}\le\mathbb{Z}$, i multipli di $n$; $SO(n)\le O(n)\le GL(n,\mathbb{R})$; le rotazioni attorno all'asse $z$, che formano una copia di $SO(2)$ dentro $SO(3)$; il sottogruppo ciclico $\langle a\rangle$ di ogni elemento.</p>`},
+  {t:'prosa', title:'Le classi laterali: un sottogruppo affetta il gruppo', tag:'costruzione', html:R`
+  <p>Dato $H\le G$ e $a\in G$, la <b>classe laterale</b> sinistra di $a$ è $aH=\{ah: h\in H\}$. La relazione</p>
+  $$a\sim b\iff a^{-1}b\in H$$
+  <p>è una relazione di equivalenza — riflessiva perché $a^{-1}a=e\in H$, simmetrica perché $(a^{-1}b)^{-1}=b^{-1}a$, transitiva perché $(a^{-1}b)(b^{-1}c)=a^{-1}c$ — e la sua <span class="str" data-str="classe-di-equivalenza">classe di equivalenza</span> di $a$ è proprio $aH$: infatti $b\sim a\iff a^{-1}b=h\in H\iff b=ah$. Quindi <b>le classi laterali sono una partizione di $G$</b>: due classi o coincidono o sono disgiunte, e ogni elemento sta in una sola.</p>
+  <p>C'è di più: <b>tutte le classi hanno la stessa cardinalità di $H$</b>, perché $h\mapsto ah$ è una biiezione $H\to aH$ (iniettiva per la semplificazione della tappa 01, suriettiva per definizione di $aH$). Un sottogruppo affetta il gruppo in fette tutte uguali.</p>`},
+  {t:'plot', title:'Le tre classi laterali di 3Z in Z',
+   intro:R`Gli interi da $-6$ a $6$ divisi secondo il resto nella divisione per $3$: ogni riga è una classe laterale $a+3\mathbb{Z}$, cioè un sottogruppo traslato.`,
+   plots:[
+    {kind:'curve', x:'t', y:'-0.6', tr:[-6.5,6.5], height:230, equal:false,
+     xr:[-7,7], yr:[-0.9,2.6],
+     title:'le righe sono 3Z, 1+3Z e 2+3Z: stessa forma, spostate di uno',
+     marks:[{x:-6,y:0,col:'#5eead4'},{x:-3,y:0,col:'#5eead4'},{x:0,y:0,col:'#5eead4',label:'3Z (contiene 0: e il sottogruppo)'},{x:3,y:0,col:'#5eead4'},{x:6,y:0,col:'#5eead4'},
+            {x:-5,y:1,col:'#d8a13a'},{x:-2,y:1,col:'#d8a13a'},{x:1,y:1,col:'#d8a13a',label:'1+3Z'},{x:4,y:1,col:'#d8a13a'},
+            {x:-4,y:2,col:'#c084fc'},{x:-1,y:2,col:'#c084fc'},{x:2,y:2,col:'#c084fc',label:'2+3Z'},{x:5,y:2,col:'#c084fc'}]}
+   ],
+   leggi:R`<p>Tre cose da leggere nella figura, e sono le tre proprietà dimostrate sopra. Le righe non si toccano: ogni intero ha un solo resto, quindi sta in una sola classe. Le righe hanno la stessa forma: ciascuna è la prima traslata di $1$ o di $2$, cioè $h\mapsto a+h$ è una biiezione. Solo la prima riga contiene lo $0$, ed è l'unica che sia un sottogruppo: le altre due sono classi laterali, non sottogruppi, perché il neutro non c'è. Il caso è particolare in una cosa sola: qui il gruppo è infinito, quindi le fette sono infinite e il teorema di Lagrange qui sotto, che conta gli elementi, non dice niente; resta vero che le fette sono tre, cioè che l'indice $[\mathbb{Z}:3\mathbb{Z}]$ vale $3$.</p>`},
+  {t:'reveal', title:'Il teorema di Lagrange, con la dimostrazione di Landau', tag:'teorema', steps:[
+   {label:'Enunciato', body:R`<p>Se $G$ è un gruppo finito e $H\le G$, allora l'ordine di $H$ divide l'ordine di $G$:</p>
+   $$|G|=|H|\cdot[G:H],$$
+   <p>dove l'<b>indice</b> $[G:H]$ è il numero di classi laterali.</p>`},
+   {label:'Dimostrazione', body:R`<p>Le classi laterali sono una partizione di $G$, tutte di $|H|$ elementi; se sono $m$, allora $|G|=m|H|$. Landau la fa con le classi a destra $HG_1, HG_2,\dots$, costruite una alla volta scegliendo ogni volta un elemento non ancora usato, e mostra a mano che un elemento di $HG_1$ non può stare in $H$, perché da $H_aG_1=H_b$ seguirebbe $G_1=H_a^{-1}H_b\in H$ (§92, stampate 424-425). È lo stesso argomento: la disgiunzione delle classi, verificata invece che dedotta dalla relazione di equivalenza.</p>`},
+   {label:'Tre conseguenze', body:R`<p>(a) L'ordine di ogni elemento divide $|G|$: basta applicare il teorema a $\langle a\rangle$. (b) Un gruppo di ordine primo $p$ non ha sottogruppi propri oltre a $\{e\}$, ed è ciclico: ogni $a\ne e$ ha ordine che divide $p$ e non è $1$, quindi è $p$, e $\langle a\rangle$ è tutto il gruppo. Landau enuncia anche il viceversa (stampata 425). (c) Un esempio da tenere: nel gruppo $S_3$ delle permutazioni di tre oggetti, che ha $6$ elementi (tappa 07), il sottogruppo $H=\{e,(1\,2)\}$ generato da uno scambio ha indice</p>
+   $$[S_3:H]=6/2=3.$$`}
+  ]}
+]},
+
+/* ---------------- 03 · OMOMORFISMI ---------------- */
+{ num:'03', title:'Omomorfismi: le mappe che rispettano la composizione', meta:'la definizione · cosa conserva automaticamente · nucleo e immagine · iniettivo se e solo se il nucleo è banale · isomorfismo',
+  blocchi:[
+  {t:'prosa', title:'La definizione, e quattro esempi da Lee', tag:'grammatica', html:R`
+  <p>Una funzione $\varphi:G\to G'$ fra due gruppi è un <b>omomorfismo</b> se</p>
+  $$\forall a,b\in G:\ \ \varphi(ab)=\varphi(a)\,\varphi(b).$$
+  <p>A sinistra il prodotto è quello di $G$, a destra quello di $G'$: l'omomorfismo è una traduzione fra due gruppi che non tradisce la composizione. Lee raccoglie gli esempi che servono in un elenco solo (Esempio 7.4, stampata 153), e sono gli stessi che la fisica usa:</p>
+  <ul>
+  <li>l'esponenziale $\exp:(\mathbb{R},+)\to(\mathbb{R}_{gt 0},\cdot)$, perché $e^{a+b}=e^a\,e^b$: trasforma somme in prodotti, ed è il motivo per cui un operatore di evoluzione $e^{-iHt/\hbar}$ compone tempi sommandoli;</li>
+  <li>il determinante $\det:GL(n,\mathbb{R})\to(\mathbb{R}\setminus\{0\},\cdot)$, perché $\det(AB)=\det A\,\det B$;</li>
+  <li>la mappa $\varepsilon:(\mathbb{R},+)\to U(1)$, $\varepsilon(t)=e^{2\pi it}$, che avvolge la retta sul cerchio delle fasi;</li>
+  <li>la mappa $\theta\mapsto R_\theta$ da $(\mathbb{R},+)$ alle rotazioni del piano, perché $R_\alpha R_\beta=R_{\alpha+\beta}$: ruotare di $\beta$ e poi di $\alpha$ è ruotare della somma.</li>
+  </ul>`},
+  {t:'reveal', title:'Che cosa un omomorfismo conserva da solo', tag:'costruzione', steps:[
+   {label:'Il neutro va nel neutro', body:R`<p>$\varphi(e)=\varphi(ee)=\varphi(e)\varphi(e)$; moltiplicando a sinistra per $\varphi(e)^{-1}$ in $G'$ resta $e'=\varphi(e)$. Non serve chiederlo nella definizione: segue dalla sola compatibilità col prodotto.</p>`},
+   {label:'Gli inversi negli inversi', body:R`<p>$\varphi(a)\varphi(a^{-1})=\varphi(aa^{-1})=\varphi(e)=e'$, quindi $\varphi(a^{-1})=\varphi(a)^{-1}$ per l'unicità dell'inverso.</p>`},
+   {label:'Nucleo e immagine sono sottogruppi', body:R`<p>Il <b>nucleo</b> è $\ker\varphi=\{a\in G:\varphi(a)=e'\}$, l'<b>immagine</b> è $\operatorname{im}\varphi=\varphi(G)\subseteq G'$. Per il nucleo, col criterio della tappa 02: $e\in\ker\varphi$, e se $a,b\in\ker\varphi$ allora $\varphi(ab^{-1})=\varphi(a)\varphi(b)^{-1}=e'e'^{-1}=e'$. Per l'immagine: $\varphi(a)\varphi(b)^{-1}=\varphi(ab^{-1})$ sta ancora nell'immagine.</p>`},
+   {label:'Iniettivo se e solo se il nucleo è banale', body:R`<p>$$\varphi\ \text{iniettivo}\iff\ker\varphi=\{e\}.$$ Se $\varphi$ è iniettivo, solo $e$ va in $e'$. Viceversa, se $\varphi(a)=\varphi(b)$ allora $\varphi(a^{-1}b)=\varphi(a)^{-1}\varphi(b)=e'$, cioè $a^{-1}b\in\ker\varphi=\{e\}$, quindi $a=b$. Il nucleo misura <b>quanto</b> la traduzione confonde elementi diversi: due elementi hanno la stessa immagine esattamente quando differiscono per un elemento del nucleo.</p>`}
+  ]},
+  {t:'prosa', title:'Il nucleo dell’avvolgimento sul cerchio', tag:'esempi', html:R`
+  <p>L'esempio che conviene tenere a mente è $\varepsilon(t)=e^{2\pi it}$. Il suo nucleo sono i $t$ con $e^{2\pi it}=1$, cioè gli interi, perché</p>
+  $$e^{2\pi i k}=1\quad\text{per ogni }k\in\mathbb{Z},$$
+  <p>e per nessun altro reale. Lee lo dice in una riga: la mappa è un omomorfismo «il cui nucleo è l'insieme $\mathbb{Z}$ degli interi» (Esempio 7.4(d), stampata 153). Due tempi $t$ e $t'$ hanno la stessa immagine esattamente quando $t'-t\in\mathbb{Z}$: la retta si avvolge sul cerchio facendo un giro per ogni unità. Allo stesso modo $\theta\mapsto R_\theta$ ha nucleo $2\pi\mathbb{Z}$: ruotare di $2\pi$ è non ruotare.</p>
+  <p>Un omomorfismo biiettivo si chiama <b>isomorfismo</b>, e due gruppi isomorfi sono indistinguibili come gruppi. La definizione di Landau è questa e aggiunge la frase che ne spiega l'uso: due gruppi isomorfi, «considerati in modo astratto, posseggono evidentemente proprietà identiche, benché sia diverso il significato concreto dei loro elementi» (§92, stampata 426). Le fasi $e^{i\theta}\in U(1)$ e le rotazioni $R_\theta\in SO(2)$ sono lo stesso gruppo: in meccanica quantistica le prime moltiplicano una funzione d'onda, le seconde ruotano il piano, e tutto ciò che dipende solo dalla struttura di gruppo vale per entrambe.</p>`}
+]},
+
+/* ---------------- 04 · CONIUGIO, NORMALI, QUOZIENTE ---------------- */
+{ num:'04', title:'Coniugio, sottogruppi normali e gruppo quoziente', meta:'il coniugio come cambio di punto di vista · classi di coniugio delle rotazioni · normale come invariante per coniugio · il quoziente e il teorema di omomorfismo',
+  blocchi:[
+  {t:'prosa', title:'Il coniugio: la stessa operazione vista da un altro posto', tag:'grammatica', html:R`
+  <p>Dato $g\in G$, il <b>coniugio</b> per $g$ è la mappa $C_g(h)=ghg^{-1}$. È un <span class="str" data-str="omomorfismo">omomorfismo</span> di $G$ in sé, perché $gh_1g^{-1}\,gh_2g^{-1}=gh_1h_2g^{-1}$, ed è biiettivo con inverso $C_{g^{-1}}$ (Lee, Esempio 7.4(f), stampata 153). Due elementi $a,b$ si dicono <b>coniugati</b> se esiste $g$ con $b=gag^{-1}$; la relazione è di equivalenza, e le sue classi si chiamano <b>classi di coniugio</b>. Landau ne dimostra la transitività in una riga — da $B=P^{-1}AP$ e $C=Q^{-1}BQ$ segue $C=(PQ)^{-1}A(PQ)$ — e osserva due fatti: il neutro forma una classe da solo, e in un gruppo commutativo ogni elemento forma una classe da solo (§92, stampata 425).</p>
+  <p>Il significato fisico del coniugio è un <b>cambio di punto di vista</b>. Leggendo $gag^{-1}$ da destra: si porta il sistema nella posizione di riferimento con $g^{-1}$, si fa $a$, si torna indietro con $g$. È l'operazione $a$ «trasportata» dove $g$ porta. Landau lo mostra sulle rotazioni con un argomento puramente geometrico (stampata 427): se $A$ è la rotazione di angolo $\theta$ attorno all'asse $Oa$ e $G$ porta $Oa$ in $Ob$, allora $GAG^{-1}$ lascia fermo l'asse $Ob$ — $G^{-1}$ lo riporta su $Oa$, $A$ lo lascia lì, $G$ lo rimette a posto — e quindi è una rotazione attorno a $Ob$, dello <b>stesso angolo</b>. Le classi di coniugio di $SO(3)$ sono quindi le rotazioni di un angolo fissato, attorno a qualunque asse.</p>
+  <p>Lo si può verificare con un conto, senza geometria. La traccia di una rotazione di angolo $\theta$ in tre dimensioni vale $1+2\cos\theta$ (in una base con l'asse come terzo vettore la matrice ha un blocco $2\times2$ di traccia $2\cos\theta$ e un $1$), e la traccia è invariante per coniugio perché $\operatorname{tr}(XY)=\operatorname{tr}(YX)$. Coniugando una rotazione attorno a $z$ con una rotazione attorno a $x$ di angolo qualunque:</p>
+  $$\operatorname{tr}(GAG^{-1})=\operatorname{tr}A=1+2\cos\theta.$$
+  <p>Le riflessioni si comportano allo stesso modo. Indicando con $\sigma_z$ la riflessione nel piano $xy$ (cambia segno alla $z$) e con $R$ il quarto di giro attorno a $x$, che porta l'asse $z$ sull'asse $y$, il coniugio dà la riflessione nel piano $xz$:</p>
+  $$R\,\sigma_z\,R^{-1}=\sigma_y.$$
+  <p>Due riflessioni sono coniugate quando un elemento del gruppo porta un piano sull'altro, ed è la seconda regola che Landau usa per dividere i gruppi puntuali in classi (stampata 427).</p>`},
+  {t:'prosa', title:'Sottogruppi normali', tag:'grammatica', html:R`
+  <p>Un sottogruppo $N\le G$ è <b>normale</b>, e si scrive $N\trianglelefteq G$, se è invariante per ogni coniugio:</p>
+  $$N\trianglelefteq G\iff\forall g\in G:\ gNg^{-1}=N.$$
+  <p>È la definizione di Lee (stampata 153), e Landau la dà nella stessa forma col nome antico: «divisore normale (o sottogruppo invariante)» (§92, stampata 426). Equivalentemente, le classi laterali sinistre e destre coincidono, $gN=Ng$ per ogni $g$. Il motivo per cui la nozione è centrale è che <b>il nucleo di un omomorfismo è sempre normale</b>: se $\varphi(n)=e'$, allora $\varphi(gng^{-1})=\varphi(g)e'\varphi(g)^{-1}=e'$.</p>
+  <p>Esempi e un non esempio. $SO(n)$ è normale in $O(n)$, perché è il nucleo di $\det:O(n)\to\{\pm1\}$. Nel gruppo dei movimenti rigidi $x\mapsto Rx+\mathbf a$ le traslazioni formano un sottogruppo normale: coniugare la traslazione di $\mathbf a$ con una rotazione $R$ dà $x\mapsto R(R^{-1}x+\mathbf a)=x+R\mathbf a$, ancora una traslazione, di un vettore ruotato. Le rotazioni attorno all'origine, invece, non sono normali: coniugate con una traslazione diventano rotazioni attorno a un altro punto. E in $S_3$ il sottogruppo $\{e,(1\,2)\}$ non è normale, perché $(1\,3)(1\,2)(1\,3)=(2\,3)$ non ci sta. In un gruppo commutativo ogni sottogruppo è normale, come nota Landau.</p>`},
+  {t:'reveal', title:'Il gruppo quoziente, e il teorema di omomorfismo', tag:'teorema', steps:[
+   {label:'Il prodotto delle classi è ben definito se e solo se N è normale', body:R`<p>Sull'insieme $G/N$ delle classi laterali si vuole definire $(aN)(bN)=abN$. Il problema è che la stessa classe ha molti rappresentanti: se $aN=a'N$ e $bN=b'N$, cioè $a'=an_1$ e $b'=bn_2$, bisogna che $a'b'N=abN$. Ora $a'b'=an_1bn_2=ab\,(b^{-1}n_1b)\,n_2$, e se $N$ è normale $b^{-1}n_1b\in N$, quindi $a'b'\in abN$. Senza normalità il conto si ferma lì, e infatti il prodotto non è ben definito: col non esempio di $S_3$ si trovano due rappresentanti della stessa classe che danno prodotti in classi diverse.</p>`},
+   {label:'G/N è un gruppo', body:R`<p>Con $N$ normale, $G/N$ eredita gli assiomi da $G$: neutro $eN=N$, inverso $(aN)^{-1}=a^{-1}N$, associatività da quella di $G$. La proiezione $\pi:G\to G/N$, $a\mapsto aN$, è un omomorfismo suriettivo con nucleo $N$. Quindi ogni sottogruppo normale è un nucleo, e i due concetti sono lo stesso.</p>`},
+   {label:'Teorema di omomorfismo', body:R`<p>Se $\varphi:G\to G'$ è un omomorfismo, allora $$G/\ker\varphi\ \cong\ \operatorname{im}\varphi,$$ tramite $a\ker\varphi\mapsto\varphi(a)$. La mappa è ben definita e iniettiva perché $\varphi(a)=\varphi(b)\iff a^{-1}b\in\ker\varphi$ (tappa 03); è un omomorfismo perché lo è $\varphi$; è suriettiva sull'immagine per costruzione. Il teorema dice che ogni omomorfismo si spezza in due passi: prima si identificano gli elementi che $\varphi$ confonde, poi si traduce senza perdere niente.</p>`}
+  ]},
+  {t:'plot', title:'Il cerchio come quoziente della retta: R / 2piZ',
+   intro:R`L'omomorfismo $\theta\mapsto e^{i\theta}$ ha nucleo $2\pi\mathbb{Z}$; per il teorema di omomorfismo $\mathbb{R}/2\pi\mathbb{Z}\cong U(1)$. In figura, quattro reali della stessa classe vanno nello stesso punto del cerchio.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:300, equal:true,
+     xr:[-1.7,1.7], yr:[-1.5,1.5],
+     title:'theta, theta + 2pi, theta - 2pi, theta + 4pi: una sola fase',
+     segs:[{x1:0,y1:0,x2:0.766,y2:0.643,col:'#d8a13a',arrow:true,label:'e^(i theta), theta = 0.7',lx:0.95,ly:0.95},
+           {x1:-1.5,y1:-1.3,x2:1.5,y2:-1.3,col:'#8ea0b8',width:1.4}],
+     marks:[{x:0.766,y:0.643,col:'#d8a13a'},
+            {x:-1.2,y:-1.3,col:'#5eead4',label:'0.7 - 2pi'},{x:0.0,y:-1.3,col:'#5eead4',label:'0.7'},{x:1.2,y:-1.3,col:'#5eead4',label:'0.7 + 2pi'},
+            {x:1,y:0,col:'#8ea0b8',label:'1 = e^(2 pi i k)'}]}
+   ],
+   leggi:R`<p>La riga in basso è la retta reale, compressa per stare nel disegno; i tre punti verdi sono tre rappresentanti della stessa classe laterale $0{,}7+2\pi\mathbb{Z}$, e tutti finiscono sul punto arancione del cerchio. Il punto $1$ sulla destra è l'immagine dell'intero nucleo $2\pi\mathbb{Z}$: è il neutro del gruppo quoziente. Il disegno mostra due quozienti in uno: quello di <b>gruppi</b>, dove le classi si moltiplicano sommando gli angoli, e quello di <b>spazi topologici</b>, dove la retta incollata su se stessa ogni $2\pi$ dà il cerchio come <span class="str" data-str="quoziente-topologico">quoziente topologico</span>. Per $\mathbb{R}/2\pi\mathbb{Z}$ i due coincidono, ed è il primo esempio di un oggetto che è insieme un gruppo e uno spazio. Generale: la classe è una fibra di $\varphi$. Accidentale: che il quoziente si disegni come una curva chiusa, perché qui il gruppo ha una dimensione.</p>`}
+]},
+
+/* ---------------- 05 · AZIONI ---------------- */
+{ num:'05', title:'Azioni di gruppo: orbite e stabilizzatori', meta:'un gruppo che muove un insieme · orbite come partizione · stabilizzatore come sottogruppo · la formula orbita-stabilizzatore · come agisce un gruppo sulle funzioni',
+  blocchi:[
+  {t:'prosa', title:'La definizione di Lee', tag:'grammatica', html:R`
+  <p>In fisica un gruppo non si incontra mai da solo: si incontra mentre <b>muove</b> qualcosa. Un'<b>azione</b> (sinistra) di un gruppo $G$ su un insieme $M$ è una mappa $G\times M\to M$, $(g,p)\mapsto g\cdot p$, tale che</p>
+  $$\forall g_1,g_2\in G,\ \forall p\in M:\ \ g_1\cdot(g_2\cdot p)=(g_1g_2)\cdot p,\qquad \forall p\in M:\ e\cdot p=p.$$
+  <p>È la definizione (7.6) di Lee (stampata 161), che aggiunge il motivo per cui si preferiscono le azioni a sinistra: con esse «la moltiplicazione degli elementi del gruppo corrisponde alla composizione delle mappe». Ogni $g$ agisce con una biiezione $p\mapsto g\cdot p$, la cui inversa è l'azione di $g^{-1}$; quindi un'azione è la stessa cosa di un <span class="str" data-str="omomorfismo">omomorfismo</span> da $G$ al gruppo delle biiezioni di $M$.</p>
+  <p>Gli esempi che servono: $SO(3)$ agisce su $\mathbb{R}^3$ con $R\cdot\mathbf x=R\mathbf x$; le traslazioni agiscono su $\mathbb{R}^3$ con $\mathbf a\cdot\mathbf x=\mathbf x+\mathbf a$; $S_N$ agisce sulle posizioni di $N$ particelle scambiandole; ogni gruppo agisce su sé stesso col coniugio.</p>`},
+  {t:'reveal', title:'Orbite, stabilizzatori, e la formula che li lega', tag:'costruzione', steps:[
+   {label:'Le orbite sono una partizione', body:R`<p>L'<b>orbita</b> di $p$ è $G\cdot p=\{g\cdot p: g\in G\}$. La relazione $p\sim q\iff\exists g\in G:\ q=g\cdot p$ è di equivalenza — riflessiva con $e$, simmetrica con $g^{-1}$, transitiva perché $g_1\cdot(g_2\cdot p)=(g_1g_2)\cdot p$ — quindi le orbite dividono $M$ in pezzi disgiunti. L'azione è <b>transitiva</b> se c'è una sola orbita.</p>`},
+   {label:'Lo stabilizzatore è un sottogruppo', body:R`<p>Lo <b>stabilizzatore</b> (Lee: <i>isotropy group</i>) di $p$ è $G_p=\{g: g\cdot p=p\}$. Contiene $e$, e se $g,h\in G_p$ allora $gh^{-1}\cdot p=g\cdot(h^{-1}\cdot p)=g\cdot p=p$, perché da $h\cdot p=p$ segue $p=h^{-1}\cdot p$.</p>`},
+   {label:'Formula orbita-stabilizzatore', body:R`<p>La mappa $gG_p\mapsto g\cdot p$ dalle classi laterali di $G_p$ all'orbita è ben definita e biiettiva: $g\cdot p=h\cdot p\iff h^{-1}g\in G_p\iff gG_p=hG_p$. Quindi l'orbita è in corrispondenza con $G/G_p$, e per un gruppo finito, per Lagrange,</p>
+   $$|G\cdot p|\cdot|G_p|=|G|.$$`},
+   {label:'Lungo un’orbita gli stabilizzatori sono coniugati', body:R`<p>$G_{g\cdot p}=g\,G_p\,g^{-1}$: se $h$ fissa $p$, allora $ghg^{-1}$ fissa $g\cdot p$, e viceversa. Punti della stessa orbita hanno stabilizzatori «uguali visti da posti diversi». In fisica delle particelle lo stabilizzatore di un impulso si chiama <b>piccolo gruppo</b>, e questa riga è il motivo per cui basta studiarlo per un solo impulso di riferimento.</p>`}
+  ]},
+  {t:'plot', title:'Le orbite delle rotazioni del piano',
+   intro:R`$SO(2)$ agisce su $\mathbb{R}^2$ ruotando. Le orbite sono i cerchi centrati nell'origine, più l'origine da sola.`,
+   plots:[
+    {kind:'curve', x:'1.5*cos(t)', y:'1.5*sin(t)', tr:[0,6.2832], height:300, equal:true,
+     xr:[-1.9,1.9], yr:[-1.8,1.8],
+     title:'tre orbite e il punto fisso: lo stabilizzatore e tutto il gruppo in 0, banale altrove',
+     rings:[{r:0.5,col:'#5eead4'},{r:1.0,col:'#8ee0c8'}],
+     segs:[{x1:0,y1:0,x2:1.06,y2:1.06,col:'#d8a13a',arrow:true,label:'R_theta p',lx:0.55,ly:0.85}],
+     marks:[{x:0,y:0,col:'#c084fc',label:'orbita {0}'},{x:1.5,y:0,col:'#d8a13a',label:'p'},{x:1.06,y:1.06,col:'#d8a13a'}]}
+   ],
+   leggi:R`<p>Ogni cerchio è un'orbita: un punto a distanza $r$ dall'origine si può portare con una rotazione su qualunque altro punto alla stessa distanza, e su nessun punto a distanza diversa. Le orbite non si toccano, come vuole la partizione. Lo stabilizzatore di un punto $p\ne0$ è il solo $\{I\}$, perché nessuna rotazione non banale del piano lascia fermo un punto fuori dal centro; quello dell'origine è tutto $SO(2)$. È la formula orbita-stabilizzatore nel caso infinito: orbita grande, stabilizzatore piccolo, e viceversa. Generale: le orbite sono le superfici di livello della quantità conservata dall'azione, qui la distanza dall'origine. In tre dimensioni, con $SO(3)$, le orbite diventano sfere e lo stabilizzatore di un punto sull'asse $z$ diventa la copia di $SO(2)$ delle rotazioni attorno a $z$.</p>`},
+  {t:'prosa', title:'Un conto sul cubo, e l’azione sulle funzioni', tag:'esempi', html:R`
+  <p>Il gruppo delle rotazioni che portano un cubo in sé ha $24$ elementi, e la formula orbita-stabilizzatore lo conta in tre modi indipendenti. Le facce sono $6$, tutte nella stessa orbita, e lo stabilizzatore di una faccia sono le $4$ rotazioni attorno all'asse che la attraversa; i vertici sono $8$, ciascuno fissato dalle $3$ rotazioni attorno alla diagonale; gli spigoli sono $12$, ciascuno fissato da $2$ rotazioni. I tre conti devono dare lo stesso numero, e lo danno:</p>
+  $$6\cdot 4=8\cdot 3=12\cdot 2=24.$$
+  <p>Quando un gruppo agisce su uno spazio, agisce anche sulle funzioni definite su quello spazio, ed è così che le simmetrie entrano in meccanica quantistica, dove gli stati sono funzioni d'onda. La regola giusta ha un inverso che sorprende la prima volta:</p>
+  $$(g\cdot f)(x)=f(g^{-1}\cdot x).$$
+  <p>Con le traslazioni, $T_af(x)=f(x-a)$: il grafico di $f$ si sposta di $a$ verso destra, perché il valore che $f$ aveva in $0$ ora sta in $a$. L'inverso serve perché sia un'azione sinistra. Componendo due traslazioni,</p>
+  $$(T_a(T_bf))(x)=f(x-a-b)=(T_{a+b}f)(x),$$
+  <p>e in generale $(g_1\cdot(g_2\cdot f))(x)=(g_2\cdot f)(g_1^{-1}x)=f(g_2^{-1}g_1^{-1}x)=f((g_1g_2)^{-1}x)$: è l'inverso del prodotto della tappa 01, che rovescia l'ordine, a rimettere le cose a posto. Senza l'inverso si otterrebbe $(g_2g_1)$, cioè un'azione destra. Ballentine costruisce le simmetrie in meccanica quantistica proprio come operatori $U$ che agiscono sui vettori di stato, $|\psi\rangle\mapsto U|\psi\rangle$, e richiede che la composizione delle trasformazioni sia rispettata (§3.1, stampate 64-65).</p>`}
+]},
+
+/* ---------------- 06 · GALILEI ---------------- */
+{ num:'06', title:'Il gruppo di Galilei, letto come gruppo', meta:'quattro parametri e una legge di composizione · neutro e inverso calcolati · i sottogruppi · chi è normale e chi no · perché non è un prodotto diretto',
+  blocchi:[
+  {t:'prosa', title:'La legge di composizione di Ballentine', tag:'costruzione', html:R`
+  <p>Le simmetrie dello spazio-tempo non relativistico sono le rotazioni, le traslazioni nello spazio e nel tempo, e i cambi verso un riferimento in moto uniforme. Ballentine le scrive tutte insieme, con quattro parametri (equazione (3.5), stampata 66):</p>
+  $$\tau(R,\mathbf a,\mathbf v,s):\qquad \mathbf x\mapsto R\mathbf x+\mathbf a+\mathbf v t,\qquad t\mapsto t+s,$$
+  <p>con $R$ una rotazione, $\mathbf a$ una traslazione spaziale, $\mathbf v$ la velocità del nuovo riferimento (un <b>boost</b>), $s$ una traslazione temporale. «L'insieme di tutte queste trasformazioni si chiama gruppo di Galilei.» Che sia davvero un gruppo è un conto, e Ballentine lo fa componendo: se $\tau_1$ porta $(\mathbf x,t)$ in $(\mathbf x',t')$ e $\tau_2$ porta $(\mathbf x',t')$ in $(\mathbf x'',t'')$, il risultato è ancora della stessa forma, con parametri (3.6)</p>
+  $$R_3=R_2R_1,\quad \mathbf a_3=\mathbf a_2+R_2\mathbf a_1+\mathbf v_2s_1,\quad \mathbf v_3=\mathbf v_2+R_2\mathbf v_1,\quad s_3=s_2+s_1.$$
+  <p>La chiusura c'è. In una dimensione, dove la rotazione è l'identità, il conto si fa a mano: da $x'=x+v_1t+a_1$, $t'=t+s_1$ e $x''=x'+v_2t'+a_2$ segue</p>
+  $$x''=x+(v_1+v_2)\,t+(a_1+a_2+v_2s_1).$$
+  <p>Il termine $v_2s_1$ è il punto interessante: un boost applicato <b>dopo</b> una traslazione temporale produce anche una traslazione spaziale. I parametri non si compongono separatamente; il gruppo li mescola.</p>`},
+  {t:'prosa', title:'Neutro, inverso, associatività', tag:'grammatica', html:R`
+  <p>L'associatività è gratis, perché sono trasformazioni dello spazio-tempo e si compongono come funzioni. Il neutro è $\tau(I,\mathbf 0,\mathbf 0,0)$. L'inverso si ricava imponendo che la composizione (3.6) dia il neutro: $R_2R_1=I$ fissa $R_2=R_1^{-1}$; $\mathbf v_2+R_2\mathbf v_1=\mathbf 0$ fissa $\mathbf v_2=-R_1^{-1}\mathbf v_1$; $s_2=-s_1$; e infine $\mathbf a_2=-R_1^{-1}(\mathbf a_1-\mathbf v_1s_1)$. In una dimensione:</p>
+  $$\tau^{-1}=(-v,\,-a+vs,\,-s),$$
+  <p>e componendo con $\tau$ si torna esattamente a $x$: la traslazione $-a$ da sola non basta, perché nel frattempo il riferimento si è mosso per un tempo $s$.</p>
+  <p>Dentro il gruppo stanno quattro <b>sottogruppi</b>, che sono le quattro famiglie di simmetrie della fisica classica: le rotazioni $SO(3)$ ($\mathbf a=\mathbf v=\mathbf 0$, $s=0$), le traslazioni spaziali $(\mathbb{R}^3,+)$, i boost $(\mathbb{R}^3,+)$, le traslazioni temporali $(\mathbb{R},+)$. Ciascuno si verifica col criterio della tappa 02. Due boost commutano ($\mathbf v_3=\mathbf v_1+\mathbf v_2$ in qualunque ordine); un boost e una rotazione no, perché $\mathbf v_3=\mathbf v_2+R_2\mathbf v_1$ ruota la velocità del primo.</p>`},
+  {t:'prosa', title:'Chi è normale: un boost coniuga il tempo in spazio', tag:'teorema', html:R`
+  <p>Il coniugio della tappa 04 dice quali sottogruppi sono normali, e il risultato ha un contenuto fisico. Si coniughi una traslazione temporale $s$ con un boost $v$, in una dimensione: prima il boost inverso $x\mapsto x-vt$, poi la traslazione $t\mapsto t+s$, poi il boost $x\mapsto x+vt$, con il tempo ormai spostato. Il risultato è</p>
+  $$x\mapsto x+vs,\quad t\mapsto t+s:$$
+  <p>non più una traslazione temporale pura, ma una traslazione temporale accompagnata da una spaziale di $vs$. Quindi le traslazioni temporali <b>non</b> sono un sottogruppo normale: «aspettare un tempo $s$», visto da un riferimento in moto, è anche «spostarsi». Le traslazioni spaziali invece lo sono: coniugando con una rotazione diventano traslazioni di un vettore ruotato, con un boost restano traslazioni (un boost non cambia lo spostamento a tempo fissato). Anche il sottogruppo di traslazioni spaziali e boost insieme è normale.</p>
+  <p>Ne segue che il gruppo di Galilei <b>non è un prodotto diretto</b> dei suoi quattro pezzi: in un prodotto diretto i fattori commutano fra loro, e qui non commutano. È un <b>prodotto semidiretto</b> — un sottogruppo normale $N$ e un sottogruppo $H$ con $G=NH$, $N\cap H=\{e\}$, dove $H$ agisce su $N$ per coniugio — e la regola $\mathbf a_3=\mathbf a_2+R_2\mathbf a_1+\dots$ dice esattamente come le rotazioni agiscono sulle traslazioni. Landau definisce il prodotto diretto con la condizione che gli elementi dei due fattori commutino (§92, stampata 426), ed è proprio quella che qui manca.</p>`},
+  {t:'plot', title:'Un boost visto sul piano (t, x)',
+   intro:R`La linea d'universo di una particella ferma nell'origine, $x=0$, e la stessa linea dopo tre trasformazioni di Galilei in una dimensione.`,
+   plots:[
+    {kind:'curve', x:'t', y:'0', tr:[-0.2,2.2], height:280, equal:false,
+     xr:[-0.3,2.4], yr:[-0.6,3.2],
+     title:'asse orizzontale t, verticale x: traslare, boostare, comporre',
+     segs:[{x1:-0.2,y1:0.8,x2:2.2,y2:0.8,col:'#5eead4',label:'x = a (traslazione, a = 0.8)',lx:1.6,ly:1.0},
+           {x1:-0.2,y1:-0.2,x2:2.2,y2:2.2,col:'#d8a13a',label:'x = v t (boost, v = 1)',lx:1.85,ly:1.6},
+           {x1:-0.2,y1:0.6,x2:2.2,y2:3.0,col:'#c084fc',dash:true,label:'x = v t + a',lx:1.2,ly:2.4}],
+     marks:[{x:0,y:0,col:'#8ea0b8',label:'evento (0, 0)'},{x:0,y:0.8,col:'#5eead4'}]}
+   ],
+   leggi:R`<p>La retta orizzontale $x=0$ (l'asse) è la particella ferma. La traslazione la sposta parallela a sé stessa (verde); il boost la inclina, perché nel nuovo riferimento la particella si muove (arancione); la composizione fa entrambe le cose (viola, tratteggiata). Tutte le trasformazioni del gruppo mandano rette in rette, e nessuna cambia il tempo assoluto se non per lo spostamento rigido $s$: il fatto che due eventi siano simultanei non dipende dal riferimento. La figura mostra anche perché un boost dopo una traslazione temporale produce uno spostamento: spostare la retta a destra di $s$ e poi inclinarla la fa passare più in alto o più in basso dell'origine, di $vs$. Generale: la forma $x\mapsto x+vt+a$; accidentale: i valori numerici scelti per il disegno.</p>`}
+]},
+
+/* ---------------- 07 · PERMUTAZIONI ---------------- */
+{ num:'07', title:'Il gruppo delle permutazioni e il segno', meta:'le biiezioni di N oggetti · cicli e trasposizioni · il segno come omomorfismo verso più e meno uno · classi di coniugio per tipo di ciclo · particelle identiche',
+  blocchi:[
+  {t:'prosa', title:'S_N, i cicli, e il più piccolo gruppo non commutativo', tag:'grammatica', html:R`
+  <p>Il <b>gruppo simmetrico</b> $S_N$ è l'insieme delle biiezioni $\sigma:\{1,\dots,N\}\to\{1,\dots,N\}$, con la composizione. Si contano facilmente: $\sigma(1)$ ha $N$ scelte, $\sigma(2)$ ne ha $N-1$, e così via, quindi $|S_N|=N!$. Per tre oggetti:</p>
+  $$|S_3|=3!=6.$$
+  <p>Si scrivono in <b>notazione a cicli</b>: $(1\,2\,3)$ è la permutazione che manda $1\to2$, $2\to3$, $3\to1$; $(1\,2)$ scambia $1$ e $2$ e lascia fermo il resto, e si chiama <b>trasposizione</b>. Il prodotto $\sigma\tau$ si legge come composizione di funzioni, quindi da destra: prima $\tau$, poi $\sigma$. Con questa convenzione $(1\,2)(2\,3)=(1\,2\,3)$, mentre $(2\,3)(1\,2)=(1\,3\,2)$: le due permutazioni sono diverse, e $S_3$ è il più piccolo gruppo non commutativo. Lo si vede seguendo l'$1$: nel primo prodotto $(2\,3)$ lo lascia fermo e $(1\,2)$ lo manda in $2$; nel secondo $(1\,2)$ lo manda in $2$ e $(2\,3)$ lo manda in $3$.</p>
+  <p>Ogni permutazione è un prodotto di cicli disgiunti, e ogni ciclo è un prodotto di trasposizioni: $(a_1\,a_2\,\cdots\,a_k)=(a_1\,a_k)\cdots(a_1\,a_3)(a_1\,a_2)$. Quindi <b>le trasposizioni generano $S_N$</b>: ogni riordinamento di $N$ oggetti si ottiene scambiandoli a due a due.</p>`},
+  {t:'reveal', title:'Il segno è un omomorfismo', tag:'teorema', steps:[
+   {label:'La definizione', body:R`<p>Si pone $$\operatorname{sgn}\sigma=\prod_{i<j}\frac{\sigma(j)-\sigma(i)}{j-i}.$$ Ogni coppia $\{i,j\}$ compare una volta, e quando $\{i,j\}$ percorre tutte le coppie anche $\{\sigma(i),\sigma(j)\}$ le percorre tutte; quindi numeratore e denominatore contengono gli stessi fattori a meno del segno, e il prodotto vale $\pm1$: vale $-1$ elevato al numero di <b>inversioni</b>, le coppie $i<j$ con $\sigma(i)>\sigma(j)$. È la stessa cosa che chiedersi come cambia il polinomio $\Delta=\prod_{i<j}(x_j-x_i)$ quando si permutano le variabili.</p>`},
+   {label:'Due conti su S_3', body:R`<p>Per $\sigma=(1\,2\,3)$, cioè $\sigma(1)=2$, $\sigma(2)=3$, $\sigma(3)=1$, le tre coppie danno $\frac{3-2}{2-1}\cdot\frac{1-2}{3-1}\cdot\frac{1-3}{3-2}$, e quindi $$\operatorname{sgn}(1\,2\,3)=+1.$$ Per lo scambio $\tau=(1\,2)$ le coppie danno $\frac{1-2}{2-1}\cdot\frac{3-2}{3-1}\cdot\frac{3-1}{3-2}$, e quindi $$\operatorname{sgn}(1\,2)=-1.$$ In generale una trasposizione ha segno $-1$ e un ciclo di lunghezza $k$ ha segno $(-1)^{k-1}$, perché è prodotto di $k-1$ trasposizioni — purché il segno sia moltiplicativo, che è il passo successivo.</p>`},
+   {label:'sgn(στ) = sgn σ · sgn τ', body:R`<p>Si spezza il prodotto inserendo un fattore uguale sopra e sotto: $$\operatorname{sgn}(\sigma\tau)=\prod_{i<j}\frac{\sigma(\tau(j))-\sigma(\tau(i))}{\tau(j)-\tau(i)}\cdot\prod_{i<j}\frac{\tau(j)-\tau(i)}{j-i}.$$ Il secondo prodotto è $\operatorname{sgn}\tau$. Nel primo, il fattore $\frac{\sigma(q)-\sigma(p)}{q-p}$ non cambia scambiando $p$ e $q$, quindi dipende solo dalla coppia non ordinata $\{p,q\}=\{\tau(i),\tau(j)\}$; e quando $\{i,j\}$ percorre tutte le coppie, $\{\tau(i),\tau(j)\}$ le percorre tutte una volta. Il primo prodotto è quindi $\operatorname{sgn}\sigma$. Dunque $\operatorname{sgn}:S_N\to\{\pm1\}$ è un omomorfismo, e il suo nucleo $A_N$, le permutazioni pari, è un sottogruppo normale di indice $2$.</p>`}
+  ]},
+  {t:'plot', title:'S_3 come simmetrie del triangolo equilatero',
+   intro:R`Le sei permutazioni dei vertici $1,2,3$ sono esattamente le sei isometrie del triangolo: tre rotazioni e tre riflessioni.`,
+   plots:[
+    {kind:'curve', x:'0.25*cos(t)', y:'0.25*sin(t)', tr:[0.3,5.0], height:300, equal:true,
+     xr:[-1.4,1.4], yr:[-0.9,1.35],
+     title:'rotazioni: cicli (1 2 3), (1 3 2) · riflessioni negli assi tratteggiati: trasposizioni',
+     segs:[{x1:0,y1:1,x2:-0.866,y2:-0.5,col:'#5eead4'},{x1:-0.866,y1:-0.5,x2:0.866,y2:-0.5,col:'#5eead4'},{x1:0.866,y1:-0.5,x2:0,y2:1,col:'#5eead4'},
+           {x1:0,y1:1.15,x2:0,y2:-0.75,col:'#d8a13a',dash:true,label:'(2 3)',lx:0.15,ly:-0.72},
+           {x1:-1.0,y1:-0.577,x2:0.65,y2:0.375,col:'#d8a13a',dash:true,label:'(1 3)',lx:0.75,ly:0.48},
+           {x1:1.0,y1:-0.577,x2:-0.65,y2:0.375,col:'#d8a13a',dash:true,label:'(1 2)',lx:-0.78,ly:0.48}],
+     marks:[{x:0,y:1,col:'#c084fc',label:'1'},{x:-0.866,y:-0.5,col:'#c084fc',label:'2',left:true},{x:0.866,y:-0.5,col:'#c084fc',label:'3'}]}
+   ],
+   leggi:R`<p>Ogni isometria del triangolo è determinata da dove manda i tre vertici, quindi è una permutazione di $\{1,2,3\}$; viceversa ogni permutazione si realizza. Le riflessioni sono le trasposizioni: la riflessione nell'asse che passa per il vertice $1$ lo lascia fermo e scambia $2$ e $3$. Le rotazioni di $120^\circ$ e $240^\circ$ (l'arco attorno al centro) sono i due cicli di lunghezza tre. Le rotazioni conservano l'orientazione e hanno segno $+1$, le riflessioni la invertono e hanno segno $-1$: il segno della permutazione è il determinante dell'isometria. Le classi di coniugio si vedono a occhio: le tre riflessioni sono coniugate fra loro (una rotazione porta un asse su un altro), le due rotazioni non banali pure, e l'identità sta da sola.</p>`},
+  {t:'prosa', title:'Classi di coniugio, e le particelle identiche', tag:'esempi', html:R`
+  <p>In $S_N$ il coniugio ha una forma esplicita: $\pi(a_1\,\cdots\,a_k)\pi^{-1}=(\pi(a_1)\,\cdots\,\pi(a_k))$, cioè coniugare <b>rinomina</b> gli oggetti. Due permutazioni sono coniugate se e solo se hanno lo stesso <b>tipo di ciclo</b>, cioè le stesse lunghezze dei cicli disgiunti. In $S_3$ le classi sono l'identità, le tre trasposizioni, i due $3$-cicli, e il conto torna:</p>
+  $$1+3+2=6.$$
+  <p>In $S_4$ le classi sono cinque: l'identità, le $6$ trasposizioni, i $3$ prodotti di due trasposizioni disgiunte come $(1\,2)(3\,4)$, gli $8$ cicli di lunghezza tre, i $6$ cicli di lunghezza quattro:</p>
+  $$1+6+3+8+6=24.$$
+  <p>Il motivo per cui la fisica ha bisogno di questo gruppo lo dice Ballentine all'inizio del capitolo sulle particelle identiche: tutti gli elettroni hanno le stesse proprietà, «due situazioni fisiche che differiscono solo per lo scambio di particelle identiche sono indistinguibili», e quindi ogni hamiltoniana fisica dev'essere invariante per permutazione delle particelle identiche (§17.1, stampata 470). $S_N$ agisce sulle configurazioni di $N$ particelle rinominandole, e Landau ricorda che le proprietà generali dei gruppi valgono anche per «il gruppo delle permutazioni», l'insieme di tutte le permutazioni di particelle identiche di un sistema (§92, stampata 423, nota). Il segno costruito qui è il numero che distingue i due comportamenti possibili sotto scambio: una funzione d'onda che resta uguale e una che cambia segno.</p>`}
+]},
+
+/* ---------------- 08 · ESERCIZI ---------------- */
+{ num:'08', title:'Esercizi — tocca a te', meta:'cinque esercizi con soluzione · una prova per capire se il movimento è passato',
+  blocchi:[
+  {t:'esercizio', title:'1 · Z/nZ, costruito come quoziente', html:R`
+  <p>Mostra che $n\mathbb{Z}$ è un sottogruppo normale di $(\mathbb{Z},+)$, descrivi le classi laterali e mostra che $\mathbb{Z}/n\mathbb{Z}$ è un gruppo ciclico di ordine $n$.</p>`,
+   sol:R`<p>$n\mathbb{Z}$ non è vuoto e $na-nb=n(a-b)\in n\mathbb{Z}$, quindi è un sottogruppo; è normale perché $\mathbb{Z}$ è commutativo. Le classi sono $k+n\mathbb{Z}$ per $k=0,\dots,n-1$, una per ogni resto nella divisione per $n$, e sono distinte perché due resti diversi differiscono per meno di $n$. La somma delle classi è la somma dei resti modulo $n$, ben definita per la normalità; la classe di $1$ ha ordine $n$ e genera tutto. È anche il nucleo dell'omomorfismo $k\mapsto e^{2\pi ik/n}$ verso le radici $n$-esime dell'unità, che per il teorema di omomorfismo sono quindi isomorfe a $\mathbb{Z}/n\mathbb{Z}$.</p>`},
+  {t:'esercizio', title:'2 · SO(n) dentro O(n)', html:R`
+  <p>Mostra che $\det:O(n)\to\{\pm1\}$ è un omomorfismo suriettivo e deduci che $SO(n)$ è normale in $O(n)$, di indice $2$. Qual è l'altra classe laterale?</p>`,
+   sol:R`<p>Se $A^TA=I$ allora $(\det A)^2=1$, quindi $\det A=\pm1$; la moltiplicatività del determinante dice che è un omomorfismo; la riflessione $\operatorname{diag}(-1,1,\dots,1)$ ha determinante $-1$, quindi è suriettivo. Il nucleo è $SO(n)$, normale perché nucleo; per il teorema di omomorfismo $O(n)/SO(n)\cong\{\pm1\}$, quindi le classi sono due. L'altra è l'insieme delle isometrie che invertono l'orientazione, cioè le rotazioni composte con una riflessione fissata. Nota che questa classe <b>non</b> è un sottogruppo: il prodotto di due riflessioni è una rotazione.</p>`},
+  {t:'esercizio', title:'3 · Orbite e stabilizzatori del tetraedro', html:R`
+  <p>Il gruppo delle rotazioni che portano un tetraedro regolare in sé ha $12$ elementi. Verificalo con la formula orbita-stabilizzatore in due modi: sui vertici e sugli spigoli.</p>`,
+   sol:R`<p>I vertici sono $4$, tutti nella stessa orbita (si può portare ogni vertice su ogni altro); lo stabilizzatore di un vertice sono le $3$ rotazioni attorno all'asse che lo congiunge al centro della faccia opposta. Gli spigoli sono $6$, tutti nella stessa orbita; lo stabilizzatore di uno spigolo sono l'identità e il mezzo giro attorno all'asse che congiunge il suo punto medio con quello dello spigolo opposto. I due conti danno $4\cdot 3=6\cdot 2=12$. Il gruppo è isomorfo ad $A_4$: le rotazioni permutano i quattro vertici, e sono esattamente le permutazioni pari.</p>`},
+  {t:'esercizio', title:'4 · Boost e rotazioni non commutano', html:R`
+  <p>Usando la legge di composizione (3.6) di Ballentine, componi un boost $\tau(I,\mathbf 0,\mathbf v,0)$ e una rotazione $\tau(R,\mathbf 0,\mathbf 0,0)$ nei due ordini, e di' quando i due risultati coincidono.</p>`,
+   sol:R`<p>Rotazione dopo boost ($\tau_1$ boost, $\tau_2$ rotazione): $R_3=R$, $\mathbf v_3=\mathbf 0+R\mathbf v=R\mathbf v$. Boost dopo rotazione ($\tau_1$ rotazione, $\tau_2$ boost): $R_3=R$, $\mathbf v_3=\mathbf v+I\cdot\mathbf 0=\mathbf v$. Gli altri parametri sono nulli in entrambi i casi. I due risultati coincidono se e solo se $R\mathbf v=\mathbf v$, cioè se la rotazione è attorno all'asse del boost (o è l'identità). È l'analogo, nel gruppo, di una regola di commutazione: il generatore delle rotazioni e quello dei boost commutano solo lungo lo stesso asse.</p>`},
+  {t:'esercizio', title:'5 · Il segno di un ciclo di quattro', html:R`
+  <p>Scrivi $(1\,2\,3\,4)$ come prodotto di trasposizioni, calcolane il segno, e di' se sta in $A_4$.</p>`,
+   sol:R`<p>Con la regola della tappa 07, $(1\,2\,3\,4)=(1\,4)(1\,3)(1\,2)$: seguendo l'$1$ da destra, $(1\,2)$ lo manda in $2$ e gli altri due lo lasciano lì; il $2$ va in $1$, poi in $3$; il $3$ resta $3$ col primo fattore, va in $1$ col secondo e in $4$ col terzo; il $4$ va in $1$ con l'ultimo. Tre trasposizioni: segno $(-1)^3=-1$, come prevede $(-1)^{k-1}$ con $k=4$. Non sta in $A_4$. Nel conto sul cubo della tappa 05 è la rotazione di un quarto di giro attorno all'asse di una faccia, vista come permutazione delle quattro diagonali: per questo il gruppo delle rotazioni del cubo è $S_4$ e non $A_4$.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché per verificare che un sottoinsieme di un gruppo infinito sia un sottogruppo non basta la chiusura rispetto al prodotto, mentre per un gruppo finito basta?</li>
+  <li>Dove si usa l'associatività nella dimostrazione che l'inverso è unico?</li>
+  <li>Perché il nucleo di un omomorfismo è sempre normale, mentre l'immagine può non esserlo?</li>
+  <li>Che cosa va storto nella definizione del prodotto su $G/H$ se $H$ non è normale?</li>
+  <li>Perché un'azione sulle funzioni si definisce con $f(g^{-1}x)$ e non con $f(gx)$?</li>
+  <li>Perché il gruppo di Galilei non è il prodotto diretto delle rotazioni, delle traslazioni e dei boost?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>In un gruppo finito ogni elemento ha ordine finito $n$, e l'inverso è la potenza $a^{n-1}$, che la chiusura garantisce; in un gruppo infinito le potenze positive possono non tornare mai indietro, come in $\mathbb{N}\subset\mathbb{Z}$.</li>
+   <li>Nel passaggio $b(ac)=(ba)c$: si sposta la parentesi per far comparire prima $ac=e$ e poi $ba=e$.</li>
+   <li>Perché $\varphi(gng^{-1})=\varphi(g)\varphi(n)\varphi(g)^{-1}$, e se $\varphi(n)$ è il neutro il risultato è il neutro. L'immagine invece è un sottogruppo di $G'$, e un elemento di $G'$ fuori dall'immagine può coniugarla in qualcosa di diverso.</li>
+   <li>Due rappresentanti della stessa classe possono dare prodotti in classi diverse: il conto $a'b'=ab\,(b^{-1}n_1b)\,n_2$ richiede che $b^{-1}n_1b$ stia ancora in $H$.</li>
+   <li>Perché con $f(gx)$ la composizione viene rovesciata, $(g_1\cdot(g_2\cdot f))=(g_2g_1)\cdot f$, e si ottiene un'azione destra; l'inverso di un prodotto rovescia l'ordine una seconda volta e lo rimette a posto.</li>
+   <li>In un prodotto diretto i fattori commutano, mentre qui una rotazione ruota la velocità di un boost e un boost trasforma una traslazione temporale in una spazio-temporale. È un prodotto semidiretto.</li>
+   </ol>`}
+]},
+
+/* ---------------- 09 · IL SENSO ---------------- */
+{ num:'09', title:'Il senso, e le rotte', meta:'dove riappare questo movimento nella fisica che farai',
+  blocchi:[
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il gruppo come struttura delle simmetrie, e l'azione come il modo in cui una simmetria muove qualcosa</b>: punti, stati, particelle.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Le simmetrie diventano operatori $U(g)$ sullo spazio di Hilbert, e la richiesta è che $U(g_1)U(g_2)$ e $U(g_1g_2)$ descrivano la stessa trasformazione: è un omomorfismo, salvo una fase. Dal gruppo di Galilei — con la legge di composizione di questa tappa 06 — Ballentine ricava i generatori e le loro regole di commutazione, e il fatto che un boost trasformi un'attesa temporale in uno spostamento spaziale ricompare come commutatore fra il generatore dei boost e l'hamiltoniana. Dal gruppo delle permutazioni vengono bosoni e fermioni.`},
+    {dove:'Geometria<br>differenziale', txt:R`I gruppi di matrici di questo movimento sono varietà, le azioni diventano lisce, e il quoziente $G/G_p$ della formula orbita-stabilizzatore diventa una varietà: la sfera è $SO(3)/SO(2)$, l'orbita di un punto sotto le rotazioni con lo stabilizzatore tolto.`},
+    {dove:'Meccanica<br>statistica', txt:R`Il fattore $N!$ di Gibbs nel conteggio degli stati di un gas ideale è l'ordine di $S_N$: si divide per il numero di modi di rinominare particelle identiche, cioè si conta un'orbita invece dei suoi punti.`}
+   ],
+   domanda:R`Un gruppo che agisce su uno <b>spazio vettoriale</b> con mappe <b>lineari</b> è il caso che la meccanica quantistica usa sempre. <b>Domanda da portare avanti:</b> se un sottospazio è lasciato invariato da tutto il gruppo, che cosa si può dire dell'operatore che commuta con tutte le trasformazioni del gruppo? Prova a pensarci sul caso più semplice, le rotazioni del piano che agiscono su $\mathbb{R}^2$.`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-11-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-11 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-11-gruppi-e-azioni.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
