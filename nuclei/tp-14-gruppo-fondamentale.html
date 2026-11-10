@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-14 — Omotopia, gruppo fondamentale e rivestimenti: contare i buchi con i cammini</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-14 — Omotopia, gruppo fondamentale e rivestimenti: contare i buchi con i cammini</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["gruppo-fondamentale"] = {"nome":"Gruppo fondamentale","riga":"$\\pi_1(X,x_0)$ e' l'insieme dei cammini chiusi con base in $x_0$, presi a meno di omotopia, con il prodotto dato dal percorrerne uno dopo l'altro.","serve":"E' il primo invariante che distingue spazi che la sola continuita' non distingue: il piano e il piano bucato sono entrambi connessi, aperti, della stessa dimensione, e hanno $\\pi_1$ banale il primo e $\\mathbb{Z}$ il secondo — il numero di giri attorno al buco. Nel corso di Geometria Differenziale entra alla seconda lezione, e per una ragione tecnica precisa: Diverio dimostra che il gruppo fondamentale di una VARIETA' topologica e' al piu' numerabile, e lo deduce dalla base numerabile. Il senso dell'enunciato e' che una varieta' puo' essere complicatissima, ma non arbitrariamente: le ipotesi «tecniche» della definizione le mettono un limite. E' anche il punto in cui la topologia algebrica entra nel corso, e l'unico in cui serve fin qui.","esempio":"Sulla circonferenza $S^1$ un cammino chiuso si solleva alla retta tramite $t\\mapsto e^{2\\pi it}$, e il suo estremo finale e' un intero: il numero di giri. Due cammini sono omotopi se e solo se hanno lo stesso numero di giri, quindi $\\pi_1(S^1)\\cong\\mathbb{Z}$, e comporre due cammini somma i giri. Sulla sfera $S^2$ invece ogni cammino chiuso si contrae a un punto scivolando sulla superficie, e $\\pi_1(S^2)=\\{e\\}$: e' il motivo per cui $S^1$ e $S^2$ non sono omeomorfe, e nessun conto di dimensione lo direbbe, visto che vivono in spazi diversi.","controllo":[{"tipo":"simbolico","dove":"riga","appare":"\\pi_1(X,x_0)","perche":"e' la notazione del gruppo fondamentale con punto base: un nome, non un conto"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(S^1)\\cong\\mathbb{Z}","perche":"e' un teorema della teoria dei rivestimenti, enunciato e non dimostrato qui: il debito e' dichiarato"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(S^2)=\\{e\\}","perche":"e' l'enunciato che il gruppo fondamentale della sfera e' banale: un teorema della topologia algebrica, citato e non dimostrato, e il debito e' dichiarato nel campo `debito`"}],"pieno":{"file":"tp-14-gruppo-fondamentale.html","tappa":"02","come":"il prodotto di cammini, l'associativita' a meno di omotopia, neutro e inverso, il cambio di punto base; nello stesso movimento pi_1(S^1)=Z dimostrato e pi_1(SO(3))=Z_2"}};
+STRUM["gruppo"] = {"nome":"Gruppo","riga":"Un insieme $G$ con un'operazione associativa, un elemento neutro $e$ e, per ogni elemento, un inverso: $\\forall a\\ \\exists a^{-1}:\\ aa^{-1}=a^{-1}a=e$.","serve":"È la struttura che le simmetrie hanno sempre, qualunque cosa trasformino: composte danno una simmetria, la trasformazione nulla è una simmetria, ogni simmetria si disfa. Per questo in fisica si studiano i gruppi e non le singole trasformazioni: le rotazioni, le traslazioni, il gruppo di Galilei, le permutazioni di particelle identiche, le fasi $e^{i\\theta}$. La commutatività non è negli assiomi, e infatti le rotazioni nello spazio non commutano: è la radice del fatto che le componenti del momento angolare non commutano.","esempio":"Le rotazioni del piano $R_\\theta$ formano un gruppo commutativo: ruotare di $\\alpha$ e poi di $\\beta$ è ruotare di $\\alpha+\\beta$, il neutro è $R_0=I$, l'inverso di $R_\\theta$ è $R_{-\\theta}$. Le rotazioni dello spazio no: un quarto di giro attorno a $z$ seguito da uno attorno a $x$ non è la stessa cosa dell'ordine inverso. Un insieme che fallisce: $(\\mathbb{N},+)$, dove $1$ non ha inverso.","pieno":{"file":"tp-11-gruppi-e-azioni.html","tappa":"01","come":"gli assiomi con i quantificatori e il perché sono quelli, l'unicità di neutro e inverso, esempi e non esempi, l'ordine di un elemento"},"controllo":[{"tipo":"uguale","sinistra":"simplify(Matrix([[cos(al),-sin(al)],[sin(al),cos(al)]])*Matrix([[cos(be),-sin(be)],[sin(be),cos(be)]]) - Matrix([[cos(al+be),-sin(al+be)],[sin(al+be),cos(al+be)]]))","vale":"zeros(2,2)","dove":"esempio","appare":"ruotare di $\\alpha$ e poi di $\\beta$ è ruotare di $\\alpha+\\beta$","nota":"R_alpha R_beta = R_(alpha+beta)"},{"tipo":"simbolico","dove":"riga","appare":"\\forall a\\ \\exists a^{-1}:\\ aa^{-1}=a^{-1}a=e","perche":"assioma dell'inverso: definizione, non un conto"}]};
+STRUM["connessione"] = {"nome":"Connessione","riga":"Uno spazio è connesso quando non si spezza in due aperti disgiunti non vuoti, cioè quando i suoi unici sottoinsiemi insieme aperti e chiusi sono $\\emptyset$ e lo spazio stesso.","serve":"a decidere quando un argomento globale regge su tutto lo spazio e quando invece va rifatto pezzo per pezzo. L'equivalenza con «gli unici clopen sono $\\emptyset$ e $X$» è la forma con cui si verifica la connessione nei conti: una funzione continua a valori in $\\{0,1\\}$ (discreto) è costante se e solo se il dominio è connesso, ed è lo scheletro della versione topologica del teorema dei valori intermedi (l'immagine continua di un connesso è un connesso, in $\\mathbb{R}$ un intervallo). I pezzi massimali sono le componenti connesse: formano una partizione di $X$ e ogni punto sta in una sola. Su una varietà, dove vale «localmente euclideo», connesso e connesso per archi coincidono e le componenti sono aperte — è la ragione per cui gli argomenti globali di geometria differenziale si enunciano su una varietà connessa senza perdita, e le altre componenti si trattano a parte identicamente.","esempio":"Lo spazio $X=\\mathbb{R}\\setminus\\{0\\}$ è sconnesso, e lo prova una funzione. La $f(x)=x/|x|$ è continua su $X$ (il denominatore non si annulla mai) e vale $f(-1)=\\tfrac{-1}{|-1|}=-1$ e $f(1)=\\tfrac{1}{|1|}=1$: assume solo i due valori $\\pm1$. Se $X$ fosse connesso l'immagine $f(X)$ sarebbe un connesso di $\\mathbb{R}$, cioè un intervallo, e un intervallo che contiene $-1$ e $1$ conterrebbe anche $0$ — ma $0\\notin f(X)$. Dunque $X$ non è connesso; le sue due componenti sono $(-\\infty,0)$ e $(0,+\\infty)$, su ciascuna delle quali $f$ resta costante.","pieno":{"file":"tp-08-connessione.html","tappa":"01","come":"la definizione di connesso e sconnesso, l'equivalenza col criterio dei clopen, e le componenti come partizione in pezzi massimali"},"controllo":[{"tipo":"uguale","sinistra":"-1/Abs(-1)","vale":"-1","dove":"esempio","appare":"f(-1)=\\tfrac{-1}{|-1|}=-1"},{"tipo":"uguale","sinistra":"1/Abs(1)","vale":"1","dove":"esempio","appare":"f(1)=\\tfrac{1}{|1|}=1"}]};
+STRUM["omomorfismo"] = {"nome":"Omomorfismo","riga":"Una mappa fra due gruppi che rispetta il prodotto, $\\varphi(ab)=\\varphi(a)\\varphi(b)$, e il cui nucleo $\\ker\\varphi=\\{a:\\varphi(a)=e\\}$ è un sottogruppo normale, banale esattamente quando $\\varphi$ è iniettiva.","serve":"È la traduzione fra due gruppi che non tradisce la composizione, ed è il modo in cui un gruppo astratto diventa qualcosa che agisce: una simmetria in meccanica quantistica è un omomorfismo (a meno di una fase) dal gruppo delle trasformazioni agli operatori sullo spazio degli stati. Il nucleo misura quanto la traduzione confonde: due elementi hanno la stessa immagine esattamente quando differiscono per un elemento del nucleo, e il quoziente per il nucleo è isomorfo all'immagine. Vale identico per gli anelli, dove il nucleo è un ideale.","esempio":"L'esponenziale manda somme in prodotti, $e^{a+b}=e^a e^b$, quindi è un omomorfismo da $(\\mathbb{R},+)$ a $(\\mathbb{R}_{\\gt 0},\\cdot)$, iniettivo. La mappa $t\\mapsto e^{2\\pi it}$ da $(\\mathbb{R},+)$ alle fasi ha nucleo $\\mathbb{Z}$: avvolge la retta sul cerchio, un giro per ogni unità. Il determinante, $\\det(AB)=\\det A\\det B$, ha per nucleo le matrici di determinante uno.","pieno":{"file":"tp-11-gruppi-e-azioni.html","tappa":"03","come":"la definizione con gli esempi di Lee, ciò che si conserva da solo, nucleo e immagine, iniettività e nucleo banale, l'isomorfismo nella forma di Landau"},"controllo":[{"tipo":"uguale","sinistra":"simplify(exp(a+b)-exp(a)*exp(b))","vale":"0","dove":"esempio","appare":"e^{a+b}=e^a e^b"},{"tipo":"uguale","sinistra":"exp(2*pi*I*k)","vale":"1","ipotesi":{"k":"integer"},"dove":"esempio","appare":"ha nucleo $\\mathbb{Z}$","nota":"e^(2 pi i k) = 1 per ogni intero k"}]};
+STRUM["omotopia"] = {"nome":"Omotopia","riga":"Due applicazioni continue $F,G:X\\to Y$ sono omotope se esiste $H:X\\times[0,1]\\to Y$ continua con $H(\\cdot,0)=F$ e $H(\\cdot,1)=G$: una deformazione continua dell'una nell'altra.","serve":"E' la nozione che rende precisa l'idea di deformare con continuita' senza strappare, ed e' la relazione di equivalenza su cui si costruisce la topologia algebrica: il gruppo fondamentale e' fatto di cammini chiusi presi a meno di omotopia, e senza quel quoziente non ci sarebbe nessun gruppo ma solo un insieme enorme di cammini. Nel percorso serve per leggere due cose: gli enunciati che citano $\\pi_1$, e la nozione di spazio semplicemente connesso, che e' connesso per archi e con ogni cammino chiuso omotopo a una costante.","esempio":"Nel piano bucato $\\mathbb{R}^2\\setminus\\{0\\}$ si considerino il cammino che gira una volta attorno all'origine, $\\gamma(t)=(\\cos 2\\pi t,\\ \\sin 2\\pi t)$, e il cammino costante nel punto $(1,0)$. Non sono omotopi, e la ragione e' che la deformazione dovrebbe far passare la curva per l'origine, che e' stata tolta. Nel piano intero invece lo sono, con $H(t,s)=\\big((1-s)\\cos 2\\pi t+s,\\ (1-s)\\sin 2\\pi t\\big)$: per $s=0$ si ottiene $(\\cos 2\\pi t,\\ \\sin 2\\pi t)$, cioe' il cerchio, e per $s=1$ si ottiene $(1,\\ 0)$, cioe' il punto. Il buco e' tutta la differenza, ed e' per questo che l'omotopia vede i buchi mentre la continuita' da sola no.","controllo":[{"tipo":"uguale","sinistra":"Matrix([[(1-0)*cos(2*pi*t)+0], [(1-0)*sin(2*pi*t)]])","vale":"Matrix([[cos(2*pi*t)], [sin(2*pi*t)]])","ipotesi":{"t":"real"},"dove":"esempio","appare":"per $s=0$ si ottiene $(\\cos 2\\pi t,\\ \\sin 2\\pi t)$"},{"tipo":"uguale","sinistra":"Matrix([[(1-1)*cos(2*pi*t)+1], [(1-1)*sin(2*pi*t)]])","vale":"Matrix([[1], [0]])","ipotesi":{"t":"real"},"dove":"esempio","appare":"per $s=1$ si ottiene $(1,\\ 0)$"},{"tipo":"simbolico","dove":"riga","appare":"H(\\cdot,0)=F","perche":"definizione o notazione introdotta, non un conto"},{"tipo":"simbolico","dove":"riga","appare":"H(\\cdot,1)=G","perche":"definizione o notazione introdotta, non un conto"}],"pieno":{"file":"tp-14-gruppo-fondamentale.html","tappa":"01","come":"le definizioni di Lee per mappe e per cammini a estremi fissi, la relazione di equivalenza dimostrata, l'omotopia lineare nei convessi e negli stellati"}};
+STRUM["semplicemente-connesso"] = {"nome":"Semplicemente connesso","riga":"Uno spazio e' semplicemente connesso se e' connesso per archi e ogni cammino chiuso si contrae a un punto restando nello spazio: in simboli, $\\pi_1(X,x_0)=\\{e\\}$.","serve":"Separa due domande che «un pezzo solo» confonde. La connessione per archi dice che si va da ogni punto a ogni altro; la semplice connessione dice che due strade con gli stessi estremi si deformano l'una nell'altra, cioe' che lo spazio non ha buchi attorno a cui girare. E' la seconda a decidere quando un oggetto definito localmente si estende a tutto lo spazio senza ambiguita': un potenziale per un campo irrotazionale in Analisi Vettoriale, una primitiva di una funzione olomorfa in Metodi, un ramo del logaritmo. In Geometria Differenziale e' cio' che distingue $SU(2)$ da $SO(3)$: hanno la stessa algebra di Lie, ma solo il primo e' semplicemente connesso, ed e' il motivo per cui esiste lo spin semintero.","esempio":"Il piano bucato $\\mathbb{R}^2\\setminus\\{0\\}$ e' connesso per archi ma non semplicemente connesso: un cappio attorno all'origine non si contrae senza passare per il buco, e $\\pi_1$ conta i giri, $\\pi_1(\\mathbb{R}^2\\setminus\\{0\\})\\cong\\mathbb{Z}$. La sfera $S^2$ invece lo e': un cappio si contrae scivolando sulla superficie. Lo stesso accade una dimensione sopra: $S^3$, che e' $SU(2)$, e' semplicemente connessa, mentre $\\mathbb{RP}^3$, che e' $SO(3)$, ha $\\pi_1\\cong\\mathbb{Z}/2$ — un giro completo di rotazione non si contrae, due si'. (Lo si dichiara: le affermazioni sui gruppi fondamentali sono enunciate e non dimostrate: richiedono la teoria dei rivestimenti, che non e' nel percorso per scelta dichiarata di Giuseppe. La scheda e' costruita sopra quelle del gruppo fondamentale e dell'omotopia, e non le rispiega.)","pieno":{"file":"00-topologia.html","tappa":"07","come":"il ponte fra connesso e semplicemente connesso nel nucleo di topologia di Analisi Vettoriale, con il piano bucato come esempio e il motivo per cui decide l'esistenza dei potenziali"},"controllo":[{"tipo":"simbolico","dove":"riga","appare":"\\pi_1(X,x_0)=\\{e\\}","perche":"e' la definizione (gruppo fondamentale banale), non un conto"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(\\mathbb{R}^2\\setminus\\{0\\})\\cong\\mathbb{Z}","perche":"teorema della teoria dei rivestimenti, enunciato e non dimostrato: il debito e' dichiarato"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1\\cong\\mathbb{Z}/2","perche":"il gruppo fondamentale di RP^3 = SO(3), enunciato e non dimostrato: il debito e' dichiarato"}]};
+STRUM["rivestimento"] = {"nome":"Rivestimento","riga":"Una mappa continua suriettiva $\\pi:E\\to B$ è un rivestimento se ogni punto di $B$ ha un intorno $U$ la cui controimmagine è un&rsquo;unione disgiunta di aperti, ciascuno portato da $\\pi$ omeomorficamente su $U$.","serve":"Descrive gli spazi che localmente sono copie di un altro e globalmente si avvolgono attorno ad esso. È il modo in cui il corso incontra la topologia globale senza calcolarla: $S^n$ riveste due volte lo spazio proiettivo, $SU(2)$ riveste due volte $SO(3)$, e in Metodi la funzione logaritmo diventa monodroma sul suo rivestimento. Un laccio della base si solleva in un cammino che può non chiudersi, ed è da lì che vengono gli spin seminteri.","esempio":"La mappa $t\\mapsto e^{2\\pi it}$ dalla retta alla circonferenza: ogni arco piccolo di $S^1$ ha per controimmagine infinite copie disgiunte, una per ogni intero, ciascuna portata sull&rsquo;arco senza strappi: le preimmagini di un punto differiscono per interi, perché $e^{2\\pi i(t+1)}=e^{2\\pi it}$. Il laccio che fa un giro su $S^1$ si solleva al segmento da $0$ a $1$, che non si chiude: è il motivo per cui $S^1$ ha un buco e la retta no.","pieno":{"file":"tp-05-il-quoziente.html","tappa":"07","come":"la proiezione dalla sfera allo spazio proiettivo reale, con la verifica che è un rivestimento doppio e non solo un quoziente"},"controllo":[{"tipo":"uguale","sinistra":"simplify(exp(2*pi*I*(t+1))-exp(2*pi*I*t))","vale":"0","ipotesi":{"t":"real"},"dove":"esempio","appare":"e^{2\\pi i(t+1)}=e^{2\\pi it}","nota":"periodicita': t e t+1 hanno la stessa immagine"}]};
+STRUM["campo-conservativo"] = {"nome":"Campo conservativo","riga":"Un campo che è il gradiente di una funzione, $\\mathbf F=\\nabla U$, e che perciò compie lungo un cammino un lavoro deciso solo dagli estremi.","serve":"Le tre proprietà — esiste un potenziale, il lavoro non dipende dal cammino, la circuitazione su ogni chiusa è nulla — sono equivalenti, e all'esame si usa quella che costa meno. Il rotore nullo è invece una condizione soltanto NECESSARIA: diventa sufficiente unicamente se il dominio è semplicemente connesso, e dimenticare quella clausola è l'errore classico, perché il controesempio non è patologico ma è il campo attorno a un filo.","esempio":"Il campo $\\mathbf F=(2xy,\\,x^{2})$ ha potenziale $U=x^{2}y$, perché $\\partial_xU=2xy$ e $\\partial_yU=x^{2}$; quindi il lavoro da $(0,0)$ a $(1,1)$ vale $U(1,1)-U(0,0)=1$, lungo qualunque cammino si scelga fra i due punti.","pieno":{"file":"04-campi-vettoriali.html","tappa":"05","come":"le tre caratterizzazioni equivalenti, la costruzione del potenziale per integrazione e il ruolo del dominio, nel nucleo sui campi vettoriali"},"qui":{"elettromagnetismo":{"serve":"In elettrostatica $\\mathbf E$ è conservativo, e l'intero apparato del potenziale $V$ poggia su questo: il lavoro per spostare una carica da $A$ a $B$ è $q(V_A-V_B)$ qualunque strada prenda, e solo per questo ha senso parlare di energia potenziale di una configurazione. La proprietà cade appena $\\mathbf B$ varia nel tempo: per Faraday la circuitazione di $\\mathbf E$ su una chiusa vale $-\\dfrac{d\\Phi_B}{dt}$, e un campo con circuitazione non nulla non ammette potenziale scalare.","esempio":"Per la carica puntiforme, il lavoro del campo di Coulomb su una carica di prova unitaria che va da $r_1$ a $r_2$ è $\\displaystyle\\int_{r_1}^{r_2}\\dfrac{q}{4\\pi\\varepsilon_0r^{2}}\\,dr=\\dfrac{q}{4\\pi\\varepsilon_0}\\left(\\dfrac{1}{r_1}-\\dfrac{1}{r_2}\\right)$: dipende solo dai due raggi, e l'angolo percorso non compare da nessuna parte. È la stessa cosa che dire $V\\propto 1/r$."}},"controllo":[{"tipo":"derivata","espr":"x**2*y","rispetto":["x"],"vale":"2*x*y","dove":"esempio","appare":"2xy"},{"tipo":"derivata","espr":"x**2*y","rispetto":["y"],"vale":"x**2","dove":"esempio","appare":"x^{2}"},{"tipo":"uguale","sinistra":"1**2*1-0**2*0","vale":"1","dove":"esempio","appare":"=1"},{"tipo":"integrale","espr":"q/(4*pi*e0*r**2)","var":"r","da":"r1","a":"r2","vale":"q/(4*pi*e0)*(1/r1-1/r2)","ipotesi":{"r":"positive","r1":"positive","r2":"positive"},"dove":"qui.elettromagnetismo.esempio","appare":"\\left(\\dfrac{1}{r_1}-\\dfrac{1}{r_2}\\right)"}]};
+STRUM["grado-di-una-mappa"] = {"nome":"Grado di una mappa","riga":"Per una mappa liscia $F:M\\to N$ fra varietà compatte connesse della stessa dimensione, il grado è il numero di preimmagini di un valore regolare, contate con il segno dell&rsquo;orientazione; non dipende dal valore regolare scelto, e non cambia sotto deformazione continua.","serve":"È il prototipo dei numeri interi che la geometria estrae da una mappa: siccome un intero non può variare con continuità, due mappe di grado diverso non si deformano l&rsquo;una nell&rsquo;altra. Da qui l&rsquo;indice degli zeri di un campo, il teorema di Poincaré-Hopf, e in fisica i numeri quantici topologici, come il numero di avvolgimento di un vortice.","esempio":"La mappa $z\\mapsto z^2$ della circonferenza in sé ha grado $2$: ogni punto ha due preimmagini, $\\pm\\sqrt w$, e la mappa le percorre entrambe nel verso positivo. La mappa $z\\mapsto\\bar z$ ha grado $-1$: una preimmagine, percorsa al contrario. Una mappa costante ha grado $0$: quasi ogni punto non ha preimmagini.","pieno":{"file":"gd-08-valori-regolari.html","tappa":"04","come":"il numero di preimmagini localmente costante sui valori regolari, nella dimostrazione geometrica del teorema fondamentale dell'algebra"},"controllo":[{"tipo":"simbolico","dove":"esempio","appare":"\\pm\\sqrt w","perche":"le due radici quadrate di w, preimmagini di w per z^2: una descrizione, non un conto da ridurre"}]};
+STRUM["proiezione-stereografica"] = {"nome":"Proiezione stereografica","riga":"Da un polo si proietta la sfera sul piano tangente al polo opposto: $\\sigma(x,y,z)=\\left(\\frac{x}{1-z},\\frac{y}{1-z}\\right)$ è un diffeomorfismo fra $S^{2}$ meno il polo nord e $\\mathbb{R}^{2}$, e la stessa formula funziona in ogni dimensione.","serve":"È la carta con cui si dimostra che la sfera è una varietà — due proiezioni, dai due poli, coprono tutto — ed è per questo la prima costruzione concreta del corso. Le due proprietà per cui la si sceglie fra tutte le mappe possibili sono che è **conforme** (conserva gli angoli, non le distanze) e che **manda circonferenze in circonferenze o rette**: una circonferenza che passa per il polo di proiezione diventa una retta, tutte le altre restano circonferenze. La seconda proprietà è ciò che la rende insostituibile quando si visualizza $S^{3}$: le fibre della fibrazione di Hopf sono cerchi, e dopo la proiezione restano cerchi — tranne una, quella che passa per il polo tolto, che diventa una retta. Il prezzo è che un punto va perso, e questo non è un difetto della carta ma un teorema: $S^{n}$ è compatta e $\\mathbb{R}^{n}$ no, quindi nessuna carta può coprire tutto.","esempio":"Il conto che si rifà ogni volta è la norma dell'immagine. Per $(x,y,z)\\in S^{2}$ vale $x^{2}+y^{2}=1-z^{2}$, quindi $\\lVert\\sigma(x,y,z)\\rVert^{2}=\\frac{1-z^{2}}{(1-z)^{2}}=\\frac{1+z}{1-z}$, dove la semplificazione è la differenza di quadrati. Da qui si legge tutto senza altri conti: l'equatore $z=0$ va nella circonferenza di raggio $1$, perché $\\frac{1+0}{1-0}=1$; l'emisfero sud $z\\lt0$ finisce dentro il disco unitario; avvicinandosi al polo nord $z\\to1$ la norma esplode, ed è il punto che manca. Il polo sud $z=-1$ va nell'origine, come dev'essere: $\\frac{1-1}{1+1}=0$.","debito":"la conformità e la proprietà «cerchi in cerchi» sono qui dichiarate e non dimostrate: la prima si prova calcolando la metrica indotta, che risulta un multiplo di quella euclidea, e la seconda si prova osservando che la proiezione è la restrizione di un'inversione. Entrambe stanno in Lee, cap. 1, e nessuna delle due serve per i conti del percorso.","controllo":[{"tipo":"uguale","sinistra":"1-z**2","vale":"(1-z)*(1+z)","dove":"esempio","appare":"1-z^{2}"},{"tipo":"uguale","sinistra":"(1-z**2)/(1-z)**2","vale":"(1+z)/(1-z)","dove":"esempio","appare":"\\frac{1+z}{1-z}"},{"tipo":"uguale","sinistra":"(1+0)/(1-0)","vale":"1","dove":"esempio","appare":"\\frac{1+0}{1-0}=1"},{"tipo":"uguale","sinistra":"(1-1)/(1+1)","vale":"0","dove":"esempio","appare":"\\frac{1-1}{1+1}=0"}]};
+STRUM["gruppo-di-lie"] = {"nome":"Gruppo di Lie","riga":"Una varieta differenziabile che e anche un gruppo, e in cui il prodotto $(g,h)\\mapsto gh$ e l'inverso $g\\mapsto g^{-1}$ sono applicazioni lisce.","serve":"a trattare insieme due strutture che di solito si studiano separate: la simmetria (il gruppo) e il calcolo differenziale (la varieta). La conseguenza che si usa di piu e l'omogeneita: le traslazioni $L_g(x)=gx$ sono diffeomorfismi, quindi ogni punto ha un intorno diffeomorfo a quello dell'identita, e tutto cio che si dimostra nell'identita si trasporta ovunque gratis. Da qui seguono due fatti usati continuamente: ogni gruppo di Lie e parallelizzabile, e per conoscerne la geometria infinitesima basta lo spazio tangente in un punto solo, che si chiama la sua algebra di Lie.","esempio":"Il gruppo delle rotazioni del piano $SO(2)$ e la circonferenza. Una sua matrice e $R(\\theta)=\\begin{pmatrix}\\cos\\theta & -\\sin\\theta\\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}$, e che il determinante valga $1$ si verifica subito: $\\cos^2\\theta+\\sin^2\\theta=1$. Il prodotto e liscio perche in coordinate e l'addizione degli angoli — svolgendo la riga in alto del prodotto $R(\\alpha)R(\\varphi)$ si trova $\\cos\\alpha\\cos\\varphi-\\sin\\alpha\\sin\\varphi=\\cos(\\alpha+\\varphi)$ e $\\sin\\alpha\\cos\\varphi+\\cos\\alpha\\sin\\varphi=\\sin(\\alpha+\\varphi)$, cioe $R(\\alpha)R(\\varphi)=R(\\alpha+\\varphi)$ — e l'inverso e $R(-\\theta)$, liscio in $\\theta$. La varieta sottostante e $S^1$, di dimensione $1$.","pieno":{"file":"gd-14-gruppi-di-lie.html","tappa":"01","come":"i gruppi di matrici, la traslazione che rende tutto omogeneo, e l'algebra di Lie come tangente all'identita"},"controllo":[{"tipo":"uguale","sinistra":"cos(theta)**2+sin(theta)**2","vale":"1","dove":"esempio","appare":"\\cos^2\\theta+\\sin^2\\theta=1"},{"tipo":"uguale","sinistra":"cos(alpha)*cos(varphi)-sin(alpha)*sin(varphi)","vale":"cos(alpha+varphi)","dove":"esempio","appare":"\\cos\\alpha\\cos\\varphi-\\sin\\alpha\\sin\\varphi=\\cos(\\alpha+\\varphi)"},{"tipo":"uguale","sinistra":"sin(alpha)*cos(varphi)+cos(alpha)*sin(varphi)","vale":"sin(alpha+varphi)","dove":"esempio","appare":"\\sin\\alpha\\cos\\varphi+\\cos\\alpha\\sin\\varphi=\\sin(\\alpha+\\varphi)"}]};
+STRUM["matrici-di-pauli"] = {"nome":"Matrici di Pauli","riga":"Sono le tre matrici $2\\times2$ hermitiane a traccia nulla il cui quadrato e' l'identita' e il cui commutatore riproduce l'algebra del momento angolare, da cui lo spin $\\hat S_i=\\tfrac{\\hbar}{2}\\sigma_i$.","serve":"Sono la rappresentazione piu' piccola non banale del momento angolare, e insieme all'identita' formano una base di tutte le matrici due per due hermitiane: qualunque osservabile di un sistema a due stati e' una combinazione dell'identita' e delle tre. Ogni conto di spin un mezzo — Stern-Gerlach, precessione, risonanza magnetica, qubit — si riduce alla loro algebra.","esempio":"Siccome il quadrato di una combinazione unitaria delle tre e' l'identita', qualunque esponenziale collassa: l'operatore di rotazione dello spinore diventa $\\cos(\\theta/2)$ per l'identita' meno $i\\sin(\\theta/2)$ per la combinazione. Il mezzo nell'angolo e' la ragione per cui una rotazione di un giro intero cambia segno allo stato, perche' $\\cos(\\pi)=-1$.","debito":"la costruzione generale delle rappresentazioni di SU(2) e il suo legame con SO(3) stanno nel movimento sul momento angolare; qui c'e' il caso di spin un mezzo con le sue regole di calcolo.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi/2)","vale":"-1","dove":"esempio","appare":"\\cos(\\pi)=-1"},{"tipo":"uguale","sinistra":"cos(pi/3)**2+sin(pi/3)**2","vale":"1","dove":"esempio","appare":"\\sin(\\theta/2)"}],"qui":{},"pieno":null};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-14: Omotopia, gruppo fondamentale e rivestimenti: contare i buchi con i cammini <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-14 — omotopia, gruppo fondamentale e rivestimenti
+identita:  connesso dice che uno spazio e' in un pezzo solo; non dice se ha buchi. Il piano e il piano bucato sono tutti e due connessi, e un campo irrotazionale e' un gradiente sul primo e non sul secondo. La differenza si misura con i cammini chiusi presi a meno di deformazione: formano un gruppo, il gruppo fondamentale, e il primo esempio in cui un oggetto algebrico (tp-11) diventa un invariante topologico. Il conto che regge tutto e' pi_1(S^1)=Z, fatto con il sollevamento al rivestimento R->S^1: il numero di giri e' l'intero in cui il cammino sollevato finisce. Da li' il numero di avvolgimento e il grado delle mappe del cerchio, e il conto che serve alla fisica, pi_1(SO(3))=Z_2: una rotazione di 2 pi non si deforma nell'identita', una di 4 pi si'
+copre:     4.1 — Omotopia, gruppo fondamentale, rivestimenti e sollevamento; pi_1(S^1)=Z e pi_1(SO(3))...
+serve:     tp-08 (tp-08-connessione.html), tp-11 (tp-11-gruppi-e-azioni.html), tp-05 (tp-05-il-quoziente.html)
+apre:      tp-15 (da costruire), tp-13 (da costruire)
+strumenti: gruppo-fondamentale · omotopia · semplicemente-connesso · rivestimento · grado-di-una-mappa · gruppo · omomorfismo · connessione · campo-conservativo · proiezione-stereografica · gruppo-di-lie · matrici-di-pauli
+fonti:     Lee, appendice A
+fonti:     Abate-Tovena §2.5 ed esercizi del cap. 5
+coordinate: Lee, Introduction to Smooth Manifolds (2a ed.) pp. 612-616 · Abate & Tovena, Geometria Differenziale pp. 97-98, 303-304
+profondita: dimostrati: pi_1 e' un gruppo; non dipende dal punto base in uno spazio connesso per archi; e' invariante per omeomorfismo (omomorfismo indotto); contrattile implica semplicemente connesso; sollevamento unico dei cammini e delle omotopie per R->S^1; pi_1(S^1)=Z; pi_1(X x Y)=pi_1(X) x pi_1(Y); pi_1(S^n)=0 per n>=2; pi_1(RP^n)=Z_2 e pi_1(SO(3))=Z_2 via S^3->RP^3. Enunciati con fonte: il teorema di Van Kampen, il criterio generale di sollevamento. Fuori: gruppi di omotopia superiori, classificazione dei rivestimenti, omologia singolare. Non si rifa': la connessione per archi (tp-08), il dominio semplicemente connesso di R^n (Analisi Vettoriale, nucleo di topologia tappa 07), il quoziente S^n->RP^n come rivestimento (tp-05 tappa 07).
+generata:  2026-11-10 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "((1-t)*f(s)+t*g(s)).subs(t,0)", "vale": "f(s)", "ipotesi": {"f": "funzione", "g": "funzione"}, "dove": "01", "appare": "H(s,0)=f(s)"},
+ {"tipo": "uguale", "sinistra": "((1-t)*f(s)+t*g(s)).subs(t,1)", "vale": "g(s)", "ipotesi": {"f": "funzione", "g": "funzione"}, "dove": "01", "appare": "H(s,1)=g(s)"},
+ {"tipo": "uguale", "sinistra": "Rational(1,2)/Rational(1,4)", "vale": "2", "dove": "02", "appare": "\\varphi'=2"},
+ {"tipo": "uguale", "sinistra": "(Rational(3,4)-Rational(1,2))/(Rational(1,2)-Rational(1,4))", "vale": "1", "dove": "02", "appare": "\\varphi'=1"},
+ {"tipo": "uguale", "sinistra": "(1-Rational(3,4))/(1-Rational(1,2))", "vale": "Rational(1,2)", "dove": "02", "appare": "\\varphi'=\\tfrac12"},
+ {"tipo": "uguale", "sinistra": "simplify(cos(2*pi*(x+n)) - cos(2*pi*x))", "vale": "0", "ipotesi": {"n": "integer"}, "dove": "04", "appare": "p(x+n)=p(x)", "nota": "prima componente di p"},
+ {"tipo": "uguale", "sinistra": "simplify(sin(2*pi*(x+n)) - sin(2*pi*x))", "vale": "0", "ipotesi": {"n": "integer"}, "dove": "04", "appare": "p(x+n)=p(x)", "nota": "seconda componente di p"},
+ {"tipo": "uguale", "sinistra": "(n*s).subs(s,1)", "vale": "n", "dove": "05", "appare": "\\tilde\\omega_n(1)=n"},
+ {"tipo": "uguale", "sinistra": "integrate(diff(exp(2*pi*I*n*s),s)/exp(2*pi*I*n*s),(s,0,1))/(2*pi*I)", "vale": "n", "ipotesi": {"n": "integer"}, "dove": "05", "appare": "\\frac1{2\\pi i}\\oint_{\\omega_n}\\frac{dz}{z}=n"},
+ {"tipo": "numero", "espr": "N(Integral(diff(exp(4*pi*I*s)+Rational(1,2),s)/(exp(4*pi*I*s)+Rational(1,2)),(s,0,1))/(2*pi*I))", "vale": "2.000", "dove": "05", "appare": "\\frac1{2\\pi i}\\oint\\frac{dz}{z}=2"},
+ {"tipo": "uguale", "sinistra": "Matrix([[exp(-I*2*pi/2),0],[0,exp(I*2*pi/2)]])", "vale": "-eye(2)", "dove": "06", "appare": "U(2\\pi)=-I"},
+ {"tipo": "uguale", "sinistra": "Matrix([[exp(-I*4*pi/2),0],[0,exp(I*4*pi/2)]])", "vale": "eye(2)", "dove": "06", "appare": "U(4\\pi)=I"},
+ {"tipo": "uguale", "sinistra": "simplify(Matrix([[cos(q/2)-I*sin(q/2),0],[0,cos(q/2)+I*sin(q/2)]]) - Matrix([[exp(-I*q/2),0],[0,exp(I*q/2)]]))", "vale": "zeros(2,2)", "dove": "06", "appare": "U(\\theta)=e^{-i\\theta\\sigma_z/2}=\\cos\\tfrac\\theta2\\,I-i\\sin\\tfrac\\theta2\\,\\sigma_z"},
+ {"tipo": "uguale", "sinistra": "expand((cos(2*pi*a)+I*sin(2*pi*a))*(cos(2*pi*b)+I*sin(2*pi*b)) - (cos(2*pi*(a+b))+I*sin(2*pi*(a+b))), trig=True)", "vale": "0", "dove": "07", "appare": "e^{2\\pi ia}e^{2\\pi ib}=e^{2\\pi i(a+b)}"},
+ {"tipo": "simbolico", "dove": "00", "appare": "\\pi_1(S^1)=\\mathbb{Z}", "perche": "annuncio del teorema dimostrato nella tappa 05 (grado come isomorfismo)"},
+ {"tipo": "simbolico", "dove": "02", "appare": "(f\\cdot g)\\cdot h=(f\\cdot(g\\cdot h))\\circ\\varphi", "perche": "riparametrizzazione con le tre pendenze asserite sopra"},
+ {"tipo": "simbolico", "dove": "02", "appare": "f\\cdot c_q=f\\circ\\varphi", "perche": "riparametrizzazione con phi(s)=min(2s,1), verificata nella prosa tratto per tratto"},
+ {"tipo": "simbolico", "dove": "03", "appare": "F\\circ(f\\cdot g)=(F\\circ f)\\cdot(F\\circ g)", "perche": "comporre con F commuta con la concatenazione, per la definizione a due tratti del prodotto"},
+ {"tipo": "simbolico", "dove": "04", "appare": "p^{-1}(U)=\\bigcup_n(n-\\tfrac12,n+\\tfrac12)", "perche": "controimmagine di un arco: lettura della periodicita' asserita sopra"},
+ {"tipo": "simbolico", "dove": "04", "appare": "p^{-1}(V)=\\bigcup_n(n,n+1)", "perche": "controimmagine di un arco: lettura della periodicita' asserita sopra"},
+ {"tipo": "simbolico", "dove": "04", "appare": "p^{-1}(f(0))=\\mathbb{Z}", "perche": "la fibra sopra il punto base (1,0): gli interi, per la periodicita'"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\deg(f\\cdot g)=\\deg f+\\deg g", "perche": "omomorfismo, dimostrato nella prosa con il sollevamento traslato"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\pi_1(S^1)=\\mathbb{Z}", "perche": "teorema dimostrato nella tappa 05 (grado come isomorfismo)"},
+ {"tipo": "simbolico", "dove": "06", "appare": "T^2=S^1\\times S^1", "perche": "definizione del toro"},
+ {"tipo": "simbolico", "dove": "06", "appare": "|a|^2+|b|^2=1", "perche": "condizione che definisce SU(2) come sfera S^3"},
+ {"tipo": "simbolico", "dove": "07", "appare": "e^{2\\pi ix}=1", "perche": "condizione che definisce il nucleo, non un conto"},
+ {"tipo": "uguale", "dove": "07", "appare": "p(x+n)=p(x)", "sinistra": "simplify(exp(2*pi*I*(x+n)) - exp(2*pi*I*x))", "vale": "0", "ipotesi": {"n": "integer"}},
+ {"tipo": "simbolico", "dove": "07", "appare": "T^2=S^1\\times S^1", "perche": "definizione del toro"},
+ {"tipo": "uguale", "dove": "07", "appare": "(1,0)+(0,1)-(1,0)-(0,1)=(0,0)", "sinistra": "Matrix([1,0])+Matrix([0,1])-Matrix([1,0])-Matrix([0,1])", "vale": "Matrix([0,0])"},
+ {"tipo": "uguale", "dove": "07", "appare": "\\cos\\pi\\,I-i\\sin\\pi\\,\\sigma_x=-I", "sinistra": "cos(pi)*eye(2) - I*sin(pi)*Matrix([[0,1],[1,0]])", "vale": "-eye(2)"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\forall x\\in X\\ \\ \\exists U\\ni x\\ \\text{aperto}:\\ \\ p^{-1}(U)=\\bigsqcup_\\alpha W_\\alpha,", "perche": "definizione di rivestimento, non un conto"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'connesso non vede i buchi · i cammini chiusi a meno di deformazione · il cerchio come primo conto · la rotazione di due pi greco',
+  blocchi:[
+  {t:'prosa', title:'Un invariante che vede i buchi', tag:'architettura', html:R`
+  <p>Il piano $\mathbb{R}^2$ e il piano bucato $\mathbb{R}^2\setminus\{0\}$ sono entrambi aperti, connessi, connessi per archi, della stessa dimensione. Eppure non sono la stessa cosa, e la fisica lo sa da tempo: un campo irrotazionale è un gradiente sul primo e può non esserlo sul secondo, e l'effetto Aharonov-Bohm esiste perché un solenoide fa un buco nella regione dove si muove l'elettrone. La connessione non vede la differenza, perché dice solo che lo spazio è in un pezzo. Serve un invariante che guardi i <b>cammini chiusi</b> e chieda se si possono stringere a un punto.</p>
+  <p>Quell'invariante è il <span class="str" data-str="gruppo-fondamentale">gruppo fondamentale</span>: i cammini chiusi presi a meno di deformazione, con il prodotto «uno dopo l'altro». È il primo caso in cui un oggetto algebrico — un gruppo, nel senso dei movimenti precedenti — diventa un invariante topologico: spazi omeomorfi hanno gruppi fondamentali isomorfi, quindi due spazi con gruppi diversi non sono omeomorfi. Lee lo riassume nell'appendice di ripasso (appendice A, stampate 612-616) e ne enuncia tutti i fatti, ma per le dimostrazioni rimanda a testi di topologia che non sono in casa. Qui le dimostrazioni ci sono, e quelle che nessun libro in casa contiene sono dichiarate come tali.</p>
+  <p>L'ordine:</p>
+  <ol>
+  <li>omotopia di mappe e di cammini (tappa 01);</li>
+  <li>il gruppo fondamentale, e perché il prodotto di cammini è associativo solo a meno di omotopia (tappa 02);</li>
+  <li>l'omomorfismo indotto da una mappa continua, l'invarianza, e gli spazi semplicemente connessi (tappa 03);</li>
+  <li>il rivestimento della retta sul cerchio e il sollevamento dei cammini e delle omotopie, dimostrato (tappa 04);</li>
+  <li>il conto che regge tutto, $\pi_1(S^1)=\mathbb{Z}$, il numero di avvolgimento, e due conseguenze: Brouwer nel piano e $\mathbb{R}^2\not\cong\mathbb{R}^n$ (tappa 05);</li>
+  <li>prodotti, sfere, spazi proiettivi e il conto che serve alla fisica, $\pi_1(SO(3))=\mathbb{Z}_2$: una rotazione di $2\pi$ non si deforma nell'identità, una di $4\pi$ sì (tappa 06).</li>
+  </ol>
+  <p>Che cosa resta fuori: i gruppi di omotopia superiori, la classificazione dei rivestimenti, il teorema di Van Kampen in forma generale (se ne usa un caso, dimostrato, per le sfere), l'omologia. Il dominio semplicemente connesso di $\mathbb{R}^n$ come idea intuitiva e la sua conseguenza sui potenziali sono già noti dall'Analisi Vettoriale, e qui diventano un teorema.</p>`}
+]},
+
+/* ---------------- 01 · OMOTOPIA ---------------- */
+{ num:'01', title:'Omotopia: deformare con continuità', meta:'omotopia di mappe · omotopia di cammini a estremi fissi · è una relazione di equivalenza · l’omotopia lineare nei convessi',
+  blocchi:[
+  {t:'prosa', title:'Le definizioni di Lee', tag:'grammatica', html:R`
+  <p>Siano $X,Y$ spazi topologici e $F_0,F_1:X\to Y$ continue, e sia $I=[0,1]$. Un'<b>omotopia</b> da $F_0$ a $F_1$ è una mappa continua $H:X\times I\to Y$ con</p>
+  $$\forall x\in X:\ \ H(x,0)=F_0(x),\quad H(x,1)=F_1(x).$$
+  <p>Il parametro $t\in I$ è un tempo: $H(\cdot,t)$ è un film che parte da $F_0$ e arriva a $F_1$ senza strappi. Se un'omotopia esiste, $F_0$ e $F_1$ sono <b>omotope</b>, $F_0\simeq F_1$. Per i cammini — mappe continue $f:I\to X$ — serve una versione più rigida: due cammini $f_0,f_1$ con gli stessi estremi $p=f_0(0)=f_1(0)$ e $q=f_0(1)=f_1(1)$ sono <b>omotopi come cammini</b>, $f_0\sim f_1$, se c'è un'omotopia che tiene fermi gli estremi a ogni istante:</p>
+  $$H(s,0)=f_0(s),\quad H(s,1)=f_1(s),\quad \forall t:\ H(0,t)=p,\ \ H(1,t)=q.$$
+  <p>Sono le definizioni dell'appendice A di Lee (stampate 612-613). La condizione sugli estremi non è un dettaglio: senza di essa ogni cammino si deformerebbe nel cammino costante facendolo «ritirare» lungo sé stesso, e l'invariante non vedrebbe niente.</p>`},
+  {t:'reveal', title:'Una relazione di equivalenza, e il caso convesso', tag:'costruzione', steps:[
+   {label:'Riflessiva e simmetrica', body:R`<p>$f\sim f$ con l'omotopia ferma $H(s,t)=f(s)$. Se $H$ va da $f_0$ a $f_1$, allora $\bar H(s,t)=H(s,1-t)$ va da $f_1$ a $f_0$: si proietta il film all'indietro.</p>`},
+   {label:'Transitiva', body:R`<p>Se $H$ va da $f_0$ a $f_1$ e $K$ da $f_1$ a $f_2$, si proiettano i due film uno dopo l'altro a velocità doppia: $L(s,t)=H(s,2t)$ per $t\le\tfrac12$ e $L(s,t)=K(s,2t-1)$ per $t\ge\tfrac12$. Le due formule coincidono su $t=\tfrac12$, dove entrambe danno $f_1(s)$, e sono continue sui due chiusi $I\times[0,\tfrac12]$ e $I\times[\tfrac12,1]$: per il lemma di incollamento $L$ è continua. Gli estremi restano fermi perché lo sono in $H$ e in $K$. La classe di $f$ si scrive $[f]$.</p>`},
+   {label:'L’omotopia lineare', body:R`<p>Se $X\subseteq\mathbb{R}^n$ è <b>convesso</b>, due cammini qualunque con gli stessi estremi sono omotopi, con l'omotopia lineare $$H(s,t)=(1-t)\,f(s)+t\,g(s).$$ Per $t=0$ si ha $H(s,0)=f(s)$, per $t=1$ si ha $H(s,1)=g(s)$, e per ogni $t$ il punto $H(s,t)$ sta sul segmento fra $f(s)$ e $g(s)$, quindi in $X$. Gli estremi sono fermi perché $f$ e $g$ li condividono. Lee usa la stessa costruzione per gli insiemi <b>stellati</b> rispetto a un punto $c$ (Esercizio A.67): il segmento da $c$ a ogni punto sta nell'insieme, e la contrazione lineare verso $c$ funziona.</p>`}
+  ]},
+  {t:'plot', title:'Nel piano bucato un cammino attorno al buco non si stringe',
+   intro:R`Due cammini chiusi nel piano privato dell'origine: quello piccolo, che non gira attorno al buco, si contrae a un punto; quello grande, che gira attorno, no.`,
+   plots:[
+    {kind:'curve', x:'1.3*cos(t)', y:'1.3*sin(t)', tr:[0,6.2832], height:300, equal:true,
+     xr:[-1.8,2.6], yr:[-1.6,1.6],
+     title:'il buco in 0, un laccio che lo circonda e uno che no',
+     rings:[{r:0.35,x:1.8,y:0.6,col:'#5eead4',label:'si contrae',ly:1.1},{r:0.12,x:1.8,y:0.6,col:'#5eead4',dash:true}],
+     segs:[{x1:1.3,y1:0,x2:0.9,y2:0,col:'#d8a13a',arrow:true,label:'stringere?',lx:0.85,ly:0.18}],
+     marks:[{x:0,y:0,col:'#c084fc',hollow:true,label:'0: il buco'},{x:1.3,y:0,col:'#d8a13a'}]}
+   ],
+   leggi:R`<p>Il laccio verde a destra si stringe a un punto lungo i cerchi tratteggiati senza mai incontrare l'origine: è omotopo al cammino costante. Il laccio arancione, di raggio $1{,}3$, gira attorno all'origine, e per stringerlo bisognerebbe a un certo istante attraversare il buco. Che <b>nessuna</b> deformazione lo stringa, comunque scelta, non si vede dal disegno: è il teorema della tappa 05, e la prova passa per un conto, il numero di giri, che le deformazioni non possono cambiare. Generale: il buco può essere qualunque compatto che il laccio circonda. Accidentale: che i lacci siano cerchi.</p>`}
+]},
+
+/* ---------------- 02 · IL GRUPPO FONDAMENTALE ---------------- */
+{ num:'02', title:'Il gruppo fondamentale', meta:'il prodotto di cammini · associativo solo a meno di omotopia · neutro e inverso · il punto base non conta in uno spazio connesso per archi',
+  blocchi:[
+  {t:'prosa', title:'Il prodotto di cammini', tag:'grammatica', html:R`
+  <p>Se $f$ finisce dove $g$ comincia, $f(1)=g(0)$, il loro <b>prodotto</b> è il cammino che percorre $f$ e poi $g$, ciascuno a velocità doppia (Lee, stampata 613):</p>
+  $$(f\cdot g)(s)=\begin{cases}f(2s)&0\le s\le\tfrac12\\ g(2s-1)&\tfrac12\le s\le1.\end{cases}$$
+  <p>Il prodotto passa alle classi: se $f\sim f'$ con l'omotopia $H$ e $g\sim g'$ con $K$, l'omotopia che fa $H$ sulla prima metà e $K$ sulla seconda va da $f\cdot g$ a $f'\cdot g'$. Quindi $[f][g]=[f\cdot g]$ è ben definito. Un <b>laccio</b> con base $q$ è un cammino con $f(0)=f(1)=q$, e l'insieme delle classi dei lacci con base $q$ si indica con $\pi_1(X,q)$.</p>`},
+  {t:'reveal', title:'π1 è un gruppo', tag:'teorema', steps:[
+   {label:'La riparametrizzazione non conta', body:R`<p>Il lemma che fa tutto il lavoro: se $\varphi:I\to I$ è continua con $\varphi(0)=0$ e $\varphi(1)=1$, allora $f\circ\varphi\sim f$. L'omotopia è $H(s,t)=f\big((1-t)\varphi(s)+ts\big)$: l'argomento sta in $I$, che è convesso, e gli estremi restano $0$ e $1$. Percorrere lo stesso cammino a velocità diversa non cambia la classe.</p>`},
+   {label:'Associatività a meno di omotopia', body:R`<p>I cammini $(f\cdot g)\cdot h$ e $f\cdot(g\cdot h)$ <b>non</b> sono uguali: il primo spende un quarto del tempo su $f$, un quarto su $g$ e metà su $h$; il secondo metà su $f$ e un quarto ciascuno su $g$ e $h$. Ma l'uno è l'altro riparametrizzato: $(f\cdot g)\cdot h=(f\cdot(g\cdot h))\circ\varphi$, con $\varphi$ lineare a tratti che porta $[0,\tfrac14]$ su $[0,\tfrac12]$, $[\tfrac14,\tfrac12]$ su $[\tfrac12,\tfrac34]$ e $[\tfrac12,1]$ su $[\tfrac34,1]$. Le pendenze dei tre tratti sono $\varphi'=2$, $\varphi'=1$, $\varphi'=\tfrac12$. Per il lemma, $([f][g])[h]=[f]([g][h])$. È la frase di Lee: il prodotto di cammini «non è associativo, ma è associativo a meno di omotopia» (stampata 613).</p>`},
+   {label:'Neutro e inverso', body:R`<p>Il neutro è la classe del cammino costante $c_q(s)=q$: $f\cdot c_q=f\circ\varphi$ con $\varphi(s)=\min(2s,1)$, quindi $f\cdot c_q\sim f$, e allo stesso modo dall'altra parte. L'inverso di $[f]$ è la classe del cammino percorso all'indietro, $\bar f(s)=f(1-s)$: l'omotopia $H(s,t)=f(2s(1-t))$ per $s\le\tfrac12$ e $H(s,t)=f((2-2s)(1-t))$ per $s\ge\tfrac12$ va da $f\cdot\bar f$ al cammino costante, perché a ogni istante $t$ si percorre $f$ fino al punto $f(1-t)$ e si torna indietro, e a $t=1$ non si parte nemmeno. Quindi $\pi_1(X,q)$ è un <span class="str" data-str="gruppo">gruppo</span>, il <b>gruppo fondamentale</b> di $X$ con base $q$.</p>`},
+   {label:'Il punto base', body:R`<p>Se $X$ è <span class="str" data-str="connessione">connesso</span> per archi, i gruppi con basi diverse sono isomorfi. Un cammino $h$ da $p$ a $q$ dà $$\beta_h:\pi_1(X,p)\to\pi_1(X,q),\qquad \beta_h[f]=[\bar h\cdot f\cdot h],$$ che si va da $q$ a $p$ lungo $\bar h$, si fa il laccio, si torna. È un omomorfismo, perché $\bar h\cdot f\cdot h\cdot\bar h\cdot g\cdot h\sim\bar h\cdot f\cdot g\cdot h$ (il pezzo $h\cdot\bar h$ in mezzo è omotopo al costante), con inverso $\beta_{\bar h}$. L'isomorfismo dipende da $h$, ma il gruppo no: per uno spazio connesso per archi si scrive $\pi_1(X)$.</p>`}
+  ]}
+]},
+
+/* ---------------- 03 · OMOMORFISMO INDOTTO, SEMPLICEMENTE CONNESSO ---------------- */
+{ num:'03', title:'L’omomorfismo indotto, l’invarianza e gli spazi semplicemente connessi', meta:'una mappa continua induce un omomorfismo · omeomorfi hanno lo stesso gruppo · equivalenza omotopica · contrattile implica semplicemente connesso',
+  blocchi:[
+  {t:'prosa', title:'Il gruppo fondamentale è un invariante', tag:'teorema', html:R`
+  <p>Una mappa continua $F:X\to Y$ manda lacci in lacci, e omotopie in omotopie. Quindi definisce</p>
+  $$F_*:\pi_1(X,q)\to\pi_1(Y,F(q)),\qquad F_*[f]=[F\circ f].$$
+  <p>È un <span class="str" data-str="omomorfismo">omomorfismo</span>, perché $F\circ(f\cdot g)=(F\circ f)\cdot(F\circ g)$: comporre con $F$ commuta con il percorrere uno dopo l'altro. Inoltre $(G\circ F)_*=G_*\circ F_*$ e $(\mathrm{Id}_X)_*=\mathrm{Id}$. Sono le Proposizioni A.64 e A.65 di Lee (stampata 614), e la conseguenza è in una riga: se $F$ è un omeomorfismo con inversa $G$, allora $G_*F_*=(G\circ F)_*=\mathrm{Id}$ e $F_*G_*=\mathrm{Id}$, quindi $F_*$ è un isomorfismo. <b>Spazi omeomorfi hanno gruppi fondamentali isomorfi.</b> Letto al contrario è lo strumento: due spazi con gruppi fondamentali diversi non sono omeomorfi.</p>
+  <p>C'è un invariante più grossolano dell'omeomorfismo, e il gruppo fondamentale lo rispetta già. Una mappa $F:X\to Y$ è un'<b>equivalenza omotopica</b> se c'è $G:Y\to X$ con $F\circ G\simeq\mathrm{Id}_Y$ e $G\circ F\simeq\mathrm{Id}_X$, e allora $F_*$ è un isomorfismo (Teorema A.71, che Lee enuncia rimandando la dimostrazione ad altri testi: qui si usa così). L'esempio di Lee è quello che serve: l'inclusione $\iota:S^{n-1}\hookrightarrow\mathbb{R}^n\setminus\{0\}$ e la retrazione $r(x)=x/|x|$ sono una l'inversa omotopica dell'altra. Infatti $r\circ\iota=\mathrm{Id}$ sulla sfera, e $\iota\circ r$ è <span class="str" data-str="omotopia">omotopa</span> all'identità con l'omotopia lineare $H(x,t)=tx+(1-t)\,x/|x|$, che non passa mai per l'origine perché è una combinazione a coefficienti positivi di due vettori sulla stessa semiretta. Quindi $\pi_1(\mathbb{R}^n\setminus\{0\})\cong\pi_1(S^{n-1})$: il piano bucato ha il gruppo del cerchio.</p>`},
+  {t:'prosa', title:'Semplicemente connesso, adesso come teorema', tag:'grammatica', html:R`
+  <p>Uno spazio connesso per archi è <b>semplicemente connesso</b> se il suo gruppo fondamentale è banale: ogni laccio è omotopo al cammino costante. In simboli, per uno spazio $X$ connesso per archi e un punto $q$,</p>
+  $$X\ \text{semplicemente connesso}\iff\forall f:I\to X\ \text{con}\ f(0)=f(1)=q:\ \ f\sim c_q.$$
+  <p> È la definizione di Lee (stampata 613), ed è la versione precisa di quella che l'Analisi Vettoriale dava per i domini di $\mathbb{R}^n$, il <span class="str" data-str="semplicemente-connesso">dominio semplicemente connesso</span> dove ogni cammino chiuso si contrae a un punto. Due fatti, dimostrati:</p>
+  <ul>
+  <li><b>Gli insiemi stellati, e quindi i convessi e $\mathbb{R}^n$, sono semplicemente connessi.</b> Un laccio con base nel centro $c$ si contrae con $H(s,t)=(1-t)f(s)+tc$, che tiene la base ferma in $c$; per una base diversa basta l'isomorfismo $\beta_h$ della tappa 02. Più in generale uno spazio <b>contrattile</b> — omotopicamente equivalente a un punto — ha il gruppo fondamentale di un punto, cioè banale.</li>
+  <li><b>In uno spazio semplicemente connesso due cammini con gli stessi estremi sono omotopi</b> (Esercizio A.61 di Lee). Se $f$ e $g$ vanno da $p$ a $q$, il laccio $f\cdot\bar g$ è banale, quindi $f\sim f\cdot\bar g\cdot g\sim c_p\cdot g\sim g$. È questo il motivo per cui su un dominio semplicemente connesso l'integrale di un campo irrotazionale non dipende dal cammino: due cammini fra gli stessi punti si deformano l'uno nell'altro.</li>
+  </ul>
+  <p>Il viceversa del primo punto è falso, ed è il punto di tutto il resto: uno spazio può essere semplicemente connesso senza essere contrattile. La sfera $S^2$ lo è (tappa 06), e non è contrattile.</p>`}
+]},
+
+/* ---------------- 04 · RIVESTIMENTI E SOLLEVAMENTO ---------------- */
+{ num:'04', title:'Il rivestimento della retta sul cerchio, e il sollevamento', meta:'la retta che si avvolge sul cerchio · sollevare un cammino, dimostrato · sollevare un’omotopia · l’estremo del sollevamento dipende solo dalla classe',
+  blocchi:[
+  {t:'prosa', title:'La retta si avvolge sul cerchio', tag:'costruzione', html:R`
+  <p>La mappa $p:\mathbb{R}\to S^1$, $p(x)=(\cos2\pi x,\sin2\pi x)$, avvolge la retta sul cerchio facendo un giro per ogni unità. È periodica di periodo $1$:</p>
+  $$p(x+n)=p(x)\qquad\text{per ogni }n\in\mathbb{Z},$$
+  <p>quindi la controimmagine di ogni punto è una copia di $\mathbb{Z}$ traslata. È l'esempio fondamentale di <span class="str" data-str="rivestimento">rivestimento</span>: ogni arco aperto $U\subsetneq S^1$ ha per controimmagine un'unione disgiunta di intervalli, i <b>fogli</b>, ciascuno portato da $p$ omeomorficamente su $U$. La definizione generale, per $p:E\to X$ continua e suriettiva, è $$\forall x\in X\ \ \exists U\ni x\ \text{aperto}:\ \ p^{-1}(U)=\bigsqcup_\alpha W_\alpha,\quad p|_{W_\alpha}:W_\alpha\to U\ \text{omeomorfismo}.$$ Per il cerchio bastano due archi: $U=S^1\setminus\{(-1,0)\}$, con $p^{-1}(U)=\bigcup_n(n-\tfrac12,n+\tfrac12)$, e $V=S^1\setminus\{(1,0)\}$, con $p^{-1}(V)=\bigcup_n(n,n+1)$. Lee dà la definizione generale (stampata 615) e ne enuncia le proprietà di sollevamento (Proposizione A.77, stampata 616) rimandando le dimostrazioni ad altri testi. Per $p:\mathbb{R}\to S^1$, che è tutto ciò che serve per il cerchio, le dimostrazioni sono qui. Sono quelle standard — in Hatcher, Proposizione 1.30, che non è in casa — scritte per questo caso.</p>`},
+  {t:'reveal', title:'Sollevare un cammino: esistenza e unicità', tag:'teorema', steps:[
+   {label:'Enunciato', body:R`<p>Dato un cammino $f:I\to S^1$ e un punto $x_0\in\mathbb{R}$ con $p(x_0)=f(0)$, esiste un unico cammino $\tilde f:I\to\mathbb{R}$ con $\tilde f(0)=x_0$ e $p\circ\tilde f=f$: $$\forall f:I\to S^1\ \ \forall x_0\in p^{-1}(f(0))\ \ \exists!\,\tilde f:I\to\mathbb{R}:\ \ \tilde f(0)=x_0,\ \ p\circ\tilde f=f.$$ Si chiama il <b>sollevamento</b> di $f$ che parte da $x_0$: è «l'angolo di $f(s)$ diviso per $2\pi$», scelto con continuità invece che fra $0$ e $1$.</p>`},
+   {label:'Unicità', body:R`<p>Se $\tilde f_1$ e $\tilde f_2$ sono due sollevamenti con lo stesso punto di partenza, allora $p\circ\tilde f_1=p\circ\tilde f_2$, quindi $\tilde f_1(s)-\tilde f_2(s)\in\mathbb{Z}$ per ogni $s$. La differenza è una funzione continua da $I$, che è connesso, a $\mathbb{Z}$, che è discreto: è costante, e vale $0$ in $s=0$. Quindi i due sollevamenti coincidono. L'argomento usa solo la connessione del dominio, e vale per ogni spazio connesso al posto di $I$.</p>`},
+   {label:'Esistenza', body:R`<p>Gli aperti $f^{-1}(U)$ e $f^{-1}(V)$ ricoprono $I$, che è compatto; per il lemma del numero di Lebesgue c'è una suddivisione $0=s_0<s_1<\dots<s_k=1$ tale che ogni $f([s_j,s_{j+1}])$ sta tutto in $U$ o tutto in $V$. Si costruisce $\tilde f$ un tratto alla volta. Supposto $\tilde f$ definito fino a $s_j$, sia per esempio $f([s_j,s_{j+1}])\subseteq U$: il punto $\tilde f(s_j)$ sta in uno solo dei fogli sopra $U$, chiamato $W$, e $p|_W:W\to U$ è un omeomorfismo; si pone $\tilde f=(p|_W)^{-1}\circ f$ su $[s_j,s_{j+1}]$. È continuo, solleva $f$, e nel punto $s_j$ coincide con il tratto precedente. Dopo $k$ passi $\tilde f$ è definito su tutto $I$. $\blacksquare$</p>`}
+  ]},
+  {t:'reveal', title:'Sollevare un’omotopia, e il teorema di monodromia', tag:'teorema', steps:[
+   {label:'Le omotopie si sollevano', body:R`<p>Se $H:I\times I\to S^1$ è continua e $p(x_0)=H(0,0)$, esiste un'unica $\tilde H:I\times I\to\mathbb{R}$ continua con $p\circ\tilde H=H$ e $\tilde H(0,0)=x_0$. La dimostrazione è la stessa sul quadrato: per compattezza di $I\times I$ e Lebesgue si divide il quadrato in una griglia di quadratini, ciascuno portato da $H$ dentro $U$ o dentro $V$, e si solleva un quadratino alla volta, riga per riga, con l'inversa locale del foglio giusto. Due quadratini adiacenti condividono un lato, che è connesso, e sul lato i due sollevamenti coincidono per l'unicità: quindi si incollano in una funzione continua.</p>`},
+   {label:'Monodromia', body:R`<p>Se $f\sim g$ come cammini con l'omotopia $H$, i loro sollevamenti che partono dallo stesso punto <b>finiscono nello stesso punto</b>. Si sollevi $H$ con $\tilde H(0,0)=x_0$. Il lato $s=0$ è mandato da $H$ nel punto fisso $f(0)$, quindi $t\mapsto\tilde H(0,t)$ è un cammino continuo dentro la fibra $p^{-1}(f(0))$, che è discreta: è costante. Lo stesso per il lato $s=1$. Allora $\tilde H(\cdot,0)$ e $\tilde H(\cdot,1)$ sono sollevamenti di $f$ e di $g$ che partono da $x_0$, e finiscono entrambi in $\tilde H(1,0)=\tilde H(1,1)$. È la parte (c) della Proposizione A.77 di Lee, il «teorema di monodromia» (stampata 616). $\blacksquare$</p>`}
+  ]},
+  {t:'plot', title:'Il sollevamento di un laccio che fa due giri',
+   intro:R`Un laccio sul cerchio che fa due giri, irregolarmente, sollevato alla retta: in orizzontale il tempo $s$, in verticale il valore $\tilde f(s)$, cioè l'angolo diviso per $2\pi$.`,
+   plots:[
+    {kind:'curve', x:'t', y:'2*t + 0.12*sin(12.566*t)', tr:[0,1], height:280, equal:false,
+     xr:[-0.08,1.35], yr:[-0.35,2.45],
+     title:'parte dalla fibra 0 e finisce nella fibra 2: il numero di giri e il punto d’arrivo',
+     segs:[{x1:0,y1:0,x2:1.1,y2:0,col:'#8ea0b8',dash:true,label:'0',lx:1.18,ly:0},
+           {x1:0,y1:1,x2:1.1,y2:1,col:'#8ea0b8',dash:true,label:'1',lx:1.18,ly:1},
+           {x1:0,y1:2,x2:1.1,y2:2,col:'#8ea0b8',dash:true,label:'2',lx:1.18,ly:2}],
+     marks:[{x:0,y:0,col:'#5eead4',label:'f(0) sollevato in 0'},{x:1,y:2,col:'#d8a13a',label:'arriva in 2',left:true}]}
+   ],
+   leggi:R`<p>Le rette tratteggiate sono la fibra $p^{-1}(f(0))=\mathbb{Z}$: tutti i punti della retta che stanno sopra il punto di partenza. Il laccio torna al punto di partenza sul cerchio, quindi il sollevamento finisce su una di quelle rette, ma non necessariamente su quella da cui è partito: qui finisce in $2$. Le oscillazioni della curva sono il laccio che rallenta, accelera, torna un po' indietro; nessuna di esse cambia il punto d'arrivo, ed è il contenuto del teorema di monodromia: deformare il laccio deforma la curva, ma il suo estremo è inchiodato a una fibra discreta e non può saltare. Generale: l'estremo del sollevamento è un intero. Accidentale: la forma delle oscillazioni.</p>`}
+]},
+
+/* ---------------- 05 · PI1 DEL CERCHIO ---------------- */
+{ num:'05', title:'Il gruppo fondamentale del cerchio è Z', meta:'il grado di un laccio · è un isomorfismo, dimostrato · il numero di avvolgimento come integrale · Brouwer nel piano · il piano non è omeomorfo allo spazio',
+  blocchi:[
+  {t:'reveal', title:'Il teorema, con la dimostrazione', tag:'teorema', steps:[
+   {label:'Enunciato e definizione del grado', body:R`<p>Si prenda come base $q=(1,0)=p(0)$. A un laccio $f$ con base $q$ si associa il suo <b>grado</b>, $\deg f=\tilde f(1)$, dove $\tilde f$ è il sollevamento che parte da $0$; è un intero, perché $p(\tilde f(1))=f(1)=q$. Il teorema (Proposizione A.68(a) di Lee, stampata 614, enunciata senza dimostrazione) dice che $$\deg:\pi_1(S^1,q)\to\mathbb{Z}$$ è un isomorfismo, con generatore la classe del laccio $\omega(s)=(\cos2\pi s,\sin2\pi s)$. La dimostrazione che segue è la standard (Hatcher, Teorema 1.7, non in casa), con i lemmi della tappa 04.</p>`},
+   {label:'Ben definito', body:R`<p>Se $f\sim g$, per la monodromia i loro sollevamenti da $0$ finiscono nello stesso punto: $\deg f=\deg g$. Il grado è una funzione delle classi.</p>`},
+   {label:'Omomorfismo', body:R`<p>Siano $\tilde f$ e $\tilde g$ i sollevamenti da $0$, con $\tilde f(1)=m$. Il cammino che percorre $\tilde f$ e poi $\tilde g+m$ (il sollevamento di $g$ traslato di $m$) è continuo, perché $\tilde f(1)=m=\tilde g(0)+m$, e solleva $f\cdot g$, perché $p(\tilde g+m)=p(\tilde g)=g$ per la periodicità. Parte da $0$ e finisce in $m+\tilde g(1)$. Quindi $\deg(f\cdot g)=\deg f+\deg g$.</p>`},
+   {label:'Suriettivo e iniettivo', body:R`<p>Suriettivo: il laccio $\omega_n(s)=p(ns)$ si solleva in $\tilde\omega_n(s)=ns$, e $\tilde\omega_n(1)=n$. Iniettivo: se $\deg f=0$, il sollevamento $\tilde f$ è un laccio in $\mathbb{R}$ con base $0$; $\mathbb{R}$ è convesso, quindi $\tilde H(s,t)=(1-t)\tilde f(s)$ contrae $\tilde f$ tenendo fermi gli estremi; allora $H=p\circ\tilde H$ contrae $f$ tenendo ferma la base, e $[f]$ è il neutro. Un omomorfismo suriettivo con nucleo banale è un isomorfismo. $\blacksquare$</p>`}
+  ]},
+  {t:'prosa', title:'Il numero di avvolgimento come integrale', tag:'costruzione', html:R`
+  <p>Il grado si calcola anche senza sollevare. Per un laccio $z:I\to\mathbb{C}\setminus\{0\}$, l'angolo cresce di $d\arg z=\operatorname{Im}(dz/z)$, e il numero di giri attorno all'origine è</p>
+  $$\frac1{2\pi i}\oint_z\frac{dz}{z},$$
+  <p>che è l'<b>indice di avvolgimento</b> dell'analisi complessa e il grado del laccio $z/|z|$ sul cerchio. Sul laccio $\omega_n(s)=e^{2\pi ins}$ il conto è diretto:</p>
+  $$\frac1{2\pi i}\oint_{\omega_n}\frac{dz}{z}=n.$$
+  <p>La forma $dz/z$ è chiusa sul piano bucato, quindi il suo integrale non cambia deformando il laccio, ed è esattamente il motivo per cui l'indice è un invariante omotopico. Visto dall'Analisi Vettoriale, è il campo $\nabla\theta$, irrotazionale e non <span class="str" data-str="campo-conservativo">conservativo</span>: la sua circolazione su un laccio è $2\pi$ per il grado. Per il laccio $z(s)=e^{4\pi is}+\tfrac12$, che gira due volte attorno a un cerchio di raggio uno spostato di un mezzo, l'origine resta dentro e il conto numerico dà</p>
+  $$\frac1{2\pi i}\oint\frac{dz}{z}=2.$$
+  <p>Lo stesso intero, calcolato su una mappa liscia del cerchio in sé come numero di preimmagini contate col segno, è il <span class="str" data-str="grado-di-una-mappa">grado di una mappa</span> della geometria differenziale: tre definizioni — il sollevamento, l'integrale, il conteggio delle preimmagini — dello stesso invariante.</p>`},
+  {t:'plot', title:'Un laccio che gira due volte attorno all’origine',
+   intro:R`Il laccio $z(s)=e^{4\pi is}+\tfrac12$: un cerchio di raggio uno centrato in $\tfrac12$, percorso due volte. L'origine è dentro.`,
+   plots:[
+    {kind:'curve', x:'cos(2*t)+0.5', y:'sin(2*t)', tr:[0,6.2832], height:290, equal:true,
+     xr:[-0.9,1.9], yr:[-1.25,1.25],
+     title:'due giri attorno a 0: grado 2',
+     segs:[{x1:0,y1:0,x2:1.5,y2:0,col:'#d8a13a',arrow:true,label:'z(0) = 3/2',lx:1.55,ly:0.15}],
+     marks:[{x:0,y:0,col:'#c084fc',hollow:true,label:'0'},{x:0.5,y:0,col:'#8ea0b8',label:'centro 1/2'}]}
+   ],
+   leggi:R`<p>La freccia dall'origine a $z(s)$ ruota due volte mentre $s$ va da $0$ a $1$, perché il laccio percorre due volte un cerchio che contiene l'origine: grado $2$. Se si spostasse il centro oltre $1$, l'origine uscirebbe dal cerchio, la freccia oscillerebbe senza mai fare un giro intero, e il grado sarebbe $0$. Il passaggio fra i due casi è impossibile per deformazione nel piano bucato: a metà strada il laccio dovrebbe passare per l'origine. Generale: il grado conta i giri della freccia. Accidentale: che il laccio sia un cerchio.</p>`},
+  {t:'reveal', title:'Due conseguenze', tag:'teorema', steps:[
+   {label:'Brouwer nel piano', body:R`<p><b>Ogni mappa continua del disco chiuso $D^2$ in sé ha un punto fisso.</b> Prima un lemma: non esiste una retrazione $r:D^2\to S^1$, cioè una mappa continua con $r=\mathrm{Id}$ sul bordo. Se ci fosse, con l'inclusione $\iota:S^1\to D^2$ si avrebbe $r\circ\iota=\mathrm{Id}_{S^1}$, quindi $r_*\circ\iota_*=\mathrm{Id}$ su $\pi_1(S^1)=\mathbb{Z}$; ma $\iota_*$ passa per $\pi_1(D^2)$, che è banale perché il disco è convesso, e l'identità di $\mathbb{Z}$ non si fattorizza attraverso il gruppo banale. Ora, se $F:D^2\to D^2$ non avesse punti fissi, la semiretta da $F(x)$ verso $x$ incontrerebbe il bordo in un punto $r(x)$, che dipende con continuità da $x$ e vale $x$ quando $x$ è già sul bordo: sarebbe una retrazione. $\blacksquare$</p>`},
+   {label:'Il piano non è omeomorfo allo spazio', body:R`<p><b>$\mathbb{R}^2$ non è omeomorfo a $\mathbb{R}^n$ per $n\ge3$.</b> Un omeomorfismo $F$ si restringerebbe a un omeomorfismo fra $\mathbb{R}^2\setminus\{p\}$ e $\mathbb{R}^n\setminus\{F(p)\}$. Il primo ha il gruppo fondamentale di $S^1$, cioè $\mathbb{Z}$ (tappa 03); il secondo quello di $S^{n-1}$, che è banale per $n-1\ge2$ (tappa 06). Gruppi diversi, spazi non omeomorfi. È il debito che il movimento sulla connessione aveva dichiarato aperto: la sola connessione separa $\mathbb{R}$ da $\mathbb{R}^n$, il gruppo fondamentale separa anche $\mathbb{R}^2$ da $\mathbb{R}^n$. Il caso generale, $\mathbb{R}^m$ contro $\mathbb{R}^n$ con $m,n\ge3$, resta fuori: lì il gruppo fondamentale è banale per entrambi, e serve l'omologia.</p>`}
+  ]}
+]},
+
+/* ---------------- 06 · PRODOTTI, SFERE, PROIETTIVI, SO(3) ---------------- */
+{ num:'06', title:'Prodotti, sfere, spazi proiettivi e la rotazione di due pi greco', meta:'il gruppo di un prodotto · le sfere di dimensione almeno due sono semplicemente connesse · contare con i fogli di un rivestimento · SO(3) ha gruppo Z2',
+  blocchi:[
+  {t:'reveal', title:'Prodotti e sfere', tag:'teorema', steps:[
+   {label:'Il prodotto', body:R`<p>$\pi_1(X\times Y)\cong\pi_1(X)\times\pi_1(Y)$, con l'isomorfismo $[f]\mapsto([p_X\circ f],[p_Y\circ f])$ (Proposizione A.69 di Lee). Un laccio nel prodotto è una coppia di lacci, una per ogni fattore, e un'omotopia nel prodotto è una coppia di omotopie: ogni costruzione si fa componente per componente. Il toro $T^2=S^1\times S^1$ ha quindi gruppo $\mathbb{Z}\times\mathbb{Z}$, commutativo: il giro «lungo» e il giro «corto» commutano, perché il quadrato da cui il toro si ottiene incollando i lati è proprio un'omotopia fra $a\cdot b$ e $b\cdot a$.</p>`},
+   {label:'Le sfere, con un caso di Van Kampen', body:R`<p>Per $n\ge2$ la sfera $S^n$ è semplicemente connessa (A.68(b) di Lee). Siano $N$ e $S$ i poli, $U=S^n\setminus\{N\}$ e $V=S^n\setminus\{S\}$. Con la <span class="str" data-str="proiezione-stereografica">proiezione stereografica</span> ciascuno è omeomorfo a $\mathbb{R}^n$, quindi semplicemente connesso, e $U\cap V$ è omeomorfo a $\mathbb{R}^n\setminus\{0\}$, connesso per archi perché $n\ge2$. Sia $f$ un laccio con base $x_0\in U\cap V$. Per Lebesgue si divide $I$ in tratti ciascuno portato da $f$ dentro $U$ o dentro $V$, e in ogni punto di suddivisione $s_j$ il punto $f(s_j)$ sta in $U\cap V$. Si congiunge $f(s_j)$ a $x_0$ con un cammino $\gamma_j$ dentro $U\cap V$, e si inserisce $\bar\gamma_j\cdot\gamma_j$, omotopo al costante: $f$ diventa omotopo a un prodotto di lacci con base $x_0$, ciascuno tutto in $U$ o tutto in $V$, e ciascuno banale. Quindi $[f]$ è banale. Per $n=1$ l'argomento cade in un punto preciso: $S^1$ meno due punti sono due archi, $U\cap V$ non è connesso, e i $\gamma_j$ non esistono.</p>`}
+  ]},
+  {t:'prosa', title:'Contare con i fogli: gli spazi proiettivi', tag:'costruzione', html:R`
+  <p>Se un rivestimento $p:E\to X$ ha lo spazio $E$ <b>semplicemente connesso</b>, il gruppo fondamentale della base si conta con i fogli: la mappa che a $[f]$ associa l'estremo del sollevamento da un punto $e$ fissato, $$\Phi:\pi_1(X,x_0)\to p^{-1}(x_0),\qquad \Phi[f]=\tilde f(1),$$ è una biiezione. È ben definita per la monodromia, che vale per ogni rivestimento con la stessa dimostrazione della tappa 04. È suriettiva perché $E$ è connesso per archi: un cammino in $E$ da $e$ a un altro punto $e'$ della fibra scende a un laccio che si solleva a quel cammino. È iniettiva perché, se due lacci hanno sollevamenti con lo stesso estremo, i due sollevamenti sono cammini in $E$ con gli stessi estremi, quindi omotopi (tappa 03), e l'omotopia scende a un'omotopia fra i lacci.</p>
+  <p>Il rivestimento $S^n\to\mathbb{RP}^n$ che identifica punti antipodali ha due fogli, e $S^n$ è semplicemente connessa per $n\ge2$: quindi $\pi_1(\mathbb{RP}^n)$ ha esattamente due elementi, ed è $\mathbb{Z}_2$, l'unico gruppo di ordine due. Il laccio non banale è l'immagine di un cammino sulla sfera da un punto al suo antipodo, che nella base è chiuso ma nel rivestimento no.</p>`},
+  {t:'prosa', title:'SO(3) e la rotazione di due pi greco', tag:'teorema', html:R`
+  <p>Il gruppo delle rotazioni è rivestito due volte da $SU(2)$, che come spazio è la sfera $S^3$: ogni matrice $\begin{pmatrix}a&-\bar b\\ b&\bar a\end{pmatrix}$ con $|a|^2+|b|^2=1$ è un punto di $S^3\subset\mathbb{C}^2$, e la mappa $SU(2)\to SO(3)$ che fa agire $U$ per coniugio sulle matrici hermitiane a traccia nulla manda $U$ e $-U$ nella stessa rotazione. È un rivestimento a due fogli fra <span class="str" data-str="gruppo-di-lie">gruppi di Lie</span>, e $S^3$ è semplicemente connessa: per il conto dei fogli,</p>
+  <p>Che il rivestimento sia anche un omomorfismo di gruppi non è un caso fortunato. Abate-Tovena dimostra che il rivestimento universale di un gruppo di Lie connesso è ancora un gruppo di Lie, con prodotto e inverso sollevati da quelli di sotto, in modo che la proiezione sia un omomorfismo (§2.5, stampate 97-98): $SU(2)$ è il rivestimento universale di $SO(3)$, e la sua struttura di gruppo è quella che il sollevamento impone. Il conto:</p>
+  $$\pi_1(SO(3))\cong\mathbb{Z}_2,\qquad SO(3)\cong\mathbb{RP}^3.$$
+  <p>Si veda quale laccio è quello non banale. La rotazione di angolo $\theta$ attorno all'asse $z$, per $\theta$ da $0$ a $2\pi$, è un laccio in $SO(3)$ con base l'identità. Il suo sollevamento in $SU(2)$ che parte dall'identità è, con le <span class="str" data-str="matrici-di-pauli">matrici di Pauli</span>,</p>
+  $$U(\theta)=e^{-i\theta\sigma_z/2}=\cos\tfrac\theta2\,I-i\sin\tfrac\theta2\,\sigma_z,$$
+  <p>e alla fine del giro non torna all'inizio:</p>
+  $$U(2\pi)=-I.$$
+  <p>Il sollevamento finisce nell'altro foglio, quindi il laccio è il generatore non banale: <b>la rotazione di $2\pi$ non si deforma con continuità nella rotazione nulla</b>. Percorso due volte, il laccio si solleva fino a $U(4\pi)=I$: si chiude nel rivestimento, ed è banale. In fisica è il segno che uno spinore prende sotto una rotazione completa, ed è il motivo per cui esistono gli spin seminteri: una rappresentazione di $SU(2)$ in cui $-I$ agisce come $-1$ è una rappresentazione di $SO(3)$ solo a meno del segno. Il trucco della cintura di Dirac — un piatto tenuto in mano che dopo un giro ha il braccio attorcigliato e dopo due giri no — è lo stesso fatto fatto con le mani.</p>`},
+  {t:'plot', title:'Il sollevamento della rotazione attorno a z in SU(2)',
+   intro:R`I coefficienti $(\cos\tfrac\theta2,\sin\tfrac\theta2)$ di $U(\theta)$ nella base $I$, $-i\sigma_z$, al variare di $\theta$: un giro in $SO(3)$ percorre mezzo cerchio in $SU(2)$.`,
+   plots:[
+    {kind:'curve', x:'cos(t/2)', y:'sin(t/2)', tr:[0,6.2832], height:280, equal:true,
+     xr:[-1.6,1.6], yr:[-1.25,1.35],
+     title:'theta da 0 a 2 pi: da I a meno I; da 2 pi a 4 pi si chiude dal basso',
+     rings:[{r:1,col:'#8ea0b8',dash:true}],
+     marks:[{x:1,y:0,col:'#5eead4',label:'U = I (theta = 0, 4 pi)'},{x:-1,y:0,col:'#d8a13a',label:'U = -I (theta = 2 pi)',left:true},{x:0,y:1,col:'#c084fc',label:'theta = pi'}]}
+   ],
+   leggi:R`<p>La semicirconferenza piena è il sollevamento del laccio $\theta\in[0,2\pi]$: parte dall'identità e finisce in $-I$, il punto del rivestimento che sta sopra la stessa rotazione ma sull'altro foglio. La metà tratteggiata sotto è il secondo giro, $\theta\in[2\pi,4\pi]$, che riporta all'identità. Il disegno è un taglio bidimensionale di $S^3$, il cerchio massimo che contiene $I$ e $-I\sigma_z$; il fatto che conta non dipende dal taglio: $I$ e $-I$ sono due punti diversi della stessa fibra, quindi un cammino fra loro non è chiuso e il laccio sotto non è banale. Generale: in un rivestimento a due fogli un laccio è banale se e solo se il suo sollevamento si chiude. Accidentale: l'asse $z$.</p>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'cinque esercizi con soluzione · una prova per capire se il movimento è passato',
+  blocchi:[
+  {t:'esercizio', title:'1 · L’anello e il piano bucato', html:R`
+  <p>Mostra che l'anello $A=\{1\le|x|\le2\}\subset\mathbb{R}^2$ ha gruppo fondamentale $\mathbb{Z}$.</p>`,
+   sol:R`<p>La retrazione $r(x)=x/|x|$ manda l'anello sul cerchio unitario; con l'inclusione del cerchio di raggio uno, $r\circ\iota=\mathrm{Id}$ e $\iota\circ r\simeq\mathrm{Id}_A$ con l'omotopia lineare $H(x,t)=tx+(1-t)x/|x|$, che resta nell'anello perché $|H(x,t)|=t|x|+(1-t)$ sta fra $1$ e $2$. L'anello è omotopicamente equivalente a $S^1$, quindi ha gruppo $\mathbb{Z}$. Non è omeomorfo al cerchio — ha interno, il cerchio no — ed è il caso tipico in cui l'equivalenza omotopica basta e l'omeomorfismo non c'è.</p>`},
+  {t:'esercizio', title:'2 · Il grado è un omomorfismo, verificato sulle fasi', html:R`
+  <p>Usando $p(x)=e^{2\pi ix}$ (cioè il cerchio visto in $\mathbb{C}$), mostra che la periodicità di $p$ è la stessa cosa del fatto che $p$ è un omomorfismo da $(\mathbb{R},+)$ a $U(1)$, e di' qual è il suo nucleo.</p>`,
+   sol:R`<p>$p$ è un omomorfismo perché $$e^{2\pi ia}e^{2\pi ib}=e^{2\pi i(a+b)}.$$ Il suo nucleo sono gli $x$ con $e^{2\pi ix}=1$, cioè $\mathbb{Z}$, e la periodicità $p(x+n)=p(x)$ è la frase «$x$ e $x+n$ differiscono per un elemento del nucleo». Per il teorema di omomorfismo $\mathbb{R}/\mathbb{Z}\cong U(1)$: il cerchio come gruppo quoziente. Il gruppo fondamentale del cerchio è isomorfo proprio al nucleo, e non per caso: per un rivestimento che è anche un omomorfismo con $E$ semplicemente connesso, il conto dei fogli della tappa 06 identifica $\pi_1$ della base con la fibra sopra il neutro, cioè con il nucleo.</p>`},
+  {t:'esercizio', title:'3 · Il toro e i due giri', html:R`
+  <p>Sul toro $T^2=S^1\times S^1$ siano $a$ il laccio che fa un giro sul primo fattore e $b$ quello sul secondo. Scrivi l'immagine di $[a\cdot b\cdot\bar a\cdot\bar b]$ in $\mathbb{Z}\times\mathbb{Z}$ e deduci che il laccio è banale.</p>`,
+   sol:R`<p>Nell'isomorfismo $\pi_1(T^2)\cong\mathbb{Z}\times\mathbb{Z}$, $[a]\mapsto(1,0)$ e $[b]\mapsto(0,1)$; il prodotto va nella somma $(1,0)+(0,1)-(1,0)-(0,1)=(0,0)$. Quindi $a\cdot b\cdot\bar a\cdot\bar b$ è banale, cioè $[a][b]=[b][a]$. Geometricamente è il bordo del quadrato da cui il toro si ottiene incollando i lati opposti: il quadrato stesso è la contrazione.</p>`},
+  {t:'esercizio', title:'4 · Due giri di rotazione', html:R`
+  <p>Mostra con il sollevamento in $SU(2)$ che il laccio «rotazione di $4\pi$ attorno a $z$» è banale in $SO(3)$, e che la rotazione di $2\pi$ attorno a $x$ è nella stessa classe di quella attorno a $z$.</p>`,
+   sol:R`<p>Il sollevamento della rotazione di $4\pi$ è $U(\theta)$ per $\theta\in[0,4\pi]$, che finisce in $U(4\pi)=I$: si chiude, quindi il laccio è banale per il conto dei fogli. Per l'asse $x$ il sollevamento è $e^{-i\theta\sigma_x/2}$, che in $\theta=2\pi$ vale $\cos\pi\,I-i\sin\pi\,\sigma_x=-I$: finisce nell'altro foglio, come quello attorno a $z$. Avendo lo stesso estremo, i due lacci hanno la stessa classe. Si può vedere anche senza conti: $SO(3)$ è connesso, si può ruotare con continuità l'asse $x$ fino all'asse $z$, e quella rotazione degli assi è un'omotopia fra i due lacci.</p>`},
+  {t:'esercizio', title:'5 · Perché il cerchio non è semplicemente connesso, senza teorema', html:R`
+  <p>Un compagno sostiene che il laccio $\omega$ del cerchio si contrae: «lo stringo verso il punto $(1,0)$». Trova dove l'argomento si rompe, usando solo il sollevamento.</p>`,
+   sol:R`<p>Stringere $\omega$ tenendo ferma la base vorrebbe dire un'omotopia di cammini da $\omega$ al costante. Per la monodromia i sollevamenti da $0$ finirebbero nello stesso punto; ma $\tilde\omega(s)=s$ finisce in $1$ e il sollevamento del costante finisce in $0$. Il «stringo verso $(1,0)$» del compagno, se lo si disegna, tira il laccio all'indietro lungo sé stesso e a un certo istante lo deve staccare dal cerchio, cioè uscire dallo spazio: nel disco si può fare, sul cerchio no.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché nella definizione di omotopia di cammini si tengono fermi gli estremi?</li>
+  <li>Perché il prodotto di cammini è associativo solo a meno di omotopia?</li>
+  <li>Dove si usa la compattezza di $I$ nel sollevamento dei cammini?</li>
+  <li>Perché l'estremo del sollevamento non può cambiare durante un'omotopia?</li>
+  <li>Perché l'argomento che rende $S^n$ semplicemente connessa non funziona per $n=1$?</li>
+  <li>Che cosa ha a che fare $U(2\pi)=-I$ con l'esistenza degli spin seminteri?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perché senza quel vincolo ogni cammino si contrae ritirandosi lungo sé stesso fino al punto di partenza, e l'invariante sarebbe sempre banale.</li>
+   <li>Perché $(f\cdot g)\cdot h$ e $f\cdot(g\cdot h)$ percorrono gli stessi tratti con tempi diversi: sono lo stesso cammino riparametrizzato, e la riparametrizzazione è un'omotopia, non un'uguaglianza.</li>
+   <li>Per avere una suddivisione finita in tratti ciascuno contenuto in un arco con fogli disgiunti: è il numero di Lebesgue di un ricoprimento aperto di un compatto.</li>
+   <li>Perché durante l'omotopia l'estremo si muove dentro la fibra, che è discreta, e un cammino continuo in un insieme discreto è costante.</li>
+   <li>Perché $S^1$ meno due punti è sconnesso, e non si possono congiungere i punti di suddivisione alla base dentro l'intersezione.</li>
+   <li>Il laccio della rotazione completa non è banale in $SO(3)$, e il suo sollevamento finisce in $-I$: una rappresentazione di $SU(2)$ in cui $-I$ vale $-1$ non scende a una rappresentazione vera delle rotazioni, ma solo a meno di un segno. Sono gli spin seminteri.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'dove riappare questo movimento nella fisica che farai',
+  blocchi:[
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il gruppo fondamentale come il conto dei cammini chiusi che non si stringono</b>: lo strumento che separa spazi che la connessione non separa, e che decide quando una fase o un potenziale si possono definire globalmente.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`Lo spin semintero esiste perché $\pi_1(SO(3))=\mathbb{Z}_2$: le rappresentazioni di $SU(2)$ in cui $-I$ agisce come $-1$ sono rappresentazioni delle rotazioni solo a meno di un segno. L'effetto Aharonov-Bohm vive nel complementare di un solenoide, che non è semplicemente connesso: la fase che l'elettrone accumula girando attorno dipende dal numero di giri. E la statistica delle particelle identiche viene dal gruppo fondamentale dello spazio delle configurazioni: in tre dimensioni lo scambio fatto due volte si contrae, e restano bosoni e fermioni; in due dimensioni non si contrae, e compaiono gli anyoni.`},
+    {dove:'Metodi<br>matematici', txt:R`Il teorema di Cauchy vale su un dominio semplicemente connesso perché $\oint f\,dz$ non cambia deformando il cammino; l'indice di avvolgimento è il grado della tappa 05; il logaritmo complesso è il sollevamento di $z\mapsto z/|z|$ al rivestimento $\mathbb{R}\to S^1$, ed è per questo che ha infiniti rami.`},
+    {dove:'Geometria<br>differenziale', txt:R`Una varietà ha gruppo fondamentale numerabile, conseguenza della base numerabile; ogni gruppo di Lie connesso ha un rivestimento universale che è ancora un gruppo di Lie, e $SU(2)\to SO(3)$ ne è il primo esempio. Negli esercizi del capitolo sulla coomologia Abate-Tovena chiede di dimostrare che una varietà con gruppo fondamentale finito non ha forme chiuse non esatte di grado uno (Esercizio 5.22, stampata 304): il gruppo fondamentale controlla quali campi irrotazionali sono gradienti.`}
+   ],
+   domanda:R`L'integrale di $dz/z$ su un laccio dipende solo dalla sua classe di omotopia. <b>Domanda da portare avanti:</b> quali campi hanno questa proprietà, e come si misura in generale quanto un campo irrotazionale manca di essere un gradiente su uno spazio con dei buchi?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-14-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-14 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-14-gruppo-fondamentale.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
