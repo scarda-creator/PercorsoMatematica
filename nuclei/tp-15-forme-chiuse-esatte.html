@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-15 — Forme chiuse ed esatte: i buchi visti dai campi</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-15 — Forme chiuse ed esatte: i buchi visti dai campi</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["campo-conservativo"] = {"nome":"Campo conservativo","riga":"Un campo che è il gradiente di una funzione, $\\mathbf F=\\nabla U$, e che perciò compie lungo un cammino un lavoro deciso solo dagli estremi.","serve":"Le tre proprietà — esiste un potenziale, il lavoro non dipende dal cammino, la circuitazione su ogni chiusa è nulla — sono equivalenti, e all'esame si usa quella che costa meno. Il rotore nullo è invece una condizione soltanto NECESSARIA: diventa sufficiente unicamente se il dominio è semplicemente connesso, e dimenticare quella clausola è l'errore classico, perché il controesempio non è patologico ma è il campo attorno a un filo.","esempio":"Il campo $\\mathbf F=(2xy,\\,x^{2})$ ha potenziale $U=x^{2}y$, perché $\\partial_xU=2xy$ e $\\partial_yU=x^{2}$; quindi il lavoro da $(0,0)$ a $(1,1)$ vale $U(1,1)-U(0,0)=1$, lungo qualunque cammino si scelga fra i due punti.","pieno":{"file":"04-campi-vettoriali.html","tappa":"05","come":"le tre caratterizzazioni equivalenti, la costruzione del potenziale per integrazione e il ruolo del dominio, nel nucleo sui campi vettoriali"},"qui":{"elettromagnetismo":{"serve":"In elettrostatica $\\mathbf E$ è conservativo, e l'intero apparato del potenziale $V$ poggia su questo: il lavoro per spostare una carica da $A$ a $B$ è $q(V_A-V_B)$ qualunque strada prenda, e solo per questo ha senso parlare di energia potenziale di una configurazione. La proprietà cade appena $\\mathbf B$ varia nel tempo: per Faraday la circuitazione di $\\mathbf E$ su una chiusa vale $-\\dfrac{d\\Phi_B}{dt}$, e un campo con circuitazione non nulla non ammette potenziale scalare.","esempio":"Per la carica puntiforme, il lavoro del campo di Coulomb su una carica di prova unitaria che va da $r_1$ a $r_2$ è $\\displaystyle\\int_{r_1}^{r_2}\\dfrac{q}{4\\pi\\varepsilon_0r^{2}}\\,dr=\\dfrac{q}{4\\pi\\varepsilon_0}\\left(\\dfrac{1}{r_1}-\\dfrac{1}{r_2}\\right)$: dipende solo dai due raggi, e l'angolo percorso non compare da nessuna parte. È la stessa cosa che dire $V\\propto 1/r$."}},"controllo":[{"tipo":"derivata","espr":"x**2*y","rispetto":["x"],"vale":"2*x*y","dove":"esempio","appare":"2xy"},{"tipo":"derivata","espr":"x**2*y","rispetto":["y"],"vale":"x**2","dove":"esempio","appare":"x^{2}"},{"tipo":"uguale","sinistra":"1**2*1-0**2*0","vale":"1","dove":"esempio","appare":"=1"},{"tipo":"integrale","espr":"q/(4*pi*e0*r**2)","var":"r","da":"r1","a":"r2","vale":"q/(4*pi*e0)*(1/r1-1/r2)","ipotesi":{"r":"positive","r1":"positive","r2":"positive"},"dove":"qui.elettromagnetismo.esempio","appare":"\\left(\\dfrac{1}{r_1}-\\dfrac{1}{r_2}\\right)"}]};
+STRUM["gruppo-fondamentale"] = {"nome":"Gruppo fondamentale","riga":"$\\pi_1(X,x_0)$ e' l'insieme dei cammini chiusi con base in $x_0$, presi a meno di omotopia, con il prodotto dato dal percorrerne uno dopo l'altro.","serve":"E' il primo invariante che distingue spazi che la sola continuita' non distingue: il piano e il piano bucato sono entrambi connessi, aperti, della stessa dimensione, e hanno $\\pi_1$ banale il primo e $\\mathbb{Z}$ il secondo — il numero di giri attorno al buco. Nel corso di Geometria Differenziale entra alla seconda lezione, e per una ragione tecnica precisa: Diverio dimostra che il gruppo fondamentale di una VARIETA' topologica e' al piu' numerabile, e lo deduce dalla base numerabile. Il senso dell'enunciato e' che una varieta' puo' essere complicatissima, ma non arbitrariamente: le ipotesi «tecniche» della definizione le mettono un limite. E' anche il punto in cui la topologia algebrica entra nel corso, e l'unico in cui serve fin qui.","esempio":"Sulla circonferenza $S^1$ un cammino chiuso si solleva alla retta tramite $t\\mapsto e^{2\\pi it}$, e il suo estremo finale e' un intero: il numero di giri. Due cammini sono omotopi se e solo se hanno lo stesso numero di giri, quindi $\\pi_1(S^1)\\cong\\mathbb{Z}$, e comporre due cammini somma i giri. Sulla sfera $S^2$ invece ogni cammino chiuso si contrae a un punto scivolando sulla superficie, e $\\pi_1(S^2)=\\{e\\}$: e' il motivo per cui $S^1$ e $S^2$ non sono omeomorfe, e nessun conto di dimensione lo direbbe, visto che vivono in spazi diversi.","controllo":[{"tipo":"simbolico","dove":"riga","appare":"\\pi_1(X,x_0)","perche":"e' la notazione del gruppo fondamentale con punto base: un nome, non un conto"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(S^1)\\cong\\mathbb{Z}","perche":"e' un teorema della teoria dei rivestimenti, enunciato e non dimostrato qui: il debito e' dichiarato"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(S^2)=\\{e\\}","perche":"e' l'enunciato che il gruppo fondamentale della sfera e' banale: un teorema della topologia algebrica, citato e non dimostrato, e il debito e' dichiarato nel campo `debito`"}],"pieno":{"file":"tp-14-gruppo-fondamentale.html","tappa":"02","come":"il prodotto di cammini, l'associativita' a meno di omotopia, neutro e inverso, il cambio di punto base; nello stesso movimento pi_1(S^1)=Z dimostrato e pi_1(SO(3))=Z_2"}};
+STRUM["coomologia"] = {"nome":"Coomologia (di de Rham)","riga":"La coomologia di de Rham misura quante forme chiuse non sono esatte: $H^k(M)$ è lo spazio delle $k$-forme $\\omega$ con $d\\omega=0$ modulo quelle della forma $d\\eta$.","serve":"Trasforma la domanda «un campo irrotazionale è un gradiente?» in un invariante: la risposta è sì per ogni campo se e solo se $H^1(M)=0$, e in grado due la domanda «un campo a divergenza nulla è un rotore?» ha risposta sì se e solo se $H^2(M)=0$. I periodi — circolazioni su lacci, flussi su superfici chiuse — sono ciò che un cambio di potenziale non può togliere: l'effetto Aharonov-Bohm è un periodo di grado uno, il monopolo di Dirac uno di grado due. In geometria differenziale la si incontra anche citata, per dire che cosa misura l'invariante di Hopf.","esempio":"Nel piano bucato la forma $\\dfrac{-y\\,dx+x\\,dy}{x^2+y^2}$ è chiusa ma non esatta: il suo integrale sul cerchio unitario vale $2\\pi$, non $0$. È il vortice di Analisi Vettoriale, e la sua classe genera $H^1(\\mathbb{R}^2\\setminus\\{0\\})$, che è una retta reale: un buco, una dimensione.","controllo":[{"tipo":"integrale","espr":"((-sin(t))*(-sin(t))+cos(t)*cos(t))/(cos(t)**2+sin(t)**2)","var":"t","da":"0","a":"2*pi","vale":"2*pi","dove":"esempio","appare":"vale $2\\pi$","nota":"la forma del vortice integrata sul cerchio unitario parametrizzato da (cos t, sin t)"},{"tipo":"simbolico","dove":"riga","appare":"H^k(M)","perche":"nome dello spazio di coomologia"},{"tipo":"simbolico","dove":"serve","appare":"H^1(M)=0","perche":"condizione topologica enunciata, non un conto"}],"pieno":{"file":"tp-15-forme-chiuse-esatte.html","tappa":"04","come":"il quoziente chiuse modulo esatte, il grado zero che conta le componenti, H^1 del piano bucato dimostrato uguale a R con i periodi; nello stesso movimento il lemma di Poincaré e il grado due del monopolo"}};
+STRUM["teorema-di-stokes"] = {"nome":"Teorema di Stokes","riga":"La circuitazione di un campo lungo una curva chiusa è il flusso del suo rotore attraverso una qualunque superficie che quella curva borda: $\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r=\\int_S(\\nabla\\times\\mathbf F)\\cdot\\hat n\\,dS$.","serve":"Dice che la circuitazione dipende solo dal bordo e non dalla superficie scelta — ed è la licenza a deformare la superficie a piacere, che in fisica si usa continuamente. Letto nell'altro verso dà il significato del rotore: la circuitazione per unità di area, nel limite di un cappio piccolo. Il verso della normale e quello di percorrenza del bordo vanno legati dalla regola della mano destra, altrimenti il segno è casuale.","esempio":"Per il vortice $\\mathbf F=(-y,x,0)$ il rotore ha solo componente $z$, che vale $\\partial_x(x)-\\partial_y(-y)=2$. Sul disco di raggio $R$ nel piano $xy$ il flusso del rotore è quindi $2$ per l'area, $2\\pi R^{2}$; la circuitazione diretta sul cerchio, dove $\\mathbf F\\cdot d\\mathbf r$ vale $R^{2}\\,dt$, dà $\\int_0^{2\\pi}R^{2}\\,dt=2\\pi R^{2}$.","pieno":{"file":"05-teoremi-integrali.html","tappa":"03","come":"l'enunciato, l'orientazione coerente bordo-normale e l'indipendenza dalla superficie, nel nucleo dei teoremi integrali"},"qui":{"elettromagnetismo":{"serve":"È il ponte fra la forma integrale e la forma locale delle due leggi di circuitazione: Ampère, $\\oint\\mathbf B\\cdot d\\mathbf r=\\mu_0 I$, diventa $\\nabla\\times\\mathbf B=\\mu_0\\mathbf J$; Faraday, $\\oint\\mathbf E\\cdot d\\mathbf r=-\\dfrac{d\\Phi_B}{dt}$, diventa $\\nabla\\times\\mathbf E=-\\partial_t\\mathbf B$. E regge l'affermazione più usata dell'elettrostatica: se il rotore di $\\mathbf E$ è nullo su un dominio senza buchi, ogni circuitazione è nulla e il campo è conservativo.","esempio":"Per il filo rettilineo infinito percorso da una corrente il campo ha modulo $\\dfrac{\\mu_0 I}{2\\pi r}$ ed è tangente ai cerchi concentrici, quindi la circuitazione su un cerchio di raggio $r$ è $\\dfrac{\\mu_0 I}{2\\pi r}\\cdot 2\\pi r=\\mu_0 I$: il raggio scompare. Stokes dice che lo stesso valore si ottiene su qualunque cappio che allacci il filo, anche storto — è il bordo a contare, non la forma."}},"controllo":[{"tipo":"uguale","sinistra":"diff(x,x)-diff(-y,y)","vale":"2","dove":"esempio","appare":"=2"},{"tipo":"integrale","espr":"R**2","var":"t","da":"0","a":"2*pi","vale":"2*pi*R**2","dove":"esempio","appare":"2\\pi R^{2}"},{"tipo":"uguale","sinistra":"mu0*Ic/(2*pi*r)*2*pi*r","vale":"mu0*Ic","dove":"qui.elettromagnetismo.esempio","appare":"\\mu_0 I"}]};
+STRUM["omotopia"] = {"nome":"Omotopia","riga":"Due applicazioni continue $F,G:X\\to Y$ sono omotope se esiste $H:X\\times[0,1]\\to Y$ continua con $H(\\cdot,0)=F$ e $H(\\cdot,1)=G$: una deformazione continua dell'una nell'altra.","serve":"E' la nozione che rende precisa l'idea di deformare con continuita' senza strappare, ed e' la relazione di equivalenza su cui si costruisce la topologia algebrica: il gruppo fondamentale e' fatto di cammini chiusi presi a meno di omotopia, e senza quel quoziente non ci sarebbe nessun gruppo ma solo un insieme enorme di cammini. Nel percorso serve per leggere due cose: gli enunciati che citano $\\pi_1$, e la nozione di spazio semplicemente connesso, che e' connesso per archi e con ogni cammino chiuso omotopo a una costante.","esempio":"Nel piano bucato $\\mathbb{R}^2\\setminus\\{0\\}$ si considerino il cammino che gira una volta attorno all'origine, $\\gamma(t)=(\\cos 2\\pi t,\\ \\sin 2\\pi t)$, e il cammino costante nel punto $(1,0)$. Non sono omotopi, e la ragione e' che la deformazione dovrebbe far passare la curva per l'origine, che e' stata tolta. Nel piano intero invece lo sono, con $H(t,s)=\\big((1-s)\\cos 2\\pi t+s,\\ (1-s)\\sin 2\\pi t\\big)$: per $s=0$ si ottiene $(\\cos 2\\pi t,\\ \\sin 2\\pi t)$, cioe' il cerchio, e per $s=1$ si ottiene $(1,\\ 0)$, cioe' il punto. Il buco e' tutta la differenza, ed e' per questo che l'omotopia vede i buchi mentre la continuita' da sola no.","controllo":[{"tipo":"uguale","sinistra":"Matrix([[(1-0)*cos(2*pi*t)+0], [(1-0)*sin(2*pi*t)]])","vale":"Matrix([[cos(2*pi*t)], [sin(2*pi*t)]])","ipotesi":{"t":"real"},"dove":"esempio","appare":"per $s=0$ si ottiene $(\\cos 2\\pi t,\\ \\sin 2\\pi t)$"},{"tipo":"uguale","sinistra":"Matrix([[(1-1)*cos(2*pi*t)+1], [(1-1)*sin(2*pi*t)]])","vale":"Matrix([[1], [0]])","ipotesi":{"t":"real"},"dove":"esempio","appare":"per $s=1$ si ottiene $(1,\\ 0)$"},{"tipo":"simbolico","dove":"riga","appare":"H(\\cdot,0)=F","perche":"definizione o notazione introdotta, non un conto"},{"tipo":"simbolico","dove":"riga","appare":"H(\\cdot,1)=G","perche":"definizione o notazione introdotta, non un conto"}],"pieno":{"file":"tp-14-gruppo-fondamentale.html","tappa":"01","come":"le definizioni di Lee per mappe e per cammini a estremi fissi, la relazione di equivalenza dimostrata, l'omotopia lineare nei convessi e negli stellati"}};
+STRUM["semplicemente-connesso"] = {"nome":"Semplicemente connesso","riga":"Uno spazio e' semplicemente connesso se e' connesso per archi e ogni cammino chiuso si contrae a un punto restando nello spazio: in simboli, $\\pi_1(X,x_0)=\\{e\\}$.","serve":"Separa due domande che «un pezzo solo» confonde. La connessione per archi dice che si va da ogni punto a ogni altro; la semplice connessione dice che due strade con gli stessi estremi si deformano l'una nell'altra, cioe' che lo spazio non ha buchi attorno a cui girare. E' la seconda a decidere quando un oggetto definito localmente si estende a tutto lo spazio senza ambiguita': un potenziale per un campo irrotazionale in Analisi Vettoriale, una primitiva di una funzione olomorfa in Metodi, un ramo del logaritmo. In Geometria Differenziale e' cio' che distingue $SU(2)$ da $SO(3)$: hanno la stessa algebra di Lie, ma solo il primo e' semplicemente connesso, ed e' il motivo per cui esiste lo spin semintero.","esempio":"Il piano bucato $\\mathbb{R}^2\\setminus\\{0\\}$ e' connesso per archi ma non semplicemente connesso: un cappio attorno all'origine non si contrae senza passare per il buco, e $\\pi_1$ conta i giri, $\\pi_1(\\mathbb{R}^2\\setminus\\{0\\})\\cong\\mathbb{Z}$. La sfera $S^2$ invece lo e': un cappio si contrae scivolando sulla superficie. Lo stesso accade una dimensione sopra: $S^3$, che e' $SU(2)$, e' semplicemente connessa, mentre $\\mathbb{RP}^3$, che e' $SO(3)$, ha $\\pi_1\\cong\\mathbb{Z}/2$ — un giro completo di rotazione non si contrae, due si'. (Lo si dichiara: le affermazioni sui gruppi fondamentali sono enunciate e non dimostrate: richiedono la teoria dei rivestimenti, che non e' nel percorso per scelta dichiarata di Giuseppe. La scheda e' costruita sopra quelle del gruppo fondamentale e dell'omotopia, e non le rispiega.)","pieno":{"file":"00-topologia.html","tappa":"07","come":"il ponte fra connesso e semplicemente connesso nel nucleo di topologia di Analisi Vettoriale, con il piano bucato come esempio e il motivo per cui decide l'esistenza dei potenziali"},"controllo":[{"tipo":"simbolico","dove":"riga","appare":"\\pi_1(X,x_0)=\\{e\\}","perche":"e' la definizione (gruppo fondamentale banale), non un conto"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(\\mathbb{R}^2\\setminus\\{0\\})\\cong\\mathbb{Z}","perche":"teorema della teoria dei rivestimenti, enunciato e non dimostrato: il debito e' dichiarato"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1\\cong\\mathbb{Z}/2","perche":"il gruppo fondamentale di RP^3 = SO(3), enunciato e non dimostrato: il debito e' dichiarato"}]};
+STRUM["grado-di-una-mappa"] = {"nome":"Grado di una mappa","riga":"Per una mappa liscia $F:M\\to N$ fra varietà compatte connesse della stessa dimensione, il grado è il numero di preimmagini di un valore regolare, contate con il segno dell&rsquo;orientazione; non dipende dal valore regolare scelto, e non cambia sotto deformazione continua.","serve":"È il prototipo dei numeri interi che la geometria estrae da una mappa: siccome un intero non può variare con continuità, due mappe di grado diverso non si deformano l&rsquo;una nell&rsquo;altra. Da qui l&rsquo;indice degli zeri di un campo, il teorema di Poincaré-Hopf, e in fisica i numeri quantici topologici, come il numero di avvolgimento di un vortice.","esempio":"La mappa $z\\mapsto z^2$ della circonferenza in sé ha grado $2$: ogni punto ha due preimmagini, $\\pm\\sqrt w$, e la mappa le percorre entrambe nel verso positivo. La mappa $z\\mapsto\\bar z$ ha grado $-1$: una preimmagine, percorsa al contrario. Una mappa costante ha grado $0$: quasi ogni punto non ha preimmagini.","pieno":{"file":"gd-08-valori-regolari.html","tappa":"04","come":"il numero di preimmagini localmente costante sui valori regolari, nella dimostrazione geometrica del teorema fondamentale dell'algebra"},"controllo":[{"tipo":"simbolico","dove":"esempio","appare":"\\pm\\sqrt w","perche":"le due radici quadrate di w, preimmagini di w per z^2: una descrizione, non un conto da ridurre"}]};
+STRUM["indice-di-uno-zero"] = {"nome":"Indice di uno zero di un campo","riga":"L&rsquo;indice di uno zero isolato $p$ di un campo $X$ in una superficie è il numero di giri che compie la direzione di $X$ percorrendo una volta un piccolo cerchio attorno a $p$.","serve":"Trasforma un comportamento locale in un intero, e un intero non può cambiare per piccole deformazioni del campo: per questo lo si può sommare su tutti gli zeri e ottenere un invariante della superficie. In dimensione qualunque è il grado della mappa che manda una piccola sfera attorno a $p$ nella sfera delle direzioni.","esempio":"Il campo $(x,y)$, una sorgente, ha indice $1$: percorrendo il cerchio la freccia gira una volta nel verso del cerchio. Il campo $(x,-y)$, una sella, ha indice $-1$: la freccia gira una volta nel verso opposto. Il campo $(x^2-y^2,2xy)$, che è $z^2$ letto come campo, ha indice $2$: lungo il cerchio l&rsquo;angolo della freccia è il doppio dell&rsquo;angolo del punto.","pieno":{"file":"gd-07-fibrato-tangente.html","tappa":"04c","come":"il campo su S^2 con un solo zero, dove si vede l'indice 2 contando i giri delle frecce"},"controllo":[{"tipo":"uguale","sinistra":"expand((x+I*y)**2)","vale":"x**2-y**2+2*I*x*y","ipotesi":{"x":"real","y":"real"},"dove":"esempio","appare":"(x^2-y^2,2xy)","nota":"il campo (x^2-y^2, 2xy) e' z^2 letto come campo vettoriale"}]};
+STRUM["poincare-hopf"] = {"nome":"Teorema di Poincaré-Hopf","riga":"Su una varietà compatta, per un campo vettoriale con zeri isolati, la somma degli indici degli zeri è la caratteristica di Eulero: $\\sum_p\\operatorname{ind}_p(X)=\\chi(M)$.","serve":"Lega un dato locale, il comportamento del campo vicino a ciascuno zero, a un numero globale che dipende solo dalla forma della varietà. La conseguenza è che il numero di zeri, contati con il loro indice, non dipende dal campo scelto: lo decide la superficie. La palla pelosa ne è il caso più semplice — $\\chi(S^2)=2\\neq0$, quindi qualche zero c&rsquo;è — e il toro, con $\\chi=0$, ammette campi mai nulli.","esempio":"Sulla sfera il campo che scorre dai poli lungo i meridiani ha due zeri, una sorgente al polo sud e un pozzo al polo nord, di indice $1$ ciascuno: somma $2$. Si può anche costruire un campo con un solo zero di indice $2$. La somma non cambia, ed è $\\chi(S^2)$.","pieno":{"file":"gd-07-fibrato-tangente.html","tappa":"04c","come":"l'esercizio del campo su S^2 con un solo zero di indice 2, e il teorema enunciato come la ragione che sta dietro"},"controllo":[{"tipo":"simbolico","dove":"riga","appare":"\\sum_p\\operatorname{ind}_p(X)=\\chi(M)","perche":"enunciato del teorema, citato e non dimostrato nel corso"},{"tipo":"simbolico","dove":"serve","appare":"\\chi(S^2)=2\\neq0","perche":"valore della caratteristica di Eulero della sfera, enunciato"}]};
+STRUM["caratteristica-di-eulero"] = {"nome":"Caratteristica di Eulero","riga":"È il numero intero $\\chi(M)$ che, per una superficie triangolata, vale vertici meno spigoli più facce, non dipende dalla triangolazione scelta, e su una varietà compatta conta con segno gli zeri di qualunque campo vettoriale.","serve":"a decidere se su una varietà compatta esistano oggetti globali che una partizione dell'unità non sa costruire, perché l'insieme in cui vivono non è convesso. Il fatto che si usa è il teorema di Poincaré-Hopf: se un campo vettoriale su una varietà compatta ha zeri isolati, la somma dei loro indici (il numero di giri che il campo compie su un cerchietto attorno allo zero, con segno) vale $\\chi(M)$, qualunque sia il campo. Ne seguono due conseguenze operative. Se $\\chi(M)\\neq0$, ogni campo ha almeno uno zero: è il teorema della palla pelosa per $S^2$, che ha $\\chi=2$. Se $\\chi(M)=0$, esiste un campo mai nullo, e su una varietà compatta questo equivale ad avere una metrica lorentziana, cioè a poter essere uno spazio-tempo. Le superfici compatte orientabili hanno $\\chi=2-2g$, con $g$ il numero di buchi: solo il toro ha caratteristica nulla, perché con $g=1$ viene $\\chi=2-2\\cdot1=0$.","esempio":"Si calcola sulla sfera con la triangolazione più piccola, il bordo di un tetraedro: $4$ vertici, $6$ spigoli, $4$ facce, quindi $\\chi(S^2)=4-6+4=2$. Con il bordo di un cubo, che è un'altra decomposizione della stessa sfera, si contano $8$ vertici, $12$ spigoli e $6$ facce quadrate, e torna lo stesso numero: $8-12+6=2$. Il toro si ottiene da un quadrato identificando i lati opposti, e la decomposizione minima ha un solo vertice (i quattro angoli diventano un punto), due spigoli e una faccia: $\\chi(T^2)=1-2+1=0$. Il confronto con i campi è immediato. Sul toro il campo $\\partial/\\partial\\vartheta_1$ della coordinata angolare non si annulla mai, coerentemente con $\\chi=0$. Sulla sfera il campo di rotazione attorno all'asse verticale si annulla nei due poli, e ciascuno ha indice $+1$: la somma $1+1=2$ è esattamente $\\chi(S^2)$, e nessun campo può fare meglio.","debito":"che $\\chi$ non dipenda dalla decomposizione scelta, e il teorema di Poincaré-Hopf che lega $\\chi$ agli zeri dei campi, si dimostrano con l'omologia (o con la teoria del grado) in un corso di topologia algebrica, che non è fra i prerequisiti; in Lee la palla pelosa è il Problem 16-6, risolto con la coomologia di de Rham. Qui si enuncia il teorema, si calcola $\\chi$ sui casi che servono, e si dichiara il confine: il corso usa $\\chi$ per sapere quando un'ostruzione esiste, non per dimostrarla.","controllo":[{"tipo":"uguale","sinistra":"4-6+4","vale":"2","dove":"esempio","appare":"\\chi(S^2)=4-6+4=2"},{"tipo":"uguale","sinistra":"8-12+6","vale":"2","dove":"esempio","appare":"8-12+6=2"},{"tipo":"uguale","sinistra":"1-2+1","vale":"0","dove":"esempio","appare":"\\chi(T^2)=1-2+1=0"},{"tipo":"uguale","sinistra":"1+1","vale":"2","dove":"esempio","appare":"1+1=2"},{"tipo":"uguale","sinistra":"2-2*1","vale":"0","dove":"serve","appare":"2-2\\cdot1=0"}]};
+STRUM["palla-pelosa"] = {"nome":"Teorema della palla pelosa","riga":"Su $S^2$ ogni campo vettoriale tangente continuo si annulla in almeno un punto: non si può pettinare una sfera pelosa senza lasciare un vortice.","serve":"E' la prima ostruzione topologica che il corso incontra: dice che un oggetto definito localmente senza problemi — un campo mai nullo, una base di vettori tangenti — non esiste globalmente, e la ragione non sono le coordinate ma la forma dello spazio. Ne seguono fatti che si usano: $S^2$ non è parallelizzabile, quindi non è un gruppo di Lie, e non ammette una metrica lorentziana, quindi non può essere uno spazio-tempo. Vale su ogni sfera di dimensione pari, e cade su quelle dispari.","esempio":"Su $S^1$ il campo che gira, $(-y,x)$, non si annulla mai: la circonferenza si pettina. Su $S^3$ lo stesso trucco funziona in quattro coordinate, $(x,y,z,w)\\mapsto(-y,x,-w,z)$, che è tangente perché il suo prodotto scalare con il punto è $-xy+yx-zw+wz$, cioè zero, e non si annulla mai sulla sfera. Su $S^2$, con tre coordinate, non c&rsquo;è modo di accoppiarle a due a due, ed è un indizio del perché la dimensione pari è diversa.","pieno":{"file":"gd-07-fibrato-tangente.html","tappa":"04","come":"la palla pelosa dentro la discussione delle varietà parallelizzabili, con il confine di ciò che il corso dimostra e il rimando alla dimostrazione di Lee (Problem 16-6)"},"controllo":[{"tipo":"uguale","sinistra":"x*(-y)+y*x+z*(-w)+w*z","vale":"0","dove":"esempio","appare":"-xy+yx-zw+wz","nota":"il campo (-y,x,-w,z) e' ortogonale al punto, quindi tangente a S^3"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-15: Forme chiuse ed esatte: i buchi visti dai campi <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-15 — forme chiuse ed esatte: i buchi visti dai campi
+identita:  Analisi Vettoriale ha mostrato il trabocchetto: d theta sul piano bucato e' chiusa e non esatta. Qui si risponde al perche', e la risposta e' topologica. L'integrale di una forma chiusa non cambia se il cammino si deforma, quindi dipende solo dalla classe di omotopia: su uno spazio semplicemente connesso chiusa implica esatta (lemma di Poincare'), e dove pi_1 non e' banale l'ostruzione si misura con un quoziente di spazi vettoriali - le chiuse modulo le esatte, la coomologia di de Rham. In grado uno conta i buchi attraversabili da un cammino; in grado due quelli che una superficie racchiude, ed e' li' che vive il monopolo di Dirac: il campo g r/r^3 e' chiuso su R^3 meno l'origine ma non e' un rotore, e la condizione che la fase quantistica sia ben definita lo costringe a essere quantizzato. Lo stesso linguaggio da' l'effetto Aharonov-Bohm, il grado di una mappa della sfera e il teorema di Poincare'-Hopf
+copre:     4.2 — Forme chiuse ed esatte, lemma di Poincare', coomologia di de Rham in grado uno e due;...
+serve:     tp-14 (tp-14-gruppo-fondamentale.html)
+apre:      — (e' una foglia)
+strumenti: coomologia · campo-conservativo · teorema-di-stokes · gruppo-fondamentale · semplicemente-connesso · grado-di-una-mappa · indice-di-uno-zero · poincare-hopf · caratteristica-di-eulero · palla-pelosa · omotopia
+fonti:     Abate-Tovena cap. 5 (Coomologia)
+fonti:     Lee capp. 11 e 17
+coordinate: Abate & Tovena, Geometria Differenziale pp. 245-269 · Lee, Introduction to Smooth Manifolds (2a ed.) pp. 292-297, 440-447, 457-459
+profondita: dimostrati: l'integrale di una 1-forma chiusa e' invariante per omotopia di cammini; su un semplicemente connesso chiusa implica esatta; H^1 del piano bucato e' R, generato da d theta, con il periodo 2 pi come isomorfismo; la 2-forma del monopolo e' chiusa e non esatta su S^2 (integrale 4 pi g non nullo), e la quantizzazione di Dirac eg/(hbar c) = n/2 dal fatto che la fase sia ben definita. Enunciati con fonte: il teorema di de Rham (H^1 come duale di pi_1 abelianizzato, solo enunciato), Mayer-Vietoris come strumento di calcolo, Poincare'-Hopf. Fuori: l'algebra delle forme oltre quello che serve in R^3, l'omologia singolare, la dualita' di Poincare'. Non si rifa': il trabocchetto di d theta (Analisi Vettoriale 04, tappa 06), Stokes e il linguaggio delle forme (Analisi Vettoriale 05, tappa 04), la fisica dell'effetto Aharonov-Bohm (mq-20): qui c'e' la sua matematica.
+generata:  2026-11-10 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "Matrix([diff(diff(U(x,y,z),z),y)-diff(diff(U(x,y,z),y),z), diff(diff(U(x,y,z),x),z)-diff(diff(U(x,y,z),z),x), diff(diff(U(x,y,z),y),x)-diff(diff(U(x,y,z),x),y)])", "vale": "Matrix([0,0,0])", "ipotesi": {"U": "funzione"}, "dove": "01", "appare": "\\nabla\\times\\nabla U=0"},
+ {"tipo": "uguale", "sinistra": "diff(diff(A3(x,y,z),y)-diff(A2(x,y,z),z),x)+diff(diff(A1(x,y,z),z)-diff(A3(x,y,z),x),y)+diff(diff(A2(x,y,z),x)-diff(A1(x,y,z),y),z)", "vale": "0", "ipotesi": {"A1": "funzione", "A2": "funzione", "A3": "funzione"}, "dove": "01", "appare": "\\nabla\\cdot(\\nabla\\times\\mathbf A)=0"},
+ {"tipo": "uguale", "sinistra": "diff(x**2+3*y**2,x) - diff(2*x*y,y)", "vale": "0", "dove": "02", "appare": "\\partial_xQ-\\partial_yP=2x-2x=0"},
+ {"tipo": "uguale", "sinistra": "integrate((2*(t*x)*(t*y))*x + ((t*x)**2+3*(t*y)**2)*y, (t,0,1))", "vale": "x**2*y + y**3", "dove": "02", "appare": "U(x,y)=x^2y+y^3"},
+ {"tipo": "uguale", "sinistra": "Matrix([diff(x**2*y+y**3,x), diff(x**2*y+y**3,y)])", "vale": "Matrix([2*x*y, x**2+3*y**2])", "dove": "02", "appare": "\\nabla U=(2xy,\\;x^2+3y^2)"},
+ {"tipo": "uguale", "sinistra": "simplify(diff(x/(x**2+y**2),x) - diff(-y/(x**2+y**2),y))", "vale": "0", "dove": "04", "appare": "\\partial_x\\frac{x}{x^2+y^2}-\\partial_y\\frac{-y}{x^2+y^2}=0"},
+ {"tipo": "uguale", "sinistra": "integrate(((-sin(t))*(-sin(t)) + cos(t)*cos(t)), (t,0,2*pi))", "vale": "2*pi", "dove": "04", "appare": "\\oint_{S^1}d\\theta=2\\pi"},
+ {"tipo": "uguale", "sinistra": "simplify(diff(g*x/(x**2+y**2+z**2)**Rational(3,2),x)+diff(g*y/(x**2+y**2+z**2)**Rational(3,2),y)+diff(g*z/(x**2+y**2+z**2)**Rational(3,2),z))", "vale": "0", "dove": "05", "appare": "\\nabla\\cdot\\frac{g\\,\\mathbf r}{r^3}=0"},
+ {"tipo": "uguale", "sinistra": "integrate(integrate(g/R**2 * R**2*sin(th), (th,0,pi)), (ph,0,2*pi))", "vale": "4*pi*g", "dove": "05", "appare": "\\oint_{S^2}\\mathbf B\\cdot d\\mathbf S=4\\pi g"},
+ {"tipo": "uguale", "sinistra": "simplify(diff(sin(th)*g*(1-cos(th))/(r*sin(th)), th)/(r*sin(th)))", "vale": "g/r**2", "dove": "05", "appare": "(\\nabla\\times\\mathbf A_N)_r=\\frac{g}{r^2}"},
+ {"tipo": "uguale", "sinistra": "simplify(g*(1-cos(th))/(r*sin(th)) + g*(1+cos(th))/(r*sin(th)))", "vale": "2*g/(r*sin(th))", "dove": "05", "appare": "A_{N,\\varphi}-A_{S,\\varphi}=\\frac{2g}{r\\sin\\theta}"},
+ {"tipo": "uguale", "sinistra": "diff(2*g*ph, ph)/(r*sin(th))", "vale": "2*g/(r*sin(th))", "dove": "05", "appare": "\\nabla(2g\\varphi)=\\frac{2g}{r\\sin\\theta}\\,\\hat{\\boldsymbol\\varphi}"},
+ {"tipo": "uguale", "sinistra": "exp(I*2*pi*n)", "vale": "1", "ipotesi": {"n": "integer"}, "dove": "05", "appare": "e^{2\\pi i n}=1"},
+ {"tipo": "uguale", "sinistra": "simplify(diff(Phi/(2*pi)*x/(x**2+y**2),x) - diff(-Phi/(2*pi)*y/(x**2+y**2),y))", "vale": "0", "dove": "06", "appare": "\\nabla\\times\\mathbf A=0\\ \\ \\text{fuori dal solenoide}"},
+ {"tipo": "uguale", "sinistra": "integrate(Phi/(2*pi)*(sin(t)**2+cos(t)**2), (t,0,2*pi))", "vale": "Phi", "dove": "06", "appare": "\\oint\\mathbf A\\cdot d\\mathbf l=\\Phi"},
+ {"tipo": "uguale", "sinistra": "integrate((cos(t)*(-cos(t)) - (-sin(t))*(-sin(t))), (t,0,2*pi))/(2*pi)", "vale": "-1", "dove": "06", "appare": "\\operatorname{ind}_0(x,-y)=-1"},
+ {"tipo": "uguale", "sinistra": "integrate((cos(t)*cos(t) - sin(t)*(-sin(t))), (t,0,2*pi))/(2*pi)", "vale": "1", "dove": "06", "appare": "\\operatorname{ind}_0(x,y)=+1"},
+ {"tipo": "uguale", "sinistra": "integrate(((-sin(t))*(-sin(t)) + cos(t)*cos(t))*(-1), (t,0,2*pi))", "vale": "-2*pi", "dove": "07", "appare": "\\oint_{S^1}\\eta=-2\\pi"},
+ {"tipo": "uguale", "sinistra": "simplify(integrate(k*(cos(k*t)**2+sin(k*t)**2), (t,0,2*pi))/(2*pi))", "vale": "k", "dove": "07", "appare": "\\operatorname{ind}_0=k"},
+ {"tipo": "simbolico", "dove": "00", "appare": "H^1(\\mathbb{R}^2\\setminus\\{0\\})=\\mathbb{R}", "perche": "teorema dimostrato nella tappa 04 con i periodi"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\sum_i t\\,x^i\\,\\partial_i\\omega_j(tx)=t\\,\\frac{d}{dt}\\omega_j(tx)", "perche": "regola della catena, d/dt omega_j(tx) = sum_i x^i d_i omega_j(tx): passaggio della dimostrazione"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\partial_jU=\\omega_j", "perche": "conclusione della dimostrazione del lemma di Poincare', verificata sull'esempio con le asserzioni della stessa tappa"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\int_{\\gamma_0}\\omega-\\int_{\\gamma_1}\\omega=0", "perche": "conclusione della dimostrazione per griglia, svolta nella prosa"},
+ {"tipo": "simbolico", "dove": "04", "appare": "H^k(X)=\\frac{Z^k(X)}{B^k(X)},", "perche": "definizione della coomologia di de Rham"},
+ {"tipo": "simbolico", "dove": "04", "appare": "H^0(X)=\\mathbb{R}", "perche": "funzioni localmente costanti su uno spazio connesso: argomento svolto nella prosa"},
+ {"tipo": "simbolico", "dove": "04", "appare": "\\omega-c\\,d\\theta=dU", "perche": "periodi nulli implicano esatta, per la tappa 03"},
+ {"tipo": "simbolico", "dove": "05", "appare": "H^2(\\mathbb{R}^3\\setminus\\{0\\})\\cong H^2(S^2)=\\mathbb{R}", "perche": "invarianza per omotopia (Lee 17.11) e coomologia delle sfere (Abate-Tovena 5.3.7), enunciate con la fonte"},
+ {"tipo": "simbolico", "dove": "05", "appare": "\\frac{2eg}{\\hbar c}=n\\in\\mathbb{Z}.", "perche": "condizione di Dirac: la fase a un solo valore, derivata nella prosa"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\mathbf A=\\frac{\\Phi}{2\\pi}\\,\\frac{(-y,x)}{x^2+y^2}=\\frac{\\Phi}{2\\pi}\\,d\\theta", "perche": "scelta di gauge per il potenziale fuori dal solenoide; chiusura e periodo asseriti sotto"},
+ {"tipo": "simbolico", "dove": "06", "appare": "\\frac{e}{\\hbar c}\\oint\\mathbf A\\cdot d\\mathbf l=\\frac{e\\Phi}{\\hbar c}", "perche": "fase di Aharonov-Bohm: il periodo asserito sopra moltiplicato per e/hbar c"},
+ {"tipo": "simbolico", "dove": "07", "appare": "H^2(\\mathbb{R}^3\\setminus\\{0\\})=\\mathbb{R}", "perche": "invarianza per omotopia (Lee 17.11) e coomologia delle sfere (Abate-Tovena 5.3.7), enunciate con la fonte"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'il trabocchetto di Analisi Vettoriale e la sua ragione · un quoziente di spazi vettoriali che conta i buchi · grado uno e grado due · il monopolo, Aharonov-Bohm, gli indici',
+  blocchi:[
+  {t:'prosa', title:'Perché irrotazionale non basta', tag:'architettura', html:R`
+  <p>In Analisi Vettoriale c'era un trabocchetto. Il campo $\big(-y,x\big)/(x^2+y^2)$ sul piano bucato ha rotore nullo, eppure non è il gradiente di nessuna funzione: la sua circolazione sul cerchio unitario vale $2\pi$, non zero. La regola che se ne ricavava — irrotazionale implica <span class="str" data-str="campo-conservativo">conservativo</span> sui domini semplicemente connessi — era enunciata come un fatto. Questo movimento la dimostra, e risponde alla domanda che resta: <b>quando il dominio ha dei buchi, di quanto un campo irrotazionale manca di essere un gradiente?</b></p>
+  <p>La risposta è un oggetto algebrico, ed è il secondo invariante topologico che si incontra dopo il <span class="str" data-str="gruppo-fondamentale">gruppo fondamentale</span>. Si prendono i campi con rotore nullo — le <b>forme chiuse</b> — e si identificano due campi che differiscono per un gradiente — una <b>forma esatta</b>. Il quoziente è uno spazio vettoriale, la <span class="str" data-str="coomologia">coomologia di de Rham</span>, e la sua dimensione conta i buchi. Abate-Tovena apre il capitolo sulla coomologia proprio così: i gruppi di coomologia sono «insiemi di soluzioni di speciali equazioni differenziali, modulo soluzioni banali», oggetti algebrici definiti per via analitica che risultano essere invarianti topologici (cap. 5, stampata 245).</p>
+  <p>L'ordine:</p>
+  <ol>
+  <li>le forme in $\mathbb{R}^3$ e il differenziale, che riunisce gradiente, rotore e divergenza in un'operazione sola con $d\circ d=0$ (tappa 01);</li>
+  <li>il lemma di Poincaré: sugli stellati chiusa implica esatta, con la costruzione esplicita del potenziale (tappa 02);</li>
+  <li>l'integrale di una forma chiusa non cambia deformando il cammino, quindi dipende solo dalla classe di omotopia: la dimostrazione del teorema dei domini semplicemente connessi, e i periodi (tappa 03);</li>
+  <li>la coomologia come quoziente, e il conto $H^1(\mathbb{R}^2\setminus\{0\})=\mathbb{R}$ (tappa 04);</li>
+  <li>il grado due: il campo del monopolo è chiuso e non esatto, e la quantizzazione di Dirac è un numero di avvolgimento (tappa 05);</li>
+  <li>la stessa matematica nell'effetto Aharonov-Bohm e negli indici degli zeri di un campo (tappa 06).</li>
+  </ol>
+  <p>Che cosa resta fuori: l'algebra delle forme di grado qualunque su una varietà qualunque, il prodotto esterno in generale, la successione di Mayer-Vietoris come macchina di calcolo, il teorema di de Rham nella forma completa. Si lavora in $\mathbb{R}^2$ e $\mathbb{R}^3$ privati di punti o di rette, dove le forme sono campi vettoriali con un altro nome, e i fatti generali si enunciano con la loro fonte.</p>`}
+]},
+
+/* ---------------- 01 · FORME E DIFFERENZIALE ---------------- */
+{ num:'01', title:'Le forme in R3, e il differenziale che le collega', meta:'funzioni, lavori, flussi, densità · il differenziale come gradiente rotore e divergenza · d composto due volte fa zero · chiuse ed esatte',
+  blocchi:[
+  {t:'prosa', title:'Il dizionario', tag:'grammatica', html:R`
+  <p>Su un aperto di $\mathbb{R}^3$ le forme differenziali sono quattro specie di oggetti che la fisica conosce già con altri nomi, e il differenziale esterno $d$ le collega in fila:</p>
+  <ul>
+  <li><b>0-forme</b>: funzioni $U$, i potenziali;</li>
+  <li><b>1-forme</b>: $\omega=F_1\,dx+F_2\,dy+F_3\,dz$, cioè campi $\mathbf F$ da integrare lungo curve — il <b>lavoro</b> $\int_\gamma\mathbf F\cdot d\mathbf l$;</li>
+  <li><b>2-forme</b>: campi $\mathbf B$ da integrare su superfici — il <b>flusso</b> $\int_S\mathbf B\cdot d\mathbf S$;</li>
+  <li><b>3-forme</b>: densità $\rho\,dx\,dy\,dz$ da integrare su volumi.</li>
+  </ul>
+  <p>In questo dizionario il differenziale è, grado per grado, un operatore che si conosce:</p>
+  $$dU\leftrightarrow\nabla U,\qquad d\omega\leftrightarrow\nabla\times\mathbf F,\qquad d\beta\leftrightarrow\nabla\cdot\mathbf B.$$
+  <p>Il teorema di <span class="str" data-str="teorema-di-stokes">Stokes</span> generale, $\int_M d\alpha=\int_{\partial M}\alpha$, contiene in una riga il teorema fondamentale del calcolo lungo una curva, Stokes classico e il teorema della divergenza: è la tappa dell'Analisi Vettoriale che riunisce i teoremi integrali. Abate-Tovena elenca le proprietà del differenziale che servono (stampata 246): alza il grado di uno, rispetta una regola di Leibniz con segni, commuta con il pullback per le mappe differenziabili, e soprattutto</p>
+  $$d\circ d=0.$$
+  <p>Tradotto, sono le due identità che in Analisi Vettoriale si dimostravano a parte, e che qui sono il riflesso dello stesso fatto — le derivate parziali seconde commutano:</p>
+  $$\nabla\times\nabla U=0,\qquad \nabla\cdot(\nabla\times\mathbf A)=0.$$`},
+  {t:'prosa', title:'Chiuse ed esatte', tag:'grammatica', html:R`
+  <p>Una forma $\omega$ è <b>chiusa</b> se $d\omega=0$, <b>esatta</b> se è il differenziale di qualcosa:</p>
+  $$\omega\ \text{chiusa}\iff d\omega=0,\qquad \omega\ \text{esatta}\iff\exists\,\eta:\ \omega=d\eta.$$
+  <p>Per $d\circ d=0$ <b>ogni esatta è chiusa</b> (Lee, Proposizione 11.44, stampata 294). In grado uno: un gradiente ha rotore nullo; in grado due: un rotore ha divergenza nulla. Le domande inverse sono quelle della fisica dei potenziali. Un campo elettrostatico ha rotore nullo: è il gradiente di un potenziale scalare? Un campo magnetico ha divergenza nulla: è il rotore di un potenziale vettore? La risposta, si vedrà, è sì localmente sempre, globalmente dipende dalla forma del dominio — ed è proprio quella dipendenza che la coomologia misura.</p>
+  <p>Lee formula il problema in grado uno con la parola della meccanica: una 1-forma è <b>conservativa</b> se il suo integrale lungo ogni curva chiusa è zero, cioè se gli integrali di linea non dipendono dal cammino, e dimostra che <b>conservativa equivale a esatta</b> (Teorema 11.42, stampata 292): il potenziale si costruisce integrando da un punto fissato, e la buona definizione è l'indipendenza dal cammino.</p>`}
+]},
+
+/* ---------------- 02 · POINCARE ---------------- */
+{ num:'02', title:'Il lemma di Poincaré: sugli stellati chiusa vuol dire esatta', meta:'la costruzione del potenziale lungo i raggi · il conto su un esempio · localmente ogni forma chiusa è esatta',
+  blocchi:[
+  {t:'reveal', title:'L’enunciato e la costruzione', tag:'teorema', steps:[
+   {label:'Enunciato', body:R`<p><b>Lemma di Poincaré</b> (Lee, Teorema 11.49, stampata 296). Se $V\subseteq\mathbb{R}^n$ è un aperto <b>stellato</b> rispetto a un punto $c$, ogni 1-forma chiusa su $V$ è esatta:</p>
+   $$\forall\,\omega\ \text{su}\ V:\ \ d\omega=0\ \Longrightarrow\ \exists\,U:V\to\mathbb{R}\ \ \omega=dU.$$
+   <p>Abate-Tovena lo dimostra in tutti i gradi, con un operatore di omotopia, nella forma $H^k(\mathbb{R}^n)=0$ per $k\gt0$ (Corollario 5.3.6, stampata 258). Qui si fa il grado uno, che è il caso dei potenziali.</p>`},
+   {label:'Il potenziale lungo i raggi', body:R`<p>Si prende $c=0$ e, per $x\in V$, si integra $\omega=\sum_i\omega_i\,dx^i$ lungo il segmento da $0$ a $x$, che sta in $V$ perché $V$ è stellato:</p>
+   $$U(x)=\int_0^1\sum_i\omega_i(tx)\,x^i\,dt.$$
+   <p>Derivando sotto il segno di integrale, $\partial_jU(x)=\int_0^1\big(\omega_j(tx)+\sum_i t\,x^i\,\partial_j\omega_i(tx)\big)dt$. La chiusura dice $\partial_j\omega_i=\partial_i\omega_j$, quindi la somma è $\sum_i t\,x^i\,\partial_i\omega_j(tx)=t\,\frac{d}{dt}\omega_j(tx)$, e l'integrando diventa $\frac{d}{dt}\big(t\,\omega_j(tx)\big)$. Integrando fra $0$ e $1$ resta $\omega_j(x)$: $\partial_jU=\omega_j$. $\blacksquare$ La chiusura è usata in un punto solo, per scambiare due indici.</p>`},
+   {label:'Un esempio, fatto per intero', body:R`<p>Sia $\omega=P\,dx+Q\,dy$ con $P=2xy$ e $Q=x^2+3y^2$ su $\mathbb{R}^2$. È chiusa: $$\partial_xQ-\partial_yP=2x-2x=0.$$ La formula lungo i raggi dà $U(x,y)=\int_0^1\big(2t^2xy\cdot x+(t^2x^2+3t^2y^2)\,y\big)dt$, cioè $$U(x,y)=x^2y+y^3,$$ e il controllo è $$\nabla U=(2xy,\;x^2+3y^2).$$</p>`}
+  ]},
+  {t:'plot', title:'Il potenziale si costruisce lungo i raggi dal centro',
+   intro:R`Un aperto stellato rispetto all'origine (una stella a cinque punte, non convessa) e alcuni dei segmenti lungo cui si integra la forma: ogni punto è raggiunto da un raggio che resta dentro l'insieme.`,
+   plots:[
+    {kind:'curve', x:'(1.1+0.55*cos(5*t))*cos(t)', y:'(1.1+0.55*sin(5*t+1.5708))*sin(t)', tr:[0,6.2832], height:300, equal:true,
+     xr:[-1.9,1.9], yr:[-1.9,1.9],
+     title:'U(x) = integrale di omega lungo il segmento da 0 a x',
+     segs:[{x1:0,y1:0,x2:1.5,y2:0.1,col:'#d8a13a',arrow:true,label:'x1',lx:1.62,ly:0.2},
+           {x1:0,y1:0,x2:0.43,y2:1.33,col:'#d8a13a',arrow:true,label:'x2',lx:0.5,ly:1.5},
+           {x1:0,y1:0,x2:-1.0,y2:-0.8,col:'#d8a13a',arrow:true,label:'x3',lx:-1.15,ly:-0.95}],
+     marks:[{x:0,y:0,col:'#5eead4',label:'c = 0'}]}
+   ],
+   leggi:R`<p>La curva chiusa è il bordo di un aperto che non è convesso — fra due punte il segmento che le unisce esce — ma è stellato rispetto all'origine: il segmento dall'origine a ogni suo punto resta dentro. È tutto ciò che la costruzione chiede, perché integra solo lungo quei segmenti. La formula assegna a ogni punto $x$ il lavoro di $\omega$ lungo il raggio da $0$ a $x$; la chiusura garantisce che le derivate di quel lavoro siano proprio le componenti di $\omega$. Sul piano bucato la costruzione fallisce dove deve: nessun punto vede tutti gli altri senza passare per il buco, quindi non c'è un centro. Generale: serve un punto da cui tutto sia visibile in linea retta. Accidentale: la forma della stella.</p>`},
+  {t:'prosa', title:'Localmente sempre, globalmente non sempre', tag:'teorema', html:R`
+  <p>Ogni punto di un aperto di $\mathbb{R}^n$ ha una palla attorno, e una palla è convessa, quindi stellata. Per il lemma, <b>ogni forma chiusa è localmente esatta</b>: vicino a ogni punto è il differenziale di una funzione. Il problema dei potenziali non è mai locale. È di incollare i potenziali locali in uno globale, e l'incollamento può fallire: sul piano bucato, $d\theta$ è localmente il differenziale dell'angolo $\theta$, che però non è una funzione continua su tutto il piano bucato, perché fare un giro attorno all'origine lo aumenta di $2\pi$. Lee lo mostra nell'Esempio 11.48 (stampata 296): sul semipiano $x\gt0$ la forma è il differenziale di $\arctan(y/x)$, e su tutto il piano bucato non è il differenziale di niente.</p>`}
+]},
+
+/* ---------------- 03 · INTEGRALI E OMOTOPIA ---------------- */
+{ num:'03', title:'L’integrale di una forma chiusa dipende solo dalla classe di omotopia', meta:'la dimostrazione con i potenziali locali · il teorema dei domini semplicemente connessi, dimostrato · i periodi come omomorfismo dal gruppo fondamentale',
+  blocchi:[
+  {t:'reveal', title:'Invarianza per omotopia', tag:'teorema', steps:[
+   {label:'Enunciato', body:R`<p>Sia $\omega$ una 1-forma chiusa su un aperto $X\subseteq\mathbb{R}^n$, e siano $\gamma_0,\gamma_1$ due cammini con gli stessi estremi, <span class="str" data-str="omotopia">omotopi</span> come cammini dentro $X$. Allora $$\int_{\gamma_0}\omega=\int_{\gamma_1}\omega.$$</p>`},
+   {label:'Dimostrazione con i potenziali locali', body:R`<p>Sia $H:I\times I\to X$ l'omotopia. I punti di $X$ hanno palle dove $\omega$ è esatta; le controimmagini di quelle palle ricoprono il quadrato $I\times I$, che è compatto, e per il numero di Lebesgue si divide il quadrato in una griglia di quadratini $Q_{ab}$, ciascuno mandato da $H$ dentro una palla $B_{ab}$ dove $\omega=dU_{ab}$. Su ciascun quadratino l'integrale di $\omega$ lungo il bordo $H(\partial Q_{ab})$ vale zero, perché è l'integrale di un differenziale su un cammino chiuso: $U_{ab}$ alla fine meno $U_{ab}$ all'inizio. Sommando su tutti i quadratini, i lati interni compaiono due volte con verso opposto e si cancellano; restano i quattro lati del quadrato grande. Il lato in basso dà $\int_{\gamma_0}\omega$, quello in alto $-\int_{\gamma_1}\omega$, e i due lati verticali sono mandati negli estremi fissi, cioè in punti, e danno zero. Quindi $\int_{\gamma_0}\omega-\int_{\gamma_1}\omega=0$. $\blacksquare$</p>
+   <p>È la stessa costruzione con cui si solleva un'omotopia al rivestimento della retta sul cerchio: una griglia fine abbastanza perché su ogni pezzo valga una proprietà locale, e un incollamento che i lati condivisi rendono coerente.</p>`}
+  ]},
+  {t:'prosa', title:'Il teorema dei domini semplicemente connessi, e i periodi', tag:'teorema', html:R`
+  <p><b>Su un aperto <span class="str" data-str="semplicemente-connesso">semplicemente connesso</span> ogni 1-forma chiusa è esatta.</b> In uno spazio semplicemente connesso due cammini con gli stessi estremi sono omotopi, quindi per il teorema appena dimostrato l'integrale di $\omega$ fra due punti non dipende dal cammino: $\omega$ è conservativa, e per il Teorema 11.42 di Lee è esatta, con il potenziale $U(x)=\int_{x_0}^x\omega$. È la regola dell'Analisi Vettoriale — irrotazionale su un dominio semplicemente connesso implica gradiente — dimostrata.</p>
+  <p>Su uno spazio con buchi si raccoglie ciò che resta. Fissato un punto base, si associa a ogni laccio $f$ il suo <b>periodo</b> $\oint_f\omega$. Il periodo non cambia per omotopia, e su un laccio concatenato si somma, $\oint_{f\cdot g}\omega=\oint_f\omega+\oint_g\omega$. Quindi è un omomorfismo</p>
+  $$\pi_1(X,x_0)\to(\mathbb{R},+),\qquad [f]\mapsto\oint_f\omega,$$
+  <p>e $\omega$ è esatta se e solo se tutti i periodi sono nulli: se lo sono, l'integrale è indipendente dal cammino e il potenziale c'è; se uno non lo è, nessun potenziale può esistere, perché il periodo di un esatto è la differenza del potenziale fra due punti uguali. <b>I periodi sono l'ostruzione, e vivono sul gruppo fondamentale.</b></p>`}
+]},
+
+/* ---------------- 04 · COOMOLOGIA ---------------- */
+{ num:'04', title:'La coomologia di de Rham: chiuse modulo esatte', meta:'il quoziente di Abate-Tovena · il grado zero conta le componenti · il piano bucato ha un buco solo · dove le definizioni concordano col gruppo fondamentale',
+  blocchi:[
+  {t:'prosa', title:'La definizione', tag:'grammatica', html:R`
+  <p>Su un aperto $X$ (più in generale su una varietà) siano $Z^k(X)$ lo spazio delle $k$-forme chiuse e $B^k(X)$ quello delle esatte. Poiché ogni esatta è chiusa, $B^k\subseteq Z^k$, e il <b>$k$-esimo gruppo di coomologia di de Rham</b> è il quoziente</p>
+  $$H^k(X)=\frac{Z^k(X)}{B^k(X)},$$
+  <p>con la classe $[\omega]=\omega+B^k$ di una forma chiusa (Abate-Tovena, stampata 246). È un quoziente di spazi vettoriali, cioè di gruppi commutativi: due forme chiuse sono nella stessa classe quando differiscono per un esatto, cioè quando i campi differiscono per un gradiente. Abate-Tovena aggiunge l'osservazione che lo rende un invariante: varietà diffeomorfe hanno coomologia isomorfa, e — risultato «tutt'altro che evidente» dimostrato più avanti nel capitolo — anche varietà soltanto omeomorfe (stampata 246). Lee dimostra l'invarianza per <b>equivalenza omotopica</b> (Teorema 17.11, stampata 445): $H^k(\mathbb{R}^3\setminus\{0\})\cong H^k(S^2)$ e $H^k(\mathbb{R}^2\setminus\{0\})\cong H^k(S^1)$, come per il gruppo fondamentale.</p>
+  <p>Il grado zero si legge subito. Una 0-forma è una funzione, non ci sono esatte di grado zero, e una funzione chiusa ha $dU=0$, cioè è localmente costante: su uno spazio connesso è costante. Quindi $H^0(X)=\mathbb{R}$ per $X$ connesso, e in generale $H^0$ ha una dimensione per ogni componente connessa (Abate-Tovena, Osservazione 5.1.5, stampata 247). La dimensione di $H^0$ conta i pezzi, quella di $H^1$ conta i buchi che un cammino può circondare.</p>`},
+  {t:'reveal', title:'Il piano bucato: H1 = R', tag:'teorema', steps:[
+   {label:'La forma che genera', body:R`<p>La forma $d\theta=\dfrac{-y\,dx+x\,dy}{x^2+y^2}$ è chiusa sul piano bucato: $$\partial_x\frac{x}{x^2+y^2}-\partial_y\frac{-y}{x^2+y^2}=0,$$ e il suo periodo sul cerchio unitario, parametrizzato da $(\cos t,\sin t)$, è $$\oint_{S^1}d\theta=2\pi.$$ Non è esatta: un esatto ha periodi nulli.</p>`},
+   {label:'Ogni forma chiusa è un multiplo di dθ più un esatto', body:R`<p>Sia $\omega$ chiusa sul piano bucato, e sia $c=\frac1{2\pi}\oint_{S^1}\omega$. La forma $\omega-c\,d\theta$ ha periodo zero sul cerchio. Il gruppo fondamentale del piano bucato è $\mathbb{Z}$, generato dal cerchio, e il periodo è un omomorfismo: è nullo sul generatore, quindi su tutto il gruppo. Per la tappa 03, $\omega-c\,d\theta=dU$ è esatta. Dunque $$\omega=c\,d\theta+dU,$$ e la mappa $[\omega]\mapsto\frac1{2\pi}\oint_{S^1}\omega$ è un isomorfismo $H^1(\mathbb{R}^2\setminus\{0\})\to\mathbb{R}$: iniettiva per quanto appena visto, suriettiva perché $d\theta$ va in $1$. $\blacksquare$</p>`},
+   {label:'Gli altri spazi che servono', body:R`<p>Lo stesso ragionamento dà $H^1(S^1)=\mathbb{R}$, che Abate-Tovena calcola invece con la successione di Mayer-Vietoris (Esempio 5.2.4, stampata 255), e $H^1$ del piano privato di $m$ punti uguale a $\mathbb{R}^m$, un periodo per ogni buco. In grado più alto Abate-Tovena calcola le sfere: $H^k(S^n)=\mathbb{R}$ per $k=0$ e $k=n$, e zero altrimenti (Esempio 5.3.7, stampata 259). Quindi $H^1(S^2)=0$ — sulla sfera ogni campo irrotazionale tangente è un gradiente — e $H^2(S^2)=\mathbb{R}$, che è il grado del monopolo. Il legame con il gruppo fondamentale, nella forma generale, è il teorema di de Rham: $H^1(X)$ è lo spazio degli omomorfismi da $\pi_1(X)$ a $\mathbb{R}$, cioè delle scelte coerenti di periodi. Qui si enuncia; Abate-Tovena ne propone il caso più semplice come esercizio: se il gruppo fondamentale è finito, $H^1=0$ (Esercizio 5.22, stampata 304), perché un omomorfismo da un gruppo finito a $\mathbb{R}$ è nullo.</p>`}
+  ]},
+  {t:'plot', title:'Il campo dθ sul piano bucato',
+   intro:R`Il campo $\big(-y,x\big)/(x^2+y^2)$: gira attorno all'origine, si indebolisce come $1/r$, ha rotore nullo dappertutto tranne che nel buco, e circolazione $2\pi$ su ogni laccio che fa un giro.`,
+   plots:[
+    {kind:'field2d', fx:'-y/(x*x+y*y)', fy:'x/(x*x+y*y)', xr:[-2,2], yr:[-2,2], n:13, height:340,
+     title:'d theta: circolazione 2 pi attorno a 0, zero su ogni laccio che non lo circonda',
+     rings:[{r:1,col:'#d8a13a',label:'circolazione 2 pi'},{r:0.45,x:1.3,y:1.3,col:'#5eead4',label:'circolazione 0',ly:1.85}],
+     marks:[{x:0,y:0,col:'#c084fc',hollow:true,label:'il buco'}]}
+   ],
+   leggi:R`<p>Il laccio arancione circonda l'origine: lungo di esso il campo è sempre tangente e concorde, e la circolazione è $2\pi$. Il laccio verde non la circonda: il campo lo attraversa entrando da una parte e uscendo dall'altra, e la circolazione è zero, perché dentro quel laccio il campo è il gradiente di un ramo dell'angolo. Che la circolazione arancione sia la stessa per <b>ogni</b> laccio che fa un giro, grande, piccolo o storto, è l'invarianza per omotopia; che il suo valore non si possa azzerare sottraendo un gradiente è $H^1=\mathbb{R}$. Generale: un buco, un numero. Accidentale: la scelta del campo rappresentante, che si può cambiare aggiungendo un gradiente qualunque senza cambiare la classe.</p>`}
+]},
+
+/* ---------------- 05 · MONOPOLO ---------------- */
+{ num:'05', title:'Grado due: il campo del monopolo, e la quantizzazione come avvolgimento', meta:'un campo a divergenza nulla che non è un rotore · il flusso come periodo di grado due · due potenziali su due calotte · la funzione di transizione e il suo numero di giri',
+  blocchi:[
+  {t:'prosa', title:'Chiuso e non esatto, in grado due', tag:'teorema', html:R`
+  <p>Il campo di una carica magnetica $g$ nell'origine, $\mathbf B=g\,\mathbf r/r^3$, è una 2-forma su $\mathbb{R}^3\setminus\{0\}$, ed è chiusa:</p>
+  $$\nabla\cdot\frac{g\,\mathbf r}{r^3}=0.$$
+  <p>Non è esatta. Se fosse $\mathbf B=\nabla\times\mathbf A$ con $\mathbf A$ liscio su tutto $\mathbb{R}^3\setminus\{0\}$, il suo flusso attraverso la sfera unitaria sarebbe, per Stokes, l'integrale di $\mathbf A$ sul bordo della sfera, che non ha bordo: zero. Invece il flusso è</p>
+  $$\oint_{S^2}\mathbf B\cdot d\mathbf S=4\pi g.$$
+  <p>È esattamente la struttura del grado uno, salita di un grado: là un laccio che circonda un buco e un periodo non nullo, qui una sfera che racchiude un punto e un flusso non nullo. Il flusso su superfici chiuse è il periodo delle 2-forme, e $H^2(\mathbb{R}^3\setminus\{0\})\cong H^2(S^2)=\mathbb{R}$ dice che, a meno di rotori, il campo del monopolo è l'unica 2-forma chiusa che c'è: una 2-forma chiusa è un rotore se e solo se il suo flusso attraverso una sfera attorno all'origine è nullo.</p>`},
+  {t:'reveal', title:'Due potenziali, e dove si incontrano', tag:'costruzione', steps:[
+   {label:'Un potenziale per calotta', body:R`<p>Il potenziale globale non esiste, ma ne esistono due locali, ciascuno regolare fuori da un semiasse. In coordinate sferiche, con il solo componente lungo $\hat{\boldsymbol\varphi}$: $$\mathbf A_N=\frac{g(1-\cos\theta)}{r\sin\theta}\,\hat{\boldsymbol\varphi},\qquad \mathbf A_S=-\frac{g(1+\cos\theta)}{r\sin\theta}\,\hat{\boldsymbol\varphi}.$$ Il primo è regolare tranne che sul semiasse $\theta=\pi$ (dove $1-\cos\theta\to2$ e $\sin\theta\to0$), il secondo tranne che su $\theta=0$. Entrambi hanno rotore $\mathbf B$: per $\mathbf A_N$, la componente radiale del rotore è $$(\nabla\times\mathbf A_N)_r=\frac{g}{r^2},$$ e le altre sono nulle perché $rA_{N,\varphi}$ non dipende da $r$.</p>`},
+   {label:'La differenza è un gradiente, ma solo localmente', body:R`<p>Dove sono definiti entrambi — fuori dall'asse $z$ — i due potenziali differiscono per $$A_{N,\varphi}-A_{S,\varphi}=\frac{2g}{r\sin\theta},$$ e questa è la componente $\varphi$ del gradiente della funzione $2g\varphi$: $$\nabla(2g\varphi)=\frac{2g}{r\sin\theta}\,\hat{\boldsymbol\varphi}.$$ Ma l'angolo $\varphi$ non è una funzione continua fuori dall'asse: fare un giro attorno all'asse lo aumenta di $2\pi$. La differenza $\mathbf A_N-\mathbf A_S$ è una 1-forma chiusa e non esatta sulla regione di sovrapposizione, il cui periodo attorno all'equatore è $2g\cdot2\pi=4\pi g$: il flusso del grado due è ricomparso come periodo del grado uno sulla zona dove le due calotte si incollano.</p>`}
+  ]},
+  {t:'plot', title:'Due calotte, due potenziali, una fascia dove si incollano',
+   intro:R`Una sezione della sfera attorno al monopolo con l'asse $z$ in verticale: $\mathbf A_N$ è regolare ovunque tranne sul semiasse sud, $\mathbf A_S$ tranne sul semiasse nord; sulla fascia attorno all'equatore valgono entrambi e differiscono per il gradiente di $2g\varphi$.`,
+   plots:[
+    {kind:'curve', x:'cos(t)', y:'sin(t)', tr:[0,6.2832], height:300, equal:true,
+     xr:[-1.9,1.9], yr:[-1.6,1.6],
+     title:'singolare di A_N: semiasse sud · singolare di A_S: semiasse nord',
+     segs:[{x1:0,y1:0,x2:0,y2:1.5,col:'#c084fc',dash:true,label:'A_S qui non esiste',lx:0.75,ly:1.42},
+           {x1:0,y1:0,x2:0,y2:-1.5,col:'#5eead4',dash:true,label:'A_N qui non esiste',lx:0.75,ly:-1.42},
+           {x1:-1.0,y1:0.25,x2:1.0,y2:0.25,col:'#d8a13a',width:1.4},
+           {x1:-1.0,y1:-0.25,x2:1.0,y2:-0.25,col:'#d8a13a',width:1.4,label:'fascia: A_N - A_S = grad(2 g phi)',lx:0,ly:-0.55}],
+     marks:[{x:0,y:0,col:'#8ea0b8',label:'g'}]}
+   ],
+   leggi:R`<p>Le due semirette tratteggiate sono le corde di Dirac, le linee dove ciascun potenziale esplode; nessuna delle due è fisica, perché ognuna sta fuori dal dominio dell'altro potenziale. La fascia arancione è la zona di incollamento: lì $\mathbf A_N-\mathbf A_S=\nabla(2g\varphi)$, e $\varphi$ fa un giro mentre si percorre l'equatore. Il disegno è una sezione: la fascia vera è una striscia attorno all'equatore della sfera, e l'equatore è il laccio su cui si conta il numero di giri della funzione di transizione. Generale: due carte e una funzione di transizione sul loro incontro, che è come si costruisce un fibrato. Accidentale: la scelta dell'asse $z$ per le corde.</p>`},
+  {t:'prosa', title:'La quantizzazione di Dirac è un numero di giri', tag:'teorema', html:R`
+  <p>In meccanica quantistica cambiare potenziale vettore per un gradiente, $\mathbf A\to\mathbf A+\nabla\chi$, va accompagnato da una fase sulla funzione d'onda, $\psi\to e^{ie\chi/\hbar c}\,\psi$. Sulla zona di sovrapposizione le due descrizioni, con $\mathbf A_N$ e con $\mathbf A_S$, devono descrivere lo stesso stato, quindi $\psi_N=e^{ie\chi/\hbar c}\psi_S$ con $\chi=2g\varphi$. La funzione d'onda è a un solo valore, e così deve essere la fase: girando una volta attorno all'asse, $\varphi$ aumenta di $2\pi$ e la fase di $e\cdot2g\cdot2\pi/\hbar c$. Perché la fase torni al valore di partenza serve $$e^{2\pi i n}=1,\qquad \frac{2eg}{\hbar c}=n\in\mathbb{Z}.$$ Letta con la topologia, la condizione dice una cosa precisa: la <b>funzione di transizione</b> $\varphi\mapsto e^{ie\cdot2g\varphi/\hbar c}$ è una mappa dall'equatore $S^1$ alle fasi $U(1)\cong S^1$, e l'intero $n$ è il suo <span class="str" data-str="grado-di-una-mappa">grado</span>, il numero di giri della tappa sul gruppo fondamentale del cerchio. La carica elettrica è quantizzata perché un numero di avvolgimento è un intero. Il flusso $4\pi g$ fissa quanti giri la fase deve fare, e la fase può farne solo un numero intero.</p>`}
+]},
+
+/* ---------------- 06 · AHARONOV-BOHM E INDICI ---------------- */
+{ num:'06', title:'La stessa matematica: Aharonov-Bohm e gli indici degli zeri', meta:'un potenziale chiuso e non esatto fuori dal solenoide · la fase come periodo · l’indice di uno zero come grado · la somma degli indici e la caratteristica di Eulero',
+  blocchi:[
+  {t:'prosa', title:'Aharonov-Bohm: un periodo che si misura', tag:'esempi', html:R`
+  <p>Fuori da un solenoide infinito lungo l'asse $z$, con flusso $\Phi$, il campo magnetico è nullo ma il potenziale vettore no: in un gauge simmetrico $\mathbf A=\frac{\Phi}{2\pi}\,\frac{(-y,x)}{x^2+y^2}=\frac{\Phi}{2\pi}\,d\theta$. È la forma della tappa 04, moltiplicata per una costante: chiusa,</p>
+  $$\nabla\times\mathbf A=0\ \ \text{fuori dal solenoide},$$
+  <p>e non esatta, con periodo</p>
+  $$\oint\mathbf A\cdot d\mathbf l=\Phi$$
+  <p>su ogni laccio che fa un giro attorno al solenoide. La regione accessibile all'elettrone — lo spazio meno il cilindro — non è semplicemente connessa, ed è questo a rendere possibile l'effetto: il campo dove l'elettrone passa è nullo, quindi nessuna forza; ma la fase che accumula è $\frac{e}{\hbar c}\oint\mathbf A\cdot d\mathbf l=\frac{e\Phi}{\hbar c}$ per giro, un periodo che non si può togliere con un cambio di gauge, perché un cambio di gauge aggiunge un esatto e un esatto ha periodo zero. L'interferenza fra due cammini che passano ai due lati del solenoide misura la differenza dei loro integrali, cioè il periodo sul laccio che formano insieme: la coomologia di de Rham del complementare di un solenoide si vede in laboratorio.</p>`},
+  {t:'prosa', title:'L’indice di uno zero è un grado', tag:'teorema', html:R`
+  <p>Sia $V$ un campo vettoriale del piano con uno zero isolato in un punto. Su un piccolo cerchio attorno allo zero, $V/|V|$ è una mappa del cerchio nel cerchio, e il suo grado è l'<span class="str" data-str="indice-di-uno-zero">indice dello zero</span>. Per calcolarlo si usa il periodo di $d\theta$ tirato indietro: l'indice è $\frac1{2\pi}\oint\frac{V_1\,dV_2-V_2\,dV_1}{V_1^2+V_2^2}$. Per la sorgente $V=(x,y)$ e per la sella $V=(x,-y)$, sul cerchio unitario:</p>
+  $$\operatorname{ind}_0(x,y)=+1,\qquad \operatorname{ind}_0(x,-y)=-1.$$
+  <p>La sella gira in verso opposto al cammino: mentre il punto fa un giro in senso antiorario, il vettore ne fa uno in senso orario. Lee definisce il grado di una mappa fra varietà compatte orientate della stessa dimensione con le forme di grado massimo, come l'intero che moltiplica l'integrale quando si tira indietro una forma (Teorema 17.35, stampata 457), ed è lo stesso numero. Il teorema che mette insieme gli indici è quello di <span class="str" data-str="poincare-hopf">Poincaré-Hopf</span>: su una varietà compatta la somma degli indici degli zeri di un campo vale la <span class="str" data-str="caratteristica-di-eulero">caratteristica di Eulero</span>, che è la somma alternata delle dimensioni dei gruppi di coomologia. Per la sfera, $1-0+1=2$, e un campo tangente senza zeri avrebbe somma degli indici zero: è la <span class="str" data-str="palla-pelosa">palla pelosa</span>, conseguenza di $H^0$ e $H^2$ della sfera.</p>`},
+  {t:'plot', title:'Una sorgente e una sella: il vettore gira nei due versi',
+   intro:R`Il campo $V=(x,-y)$ attorno alla sella nell'origine: lungo il cerchio unitario, percorso in senso antiorario, il vettore fa un giro in senso orario.`,
+   plots:[
+    {kind:'field2d', fx:'x', fy:'-y', xr:[-2,2], yr:[-2,2], n:11, height:330,
+     title:'sella (x, -y): indice -1',
+     rings:[{r:1.2,col:'#d8a13a',label:'il cammino, antiorario'}],
+     marks:[{x:1.2,y:0,col:'#5eead4',label:'V punta a destra'},{x:0,y:1.2,col:'#5eead4',label:'V punta in basso'},{x:-1.2,y:0,col:'#5eead4',label:'V punta a sinistra',left:true},{x:0,y:-1.2,col:'#5eead4',label:'V punta in alto'}]}
+   ],
+   leggi:R`<p>Si segua il vettore mentre il punto gira sul cerchio arancione partendo da destra: a destra punta a destra, in alto punta in basso, a sinistra punta a sinistra, in basso punta in alto. Si contino i quarti di giro: fra destra e alto il punto ruota di $+90^\circ$ e il vettore di $-90^\circ$, e lo stesso accade in ognuno dei quattro quarti. Alla fine il punto ha fatto $+1$ giro, il vettore $-1$: indice $-1$. Per la sorgente, che punta sempre verso l'esterno, il vettore gira insieme al punto: indice $+1$. Generale: l'indice è il grado di $V/|V|$ su un cerchio piccolo e non dipende dal cerchio, per l'invarianza per omotopia. Accidentale: la forma lineare dei due campi.</p>`}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'cinque esercizi con soluzione · una prova per capire se il movimento è passato',
+  blocchi:[
+  {t:'esercizio', title:'1 · Il segno di un periodo', html:R`
+  <p>Sia $\eta=\dfrac{y\,dx-x\,dy}{x^2+y^2}$ sul piano bucato. Di' se è chiusa, calcola il suo periodo sul cerchio unitario antiorario, e scrivila come $c\,d\theta+dU$.</p>`,
+   sol:R`<p>$\eta=-d\theta$, quindi è chiusa e il suo periodo è $$\oint_{S^1}\eta=-2\pi.$$ Dunque $c=-1$ e $U=0$. Il segno conta: il periodo distingue i due versi di rotazione, ed è la ragione per cui $H^1$ è $\mathbb{R}$ e non solo «c'è o non c'è un buco».</p>`},
+  {t:'esercizio', title:'2 · Il piano senza due punti', html:R`
+  <p>Su $X=\mathbb{R}^2\setminus\{p_1,p_2\}$ costruisci due forme chiuse indipendenti in $H^1(X)$ e spiega perché $H^1(X)\cong\mathbb{R}^2$.</p>`,
+   sol:R`<p>Siano $d\theta_1$ e $d\theta_2$ le forme angolari centrate in $p_1$ e in $p_2$. Su un piccolo cerchio attorno a $p_1$ la prima ha periodo $2\pi$ e la seconda $0$ (dentro quel cerchio $\theta_2$ è un ramo regolare); il contrario attorno a $p_2$. La mappa $[\omega]\mapsto\big(\oint_{C_1}\omega,\oint_{C_2}\omega\big)/2\pi$ manda le due forme nei due vettori della base, quindi è suriettiva. È iniettiva perché ogni laccio in $X$ è, a meno di omotopia, un prodotto di giri attorno a $p_1$ e a $p_2$, e il periodo è un omomorfismo: se è nullo sui due giri, è nullo su tutto, e la forma è esatta.</p>`},
+  {t:'esercizio', title:'3 · Il flusso che non racchiude', html:R`
+  <p>Calcola il flusso del campo del monopolo attraverso una sfera che non contiene l'origine, e spiega perché il risultato è compatibile con $H^2(\mathbb{R}^3\setminus\{0\})=\mathbb{R}$.</p>`,
+   sol:R`<p>La sfera e il suo interno stanno in un aperto stellato che non contiene l'origine, dove $\mathbf B$ è un rotore (il lemma di Poincaré vale anche in grado due), oppure, direttamente, per il teorema della divergenza il flusso è l'integrale di $\nabla\cdot\mathbf B=0$ sulla palla. Il flusso è zero. La classe di $\mathbf B$ non è nulla perché <b>esiste</b> una sfera con flusso non nullo, quella che racchiude l'origine; i periodi si misurano sulle superfici che circondano il buco, come i periodi di grado uno si misurano sui lacci che lo circondano.</p>`},
+  {t:'esercizio', title:'4 · L’indice di z elevato a k', html:R`
+  <p>Il campo $V=(\operatorname{Re}z^k,\operatorname{Im}z^k)$, con $z=x+iy$ e $k$ intero positivo, ha uno zero nell'origine. Calcolane l'indice.</p>`,
+   sol:R`<p>Sul cerchio $z=e^{it}$ il campo vale $e^{ikt}$, cioè ha angolo $kt$: mentre il punto fa un giro, il vettore ne fa $k$. Il conto con l'integrale dà $$\operatorname{ind}_0=k.$$ Con $\bar z^k$ si ottiene $-k$. È la versione vettoriale del teorema fondamentale dell'algebra: un polinomio di grado $k$, su un cerchio grande, si comporta come $z^k$ e ha grado $k$, quindi deve avere zeri dentro, e la somma dei loro indici è $k$.</p>`},
+  {t:'esercizio', title:'5 · Irrotazionale nello spazio bucato', html:R`
+  <p>Un campo $\mathbf F$ è irrotazionale su $\mathbb{R}^3\setminus\{0\}$. È necessariamente un gradiente? E su $\mathbb{R}^3$ meno l'asse $z$?</p>`,
+   sol:R`<p>Su $\mathbb{R}^3\setminus\{0\}$ sì: lo spazio è omotopicamente equivalente a $S^2$, che è semplicemente connessa, quindi ogni laccio si contrae e ogni forma chiusa di grado uno è esatta; equivalentemente $H^1(S^2)=0$. Su $\mathbb{R}^3$ meno l'asse $z$ no: quello spazio è omotopicamente equivalente al cerchio, $H^1=\mathbb{R}$, e il potenziale di Aharonov-Bohm è il controesempio. Togliere un punto dallo spazio non crea buchi per i lacci; togliere una retta sì. Per le superfici è il contrario: togliere un punto crea $H^2$, ed è il monopolo.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché ogni forma esatta è chiusa, e quale identità dell'Analisi Vettoriale lo dice in grado uno?</li>
+  <li>Dove si usa la chiusura nella dimostrazione del lemma di Poincaré?</li>
+  <li>Perché l'integrale di una forma chiusa non cambia deformando il cammino a estremi fissi?</li>
+  <li>Perché i periodi definiscono un omomorfismo dal gruppo fondamentale ai reali?</li>
+  <li>Perché il campo del monopolo non è un rotore, anche se ha divergenza nulla?</li>
+  <li>In che senso la condizione di Dirac è un numero di avvolgimento?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perché $d\circ d=0$: in grado uno è $\nabla\times\nabla U=0$, che segue dal fatto che le derivate seconde commutano.</li>
+   <li>Nello scambio $\partial_j\omega_i=\partial_i\omega_j$, che trasforma l'integrando in una derivata totale rispetto al parametro del raggio.</li>
+   <li>Perché localmente la forma è esatta: sulla griglia fine di un'omotopia ogni quadratino dà contributo nullo, i lati interni si cancellano, e restano solo i due cammini.</li>
+   <li>Perché il periodo non cambia per omotopia e si somma sui lacci concatenati.</li>
+   <li>Perché il suo flusso su una sfera attorno all'origine è $4\pi g\ne0$, mentre il flusso di un rotore su una superficie senza bordo è zero per Stokes.</li>
+   <li>La funzione di transizione fra i due gauge è una mappa dall'equatore alle fasi; la fase deve tornare al valore di partenza, quindi la mappa fa un numero intero di giri, e quel numero è $2eg/\hbar c$.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'dove riappare questo movimento nella fisica che farai',
+  blocchi:[
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>La coomologia come la misura di quanto un campo localmente derivabile da un potenziale manca di esserlo globalmente</b>: periodi su lacci e flussi su superfici chiuse, cioè le cose che un cambio di potenziale non può togliere.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`L'effetto Aharonov-Bohm è un periodo di grado uno misurato con l'interferenza; il monopolo di Dirac è un periodo di grado due, e la quantizzazione della carica è il grado di una funzione di transizione; la fase di Berry è il periodo di una forma chiusa sullo spazio dei parametri di un'hamiltoniana, e i suoi valori quantizzati nell'effetto Hall sono flussi interi.`},
+    {dove:'Elettro-<br>magnetismo', txt:R`Il potenziale scalare esiste globalmente quando i periodi del campo elettrostatico sono nulli, il potenziale vettore quando i flussi del campo magnetico su superfici chiuse sono nulli: la legge di Gauss per il campo magnetico, flusso nullo su ogni superficie chiusa, è esattamente la condizione perché $\mathbf B$ sia un rotore globale.`},
+    {dove:'Geometria<br>differenziale', txt:R`La coomologia di de Rham su una varietà qualunque, l'integrazione delle forme di grado massimo, il grado di una mappa e il teorema di Poincaré-Hopf sono il seguito naturale: qui si sono visti in $\mathbb{R}^2$ e $\mathbb{R}^3$, dove le forme sono campi con un altro nome.`}
+   ],
+   domanda:R`Il potenziale del monopolo si è dovuto spezzare in due pezzi incollati da una fase. <b>Domanda da portare avanti:</b> che cosa succede se l'incollamento usa non una fase, ma una matrice unitaria — come nei campi di gauge non abeliani — e qual è allora l'oggetto che conta i giri?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-15-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-15 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-15-forme-chiuse-esatte.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
