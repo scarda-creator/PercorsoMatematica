@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimento tp-13 — Prodotti di rappresentazioni e rappresentazioni proiettive: dove gruppi e topologia si incontrano</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="motore-plot.js"></script>
+<script defer src="progresso.js"></script>
+<script defer src="esame-tag.js"></script>
+<!-- La barra di casa: un nucleo senza di lei e' un vicolo cieco - si arrivava qui
+     e l'unica uscita era il tasto indietro del browser, che dall'app installata
+     sulla schermata Home non c'e'. Porta anche i due movimenti accanto, letti
+     dall'indice: l'ordine non e' scritto nel nucleo e non puo' sfasarsi. -->
+<script defer src="../nav-tengri.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --border:#2b333d;
+    --txt:#eef3f8; --muted:#b9c4d1; --accent:#4c8dff; --accent2:#8fb0ff;
+    --ok:#2ea043; --okbg:#10331b; --warn:#d8a13a; --warnbg:#332a10;
+    --gram:#5eead4; --grambg:#0f2a26;
+    --pro:#b98cff; --probg:#1a1430; --proline:#2a2247; --proedge:#3a2d5c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.55;}
+  a{color:var(--accent2);}
+  .banner{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--muted);
+    font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;letter-spacing:.3px;}
+  .banner b{color:var(--accent2);}
+  .shell{display:flex;max-width:1180px;margin:0 auto;align-items:flex-start;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{width:280px;flex:0 0 280px;padding:20px 12px 60px;position:sticky;top:0;
+    max-height:100vh;overflow-y:auto;border-right:1px solid var(--border);}
+  .sidebar h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:18px 8px 8px;}
+  .navitem{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:none;
+    background:transparent;color:var(--txt);padding:9px 10px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;transition:.12s;border:1px solid transparent;}
+  .navitem:hover{background:var(--panel2);}
+  .navitem.active{background:#13233f;border-color:var(--accent);color:#fff;}
+  .navitem .dot{width:7px;height:7px;border-radius:50%;background:transparent;flex:0 0 7px;
+    border:1px solid var(--border);}
+  .navitem.seen .dot{background:var(--ok);border-color:var(--ok);}
+  .navitem .nx{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* ---- MAIN ---- */
+  .main{flex:1 1 auto;min-width:0;padding:24px 30px 90px;max-width:860px;}
+  h1{font-size:1.5rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px;}
+  .sfhead{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px;}
+  .sfhead h1{font-size:1.55rem;}
+  .meta{color:var(--muted);font-size:.82rem;margin-top:6px;}
+
+  .section{margin:26px 0;}
+  .section > h3{font-size:1.02rem;color:var(--accent2);margin:0 0 10px;
+    display:flex;align-items:center;gap:10px;}
+  .section > h3 .tag{font-size:.66rem;font-weight:700;letter-spacing:.4px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;}
+  /* --- blocchi figura --- */
+  .section > h3 .tag.plottag{background:#101f2e;border-color:#1f3c57;color:#7ab8e0;}
+  .plot-intro{color:var(--muted);font-size:.95rem;margin:0 0 12px;}
+  .plot-row{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .plot-row.due .plot-box{flex:1 1 300px;min-width:280px;}
+  .plot-box{max-width:560px;}
+  .plot-leggi{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);}
+  .plot-leggi b{color:#7ab8e0;}
+  .plot-err{color:#ff6b6b;font-size:.85rem;}
+  /* --- figure importate da una dispensa del docente ---
+     Stesso vestito dei plot nativi, di proposito: la figura viene dal suo PDF ma e'
+     stata ri-colorata sulla nostra tavolozza da `figure-da-pdf.py`, e deve sembrare di
+     casa invece che incollata. La riga `fonte` dice sempre da dove viene. */
+  .fig-nota{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin:14px 0;text-align:center;}
+  .fig-nota img{max-width:100%;height:auto;}
+  .fig-nota figcaption{margin-top:10px;background:var(--panel2);border:1px solid var(--border);
+    border-left:3px solid #4a8fc7;border-radius:0 10px 10px 0;padding:11px 14px;
+    font-size:.93rem;color:var(--muted);text-align:left;}
+  .fig-nota figcaption b{color:#7ab8e0;}
+  .fig-nota .fonte{display:block;margin-top:8px;font-size:.78rem;color:var(--muted);
+    opacity:.7;text-align:right;font-style:italic;}
+  .open-body{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .open-body p:first-child{margin-top:0;} .open-body p:last-child{margin-bottom:0;}
+  .open-body ul{margin:.4em 0;padding-left:1.2em;} .open-body li{margin:.35em 0;}
+
+  .note{background:var(--panel2);border-left:3px solid var(--muted);border-radius:6px;
+    padding:9px 12px;margin:12px 0;font-size:.9rem;color:var(--muted);}
+  .note b{color:#ff9d6b;}
+  .note.warn{background:var(--warnbg);border-left-color:var(--warn);color:#e0b85a;}
+  .note.warn b{color:#f0c25a;}
+
+  /* ---- GRAMMATICA ---- */
+  .gramwrap{background:var(--grambg);border:1px solid #1f4d47;border-radius:12px;padding:6px 6px;}
+  table.gramtab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.gramtab td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #17332e;}
+  table.gramtab tr:last-child td{border-bottom:none;}
+  table.gramtab td.gs{white-space:nowrap;color:var(--gram);width:1%;
+    border-right:1px solid #17332e;font-variant-numeric:tabular-nums;}
+  .section > h3 .tag.gramtag{background:var(--grambg);border-color:#1f4d47;color:var(--gram);}
+
+  /* ---- STRUMENTI (repertorio condiviso: la scheda si apre DENTRO la frase) ----
+     Nessun accento nuovo: riusa il verde della grammatica, perche' uno strumento
+     richiamato e' grammatica gia' spiegata altrove, non una quinta specie di blocco. */
+  .str{color:var(--gram);border-bottom:1px dashed var(--gram);cursor:pointer;}
+  .str:hover{background:var(--grambg);}
+  .str::after{content:"\2666";font-size:.62em;vertical-align:.42em;margin-left:2px;opacity:.8;}
+  .str.aperto::after{content:"\2715";}
+  .str.rotto{color:#ff6b6b;border-bottom-color:#ff6b6b;cursor:help;}
+  /* la scheda e' uno SPAN in display:block, non un div: i rimandi cadono dentro
+     <p>, <li> e celle di tabella, dove un div e' HTML illegale. */
+  .strcard{display:block;margin:10px 0;background:var(--grambg);border:1px solid #1f4d47;
+    border-left:3px solid var(--gram);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.9rem;}
+  .strcard .sh{display:block;font-size:.66rem;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--gram);margin-bottom:7px;}
+  .strcard .sr{display:block;margin:5px 0;}
+  .strcard .sk{color:var(--gram);font-weight:600;}
+
+  /* ---- PROLESSI (preannuncio fisico) ---- */
+  .prowrap{background:var(--probg);border:1px solid var(--proedge);border-radius:12px;padding:4px 4px 8px;}
+  .prohead{padding:11px 14px 4px;color:var(--pro);font-size:.72rem;font-weight:700;letter-spacing:.7px;
+    text-transform:uppercase;}
+  .pro-oggetto{padding:2px 14px 11px;color:var(--muted);font-size:.92rem;border-bottom:1px solid var(--proline);
+    margin-bottom:2px;} .pro-oggetto b{color:var(--txt);}
+  table.protab{border-collapse:collapse;width:100%;font-size:.92rem;}
+  table.protab td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--proline);}
+  table.protab tr:last-child td{border-bottom:none;}
+  table.protab td.pd{white-space:nowrap;color:var(--pro);width:1%;font-weight:700;font-size:.78rem;
+    letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--proline);line-height:1.3;}
+  .pro-domanda{margin:8px 8px 2px;background:#140d26;border:1px solid var(--proedge);
+    border-left:3px solid var(--pro);border-radius:8px;padding:10px 14px;font-size:.92rem;}
+  .pro-domanda b{color:var(--pro);}
+  .section > h3 .tag.protag{background:var(--probg);border-color:var(--proedge);color:var(--pro);}
+
+  /* ---- REVEAL ---- */
+  .rsteps{display:flex;flex-direction:column;gap:12px;}
+  .rstep{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .rlabel{font-size:.7rem;font-weight:700;letter-spacing:.4px;color:var(--accent);
+    text-transform:uppercase;margin-bottom:8px;}
+  .rstep p:first-of-type{margin-top:0;} .rstep p:last-child{margin-bottom:0;}
+  .rstep ul{margin:.4em 0;padding-left:1.2em;}
+  .testo{background:#13233f;border:1px solid #2b4877;border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .testo .src{display:block;font-size:.74rem;font-style:italic;color:var(--accent2);margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.3px;}
+  .esame-nota{font-size:.9rem;color:var(--muted);font-style:italic;margin-top:12px;padding-left:12px;
+    border-left:3px solid var(--border);}
+
+  .reveal-btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:10px;
+    font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;transition:.12s;}
+  .reveal-btn:hover:not(:disabled){background:var(--accent2);}
+  .reveal-btn.small{padding:7px 14px;font-size:.85rem;margin-top:0;background:var(--panel2);
+    color:var(--accent2);border:1px solid var(--border);}
+  .reveal-btn.small:hover:not(:disabled){border-color:var(--accent);}
+  .reveal-btn:disabled,.reveal-btn.done{background:var(--panel2);color:var(--muted);
+    border:1px solid var(--border);cursor:default;}
+
+  /* ---- COLLAUDO ---- */
+  .collaudo-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:12px;}
+  .cq{margin-bottom:10px;}
+  .ca{margin-top:12px;background:var(--okbg);border:1px solid #235c33;border-radius:8px;
+    padding:10px 14px;font-size:.94rem;}
+  .ca b{color:#5fd980;}
+
+  /* ---- PREV / NEXT ---- */
+  .prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:40px;
+    border-top:1px solid var(--border);padding-top:20px;}
+  .pnbtn{flex:1 1 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:.14s;font:inherit;}
+  .pnbtn:hover{border-color:var(--accent);background:var(--panel2);}
+  .pnbtn.next{text-align:right;}
+  .pnbtn .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .pnbtn .t{font-weight:600;color:var(--accent2);}
+  .pnbtn:disabled{opacity:.35;cursor:default;border-color:var(--border);background:var(--panel);}
+
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;
+    padding:1px 5px;font-size:.85em;color:var(--accent2);}
+  .katex{font-size:1.02em;color:var(--txt);} .katex-display{margin:.5em 0;overflow-x:auto;overflow-y:hidden;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%;flex:none;position:static;max-height:none;border-right:none;
+      border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+    .sidebar h2{width:100%;} .navitem{width:auto;}
+    .main{padding:20px 16px 80px;}
+  }
+</style>
+</head>
+<body>
+<div class="banner">TENGRI · Topologia · Movimento <b>tp-13 — Prodotti di rappresentazioni e rappresentazioni proiettive: dove gruppi e topologia si incontrano</b></div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+const R = String.raw;
+
+function typeset(el){
+  if(el && window.renderMathInElement){
+    try{ renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false}
+    ],throwOnError:false}); }catch(e){}
+  }
+}
+function elFromHTML(html){ var d=document.createElement('div'); d.innerHTML=html; return d; }
+
+/* ===================================================================
+   >>> IL REPERTORIO DEGLI STRUMENTI <<<
+   Uno strumento matematico si spiega UNA VOLTA SOLA, in una scheda che
+   vive in strumenti/<id>.json, e ogni movimento ci si aggancia con un
+   rimando scritto nella prosa:
+
+       <span class="str" data-str="serie-geometrica">la serie geometrica</span>
+
+   Le schede citate da questo nucleo sono cucite qui sotto dal montaggio
+   (assembla-nucleo.js): la pagina resta autosufficiente — niente fetch,
+   niente sottocartelle da pubblicare — e un rimando a una scheda che non
+   esiste FERMA la costruzione invece di arrivare in pagina rotto.
+   Apertura: lo stesso gesto del collaudo (si clicca, il pannello compare,
+   si typeset una volta sola), portato dentro la frase.
+   =================================================================== */
+var CORSO = 'topologia';   /* per il taglio «a cosa serve QUI»; vuoto = taglio di default della scheda */
+var STRUM = {};
+STRUM["rappresentazione"] = {"nome":"Rappresentazione","riga":"Un omomorfismo $D:G\\to GL(V)$ che assegna a ogni elemento di un gruppo una mappa lineare invertibile di uno spazio vettoriale, con $D(gh)=D(g)D(h)$.","serve":"È il modo in cui una simmetria agisce sugli stati quantistici: linearmente, perché il trasformato di una sovrapposizione è la sovrapposizione dei trasformati, e in modo unitario, perché le probabilità si conservano. Due rappresentazioni che differiscono per un cambio di base sono la stessa, e il carattere $\\chi(g)=\\operatorname{tr}D(g)$ lo riconosce senza cercare il cambio di base. Ogni rappresentazione unitaria di dimensione finita si spezza in pezzi irriducibili, ed è su quei pezzi che si leggono degenerazioni e regole di selezione.","esempio":"Le rotazioni attorno a un asse agiscono su una funzione d'onda $e^{in\\varphi}$ moltiplicandola per una fase: $D_n(R_\\theta)=e^{in\\theta}$ è una rappresentazione di dimensione uno, ben definita solo per $n$ intero, e $n$ è il numero quantico magnetico. Il gruppo delle permutazioni di tre oggetti agisce su $\\mathbb{C}^3$ scambiando i vettori di base: è una rappresentazione di dimensione tre che si spezza in una retta invariante, generata da $(1,1,1)$, e in un piano.","pieno":{"file":"tp-12-rappresentazioni-e-schur.html","tappa":"01","come":"la definizione di Lee e la costruzione di Landau dalle funzioni d'onda, con sei esempi dalla banale alla rappresentazione sulle funzioni"},"controllo":[{"tipo":"uguale","sinistra":"simplify(exp(I*n*al)*exp(I*n*be) - exp(I*n*(al+be)))","vale":"0","dove":"esempio","appare":"$D_n(R_\\theta)=e^{in\\theta}$ è una rappresentazione","nota":"e^(in alpha) e^(in beta) = e^(in(alpha+beta)): rispetta il prodotto"},{"tipo":"simbolico","dove":"riga","appare":"D(gh)=D(g)D(h)","perche":"definizione di omomorfismo, non un conto"}]};
+STRUM["rappresentazione-irriducibile"] = {"nome":"Rappresentazione irriducibile e lemma di Schur","riga":"Una rappresentazione è irriducibile se nessun sottospazio, salvo zero e lo spazio intero, è invariante sotto tutto il gruppo, e per il lemma di Schur ogni operatore che commuta con tutte le sue trasformazioni è un multiplo dell'identità.","serve":"È lo strumento con cui la simmetria fissa le cose senza risolvere equazioni. Un'hamiltoniana che commuta con un gruppo è un multiplo dell'identità su ogni pezzo irriducibile, quindi la degenerazione di un livello è la dimensione dell'irriducibile; un operatore simmetrico non ha elementi di matrice fra irriducibili diverse, e quelle sono le regole di selezione. Nella forma di Ballentine vale per insiemi di operatori: siccome posizione e impulso formano un insieme irriducibile, due operatori con gli stessi commutatori con $Q$ e $P$ differiscono per una costante, ed è così che si ricavano i generatori di Galilei.","esempio":"Un elettrone su tre siti identici ha un'hamiltoniana che commuta con le permutazioni dei siti; lo spazio $\\mathbb{C}^3$ si spezza nella retta di $(1,1,1)$ e nel piano $x+y+z=0$, entrambi irriducibili, e su ciascuno l'hamiltoniana è un multiplo dell'identità: un livello singolo e un livello doppio. Sui reali il lemma fallisce: la rotazione di un quarto di giro commuta con tutte le rotazioni del piano senza essere un multiplo dell'identità.","pieno":{"file":"tp-12-rappresentazioni-e-schur.html","tappa":"04","come":"le due forme del lemma dimostrate in dimensione finita, il controesempio reale delle rotazioni del piano, i gruppi commutativi"},"controllo":[{"tipo":"uguale","sinistra":"Matrix([[0,-t,-t],[-t,0,-t],[-t,-t,0]])*Matrix([[1],[1],[1]])","vale":"-2*t*Matrix([[1],[1],[1]])","dove":"esempio","appare":"un livello singolo e un livello doppio","nota":"autovalore -2t sulla retta di (1,1,1)"},{"tipo":"uguale","sinistra":"Matrix([[0,-t,-t],[-t,0,-t],[-t,-t,0]])*Matrix([[1],[-1],[0]])","vale":"t*Matrix([[1],[-1],[0]])","dove":"esempio","appare":"un livello singolo e un livello doppio","nota":"autovalore t sul piano x+y+z=0"}]};
+STRUM["prodotto-tensoriale"] = {"nome":"Prodotto tensoriale","riga":"Lo spazio di due sistemi e' $\\mathcal H_1\\otimes\\mathcal H_2$, di dimensione pari al PRODOTTO delle due e non alla somma, con base fatta dai prodotti degli elementi delle due basi.","serve":"E' il motivo per cui la meccanica quantistica non e' una teoria di particelle indipendenti messe accanto. La dimensione cresce come il prodotto, quindi la stragrande maggioranza degli stati non si scrive come prodotto di due stati singoli: quelli che non si scrivono cosi' sono gli stati entangled, e sono la regola, non l'eccezione. Fuori da questa scheda e dal percorso, per ora: la matrice densità ridotta e la misura dell'entanglement con l'entropia di von Neumann.","esempio":"Due spin un mezzo: ogni fattore ha dimensione due, il prodotto ne ha $2\\cdot2=4$. Gli stati fattorizzati sono parametrizzati da due punti sulla sfera di Bloch, cioe' da quattro parametri reali, mentre lo spazio totale ne ha $2\\cdot4-2=6$: restano due dimensioni di stati che non si fattorizzano, e il singoletto e' uno di quelli.","controllo":[{"tipo":"uguale","sinistra":"2*2","vale":"4","dove":"esempio","appare":"2\\cdot2=4"},{"tipo":"uguale","sinistra":"2*4-2","vale":"6","dove":"esempio","appare":"2\\cdot4-2=6"}],"qui":{},"pieno":{"file":"mq-16-sistemi-composti.html","tappa":"01","come":"lo spazio di due sistemi costruito come prodotto tensoriale, con la base prodotto e la dimensione"}};
+STRUM["traccia"] = {"nome":"Traccia di un operatore","riga":"La traccia e' la somma degli elementi diagonali, $\\operatorname{tr}\\hat A=\\sum_i\\langle i|\\hat A|i\\rangle$, e non dipende dalla base ortonormale scelta perche' e' invariante per permutazione ciclica: $\\operatorname{tr}(\\hat A\\hat B)=\\operatorname{tr}(\\hat B\\hat A)$, da cui $\\operatorname{tr}(\\hat U^{\\dagger}\\hat A\\hat U)=\\operatorname{tr}\\hat A$.","serve":"E' il modo di estrarre un numero da un operatore senza privilegiare una rappresentazione. Il valor medio di un'osservabile su uno stato si scrive $\\langle A\\rangle=\\operatorname{tr}(\\rho\\hat A)$ con $\\rho=|\\psi\\rangle\\langle\\psi|$, e questa forma — a differenza di $\\langle\\psi|\\hat A|\\psi\\rangle$ — vale identica per gli stati misti, dove $\\rho$ non e' piu' un proiettore: e' la porta verso la matrice densita' e la decoerenza.","esempio":"Per $A=\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}$ e $B=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}$, pur essendo $AB\\neq BA$, le due tracce coincidono: $AB=\\begin{pmatrix}2&1\\\\4&3\\end{pmatrix}$ da' $\\operatorname{tr}(AB)=2+3=5$, mentre $BA=\\begin{pmatrix}3&4\\\\1&2\\end{pmatrix}$ da' $\\operatorname{tr}(BA)=3+2=5$. La traccia di un proiettore di rango uno vale $1$, e in generale la traccia di un proiettore e' la dimensione del sottospazio su cui proietta.","debito":"la traccia di un operatore in dimensione infinita esiste solo per la classe degli operatori a traccia (totalmente continui), e la costruzione rigorosa — $\\operatorname{tr}(\\hat A^{\\dagger}\\hat A)=\\sum_\\mu\\|\\hat A\\phi_\\mu\\|^2$ indipendente dalla base, von Neumann cap. II.11 — qui si cita. Si lavora col caso in cui la somma converge.","controllo":[{"tipo":"uguale","sinistra":"(Matrix([[1,2],[3,4]])*Matrix([[0,1],[1,0]])).trace()","vale":"5","dove":"esempio","appare":"\\operatorname{tr}(AB)=2+3=5"},{"tipo":"uguale","sinistra":"(Matrix([[0,1],[1,0]])*Matrix([[1,2],[3,4]])).trace()","vale":"5","dove":"esempio","appare":"\\operatorname{tr}(BA)=3+2=5"},{"tipo":"uguale","sinistra":"Matrix([[1,2],[3,4]])*Matrix([[0,1],[1,0]])","vale":"Matrix([[2,1],[4,3]])","dove":"esempio","appare":"AB=\\begin{pmatrix}2&1\\\\4&3\\end{pmatrix}"},{"tipo":"uguale","sinistra":"Matrix([[0,1],[1,0]])*Matrix([[1,2],[3,4]])","vale":"Matrix([[3,4],[1,2]])","dove":"esempio","appare":"BA=\\begin{pmatrix}3&4\\\\1&2\\end{pmatrix}"}],"qui":{},"pieno":null};
+STRUM["clebsch-gordan"] = {"nome":"Coefficienti di Clebsch-Gordan","riga":"Sono il cambio di base fra quella disaccoppiata $|j_1m_1\\rangle|j_2m_2\\rangle$ e quella accoppiata $|JM\\rangle$, dove $J$ va da $|j_1-j_2|$ a $j_1+j_2$ a passi di uno e il coefficiente si annulla se $M$ non vale $m_1+m_2$.","serve":"Servono ogni volta che due momenti angolari si sommano — spin-orbita, due elettroni, spin nucleare ed elettronico — e serve la base in cui il momento totale e' definito. I coefficienti si leggono su tavola; cio' che va saputo a memoria e' quali valori del totale escono, e che senza la somma delle proiezioni il coefficiente e' zero.","esempio":"Due spin un mezzo danno un singoletto e un tripletto. Il conteggio torna, ed e' il primo controllo da fare su ogni composizione: $2\\cdot2=4$ stati nella base disaccoppiata, e $1+3=4$ in quella accoppiata. La dimensione non cambia mai, perche' e' solo un cambio di base.","controllo":[{"tipo":"uguale","sinistra":"2*2","vale":"4","dove":"esempio","appare":"2\\cdot2=4"},{"tipo":"uguale","sinistra":"1+3","vale":"4","dove":"esempio","appare":"1+3=4"}],"qui":{},"pieno":{"file":"mq-21-composizione-momenti-angolari.html","tappa":"04","come":"la costruzione generale: abbassare, ortogonalizzare, fissare il segno con la convenzione di Condon-Shortley"}};
+STRUM["gruppo-delle-permutazioni"] = {"nome":"Gruppo delle permutazioni","riga":"$S_N$ è l'insieme delle biiezioni di $\\{1,\\dots,N\\}$ in sé, con la composizione; ha $N!$ elementi, è generato dagli scambi di due oggetti, e il segno $\\operatorname{sgn}:S_N\\to\\{\\pm1\\}$ è un omomorfismo.","serve":"È il gruppo che agisce su un sistema di $N$ particelle identiche rinominandole: un'hamiltoniana fisica dev'essere invariante per ogni permutazione, perché due situazioni che differiscono solo per lo scambio di particelle identiche sono indistinguibili. Il segno è il numero che separa i due comportamenti possibili sotto scambio, bosoni e fermioni; l'ordine $N!$ è il fattore di Gibbs nel conteggio degli stati di un gas.","esempio":"$S_3$ ha $6$ elementi, le sei isometrie di un triangolo equilatero: tre riflessioni, che sono gli scambi e hanno segno $-1$, e due rotazioni di $120^\\circ$ e $240^\\circ$, che sono i cicli $(1\\,2\\,3)$ e $(1\\,3\\,2)$ e hanno segno $+1$, più l'identità. È il più piccolo gruppo non commutativo: $(1\\,2)(2\\,3)=(1\\,2\\,3)$ ma $(2\\,3)(1\\,2)=(1\\,3\\,2)$.","pieno":{"file":"tp-11-gruppi-e-azioni.html","tappa":"07","come":"cicli e trasposizioni, il segno definito come prodotto e dimostrato omomorfismo, le classi di coniugio per tipo di ciclo, S_3 come simmetrie del triangolo"},"controllo":[{"tipo":"uguale","sinistra":"factorial(3)","vale":"6","dove":"esempio","appare":"$S_3$ ha $6$ elementi"}]};
+STRUM["determinante-di-slater"] = {"nome":"Determinante di Slater","riga":"Per $N$ fermioni in $N$ stati di singola particella lo stato antisimmetrico e' il determinante della matrice $[\\phi_i(x_j)]$ diviso per $\\sqrt{N!}$.","serve":"E' il modo di scrivere uno stato di piu' fermioni che porta dentro di se' il principio di esclusione: un determinante con due righe uguali vale zero, quindi due fermioni nello stesso stato danno automaticamente lo stato nullo. Pauli non va imposto a parte, e' una proprieta' del determinante. Fuori da questa scheda e dal percorso, per ora: il permanente, cioè l'analogo bosonico del determinante.","esempio":"Per due fermioni resta la differenza fra i due prodotti incrociati, divisa per $1/\\sqrt2$: ponendo i due stati uguali i termini si cancellano. Il fattore di normalizzazione per tre particelle diventa $1/\\sqrt6$.","controllo":[{"tipo":"uguale","sinistra":"1/sqrt(factorial(2))","vale":"1/sqrt(2)","dove":"esempio","appare":"1/\\sqrt2"},{"tipo":"uguale","sinistra":"1/sqrt(factorial(3))","vale":"1/sqrt(6)","dove":"esempio","appare":"1/\\sqrt6"},{"tipo":"uguale","sinistra":"Matrix([[a,b],[a,b]]).det()","vale":"0","ipotesi":{"a":"real","b":"real"},"dove":"serve","appare":"due righe uguali vale zero"}],"qui":{},"pieno":{"file":"mq-22-particelle-identiche.html","tappa":"04","come":"simmetrizzare e antisimmetrizzare N particelle, con il determinante come stato antisimmetrico e il conteggio degli stati"}};
+STRUM["operatore-unitario"] = {"nome":"Operatore unitario","riga":"Un operatore $\\hat U$ e' unitario quando $\\hat U^{\\dagger}\\hat U=\\hat U\\hat U^{\\dagger}=\\mathbb 1$, cioe' $\\hat U^{\\dagger}=\\hat U^{-1}$, il che equivale a conservare il prodotto interno: $\\langle \\hat U\\phi|\\hat U\\psi\\rangle=\\langle\\phi|\\psi\\rangle$ per ogni coppia di stati.","serve":"Conservare il prodotto interno vuol dire conservare le probabilita': ogni trasformazione fisica che non cambia gli esiti di una misura — un cambio di base, una traslazione, una rotazione, l'evoluzione temporale — e' unitaria. I suoi autovalori hanno modulo uno, e due osservabili legate da un operatore unitario hanno lo stesso spettro.","esempio":"La rotazione del piano $\\hat U=\\begin{pmatrix}\\cos\\theta&-\\sin\\theta\\\\\\sin\\theta&\\cos\\theta\\end{pmatrix}$ e' unitaria — il prodotto $\\hat U^{\\dagger}\\hat U$ ha sulla diagonale $\\cos^2\\theta+\\sin^2\\theta=1$ e zero fuori — e ha autovalori $e^{\\pm i\\theta}$, di modulo $|e^{i\\theta}|=1$. La matrice $S$ del cambio di base ortonormale e' unitaria per lo stesso motivo: manda una base ortonormale in un'altra.","debito":"la trasformata di Cayley $\\hat U=(\\hat A-i)/(\\hat A+i)$, che lega operatori autoaggiunti e unitari e con cui von Neumann risolve il problema agli autovalori in dimensione infinita, si cita e non si costruisce.","controllo":[{"tipo":"uguale","sinistra":"Abs(exp(I*theta))","vale":"1","ipotesi":{"theta":"real"},"dove":"esempio","appare":"|e^{i\\theta}|=1"},{"tipo":"uguale","sinistra":"Matrix([[cos(th),-sin(th)],[sin(th),cos(th)]]).T*Matrix([[cos(th),-sin(th)],[sin(th),cos(th)]])","vale":"Matrix([[1,0],[0,1]])","ipotesi":{"th":"real"},"dove":"esempio","appare":"\\cos^2\\theta+\\sin^2\\theta=1"}],"qui":{},"pieno":null};
+STRUM["matrici-di-pauli"] = {"nome":"Matrici di Pauli","riga":"Sono le tre matrici $2\\times2$ hermitiane a traccia nulla il cui quadrato e' l'identita' e il cui commutatore riproduce l'algebra del momento angolare, da cui lo spin $\\hat S_i=\\tfrac{\\hbar}{2}\\sigma_i$.","serve":"Sono la rappresentazione piu' piccola non banale del momento angolare, e insieme all'identita' formano una base di tutte le matrici due per due hermitiane: qualunque osservabile di un sistema a due stati e' una combinazione dell'identita' e delle tre. Ogni conto di spin un mezzo — Stern-Gerlach, precessione, risonanza magnetica, qubit — si riduce alla loro algebra.","esempio":"Siccome il quadrato di una combinazione unitaria delle tre e' l'identita', qualunque esponenziale collassa: l'operatore di rotazione dello spinore diventa $\\cos(\\theta/2)$ per l'identita' meno $i\\sin(\\theta/2)$ per la combinazione. Il mezzo nell'angolo e' la ragione per cui una rotazione di un giro intero cambia segno allo stato, perche' $\\cos(\\pi)=-1$.","debito":"la costruzione generale delle rappresentazioni di SU(2) e il suo legame con SO(3) stanno nel movimento sul momento angolare; qui c'e' il caso di spin un mezzo con le sue regole di calcolo.","controllo":[{"tipo":"uguale","sinistra":"cos(2*pi/2)","vale":"-1","dove":"esempio","appare":"\\cos(\\pi)=-1"},{"tipo":"uguale","sinistra":"cos(pi/3)**2+sin(pi/3)**2","vale":"1","dove":"esempio","appare":"\\sin(\\theta/2)"}],"qui":{},"pieno":null};
+STRUM["gruppo-fondamentale"] = {"nome":"Gruppo fondamentale","riga":"$\\pi_1(X,x_0)$ e' l'insieme dei cammini chiusi con base in $x_0$, presi a meno di omotopia, con il prodotto dato dal percorrerne uno dopo l'altro.","serve":"E' il primo invariante che distingue spazi che la sola continuita' non distingue: il piano e il piano bucato sono entrambi connessi, aperti, della stessa dimensione, e hanno $\\pi_1$ banale il primo e $\\mathbb{Z}$ il secondo — il numero di giri attorno al buco. Nel corso di Geometria Differenziale entra alla seconda lezione, e per una ragione tecnica precisa: Diverio dimostra che il gruppo fondamentale di una VARIETA' topologica e' al piu' numerabile, e lo deduce dalla base numerabile. Il senso dell'enunciato e' che una varieta' puo' essere complicatissima, ma non arbitrariamente: le ipotesi «tecniche» della definizione le mettono un limite. E' anche il punto in cui la topologia algebrica entra nel corso, e l'unico in cui serve fin qui.","esempio":"Sulla circonferenza $S^1$ un cammino chiuso si solleva alla retta tramite $t\\mapsto e^{2\\pi it}$, e il suo estremo finale e' un intero: il numero di giri. Due cammini sono omotopi se e solo se hanno lo stesso numero di giri, quindi $\\pi_1(S^1)\\cong\\mathbb{Z}$, e comporre due cammini somma i giri. Sulla sfera $S^2$ invece ogni cammino chiuso si contrae a un punto scivolando sulla superficie, e $\\pi_1(S^2)=\\{e\\}$: e' il motivo per cui $S^1$ e $S^2$ non sono omeomorfe, e nessun conto di dimensione lo direbbe, visto che vivono in spazi diversi.","controllo":[{"tipo":"simbolico","dove":"riga","appare":"\\pi_1(X,x_0)","perche":"e' la notazione del gruppo fondamentale con punto base: un nome, non un conto"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(S^1)\\cong\\mathbb{Z}","perche":"e' un teorema della teoria dei rivestimenti, enunciato e non dimostrato qui: il debito e' dichiarato"},{"tipo":"simbolico","dove":"esempio","appare":"\\pi_1(S^2)=\\{e\\}","perche":"e' l'enunciato che il gruppo fondamentale della sfera e' banale: un teorema della topologia algebrica, citato e non dimostrato, e il debito e' dichiarato nel campo `debito`"}],"pieno":{"file":"tp-14-gruppo-fondamentale.html","tappa":"02","come":"il prodotto di cammini, l'associativita' a meno di omotopia, neutro e inverso, il cambio di punto base; nello stesso movimento pi_1(S^1)=Z dimostrato e pi_1(SO(3))=Z_2"}};
+STRUM["rivestimento"] = {"nome":"Rivestimento","riga":"Una mappa continua suriettiva $\\pi:E\\to B$ è un rivestimento se ogni punto di $B$ ha un intorno $U$ la cui controimmagine è un&rsquo;unione disgiunta di aperti, ciascuno portato da $\\pi$ omeomorficamente su $U$.","serve":"Descrive gli spazi che localmente sono copie di un altro e globalmente si avvolgono attorno ad esso. È il modo in cui il corso incontra la topologia globale senza calcolarla: $S^n$ riveste due volte lo spazio proiettivo, $SU(2)$ riveste due volte $SO(3)$, e in Metodi la funzione logaritmo diventa monodroma sul suo rivestimento. Un laccio della base si solleva in un cammino che può non chiudersi, ed è da lì che vengono gli spin seminteri.","esempio":"La mappa $t\\mapsto e^{2\\pi it}$ dalla retta alla circonferenza: ogni arco piccolo di $S^1$ ha per controimmagine infinite copie disgiunte, una per ogni intero, ciascuna portata sull&rsquo;arco senza strappi: le preimmagini di un punto differiscono per interi, perché $e^{2\\pi i(t+1)}=e^{2\\pi it}$. Il laccio che fa un giro su $S^1$ si solleva al segmento da $0$ a $1$, che non si chiude: è il motivo per cui $S^1$ ha un buco e la retta no.","pieno":{"file":"tp-05-il-quoziente.html","tappa":"07","come":"la proiezione dalla sfera allo spazio proiettivo reale, con la verifica che è un rivestimento doppio e non solo un quoziente"},"controllo":[{"tipo":"uguale","sinistra":"simplify(exp(2*pi*I*(t+1))-exp(2*pi*I*t))","vale":"0","ipotesi":{"t":"real"},"dove":"esempio","appare":"e^{2\\pi i(t+1)}=e^{2\\pi it}","nota":"periodicita': t e t+1 hanno la stessa immagine"}]};
+STRUM["gruppo-di-lie"] = {"nome":"Gruppo di Lie","riga":"Una varieta differenziabile che e anche un gruppo, e in cui il prodotto $(g,h)\\mapsto gh$ e l'inverso $g\\mapsto g^{-1}$ sono applicazioni lisce.","serve":"a trattare insieme due strutture che di solito si studiano separate: la simmetria (il gruppo) e il calcolo differenziale (la varieta). La conseguenza che si usa di piu e l'omogeneita: le traslazioni $L_g(x)=gx$ sono diffeomorfismi, quindi ogni punto ha un intorno diffeomorfo a quello dell'identita, e tutto cio che si dimostra nell'identita si trasporta ovunque gratis. Da qui seguono due fatti usati continuamente: ogni gruppo di Lie e parallelizzabile, e per conoscerne la geometria infinitesima basta lo spazio tangente in un punto solo, che si chiama la sua algebra di Lie.","esempio":"Il gruppo delle rotazioni del piano $SO(2)$ e la circonferenza. Una sua matrice e $R(\\theta)=\\begin{pmatrix}\\cos\\theta & -\\sin\\theta\\\\ \\sin\\theta & \\cos\\theta\\end{pmatrix}$, e che il determinante valga $1$ si verifica subito: $\\cos^2\\theta+\\sin^2\\theta=1$. Il prodotto e liscio perche in coordinate e l'addizione degli angoli — svolgendo la riga in alto del prodotto $R(\\alpha)R(\\varphi)$ si trova $\\cos\\alpha\\cos\\varphi-\\sin\\alpha\\sin\\varphi=\\cos(\\alpha+\\varphi)$ e $\\sin\\alpha\\cos\\varphi+\\cos\\alpha\\sin\\varphi=\\sin(\\alpha+\\varphi)$, cioe $R(\\alpha)R(\\varphi)=R(\\alpha+\\varphi)$ — e l'inverso e $R(-\\theta)$, liscio in $\\theta$. La varieta sottostante e $S^1$, di dimensione $1$.","pieno":{"file":"gd-14-gruppi-di-lie.html","tappa":"01","come":"i gruppi di matrici, la traslazione che rende tutto omogeneo, e l'algebra di Lie come tangente all'identita"},"controllo":[{"tipo":"uguale","sinistra":"cos(theta)**2+sin(theta)**2","vale":"1","dove":"esempio","appare":"\\cos^2\\theta+\\sin^2\\theta=1"},{"tipo":"uguale","sinistra":"cos(alpha)*cos(varphi)-sin(alpha)*sin(varphi)","vale":"cos(alpha+varphi)","dove":"esempio","appare":"\\cos\\alpha\\cos\\varphi-\\sin\\alpha\\sin\\varphi=\\cos(\\alpha+\\varphi)"},{"tipo":"uguale","sinistra":"sin(alpha)*cos(varphi)+cos(alpha)*sin(varphi)","vale":"sin(alpha+varphi)","dove":"esempio","appare":"\\sin\\alpha\\cos\\varphi+\\cos\\alpha\\sin\\varphi=\\sin(\\alpha+\\varphi)"}]};
+
+function schedaHTML(s){
+  var q = (s.qui && s.qui[CORSO]) || s;
+  var h = '<span class="sh">&#9670; strumento &middot; '+s.nome+'</span>';
+  h += '<span class="sr"><span class="sk">Cos&rsquo;&egrave;.</span> '+s.riga+'</span>';
+  h += '<span class="sr"><span class="sk">A cosa serve qui.</span> '+q.serve+'</span>';
+  h += '<span class="sr"><span class="sk">Esempio.</span> '+q.esempio+'</span>';
+  if(s.pieno) h += '<span class="sr"><span class="sk">Tutto il resto.</span> <a href="'+
+                   s.pieno.file+'#'+s.pieno.tappa+'">'+s.pieno.come+'</a></span>';
+  else h += '<span class="sr"><span class="sk">Debito dichiarato.</span> '+s.debito+'</span>';
+  return h;
+}
+
+function cablaStrumenti(root){
+  Array.prototype.forEach.call(root.querySelectorAll('span.str[data-str]'), function(el){
+    if(el.getAttribute('data-cablato')) return;
+    el.setAttribute('data-cablato','1');
+    var id = el.getAttribute('data-str'), s = STRUM[id];
+    /* La scheda mancante si VEDE: il montaggio non dovrebbe mai lasciarne passare
+       una, ma se un nucleo viene aperto senza essere ristato montato, meglio un
+       rimando rosso che un clic che non fa niente. */
+    if(!s){ el.className='str rotto'; el.title='scheda-strumento mancante: '+id; return; }
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.title='strumento: '+s.nome;
+    var card=null;
+    function apri(){
+      if(card){ card.parentNode.removeChild(card); card=null; el.classList.remove('aperto'); return; }
+      card=document.createElement('span'); card.className='strcard';
+      card.innerHTML=schedaHTML(s);
+      el.parentNode.insertBefore(card, el.nextSibling);
+      typeset(card); el.classList.add('aperto');
+    }
+    el.onclick=apri;
+    el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); apri(); } };
+  });
+}
+
+/* ===================================================================
+   >>> CONTENUTO — Nucleo tp-13: Prodotti di rappresentazioni e rappresentazioni proiettive: dove gruppi e topologia si incontrano <<<
+   Modello dati: TAPPE[] ; ogni tappa ha blocchi[] con un tipo (t).
+   Tipi: prosa | gram | reveal | esercizio | collaudo | prolessi | plot
+   Tutta la matematica in R`...` (String.raw). Nelle formule si usano
+   \lt \gt \le \ge (mai < > nudi, che l'HTML leggerebbe come tag).
+   =================================================================== */
+
+var TAPPE = [
+
+
+/*MOVIMENTO
+id:        tp-13 — prodotti di rappresentazioni e rappresentazioni proiettive
+identita:  due fatti del corso di Quantistica che oggi arrivano senza la loro ragione matematica. Il primo: lo spazio di N particelle e' un prodotto tensoriale, il gruppo delle permutazioni ci agisce sopra, e bosoni e fermioni sono le due rappresentazioni di dimensione uno di quel gruppo - simmetrica e antisimmetrica. Il secondo: uno stato quantistico e' un raggio, non un vettore, quindi una simmetria e' rappresentata a meno di una fase, e la rappresentazione e' proiettiva. Da qui due conseguenze fisiche: la massa compare nel gruppo di Galilei come termine centrale che nessuna ridefinizione toglie, e le rotazioni hanno rappresentazioni a due valori - lo spin semintero - perche' pi_1(SO(3))=Z_2 (tp-14) e la rappresentazione vera e' di SU(2), che riveste SO(3) due volte: e' il punto in cui il blocco dei gruppi e quello della topologia algebrica si incontrano
+copre:     3.3 — Prodotti di rappresentazioni, permutazioni sulle potenze tensoriali, rappresentazioni...
+serve:     tp-12 (tp-12-rappresentazioni-e-schur.html), tp-14 (tp-14-gruppo-fondamentale.html)
+apre:      — (e' una foglia)
+strumenti: rappresentazione · rappresentazione-irriducibile · prodotto-tensoriale · traccia · clebsch-gordan · gruppo-delle-permutazioni · determinante-di-slater · operatore-unitario · matrici-di-pauli · gruppo-fondamentale · rivestimento · gruppo-di-lie
+fonti:     Landau-Lifsic 3, cap. XII, §§94, 99 e §63
+fonti:     Ballentine §3.3-3.4, §7.5, §17.1
+fonti:     Lee cap. 7
+coordinate: Landau-Lifsic, Fisica Teorica 3, Meccanica quantistica (Editori Riuniti-MIR 1976) pp. 440-444, 455-464, 280-288 · Ballentine, Quantum Mechanics: A Modern Development pp. 64, 73-80, 179, 470-475 · Lee, Introduction to Smooth Manifolds (2a ed.) pp. 154, 169-171
+profondita: confini dichiarati perche' qui il rischio di ripetere e' il piu' alto. Lo spazio prodotto tensoriale e' di mq-16 e della scheda `prodotto-tensoriale`: qui si prende come dato e si guarda solo come il gruppo ci agisce. I Clebsch-Gordan sono di mq-21: qui la decomposizione di un prodotto si fa sui gruppi finiti e con i caratteri, come domanda generale. Il teorema di Wigner e la costruzione dei generatori di Galilei sono di mq-07: qui si spiega solo perche' una fase non removibile cambia il gruppo (estensione centrale), senza rifare la fisica. Il rivestimento SU(2)->SO(3) e' di gd-14 e di tp-05/07. pi_1(SO(3))=Z_2 e' dimostrato in tp-14: qui si usa per dire quali rappresentazioni proiettive di SO(3) si sollevano a rappresentazioni vere di SU(2).
+generata:  2026-11-10 da mappa.json — non modificare a mano, si cambia la mappa
+MOVIMENTO*/
+
+/*CONTROLLO
+[
+ {"tipo": "uguale", "sinistra": "expand(Matrix(kronecker_product(Matrix([[a,b],[c,d]]),Matrix([[e,f],[g,h]]))).trace() - (a+d)*(e+h))", "vale": "0", "dove": "01", "appare": "\\operatorname{tr}(A\\otimes B)=\\operatorname{tr}A\\,\\operatorname{tr}B"},
+ {"tipo": "uguale", "sinistra": "Rational(1,6)*(1*4*1 + 3*0*1 + 2*1*1)", "vale": "1", "dove": "01", "appare": "m_{\\text{banale}}=\\tfrac16(4+0+2)=1"},
+ {"tipo": "uguale", "sinistra": "Rational(1,6)*(1*4*1 + 3*0*(-1) + 2*1*1)", "vale": "1", "dove": "01", "appare": "m_{\\text{segno}}=\\tfrac16(4-0+2)=1"},
+ {"tipo": "uguale", "sinistra": "Rational(1,6)*(1*4*2 + 3*0*0 + 2*1*(-1))", "vale": "1", "dove": "01", "appare": "m_{\\text{std}}=\\tfrac16(8+0-2)=1"},
+ {"tipo": "uguale", "sinistra": "Matrix([Rational(1,2)*(4+2), Rational(1,2)*(0+2), Rational(1,2)*(1+(-1))])", "vale": "Matrix([3,1,0])", "dove": "02", "appare": "\\chi_S=\\tfrac12\\big((4,0,1)+(2,2,-1)\\big)=(3,1,0)"},
+ {"tipo": "uguale", "sinistra": "Matrix([Rational(1,2)*(4-2), Rational(1,2)*(0-2), Rational(1,2)*(1-(-1))])", "vale": "Matrix([1,-1,1])", "dove": "02", "appare": "\\chi_A=\\tfrac12\\big((4,0,1)-(2,2,-1)\\big)=(1,-1,1)"},
+ {"tipo": "uguale", "sinistra": "simplify(((2*cos(q/2))**2 + 2*cos(q))/2)", "vale": "1+2*cos(q)", "dove": "02", "appare": "\\chi_S(\\theta)=\\tfrac12\\big(4\\cos^2\\tfrac\\theta2+2\\cos\\theta\\big)=1+2\\cos\\theta"},
+ {"tipo": "uguale", "sinistra": "simplify(((2*cos(q/2))**2 - 2*cos(q))/2)", "vale": "1", "dove": "02", "appare": "\\chi_A(\\theta)=\\tfrac12\\big(4\\cos^2\\tfrac\\theta2-2\\cos\\theta\\big)=1"},
+ {"tipo": "uguale", "sinistra": "simplify(1 + 2*cos(q) - (exp(I*q)+1+exp(-I*q)))", "vale": "0", "dove": "02", "appare": "1+2\\cos\\theta=e^{i\\theta}+1+e^{-i\\theta}"},
+ {"tipo": "uguale", "sinistra": "Matrix([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])*Matrix(kronecker_product(Matrix([[a,b],[c,d]]),Matrix([[a,b],[c,d]])))*Matrix([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]]) - Matrix(kronecker_product(Matrix([[a,b],[c,d]]),Matrix([[a,b],[c,d]])))", "vale": "zeros(4,4)", "dove": "03", "appare": "P\\,(A\\otimes A)\\,P=A\\otimes A"},
+ {"tipo": "uguale", "sinistra": "((eye(4)+Matrix([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]]))/2)**2", "vale": "(eye(4)+Matrix([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]]))/2", "dove": "03", "appare": "S^2=S"},
+ {"tipo": "uguale", "sinistra": "((eye(4)+Matrix([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]]))/2).trace()", "vale": "3", "dove": "03", "appare": "\\operatorname{tr}S=3"},
+ {"tipo": "uguale", "sinistra": "binomial(n+N-1,N).subs({n:2,N:2})", "vale": "3", "dove": "03", "appare": "\\binom{n+N-1}{N}=3", "ipotesi": {"N": "positive", "n": "positive"}},
+ {"tipo": "uguale", "sinistra": "binomial(3,2) + binomial(3+2-1,2)", "vale": "9", "dove": "03", "appare": "\\binom32+\\binom42=3+6=9"},
+ {"tipo": "uguale", "sinistra": "binomial(5,3)", "vale": "10", "dove": "03", "appare": "\\binom53=10"},
+ {"tipo": "uguale", "sinistra": "Matrix([[exp(-I*pi/2),0],[0,exp(I*pi/2)]])**2", "vale": "-eye(2)", "dove": "05", "appare": "U(C_2)^2=U(2\\pi)=-I"},
+ {"tipo": "uguale", "sinistra": "exp(I*Rational(1,2)*2*pi)", "vale": "-1", "dove": "05", "appare": "e^{i\\theta/2}\\big|_{\\theta=2\\pi}=-1"},
+ {"tipo": "uguale", "sinistra": "simplify(exp(I*M*v*(x-a))*psi(x-a) / (exp(I*M*v*x)*psi(x-a)))", "vale": "exp(-I*M*v*a)", "ipotesi": {"psi": "funzione"}, "dove": "06", "appare": "U(a)U(v)=e^{-iMva}\\,U(v)U(a)"},
+ {"tipo": "simbolico", "dove": "06", "appare": "c(a)c(v)c(a)^{-1}c(v)^{-1}=1", "perche": "le fasi sono numeri e commutano: si cancellano a coppie, per definizione di inverso"},
+ {"tipo": "uguale", "sinistra": "Matrix([[cos(pi),0],[0,cos(pi)]])", "vale": "-eye(2)", "dove": "07", "appare": "U(2\\pi)=\\cos\\pi\\,I=-I"},
+ {"tipo": "simbolico", "dove": "01", "appare": "\\frac1g\\sum_g\\chi^{(\\alpha)}\\chi^{(\\beta)*}=\\delta_{\\alpha\\beta}", "perche": "ortogonalita' dei caratteri, teorema enunciato e usato"},
+ {"tipo": "uguale", "dove": "02", "appare": "\\sum_{i\\le k}\\lambda_i\\lambda_k=\\tfrac12\\big((\\sum\\lambda_i)^2+\\sum\\lambda_i^2\\big)", "sinistra": "expand(((l1+l2+l3)**2 + l1**2+l2**2+l3**2)/2)", "vale": "l1**2+l2**2+l3**2+l1*l2+l1*l3+l2*l3"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\sum\\lambda_i=\\chi(g)", "perche": "la traccia e' la somma degli autovalori"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\sum\\lambda_i^2=\\operatorname{tr}D(g)^2=\\chi(g^2)", "perche": "gli autovalori di D(g)^2 sono i quadrati di quelli di D(g)"},
+ {"tipo": "simbolico", "dove": "02", "appare": "\\tfrac12\\otimes\\tfrac12=1\\oplus0", "perche": "conclusione dei due caratteri asserita sopra nella stessa tappa"},
+ {"tipo": "simbolico", "dove": "03", "appare": "P_\\sigma(v_1\\otimes\\cdots\\otimes v_N)=v_{\\sigma^{-1}(1)}\\otimes\\cdots\\otimes v_{\\sigma^{-1}(N)}", "perche": "definizione dell'azione per permutazione dei fattori"},
+ {"tipo": "uguale", "dove": "03", "appare": "\\binom{n+1}2+\\binom n2=n^2", "sinistra": "expand(expand_func(binomial(n+1,2)+binomial(n,2)))", "vale": "n**2"},
+ {"tipo": "simbolico", "dove": "05", "appare": "Q^2=E", "perche": "definizione del gruppo doppio di Bethe, riportata da Landau"},
+ {"tipo": "simbolico", "dove": "05", "appare": "C_n^n=Q", "perche": "definizione del gruppo doppio di Bethe, riportata da Landau"},
+ {"tipo": "simbolico", "dove": "06", "appare": "U(a)U(v)U(a)^{-1}U(v)^{-1}=e^{-iMva}I", "perche": "riscrittura della relazione asserita sopra, moltiplicando a destra per gli inversi"},
+ {"tipo": "simbolico", "dove": "06", "appare": "(g,e^{i\\phi})(h,e^{i\\psi})=(gh,\\ \\omega(g,h)\\,e^{i(\\phi+\\psi)})", "perche": "definizione dell'estensione centrale"},
+ {"tipo": "simbolico", "dove": "07", "appare": "\\operatorname{sgn}(\\sigma)^2=1", "perche": "il segno vale piu' o meno uno"},
+ {"tipo": "uguale", "dove": "07", "appare": "(2\\cos\\tfrac\\theta2)^3=8\\cos^3\\tfrac\\theta2", "sinistra": "expand((2*cos(q/2))**3)", "vale": "8*cos(q/2)**3"},
+ {"tipo": "uguale", "dove": "07", "appare": "\\tfrac12\\otimes\\tfrac12\\otimes\\tfrac12=\\tfrac32\\oplus\\tfrac12\\oplus\\tfrac12", "sinistra": "expand((exp(I*q/2)+exp(-I*q/2))**3 - (exp(3*I*q/2)+exp(I*q/2)+exp(-I*q/2)+exp(-3*I*q/2)) - 2*(exp(I*q/2)+exp(-I*q/2)))", "vale": "0"},
+ {"tipo": "uguale", "dove": "07", "appare": "\\binom{2+3-1}3=4", "sinistra": "binomial(2+3-1,3)", "vale": "4"},
+ {"tipo": "uguale", "dove": "07", "appare": "\\frac{c(g)c(h)}{c(gh)}\\cdot\\frac{c(gh)c(k)}{c(ghk)}=\\frac{c(g)c(h)c(k)}{c(ghk)}", "sinistra": "simplify(c1*c2/c12 * c12*c3/c123)", "vale": "c1*c2*c3/c123"},
+ {"tipo": "simbolico", "dove": "07", "appare": "U'(g)U'(h)=c(g)^{-1}c(h)^{-1}\\omega(g,h)U(gh)=c(gh)^{-1}U(gh)=U'(gh)", "perche": "conto con la definizione di U' e del cobordo, svolto nella prosa"},
+ {"tipo": "uguale", "dove": "07", "appare": "e^{-i\\pi\\sigma_n}=\\cos\\pi\\,I-i\\sin\\pi\\,(\\mathbf n\\cdot\\boldsymbol\\sigma)", "sinistra": "(-I*pi*Matrix([[0,1],[1,0]])).exp()", "vale": "-eye(2)"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\psi\\in S^NV\\iff\\forall\\sigma\\in S_N:\\ P_\\sigma\\psi=\\psi,", "perche": "definizione dei sottospazi totalmente simmetrico e antisimmetrico"},
+ {"tipo": "simbolico", "dove": "03", "appare": "\\psi\\in\\Lambda^NV\\iff\\forall\\sigma\\in S_N:\\ P_\\sigma\\psi=\\operatorname{sgn}\\sigma\\,\\psi.", "perche": "definizione dei sottospazi totalmente simmetrico e antisimmetrico"}
+]
+CONTROLLO*/
+
+/* ---------------- 00 · DI COSA PARLA QUESTO MOVIMENTO ---------------- */
+{ num:'00', title:'Di cosa parla questo movimento', meta:'due fatti della meccanica quantistica senza la loro ragione matematica · il prodotto e la fase · il punto in cui il blocco dei gruppi e quello della topologia si toccano',
+  blocchi:[
+  {t:'prosa', title:'Due fatti, e la matematica che li regge', tag:'architettura', html:R`
+  <p>La meccanica quantistica usa due fatti di teoria dei gruppi senza dirli in questi termini. Il primo: lo spazio di due sistemi è il prodotto tensoriale dei loro spazi, il gruppo di simmetria agisce su entrambi i fattori, e il risultato è una nuova <span class="str" data-str="rappresentazione">rappresentazione</span> che va scomposta in pezzi <span class="str" data-str="rappresentazione-irriducibile">irriducibili</span>; per $N$ particelle identiche, sullo stesso prodotto agisce anche il gruppo delle permutazioni, e bosoni e fermioni sono due suoi pezzi. Il secondo: uno stato è un raggio e non un vettore, quindi una simmetria è rappresentata solo a meno di una fase, e quella fase a volte non si toglie — ed è allora che nascono lo spin semintero e la massa come etichetta delle rappresentazioni di Galilei.</p>
+  <p>Questo movimento costruisce la matematica sotto i due fatti, e il secondo è il punto in cui i gruppi e la topologia algebrica si incontrano: le rappresentazioni a due valori delle rotazioni esistono perché il gruppo delle rotazioni ha un laccio che non si contrae.</p>
+  <ol>
+  <li>il prodotto di due rappresentazioni e il suo carattere, che è il prodotto dei caratteri (tappa 01);</li>
+  <li>la parte simmetrica e antisimmetrica del quadrato di una rappresentazione, con le formule di Landau, e due spin un mezzo scomposti solo con i caratteri (tappa 02);</li>
+  <li>il gruppo delle permutazioni che agisce sulle potenze tensoriali, e i suoi proiettori (tappa 03);</li>
+  <li>le rappresentazioni proiettive: la fase, la condizione che la rende coerente, quando si toglie (tappa 04);</li>
+  <li>le rappresentazioni a due valori delle rotazioni come rappresentazioni vere del rivestimento (tappa 05);</li>
+  <li>la fase che non si toglie nel gruppo di Galilei, e perché è una fase in un commutatore (tappa 06).</li>
+  </ol>
+  <p>Che cosa resta fuori, perché ha già chi lo tratta. Lo spazio prodotto tensoriale e gli operatori su di esso, la costruzione dei coefficienti di Clebsch-Gordan con gli operatori a scala, la simmetrizzazione di $N$ particelle con le sue conseguenze fisiche, l'algebra dei generatori di Galilei con l'identità di Jacobi: qui si usano come dati, e si aggiunge solo la ragione di gruppo che li regge. Gli schemi di Young per le simmetrie miste di $N\ge3$ oggetti, che Landau usa per gli atomi, si nominano e non si sviluppano.</p>`}
+]},
+
+/* ---------------- 01 · PRODOTTO DI RAPPRESENTAZIONI ---------------- */
+{ num:'01', title:'Il prodotto di due rappresentazioni, e il suo carattere', meta:'il gruppo che agisce su entrambi i fattori · la traccia di un prodotto di Kronecker · scomporre un prodotto contando · il prodotto della standard di S3 con sé stessa',
+  blocchi:[
+  {t:'prosa', title:'La definizione e il carattere', tag:'grammatica', html:R`
+  <p>Siano $D_1$ su $V_1$ e $D_2$ su $V_2$ due rappresentazioni dello stesso gruppo $G$. Sul <span class="str" data-str="prodotto-tensoriale">prodotto tensoriale</span> $V_1\otimes V_2$ il gruppo agisce su entrambi i fattori insieme:</p>
+  $$\forall g\in G:\ \ (D_1\otimes D_2)(g)\,(v\otimes w)=D_1(g)v\otimes D_2(g)w.$$
+  <p>È una rappresentazione, perché $(D_1(g)D_1(h))\otimes(D_2(g)D_2(h))=(D_1(g)\otimes D_2(g))(D_1(h)\otimes D_2(h))$, e in una base prodotto la sua matrice è il prodotto di Kronecker delle due. Landau-Lifsic, nel cap. XII, la chiama <b>prodotto diretto delle rappresentazioni</b>, e avverte di non confonderla con il prodotto diretto di due gruppi: qui il gruppo è uno, e agisce due volte (§94, stampate 440-442). Il fatto che rende il prodotto maneggiabile è che <b>il carattere del prodotto è il prodotto dei caratteri</b>, $\chi_{1\otimes2}(g)=\chi_1(g)\,\chi_2(g)$, perché la <span class="str" data-str="traccia">traccia</span> di un prodotto di Kronecker è il prodotto delle tracce:</p>
+  $$\operatorname{tr}(A\otimes B)=\operatorname{tr}A\,\operatorname{tr}B.$$
+  <p>Gli elementi diagonali di $A\otimes B$ sono i prodotti $A_{ii}B_{kk}$, uno per ogni coppia di indici, e la loro somma si fattorizza.</p>`},
+  {t:'prosa', title:'Scomporre un prodotto contando', tag:'costruzione', html:R`
+  <p>Con la formula delle molteplicità, $m_\alpha=\frac1g\sum_g\chi(g)\chi^{(\alpha)}(g)^*$, scomporre un prodotto è un conto sui caratteri. Il caso più piccolo che non sia banale è la rappresentazione standard di $S_3$, di dimensione due e carattere $(2,0,-1)$ sulle tre classi (identità, trasposizioni, cicli di tre), moltiplicata per sé stessa: il carattere del prodotto è il quadrato, $(4,0,1)$. Con i pesi $1,3,2$ delle classi:</p>
+  $$m_{\text{banale}}=\tfrac16(4+0+2)=1,\qquad m_{\text{segno}}=\tfrac16(4-0+2)=1,\qquad m_{\text{std}}=\tfrac16(8+0-2)=1.$$
+  <p>Lo spazio di dimensione quattro si spezza nella banale, nel segno e nella standard, $4=1+1+2$. Che la banale compaia una volta non è un caso, e Landau lo dice in generale: il prodotto di un'irriducibile con la sua complessa coniugata contiene la rappresentazione unità esattamente una volta, e il prodotto di due irriducibili diverse non la contiene mai (stampata 443). Basta la formula delle molteplicità: la molteplicità della banale nel prodotto $D^{(\alpha)}\otimes D^{(\beta)*}$ è $\frac1g\sum_g\chi^{(\alpha)}\chi^{(\beta)*}=\delta_{\alpha\beta}$, cioè l'ortogonalità dei caratteri letta come un conto di invarianti. In meccanica quantistica è il motivo per cui un elemento di matrice $\langle\beta|A|\alpha\rangle$ di un operatore invariante è nullo fra irriducibili diverse: l'elemento di matrice è un invariante del prodotto, e il prodotto non ne contiene.</p>`}
+]},
+
+/* ---------------- 02 · SIMMETRICO E ANTISIMMETRICO ---------------- */
+{ num:'02', title:'La parte simmetrica e la parte antisimmetrica', meta:'lo scambio dei due fattori commuta con il gruppo · le formule di Landau per i caratteri, dimostrate · la standard di S3 al quadrato · due spin un mezzo con i soli caratteri',
+  blocchi:[
+  {t:'reveal', title:'Le formule di Landau', tag:'teorema', steps:[
+   {label:'Lo scambio spezza il quadrato', body:R`<p>Sul quadrato $V\otimes V$ di una sola rappresentazione c'è un operatore in più, lo scambio $P(v\otimes w)=w\otimes v$, che commuta con il gruppo: scambiare e poi trasformare entrambi i fattori allo stesso modo è lo stesso che trasformare e poi scambiare. Gli autospazi di $P$, con autovalori $+1$ e $-1$, sono quindi invarianti — è la prima forma di Schur vista come costruzione — e $$V\otimes V=S^2V\oplus\Lambda^2V,$$ la parte simmetrica di dimensione $\tfrac12n(n+1)$ e l'antisimmetrica di dimensione $\tfrac12n(n-1)$. Landau li chiama prodotto simmetrico e antisimmetrico della rappresentazione con sé stessa (stampata 443).</p>`},
+   {label:'I caratteri, dimostrati', body:R`<p>Si diagonalizzi $D(g)$ (si può, perché è unitaria), con autovalori $\lambda_1,\dots,\lambda_n$. Sulla base $e_i\otimes e_k$ il gruppo agisce per $\lambda_i\lambda_k$. La parte simmetrica ha base $e_i\otimes e_k+e_k\otimes e_i$ con $i\le k$, e quindi traccia $\sum_{i\le k}\lambda_i\lambda_k=\tfrac12\big((\sum\lambda_i)^2+\sum\lambda_i^2\big)$; la parte antisimmetrica, con $i\lt k$, ha traccia $\tfrac12\big((\sum\lambda_i)^2-\sum\lambda_i^2\big)$. Ma $\sum\lambda_i=\chi(g)$ e $\sum\lambda_i^2=\operatorname{tr}D(g)^2=\chi(g^2)$. Quindi $$\chi_S(g)=\tfrac12\big(\chi(g)^2+\chi(g^2)\big),\qquad \chi_A(g)=\tfrac12\big(\chi(g)^2-\chi(g^2)\big),$$ che sono le formule di Landau (stampata 443), qui dimostrate con gli autovalori.</p>`},
+   {label:'La standard di S3', body:R`<p>Per la standard, $\chi=(2,0,-1)$. Il quadrato di una trasposizione è l'identità e il quadrato di un ciclo di tre è l'altro ciclo di tre, nella stessa classe, quindi $\chi(g^2)=(2,2,-1)$. Allora $$\chi_S=\tfrac12\big((4,0,1)+(2,2,-1)\big)=(3,1,0),$$ $$\chi_A=\tfrac12\big((4,0,1)-(2,2,-1)\big)=(1,-1,1).$$ La parte antisimmetrica è il segno; la simmetrica ha il carattere della permutazione di tre oggetti, cioè banale più standard. La scomposizione della tappa 01 si è distribuita così: il segno sta tutto nella parte antisimmetrica, la banale e la standard nella simmetrica.</p>`}
+  ]},
+  {t:'prosa', title:'Due spin un mezzo, con i soli caratteri', tag:'esempi', html:R`
+  <p>La rotazione di angolo $\theta$ agisce sugli stati di uno spin un mezzo con autovalori $e^{\mp i\theta/2}$, quindi con carattere $\chi(\theta)=2\cos\tfrac\theta2$, e il suo quadrato è la rotazione di $2\theta$, con $\chi(g^2)=2\cos\theta$. Le formule danno:</p>
+  $$\chi_S(\theta)=\tfrac12\big(4\cos^2\tfrac\theta2+2\cos\theta\big)=1+2\cos\theta,$$
+  $$\chi_A(\theta)=\tfrac12\big(4\cos^2\tfrac\theta2-2\cos\theta\big)=1.$$
+  <p>La parte antisimmetrica ha carattere costante uno: è la banale, il singoletto. La parte simmetrica ha carattere</p>
+  $$1+2\cos\theta=e^{i\theta}+1+e^{-i\theta},$$
+  <p>cioè gli autovalori $e^{-im\theta}$ con $m=-1,0,1$: è lo spin uno, il tripletto. La scomposizione $\tfrac12\otimes\tfrac12=1\oplus0$, che i <span class="str" data-str="clebsch-gordan">coefficienti di Clebsch-Gordan</span> costruiscono vettore per vettore con gli operatori a scala, qui esce dai caratteri senza costruire un solo vettore, e dice in più dove sta ciascun pezzo: il tripletto è simmetrico nello scambio, il singoletto antisimmetrico.</p>`},
+  {t:'plot', title:'I caratteri del tripletto e del singoletto',
+   intro:R`I caratteri della parte simmetrica e antisimmetrica di due spin un mezzo, in funzione dell'angolo di rotazione, e il carattere del prodotto, che è la loro somma.`,
+   plots:[
+    {kind:'func2d', xr:[0,12.566], yr:[-1.4,4.4], height:280,
+     curves:[{f:'4*cos(x/2)*cos(x/2)', col:'#8ea0b8', label:'prodotto: 4 cos^2(theta/2)', dash:true},
+             {f:'1+2*cos(x)', col:'#d8a13a', label:'simmetrica: 1 + 2 cos theta (spin 1)'},
+             {f:'1', col:'#5eead4', label:'antisimmetrica: 1 (spin 0)'}],
+     title:'theta da 0 a 4 pi: i due pezzi sommano al prodotto'}
+   ],
+   leggi:R`<p>Le tre curve valgono, in $\theta=0$, la dimensione: $4$, $3$ e $1$. In ogni punto la curva tratteggiata è la somma delle altre due, perché il carattere di una somma diretta è la somma dei caratteri. Il singoletto è una retta: nessuna rotazione lo cambia. Il tripletto e il prodotto sono periodici di periodo $2\pi$, anche se ciascuno dei due fattori, con carattere $2\cos\tfrac\theta2$, ha periodo $4\pi$: il prodotto di due rappresentazioni a due valori è a un valore, perché i due segni meno si moltiplicano. È la prima comparsa del tema delle tappe 05 e 06. Generale: dimensione nel neutro, somma sui pezzi. Accidentale: che i fattori siano due spin un mezzo.</p>`}
+]},
+
+/* ---------------- 03 · PERMUTAZIONI SULLE POTENZE ---------------- */
+{ num:'03', title:'Il gruppo delle permutazioni sulle potenze tensoriali', meta:'due gruppi che agiscono insieme e commutano · i proiettori simmetrizzante e antisimmetrizzante · contare gli stati · dove stanno bosoni e fermioni',
+  blocchi:[
+  {t:'prosa', title:'Due azioni che commutano', tag:'costruzione', html:R`
+  <p>Sulla potenza $V^{\otimes N}$ agiscono due gruppi. Il gruppo di simmetria $G$ agisce su ogni fattore allo stesso modo, $v_1\otimes\cdots\otimes v_N\mapsto D(g)v_1\otimes\cdots\otimes D(g)v_N$; il <span class="str" data-str="gruppo-delle-permutazioni">gruppo delle permutazioni</span> $S_N$ agisce scambiando i fattori, $P_\sigma(v_1\otimes\cdots\otimes v_N)=v_{\sigma^{-1}(1)}\otimes\cdots\otimes v_{\sigma^{-1}(N)}$. Le due azioni commutano: trasformare tutti i fattori allo stesso modo e poi rimescolarli è lo stesso che rimescolarli e poi trasformarli. Per $N=2$ e lo scambio $P$ su $\mathbb{C}^2\otimes\mathbb{C}^2$ lo dice un conto con una matrice $A$ qualunque:</p>
+  $$P\,(A\otimes A)\,P=A\otimes A.$$
+  <p>Landau usa questa struttura per i sistemi di particelle identiche (§63, stampate 280-288): l'hamiltoniana commuta con le permutazioni delle particelle, e le autofunzioni si classificano secondo le irriducibili di $S_N$, che per $N\ge3$ comprendono, oltre alla banale e al segno, rappresentazioni di simmetria mista descritte dagli schemi di Young.</p>`},
+  {t:'reveal', title:'I due proiettori', tag:'teorema', steps:[
+   {label:'Definizione', body:R`<p>Si definiscono $$S=\frac1{N!}\sum_{\sigma\in S_N}P_\sigma,\qquad A=\frac1{N!}\sum_{\sigma\in S_N}\operatorname{sgn}\sigma\,P_\sigma.$$ La loro immagine è il sottospazio dei vettori totalmente simmetrici, quelli che ogni $P_\sigma$ lascia fermi, e di quelli totalmente antisimmetrici, quelli che ogni $P_\sigma$ moltiplica per il proprio segno: $$\psi\in S^NV\iff\forall\sigma\in S_N:\ P_\sigma\psi=\psi,\qquad \psi\in\Lambda^NV\iff\forall\sigma\in S_N:\ P_\sigma\psi=\operatorname{sgn}\sigma\,\psi.$$</p>`},
+   {label:'Sono proiettori', body:R`<p>Per ogni $\tau$, $P_\tau S=\frac1{N!}\sum_\sigma P_{\tau\sigma}=S$, perché $\sigma\mapsto\tau\sigma$ percorre il gruppo una volta: è la stessa rinomina della media di Weyl. Quindi $S^2=\frac1{N!}\sum_\tau P_\tau S=S$. Allo stesso modo $P_\tau A=\operatorname{sgn}\tau\,A$, perché $\operatorname{sgn}(\tau\sigma)=\operatorname{sgn}\tau\operatorname{sgn}\sigma$ — il segno è un omomorfismo — e $A^2=A$. Per $N=2$, con $S=\tfrac12(I+P)$ su $\mathbb{C}^2\otimes\mathbb{C}^2$, $$S^2=S,\qquad \operatorname{tr}S=3,$$ e la traccia di un proiettore è la dimensione della sua immagine.</p>`},
+   {label:'Commutano con il gruppo', body:R`<p>Poiché ogni $P_\sigma$ commuta con $D(g)^{\otimes N}$, anche $S$ e $A$ commutano: <b>le parti totalmente simmetrica e antisimmetrica sono sottorappresentazioni di $G$</b>. Una simmetria del sistema non porta mai uno stato di bosoni fuori dai bosoni, né uno di fermioni fuori dai fermioni. Per gli stati antisimmetrici con fattori di una base, $A(e_{i_1}\otimes\cdots\otimes e_{i_N})$ è il <span class="str" data-str="determinante-di-slater">determinante di Slater</span>, e si annulla se due indici coincidono: è il principio di esclusione.</p>`}
+  ]},
+  {t:'prosa', title:'Contare gli stati', tag:'esempi', html:R`
+  <p>Se $V$ ha dimensione $n$, la parte totalmente simmetrica di $V^{\otimes N}$ ha la dimensione delle scelte di $N$ indici fra $n$ con ripetizione e senza ordine, $\binom{n+N-1}{N}$; l'antisimmetrica quella delle scelte senza ripetizione, $\binom nN$. Per due particelle in due stati, $$\binom{n+N-1}{N}=3,$$ i tre stati del tripletto, e uno antisimmetrico, il singoletto. Per $n=3$ e $N=2$ i due pezzi riempiono tutto, $$\binom32+\binom42=3+6=9,$$ ma per $N\ge3$ no: tre particelle in tre stati hanno $27$ stati prodotto, di cui simmetrici $$\binom53=10$$ e antisimmetrico uno solo, e i $16$ che mancano hanno simmetria mista. La natura usa solo i due pezzi estremi, ed è il contenuto del postulato di simmetrizzazione; che sia un postulato e non un teorema è una delle cose su cui le fonti divergono, e Ballentine lo dice nel primo paragrafo del capitolo sulle particelle identiche: i principi più forti «non si possono dedurre dai più deboli» (§17.1, stampata 470).</p>`},
+  {t:'plot', title:'Due particelle in quattro stati: simmetrici e antisimmetrici sulla griglia',
+   intro:R`Gli stati prodotto $e_i\otimes e_k$ di due particelle con $n=4$ stati ciascuna, disposti su una griglia $4\times4$. La simmetrizzazione identifica $(i,k)$ con $(k,i)$.`,
+   plots:[
+    {kind:'curve', x:'t', y:'t', tr:[0.6,4.4], height:300, equal:true,
+     xr:[0.3,5.6], yr:[0.3,4.7],
+     title:'diagonale e triangolo superiore: 10 simmetrici; triangolo stretto: 6 antisimmetrici',
+     marks:[{x:1,y:1,col:'#d8a13a'},{x:2,y:2,col:'#d8a13a'},{x:3,y:3,col:'#d8a13a'},{x:4,y:4,col:'#d8a13a',label:'i = k: solo simmetrici'},
+            {x:1,y:2,col:'#5eead4'},{x:1,y:3,col:'#5eead4'},{x:1,y:4,col:'#5eead4'},{x:2,y:3,col:'#5eead4'},{x:2,y:4,col:'#5eead4'},{x:3,y:4,col:'#5eead4',label:'i < k: uno simmetrico e uno antisimmetrico'},
+            {x:2,y:1,col:'#8ea0b8',hollow:true},{x:3,y:1,col:'#8ea0b8',hollow:true},{x:4,y:1,col:'#8ea0b8',hollow:true},{x:3,y:2,col:'#8ea0b8',hollow:true},{x:4,y:2,col:'#8ea0b8',hollow:true},{x:4,y:3,col:'#8ea0b8',hollow:true,label:'i > k: già contati'}]}
+   ],
+   leggi:R`<p>Ogni punto pieno sopra la diagonale, $i\lt k$, rappresenta la coppia $\{e_i\otimes e_k,e_k\otimes e_i\}$, che dà uno stato simmetrico e uno antisimmetrico; i punti vuoti sotto la diagonale sono la stessa coppia vista dall'altra parte. I punti della diagonale, $i=k$, danno solo uno stato simmetrico: l'antisimmetrico $e_i\otimes e_i-e_i\otimes e_i$ è zero, ed è il principio di esclusione. Contando: $4+6=10$ simmetrici, $6$ antisimmetrici, $16$ in tutto. Generale: $\binom{n+1}2+\binom n2=n^2$. Accidentale: $n=4$.</p>`}
+]},
+
+/* ---------------- 04 · PROIETTIVE ---------------- */
+{ num:'04', title:'Rappresentazioni proiettive: la fase che accompagna una simmetria', meta:'uno stato è un raggio · il moltiplicatore e la condizione di cociclo · ridefinire le fasi · quando il moltiplicatore si toglie e quando no',
+  blocchi:[
+  {t:'prosa', title:'Uno stato è un raggio', tag:'grammatica', html:R`
+  <p>In meccanica quantistica i vettori $|\psi\rangle$ e $e^{i\alpha}|\psi\rangle$ descrivono lo stesso stato: le probabilità dipendono solo da $|\langle\phi|\psi\rangle|$. Uno stato è quindi un <b>raggio</b>, una retta complessa, e una simmetria è una trasformazione dei raggi che conserva quei moduli. Per il teorema di Wigner, che Ballentine enuncia all'inizio del capitolo sulle simmetrie (stampata 64), ogni trasformazione così si realizza con un operatore <span class="str" data-str="operatore-unitario">unitario</span> o antiunitario, ma l'operatore è fissato solo a meno di una fase. Componendo due simmetrie, gli operatori rispettano la composizione solo a meno di quella fase:</p>
+  $$\forall g,h\in G:\ \ U(g)\,U(h)=\omega(g,h)\,U(gh),\qquad |\omega(g,h)|=1.$$
+  <p>Una mappa così si chiama <b>rappresentazione proiettiva</b>, e la funzione $\omega$ il suo <b>moltiplicatore</b>. Ballentine incontra il problema esattamente in questa forma: i commutatori dei generatori di Galilei sono determinati «a meno di multipli dell'identità», che vengono dal «fattore di fase sconosciuto» nella legge di moltiplicazione degli operatori (§3.3, stampata 73).</p>`},
+  {t:'reveal', title:'Il cociclo, e quando la fase si toglie', tag:'teorema', steps:[
+   {label:'La condizione di coerenza', body:R`<p>Il moltiplicatore non è arbitrario. Calcolando $U(g)U(h)U(k)$ nei due modi permessi dall'associatività, $\big(U(g)U(h)\big)U(k)=\omega(g,h)\,\omega(gh,k)\,U(ghk)$ e $U(g)\big(U(h)U(k)\big)=\omega(h,k)\,\omega(g,hk)\,U(ghk)$. Quindi $$\omega(g,h)\,\omega(gh,k)=\omega(h,k)\,\omega(g,hk),$$ la <b>condizione di cociclo</b>: è l'associatività del gruppo trasportata sulle fasi.</p>`},
+   {label:'Ridefinire le fasi', body:R`<p>La fase di ciascun $U(g)$ è libera: si può sostituire $U(g)$ con $U'(g)=c(g)\,U(g)$, $|c(g)|=1$. Il moltiplicatore cambia in $$\omega'(g,h)=\omega(g,h)\,\frac{c(g)\,c(h)}{c(gh)}.$$ Se esiste una scelta di $c$ che rende $\omega'=1$, la rappresentazione proiettiva è una rappresentazione vera travestita, e la fase si toglie: $$\omega\ \text{si toglie}\iff\exists\,c:G\to U(1)\ \ \forall g,h\in G:\ \ \omega(g,h)=\frac{c(gh)}{c(g)\,c(h)}.$$ Ballentine distingue proprio questi casi: multipli dell'identità che si eliminano con una scelta convenzionale delle fasi, e multipli «irremovibili e fisicamente significativi» (§3.3, stampata 73). Il primo esempio di fase che si toglie è il suo: le rotazioni attorno a un asse, dove sostituire $J_\alpha$ con $J_\alpha+b_\alpha I$ cambia l'operatore di rotazione solo per una fase $e^{i\theta b_\alpha}$ (stampata 74).</p>`},
+   {label:'Due modi di non poterla togliere', body:R`<p>Le tappe che seguono mostrano due ostruzioni di natura diversa. Nelle rotazioni la fase vale $\pm1$ e non si toglie per una ragione <b>topologica</b>: il gruppo ha un laccio che non si contrae, e la rappresentazione vera vive sul rivestimento. In Galilei la fase varia con continuità e non si toglie per una ragione <b>algebrica</b>: compare in un commutatore di elementi che commutano, dove nessuna ridefinizione la raggiunge. Nei due casi il rimedio è lo stesso in sostanza: si sostituisce il gruppo con uno più grande — il rivestimento, o un'estensione per le fasi — di cui la rappresentazione proiettiva è una rappresentazione vera.</p>`}
+  ]}
+]},
+
+/* ---------------- 05 · A DUE VALORI ---------------- */
+{ num:'05', title:'Le rappresentazioni a due valori delle rotazioni', meta:'una rotazione di due pi greco che agisce come meno uno · il rivestimento come gruppo che si rappresenta davvero · il gruppo doppio di Bethe · quali proiettive di SO(3) si sollevano',
+  blocchi:[
+  {t:'prosa', title:'Il segno che resta', tag:'teorema', html:R`
+  <p>Uno spin un mezzo si trasforma sotto la rotazione di angolo $\theta$ attorno all'asse $z$ con $U(\theta)=e^{-i\theta\sigma_z/2}$, con le <span class="str" data-str="matrici-di-pauli">matrici di Pauli</span>, e una componente prende la fase $e^{-i\theta/2}$. Alla rotazione completa la fase vale $$e^{i\theta/2}\big|_{\theta=2\pi}=-1,$$ e la rotazione di $2\pi$, che nel gruppo delle rotazioni è l'identità, agisce come $-I$. Ballentine lo osserva sulle matrici di rotazione dello spin un mezzo: sono periodiche di periodo $4\pi$ e cambiano segno aggiungendo $2\pi$, una «doppia validità» che caratterizza ogni $j$ semintero (§7.5, stampata 179). Landau ne trae la conseguenza di gruppo: le rappresentazioni a due valori «non sono di fatto rappresentazioni vere e proprie di un gruppo», e per esse non valgono le relazioni dimostrate per le rappresentazioni vere, come la somma dei quadrati delle dimensioni (§99, stampata 460).</p>`},
+  {t:'prosa', title:'La rappresentazione vera vive sul rivestimento', tag:'teorema', html:R`
+  <p>La matematica che rimette ordine è quella del <span class="str" data-str="gruppo-fondamentale">gruppo fondamentale</span>. Il gruppo delle rotazioni ha $\pi_1(SO(3))=\mathbb{Z}_2$, e il suo <span class="str" data-str="rivestimento">rivestimento</span> universale è $SU(2)$, che è un <span class="str" data-str="gruppo-di-lie">gruppo di Lie</span> con la proiezione $SU(2)\to SO(3)$ omomorfismo a due fogli: Lee dimostra che ogni gruppo di Lie connesso ha un rivestimento universale con questa proprietà (Teorema 7.7, stampata 154). Le matrici $U$ dello spin un mezzo sono una rappresentazione <b>vera</b> di $SU(2)$, e anzi fedele nel senso di Lee — un omomorfismo iniettivo verso $GL(2,\mathbb{C})$ (stampata 169) —, e diventano una rappresentazione di $SO(3)$ solo a meno del segno, perché i due elementi $\pm U$ di $SU(2)$ sopra la stessa rotazione agiscono con segni opposti. Più in generale: una rappresentazione irriducibile di $SU(2)$ scende a una rappresentazione vera di $SO(3)$ se e solo se $-I$ vi agisce come $+1$, e questo accade esattamente per $j$ intero. Le altre, $j$ semintero, sono le proiettive di $SO(3)$ con moltiplicatore $\pm1$, ed è la loro esistenza che il laccio non contraibile rende possibile: se $SO(3)$ fosse semplicemente connesso, il sollevamento non avrebbe dove andare e ogni proiettiva continua si potrebbe correggere in una vera.</p>`},
+  {t:'prosa', title:'Il gruppo doppio di Bethe', tag:'esempi', html:R`
+  <p>Landau usa la stessa idea per i gruppi finiti di simmetria delle molecole, con un procedimento che attribuisce a Bethe (1929) e chiama «artificiale» (stampata 461): si aggiunge al gruppo un elemento nuovo $Q$, la rotazione di $2\pi$, diverso dall'identità e con $Q^2=E$. Una rotazione di ordine $n$ dà l'identità solo dopo $2n$ applicazioni, $C_n^n=Q$ e $C_n^{2n}=E$, e il gruppo raddoppia di ordine. È il sollevamento del gruppo finito dentro $SU(2)$: per la rotazione di mezzo giro attorno a $z$, $$U(C_2)^2=U(2\pi)=-I,$$ cioè $C_2^2=Q$. Le rappresentazioni a due valori del gruppo vero sono rappresentazioni vere del gruppo doppio, e si trattano con tutti i metodi del movimento precedente.</p>`},
+  {t:'plot', title:'Una fase con m intero e una con m semintero',
+   intro:R`La parte reale della fase $e^{im\theta}$ al variare dell'angolo di rotazione, per $m=1$ e per $m=\tfrac12$: la prima torna a uno dopo un giro, la seconda dopo due.`,
+   plots:[
+    {kind:'func2d', xr:[0,12.566], yr:[-1.3,1.5], height:260,
+     curves:[{f:'cos(x)', col:'#5eead4', label:'m = 1: periodo 2 pi'},
+             {f:'cos(x/2)', col:'#d8a13a', label:'m = 1/2: periodo 4 pi'}],
+     title:'theta da 0 a 4 pi: in theta = 2 pi la curva arancione vale -1'}
+   ],
+   leggi:R`<p>In $\theta=2\pi$ la curva verde è tornata a $1$, quella arancione vale $-1$: per uno stato con $m$ semintero la rotazione completa è una moltiplicazione per $-1$. In $\theta=4\pi$ entrambe valgono $1$. È il laccio della rotazione attorno a un asse, percorso una volta e due volte: la prima volta non si contrae e il segno resta, la seconda si contrae e il segno sparisce. Che il segno non sia osservabile da solo — una fase globale — e lo diventi in un'interferenza fra un fascio ruotato e uno no, è la verifica sperimentale con i neutroni. Generale: un moltiplicatore $\pm1$ legato a un laccio di ordine due. Accidentale: i due valori di $m$ scelti.</p>`}
+]},
+
+/* ---------------- 06 · GALILEI ---------------- */
+{ num:'06', title:'Galilei: la fase che non si toglie, e perché è un commutatore', meta:'traslazione e boost commutano nel gruppo e non negli operatori · la fase di un commutatore è immune alle ridefinizioni · l’estensione centrale · la massa come etichetta',
+  blocchi:[
+  {t:'prosa', title:'Due elementi che commutano nel gruppo', tag:'costruzione', html:R`
+  <p>Nel gruppo di Galilei in una dimensione una traslazione spaziale $a$ e un boost $v$ commutano: coniugare la traslazione con il boost la lascia invariata, perché un boost non cambia lo spostamento a tempo fissato. Sulle funzioni d'onda di una particella di massa $M$, con $\hbar=1$ e a un istante fissato, la traslazione agisce con $(U(a)\psi)(x)=\psi(x-a)$ e il boost con la moltiplicazione per un'onda piana, $(U(v)\psi)(x)=e^{iMvx}\psi(x)$, che sposta l'impulso di $Mv$. Questa forma non è una scelta: Ballentine ricava che il generatore dei boost è la posizione moltiplicata per la massa, $\mathbf G=M\mathbf Q$ (equazione (3.51), stampata 80), e l'operatore finito è il suo esponenziale. Componendo nei due ordini: $U(a)U(v)\psi(x)=e^{iMv(x-a)}\psi(x-a)$ e $U(v)U(a)\psi(x)=e^{iMvx}\psi(x-a)$. Quindi</p>
+  $$U(a)U(v)=e^{-iMva}\,U(v)U(a).$$
+  <p>Due elementi che nel gruppo commutano sono rappresentati da operatori che commutano solo a meno di una fase, e la fase dipende dalla massa.</p>`},
+  {t:'reveal', title:'Perché nessuna ridefinizione la toglie', tag:'teorema', steps:[
+   {label:'La fase di un commutatore', body:R`<p>Si scriva la relazione come $U(a)U(v)U(a)^{-1}U(v)^{-1}=e^{-iMva}I$. Se si ridefiniscono le fasi, $U'(g)=c(g)U(g)$, il primo membro diventa $$c(a)c(v)c(a)^{-1}c(v)^{-1}=1$$ volte quello di prima: le quattro fasi si cancellano, perché sono numeri e commutano. La fase $e^{-iMva}$ è quindi un <b>invariante</b> della rappresentazione proiettiva, e se non vale uno per qualche $a,v$, nessuna scelta di fasi la rende una rappresentazione vera. Per $M\ne0$ non vale uno: la rappresentazione di una particella con massa è irrimediabilmente proiettiva. È, nella forma integrata, il commutatore $[G,P]=iM$ fra il generatore dei boost e l'impulso, il multiplo dell'identità che Ballentine classifica come irremovibile (§3.3-3.4, stampate 73-77).</p>`},
+   {label:'L’estensione centrale', body:R`<p>Il gruppo che si rappresenta davvero è più grande di quello di Galilei: le coppie $(g,e^{i\phi})$ con la legge $(g,e^{i\phi})(h,e^{i\psi})=(gh,\ \omega(g,h)\,e^{i(\phi+\psi)})$, che è associativa proprio per la condizione di cociclo. È un'<b>estensione centrale</b>: le fasi commutano con tutto e formano un sottogruppo normale, e quozientando per esse si torna al gruppo di Galilei. Il moltiplicatore, a meno delle ridefinizioni, è classificato da un parametro reale, e quel parametro è la massa. La teoria generale — il teorema di Bargmann, che classifica i moltiplicatori dei gruppi di Lie — non è in nessun libro in casa: si enuncia soltanto.</p>`},
+   {label:'Le due ostruzioni a confronto', body:R`<p>Per le rotazioni il moltiplicatore prende due valori, $\pm1$, e sparisce passando al rivestimento: l'ostruzione è un laccio non contraibile. Per Galilei prende un continuo di valori, e passare al rivestimento non basta — le traslazioni e i boost formano già uno spazio semplicemente connesso — perché l'ostruzione sta nell'algebra, in un commutatore. Il rivestimento aggiusta un fatto topologico, l'estensione centrale un fatto algebrico; nella meccanica quantistica non relativistica servono tutti e due, e sono lo spin semintero e la massa.</p>`}
+  ]}
+]},
+
+/* ---------------- 07 · ESERCIZI ---------------- */
+{ num:'07', title:'Esercizi — tocca a te', meta:'cinque esercizi con soluzione · una prova per capire se il movimento è passato',
+  blocchi:[
+  {t:'esercizio', title:'1 · Il segno per il segno', html:R`
+  <p>Calcola il prodotto della rappresentazione segno di $S_N$ con sé stessa, e quello del segno con una qualunque rappresentazione $D$. Che cosa dice il secondo per $D$ irriducibile?</p>`,
+   sol:R`<p>Il carattere del primo è $\operatorname{sgn}(\sigma)^2=1$: è la banale. Il secondo ha carattere $\operatorname{sgn}\sigma\,\chi_D(\sigma)$, con la stessa norma di $\chi_D$, perché $|\operatorname{sgn}|=1$: se $D$ è irriducibile lo è anche il prodotto. Per la standard di $S_3$ il prodotto ha carattere $(2,0,-1)$, cioè è di nuovo la standard; in generale il prodotto con il segno è un'irriducibile che può essere diversa, ed è l'operazione che negli schemi di Young scambia righe e colonne.</p>`},
+  {t:'esercizio', title:'2 · Tre spin un mezzo', html:R`
+  <p>Usando i caratteri, scomponi il prodotto di tre spin un mezzo in rappresentazioni di spin definito.</p>`,
+   sol:R`<p>Il carattere è $(2\cos\tfrac\theta2)^3=8\cos^3\tfrac\theta2$. Scritto in esponenziali, $(e^{i\theta/2}+e^{-i\theta/2})^3=e^{3i\theta/2}+3e^{i\theta/2}+3e^{-i\theta/2}+e^{-3i\theta/2}$. Lo spin tre mezzi ha carattere $e^{3i\theta/2}+e^{i\theta/2}+e^{-i\theta/2}+e^{-3i\theta/2}$; quello che resta, $2(e^{i\theta/2}+e^{-i\theta/2})$, è due volte lo spin un mezzo. Quindi $\tfrac12\otimes\tfrac12\otimes\tfrac12=\tfrac32\oplus\tfrac12\oplus\tfrac12$, con dimensioni $8=4+2+2$. Lo spin tre mezzi è la parte totalmente simmetrica, $\binom{2+3-1}3=4$; i due spin un mezzo hanno simmetria mista, e la parte totalmente antisimmetrica è vuota, perché $\binom23=0$.</p>`},
+  {t:'esercizio', title:'3 · Il cociclo banale', html:R`
+  <p>Mostra che, se $\omega(g,h)=c(g)c(h)/c(gh)$ per qualche funzione $c$ di modulo uno, il moltiplicatore soddisfa la condizione di cociclo, e trova la ridefinizione che lo rende uguale a uno.</p>`,
+   sol:R`<p>Il primo membro della condizione è $\frac{c(g)c(h)}{c(gh)}\cdot\frac{c(gh)c(k)}{c(ghk)}=\frac{c(g)c(h)c(k)}{c(ghk)}$, e il secondo $\frac{c(h)c(k)}{c(hk)}\cdot\frac{c(g)c(hk)}{c(ghk)}$, che è la stessa cosa. La ridefinizione è $U'(g)=c(g)^{-1}U(g)$: allora $U'(g)U'(h)=c(g)^{-1}c(h)^{-1}\omega(g,h)U(gh)=c(gh)^{-1}U(gh)=U'(gh)$. I cocicli di questa forma sono quelli che si tolgono, e i moltiplicatori a meno di essi sono ciò che conta.</p>`},
+  {t:'esercizio', title:'4 · Due rotazioni di due pi greco', html:R`
+  <p>Verifica sullo spin un mezzo che la rotazione di $2\pi$ attorno a $x$ e quella attorno a $z$ agiscono con lo stesso operatore, e di' perché il risultato non dipende dall'asse.</p>`,
+   sol:R`<p>$e^{-i\pi\sigma_n}=\cos\pi\,I-i\sin\pi\,(\mathbf n\cdot\boldsymbol\sigma)$ per qualunque asse $\mathbf n$, e $\sin\pi=0$: $$U(2\pi)=\cos\pi\,I=-I.$$ Non dipende dall'asse perché $-I$ è l'unico elemento non banale del centro di $SU(2)$ che sta sopra l'identità di $SO(3)$: tutti i lacci «un giro attorno a un asse» sono nella stessa classe del gruppo fondamentale, e i loro sollevamenti finiscono nello stesso punto.</p>`},
+  {t:'esercizio', title:'5 · La massa nulla', html:R`
+  <p>Che cosa diventa la relazione $U(a)U(v)=e^{-iMva}U(v)U(a)$ per $M=0$, e perché in meccanica quantistica non relativistica una particella di massa nulla non ha una rappresentazione ragionevole?</p>`,
+   sol:R`<p>Per $M=0$ la fase vale uno e la rappresentazione è vera, ma il boost agisce come l'identità, $e^{i\cdot0\cdot vx}=1$: cambiare sistema di riferimento non cambia lo stato, quindi lo stato non porta impulso nel senso solito. È la ragione di gruppo per cui la massa nulla non rientra nella teoria di Galilei, mentre nel gruppo di Poincaré la massa non è un moltiplicatore ma un'etichetta della rappresentazione, e il valore zero è permesso.</p>`},
+  {t:'collaudo', title:'Controlla di aver capito', html:R`
+  <ol>
+  <li>Perché il carattere del prodotto di due rappresentazioni è il prodotto dei caratteri?</li>
+  <li>Dove si usa che $D(g)$ è diagonalizzabile nella dimostrazione delle formule di Landau?</li>
+  <li>Perché le parti totalmente simmetrica e antisimmetrica sono sottorappresentazioni del gruppo di simmetria?</li>
+  <li>Da dove viene la condizione di cociclo?</li>
+  <li>Perché la fase di un commutatore di elementi che commutano non si toglie ridefinendo le fasi?</li>
+  <li>Che cosa hanno in comune, e che cosa no, lo spin semintero e la massa di Galilei?</li>
+  </ol>`,
+   sol:R`<ol>
+   <li>Perché la traccia del prodotto di Kronecker è il prodotto delle tracce: gli elementi diagonali del prodotto sono i prodotti degli elementi diagonali.</li>
+   <li>Per scrivere la traccia sulla parte simmetrica come somma dei prodotti di autovalori con $i\le k$; vale perché le rappresentazioni dei gruppi finiti e compatti sono unitarie, quindi diagonalizzabili.</li>
+   <li>Perché ogni permutazione dei fattori commuta con l'azione di $D(g)$ su tutti i fattori, quindi commutano anche le loro medie, cioè i proiettori.</li>
+   <li>Dall'associatività: calcolando $U(g)U(h)U(k)$ nei due modi si ottengono due prodotti di moltiplicatori che devono coincidere.</li>
+   <li>Perché le quattro fasi $c(a),c(v),c(a)^{-1},c(v)^{-1}$ sono numeri, commutano, e si cancellano.</li>
+   <li>Entrambi sono moltiplicatori che non si tolgono. Lo spin viene da un laccio non contraibile e si cura con il rivestimento; la massa viene da un commutatore e si cura con un'estensione centrale.</li>
+   </ol>`}
+]},
+
+/* ---------------- 08 · IL SENSO ---------------- */
+{ num:'08', title:'Il senso, e le rotte', meta:'dove riappare questo movimento nella fisica che farai',
+  blocchi:[
+  {t:'prolessi', title:'Dove riappare questo movimento, nella fisica che farai',
+   oggetto:R`<b>Il prodotto di rappresentazioni come il modo di comporre sistemi, e la rappresentazione proiettiva come il prezzo del fatto che gli stati sono raggi</b>: due ragioni di gruppo sotto la composizione dei momenti angolari, la statistica e lo spin.`,
+   rotte:[
+    {dove:'Meccanica<br>quantistica', txt:R`La composizione dei momenti angolari è la scomposizione di un prodotto di rappresentazioni di $SU(2)$, e i coefficienti di Clebsch-Gordan sono il cambio di base che la realizza; bosoni e fermioni sono le immagini dei due proiettori di $S_N$; lo spin semintero è una rappresentazione proiettiva delle rotazioni, e la massa il moltiplicatore che non si toglie dal gruppo di Galilei, con la regola di superselezione che vieta di sovrapporre masse diverse.`},
+    {dove:'Fisica delle<br>particelle', txt:R`I multipletti di isospin e di sapore sono irriducibili di $SU(2)$ e $SU(3)$, e i loro prodotti — mesoni come quark per antiquark, barioni come tre quark — si scompongono con lo stesso conto di caratteri della tappa 02; il fatto che il prodotto di un'irriducibile con la sua coniugata contenga una sola volta la banale è il motivo per cui esiste un solo stato di colore neutro di quark e antiquark.`},
+    {dove:'Geometria<br>differenziale', txt:R`Il rivestimento universale di un gruppo di Lie connesso è il gruppo di cui le rappresentazioni proiettive con moltiplicatore discreto diventano vere; l'estensione centrale si legge nell'algebra di Lie come un termine costante aggiunto alle parentesi, ed è la coomologia dell'algebra di Lie in grado due.`}
+   ],
+   domanda:R`Lo spin è stato trattato come una rappresentazione del gruppo delle rotazioni. <b>Domanda da portare avanti:</b> nel gruppo di Poincaré della relatività ristretta, che cosa prende il posto del moltiplicatore della massa, e da dove viene lo spin delle particelle di massa nulla?`}
+]}
+
+];
+
+
+/* =================================================================== */
+var byId = {}; TAPPE.forEach(function(s){ byId[s.num]=s; });
+
+var VKEY='pm-nucleotp-13-visited';
+function loadSeen(){ try{ return new Set(JSON.parse(localStorage.getItem(VKEY)||'[]')); }catch(e){ return new Set(); } }
+function saveSeen(s){ try{ localStorage.setItem(VKEY, JSON.stringify(Array.from(s))); }catch(e){} }
+var SEEN = loadSeen();
+
+function renderNav(active){
+  var nav=document.getElementById('sidebar');
+  nav.innerHTML='';
+  var h=document.createElement('h2'); h.textContent='Nucleo tp-13 · le tappe'; nav.appendChild(h);
+  TAPPE.forEach(function(s){
+    var b=document.createElement('button');
+    b.className='navitem'+(active===s.num?' active':'')+(SEEN.has(s.num)?' seen':'');
+    b.innerHTML='<span class="dot"></span><span class="nx">'+s.num+'</span><span>'+s.title+'</span>';
+    b.onclick=function(){ showTappa(s.num); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---- renderer dei blocchi ---- */
+function sectionProsa(title, tag, html){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var body=elFromHTML('<div class="open-body">'+html+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function sectionGram(title, rows){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag gramtag">grammatica</span></h3>';
+  var inner='<table class="gramtab">';
+  rows.forEach(function(r){ inner+='<tr><td class="gs">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  inner+='</table>';
+  var body=elFromHTML('<div class="gramwrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+/* --- blocco PLOT: la figura non decora, si legge. Ogni plot porta una chiave di lettura. --- */
+function sectionPlot(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag plottag">figura</span></h3>';
+  if(b.intro){ var i=elFromHTML('<div class="plot-intro">'+b.intro+'</div>'); typeset(i); wrap.appendChild(i); }
+  var specs = b.plots || [b];
+  var row=document.createElement('div'); row.className='plot-row'+(specs.length>1?' due':'');
+  specs.forEach(function(s){
+    if(s.w===undefined) s.w = specs.length>1 ? 430 : 560;   // mai dedurre la larghezza dal DOM: il box non e ancora in pagina
+    var box=document.createElement('div'); box.className='plot-box';
+    row.appendChild(box);
+    if(window.PM_Plot) PM_Plot.render(box, s);
+    else box.innerHTML='<div class="plot-err">motore-plot.js non caricato</div>';
+  });
+  wrap.appendChild(row);
+  if(b.leggi){ var l=elFromHTML('<div class="plot-leggi"><b>Come si legge.</b> '+b.leggi+'</div>'); typeset(l); wrap.appendChild(l); }
+  return wrap;
+}
+function sectionProlessi(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag protag">prolessi</span></h3>';
+  var inner='<div class="prohead">&#9671; dove riappare, e con che nome</div>';
+  inner+='<div class="pro-oggetto"><b>L&rsquo;oggetto:</b> '+b.oggetto+'</div>';
+  inner+='<table class="protab">';
+  b.rotte.forEach(function(r){ inner+='<tr><td class="pd">'+r.dove+'</td><td>'+r.txt+'</td></tr>'; });
+  inner+='</table>';
+  inner+='<div class="pro-domanda"><b>Domanda che non sai ancora rispondere.</b> '+b.domanda+'</div>';
+  var body=elFromHTML('<div class="prowrap">'+inner+'</div>');
+  typeset(body); wrap.appendChild(body); return wrap;
+}
+function revealBlock(steps){
+  var wrap=document.createElement('div');
+  var box=document.createElement('div'); box.className='rsteps'; wrap.appendChild(box);
+  var idx=0;
+  var btn=document.createElement('button'); btn.className='reveal-btn';
+  function next(){
+    if(idx>=steps.length) return;
+    var s=steps[idx];
+    var d=document.createElement('div'); d.className='rstep';
+    d.innerHTML='<div class="rlabel">Passo '+(idx+1)+' · '+s.label+'</div>'+s.body;
+    box.appendChild(d); typeset(d); idx++;
+    if(idx>=steps.length){ btn.textContent='Tutti i passi rivelati'; btn.disabled=true; btn.classList.add('done'); }
+    else { btn.textContent='Rivela il prossimo passo  ('+idx+'/'+steps.length+')'; }
+  }
+  btn.onclick=next; next(); wrap.appendChild(btn);
+  return wrap;
+}
+function sectionReveal(title, tag, steps){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  wrap.appendChild(revealBlock(steps)); return wrap;
+}
+function sectionEsercizio(b){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+b.title+'<span class="tag">reveal progressivo</span></h3>';
+  var testo=elFromHTML('<div class="testo"><span class="src">'+b.src+'</span>'+b.testo+'</div>');
+  typeset(testo); wrap.appendChild(testo);
+  wrap.appendChild(revealBlock(b.steps));
+  if(b.nota){ var en=elFromHTML('<div class="esame-nota">'+b.nota+'</div>'); typeset(en); wrap.appendChild(en); }
+  return wrap;
+}
+function collaudoBlock(items){
+  var wrap=document.createElement('div');
+  items.forEach(function(it,i){
+    var c=document.createElement('div'); c.className='collaudo-item';
+    var q=document.createElement('div'); q.className='cq'; q.innerHTML='<b>'+(i+1)+'.</b> '+it.q;
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none'; a.innerHTML='<b>Risposta.</b> '+it.a;
+    var btn=document.createElement('button'); btn.className='reveal-btn small'; btn.textContent='Rivela risposta';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a); btn.disabled=true; btn.classList.add('done'); btn.textContent='Risposta rivelata'; };
+    c.appendChild(q); typeset(q); c.appendChild(btn); c.appendChild(a); wrap.appendChild(c);
+  });
+  return wrap;
+}
+function sectionSvelabile(title, tag, html, sol){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+(tag?'<span class="tag">'+tag+'</span>':'')+'</h3>';
+  var c=document.createElement('div'); c.className='collaudo-item';
+  var q=document.createElement('div'); q.className='cq'; q.innerHTML=html||'';
+  c.appendChild(q); typeset(q);
+  if(sol){
+    var a=document.createElement('div'); a.className='ca'; a.style.display='none';
+    a.innerHTML='<b>Soluzione.</b> '+sol;
+    var btn=document.createElement('button'); btn.className='reveal-btn small';
+    btn.textContent='Rivela la soluzione';
+    btn.onclick=function(){ a.style.display='block'; typeset(a); cablaStrumenti(a);
+      btn.disabled=true; btn.classList.add('done'); btn.textContent='Soluzione rivelata'; };
+    c.appendChild(btn); c.appendChild(a);
+  }
+  wrap.appendChild(c); return wrap;
+}
+function sectionCollaudo(title, items){
+  var wrap=document.createElement('section'); wrap.className='section';
+  wrap.innerHTML='<h3>'+title+'<span class="tag">provi, poi riveli</span></h3>';
+  wrap.appendChild(collaudoBlock(items)); return wrap;
+}
+
+function prevNext(num){
+  var idx=TAPPE.findIndex(function(s){ return s.num===num; });
+  var wrap=document.createElement('div'); wrap.className='prevnext';
+  var prev=document.createElement('button'); prev.className='pnbtn';
+  if(idx>0){ var p=TAPPE[idx-1];
+    prev.innerHTML='<span class="k">← Tappa '+p.num+'</span><span class="t">'+p.title+'</span>';
+    prev.onclick=function(){ showTappa(p.num); };
+  } else { prev.disabled=true; prev.innerHTML='<span class="k">inizio</span><span class="t">&nbsp;</span>'; }
+  var next=document.createElement('button'); next.className='pnbtn next';
+  if(idx<TAPPE.length-1){ var n=TAPPE[idx+1];
+    next.innerHTML='<span class="k">Tappa '+n.num+' →</span><span class="t">'+n.title+'</span>';
+    next.onclick=function(){ showTappa(n.num); };
+  } else { next.disabled=true; next.innerHTML='<span class="k">fine del nucleo</span><span class="t">&nbsp;</span>'; }
+  wrap.appendChild(prev); wrap.appendChild(next); return wrap;
+}
+
+function showTappa(num){
+  var s=byId[num];
+  SEEN.add(num); saveSeen(SEEN);
+  renderNav(num);
+  var m=document.getElementById('main'); m.innerHTML='';
+
+  var head=elFromHTML('<div class="sfhead"><h1>'+s.num+' · '+s.title+'</h1><div class="meta">'+s.meta+'</div></div>');
+  typeset(head); m.appendChild(head);
+
+  s.blocchi.forEach(function(b){
+    /* DUE SCHEMI, NON UNO — scoperto il 2026-10-06 provando le pagine vive. I movimenti
+       scritti per primi (em-01..03, me-10b, i collaudi di gd-01..09 e di quattro em)
+       usano una forma piu' semplice: `reveal` e `prolessi` con un solo `html`,
+       `esercizio` e `collaudo` con `html` + `sol`. Il renderer ne conosceva una sola e
+       chiamava `steps.forEach` su `undefined`: TypeError, e la tappa si fermava li' —
+       62 blocchi in 17 movimenti su 74. Non si riscrive il contenuto per far contento
+       il renderer: e' il renderer che deve leggere cio' che c'e'.
+       E in fondo un ramo che NON muore: uno schema nuovo di domani deve far vedere un
+       avviso in quella sezione, non spegnere la pagina sotto di se'. */
+    try{
+      if(b.t==='prosa')      m.appendChild(sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='gram')  m.appendChild(sectionGram(b.title,b.rows));
+      else if(b.t==='prolessi') m.appendChild(b.rotte ? sectionProlessi(b)
+                                   : sectionProsa(b.title,'prolessi',b.html));
+      else if(b.t==='reveal')m.appendChild(b.steps ? sectionReveal(b.title,b.tag,b.steps)
+                                   : sectionProsa(b.title,b.tag,b.html));
+      else if(b.t==='esercizio') m.appendChild(b.steps ? sectionEsercizio(b)
+                                   : sectionSvelabile(b.title,'esercizio',b.html,b.sol));
+      else if(b.t==='collaudo')  m.appendChild(b.items ? sectionCollaudo(b.title,b.items)
+                                   : sectionSvelabile(b.title,'provi, poi riveli',b.html,b.sol));
+      else if(b.t==='plot')      m.appendChild(sectionPlot(b));
+      else m.appendChild(sectionProsa(b.title||'(blocco)', 'tipo sconosciuto: '+b.t,
+                                      b.html||''));
+    }catch(err){
+      var avv=document.createElement('section'); avv.className='section';
+      avv.innerHTML='<h3>'+(b.title||'(blocco)')+'<span class="tag">non reso</span></h3>'
+        +'<p style="color:#ff6b6b">Questo blocco non si &egrave; potuto rendere ('
+        +b.t+': '+err.message+'). Il resto della tappa continua sotto.</p>';
+      m.appendChild(avv);
+    }
+  });
+  /* i titoli di sezione contengono formule: senza questo si leggono i dollari nudi */
+  Array.prototype.forEach.call(m.querySelectorAll('section.section > h3'), typeset);
+
+  /* I POP-UP DEGLI STRUMENTI. `cablaStrumenti` esisteva dal 18-09 e non la chiamava
+     nessuno: i 229 rimandi del percorso erano <span> senza handler, e il clic non
+     faceva niente. Nessun controllo poteva vederlo — la sintassi era valida, le schede
+     c'erano tutte, le formule rendevano: il guasto esisteva solo a pagina viva. Qui, e
+     dopo ogni inserimento successivo, perche' la tappa si rimonta da capo a ogni
+     cambio e gli handler vanno riattaccati al DOM nuovo. */
+  cablaStrumenti(m);
+
+  /* anche i titoli delle tappe contengono formule: senza typeset i pulsanti
+     avanti/indietro mostrano i dollari nudi */
+  var pn=prevNext(num); m.appendChild(pn); typeset(pn);
+  try{ history.replaceState(null,"","#"+num); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* deep-link: tp-13-prodotti-e-proiettive.html#03 apre direttamente la tappa 03 */
+window.addEventListener('DOMContentLoaded', function(){
+  var h=(location.hash||'').replace('#','');
+  showTappa(byId[h]?h:'00');
+});
+window.addEventListener('hashchange', function(){
+  var h=(location.hash||'').replace('#','');
+  if(byId[h]) showTappa(h);
+});
+</script>
+</body>
+</html>
