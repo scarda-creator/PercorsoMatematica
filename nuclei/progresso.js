@@ -93,6 +93,37 @@
     }
     if (mosso) salva(D);
   })();
+  // RINUMERAZIONE DELLE TAPPE DI GEODIFF, una volta sola per nucleo. (2026-11-12)
+  // Le tappe di Geometria Differenziale avevano sigle come 02b o 03a, che le altre materie
+  // non hanno, e quasi tutte le tappe hanno cambiato numero: le tappe viste e le voci del
+  // ripasso stanno sotto il numero vecchio. Qui si spostano al nuovo, tutte insieme
+  // (una tabella, non una catena di sostituzioni, perche' 04->05 e 05->07 non si pestino).
+  var RINUMERA_GD = {"gd-01":{"03x":"04","04":"05","04x":"06","05":"07","05x":"08","06":"09","07":"10"},"gd-02":{"01x":"02","02":"03","02c":"04","02x":"05","02d":"06","02e":"07","02b":"08","04":"09"},"gd-03":{"01x":"02","02":"03","02a":"04","02b":"05","02c":"06","02d":"07","02x":"08","02e":"09","02f":"10","03":"11"},"gd-04":{"01x":"02","02":"03","03":"04","03y":"05","03x":"06","03a":"07","03c":"08","04":"09"},"gd-05":{"02b":"03","03":"04","03a":"05","03b":"06","03c":"07","03d":"08","04":"09"},"gd-06":{"06x":"07","07":"08","07x":"09","08":"10","09":"11","10":"12"},"gd-07":{"01b":"02","02":"03","03":"04","03a":"05","04":"06","04b":"07","04c":"08","05":"09"},"gd-08":{"02x":"03","03":"04","04":"05","04b":"06","04x":"07","04y":"08","04c":"09","05":"10"},"gd-09":{"01b":"02","01x":"03","01c":"04","02":"05","03":"06","03b":"07","03x":"08","03c":"09","04":"10"},"gd-10":{"02x":"03","02y":"04","03":"05","04":"06","05":"07","05x":"08","06":"09"},"gd-11":{"01x":"02","02":"03","02x":"04","03":"05","03x":"06","04":"07","05":"08","06":"09"},"gd-12":{"01x":"02","02":"03","03":"04","04":"05","04x":"06","04y":"07","05":"08","06":"09"},"gd-13":{"01x":"02","02":"03","03":"04","03x":"05","03y":"06","04":"07","05":"08","06":"09"},"gd-14":{"01b":"02","01c":"03","02":"04","02x":"05","03":"06","03x":"07","04":"08","05":"09","06":"10"},"gd-15":{"02b":"03","02c":"04","02y":"05","03":"06","03b":"07","04":"08","04b":"09","05":"10","06":"11"},"gd-16":{"01x":"02","02":"03","02x":"04","03":"05","04":"06","04x":"07","05":"08","06":"09"},"gd-17":{"02x":"03","03":"04","03x":"05","04":"06","04x":"07","05":"08","06":"09"},"gd-18":{"01x":"02","02":"03","03":"04","03x":"05","03b":"06","03c":"07","04":"08","05":"09"}};
+  (function rinumera() {
+    var m = RINUMERA_GD[NN];
+    if (!m) return;
+    D.rinumerato = D.rinumerato || {};
+    if (D.rinumerato[NN]) return;
+    var n = D.nuclei[NN];
+    if (n && n.tappe) {
+      var nuove = {};
+      for (var k in n.tappe) if (n.tappe.hasOwnProperty(k)) nuove[m.hasOwnProperty(k) ? m[k] : k] = n.tappe[k];
+      n.tappe = nuove;
+    }
+    var voci = {};
+    for (var id in D.voci) {
+      if (!D.voci.hasOwnProperty(id)) continue;
+      var p = id.split('#');
+      if (p[0] === NN && p.length > 2 && m.hasOwnProperty(p[1])) {
+        p[1] = m[p[1]];
+        if (D.voci[id].tappa && m.hasOwnProperty(D.voci[id].tappa)) D.voci[id].tappa = m[D.voci[id].tappa];
+      }
+      voci[p.join('#')] = D.voci[id];
+    }
+    D.voci = voci;
+    D.rinumerato[NN] = '2026-11-12';
+    salva(D);
+  })();
   function tappaCorrente() { return (location.hash || '#00').replace('#', '') || '00'; }
 
   function segnaTappa(num, titolo) {
